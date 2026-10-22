@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { validateStrongPassword } from '../lib/validation'
-import { useAuthStore } from '../stores/auth'
+import { PasswordChangedLoginRequiredError, useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -46,6 +46,10 @@ async function submit(): Promise<void> {
     })
     await router.replace({ name: 'overview' })
   } catch (changeError) {
+    if (changeError instanceof PasswordChangedLoginRequiredError) {
+      await router.replace({ name: 'login', query: { reason: 'password-changed' } })
+      return
+    }
     error.value = changeError
   } finally {
     submitting.value = false
@@ -53,7 +57,11 @@ async function submit(): Promise<void> {
 }
 
 async function signOut(): Promise<void> {
-  await auth.logout()
+  try {
+    await auth.logout()
+  } catch {
+    // The store exposes the real logout error on the login screen.
+  }
   await router.replace({ name: 'login' })
 }
 </script>

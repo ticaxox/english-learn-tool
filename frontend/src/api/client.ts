@@ -33,6 +33,26 @@ function parseJsonSafely(text: string): unknown {
   }
 }
 
+function readCookie(name: string): string | null {
+  if (typeof document === 'undefined') {
+    return null
+  }
+
+  const prefix = `${name}=`
+  for (const part of document.cookie.split(';')) {
+    const candidate = part.trim()
+    if (candidate.startsWith(prefix)) {
+      const value = candidate.slice(prefix.length)
+      try {
+        return decodeURIComponent(value)
+      } catch {
+        return value
+      }
+    }
+  }
+  return null
+}
+
 function getStringField(value: unknown, key: string): string | null {
   if (typeof value !== 'object' || value === null || !(key in value)) {
     return null
@@ -120,8 +140,9 @@ export class ApiClient {
       requestHeaders.set('Authorization', `Bearer ${this.accessToken}`)
     }
 
-    if (this.csrfToken && method !== 'GET') {
-      requestHeaders.set('X-CSRF-Token', this.csrfToken)
+    const csrfToken = this.csrfToken ?? readCookie('csrf_token')
+    if (csrfToken && method !== 'GET') {
+      requestHeaders.set('X-CSRF-Token', csrfToken)
     }
 
     let requestBody: BodyInit | undefined

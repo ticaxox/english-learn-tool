@@ -14,4 +14,23 @@ describe('error presentation', () => {
       retryable: true,
     })
   })
+  it('makes throttling and server-side permission rejection explicit', () => {
+    const throttled = toErrorPresentation(
+      new ApiError(429, 'AUTH_THROTTLED', '登录尝试次数过多。', null, 'rate-limit-request'),
+    )
+    const forbidden = toErrorPresentation(
+      new ApiError(403, 'AUTH_CSRF_INVALID', 'CSRF validation failed.', null, 'csrf-request'),
+    )
+
+    expect(throttled).toMatchObject({
+      title: '请求过于频繁',
+      requestId: 'rate-limit-request',
+      retryable: true,
+    })
+    expect(forbidden).toMatchObject({
+      title: '权限不足或操作被拒绝',
+      requestId: 'csrf-request',
+      retryable: false,
+    })
+  })
 })

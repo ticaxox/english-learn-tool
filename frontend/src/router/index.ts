@@ -7,6 +7,7 @@ import {
   type RouteRecordRaw,
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
+import AdminUsersView from '../views/AdminUsersView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
@@ -147,13 +148,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'admin/users',
         name: 'admin-users',
-        component: RemoteDataPage,
+        component: AdminUsersView,
         meta: { requiresRole: 'admin' },
-        props: {
-          title: '成员管理',
-          description: '真实读取成员列表；创建、导入和权限管理将在后续任务实现。',
-          endpoint: '/admin/users',
-        },
       },
       {
         path: 'admin/ai/providers',
