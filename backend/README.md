@@ -61,8 +61,10 @@ uv run pytest
 
 `pytest` always replaces application database and Redis settings with `TEST_*` values so a
 developer shell cannot accidentally target production dependencies. The suite applies the
-current Alembic migration before running. If PostgreSQL or Redis is unavailable, integration
-tests fail rather than silently skipping.
+current Alembic migration before running. Each test runs inside a PostgreSQL transaction that
+is rolled back during teardown, and the configured test Redis database is flushed before and
+after every test. `TEST_REDIS_URL` must therefore point to a dedicated non-production database.
+If PostgreSQL or Redis is unavailable, integration tests fail rather than silently skipping.
 
 ## Database changes
 
