@@ -2,6 +2,7 @@ FROM python:3.12-slim-bookworm AS builder
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/app/.venv \
     UV_PYTHON_DOWNLOADS=never
 
 RUN python -m pip install --no-cache-dir uv==0.11.28
@@ -20,7 +21,7 @@ RUN groupadd --gid 10001 app \
     && useradd --uid 10001 --gid app --create-home --shell /usr/sbin/nologin app
 
 WORKDIR /app
-COPY --from=builder /build/.venv /app/.venv
+COPY --from=builder /app/.venv /app/.venv
 COPY --chown=app:app backend/ /app/
 COPY --chown=app:app deploy/health/ /app/deploy/health/
 
