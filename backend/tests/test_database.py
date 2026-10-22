@@ -18,6 +18,6 @@ async def test_alembic_baseline_is_applied_and_session_factory_works(app) -> Non
             for table_name in IDENTITY_TABLES
         }
 
-    assert revision == "20261022_0002"
+    assert revision == "f1b8d947271c"
     assert metadata_table == "system_metadata"
     assert identity_tables == {table_name: table_name for table_name in IDENTITY_TABLES}

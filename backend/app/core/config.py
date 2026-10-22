@@ -57,6 +57,17 @@ class Settings(BaseSettings):
     import_max_rows: int = Field(default=500, ge=1, le=5000)
     import_max_bytes: int = Field(default=1_000_000, ge=1024, le=20_000_000)
 
+    # Wordbooks have separate limits from the member CSV importer.
+    wordbook_storage_dir: str = "./var/wordbooks"
+    wordbook_preview_ttl_minutes: int = Field(default=1440, ge=1, le=1440)
+    wordbook_max_bytes: int = Field(default=10 * 1024 * 1024, ge=1024, le=10 * 1024 * 1024)
+    wordbook_max_entries: int = Field(default=20_000, ge=1, le=20_000)
+    wordbook_export_ttl_minutes: int = Field(default=15, ge=1, le=1440)
+    wordbook_job_max_attempts: int = Field(default=3, ge=1, le=5)
+    wordbook_pdf_page_rows: int = Field(default=18, ge=1, le=100)
+    wordbook_pdf_columns: int = Field(default=2, ge=1, le=4)
+    wordbook_pdf_font_path: str | None = None
+
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, value: str) -> str:
