@@ -11,6 +11,7 @@ import { RouterLink } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
+import StudyStatsPanel from '../components/StudyStatsPanel.vue'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -223,6 +224,8 @@ onMounted(() => {
           AI 练习尚未实现，本页如实显示状态，不会把它标记为已完成。
         </p>
       </section>
+
+      <StudyStatsPanel />
 
       <footer v-if="plan.calculationVersion || plan.generatedAt" class="panel today-meta">
         <p v-if="plan.generatedAt" class="inline-note">计划生成时间：{{ plan.generatedAt }}</p>

@@ -247,6 +247,14 @@ export interface LearningProfileUpdate {
   memoryConfig: MemoryConfig
 }
 
+/**
+ * UI intent for the priority-review toggle. Our own shape: the adapter owns the
+ * backend field name, which is not known before calibration.
+ */
+export interface MistakePriorityUpdate {
+  priorityReview: boolean
+}
+
 export interface MistakeQuery {
   offset?: number
   limit?: number

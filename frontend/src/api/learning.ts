@@ -21,6 +21,7 @@ import {
   parseTodayPlan,
   serializeHeartbeat,
   serializeMemoryConfig,
+  serializeMistakePriority,
   serializeProfileUpdate,
   serializeSessionStart,
   serializeStudyEvent,
@@ -33,6 +34,7 @@ import type {
   MasteryOutcome,
   MemoryConfig,
   MemoryModule,
+  MistakePriorityUpdate,
   MistakeQuery,
   PagedMistakes,
   SessionSummary,
@@ -187,6 +189,22 @@ export async function restoreWord(
     { signal: options.signal, retryCount: 0 },
   )
   return parseLearnedWordState(payload)
+}
+
+/**
+ * Toggle priority review for one mistake. The server recomputes ordering; this
+ * only reports whether the entry should be prioritised.
+ */
+export async function setMistakePriority(
+  entryId: string,
+  update: MistakePriorityUpdate,
+  options: FetchOptions = {},
+): Promise<void> {
+  await apiClient.patch(
+    `/memory/mistakes/${encodeURIComponent(entryId)}/priority`,
+    serializeMistakePriority(update),
+    { signal: options.signal, retryCount: 0 },
+  )
 }
 
 export async function fetchMistakes(

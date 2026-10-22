@@ -10,7 +10,7 @@ import { computed, onMounted, ref } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
-import { fetchMistakes, restoreWord } from '../api/learning'
+import { fetchMistakes, restoreWord, setMistakePriority } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
 import {
   MEMORY_MODULE_LABELS,
@@ -30,23 +30,36 @@ const restoring = ref<string | null>(null)
 const restored = ref<LearnedWordState | null>(null)
 const restoreError = ref<unknown>(null)
 const offset = ref(0)
+const prioritising = ref<string | null>(null)
+const priorityError = ref<unknown>(null)
 
 const page = computed(() => Math.floor(offset.value / PAGE_SIZE) + 1)
 const totalPages = computed(() => (data.value ? Math.max(1, Math.ceil(data.value.total / PAGE_SIZE)) : 1))
 const canPrev = computed(() => offset.value > 0)
 const canNext = computed(() => (data.value ? offset.value + PAGE_SIZE < data.value.total : false))
 
+/**
+ * A refetch (after a priority toggle, or a page change) keeps the current rows
+ * on screen and only disables the controls; dropping to the loading state would
+ * blank the table and lose the learner's place for a one-row change.
+ */
 async function load(nextOffset = offset.value): Promise<void> {
   if (!frozen.value) {
     return
   }
+  const isFirstLoad = data.value === null
   offset.value = nextOffset
   loading.value = true
-  error.value = null
+  if (isFirstLoad) {
+    error.value = null
+  }
   try {
     data.value = await fetchMistakes({ offset: nextOffset, limit: PAGE_SIZE })
+    error.value = null
   } catch (requestError) {
-    data.value = null
+    if (isFirstLoad) {
+      data.value = null
+    }
     error.value = requestError
   } finally {
     loading.value = false
@@ -63,6 +76,27 @@ async function restore(entry: MistakeEntry): Promise<void> {
     restoreError.value = requestError
   } finally {
     restoring.value = null
+  }
+}
+
+/**
+ * Toggle priority review. The request goes to the server, and the row keeps its
+ * previous flag until a reload confirms the change: ordering and the flag are
+ * server state, so the UI must not re-sort or re-label a row on its own.
+ */
+async function togglePriority(entry: MistakeEntry): Promise<void> {
+  if (prioritising.value) {
+    return
+  }
+  prioritising.value = entry.stateId
+  priorityError.value = null
+  try {
+    await setMistakePriority(entry.stateId, { priorityReview: !entry.priorityReview })
+    await load(offset.value)
+  } catch (requestError) {
+    priorityError.value = requestError
+  } finally {
+    prioritising.value = null
   }
 }
 
@@ -85,7 +119,7 @@ onMounted(() => {
 
     <ContractGate v-if="!frozen" :endpoints="['GET /memory/mistakes', 'PATCH /memory/words/{state_id}/restore']" />
 
-    <LoadingState v-else-if="loading" label="正在读取错词…" />
+    <LoadingState v-else-if="loading && !data" label="正在读取错词…" />
 
     <section v-else-if="error" class="panel">
       <ErrorNotice :error="error" retry-label="重新读取错词" @retry="load()" />
@@ -108,6 +142,7 @@ onMounted(() => {
                 <th scope="col">来源模块</th>
                 <th scope="col">最近错误</th>
                 <th scope="col">次数</th>
+                <th scope="col">重点复习</th>
                 <th scope="col">操作</th>
               </tr>
             </thead>
@@ -120,8 +155,20 @@ onMounted(() => {
                 <td>{{ entry.mistakeCount }}</td>
                 <td>
                   <button
-                    class="button-secondary button-small"
+                    class="link-button"
                     type="button"
+                    :disabled="prioritising === entry.stateId"
+                    :aria-pressed="entry.priorityReview"
+                    @click="togglePriority(entry)"
+                  >
+                    {{ entry.priorityReview ? '已标记重点' : '标为重点' }}
+                  </button>
+                  <span v-if="prioritising === entry.stateId" class="field-hint">更新中…</span>
+                </td>
+                <td>
+                  <button
+                    class="button-secondary button-small"
+                    typetype="button"
                     :disabled="restoring === entry.stateId"
                     @click="restore(entry)"
                   >
@@ -134,11 +181,11 @@ onMounted(() => {
         </section>
 
         <nav class="pager" aria-label="错词分页">
-          <button class="button-secondary button-small" type="button" :disabled="!canPrev || loading" @click="load(offset - PAGE_SIZE)">
+          <button class="button-secondary button-small" typetype="button" :disabled="!canPrev || loading" @click="load(offset - PAGE_SIZE)">
             上一页
           </button>
           <span>第 {{ page }} / {{ totalPages }} 页 · 共 {{ data.total }} 条</span>
-          <button class="button-secondary button-small" type="button" :disabled="!canNext || loading" @click="load(offset + PAGE_SIZE)">
+          <button class="button-secondary button-small" typetype="button" :disabled="!canNext || loading" @click="load(offset + PAGE_SIZE)">
             下一页
           </button>
         </nav>
@@ -150,6 +197,7 @@ onMounted(() => {
         <p v-else class="inline-note">服务端尚未给出下一次复习时间，请刷新查看。</p>
       </div>
       <ErrorNotice v-if="restoreError" :error="restoreError" :show-retry="false" retry-label="重试" @retry="() => {}" />
+<ErrorNotice v-if="priorityError" :error="priorityError" retry-label="重新读取错词" @retry="load()" />
     </template>
   </article>
 </template>

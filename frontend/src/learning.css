@@ -562,6 +562,49 @@ input[aria-invalid='true'] {
   margin: 0.2rem 0 0;
 }
 
+/* ---------- today stats ---------- */
+
+.study-stats {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.study-stats__heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.study-stats__heading h2 {
+  margin: 0;
+}
+
+.study-stats__value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: baseline;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.study-stats__value strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  color: var(--brand-strong);
+}
+
+.study-stats__badge {
+  padding: 0.16rem 0.55rem;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 /* ---------- mistakes ---------- */
 
 .mistake-table {
@@ -585,6 +628,34 @@ input[aria-invalid='true'] {
   text-transform: uppercase;
   color: var(--muted);
   border-bottom: 1px solid #cfdcd1;
+}
+
+/* Text-only action that keeps table rows short (priority toggle). */
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--brand);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.link-button:hover:not(:disabled) {
+  color: var(--brand-strong);
+}
+
+.link-button:disabled {
+  color: var(--muted);
+  cursor: progress;
+  text-decoration: none;
+}
+
+.link-button[aria-pressed='true'] {
+  color: var(--warning);
+  text-decoration: none;
 }
 
 .mistake-table tbody th {

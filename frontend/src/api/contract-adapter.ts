@@ -24,6 +24,7 @@ import {
   type MasteryOutcome,
   type MemoryConfig,
   type MemoryModulePreference,
+  type MistakePriorityUpdate,
   type PagedMistakes,
   type SessionSummary,
   type SpellingBlankType,
@@ -306,6 +307,24 @@ export function parseMistakes(payload: unknown): PagedMistakes {
   requireCalibrated('/memory/mistakes')
   void requireRecord(payload, '/memory/mistakes', '响应体')
   return fail('/memory/mistakes', '适配层尚未按冻结 OpenAPI 校准。')
+}
+
+// ---------------------------------------------------------------------------
+// Mistake priority
+// ---------------------------------------------------------------------------
+
+/**
+ * Marks a mistake for priority review.
+ *
+ * The UI intent is only "this entry is (or is no longer) a priority". Queue
+ * ordering, the next due date and any mastery effect remain server decisions,
+ * so none of them is expressible from here — and the backend field name for the
+ * flag stays unknown until calibration.
+ */
+export function serializeMistakePriority(update: MistakePriorityUpdate): unknown {
+  requireCalibrated('PATCH /memory/mistakes/{entry_id}/priority')
+  void update
+  return fail('PATCH /memory/mistakes/{entry_id}/priority', '适配层尚未按冻结 OpenAPI 校准。')
 }
 
 export type { MemoryModulePreference }
