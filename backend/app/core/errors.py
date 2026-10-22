@@ -16,6 +16,7 @@ _HTTP_ERROR_CODES = {
     404: "NOT_FOUND",
     405: "METHOD_NOT_ALLOWED",
     409: "CONFLICT",
+    410: "GONE",
     413: "PAYLOAD_TOO_LARGE",
     415: "UNSUPPORTED_MEDIA_TYPE",
     422: "VALIDATION_ERROR",
@@ -31,12 +32,14 @@ class AppError(Exception):
         code: str,
         message: str,
         details: Any = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(message)
         self.status_code = status_code
         self.code = code
         self.message = message
         self.details = details
+        self.headers = headers
 
 
 def _request_id(request: Request) -> str:
@@ -74,6 +77,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             message=exc.message,
             details=exc.details,
             request_id=_request_id(request),
+            headers=exc.headers,
         )
 
     @app.exception_handler(RequestValidationError)

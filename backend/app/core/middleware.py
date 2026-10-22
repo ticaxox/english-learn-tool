@@ -12,6 +12,7 @@ from app.core.request_context import reset_request_id, set_request_id
 
 logger = logging.getLogger(__name__)
 _REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+_PRIVATE_PATH_PREFIXES = ("/api/v1/auth", "/api/v1/admin")
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -57,3 +58,29 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
             return response
         finally:
             reset_request_id(token)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Apply browser hardening and prevent caching of authenticated account responses."""
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        response = await call_next(request)
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            (
+                "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; "
+                "object-src 'none'; img-src 'self' data:; "
+                "style-src 'self' 'unsafe-inline'; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net"
+            ),
+        )
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault(
+            "Permissions-Policy",
+            "camera=(), microphone=(), geolocation=(), payment=()",
+        )
+        if request.url.path.startswith(_PRIVATE_PATH_PREFIXES):
+            response.headers.setdefault("Cache-Control", "no-store")
+            response.headers.setdefault("Pragma", "no-cache")
+        return response
