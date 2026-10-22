@@ -137,4 +137,3 @@ describe('auth store', () => {
     })
   })
 })
-

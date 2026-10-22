@@ -111,4 +111,3 @@ describe('ApiClient', () => {
     expect(onSessionExpired).toHaveBeenCalledOnce()
   })
 })
-
