@@ -64,6 +64,30 @@ let clock: number | null = null
 const mappingError = computed(() => validateRequiredMapping(mapping.value))
 const previewExpired = computed(() => preview.value ? isPreviewExpired(preview.value.expires_at, now.value) : false)
 const previewHasErrors = computed(() => Boolean(preview.value && (preview.value.error_count > 0 || preview.value.errors.length > 0)))
+const importTerminalFailure = computed(() => (
+  job.value?.status === 'failed' || job.value?.status === 'cancelled'
+))
+const importTaskLabel = computed(() => {
+  if (completed.value || job.value?.status === 'succeeded') {
+    return '导入已完成'
+  }
+  if (remapping.value) {
+    return '正在更新字段映射'
+  }
+  if (job.value?.status === 'queued') {
+    return '导入任务排队中'
+  }
+  if (job.value?.status === 'running') {
+    return '后台导入中'
+  }
+  if (job.value?.status === 'failed') {
+    return '导入任务失败'
+  }
+  if (job.value?.status === 'cancelled') {
+    return '导入任务已取消'
+  }
+  return confirming.value ? '正在确认导入' : '等待任务'
+})
 const ignoredColumns = computed(() => {
   if (!preview.value) {
     return []
@@ -84,6 +108,7 @@ const canConfirm = computed(() => Boolean(
   && !previewHasErrors.value
   && !mappingError.value
   && !taskRunning.value
+  && !importTerminalFailure.value
   && form.name.trim(),
 ))
 const previewRestartSuggested = computed(() => {
@@ -96,6 +121,7 @@ const previewRestartSuggested = computed(() => {
     'WORDBOOK_PREVIEW_EXPIRED',
     'IMPORT_PREVIEW_MISMATCH',
     'IMPORT_PREVIEW_USED',
+    'WORDBOOK_PREVIEW_ALREADY_USED',
     'IMPORT_PREVIEW_NOT_FOUND',
   ].includes(candidate.code)
 })
@@ -180,6 +206,7 @@ function isPreviewInvalidError(error: unknown): boolean {
       'WORDBOOK_PREVIEW_EXPIRED',
       'IMPORT_PREVIEW_MISMATCH',
       'IMPORT_PREVIEW_USED',
+      'WORDBOOK_PREVIEW_ALREADY_USED',
       'IMPORT_PREVIEW_NOT_FOUND',
     ].includes(error.code)
   )
@@ -471,7 +498,7 @@ onUnmounted(() => {
 
         <div v-if="taskRunning || job" class="wordbook-task-card" aria-live="polite">
           <div class="wordbook-task-heading">
-            <strong>{{ completed ? '导入已完成' : remapping ? '正在更新字段映射' : job?.status === 'queued' ? '导入任务排队中' : '后台导入中' }}</strong>
+            <strong>{{ importTaskLabel }}</strong>
             <span>{{ job ? `${job.progress}%` : '等待任务' }}</span>
           </div>
           <div class="progress-track" role="progressbar" :aria-valuenow="job?.progress ?? 0" aria-valuemin="0" aria-valuemax="100">
@@ -479,11 +506,12 @@ onUnmounted(() => {
           </div>
           <p v-if="job" class="field-hint">任务 ID：<code>{{ job.job_id }}</code> · 状态：{{ job.status }} · 清理：{{ job.cleanup_status }}</p>
           <p v-if="completed" class="alert alert-success" role="status">服务端任务已成功，词书列表将刷新。</p>
+          <p v-else-if="importTerminalFailure" class="field-hint" role="status">服务端任务未成功；预览已失效，请返回文件重新预览。</p>
         </div>
 
         <footer class="dialog-actions button-row">
-          <button type="button" :disabled="!canConfirm || completed" @click="confirmImport">
-            {{ confirming ? (remapping ? '正在 remap…' : '正在确认并轮询…') : '确认导入' }}
+          <button type="button" :disabled="!canConfirm || completed || importTerminalFailure" @click="confirmImport">
+            {{ importTerminalFailure ? '请返回文件重新预览' : confirming ? (remapping ? '正在 remap…' : '正在确认并轮询…') : '确认导入' }}
           </button>
           <button class="button-secondary" type="button" :disabled="taskRunning || completed" @click="resetPreview">返回文件</button>
           <button class="button-secondary" type="button" :disabled="taskRunning" @click="close">{{ completed ? '完成' : '取消' }}</button>

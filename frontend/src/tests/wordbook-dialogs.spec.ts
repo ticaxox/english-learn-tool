@@ -335,6 +335,25 @@ describe('wordbook dialogs', () => {
     expect(changedKey).not.toBe(firstKey)
   })
 
+  it('does not offer the consumed preview again after a terminal import failure', async () => {
+    apiMocks.getWordbookJob.mockResolvedValueOnce(makeJob({
+      status: 'failed',
+      progress: 55,
+      error_code: 'WORDBOOK_JOB_FAILED',
+      error_message: '导入后台任务失败。',
+    }))
+    const wrapper = track(mount(WordbookImportDialog, { props: { isAdmin: true } }))
+    await openImportPreview(wrapper)
+
+    await buttonByText(wrapper, '确认导入').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('导入任务失败')
+    expect(wrapper.text()).not.toContain('后台导入中')
+    expect(wrapper.text()).toContain('预览已失效，请返回文件重新预览')
+    expect(buttonByText(wrapper, '请返回文件重新预览').attributes('disabled')).toBeDefined()
+  })
+
   it('creates an export, polls /exports and downloads through the authenticated Blob API', async () => {
     const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
     Object.defineProperty(window.URL, 'createObjectURL', {
@@ -401,6 +420,31 @@ describe('wordbook dialogs', () => {
     expect(wrapper.text()).not.toContain('导出已完成')
   })
 
+  it('rotates the export idempotency key after a terminal failure so retry creates a new job', async () => {
+    apiMocks.getExportJob.mockResolvedValueOnce(makeJob({
+      job_id: exportJobId,
+      kind: 'export',
+      status: 'failed',
+      progress: 70,
+      error_code: 'EXPORT_RENDER_FAILED',
+      error_message: 'PDF render failed.',
+    }))
+    const wrapper = track(mount(WordbookExportDialog, { props: { wordbook: book } }))
+
+    await buttonByText(wrapper, '开始导出').trigger('click')
+    await flushPromises()
+    const firstKey = apiMocks.createWordbookExport.mock.calls[0]?.[2]
+    expect(wrapper.text()).toContain('PDF render failed.')
+
+    await buttonByText(wrapper, '重新创建导出任务').trigger('click')
+    await flushPromises()
+    const retryKey = apiMocks.createWordbookExport.mock.calls[1]?.[2]
+
+    expect(firstKey).toEqual(expect.any(String))
+    expect(retryKey).toEqual(expect.any(String))
+    expect(retryKey).not.toBe(firstKey)
+  })
+
   it('requires the exact organization name and waits for delete job success', async () => {
     apiMocks.getWordbookJob.mockResolvedValue(makeJob({
       job_id: deleteJobId,
@@ -444,6 +488,32 @@ describe('wordbook dialogs', () => {
     expect(wrapper.text()).toContain('删除任务已取消。')
     expect(wrapper.text()).not.toContain('清理已完成')
     expect(wrapper.emitted('completed')).toBeUndefined()
+  })
+
+  it('rotates the delete idempotency key after a terminal failure so retry starts a new task', async () => {
+    apiMocks.getWordbookJob.mockResolvedValueOnce(makeJob({
+      job_id: deleteJobId,
+      kind: 'delete',
+      status: 'failed',
+      progress: 20,
+      error_code: 'WORDBOOK_JOB_FAILED',
+      error_message: '删除后台任务失败。',
+    }))
+    const wrapper = track(mount(WordbookDeleteDialog, { props: { wordbook: book } }))
+    await wrapper.get('input[autocomplete="off"]').setValue('Business English')
+
+    await buttonByText(wrapper, '确认启动删除').trigger('click')
+    await flushPromises()
+    const firstKey = apiMocks.deleteWordbook.mock.calls[0]?.[2]
+    expect(wrapper.text()).toContain('删除后台任务失败。')
+
+    await buttonByText(wrapper, '确认启动删除').trigger('click')
+    await flushPromises()
+    const retryKey = apiMocks.deleteWordbook.mock.calls[1]?.[2]
+
+    expect(firstKey).toEqual(expect.any(String))
+    expect(retryKey).toEqual(expect.any(String))
+    expect(retryKey).not.toBe(firstKey)
   })
 
   it('traps tab focus, closes on Escape and restores focus to the opener', async () => {

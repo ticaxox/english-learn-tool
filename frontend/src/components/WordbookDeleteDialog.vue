@@ -105,6 +105,9 @@ async function confirmDelete(): Promise<void> {
         return
       }
       if (current.status === 'failed' || current.status === 'cancelled') {
+        // The backend resolves a reused key to the same terminal job, so a retry needs a new key.
+        requestKey.value = null
+        requestSignature.value = null
         throw new WordbookTaskError(
           current.error_code || `DELETE_${current.status.toUpperCase()}`,
           current.error_message || (current.status === 'cancelled' ? '删除任务已取消。' : '删除清理任务失败。'),
