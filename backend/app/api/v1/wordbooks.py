@@ -37,7 +37,7 @@ from app.schemas.wordbooks import (
     WordbookSummary,
 )
 from app.services.auth import AuthContext
-from app.services.wordbook_jobs import arq_job_id
+from app.services.wordbook_queue import QueueDispatchKind, dispatch_wordbook_job
 from app.services.wordbooks import (
     activate_wordbook,
     confirm_wordbook_import,
@@ -49,7 +49,7 @@ from app.services.wordbooks import (
     get_wordbook_job,
     job_response,
     list_wordbooks,
-    mark_wordbook_job_enqueue_failed,
+    record_wordbook_queue_failure,
     remap_import_preview,
     start_delete_wordbook,
     update_wordbook,
@@ -80,26 +80,57 @@ async def _enqueue_wordbook_job(
         return
     pool = getattr(request.app.state, "arq", None)
     if pool is None:
-        await mark_wordbook_job_enqueue_failed(session, actor=actor.user, job=job)
+        await record_wordbook_queue_failure(
+            session,
+            job_id=job.id,
+            reason_code="WORDBOOK_QUEUE_UNAVAILABLE",
+            reason_message="The background queue is unavailable.",
+            increment_attempts=True,
+        )
         raise AppError(
             status_code=503,
             code="WORDBOOK_QUEUE_UNAVAILABLE",
             message="The background queue is unavailable.",
         )
+
+    settings: Settings = request.app.state.settings
     try:
-        await pool.enqueue_job(
-            "process_wordbook_job",
-            str(job.id),
-            _job_id=arq_job_id(job.id),
+        dispatch = await dispatch_wordbook_job(
+            pool,
+            job.id,
+            stale_after_seconds=settings.wordbook_job_stale_seconds,
         )
     except Exception as exc:
-        await mark_wordbook_job_enqueue_failed(session, actor=actor.user, job=job)
+        await record_wordbook_queue_failure(
+            session,
+            job_id=job.id,
+            reason_code="WORDBOOK_QUEUE_UNAVAILABLE",
+            reason_message="The background queue is unavailable.",
+            increment_attempts=True,
+        )
         raise AppError(
             status_code=503,
             code="WORDBOOK_QUEUE_UNAVAILABLE",
             message="The background queue is unavailable.",
             headers={"Retry-After": "5"},
         ) from exc
+
+    if dispatch.kind in {QueueDispatchKind.ENQUEUED, QueueDispatchKind.ACTIVE}:
+        return
+
+    await record_wordbook_queue_failure(
+        session,
+        job_id=job.id,
+        reason_code=dispatch.error_code or "WORDBOOK_QUEUE_STATE_INVALID",
+        reason_message=(dispatch.error_message or "The background queue entry is not recoverable."),
+        increment_attempts=True,
+    )
+    raise AppError(
+        status_code=503,
+        code="WORDBOOK_QUEUE_UNAVAILABLE",
+        message="The background queue is unavailable.",
+        headers={"Retry-After": "5"},
+    )
 
 
 @router.get(

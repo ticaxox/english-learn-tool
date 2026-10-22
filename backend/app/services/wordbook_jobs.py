@@ -89,19 +89,37 @@ def _safe_error(exc: Exception) -> tuple[str, str]:
 async def _start_job(
     session: AsyncSession,
     job_id: UUID,
+    *,
+    stale_after_seconds: int,
 ) -> tuple[WordbookJob | None, dict[str, Any] | None]:
     job = await session.scalar(
         select(WordbookJob).where(WordbookJob.id == job_id).with_for_update()
     )
     if job is None:
         raise WordbookJobError("WORDBOOK_JOB_NOT_FOUND", "The wordbook job was not found.")
-    if job.status == "succeeded":
+    if job.status in {"succeeded", "failed", "cancelled"}:
         result = dict(job.result or {})
+        if job.status != "succeeded":
+            result.update({"status": job.status, "error_code": job.error_code})
         await session.rollback()
         return None, result
-    if job.status == "cancelled":
-        await session.rollback()
-        return None, {"status": "cancelled"}
+    if job.status == "running":
+        updated_at = job.updated_at
+        if updated_at.tzinfo is None:
+            updated_at = updated_at.replace(tzinfo=utcnow().tzinfo)
+        if updated_at > utcnow() - timedelta(seconds=stale_after_seconds):
+            await session.rollback()
+            return None, {"status": "running"}
+        add_audit_event(
+            session,
+            actor_id=job.owner_id,
+            action=f"wordbook.{job.kind}.worker_interrupted",
+            target_type="wordbook",
+            target_id=job.wordbook_id,
+            outcome="failure",
+            reason_code="WORDBOOK_WORKER_INTERRUPTED",
+            context={"job_id": str(job.id), "attempt": job.attempts},
+        )
     job.attempts += 1
     if job.attempts > job.max_attempts:
         job.status = "failed"
@@ -560,6 +578,17 @@ async def _record_failure(ctx: dict[str, Any], job_id: UUID, exc: Exception) -> 
                     **(book.book_metadata or {}),
                     "import_error_code": code,
                 }
+        if job.kind == "delete" and job.wordbook_id is not None and final_failure:
+            book = await session.scalar(
+                select(Wordbook).where(Wordbook.id == job.wordbook_id).with_for_update()
+            )
+            if book is not None and book.status == "deleting":
+                book.status = "ready"
+                book.book_metadata = {
+                    **(book.book_metadata or {}),
+                    "delete_error_code": code,
+                }
+
         if job.kind == "import" and job.preview_id is not None and final_failure:
             preview = await session.scalar(
                 select(WordbookImportPreview)
@@ -586,7 +615,11 @@ async def process_wordbook_job(ctx: dict[str, Any], job_id: str) -> dict[str, An
     parsed_job_id = UUID(job_id)
     factory = _session_factory(ctx)
     async with factory() as session:
-        job, completed_result = await _start_job(session, parsed_job_id)
+        job, completed_result = await _start_job(
+            session,
+            parsed_job_id,
+            stale_after_seconds=_settings(ctx).wordbook_job_stale_seconds,
+        )
         if completed_result is not None:
             return completed_result
         assert job is not None
@@ -622,7 +655,3 @@ async def process_wordbook_job(ctx: dict[str, Any], job_id: str) -> dict[str, An
             if final_failure:
                 return {"status": "failed", "error_code": _safe_error(exc)[0]}
             raise Retry(defer=min(60, 2 ** max(1, attempt))) from exc
-
-
-def arq_job_id(job_id: UUID) -> str:
-    return f"wordbook:{job_id}"

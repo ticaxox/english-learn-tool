@@ -26,3 +26,8 @@ def test_cors_origins_are_normalized() -> None:
 def test_configuration_rejects_cors_paths() -> None:
     with pytest.raises(ValidationError):
         Settings(cors_origins="https://example.test/not-an-origin")
+
+
+def test_wordbook_job_stale_window_cannot_precede_worker_timeout() -> None:
+    with pytest.raises(ValidationError):
+        Settings(wordbook_job_stale_seconds=299)

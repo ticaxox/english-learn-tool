@@ -886,23 +886,53 @@ async def get_export_job(
     return job_response(job)
 
 
-async def mark_wordbook_job_enqueue_failed(
+async def record_wordbook_queue_failure(
     session: AsyncSession,
     *,
-    actor: User,
-    job: WordbookJob,
-    reason_code: str = "WORDBOOK_QUEUE_UNAVAILABLE",
-) -> None:
-    job.status = "failed"
+    job_id: UUID,
+    reason_code: str,
+    reason_message: str,
+    increment_attempts: bool,
+) -> WordbookJob:
+    job = await session.scalar(
+        select(WordbookJob).where(WordbookJob.id == job_id).with_for_update()
+    )
+    if job is None:
+        await session.rollback()
+        raise AppError(
+            status_code=404,
+            code="WORDBOOK_JOB_NOT_FOUND",
+            message="The wordbook job was not found.",
+        )
+    if job.status in {"succeeded", "failed", "cancelled"}:
+        await session.rollback()
+        return job
+    if increment_attempts:
+        job.attempts += 1
+    final_failure = job.attempts >= job.max_attempts
+    job.status = "failed" if final_failure else "queued"
+    job.progress = min(job.progress, 95)
     job.error_code = reason_code
-    job.error_message = "The background job could not be queued."
-    job.cleanup_status = "failed"
-    job.finished_at = utcnow()
-    if job.kind == "import" and job.wordbook_id is not None:
+    job.error_message = reason_message
+    job.cleanup_status = "failed" if final_failure else "pending"
+    job.finished_at = utcnow() if final_failure else None
+
+    if job.wordbook_id is not None and job.kind in {"import", "delete"}:
         book = await _load_wordbook(session, job.wordbook_id, include_deleted=True)
-        if book.status == "importing":
-            book.status = "failed"
-    if job.kind == "import" and job.preview_id is not None:
+        if job.kind == "import" and book.status == "importing":
+            book.status = "failed" if final_failure else "importing"
+            book.book_metadata = {
+                **(book.book_metadata or {}),
+                "import_error_code": reason_code,
+            }
+        if job.kind == "delete" and final_failure and book.status == "deleting":
+            book.status = "ready"
+            book.book_metadata = {
+                **(book.book_metadata or {}),
+                "delete_error_code": reason_code,
+            }
+
+    if job.kind == "import" and job.preview_id is not None and final_failure:
         preview = await session.scalar(
             select(WordbookImportPreview)
             .where(WordbookImportPreview.id == job.preview_id)
@@ -910,17 +940,23 @@ async def mark_wordbook_job_enqueue_failed(
         )
         if preview is not None:
             preview.status = "failed"
+
     add_audit_event(
         session,
-        actor=actor,
-        action=f"wordbook.{job.kind}.enqueue",
+        actor_id=job.owner_id,
+        action=f"wordbook.{job.kind}.queue_failed",
         target_type="wordbook",
         target_id=job.wordbook_id,
         outcome="failure",
         reason_code=reason_code,
-        context={"job_id": str(job.id)},
+        context={
+            "job_id": str(job.id),
+            "attempt": job.attempts,
+            "final": final_failure,
+        },
     )
     await session.commit()
+    return job
 
 
 async def create_export_job(

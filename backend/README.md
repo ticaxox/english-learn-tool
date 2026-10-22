@@ -101,10 +101,15 @@ uv run arq app.workers.worker.WorkerSettings
 uv run arq app.workers.scheduler.SchedulerSettings
 ```
 
-The worker executes the durable `process_wordbook_job` function for import, export, and deletion.
-The scheduler recovers persisted queued jobs and removes expired preview/export artifacts. Job state,
-ownership, progress, results, retry counts, and failure codes are stored in PostgreSQL; Redis is the
-queue transport, not the business source of truth.
+The worker consumes `english-learn:wordbooks` and executes the durable `process_wordbook_job`
+function for import, export, and deletion. The scheduler consumes the separate
+`english-learn:scheduler` queue, recovers persisted queued jobs and stale interrupted runs, repairs
+terminal or stale same-ID ARQ entries, and removes expired preview/export artifacts. The scheduler
+must never share the business worker queue. `WORDBOOK_JOB_STALE_SECONDS` defaults to 600 seconds,
+which is longer than the worker's 300-second job timeout; queue-delivery and processing failures are
+persisted and bounded by `WORDBOOK_JOB_MAX_ATTEMPTS`. Job state, ownership, progress, results, retry
+counts, and failure codes are stored in PostgreSQL; Redis is the queue transport, not the business
+source of truth.
 
 ## Wordbook API
 
@@ -148,11 +153,11 @@ uv run python -m app.cli convert-wordbook .\input.csv .\wordbook.json --report .
 The output identifies `english-learn-wordbook-converter/1.0.0`; a non-zero exit status means rejected
 rows were reported.
 
-`WORDBOOK_STORAGE_DIR` must be an absolute path. The API, ARQ worker, and scheduler must mount the
-same writable persistent volume there; the Compose files currently require an A40 deployment change
-to add that volume under the read-only application services. A single-host filesystem or process-local
-directory is not a valid production deployment because preview and export artifacts must cross service
-process boundaries. Uploaded data remains private and must not be served from a public directory.
+`WORDBOOK_STORAGE_DIR` must be an absolute path and defaults to `/app/var/wordbooks`. The Compose
+deployment mounts that directory from the same writable persistent volume into the API, ARQ worker,
+and scheduler because preview and export artifacts must cross service-process boundaries. A
+process-local directory is not a valid deployment. Uploaded data remains private and must not be
+served from a public directory.
 
 ## Verification
 

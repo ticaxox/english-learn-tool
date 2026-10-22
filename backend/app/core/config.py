@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     wordbook_max_entries: int = Field(default=20_000, ge=1, le=20_000)
     wordbook_export_ttl_minutes: int = Field(default=15, ge=1, le=1440)
     wordbook_job_max_attempts: int = Field(default=3, ge=1, le=5)
+    wordbook_job_stale_seconds: int = Field(default=600, ge=300, le=86400)
     wordbook_pdf_page_rows: int = Field(default=18, ge=1, le=100)
     wordbook_pdf_columns: int = Field(default=2, ge=1, le=4)
     wordbook_pdf_font_path: str | None = None

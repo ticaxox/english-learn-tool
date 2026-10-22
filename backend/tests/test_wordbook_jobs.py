@@ -30,6 +30,7 @@ from app.services.wordbooks import (
     activate_wordbook,
     confirm_wordbook_import,
     create_import_preview,
+    record_wordbook_queue_failure,
     remap_import_preview,
     start_delete_wordbook,
 )
@@ -556,4 +557,46 @@ async def test_preview_ownership_hash_expiry_and_storage_tamper_are_rejected(app
         assert expired_record.status == "expired"
     finally:
         await _cleanup_actor(other_factory, other_actor.id)
+        await _cleanup_actor(factory, actor.id)
+
+
+async def test_queue_delivery_failures_are_bounded_and_do_not_leave_jobs_queued(app) -> None:
+    actor, factory = await _create_actor(app)
+    try:
+        preview, job = await _create_import_job(app, factory, actor)
+        max_attempts = job.max_attempts
+        for expected_attempt in range(1, max_attempts + 1):
+            async with factory() as session:
+                failed = await record_wordbook_queue_failure(
+                    session,
+                    job_id=job.id,
+                    reason_code="WORDBOOK_QUEUE_UNAVAILABLE",
+                    reason_message="The background queue is unavailable.",
+                    increment_attempts=True,
+                )
+            assert failed.attempts == expected_attempt
+            assert failed.error_code == "WORDBOOK_QUEUE_UNAVAILABLE"
+            if expected_attempt < max_attempts:
+                assert failed.status == "queued"
+                assert failed.finished_at is None
+            else:
+                assert failed.status == "failed"
+                assert failed.finished_at is not None
+
+        async with factory() as session:
+            persisted_job = await session.get(WordbookJob, job.id)
+            book = await session.get(Wordbook, job.wordbook_id)
+            persisted_preview = await session.get(WordbookImportPreview, preview.preview_id)
+            audit_count = await session.scalar(
+                select(func.count(AuditLog.id)).where(
+                    AuditLog.actor_id == actor.id,
+                    AuditLog.action == "wordbook.import.queue_failed",
+                )
+            )
+        assert persisted_job is not None and persisted_job.status == "failed"
+        assert persisted_job.attempts == max_attempts
+        assert book is not None and book.status == "failed"
+        assert persisted_preview is not None and persisted_preview.status == "failed"
+        assert audit_count == max_attempts
+    finally:
         await _cleanup_actor(factory, actor.id)
