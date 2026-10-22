@@ -10,7 +10,7 @@ from app.api.v1.router import router as api_v1_router
 from app.core.config import Settings, get_settings
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
-from app.core.middleware import RequestIDMiddleware
+from app.core.middleware import RequestIDMiddleware, SecurityHeadersMiddleware
 from app.db.session import create_engine, create_session_factory
 
 logger = logging.getLogger(__name__)
@@ -58,10 +58,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=runtime_settings.cors_origin_list,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["X-Request-ID"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-CSRF-Token", "X-Request-ID"],
+        expose_headers=["X-Request-ID", "Retry-After"],
     )
+    application.add_middleware(SecurityHeadersMiddleware)
     application.add_middleware(RequestIDMiddleware)
 
     register_exception_handlers(application)

@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Request
 
+from app.api.v1.admin import router as admin_router
+from app.api.v1.auth import router as auth_router
 from app.schemas.system import ServiceInfo
 
 router = APIRouter(tags=["system"])
+router.include_router(auth_router)
+router.include_router(admin_router)
 
 
 @router.get("", response_model=ServiceInfo, summary="API service metadata")
