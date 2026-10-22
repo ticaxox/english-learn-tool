@@ -1,0 +1,1320 @@
+{
+  "schema_version": 1,
+  "task": "T-QA-001",
+  "title": "AI 英语学习工具验收门禁清单",
+  "updated_at": "2026-10-22T21:00:00+08:00",
+  "sources": [
+    "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
+    "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
+    "ai-workspace/10-collaboration/tasks/T-BE-001.md",
+    "ai-workspace/10-collaboration/tasks/T-FE-001.md",
+    "ai-workspace/10-collaboration/tasks/T-QA-001.md"
+  ],
+  "gates": [
+    {
+      "id": "S-BE-01",
+      "title": "后端锁文件依赖安装",
+      "source": [
+        "T-BE-001",
+        "v1.1 14.1/23.3-A"
+      ],
+      "scope": "stage",
+      "layer": "build",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "Python 3.12",
+        "uv 0.11.28",
+        "隔离的 PR #2 快照"
+      ],
+      "data": [
+        "仅使用审查提交 01386cb 的 tracked source",
+        "无生产连接串"
+      ],
+      "command": [
+        "uv sync --locked --all-groups"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-uv-sync.log"
+      ],
+      "status": "PASS",
+      "reason": "锁文件安装成功，EXIT_CODE=0。"
+    },
+    {
+      "id": "S-BE-02",
+      "title": "后端 Ruff lint 与格式检查",
+      "source": [
+        "T-BE-001",
+        "v1.1 21/22.2"
+      ],
+      "scope": "stage",
+      "layer": "static",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "完成 uv sync"
+      ],
+      "data": [
+        "PR #2 的 backend/** 源码"
+      ],
+      "command": [
+        "uv run ruff check .",
+        "uv run ruff format --check ."
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-ruff-check.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-ruff-format.log"
+      ],
+      "status": "PASS",
+      "reason": "两条命令均 EXIT_CODE=0；格式检查日志有一次非阻断 cache 写警告。"
+    },
+    {
+      "id": "S-BE-03",
+      "title": "后端真实 PostgreSQL/Redis 集成测试",
+      "source": [
+        "T-BE-001",
+        "v1.1 21.2"
+      ],
+      "scope": "stage",
+      "layer": "integration",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "PostgreSQL 16.10 可连接",
+        "Redis DB 14 可连接",
+        "专用 QA 数据库已创建"
+      ],
+      "data": [
+        "系统元数据迁移",
+        "无真实成员数据"
+      ],
+      "command": [
+        "$env:TEST_DATABASE_URL=<dedicated QA DB>",
+        "$env:TEST_REDIS_URL=redis://127.0.0.1:6379/14",
+        "uv run pytest"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-pytest-run1.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-pytest-run2-repeatability.log"
+      ],
+      "status": "PASS",
+      "reason": "两次连续运行均为 16 passed；现有测试不写入持久业务状态。"
+    },
+    {
+      "id": "S-BE-04",
+      "title": "空库迁移、drift check、降级与再升级",
+      "source": [
+        "T-BE-001",
+        "v1.1 22.2"
+      ],
+      "scope": "stage",
+      "layer": "migration",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "专用空数据库 english_learn_qa_a30_migration",
+        "真实 PostgreSQL"
+      ],
+      "data": [
+        "Alembic baseline 20261022_0001"
+      ],
+      "command": [
+        "uv run alembic upgrade head",
+        "uv run alembic check",
+        "uv run alembic downgrade base",
+        "uv run alembic upgrade head"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-upgrade-empty.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-check.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-downgrade-base.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-reupgrade.log"
+      ],
+      "status": "PASS",
+      "reason": "空库升级、无漂移、降级后 system_metadata 消失、再次升级均成功。"
+    },
+    {
+      "id": "S-BE-05",
+      "title": "健康检查、request_id 与统一错误结构实机冒烟",
+      "source": [
+        "T-BE-001",
+        "v1.1 15.1/15.11"
+      ],
+      "scope": "stage",
+      "layer": "integration",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "隔离 Uvicorn 实例",
+        "真实 PostgreSQL/Redis"
+      ],
+      "data": [
+        "GET 健康、服务元数据、OpenAPI 与未知路由请求"
+      ],
+      "command": [
+        "GET /health/live",
+        "GET /health/ready",
+        "GET /api/v1",
+        "GET /api/v1/openapi.json",
+        "GET /api/v1/qa-not-found"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/api/smoke-summary.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/api/body-assertions.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/api/error-envelope-404.json"
+      ],
+      "status": "PASS",
+      "reason": "状态码、组件就绪、X-Request-ID 透传及错误四字段均通过。"
+    },
+    {
+      "id": "S-BE-06",
+      "title": "后端提交范围、敏感文件与生产 mock 检查",
+      "source": [
+        "T-BE-001",
+        "v1.1 20.6/22.2"
+      ],
+      "scope": "stage",
+      "layer": "security",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "审查提交 01386cb",
+        "tracked files only"
+      ],
+      "data": [
+        "backend/**",
+        "合成测试值"
+      ],
+      "command": [
+        "git diff --name-only 922ff98..HEAD",
+        "git ls-files",
+        "custom tracked-secret scan"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/security/tracked-secret-scan.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/security/backend-tracked-secret-scan.json"
+      ],
+      "status": "PASS",
+      "reason": "44 个文件全部位于 backend/**；无二进制、真实 .env、私钥或未分类高置信度密钥。"
+    },
+    {
+      "id": "S-BE-07",
+      "title": "后端测试数据隔离",
+      "source": [
+        "T-BE-001",
+        "v1.1 22.2"
+      ],
+      "scope": "stage",
+      "layer": "integration",
+      "owner": "A10",
+      "preconditions": [
+        "专用 QA 数据库",
+        "测试夹具当前实现"
+      ],
+      "data": [
+        "QA-only 持久化探针 test_qa_isolation_probe.py"
+      ],
+      "command": [
+        "连续运行同一持久化测试两次",
+        "检查第二次是否出现前次状态"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/probes/test_qa_isolation_probe.py",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-isolation-probe-run1.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-isolation-probe-run2.log"
+      ],
+      "status": "FAIL",
+      "reason": "第一次 1 passed，第二次因前次数据残留断言失败；conftest 仅执行迁移，没有每测试回滚或清理。缺陷 QA-D-001。"
+    },
+    {
+      "id": "S-BE-08",
+      "title": "后端开发依赖漏洞审计",
+      "source": [
+        "v1.1 20.6.2/21.5"
+      ],
+      "scope": "stage",
+      "layer": "security",
+      "owner": "A10",
+      "preconditions": [
+        "隔离 backend .venv",
+        "pip-audit 可查询漏洞库"
+      ],
+      "data": [
+        "uv.lock 解析出的已安装包"
+      ],
+      "command": [
+        "uvx pip-audit --path <isolated-venv-site-packages> --format json"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/security/backend-pip-audit.json",
+        "ai-workspace/04-qa/evidence/T-QA-001/security/backend-pip-audit.stderr.log"
+      ],
+      "status": "FAIL",
+      "reason": "pytest 8.4.2 命中 PYSEC-2026-1845；修复版本 9.0.3，当前 <9 约束阻止升级。缺陷 QA-D-002。"
+    },
+    {
+      "id": "S-FE-01",
+      "title": "前端锁文件安装与生产构建",
+      "source": [
+        "T-FE-001",
+        "v1.1 18/22.2"
+      ],
+      "scope": "stage",
+      "layer": "build",
+      "owner": "A20 / A30",
+      "preconditions": [
+        "Node 24.18.0",
+        "npm 11.16.0",
+        "隔离的 PR #1 快照"
+      ],
+      "data": [
+        "frontend/** tracked source",
+        "无 dist 入库"
+      ],
+      "command": [
+        "npm ci",
+        "npm run build"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-npm-ci.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-build.log"
+      ],
+      "status": "PASS",
+      "reason": "npm ci 安装 161 包且 0 vulnerabilities；vue-tsc 与 Vite 构建成功。"
+    },
+    {
+      "id": "S-FE-02",
+      "title": "前端组件、路由守卫与 API 错误测试",
+      "source": [
+        "T-FE-001",
+        "v1.1 18.2"
+      ],
+      "scope": "stage",
+      "layer": "unit",
+      "owner": "A20 / A30",
+      "preconditions": [
+        "完成 npm ci"
+      ],
+      "data": [
+        "内存 fetch stub",
+        "合成管理员/成员用户"
+      ],
+      "command": [
+        "npm test"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-test.log"
+      ],
+      "status": "PASS",
+      "reason": "4 个测试文件、11 项测试通过；仅有 3 条 jsdom scrollTo 未实现警告。"
+    },
+    {
+      "id": "S-FE-03",
+      "title": "真实 API、无 localStorage 业务真相、无生产 mock 数据",
+      "source": [
+        "T-FE-001",
+        "v1.1 18.3"
+      ],
+      "scope": "stage",
+      "layer": "static",
+      "owner": "A20 / A30",
+      "preconditions": [
+        "PR #1 tracked source"
+      ],
+      "data": [
+        "frontend/src/**；测试 mock 与生产代码分开检查"
+      ],
+      "command": [
+        "rg localStorage/sessionStorage",
+        "rg mock/fake/fixture",
+        "检查 fetch 调用"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log"
+      ],
+      "status": "PASS",
+      "reason": "生产代码仅使用真实 fetch；无 localStorage/sessionStorage 调用；mock 仅出现在 tests。"
+    },
+    {
+      "id": "S-FE-04",
+      "title": "认证、改密、会话恢复与角色守卫基线",
+      "source": [
+        "T-FE-001",
+        "v1.1 4/18.2"
+      ],
+      "scope": "stage",
+      "layer": "unit",
+      "owner": "A20 / A30",
+      "preconditions": [
+        "前端单元测试无真实认证后端",
+        "A10 当前仅交付工程骨架"
+      ],
+      "data": [
+        "合成用户 ID、admin/member 角色、一次性密码"
+      ],
+      "command": [
+        "npm test",
+        "后续真实认证接口联调"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/inputs/review-snapshot.md"
+      ],
+      "status": "CONDITIONAL",
+      "reason": "前端逻辑和测试存在，但无法对真实 /auth/* 做端到端验证；A10 尚未实现认证。",
+      "conditions": [
+        "AUTH-INT-001",
+        "QA-D-003"
+      ]
+    },
+    {
+      "id": "S-FE-05",
+      "title": "前端依赖漏洞审计",
+      "source": [
+        "v1.1 20.6.2/21.5"
+      ],
+      "scope": "stage",
+      "layer": "security",
+      "owner": "A20 / A30",
+      "preconditions": [
+        "完成 npm ci",
+        "npm audit 可访问漏洞库"
+      ],
+      "data": [
+        "锁文件实际安装树"
+      ],
+      "command": [
+        "npm audit --json"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/security/frontend-npm-audit.json",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-npm-audit-command.log"
+      ],
+      "status": "PASS",
+      "reason": "npm audit 报告 0 vulnerabilities。"
+    },
+    {
+      "id": "S-FE-06",
+      "title": "前端提交补丁卫生",
+      "source": [
+        "T-FE-001",
+        "仓库 AGENTS.md Git 规则"
+      ],
+      "scope": "stage",
+      "layer": "static",
+      "owner": "A20",
+      "preconditions": [
+        "PR #1 baseline 922ff98"
+      ],
+      "data": [
+        "frontend/** diff"
+      ],
+      "command": [
+        "git -C worktrees/A20-VIEW diff --check 922ff98..HEAD"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log"
+      ],
+      "status": "FAIL",
+      "reason": "两个测试文件存在 EOF 空行警告，命令退出 2。缺陷 QA-D-003；无运行时影响。"
+    },
+    {
+      "id": "F-AUTH-01",
+      "title": "管理员与成员登录、强制改密、刷新轮换与退出",
+      "source": [
+        "USER-DELIVERY-001 管理员/成员流程",
+        "v1.1 4/15.2"
+      ],
+      "scope": "final",
+      "layer": "e2e",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "认证业务接口与数据库实现",
+        "真实浏览器"
+      ],
+      "data": [
+        "bootstrap admin",
+        "成员 A",
+        "一次性临时密码"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_auth_flow.py",
+        "playwright test auth.spec.ts"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "当前后端无 /auth/* 业务接口与用户表；仅前端契约/组件测试存在。"
+    },
+    {
+      "id": "F-ADMIN-01",
+      "title": "成员创建、批量导入、启停删、重置密码、角色与最后管理员保护",
+      "source": [
+        "USER-DELIVERY-001 管理员流程",
+        "v1.1 2.1/3.4/15.3"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "用户领域模型与管理 API",
+        "审计日志"
+      ],
+      "data": [
+        "至少两个合成管理员",
+        "批次含冲突和错误行"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_admin_users.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "当前仅有 system_metadata 表与系统元数据路由；未实现成员领域。"
+    },
+    {
+      "id": "F-PRIV-01",
+      "title": "管理员隐私边界与越权访问",
+      "source": [
+        "USER-DELIVERY-001 隐私证据",
+        "v1.1 3.3/21.5"
+      ],
+      "scope": "final",
+      "layer": "security",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "成员答题、草稿、教练对话数据",
+        "admin/member 两类账号"
+      ],
+      "data": [
+        "合成成员 B 的私有正文与聚合指标"
+      ],
+      "command": [
+        "pytest -q tests/security/test_admin_privacy.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无业务数据、管理接口或隐私边界测试。"
+    },
+    {
+      "id": "F-DASH-01",
+      "title": "组织级聚合学习看板且不返回成员正文",
+      "source": [
+        "USER-DELIVERY-001 管理员流程",
+        "v1.1 2.1/15.3"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "聚合查询实现",
+        "管理员会话"
+      ],
+      "data": [
+        "两个合成成员及聚合学习事件"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_admin_dashboard.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "前端只有真实 GET 骨架，后端无 dashboard API。"
+    },
+    {
+      "id": "F-AI-01",
+      "title": "多组 OpenAI 兼容提供商、提示词、连接检查与主备切换",
+      "source": [
+        "USER-DELIVERY-001 管理员流程",
+        "v1.1 10/15.3"
+      ],
+      "scope": "final",
+      "layer": "ai-contract",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "加密配置",
+        "fake provider 测试",
+        "真实 provider 人工演示"
+      ],
+      "data": [
+        "两个 synthetic provider 配置",
+        "无真实 API Key 入库"
+      ],
+      "command": [
+        "pytest -q tests/ai_contract/test_provider_failover.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无 AI 提供商/提示词模型、API、加密或连接测试。"
+    },
+    {
+      "id": "F-BOOK-01",
+      "title": "组织/私有词书、格式识别、预览映射、导出与主词书激活",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 2.1/6/15.5"
+      ],
+      "scope": "final",
+      "layer": "e2e",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "上传限制与导入任务",
+        "词书领域表"
+      ],
+      "data": [
+        "合成 CSV/JSON/TXT 各一份",
+        "冲突词条与错误编码样例"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_wordbook_import.py",
+        "playwright test wordbooks.spec.ts"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "前端只有 /wordbooks 真实 GET 骨架；后端无词书 API/表。"
+    },
+    {
+      "id": "F-MEM-01",
+      "title": "翻卡、选择、拼写、FSRS、到期复习、已记住与恢复",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 7/8/15.6"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "FSRS 实现与状态表",
+        "真实 PostgreSQL"
+      ],
+      "data": [
+        "合成 20 词词书",
+        "Again/Good/两次 Good/四卡重插样例"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_memory_fsrs.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无单词状态、记忆会话、FSRS 或记忆界面。"
+    },
+    {
+      "id": "F-PROFILE-01",
+      "title": "学习档案、每日新词量、时长目标、活跃心跳与今日任务",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 5/8/15.4"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "档案与计划快照表",
+        "真实 Redis/PostgreSQL"
+      ],
+      "data": [
+        "合成成员学习目标",
+        "跨日边界与幂等样例"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_daily_plan.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无档案/计划业务；前端 /overview 仅显示真实响应摘要骨架。"
+    },
+    {
+      "id": "F-PRACTICE-01",
+      "title": "填空、阅读、翻译、作文生成、草稿、提交、评分、历史与错题",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 9/15.7"
+      ],
+      "scope": "final",
+      "layer": "e2e",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "AI 任务、草稿版本与评分链",
+        "fake provider 集成"
+      ],
+      "data": [
+        "四类合成题目",
+        "评分失败与重试样例"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_practice_flow.py",
+        "playwright test practice.spec.ts"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无练习领域与业务 API；前端只有列表 GET 骨架。"
+    },
+    {
+      "id": "F-ANSWER-01",
+      "title": "提交前答案防泄露",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 9.4/21.3"
+      ],
+      "scope": "final",
+      "layer": "ai-contract",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "练习会话 API 与答案序列化策略"
+      ],
+      "data": [
+        "客观题正确/错误答案、主观题参考内容"
+      ],
+      "command": [
+        "pytest -q tests/security/test_answer_non_leak.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无题目数据模型或序列化脱敏实现。"
+    },
+    {
+      "id": "F-RECORD-01",
+      "title": "提交记录、错题本、草稿续做与批量删除",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 9.7/15.7"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "提交记录表与批量删除事务",
+        "审计日志"
+      ],
+      "data": [
+        "合成记录含低于 60 分样例"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_practice_records.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无练习记录表或批量删除 API。"
+    },
+    {
+      "id": "F-COACH-01",
+      "title": "AI 教练长对话、学习上下文与真实 SSE",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 11/15.8"
+      ],
+      "scope": "final",
+      "layer": "e2e",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "消息任务、Redis 队列与 SSE endpoint"
+      ],
+      "data": [
+        "合成学习上下文",
+        "fake provider 流式片段"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_coach_sse.py",
+        "playwright test coach-sse.spec.ts"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无教练模型/API/SSE；前端 coach 页面只是 GET 骨架。"
+    },
+    {
+      "id": "F-COACH-02",
+      "title": "受控 action 白名单、回执与 24 小时撤销",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 11.4"
+      ],
+      "scope": "final",
+      "layer": "security",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "action receipt 与审计事件",
+        "可控时钟"
+      ],
+      "data": [
+        "合法 action",
+        "过期/越权/重复撤销样例"
+      ],
+      "command": [
+        "pytest -q tests/security/test_coach_actions.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无 action/receipt/undo 实现。"
+    },
+    {
+      "id": "F-CHAL-01",
+      "title": "每日闯关地图、合法节点、终点挑战与历史",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 12/15.9"
+      ],
+      "scope": "final",
+      "layer": "ai-contract",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "严格地图 Schema 与任务编排",
+        "fake provider"
+      ],
+      "data": [
+        "合法地图",
+        "缺节点/错顺序/多字段/错误类型样例"
+      ],
+      "command": [
+        "pytest -q tests/ai_contract/test_challenge_schema.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无挑战表、生成 API、校验或前端交互。"
+    },
+    {
+      "id": "F-SHARED-01",
+      "title": "传统学习、AI 练习、教练与闯关共享真实进度",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 12.7/21.2"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "领域事件/outbox 与共享状态"
+      ],
+      "data": [
+        "传统学习完成 → 节点完成 → BOSS 提交合成链路"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_shared_progress.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "业务状态尚未实现，无法验证共享进度。"
+    },
+    {
+      "id": "F-NOTIF-01",
+      "title": "站内通知、偏好、免打扰、每日上限、去重与定时提醒",
+      "source": [
+        "USER-DELIVERY-001 成员流程",
+        "v1.1 13/15.10"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "通知表、调度任务与偏好规则"
+      ],
+      "data": [
+        "合成重复事件与跨日通知"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_notifications.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无通知模型/API/worker 业务任务。"
+    },
+    {
+      "id": "F-FAIL-01",
+      "title": "AI 不可用时传统学习可继续且失败态不伪造",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 23.2"
+      ],
+      "scope": "final",
+      "layer": "e2e",
+      "owner": "A10 / A20 / A30",
+      "preconditions": [
+        "可模拟 AI provider 失败",
+        "真实浏览器"
+      ],
+      "data": [
+        "provider timeout/5xx/无效 JSON 样例"
+      ],
+      "command": [
+        "playwright test failure-states.spec.ts"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "传统学习/业务前端尚未实现；当前只能验证壳层网络失败提示。"
+    },
+    {
+      "id": "F-IDEM-01",
+      "title": "计划、提交、挑战与批量操作的幂等和并发冲突",
+      "source": [
+        "v1.1 8.4/9.3/12.7/14.7"
+      ],
+      "scope": "final",
+      "layer": "integration",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "Idempotency-Key 存储与事务边界"
+      ],
+      "data": [
+        "同键同体、同键异体、并发请求样例"
+      ],
+      "command": [
+        "pytest -q tests/integration/test_idempotency.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无业务幂等表或写接口，当前只能验证基础事务配置。"
+    },
+    {
+      "id": "F-E2E-01",
+      "title": "管理员与成员完整演示闭环",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 21.4"
+      ],
+      "scope": "final",
+      "layer": "e2e",
+      "owner": "A20 / A30",
+      "preconditions": [
+        "完整前后端、合成演示数据、浏览器"
+      ],
+      "data": [
+        "管理员、成员 A、成员 B、词书与练习题"
+      ],
+      "command": [
+        "playwright test e2e/admin-member-journey.spec.ts"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "当前只有工程壳层，完整 E2E 不存在。"
+    },
+    {
+      "id": "F-AI-CONTRACT-01",
+      "title": "AI JSON Schema、选项不泄露、题量/词量、主备切换与额度失败",
+      "source": [
+        "v1.1 21.3"
+      ],
+      "scope": "final",
+      "layer": "ai-contract",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "统一 provider adapter",
+        "fake provider 只用于测试"
+      ],
+      "data": [
+        "缺字段、多字段、错误类型、超时、主备切换样例"
+      ],
+      "command": [
+        "pytest -q tests/ai_contract"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无 AI adapter、Schema、额度或切换实现。"
+    },
+    {
+      "id": "F-SEC-01",
+      "title": "认证、CSRF、限流、CSP/安全头、Cookie 与所有权检查",
+      "source": [
+        "v1.1 4/19.1"
+      ],
+      "scope": "final",
+      "layer": "security",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "认证中间件、Cookie 配置与安全响应头"
+      ],
+      "data": [
+        "过期/重放/篡改 token 与越权用户样例"
+      ],
+      "command": [
+        "pytest -q tests/security/test_app_security.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "当前无认证/Cookie/CSRF/限流；也未发现 CSP 等安全响应头。"
+    },
+    {
+      "id": "F-SEC-02",
+      "title": "AI Key 加密、Base URL SSRF 防护与不可信输出清洗",
+      "source": [
+        "v1.1 19.2"
+      ],
+      "scope": "final",
+      "layer": "security",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "provider 密钥存储与 URL 校验"
+      ],
+      "data": [
+        "云元数据地址、内网地址、恶意 HTML/Markdown 样例"
+      ],
+      "command": [
+        "pytest -q tests/security/test_ai_security.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无 AI 配置/调用实现，相关安全门无法执行。"
+    },
+    {
+      "id": "F-SEC-03",
+      "title": "上传/下载限制、路径穿越、PDF/SVG/HTML 安全",
+      "source": [
+        "v1.1 19.3"
+      ],
+      "scope": "final",
+      "layer": "security",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "词书导入/导出实现"
+      ],
+      "data": [
+        "超限、畸形编码、路径穿越、恶意 HTML 样例"
+      ],
+      "command": [
+        "pytest -q tests/security/test_upload_security.py"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无上传/导出实现。"
+    },
+    {
+      "id": "F-AUDIT-01",
+      "title": "安全/审计日志、数据保留与备份恢复",
+      "source": [
+        "v1.1 19.4-19.6"
+      ],
+      "scope": "final",
+      "layer": "security",
+      "owner": "A10 / A40 / A30",
+      "preconditions": [
+        "审计事件表",
+        "备份脚本与恢复流程"
+      ],
+      "data": [
+        "登录失败、密码重置、角色变更、AI 配置变更样例"
+      ],
+      "command": [
+        "pytest -q tests/security/test_audit_log.py",
+        "执行备份恢复演练"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "当前只有结构化访问日志，无业务审计、保留或备份证据。"
+    },
+    {
+      "id": "F-MIG-01",
+      "title": "完整业务 Schema 的空库迁移与回放",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 22.2"
+      ],
+      "scope": "final",
+      "layer": "migration",
+      "owner": "A10 / A30",
+      "preconditions": [
+        "完整业务模型与迁移链"
+      ],
+      "data": [
+        "空库",
+        "回滚后重建",
+        "演示数据"
+      ],
+      "command": [
+        "alembic upgrade head",
+        "alembic downgrade base",
+        "alembic upgrade head"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-upgrade-empty.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-downgrade-base.log"
+      ],
+      "status": "CONDITIONAL",
+      "reason": "当前单一 system_metadata 迁移已通过；完整业务迁移尚不存在。",
+      "conditions": [
+        "GAP-FINAL-SCHEMA"
+      ]
+    },
+    {
+      "id": "F-DOCKER-01",
+      "title": "Docker Compose 从干净环境启动全部服务",
+      "source": [
+        "USER-DELIVERY-001 最终形态",
+        "v1.1 20/22.2"
+      ],
+      "scope": "final",
+      "layer": "build",
+      "owner": "A40 / A30",
+      "preconditions": [
+        "Docker Compose 文件与镜像"
+      ],
+      "data": [
+        "空卷",
+        "示例环境变量",
+        "演示数据"
+      ],
+      "command": [
+        "docker compose up --build -d",
+        "docker compose ps",
+        "健康检查"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "仓库 main 当前只有 AGENTS.md；无 Compose、Dockerfile 或启动证据。"
+    },
+    {
+      "id": "F-DEMO-01",
+      "title": "演示数据初始化与评审账号",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 16.3/20.3"
+      ],
+      "scope": "final",
+      "layer": "manual",
+      "owner": "A10 / A40 / A50",
+      "preconditions": [
+        "完整 Schema",
+        "初始化命令"
+      ],
+      "data": [
+        "仅合成管理员/成员/词书/练习数据"
+      ],
+      "command": [
+        "执行演示数据初始化",
+        "按 README 登录复核"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "无演示数据初始化脚本或评审账号说明。"
+    },
+    {
+      "id": "F-CI-01",
+      "title": "GitHub Actions 测试、构建、Docker、迁移与密钥扫描",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 20.6.2"
+      ],
+      "scope": "final",
+      "layer": "build",
+      "owner": "A40 / A30",
+      "preconditions": [
+        "工作流文件与可运行 CI"
+      ],
+      "data": [
+        "合成测试服务",
+        "PR 事件"
+      ],
+      "command": [
+        "gh workflow run / 检查 PR checks"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "main 无 .github/workflows；PR #1/#2 无 CI 检查。"
+    },
+    {
+      "id": "F-DOC-01",
+      "title": "根 README、OpenAPI、部署说明、演示步骤、许可证与技术文档",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 20/24"
+      ],
+      "scope": "final",
+      "layer": "manual",
+      "owner": "A50 / A40 / A30",
+      "preconditions": [
+        "完整功能与部署参数"
+      ],
+      "data": [
+        "可复制的脱敏文档结构"
+      ],
+      "command": [
+        "按 README 在 10 分钟内完成本地/容器启动"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "当前只有 backend/frontend 组件 README；main 无根 README、部署说明或比赛文档。"
+    },
+    {
+      "id": "F-GIT-01",
+      "title": "可追溯分支、PR、分段提交、版本标签与发布历史",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 20.6.1"
+      ],
+      "scope": "final",
+      "layer": "manual",
+      "owner": "A01 / A30",
+      "preconditions": [
+        "GitHub 仓库历史"
+      ],
+      "data": [
+        "工程基线 PR #1/#2 及后续阶段"
+      ],
+      "command": [
+        "检查 branches/PR/tags/releases"
+      ],
+      "evidence": [
+        "ai-workspace/04-qa/evidence/T-QA-001/inputs/review-snapshot.md",
+        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log"
+      ],
+      "status": "CONDITIONAL",
+      "reason": "分支与两个开放 PR 可追溯；尚无后续阶段历史、版本标签或发布。",
+      "conditions": [
+        "GAP-RELEASE-HISTORY"
+      ]
+    },
+    {
+      "id": "F-PERF-01",
+      "title": "P95、导入耗时、SSE 首字节、并发与列表分页指标",
+      "source": [
+        "v1.1 23.1"
+      ],
+      "scope": "final",
+      "layer": "performance",
+      "owner": "A30 / A40",
+      "preconditions": [
+        "完成业务 API",
+        "代表性演示数据",
+        "真实 PostgreSQL/Redis"
+      ],
+      "data": [
+        "5000 行词书、并发用户、SSE provider 流"
+      ],
+      "command": [
+        "k6 或 locust 压测脚本",
+        "SSE timing probe"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "NOT_RUN",
+      "reason": "业务接口与部署环境尚未存在，当前无可测负载路径。"
+    },
+    {
+      "id": "F-COMP-01",
+      "title": "比赛材料、演示视频、公网演示与最终安全检查",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 22.3/24"
+      ],
+      "scope": "final",
+      "layer": "manual",
+      "owner": "A00 / A40 / A50 / A30",
+      "preconditions": [
+        "完整 MVP 与部署"
+      ],
+      "data": [
+        "5-8 分钟脚本、1080p 视频、评审账号"
+      ],
+      "command": [
+        "执行最终演示清单与安全检查"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "最终 MVP、部署和比赛材料未交付。"
+    },
+    {
+      "id": "F-FINAL-01",
+      "title": "USER-DELIVERY-001 最终 MVP 验收",
+      "source": [
+        "USER-DELIVERY-001 完成判定",
+        "v1.1 22"
+      ],
+      "scope": "final",
+      "layer": "manual",
+      "owner": "A30",
+      "preconditions": [
+        "所有功能、工程、安全、比赛门禁 PASS"
+      ],
+      "data": [
+        "完整合成演示环境"
+      ],
+      "command": [
+        "python tests/quality-baseline/validate_manifest.py --workspace-root ..\\.. --require-final-pass"
+      ],
+      "evidence": [
+        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
+        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+      ],
+      "status": "FAIL",
+      "reason": "当前仅有 Stage A 工程基线；不得把阶段完成当作最终 MVP 完成。"
+    }
+  ]
+}
