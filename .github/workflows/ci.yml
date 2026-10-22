@@ -120,7 +120,7 @@ jobs:
           --redact --verbose --exit-code=1 --no-banner
 
   compose:
-    name: Compose build, migration, startup and health checks
+    name: Compose build, storage, migration, startup and health checks
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -128,7 +128,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Prepare disposable environment
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          sed -i "s/^COMPOSE_PROJECT_NAME=.*/COMPOSE_PROJECT_NAME=english-learn-storage-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/" .env
       - name: Show tool versions
         run: |
           docker --version
@@ -136,8 +138,16 @@ jobs:
           python --version
       - name: Validate Compose resolution
         run: docker compose --env-file .env config --quiet
+      - name: Validate wordbook storage contract
+        run: |
+          python -m unittest discover -s deploy/tests -p "test_*.py" -v
+          python deploy/tests/check_compose_storage.py --env-file .env --compose-file docker-compose.yml
       - name: Build, migrate and verify
         run: ./deploy/scripts/start-stack.sh
+      - name: Verify cross-container wordbook storage
+        env:
+          EVIDENCE_FILE: deploy/backups/wordbook-storage-evidence.json
+        run: ./deploy/scripts/verify-wordbook-storage.sh
       - name: Show Compose state
         run: docker compose --env-file .env ps
       - name: Collect failure diagnostics
@@ -145,3 +155,17 @@ jobs:
         run: |
           docker compose --env-file .env ps -a
           docker compose --env-file .env logs --no-color --tail=200
+      - name: Upload wordbook storage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordbook-storage-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: deploy/backups/wordbook-storage-evidence.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Remove disposable Compose project and volumes
+        if: always()
+        run: |
+          if [[ -f .env ]]; then
+            docker compose --env-file .env down --volumes --remove-orphans
+          fi
