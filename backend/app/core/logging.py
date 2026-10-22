@@ -7,7 +7,7 @@ from app.core.request_context import get_request_id
 
 
 class JsonFormatter(logging.Formatter):
-    """Minimal JSON formatter for application and request logs."""
+    """Minimal JSON formatter for application, safety, and request logs."""
 
     extra_fields = (
         "environment",
@@ -17,6 +17,11 @@ class JsonFormatter(logging.Formatter):
         "duration_ms",
         "event",
         "worker",
+        "user_id",
+        "target_id",
+        "error_code",
+        "reason_code",
+        "outcome",
     )
 
     def format(self, record: logging.LogRecord) -> str:

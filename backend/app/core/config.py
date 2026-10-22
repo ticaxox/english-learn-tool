@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     db_pool_size: int = Field(default=5, ge=1, le=50)
     db_max_overflow: int = Field(default=5, ge=0, le=50)
 
+    login_max_failures: int = Field(default=5, ge=1, le=20)
+    login_failure_window_seconds: int = Field(default=300, ge=30, le=3600)
+    login_cooldown_seconds: int = Field(default=900, ge=60, le=86400)
+    import_preview_ttl_minutes: int = Field(default=30, ge=5, le=1440)
+    import_max_rows: int = Field(default=500, ge=1, le=5000)
+    import_max_bytes: int = Field(default=1_000_000, ge=1024, le=20_000_000)
+
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, value: str) -> str:
@@ -108,6 +115,19 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return self.cors_origins.split(",")
+
+    @property
+    def refresh_cookie_path(self) -> str:
+        return f"{self.api_v1_prefix}/auth/refresh"
+
+    @property
+    def csrf_cookie_path(self) -> str:
+        # The SPA must be able to read the non-HttpOnly token from any application route.
+        return "/"
+
+    @property
+    def cookie_secure(self) -> bool:
+        return self.app_env == "production"
 
     def runtime_configuration_errors(self) -> list[str]:
         """Return non-secret configuration problems suitable for readiness details."""
