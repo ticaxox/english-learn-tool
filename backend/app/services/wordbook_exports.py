@@ -82,6 +82,15 @@ def _export_rows(entries: tuple[ExportEntry, ...]) -> list[list[str]]:
     return rows
 
 
+def _csv_safe(value: str) -> str:
+    """Prevent spreadsheet applications from evaluating imported word data as formulas."""
+
+    leading_trimmed = value.lstrip("\t\r ")
+    if leading_trimmed.startswith(("=", "+", "-", "@")):
+        return f"'{value}"
+    return value
+
+
 def _render_csv(entries: tuple[ExportEntry, ...]) -> bytes:
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\r\n")
@@ -96,7 +105,7 @@ def _render_csv(entries: tuple[ExportEntry, ...]) -> bytes:
             "example_zh",
         ]
     )
-    writer.writerows(_export_rows(entries))
+    writer.writerows([[_csv_safe(cell) for cell in row] for row in _export_rows(entries)])
     return ("\ufeff" + output.getvalue()).encode("utf-8")
 
 

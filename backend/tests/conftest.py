@@ -1,6 +1,8 @@
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from collections.abc import AsyncIterator, Awaitable, Callable
 from pathlib import Path
 from uuid import UUID, uuid4
@@ -26,6 +28,8 @@ os.environ["CORS_ORIGINS"] = "http://localhost:5173,http://testserver"
 os.environ["JWT_SECRET"] = "test-jwt-secret-with-at-least-32-chars"
 os.environ["REFRESH_TOKEN_PEPPER"] = "test-refresh-pepper-with-at-least-32-chars"
 os.environ["SECRET_ENCRYPTION_KEY"] = "test-encryption-key-with-at-least-32-chars"
+TEST_WORDBOOK_STORAGE_DIR = Path(tempfile.gettempdir()) / "english-learn-wordbook-tests"
+os.environ["WORDBOOK_STORAGE_DIR"] = str(TEST_WORDBOOK_STORAGE_DIR)
 
 from app.core.config import Settings  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
@@ -72,6 +76,8 @@ async def isolate_test_state(app) -> AsyncIterator[None]:
 
     redis = app.state.redis
     await redis.flushdb()
+    shutil.rmtree(TEST_WORDBOOK_STORAGE_DIR, ignore_errors=True)
+    TEST_WORDBOOK_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
     original_session_factory = app.state.session_factory
     connection = await app.state.engine.connect()
@@ -92,6 +98,8 @@ async def isolate_test_state(app) -> AsyncIterator[None]:
             await connection.close()
             app.state.session_factory = original_session_factory
             await redis.flushdb()
+            shutil.rmtree(TEST_WORDBOOK_STORAGE_DIR, ignore_errors=True)
+            TEST_WORDBOOK_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @pytest_asyncio.fixture

@@ -148,6 +148,12 @@ uv run python -m app.cli convert-wordbook .\input.csv .\wordbook.json --report .
 The output identifies `english-learn-wordbook-converter/1.0.0`; a non-zero exit status means rejected
 rows were reported.
 
+`WORDBOOK_STORAGE_DIR` must be an absolute path. The API, ARQ worker, and scheduler must mount the
+same writable persistent volume there; the Compose files currently require an A40 deployment change
+to add that volume under the read-only application services. A single-host filesystem or process-local
+directory is not a valid production deployment because preview and export artifacts must cross service
+process boundaries. Uploaded data remains private and must not be served from a public directory.
+
 ## Verification
 
 Create a dedicated integration database and Redis database, then run the checks:

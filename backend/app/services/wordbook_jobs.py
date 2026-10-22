@@ -96,8 +96,9 @@ async def _start_job(
     if job is None:
         raise WordbookJobError("WORDBOOK_JOB_NOT_FOUND", "The wordbook job was not found.")
     if job.status == "succeeded":
+        result = dict(job.result or {})
         await session.rollback()
-        return None, job.result or {}
+        return None, result
     if job.status == "cancelled":
         await session.rollback()
         return None, {"status": "cancelled"}
@@ -216,7 +217,9 @@ async def _process_import(
                     )
                 )
     session.add_all(entries)
+    await session.flush()
     session.add_all(definitions)
+    await session.flush()
     session.add_all(examples)
     await session.flush()
 
@@ -557,6 +560,14 @@ async def _record_failure(ctx: dict[str, Any], job_id: UUID, exc: Exception) -> 
                     **(book.book_metadata or {}),
                     "import_error_code": code,
                 }
+        if job.kind == "import" and job.preview_id is not None and final_failure:
+            preview = await session.scalar(
+                select(WordbookImportPreview)
+                .where(WordbookImportPreview.id == job.preview_id)
+                .with_for_update()
+            )
+            if preview is not None:
+                preview.status = "failed"
         add_audit_event(
             session,
             actor_id=job.owner_id,

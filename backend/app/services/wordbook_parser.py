@@ -152,16 +152,38 @@ def _decode(raw: bytes) -> tuple[str, str]:
     if not raw:
         raise WordbookParseError("IMPORT_FILE_EMPTY", "The uploaded file is empty.")
 
-    has_utf16_bom = raw.startswith((b"\xff\xfe", b"\xfe\xff"))
-    has_nul = b"\x00" in raw
-    for encoding in SUPPORTED_ENCODINGS:
-        if encoding.startswith("utf-16") and not (has_utf16_bom or has_nul):
+    bom_encodings = (
+        (b"\xef\xbb\xbf", "utf-8-sig"),
+        (b"\xff\xfe", "utf-16-le"),
+        (b"\xfe\xff", "utf-16-be"),
+    )
+    for bom, encoding in bom_encodings:
+        if not raw.startswith(bom):
             continue
         try:
-            text = raw.decode(encoding)
+            text = raw.decode(encoding).removeprefix("\ufeff")
+        except UnicodeDecodeError:
+            break
+        if "\x00" not in text:
+            return text, encoding
+
+    candidates: list[str] = []
+    if b"\x00" in raw:
+        even_nuls = sum(raw[index] == 0 for index in range(0, len(raw), 2))
+        odd_nuls = sum(raw[index] == 0 for index in range(1, len(raw), 2))
+        preferred = (
+            ("utf-16-be", "utf-16-le") if even_nuls >= odd_nuls else ("utf-16-le", "utf-16-be")
+        )
+        candidates.extend(preferred)
+    else:
+        candidates.append("utf-8")
+    candidates.append("gb18030")
+
+    for encoding in dict.fromkeys(candidates):
+        try:
+            text = raw.decode(encoding).removeprefix("\ufeff")
         except UnicodeDecodeError:
             continue
-        text = text.removeprefix("\ufeff")
         if "\x00" in text:
             continue
         return text, encoding
@@ -201,6 +223,7 @@ def _json_rows(text: str) -> list[dict[str, Any]]:
 
 
 def _csv_rows(text: str) -> tuple[list[list[str]], str]:
+    csv.field_size_limit(10 * 1024 * 1024)
     best: tuple[tuple[int, int, int], list[list[str]], str] | None = None
     for delimiter in CSV_DELIMITERS:
         try:
@@ -548,7 +571,7 @@ def parse_wordbook_bytes(
 
     stripped = text.lstrip()
     json_like = suffix == ".json" or stripped.startswith(("[", "{"))
-    detected_format: str
+    detected_format: str = "txt" if suffix == ".txt" else "csv"
     delimiter: str | None = None
     builder = _ResultBuilder()
     columns: list[str]

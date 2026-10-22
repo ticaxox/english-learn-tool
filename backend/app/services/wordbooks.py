@@ -527,13 +527,16 @@ async def _owned_preview(
     session: AsyncSession,
     actor: User,
     preview_id: UUID,
+    *,
+    lock: bool = False,
 ) -> WordbookImportPreview:
-    preview = await session.scalar(
-        select(WordbookImportPreview).where(
-            WordbookImportPreview.id == preview_id,
-            WordbookImportPreview.created_by == actor.id,
-        )
+    statement = select(WordbookImportPreview).where(
+        WordbookImportPreview.id == preview_id,
+        WordbookImportPreview.created_by == actor.id,
     )
+    if lock:
+        statement = statement.with_for_update()
+    preview = await session.scalar(statement)
     if preview is None:
         raise AppError(
             status_code=404,
@@ -591,7 +594,7 @@ async def remap_import_preview(
     preview_id: UUID,
     payload: ImportRemapRequest,
 ) -> ImportPreviewResponse:
-    preview = await _owned_preview(session, actor, preview_id)
+    preview = await _owned_preview(session, actor, preview_id, lock=True)
     await _ensure_preview_usable(session, preview, token=payload.preview_token)
     raw = await storage.read_bytes(preview.storage_key)
     if hashlib.sha256(raw).hexdigest() != preview.file_sha256:
@@ -672,7 +675,7 @@ async def confirm_wordbook_import(
             code="IDEMPOTENCY_KEY_INVALID",
             message="Idempotency-Key must be at most 128 characters.",
         )
-    preview = await _owned_preview(session, actor, payload.preview_id)
+    preview = await _owned_preview(session, actor, payload.preview_id, lock=True)
     fingerprint = _request_fingerprint(
         {
             "preview_id": str(payload.preview_id),
@@ -899,6 +902,14 @@ async def mark_wordbook_job_enqueue_failed(
         book = await _load_wordbook(session, job.wordbook_id, include_deleted=True)
         if book.status == "importing":
             book.status = "failed"
+    if job.kind == "import" and job.preview_id is not None:
+        preview = await session.scalar(
+            select(WordbookImportPreview)
+            .where(WordbookImportPreview.id == job.preview_id)
+            .with_for_update()
+        )
+        if preview is not None:
+            preview.status = "failed"
     add_audit_event(
         session,
         actor=actor,
@@ -1009,7 +1020,7 @@ async def start_delete_wordbook(
     payload: DeleteWordbookRequest,
     idempotency_key: str,
 ) -> WordbookJob:
-    book = await _load_wordbook(session, wordbook_id, include_deleted=True)
+    book = await _load_wordbook(session, wordbook_id, lock=True, include_deleted=True)
     _ensure_can_view(book, actor)
     await _ensure_can_write(session, book, actor)
     existing = await session.scalar(
