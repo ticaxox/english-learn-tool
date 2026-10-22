@@ -23,6 +23,7 @@ x-backend-environment: &backend-environment
   HEALTH_CHECK_TIMEOUT_SECONDS: ${HEALTH_CHECK_TIMEOUT_SECONDS:-2.0}
   DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
   DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-5}
+  WORDBOOK_STORAGE_DIR: /app/var/wordbooks
   PYTHONDONTWRITEBYTECODE: "1"
   PYTHONUNBUFFERED: "1"
 
@@ -34,6 +35,11 @@ x-app-security: &app-security
     - ALL
   security_opt:
     - no-new-privileges:true
+
+x-wordbook-volume: &wordbook-volume
+  type: volume
+  source: wordbook-data
+  target: /app/var/wordbooks
 
 services:
   postgres:
@@ -83,6 +89,8 @@ services:
     image: ${API_IMAGE:-english-learn-api:local}
     build: *backend-build
     environment: *backend-environment
+    volumes:
+      - *wordbook-volume
     command:
       - uvicorn
       - app.main:app
@@ -115,6 +123,8 @@ services:
     <<: *app-security
     image: ${API_IMAGE:-english-learn-api:local}
     environment: *backend-environment
+    volumes:
+      - *wordbook-volume
     command: ["arq", "app.workers.worker.WorkerSettings"]
     depends_on:
       redis:
@@ -133,6 +143,8 @@ services:
     <<: *app-security
     image: ${API_IMAGE:-english-learn-api:local}
     environment: *backend-environment
+    volumes:
+      - *wordbook-volume
     command: ["arq", "app.workers.scheduler.SchedulerSettings"]
     depends_on:
       redis:
@@ -187,3 +199,4 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  wordbook-data:
