@@ -17,6 +17,9 @@ const error = ref<unknown>(null)
 const statusNote = ref('')
 
 onMounted(() => {
+  if (route.query.reason === 'password-changed') {
+    statusNote.value = '密码已更新，但自动重新登录未完成。请使用新密码手动登录。'
+  }
   if (auth.lastError) {
     error.value = auth.lastError
   }
@@ -81,6 +84,10 @@ async function retryConnection(): Promise<void> {
 
       <div v-if="route.query.reason === 'session-expired'" class="alert alert-warning" role="status">
         登录状态已失效，请重新登录。
+      </div>
+
+      <div v-if="route.query.reason === 'password-changed'" class="alert alert-warning" role="status">
+        密码已修改。请使用新密码重新登录。
       </div>
 
       <div v-if="statusNote" class="alert alert-success" role="status">

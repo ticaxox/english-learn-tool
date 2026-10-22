@@ -110,4 +110,15 @@ describe('ApiClient', () => {
     expect(refreshHandler).toHaveBeenCalledOnce()
     expect(onSessionExpired).toHaveBeenCalledOnce()
   })
+  it('restores the double-submit CSRF header from the readable cookie after reload', async () => {
+    document.cookie = 'csrf_token=restored-csrf; path=/'
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await client.post('/admin/users/example-id/reset-password')
+
+    const call = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(new Headers(call[1].headers).get('X-CSRF-Token')).toBe('restored-csrf')
+    document.cookie = 'csrf_token=; max-age=0; path=/'
+  })
 })

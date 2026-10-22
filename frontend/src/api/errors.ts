@@ -69,6 +69,24 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       }
     }
 
+    if (error.status === 429) {
+      return {
+        title: '请求过于频繁',
+        message: `${error.message} 请稍后再试，不要连续重复提交。`,
+        requestId: error.requestId,
+        retryable: true,
+      }
+    }
+
+    if (error.status === 403) {
+      return {
+        title: '权限不足或操作被拒绝',
+        message: error.message || '服务端拒绝了本次操作，请检查账号权限、CSRF 会话或账号状态。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
     if (error.status === 401) {
       return {
         title: '认证状态已失效',

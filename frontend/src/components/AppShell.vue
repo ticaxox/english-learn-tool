@@ -29,7 +29,11 @@ const accessDenied = computed(() => route.query.access === 'denied')
 const roleLabel = computed(() => (auth.user?.role === 'admin' ? '组织管理员' : '成员'))
 
 async function signOut(): Promise<void> {
-  await auth.logout()
+  try {
+    await auth.logout()
+  } catch {
+    // The store keeps the server error for the login screen while clearing in-memory credentials.
+  }
   await router.replace({ name: 'login' })
 }
 </script>
@@ -80,7 +84,7 @@ async function signOut(): Promise<void> {
       <header class="topbar">
         <p>以下页面只展示真实 API 响应或明确错误，不使用模拟业务数据。</p>
         <div class="topbar-actions">
-          <span class="inline-note">基础壳层 · T-FE-001</span>
+          <span class="inline-note">真实账号与成员管理 · M2</span>
         </div>
       </header>
 
