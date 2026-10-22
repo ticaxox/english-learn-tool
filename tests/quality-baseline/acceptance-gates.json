@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task": "T-QA-001",
   "title": "AI 英语学习工具验收门禁清单",
-  "updated_at": "2026-10-22T22:02:00+08:00",
+  "updated_at": "2026-10-23T02:19:00+08:00",
   "sources": [
     "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
     "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
@@ -355,14 +355,13 @@
         "后续真实认证接口联调"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/frontend-test.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/inputs/run-state.json"
+        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
       ],
-      "status": "CONDITIONAL",
-      "reason": "前端逻辑和路由/API 单元测试通过；真实 /auth/* 端到端联调仍依赖 AUTH-INT-001，未在本次三项缺陷修复范围内。",
-      "conditions": [
-        "AUTH-INT-001"
-      ]
+      "status": "PASS",
+      "reason": "前端登录、改密、会话恢复与角色守卫基线，已由 AUTH-INT-001 的真实 API 与 Chromium 浏览器 32/32 检查补证。"
     },
     {
       "id": "S-FE-05",
@@ -439,11 +438,13 @@
         "playwright test auth.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
       ],
-      "status": "FAIL",
-      "reason": "当前后端无 /auth/* 业务接口与用户表；仅前端契约/组件测试存在。"
+      "status": "PASS",
+      "reason": "真实 API 202/202 与真实浏览器 32/32 通过；覆盖首次登录、强制改密、Refresh 轮换/重放撤销、会话恢复和 logout。"
     },
     {
       "id": "F-ADMIN-01",
@@ -467,11 +468,13 @@
         "pytest -q tests/integration/test_admin_users.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
       ],
-      "status": "FAIL",
-      "reason": "当前仅有 system_metadata 表与系统元数据路由；未实现成员领域。"
+      "status": "PASS",
+      "reason": "真实 API 202/202 与浏览器 32/32 通过；覆盖成员创建、CSV 原子导入、启停删、重置密码、角色与最后管理员并发保护。"
     },
     {
       "id": "F-PRIV-01",
@@ -494,11 +497,16 @@
         "pytest -q tests/security/test_admin_privacy.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
       ],
-      "status": "FAIL",
-      "reason": "无业务数据、管理接口或隐私边界测试。"
+      "status": "CONDITIONAL",
+      "reason": "认证/成员管理 API、Schema、页面与审计未暴露学习私有正文；当前学习正文域尚未落地，不能完成真实私有数据边界回归。",
+      "conditions": [
+        "学习正文域落地后，对管理接口与管理页面重新执行真实私有数据隐私回归"
+      ]
     },
     {
       "id": "F-DASH-01",
@@ -931,11 +939,19 @@
         "playwright test e2e/admin-member-journey.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
       ],
-      "status": "FAIL",
-      "reason": "当前只有工程壳层，完整 E2E 不存在。"
+      "status": "CONDITIONAL",
+      "reason": "真实 Chromium 认证/成员管理闭环 32/32 通过；尚未包含词书、练习、记忆/FSRS 等完整业务旅程。",
+      "conditions": [
+        "F-BOOK-01",
+        "F-MEM-01",
+        "F-PRACTICE-01",
+        "完整业务演示旅程"
+      ]
     },
     {
       "id": "F-AI-CONTRACT-01",
@@ -982,11 +998,16 @@
         "pytest -q tests/security/test_app_security.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
       ],
-      "status": "FAIL",
-      "reason": "当前无认证/Cookie/CSRF/限流；也未发现 CSP 等安全响应头。"
+      "status": "CONDITIONAL",
+      "reason": "认证、CSRF/Origin、限流、Cookie、Refresh 重放与越权检查已通过；CSP/安全响应头尚无证据。",
+      "conditions": [
+        "补验 CSP 与安全响应头"
+      ]
     },
     {
       "id": "F-SEC-02",
@@ -1059,11 +1080,17 @@
         "执行备份恢复演练"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
       ],
-      "status": "FAIL",
-      "reason": "当前只有结构化访问日志，无业务审计、保留或备份证据。"
+      "status": "CONDITIONAL",
+      "reason": "真实审计事件 51 条、账号写事件 21 条且未包含秘密或私有学习正文；数据保留与备份恢复仍未验证。",
+      "conditions": [
+        "验证审计保留策略/轮转",
+        "完成备份恢复演练"
+      ]
     },
     {
       "id": "F-MIG-01",
@@ -1229,11 +1256,11 @@
         "检查 branches/PR/tags/releases"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/inputs/review-snapshot.md",
-        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log"
+        "ai-workspace/10-collaboration/reports/T-SYNC-001-SYNC.md",
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md"
       ],
       "status": "CONDITIONAL",
-      "reason": "分支与两个开放 PR 可追溯；尚无后续阶段历史、版本标签或发布。",
+      "reason": "PR #6/#7 已按顺序合并，main 快进到 aea77d3 且 push CI 5/5 PASS；版本标签与发布历史仍未建立。",
       "conditions": [
         "GAP-RELEASE-HISTORY"
       ]
