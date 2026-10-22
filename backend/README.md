@@ -1,8 +1,9 @@
 # Backend
 
-FastAPI backend for the private English learning platform. The current identity slice implements
-real PostgreSQL-backed accounts, rotating Redis-aware authentication sessions, administrator member
-management, CSV member import, audit records, and Alembic migrations.
+FastAPI backend for the private English learning platform. The implemented M2 slices provide real
+PostgreSQL-backed accounts, rotating Redis-aware authentication sessions, administrator member
+management, member and wordbook imports, durable ARQ wordbook jobs, audited activation/deletion, and
+Alembic migrations.
 
 ## Requirements
 
@@ -100,8 +101,63 @@ uv run arq app.workers.worker.WorkerSettings
 uv run arq app.workers.scheduler.SchedulerSettings
 ```
 
-The worker and scheduler are infrastructure entrypoints only. Business jobs belong to later
-domain tasks.
+The worker consumes `english-learn:wordbooks` and executes the durable `process_wordbook_job`
+function for import, export, and deletion. The scheduler consumes the separate
+`english-learn:scheduler` queue, recovers persisted queued jobs and stale interrupted runs, repairs
+terminal or stale same-ID ARQ entries, and removes expired preview/export artifacts. The scheduler
+must never share the business worker queue. `WORDBOOK_JOB_STALE_SECONDS` defaults to 600 seconds,
+which is longer than the worker's 300-second job timeout; queue-delivery and processing failures are
+persisted and bounded by `WORDBOOK_JOB_MAX_ATTEMPTS`. Job state, ownership, progress, results, retry
+counts, and failure codes are stored in PostgreSQL; Redis is the queue transport, not the business
+source of truth.
+
+## Wordbook API
+
+- `GET /api/v1/wordbooks` - visible organization/private list with pagination.
+- `GET /api/v1/wordbooks/{wordbook_id}` - confirmed entries and definitions with pagination.
+- `PATCH /api/v1/wordbooks/{wordbook_id}` - metadata-only update.
+- `POST /api/v1/wordbooks/{wordbook_id}/activate` - idempotent ready-book activation.
+- `DELETE /api/v1/wordbooks/{wordbook_id}` - idempotent deletion task; organization books require
+  exact `confirm_name` confirmation.
+- `POST /api/v1/wordbooks/import/preview` - CSV/JSON/TXT upload preview, valid for 24 hours.
+- `PATCH /api/v1/wordbooks/import/previews/{preview_id}` - column remapping.
+- `POST /api/v1/wordbooks/import` - confirmed asynchronous import.
+- `POST /api/v1/wordbooks/{wordbook_id}/export` - CSV/TXT/PDF asynchronous export.
+- `GET /api/v1/wordbooks/jobs/{job_id}` - import/export/delete polling.
+- `GET /api/v1/exports/{job_id}` - export-only polling and short-lived download metadata.
+- `GET /api/v1/exports/{job_id}/download` - owner or authorized organization administrator download.
+
+Import confirmation, export creation, and deletion require an `Idempotency-Key` header. Preview
+tokens are hashed at rest. Organization wordbooks are visible to active members but only
+administrators can mutate or export them; private wordbooks remain restricted to their owner, even
+when the requester is an administrator. Deleting a book immediately changes it to `deleting`, which
+blocks activation and export. Cleanup removes entries, definitions, examples, activation state,
+previews, related jobs, and isolated files while retaining a tombstone and the delete job for safe
+polling.
+
+Wordbook imports accept at most 10 MiB and 20,000 logical entries after duplicate merging. The parser
+supports UTF-8 BOM, UTF-8, GB18030, and UTF-16 LE/BE; CSV comma/tab/semicolon/pipe delimiters; JSON
+top-level arrays or `{"words": [...]}`; and structured TXT lines. Invalid rows are reported rather
+than silently dropped, and a confirmed import commits all entry/definition/example rows atomically.
+
+PDFs are rendered with bundled, OFL-licensed Noto Sans and Noto Sans SC fonts. See
+`app/assets/fonts/FONT_MANIFEST.md`. The PDF renderer supports configurable page rows and columns and
+uses the Latin font for IPA while using the SC font for Chinese text.
+
+Convert approved CSV/JSON/TXT input with the same production normalization and validation rules:
+
+```powershell
+uv run python -m app.cli convert-wordbook .\input.csv .\wordbook.json --report .\report.json
+```
+
+The output identifies `english-learn-wordbook-converter/1.0.0`; a non-zero exit status means rejected
+rows were reported.
+
+`WORDBOOK_STORAGE_DIR` must be an absolute path and defaults to `/app/var/wordbooks`. The Compose
+deployment mounts that directory from the same writable persistent volume into the API, ARQ worker,
+and scheduler because preview and export artifacts must cross service-process boundaries. A
+process-local directory is not a valid deployment. Uploaded data remains private and must not be
+served from a public directory.
 
 ## Verification
 
@@ -118,6 +174,8 @@ uv run pytest
 uv run pytest
 uv run pytest tests/test_state_isolation.py -q
 uv run pytest tests/test_state_isolation.py -q
+uv run pytest tests/test_wordbooks.py -q
+uv run pytest tests/test_wordbook_jobs.py -q
 ```
 
 `pytest` always replaces application database and Redis settings with `TEST_*` values so a developer
