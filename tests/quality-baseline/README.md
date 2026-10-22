@@ -37,14 +37,15 @@ python tests\quality-baseline\validate_manifest.py --workspace-root ..\.. --requ
 
 ## 当前快照
 
-2026-10-23 认证域合并后输入为 PR #6（`bd50685`）与 PR #7（`f7bc303`），主线合并提交为 `da24cd2` → `aea77d3`，main push CI `39829763790` 为 5/5 PASS。AUTH-INT-001 真实 API `202/202`、真实浏览器 `32/32`；权威清单共 47 条：16 条 `PASS`、6 条 `CONDITIONAL`、24 条 `FAIL`、1 条 `NOT_RUN`。
+2026-10-23 M2-CORE-INT-001 Phase A 摘要（词书冻结输入：后端 `22fb815`、前端 `2337ea0`，主线 `3fb9730`；测试分支 `test/m2-core-int-001` HEAD `91a71a6`）。真实跨容器栈（PostgreSQL 16.15 / Redis 7.0.15 / ARQ worker + scheduler / 共享可写卷）上连续两轮 API 80 断言 PASS、连续两轮真实浏览器 30 断言 PASS，另含后端 81 passed ×2、状态性隔离 2 passed ×2、迁移空库 upgrade/downgrade/upgrade 与 drift check 全 0、前后端依赖审计 0 漏洞。权威清单共 47 条：17 条 `PASS`、8 条 `CONDITIONAL`、21 条 `FAIL`、1 条 `NOT_RUN`。
 
-- `S-FE-04`、`F-AUTH-01`、`F-ADMIN-01` 已按 AUTH-INT-001 真实证据转为 `PASS`。
-- `F-PRIV-01`、`F-E2E-01`、`F-SEC-01`、`F-AUDIT-01` 保留 `CONDITIONAL`，分别等待学习正文域真实数据、完整业务旅程、CSP/安全响应头、审计保留/备份恢复。
-- `F-GIT-01` 仍为 `CONDITIONAL`，条件是版本标签与发布历史 `GAP-RELEASE-HISTORY`。
+- `F-BOOK-01` 由 `FAIL` 转为 `PASS`（导入→映射→激活→导出→删除全链路，含成员私有词书与删除后无幽灵数据）。
+- `F-IDEM-01`、`F-SEC-03` 由 `FAIL` 转为 `CONDITIONAL`（词书域已真实通过；计划/事件/心跳与 AI 媒体上传尚未覆盖）。
+- `F-PRIV-01`、`F-MIG-01` 保持 `CONDITIONAL`，条件分别收紧/扩围到学习正文域与 Phase B 迁移。
+- `F-E2E-01` 保持 `CONDITIONAL` **未放宽**：完整业务旅程仍缺今日计划、记忆/FSRS、练习与 AI 教练。
 - 最终 MVP 仍为 `FAIL / NOT_READY`；普通清单校验通过只表示结构、证据引用和当前阶段记录一致，不代表最终 PASS。
 
-不能把认证、成员管理、CSV、审计和隐私联调的 `PASS` 解释为词书、FSRS、今日任务、AI、完整 E2E、部署或最终 MVP 已完成。
+Phase A 只是 M2 的第一阶段，`M2-CORE-INT-001` 未关闭、M2 未 PASS；Phase B 需在 T-BE-004 / T-FE-004 冻结后由 A01 追加。
 
 ## 维护规则
 

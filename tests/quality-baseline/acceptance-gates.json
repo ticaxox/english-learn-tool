@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task": "T-QA-001",
   "title": "AI 英语学习工具验收门禁清单",
-  "updated_at": "2026-10-23T02:19:00+08:00",
+  "updated_at": "2026-10-23T07:55:00+08:00",
   "sources": [
     "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
     "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
@@ -487,25 +487,30 @@
       "layer": "security",
       "owner": "A10 / A30",
       "preconditions": [
-        "成员答题、草稿、教练对话数据",
-        "admin/member 两类账号"
+        "同 F-BOOK-01 的隔离栈",
+        "admin/member 两类真实账号",
+        "成员私有词书正文与共享卷导出产物"
       ],
       "data": [
-        "合成成员 B 的私有正文与聚合指标"
+        "合成成员私有词书（JSON/TXT）",
+        "成员账号访问管理员导出任务"
       ],
       "command": [
-        "pytest -q tests/security/test_admin_privacy.py"
+        "tests/m2-core-int/run-api.ps1 -RunId phase-a-api-cleanstack-final1",
+        "node tests/m2-core-int/browser_e2e.mjs"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final1/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final2/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final1/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final2/browser-acceptance.json"
       ],
       "status": "CONDITIONAL",
-      "reason": "认证/成员管理 API、Schema、页面与审计未暴露学习私有正文；当前学习正文域尚未落地，不能完成真实私有数据边界回归。",
+      "reason": "词书域真实私有边界已独立验证：管理员读成员私有词书正文与列表均 404（API 与浏览器均确认），成员访问管理员导出任务返回 404 而非泄露内容，私有词书仅所有者可删改。认证域与成员管理域此前已 PASS。但学习正文域（答题、草稿、教练对话、会话/事件）在 Phase A 冻结输入中尚未落地，无法完成该域的真实私有数据边界回归，故整体仍为 CONDITIONAL。",
       "conditions": [
-        "学习正文域落地后，对管理接口与管理页面重新执行真实私有数据隐私回归"
+        "Phase B / M3 学习正文域落地后，对管理接口与管理页面重新执行真实私有数据隐私回归",
+        "M2 记忆正文（会话、事件、错题）进入冻结输入后补充管理员不可读回归"
       ]
     },
     {
@@ -575,23 +580,36 @@
       "layer": "e2e",
       "owner": "A10 / A20 / A30",
       "preconditions": [
-        "上传限制与导入任务",
-        "词书领域表"
+        "T-BE-003 冻结输入 22fb8158a675552f444fe92ca01e88600355c978",
+        "T-FE-003 冻结输入 2337ea0d14fb7707a938727cf81a6b12e58c766f",
+        "隔离 PostgreSQL 16 / Redis / ARQ worker + scheduler / 共享可写词书卷"
       ],
       "data": [
-        "合成 CSV/JSON/TXT 各一份",
-        "冲突词条与错误编码样例"
+        "合成 CSV（含多余列）、扁平 JSON、GB18030 TXT 各一份",
+        "合成管理员 qa_m2core_admin 与成员 qa_m2core_member",
+        "组织词书与成员私有词书"
       ],
       "command": [
-        "pytest -q tests/integration/test_wordbook_import.py",
-        "playwright test wordbooks.spec.ts"
+        "tests/m2-core-int/stack.ps1 -Action up",
+        "tests/m2-core-int/run-api.ps1 -RunId phase-a-api-cleanstack-final1",
+        "tests/m2-core-int/run-api.ps1 -RunId phase-a-api-cleanstack-final2",
+        "node tests/m2-core-int/browser_e2e.mjs (LIVE_RUN_ID=phase-a-browser-cleanstack-final1/2)"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final1/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final2/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final1/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final2/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/migration-empty-db.log",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/backend-pytest-final-run1.log",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/backend-pytest-final-run2.log",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/frontend-npm-ci-final.log",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/frontend-npm-test-final.log",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/frontend-npm-build-final.log"
       ],
-      "status": "FAIL",
-      "reason": "前端只有 /wordbooks 真实 GET 骨架；后端无词书 API/表。"
+      "status": "PASS",
+      "reason": "M2-CORE-INT-001 Phase A 在真实跨容器栈（PostgreSQL 16.15 / Redis 7.0.15 / ARQ worker + scheduler / 共享可写卷）上独立验收：真实 HTTP 80 项连续两轮 PASS（79+1 INFO / 78+2 INFO，INFO 仅为温库已改密的等价路径）；真实 Chromium（Edge headless）30/30 两轮 PASS。覆盖 CSV 预览→remap→过期 409/410→确认→轮询→激活→详情→CSV/TXT/PDF 导出→短期下载→删除清理，成员 JSON 与 GB18030 TXT 私有导入、私有导出下载鉴权（他人 404、过期 410）、管理员不得读他人私有正文、删除中 409 与删除后无幽灵数据。"
     },
     {
       "id": "F-MEM-01",
@@ -904,20 +922,29 @@
       "layer": "integration",
       "owner": "A10 / A30",
       "preconditions": [
-        "Idempotency-Key 存储与事务边界"
+        "同 F-BOOK-01 的隔离栈",
+        "Idempotency-Key 存储与事务边界",
+        "可停/启的 ARQ worker"
       ],
       "data": [
-        "同键同体、同键异体、并发请求样例"
+        "同键同体、同键异体、重复 DELETE、删除中冲突样例",
+        "停 worker 后的排队与重启恢复样例"
       ],
       "command": [
-        "pytest -q tests/integration/test_idempotency.py"
+        "tests/m2-core-int/run-api.ps1 -RunId phase-a-api-cleanstack-final1",
+        "tests/m2-core-int/run-api.ps1 -RunId phase-a-api-cleanstack-final2"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final1/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final2/api-acceptance.json"
       ],
-      "status": "FAIL",
-      "reason": "无业务幂等表或写接口，当前只能验证基础事务配置。"
+      "status": "CONDITIONAL",
+      "reason": "词书域幂等与并发冲突已真实验证：导入确认与导出请求同键同体返回同一 job、同键异体返回 IDEMPOTENCY_CONFLICT、重复 DELETE 返回同一删除 job、删除中激活/导出/元数据更新返回 409、CORS 预检放行 Idempotency-Key、停 worker 时任务稳定排队（Redis ARQ 队列可观测）并在 worker 重启后恢复 succeeded。日计划 ensure、训练事件、心跳等本任务 Phase B 才覆盖的幂等点尚无证据，故整体为 CONDITIONAL。",
+      "conditions": [
+        "Phase B 验证今日计划 ensure、训练事件提交与心跳的幂等和并发",
+        "M3 批量 AI 操作的幂等与并发冲突"
+      ]
     },
     {
       "id": "F-E2E-01",
@@ -942,10 +969,13 @@
         "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
         "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
         "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
+        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final1/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final2/browser-acceptance.json"
       ],
       "status": "CONDITIONAL",
-      "reason": "真实 Chromium 认证/成员管理闭环 32/32 通过；尚未包含词书、练习、记忆/FSRS 等完整业务旅程。",
+      "reason": "真实 Chromium 认证/成员管理闭环 32/32 通过；M2-CORE-INT-001 Phase A 又补充了管理员与成员的词书浏览器闭环 30/30（真实文件上传、预览映射、导出下载、删除确认点击、成员激活与私有隔离）。尚未包含今日计划、记忆/FSRS、练习、AI 教练等完整业务旅程，完整演示闭环仍未达成。",
       "conditions": [
         "F-BOOK-01",
         "F-MEM-01",
@@ -1044,20 +1074,28 @@
       "layer": "security",
       "owner": "A10 / A30",
       "preconditions": [
-        "词书导入/导出实现"
+        "同 F-BOOK-01 的隔离栈",
+        "真实上传/导出实现"
       ],
       "data": [
-        "超限、畸形编码、路径穿越、恶意 HTML 样例"
+        "空文件、.exe、内嵌 script 的 HTML、路径穿越文件名、>10MiB 文件",
+        "导出下载路径穿越样例"
       ],
       "command": [
-        "pytest -q tests/security/test_upload_security.py"
+        "tests/m2-core-int/run-api.ps1 -RunId phase-a-api-cleanstack-final1",
+        "tests/m2-core-int/run-api.ps1 -RunId phase-a-api-cleanstack-final2"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final1/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-api-cleanstack-final2/api-acceptance.json"
       ],
-      "status": "FAIL",
-      "reason": "无上传/导出实现。"
+      "status": "CONDITIONAL",
+      "reason": "上传/下载边界已真实验证：空文件 422、不支持扩展名 415、HTML/script 载荷 415、路径穿越文件名 422、超限 413、导出下载路径穿越 404/405；导出响应带 attachment、nosniff、no-store，PDF 使用内嵌 CJK 字体且无外部引用。仍未覆盖 AI 媒体/图片上传（SVG 消毒、图片重编码）与用户上传 PDF 的解析隔离，这些能力当前尚未实现，故为 CONDITIONAL。",
+      "conditions": [
+        "M3 AI 素材上传（图片/SVG）落地后补充消毒与重编码回归",
+        "若后续支持用户上传 PDF/文档解析，补充解析隔离与恶意 PDF 回归"
+      ]
     },
     {
       "id": "F-AUDIT-01",
@@ -1103,26 +1141,28 @@
       "layer": "migration",
       "owner": "A10 / A30",
       "preconditions": [
-        "完整业务模型与迁移链"
+        "同 F-BOOK-01 的隔离栈",
+        "完整当前业务迁移链"
       ],
       "data": [
-        "空库",
-        "回滚后重建",
-        "演示数据"
+        "全新空库 m2core_mig",
+        "降级后重建"
       ],
       "command": [
         "alembic upgrade head",
         "alembic downgrade base",
-        "alembic upgrade head"
+        "alembic upgrade head",
+        "alembic check"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-upgrade-empty.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-downgrade-base.log"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/migration-empty-db.log"
       ],
       "status": "CONDITIONAL",
-      "reason": "当前单一 system_metadata 迁移已通过；完整业务迁移尚不存在。",
+      "reason": "当前完整业务迁移链（20261022_0001 → 20261022_0002 → f1b8d947271c，含身份、会话、审计、导入预览、词书与后台任务）在全新空库执行 upgrade → downgrade base → upgrade 全部 EXIT=0，`alembic check` 无 drift。M2 Phase B 的记忆/计划/事件表尚未进入冻结输入，故“完整业务 Schema”条件未满足。",
       "conditions": [
-        "GAP-FINAL-SCHEMA"
+        "Phase B 记忆、今日计划、训练事件与心跳表落地后重跑空库 upgrade/downgrade/upgrade 与 drift check",
+        "最终 MVP 前对全量 Schema 做一次回放与演示数据迁移演练"
       ]
     },
     {
