@@ -12,6 +12,7 @@ import ChangePasswordView from '../views/ChangePasswordView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import RemoteDataPage from '../views/RemoteDataPage.vue'
+import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes: RouteRecordRaw[] = [
@@ -47,12 +48,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'wordbooks',
         name: 'wordbooks',
-        component: RemoteDataPage,
-        props: {
-          title: '词书',
-          description: '真实请求当前账号可见的词书；本阶段只验证接入与错误状态。',
-          endpoint: '/wordbooks',
-        },
+        component: WordbooksView,
       },
       {
         path: 'memory',
