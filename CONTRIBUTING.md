@@ -30,13 +30,13 @@
   - `fix(memory): preserve review queue ordering`
 - 保持原子提交；不得把最终全部代码压缩为一个提交。
 - PR 至少说明变更目的、影响范围、验证命令、结果、迁移和回滚影响。
-- `main` 只由 A01 SYNC 协调合入；分支保护、CI 和发布流程以任务证据为准。
+- `main` 只由 A01 SYNC 协调合入。PR 会运行后端、前端、质量清单、敏感信息扫描和 Compose 集成五类 CI；`main` 推送同样运行，但仍不得由执行 Agent 直接写入。
 
 ## 4. 代码与文档事实
 
 - 产品蓝图、实现代码和验证结果必须分开描述。
 - 只有已定位的代码或已执行命令可以标记为“已实现”或“已验证”。
-- Docker、Compose、CI、容器迁移和容器健康检查在 T-SHIP 提供证据前必须标记为“待 T-SHIP 验证”。
+- 容器/CI 结论必须注明固定提交和 Actions run；当前已验证基线为 `a5bf49b` 的 run `39801657963`。GHCR 发布、云部署和 TLS 不能引用该 run 冒充已验证。
 - 不得编造 API、表结构、AI 结果、测试通过状态、部署地址或评审账号。
 - 更新代码事实时，同步更新 `docs/fact-check.md` 和相关文档。
 
@@ -70,7 +70,19 @@ npm run build
 
 ### 组合代理冒烟
 
-在 PostgreSQL/Redis 可用且后端已启动时，运行前端开发服务器并请求 `/api/v1`。已验证基线中该请求通过 Vite 代理返回 `200`。这只能证明代理与基础 API 可达，不能证明认证、业务 CRUD、AI 或容器部署完成。
+在 PostgreSQL/Redis 可用且后端已启动时，运行前端开发服务器并请求 `/api/v1`。当前基线中该请求通过 Vite 代理返回 `200`。这只能证明代理与基础 API 可达，不能证明认证、业务 CRUD 或 AI 完成。
+
+### Container/Compose
+
+容器路径需要 Docker Engine 与 Docker Compose v2。仅在一次性本地或 CI 环境使用示例占位配置：
+
+```bash
+cp .env.example .env
+chmod 600 .env
+ALLOW_INSECURE_EXAMPLE_ENV=1 ./deploy/scripts/start-stack.sh
+```
+
+`ALLOW_INSECURE_EXAMPLE_ENV=1` 只允许一次性环境接受示例占位密钥，禁止用于真实部署。生产参数、域名、TLS、备份和恢复必须走单独任务。本机没有可用 Compose，当前运行时证据来自 Actions run `39801657963`。
 
 ## 6. 数据库变更
 
@@ -94,8 +106,9 @@ npm run build
 - 改动只位于任务允许路径。
 - `git diff --check` 通过。
 - 相关测试、静态检查和构建已执行，或明确记录未执行原因。
-- 文档中的路径、命令、状态和代码一致。
+- 文档中的路径、命令、状态和代码一致；容器/CI 结论注明提交与 run。
 - 没有密钥、真实成员数据或虚假完成声明。
+- Markdown 相对链接、尾随空白和最终换行检查通过，且已扫描敏感信息。
 - 详细汇报和精简汇报卡按任务卡要求提交。
 
 当前基线文档事实见 `docs/fact-check.md`。

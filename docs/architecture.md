@@ -1,6 +1,6 @@
 # 架构与当前边界
 
-- 事实基线：`c3b2a50`
+- 事实基线：`caa731c`；容器/CI 代码与运行证据对应 `a5bf49b` / run `39801657963`
 - 当前形态：模块化单仓工程骨架
 - 完整目标形态：以受控的 v1.1 产品基线为准，不属于当前已实现范围；本仓库不复制内部工作区资料
 
@@ -34,6 +34,9 @@
 | ARQ 入口 | `backend/app/workers/` | worker/scheduler 心跳，不包含业务任务 |
 | 前端壳层 | `frontend/src/` | Vue 路由、真实 API client、认证状态骨架、错误展示 |
 | Vite 代理 | `frontend/vite.config.ts` | 开发/预览时把 `/api` 转发到后端 |
+| Compose 运行拓扑 | `docker-compose.yml` | PostgreSQL、Redis、一次性迁移、API、worker、scheduler、frontend、反向代理 |
+| CI | `.github/workflows/ci.yml` | 后端、前端、质量清单、敏感信息扫描和 Compose 集成五类作业 |
+| 发布与部署资产 | `.github/workflows/release.yml`、`deploy/**` | GHCR 三镜像工作流、生产覆盖、验证、备份、部署和回滚脚本 |
 
 ### 尚未实现
 
@@ -41,7 +44,7 @@
 - 数据库业务表、FSRS 服务、AI provider、额度账本和受控 action。
 - SSE 流、AI 结构化生成/校验/评分链路。
 - 完整业务页面、真实演示数据和评审账号。
-- Docker、Compose、CI、反向代理、公网部署和备份恢复。
+- GHCR 发布实跑、云服务器部署、域名/TLS、公网入口和生产恢复演练。
 
 ## 2. 目标模块边界
 
@@ -93,11 +96,14 @@
 
 ## 5. 部署边界
 
-本地开发可运行 FastAPI、前端 Vite、PostgreSQL 和 Redis。容器化交付未验证：
+仓库已包含 Dockerfile、`docker-compose.yml`、根级 `.env.example`、CI/GHCR 工作流和部署脚本。当前边界如下：
 
-- Dockerfile、`docker-compose.yml`、CI workflow、根级 `.env.example` 当前均不存在。
-- 容器迁移、容器健康检查、镜像发布和公网反向代理必须由 T-SHIP 提供可定位证据。
-- 在证据到位前，所有容器/CI 状态统一写为“待 T-SHIP 验证”。
+- `a5bf49b` 对应的 Actions run `39801657963` 第 2 次尝试 5/5 作业通过。
+- Compose 在 GitHub 托管 runner 上从空库迁移到 `20261022_0001`，七个常驻服务健康；应用容器以 UID/GID `10001` 非 root 运行，默认只有反向代理绑定 `127.0.0.1:8080`。
+- 本机没有可用 Docker Compose，因此本地只验证进程方式；容器运行时证据来自 CI，不冒充本机实测。
+- GHCR release workflow 尚未实际触发，三个发布镜像尚未推送；没有云服务器部署、域名、TLS 或公网入口。
+- 备份、部署和回滚脚本存在，但未执行生产恢复演练；应用回滚不自动反向迁移数据库。
+- 当前服务器容量不足以直接部署完整栈，正式部署必须另立任务。
 
 ## 6. 架构变更规则
 

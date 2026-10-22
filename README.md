@@ -4,20 +4,21 @@
 
 ## 当前状态
 
-本仓库在提交 `c3b2a50` 上建立了工程基线。当前交付是**可运行的工程骨架**，不是完整可用产品，也不代表比赛 MVP 已完成。
+本仓库当前主线技术基线为 `caa731c`（PR #4 合并提交），容器与 CI 实现对应提交为 `a5bf49b`。当前交付是**可运行的工程骨架与已通过的容器/CI 基础**，不是完整可用产品，也不代表比赛 MVP 已完成。
 
 | 范围 | 当前状态 | 证据 |
 |---|---|---|
 | FastAPI 应用、统一错误与 Request ID | 已实现并通过测试 | `backend/tests/` |
-| PostgreSQL/Alembic 基线 | 已实现；本地测试库迁移与 drift check 通过 | `docs/testing.md` |
+| PostgreSQL/Alembic 基线 | 本地迁移、漂移检查与容器空库迁移均通过 | `docs/testing.md`、`docs/deployment.md` |
 | Redis 就绪检查、ARQ 基础设施入口 | 已实现并通过测试 | `backend/app/workers/` |
 | Vue 3/Vite/TypeScript 应用壳层 | 已实现；连接真实 API，不使用业务 mock | `frontend/` |
 | 登录、改密、路由守卫骨架 | 前端逻辑已实现；真实认证接口尚未由后端提供 | `frontend/README.md` |
 | 词书、FSRS、AI 练习、AI 教练、每日闯关 | **未实现**；仅有产品蓝图与文档结构 | `docs/architecture.md` |
-| Docker、Compose、CI、容器迁移与容器健康检查 | **待 T-SHIP 验证** | `docs/deployment.md` |
-| 比赛技术文档正文、演示视频、评审账号 | **未交付**；仅保留结构 | `docs/competition/` |
+| Docker、Compose、CI、容器迁移与健康检查 | GitHub Actions run `39801657963` 第 2 次尝试 5/5 作业通过；Compose 7 个常驻服务健康 | `docs/testing.md`、`docs/deployment.md` |
+| GHCR 发布、公网部署、TLS、评审账号 | **未交付/未验证**；发布工作流尚未实际触发 | `docs/deployment.md` |
+| 比赛技术文档正文、演示视频 | **未交付**；仅保留结构 | `docs/competition/` |
 
-> 状态规则：只有当前仓库中可定位的代码或已执行命令才能标记为“已验证”。产品蓝图中的后续能力统一标记为“规划中”，容器与 CI 在 T-SHIP 证据到位前统一标记为“待 T-SHIP 验证”。
+> 状态规则：代码与命令结果可以标记为“已验证”，但容器/CI 结论必须同时注明固定提交和 Actions run；GHCR 发布、云服务器部署、域名、TLS 与生产恢复必须各自取得证据，不能由容器构建通过推导。产品蓝图中的后续能力统一标记为“规划中”。
 
 ## 产品边界
 
@@ -47,6 +48,10 @@ Vue 3 / Vite ── /api proxy ── FastAPI /api/v1
 ```text
 english-learn-tool/
 ├── AGENTS.md                 # 仓库协作与路径边界
+├── .env.example              # Compose/CI 非敏感占位配置
+├── docker-compose.yml        # PostgreSQL、Redis、迁移与五个应用服务
+├── .github/workflows/        # CI 与 GHCR 发布工作流
+├── deploy/                   # 镜像、生产覆盖、验证、备份和回滚脚本
 ├── backend/
 │   ├── app/
 │   │   ├── api/              # 健康检查与 /api/v1 入口
@@ -78,8 +83,9 @@ english-learn-tool/
 - npm 10+；本次验证使用 npm 11.16.0
 - PostgreSQL 16
 - Redis 7
+- Docker Engine + Docker Compose v2（仅容器路径；本机当前没有可用 Compose）
 
-后端测试使用真实 PostgreSQL 和专用 Redis 数据库，不提供内存数据库降级。若 PostgreSQL 或 Redis 不可用，集成测试会失败而不是静默跳过。
+后端测试使用真实 PostgreSQL 和专用 Redis 数据库，不提供内存数据库降级。若 PostgreSQL 或 Redis 不可用，集成测试会失败而不是静默跳过。容器运行证据来自 GitHub Actions，不能以本机配置解析代替。
 
 ## 本地启动
 
@@ -123,15 +129,15 @@ npm run dev
 
 ## 已验证命令
 
-以下命令已在 `c3b2a50` 的 `docs/delivery-baseline-001` 工作树重新执行。
+以下应用层命令已在 `caa731c` 的文档工作树复跑；后端测试使用一次性独立 PostgreSQL 数据库，避免共享测试库中的其他分支迁移干扰。容器/CI 运行证据固定引用 `a5bf49b` 与 Actions run `39801657963`。
 
 | 范围 | 命令 | 结果 |
 |---|---|---|
 | 后端安装 | `uv sync --locked --all-groups` | 成功 |
 | 后端静态检查 | `uv run ruff check .` | `All checks passed!` |
 | 后端格式检查 | `uv run ruff format --check .` | `38 files already formatted` |
-| 后端测试 | `uv run pytest` | `18 passed` |
-| 本地迁移 | `uv run alembic upgrade head` | 成功 |
+| 后端测试 | `uv run pytest` | `18 passed`（独立 PostgreSQL） |
+| 本地迁移 | `uv run alembic upgrade head` | 成功（独立空库） |
 | 迁移漂移检查 | `uv run alembic check` | `No new upgrade operations detected.` |
 | 前端安装 | `npm ci` | 成功，0 vulnerabilities |
 | 前端测试 | `npm test` | 4 个测试文件、11 项测试通过 |
@@ -141,7 +147,7 @@ npm run dev
 | ARQ worker 入口 | `uv run arq app.workers.worker.WorkerSettings` | 启动 `worker_heartbeat` 成功，随后停止 |
 | ARQ scheduler 入口 | `uv run arq app.workers.scheduler.SchedulerSettings` | 启动 `scheduler_tick`/cron 成功，随后停止 |
 
-详细环境、测试数据和未验证项见 `docs/testing.md` 与 `docs/fact-check.md`。
+容器与 CI 证据：在 `a5bf49b` 上，GitHub Actions run `39801657963` 第 2 次尝试 5/5 作业通过，Compose 完成空库迁移、七个常驻服务健康检查、非 root 检查、仅反向代理绑定回环端口，以及 `/health/live`、`/health/ready`、`/api/v1` 路由验证。详细环境、测试数据和未验证项见 `docs/testing.md`、`docs/deployment.md` 与 `docs/fact-check.md`。
 
 ## 数据库迁移
 
@@ -181,17 +187,20 @@ npm run build
 - [AI 链路（规划）](docs/ai-pipeline.md)
 - [安全与隐私](docs/security-privacy.md)
 - [测试与验证记录](docs/testing.md)
-- [部署与运行（待 T-SHIP 验证）](docs/deployment.md)
+- [部署与运行](docs/deployment.md)
 - [演示结构](docs/demo.md)
 - [事实核对清单](docs/fact-check.md)
 
 ## 部署、CI 与比赛状态
 
-当前仓库**没有**可验证的 Dockerfile、`docker-compose.yml`、`.github/workflows/` 或根级 `.env.example`。因此：
+当前仓库已包含根级 `.env.example`、`docker-compose.yml`、Dockerfile、CI、GHCR 发布工作流及部署/备份/回滚脚本。可确认的事实是：
 
-- Docker、Compose、CI、空库容器迁移和容器健康检查均标记为“待 T-SHIP 验证”。
-- 不得根据产品蓝图宣称公网演示、评审账号或容器发布已完成。
-- 正式部署参数、域名、HTTPS、备份和回滚信息只记录在受控工作区，不复制敏感接入信息到本仓库。
+- `a5bf49b` 对应的 GitHub Actions run `39801657963` 第 2 次尝试 5/5 作业通过；Compose 在干净 runner 上从空库完成迁移并验证七个常驻服务健康。
+- 应用容器以 UID/GID `10001` 非 root 运行；默认只有反向代理绑定 `127.0.0.1:8080`，PostgreSQL、Redis 与应用内部端口不发布到宿主。
+- 本机没有可用 Docker Compose，因此未把本地配置解析写成容器运行证据。
+- GHCR 发布工作流尚未实际触发，三个发布镜像尚未推送；未部署云服务器，未配置域名、TLS 或公网入口。
+- 现有服务器约 1 vCPU / 1 GiB，不适合直接部署完整栈；备份和回滚脚本已存在但未执行生产恢复演练。
+- `tests/quality-baseline` 的最终 MVP 状态仍为 `FAIL / NOT_READY`；阶段 CI 通过不能替代完整产品验收。
 
 ## 协作与安全
 

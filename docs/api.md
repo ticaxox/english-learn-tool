@@ -1,6 +1,6 @@
 # API 文档
 
-- 事实基线：`c3b2a50`
+- 事实基线：`caa731c`；容器/代理运行证据对应 `a5bf49b` / run `39801657963`
 - API 前缀：`/api/v1`
 - OpenAPI：`http://127.0.0.1:8000/api/v1/openapi.json`
 - Swagger UI：`http://127.0.0.1:8000/api/v1/docs`
@@ -109,7 +109,7 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/v1' -Headers @{'X-Request-ID'=
 Invoke-RestMethod -Uri 'http://127.0.0.1:5173/api/v1'
 ```
 
-`c3b2a50` 已验证：前端代理返回 `200`、Request ID 原样回传，`/health/live` 返回 `200`。
+当前基线已验证：前端开发代理返回 `200`、Request ID 原样回传，`/health/live` 返回 `200`。`a5bf49b` 的 Compose CI 另经反向代理验证 `/health/live`、`/health/ready` 与 `/api/v1`；这只覆盖基础路由，不代表认证或业务 API 已实现。
 
 ## 4. 前端当前声明的认证契约
 

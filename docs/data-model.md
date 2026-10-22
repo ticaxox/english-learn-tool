@@ -1,6 +1,6 @@
 # 数据模型
 
-- 事实基线：`c3b2a50`
+- 事实基线：`caa731c`；容器/CI 证据对应 `a5bf49b` / run `39801657963`
 - 当前迁移：`backend/alembic/versions/20261022_0001_initial.py`
 - 当前 revision：`20261022_0001`
 
@@ -109,15 +109,15 @@ uv run alembic check
 1. 人工审查自动生成的 migration，确认索引、约束、默认值和命名。
 2. 每个 migration 提供可执行的 `downgrade()`。
 3. 破坏性变更说明数据迁移、兼容窗口和回滚限制。
-4. 合入前在不含业务数据的新库中回放迁移；容器中的空库迁移待 T-SHIP 验证。
+4. 合入前在不含业务数据的新库中回放迁移；CI 已在 `a5bf49b` 的干净 runner 上完成容器空库迁移。
 5. 不得把 `system_metadata` 当作业务数据的兜底表。
 
 ## 6. 当前验证证据
 
-在 `c3b2a50` 工作树执行：
+在 `caa731c` 工作树使用一次性独立 PostgreSQL 数据库执行：
 
-- `uv run alembic upgrade head`：成功。
+- `uv run alembic upgrade head`：从空库升级成功。
 - `uv run alembic check`：`No new upgrade operations detected.`
 - `uv run pytest`：18 passed，其中数据库测试确认 revision 为 `20261022_0001`，`system_metadata` 存在。
 
-容器内数据库迁移仍未验证，标记为“待 T-SHIP 验证”。
+容器内证据：`a5bf49b` 的 GitHub Actions run `39801657963` 第 2 次尝试中，Compose 一次性迁移容器从空库升级成功，数据库 revision 为 `20261022_0001`，并确认 `system_metadata` 表存在。发布镜像和云部署仍不属于已验证范围。
