@@ -1,0 +1,30 @@
+services:
+  migrate:
+    image: ${API_IMAGE:?API_IMAGE is required}
+    pull_policy: always
+    restart: "no"
+
+  api:
+    image: ${API_IMAGE:?API_IMAGE is required}
+    pull_policy: always
+    restart: unless-stopped
+
+  worker:
+    image: ${API_IMAGE:?API_IMAGE is required}
+    pull_policy: always
+    restart: unless-stopped
+
+  scheduler:
+    image: ${API_IMAGE:?API_IMAGE is required}
+    pull_policy: always
+    restart: unless-stopped
+
+  frontend:
+    image: ${FRONTEND_IMAGE:?FRONTEND_IMAGE is required}
+    pull_policy: always
+    restart: unless-stopped
+
+  reverse-proxy:
+    image: ${REVERSE_PROXY_IMAGE:?REVERSE_PROXY_IMAGE is required}
+    pull_policy: always
+    restart: unless-stopped

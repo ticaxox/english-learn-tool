@@ -1,0 +1,19 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+  [[rules.allowlists]]
+  description = "Repository example placeholders"
+  condition = "AND"
+  paths = ['''\.env\.example$''']
+  regexTarget = "match"
+  regexes = ['''(?i)(replace[-_]with|change[-_]me|example[-_]placeholder|not[-_]for[-_]production)''']
+
+  [[rules.allowlists]]
+  description = "Synthetic frontend test credentials"
+  condition = "AND"
+  paths = ['''frontend/src/tests/.*\.(ts|js)$''']
+  regexTarget = "match"
+  regexes = ['''Strong-pass-123|Temporary-pass-123|Permanent-pass-456''']
