@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
-import { isApiError } from '../api/errors'
 import {
   deleteWordbook,
-  getWordbookDetail,
+  getWordbookJob,
   WordbookTaskError,
   type Wordbook,
+  type WordbookJob,
 } from '../api/wordbooks'
 import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
@@ -23,29 +23,42 @@ const emit = defineEmits<{
 const confirmation = ref('')
 const privateConfirmed = ref(false)
 const submitting = ref(false)
-const completed = ref(false)
 const error = ref<unknown>(null)
+const job = ref<WordbookJob | null>(null)
+const completed = ref(false)
 const requestKey = ref<string | null>(null)
 const requestSignature = ref<string | null>(null)
-let active = true
 const dialogRef = ref<HTMLElement | null>(null)
+let active = true
 
 const exactNameRequired = computed(() => props.wordbook.visibility === 'organization')
-const canSubmit = computed(() => {
-  if (submitting.value || completed.value) {
-    return false
+const confirmationMatches = computed(() => confirmation.value.trim() === props.wordbook.name.trim())
+const canSubmit = computed(() => Boolean(
+  !submitting.value
+  && !completed.value
+  && job.value?.status !== 'queued'
+  && job.value?.status !== 'running'
+  && (exactNameRequired.value ? confirmationMatches.value : privateConfirmed.value),
+))
+const statusLabel = computed(() => {
+  if (!job.value) {
+    return '尚未创建任务'
   }
-  return exactNameRequired.value
-    ? confirmation.value === props.wordbook.name
-    : privateConfirmed.value
+  return {
+    queued: '删除任务排队中',
+    running: '正在清理',
+    succeeded: '清理成功',
+    failed: '清理失败',
+    cancelled: '清理已取消',
+  }[job.value.status]
 })
-
-function createKey(): string {
-  return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`
-}
 
 function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds))
+}
+
+function createKey(): string {
+  return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`
 }
 
 async function confirmDelete(): Promise<void> {
@@ -54,9 +67,12 @@ async function confirmDelete(): Promise<void> {
   }
   submitting.value = true
   error.value = null
+  completed.value = false
+  job.value = null
+
   const signature = JSON.stringify({
     wordbook_id: props.wordbook.id,
-    confirmation: confirmation.value.trim(),
+    confirm_name: exactNameRequired.value ? props.wordbook.name : null,
   })
   if (requestSignature.value !== signature) {
     requestKey.value = createKey()
@@ -66,38 +82,33 @@ async function confirmDelete(): Promise<void> {
   requestKey.value = requestIdempotencyKey
 
   try {
-    const receipt = await deleteWordbook(props.wordbook, confirmation.value, requestIdempotencyKey)
+    const creation = await deleteWordbook(
+      props.wordbook,
+      exactNameRequired.value ? confirmation.value : '',
+      requestIdempotencyKey,
+    )
+    job.value = creation
     emit('started', props.wordbook.id)
 
-    if (receipt.status === 'completed') {
-      completed.value = true
-      requestKey.value = null
-      requestSignature.value = null
-      emit('completed', props.wordbook.id)
-      return
-    }
-
     for (let attempt = 0; attempt < 120 && active; attempt += 1) {
-      try {
-        const detail = await getWordbookDetail(props.wordbook.id)
-        if (!active) {
-          return
-        }
-        if (detail.wordbook.status === 'failed') {
-          throw new WordbookTaskError(
-            'WORD_BOOK_DELETE_FAILED',
-            detail.wordbook.import_error || '删除清理失败，请稍后重试并查看服务端任务状态。',
-          )
-        }
-      } catch (requestError) {
-        if (isApiError(requestError) && requestError.status === 404) {
-          completed.value = true
-          requestKey.value = null
-          requestSignature.value = null
-          emit('completed', props.wordbook.id)
-          return
-        }
-        throw requestError
+      const current = await getWordbookJob(creation.job_id)
+      if (!active) {
+        return
+      }
+      job.value = current
+
+      if (current.status === 'succeeded') {
+        completed.value = true
+        requestKey.value = null
+        requestSignature.value = null
+        emit('completed', props.wordbook.id)
+        return
+      }
+      if (current.status === 'failed' || current.status === 'cancelled') {
+        throw new WordbookTaskError(
+          current.error_code || `DELETE_${current.status.toUpperCase()}`,
+          current.error_message || (current.status === 'cancelled' ? '删除任务已取消。' : '删除清理任务失败。'),
+        )
       }
       if (attempt < 119) {
         await sleep(1000)
@@ -105,8 +116,8 @@ async function confirmDelete(): Promise<void> {
     }
 
     throw new WordbookTaskError(
-      'WORD_BOOK_DELETE_POLL_TIMEOUT',
-      '在限定时间内没有确认清理完成。页面不会把超时当作删除成功，请刷新后查看真实状态。',
+      'DELETE_POLL_TIMEOUT',
+      '在限定时间内没有确认清理完成。页面不会把超时当作删除成功，请关闭后刷新查看真实任务状态。',
     )
   } catch (requestError) {
     error.value = requestError
@@ -139,17 +150,17 @@ onUnmounted(() => {
     >
       <header class="dialog-heading">
         <div>
-          <p class="eyebrow">危险操作</p>
+          <p class="eyebrow">危险操作 · 后台清理</p>
           <h2 id="wordbook-delete-title">删除「{{ props.wordbook.name }}」</h2>
         </div>
-        <button class="icon-button" type="button" aria-label="关闭删除窗口" @click="close">×</button>
+        <button class="icon-button" type="button" aria-label="关闭删除窗口" :disabled="submitting" @click="close">×</button>
       </header>
 
       <div class="alert alert-warning">
-        <strong>删除会启动真实后台清理，不会立即从前端伪造成功。</strong>
+        <strong>只有服务端删除任务 succeeded 才会显示完成。</strong>
         <ul>
-          <li>词书将进入 <code>deleting</code> 状态，并阻止激活、学习会话和导出。</li>
-          <li>清理范围包括该词书词条及服务端定义的关联数据；最终结果以清理任务为准。</li>
+          <li>删除请求会返回真实 WordbookJob，页面随后轮询 <code>/wordbooks/jobs/:job_id</code>。</li>
+          <li>组织词书必须输入精确名称；请求体字段为 <code>confirm_name</code>。</li>
           <li v-if="props.wordbook.is_active">这是当前主词书，清理后需要重新选择或导入主词书。</li>
           <li>当前词条数：{{ props.wordbook.entry_count.toLocaleString('zh-CN') }}。</li>
         </ul>
@@ -163,29 +174,29 @@ onUnmounted(() => {
 
       <label v-else class="wordbook-check">
         <input v-model="privateConfirmed" type="checkbox" :disabled="submitting || completed" />
-        <span>我确认删除这本私有词书及其关联学习数据。</span>
+        <span>我确认删除这本私有词书；请求中的 confirm_name 为 null。</span>
       </label>
 
       <ErrorNotice v-if="error" :error="error" :show-retry="false" />
 
-      <div v-if="completed" class="alert alert-success" role="status">
-        <strong>清理已完成</strong>
-        <p>服务端已不再返回该词书；列表将刷新为真实状态。</p>
-      </div>
-
-      <div v-else-if="submitting" class="wordbook-task-card" role="status" aria-live="polite">
+      <div v-if="submitting || job" class="wordbook-task-card" role="status" aria-live="polite">
         <div class="wordbook-task-heading">
-          <strong>正在等待清理完成</strong>
-          <span class="spinner" aria-hidden="true"></span>
+          <strong>{{ completed ? '清理已完成' : statusLabel }}</strong>
+          <span>{{ job ? `${job.progress}%` : '等待任务' }}</span>
         </div>
-        <p class="field-hint">只有服务端完成清理后，页面才会确认成功。关闭窗口不会把任务标记为完成。</p>
+        <div class="progress-track" role="progressbar" :aria-valuenow="job?.progress ?? 0" aria-valuemin="0" aria-valuemax="100">
+          <span :style="{ width: `${job?.progress ?? 0}%` }"></span>
+        </div>
+        <p v-if="job" class="field-hint">任务 ID：<code>{{ job.job_id }}</code> · 状态：{{ job.status }} · 清理状态：{{ job.cleanup_status }}</p>
+        <p v-if="completed" class="alert alert-success">服务端任务已成功；列表刷新后会移除不再可见的词书。</p>
+        <p v-else class="field-hint">关闭窗口不会取消后台任务，也不会把未完成状态标记为成功。</p>
       </div>
 
       <footer class="dialog-actions button-row">
         <button v-if="!completed" class="button-danger" type="button" :disabled="!canSubmit" @click="confirmDelete">
-          {{ submitting ? '正在删除…' : '确认启动删除' }}
+          {{ submitting ? '正在删除并轮询…' : '确认启动删除' }}
         </button>
-        <button class="button-secondary" type="button" @click="close">{{ completed ? '完成' : '取消' }}</button>
+        <button class="button-secondary" type="button" :disabled="submitting" @click="close">{{ completed ? '完成' : '取消' }}</button>
       </footer>
     </section>
   </div>

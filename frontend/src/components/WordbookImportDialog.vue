@@ -3,15 +3,16 @@ import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { isApiError } from '../api/errors'
 import {
   confirmWordbookImport,
-  getWordbookDetail,
+  getWordbookJob,
   isPreviewExpired,
   previewWordbookImport,
+  remapWordbookPreview,
   validateRequiredMapping,
   validateWordbookFile,
   WordbookTaskError,
-  type DuplicateStrategy,
   type WordbookField,
   type WordbookImportPreview,
+  type WordbookJob,
   type WordbookVisibility,
 } from '../api/wordbooks'
 import { useDialogA11y } from '../composables/useDialogA11y'
@@ -29,10 +30,11 @@ const emit = defineEmits<{
 
 const fields: Array<{ key: WordbookField; label: string; required: boolean }> = [
   { key: 'headword', label: 'headword｜单词', required: true },
-  { key: 'definition', label: 'definition｜释义', required: true },
+  { key: 'definition_en', label: 'definition_en｜英文释义', required: true },
+  { key: 'definition_zh', label: 'definition_zh｜中文释义', required: true },
   { key: 'phonetic', label: 'phonetic｜音标', required: false },
   { key: 'part_of_speech', label: 'part_of_speech｜词性', required: false },
-  { key: 'example', label: 'example｜例句', required: false },
+  { key: 'example', label: 'example｜英文例句', required: false },
   { key: 'example_translation', label: 'example_translation｜例句翻译', required: false },
 ]
 
@@ -40,7 +42,6 @@ const form = reactive({
   visibility: 'private' as WordbookVisibility,
   name: '',
   description: '',
-  duplicate_strategy: 'merge' as DuplicateStrategy,
 })
 const file = ref<File | null>(null)
 const fileError = ref<string | null>(null)
@@ -48,20 +49,21 @@ const previewLoading = ref(false)
 const previewError = ref<unknown>(null)
 const preview = ref<WordbookImportPreview | null>(null)
 const mapping = ref<Partial<Record<WordbookField, string | null>>>({})
+const remapping = ref(false)
 const confirming = ref(false)
 const importError = ref<unknown>(null)
-const importProgress = ref<number | null>(null)
-const importWordbookId = ref<string | null>(null)
+const job = ref<WordbookJob | null>(null)
 const completed = ref(false)
 const now = ref(Date.now())
 const idempotencyKey = ref<string | null>(null)
 const idempotencySignature = ref<string | null>(null)
+const dialogRef = ref<HTMLElement | null>(null)
 let active = true
 let clock: number | null = null
-const dialogRef = ref<HTMLElement | null>(null)
 
 const mappingError = computed(() => validateRequiredMapping(mapping.value))
 const previewExpired = computed(() => preview.value ? isPreviewExpired(preview.value.expires_at, now.value) : false)
+const previewHasErrors = computed(() => Boolean(preview.value && (preview.value.error_count > 0 || preview.value.errors.length > 0)))
 const ignoredColumns = computed(() => {
   if (!preview.value) {
     return []
@@ -69,26 +71,39 @@ const ignoredColumns = computed(() => {
   const mapped = new Set(Object.values(mapping.value).filter((value): value is string => Boolean(value)))
   return preview.value.columns.filter((column) => !mapped.has(column))
 })
-const canPreview = computed(() => Boolean(file.value && form.name.trim()) && !fileError.value)
+const canPreview = computed(() => Boolean(file.value && form.name.trim()) && !fileError.value && !previewLoading.value)
+const taskRunning = computed(() => Boolean(
+  remapping.value
+  || confirming.value
+  || job.value?.status === 'queued'
+  || job.value?.status === 'running',
+))
 const canConfirm = computed(() => Boolean(
   preview.value
   && !previewExpired.value
+  && !previewHasErrors.value
   && !mappingError.value
-  && !confirming.value
+  && !taskRunning.value
   && form.name.trim(),
 ))
 const previewRestartSuggested = computed(() => {
-  if (!isApiError(previewError.value)) {
+  const candidate = importError.value ?? previewError.value
+  if (!isApiError(candidate)) {
     return false
   }
-  return previewError.value.status === 410 || [
+  return candidate.status === 410 || [
     'IMPORT_PREVIEW_EXPIRED',
     'WORDBOOK_PREVIEW_EXPIRED',
     'IMPORT_PREVIEW_MISMATCH',
     'IMPORT_PREVIEW_USED',
     'IMPORT_PREVIEW_NOT_FOUND',
-  ].includes(previewError.value.code)
+  ].includes(candidate.code)
 })
+
+function formatDate(value: string): string {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN')
+}
 
 function chooseFile(event: Event): void {
   const input = event.target as HTMLInputElement
@@ -96,6 +111,9 @@ function chooseFile(event: Event): void {
   file.value = selected
   preview.value = null
   previewError.value = null
+  importError.value = null
+  job.value = null
+  completed.value = false
   idempotencyKey.value = null
   idempotencySignature.value = null
   fileError.value = selected ? validateWordbookFile(selected) : null
@@ -109,6 +127,17 @@ function createKey(): string {
   return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`
 }
 
+function resetPreview(): void {
+  preview.value = null
+  previewError.value = null
+  importError.value = null
+  job.value = null
+  completed.value = false
+  mapping.value = {}
+  idempotencyKey.value = null
+  idempotencySignature.value = null
+}
+
 async function loadPreview(): Promise<void> {
   if (!file.value || !canPreview.value) {
     return
@@ -117,6 +146,8 @@ async function loadPreview(): Promise<void> {
   previewError.value = null
   importError.value = null
   preview.value = null
+  job.value = null
+  completed.value = false
   idempotencyKey.value = null
   idempotencySignature.value = null
 
@@ -127,7 +158,8 @@ async function loadPreview(): Promise<void> {
       description: form.description.trim(),
     })
     preview.value = result
-    mapping.value = { ...result.suggested_mapping }
+    const serverMapping = Object.values(result.mapping).some(Boolean)
+    mapping.value = { ...(serverMapping ? result.mapping : result.suggested_mapping) }
     now.value = Date.now()
   } catch (requestError) {
     previewError.value = requestError
@@ -136,76 +168,92 @@ async function loadPreview(): Promise<void> {
   }
 }
 
-function resetPreview(): void {
-  preview.value = null
-  previewError.value = null
-  importError.value = null
-  mapping.value = {}
-  idempotencyKey.value = null
-  idempotencySignature.value = null
-}
-
 function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds))
 }
 
+function isPreviewInvalidError(error: unknown): boolean {
+  return isApiError(error) && (
+    error.status === 410
+    || [
+      'IMPORT_PREVIEW_EXPIRED',
+      'WORDBOOK_PREVIEW_EXPIRED',
+      'IMPORT_PREVIEW_MISMATCH',
+      'IMPORT_PREVIEW_USED',
+      'IMPORT_PREVIEW_NOT_FOUND',
+    ].includes(error.code)
+  )
+}
+
 async function confirmImport(): Promise<void> {
-  if (!preview.value || !canConfirm.value) {
+  const currentPreview = preview.value
+  if (!currentPreview || !canConfirm.value) {
     return
   }
+
   confirming.value = true
   importError.value = null
-  importProgress.value = null
-
-  const request = {
-    preview_token: preview.value.preview_token,
-    visibility: form.visibility,
-    name: form.name.trim(),
-    description: form.description.trim(),
-    mapping: mapping.value,
-    ignored_columns: ignoredColumns.value,
-    duplicate_strategy: form.duplicate_strategy,
-  }
-  const signature = JSON.stringify(request)
-  if (idempotencySignature.value !== signature) {
-    idempotencyKey.value = createKey()
-    idempotencySignature.value = signature
-  }
-  const requestIdempotencyKey = idempotencyKey.value ?? createKey()
-  idempotencyKey.value = requestIdempotencyKey
+  completed.value = false
+  job.value = null
 
   try {
-    const confirmation = await confirmWordbookImport(request, requestIdempotencyKey)
-    importWordbookId.value = confirmation.wordbook_id
+    remapping.value = true
+    const remapped = await remapWordbookPreview(currentPreview.preview_id, {
+      preview_token: currentPreview.preview_token,
+      mapping: mapping.value,
+      ignored_columns: ignoredColumns.value,
+    })
+    remapping.value = false
+    preview.value = remapped
+    mapping.value = { ...mapping.value }
+    now.value = Date.now()
+
+    if (remapped.error_count > 0 || remapped.errors.length > 0) {
+      throw new WordbookTaskError(
+        'IMPORT_PREVIEW_HAS_ERRORS',
+        '当前字段映射下仍有预览错误。请修正映射或文件后重新预览，错误未清零前不能确认导入。',
+      )
+    }
+
+    const confirmationInput = {
+      preview_id: remapped.preview_id,
+      preview_token: remapped.preview_token || currentPreview.preview_token,
+      preview_hash: remapped.preview_hash,
+      visibility: form.visibility,
+      name: form.name.trim(),
+      description: form.description.trim() || null,
+    }
+    const signature = JSON.stringify(confirmationInput)
+    if (idempotencySignature.value !== signature) {
+      idempotencyKey.value = createKey()
+      idempotencySignature.value = signature
+    }
+    const requestKey = idempotencyKey.value ?? createKey()
+    idempotencyKey.value = requestKey
+
+    const creation = await confirmWordbookImport(confirmationInput, requestKey)
+    job.value = creation
     emit('started')
 
     for (let attempt = 0; attempt < 120 && active; attempt += 1) {
-      try {
-        const detail = await getWordbookDetail(confirmation.wordbook_id, null, 1)
-        if (!active) {
-          return
-        }
-        importProgress.value = detail.wordbook.import_progress
-        if (detail.wordbook.status === 'ready') {
-          completed.value = true
-          idempotencyKey.value = null
-          idempotencySignature.value = null
-          emit('completed', detail.wordbook.id)
-          return
-        }
-        if (detail.wordbook.status === 'failed') {
-          throw new WordbookTaskError(
-            'WORD_BOOK_IMPORT_FAILED',
-            detail.wordbook.import_error || '导入任务失败，请查看服务端任务状态后重新预览。',
-          )
-        }
-        if (detail.wordbook.status === 'deleting') {
-          throw new WordbookTaskError('WORD_BOOK_IMPORT_DELETED', '导入过程中词书进入了删除状态。')
-        }
-      } catch (requestError) {
-        if (!(isApiError(requestError) && requestError.status === 404 && attempt < 3)) {
-          throw requestError
-        }
+      const current = await getWordbookJob(creation.job_id)
+      if (!active) {
+        return
+      }
+      job.value = current
+
+      if (current.status === 'succeeded') {
+        completed.value = true
+        idempotencyKey.value = null
+        idempotencySignature.value = null
+        emit('completed', current.wordbook_id ?? creation.wordbook_id ?? '')
+        return
+      }
+      if (current.status === 'failed' || current.status === 'cancelled') {
+        throw new WordbookTaskError(
+          current.error_code || `IMPORT_${current.status.toUpperCase()}`,
+          current.error_message || (current.status === 'cancelled' ? '导入任务已取消。' : '导入任务失败。'),
+        )
       }
       if (attempt < 119) {
         await sleep(1000)
@@ -213,22 +261,18 @@ async function confirmImport(): Promise<void> {
     }
 
     throw new WordbookTaskError(
-      'WORD_BOOK_IMPORT_POLL_TIMEOUT',
-      '在限定时间内没有确认导入完成。页面不会显示假成功，请刷新列表查看服务端状态。',
+      'IMPORT_POLL_TIMEOUT',
+      '在限定时间内没有确认导入完成。页面不会显示假成功，请稍后刷新词书列表查看真实任务状态。',
     )
   } catch (requestError) {
     importError.value = requestError
-    if (
-      isApiError(requestError)
-      && (
-        requestError.status === 410
-        || ['IMPORT_PREVIEW_EXPIRED', 'WORDBOOK_PREVIEW_EXPIRED', 'IMPORT_PREVIEW_MISMATCH', 'IMPORT_PREVIEW_USED', 'IMPORT_PREVIEW_NOT_FOUND'].includes(requestError.code)
-      )
-    ) {
+    if (isPreviewInvalidError(requestError)) {
       previewError.value = requestError
       preview.value = null
+      job.value = null
     }
   } finally {
+    remapping.value = false
     confirming.value = false
   }
 }
@@ -243,7 +287,7 @@ useDialogA11y(dialogRef, { onClose: close })
 onMounted(() => {
   clock = window.setInterval(() => {
     now.value = Date.now()
-  }, 30000)
+  }, 1000)
 })
 
 onUnmounted(() => {
@@ -266,169 +310,186 @@ onUnmounted(() => {
     >
       <header class="dialog-heading">
         <div>
-          <p class="eyebrow">内存中的预览令牌 · 24 小时有效</p>
-          <h2 id="wordbook-import-title">导入词书</h2>
+          <p class="eyebrow">预览 · 映射 · 异步导入</p>
+          <h2 id="wordbook-import-title">导入真实词书</h2>
         </div>
-        <button class="icon-button" type="button" aria-label="关闭导入窗口" :disabled="confirming" @click="close">×</button>
+        <button class="icon-button" type="button" aria-label="关闭导入窗口" :disabled="taskRunning" @click="close">×</button>
       </header>
 
-      <div v-if="completed" class="alert alert-success" role="status">
-        <strong>导入已完成</strong>
-        <p>词书已由真实后台任务完成，并已刷新到列表。现在可以查看词条或激活它。</p>
-        <p v-if="importWordbookId" class="field-hint">词书 ID：<code>{{ importWordbookId }}</code></p>
-        <button type="button" @click="close">完成</button>
-      </div>
+      <template v-if="!preview">
+        <div class="alert alert-info">
+          <strong>文件会先进入服务端预览，不会直接写入词书。</strong>
+          <p>支持 CSV、JSON、TXT；映射必须包含 headword、definition_en 与 definition_zh。错误未清零时不会开放确认导入。</p>
+        </div>
 
-      <template v-else-if="!preview">
-        <p class="lead">先上传文件并由服务端解析。页面只保留本次预览令牌于内存中，不会写入 localStorage 或伪造预览结果。</p>
-
-        <div class="wordbook-form-grid">
-          <label class="field wordbook-form-full">
-            <span>词书文件</span>
-            <input type="file" accept=".csv,.json,.txt" :disabled="previewLoading" @change="chooseFile" />
-            <span class="field-hint">支持 CSV、JSON、TXT；前端提示上限 10 MiB，最终限制以服务端 413 校验为准。</span>
-          </label>
-
-          <label class="field">
-            <span>词书名称</span>
-            <input v-model="form.name" type="text" maxlength="120" :disabled="previewLoading" />
-          </label>
-
+        <form class="wordbook-form-grid" @submit.prevent="loadPreview">
           <label class="field">
             <span>可见范围</span>
-            <select v-model="form.visibility" :disabled="previewLoading || !props.isAdmin">
+            <select v-model="form.visibility" :disabled="previewLoading">
               <option v-if="props.isAdmin" value="organization">组织词书</option>
               <option value="private">我的私有词书</option>
             </select>
-            <span class="field-hint">{{ props.isAdmin ? '管理员可创建组织或私有词书。' : '成员只能创建自己的私有词书，最终仍由服务端校验。' }}</span>
+          </label>
+
+          <label class="field">
+            <span>词书名 <b aria-hidden="true">*</b></span>
+            <input v-model="form.name" type="text" maxlength="200" autocomplete="off" :disabled="previewLoading" />
           </label>
 
           <label class="field wordbook-form-full">
-            <span>描述（可选）</span>
-            <textarea v-model="form.description" rows="3" maxlength="500" :disabled="previewLoading"></textarea>
+            <span>描述</span>
+            <textarea v-model="form.description" rows="3" maxlength="4000" :disabled="previewLoading"></textarea>
           </label>
-        </div>
+
+          <label class="field wordbook-form-full">
+            <span>词书文件</span>
+            <input type="file" accept=".csv,.json,.txt,text/csv,application/json,text/plain" :disabled="previewLoading" @change="chooseFile" />
+            <span class="field-hint">前端先做扩展名与 10 MiB 初步检查，最终格式、编码和大小以服务端为准。</span>
+          </label>
+        </form>
 
         <p v-if="fileError" class="field-error" role="alert">{{ fileError }}</p>
         <ErrorNotice v-if="previewError" :error="previewError" :show-retry="false" />
-        <p v-if="previewRestartSuggested" class="inline-note">预览已过期、已使用或与当前映射不一致。请选择文件并重新预览，不能复用旧令牌确认。</p>
 
         <footer class="dialog-actions button-row">
-          <button type="button" :disabled="!canPreview || previewLoading" @click="loadPreview">
-            {{ previewLoading ? '正在由服务端解析…' : '预览并检查映射' }}
+          <button type="button" :disabled="!canPreview" @click="loadPreview">
+            {{ previewLoading ? '服务端预览中…' : '预览并检查映射' }}
           </button>
           <button class="button-secondary" type="button" :disabled="previewLoading" @click="close">取消</button>
         </footer>
       </template>
 
       <template v-else>
-        <div class="wordbook-preview-summary" aria-live="polite">
-          <div><strong>{{ preview.total_rows }}</strong><span>总行数</span></div>
-          <div><strong>{{ preview.importable_rows }}</strong><span>可导入</span></div>
-          <div><strong>{{ preview.warning_count }}</strong><span>警告</span></div>
-          <div><strong>{{ preview.error_count }}</strong><span>错误</span></div>
-        </div>
-
         <div class="wordbook-preview-meta">
-          <span>格式 <strong>{{ preview.detected_format }}</strong></span>
-          <span>编码 <strong>{{ preview.encoding || '自动检测' }}</strong></span>
-          <span>分隔符 <strong>{{ preview.delimiter || '不适用' }}</strong></span>
-          <span>预览有效期至 <strong>{{ new Date(preview.expires_at).toLocaleString('zh-CN') }}</strong></span>
+          <span class="wordbook-pill" :class="`wordbook-pill--${preview.requested_visibility}`">
+            {{ preview.requested_visibility === 'organization' ? '组织词书' : '我的私有词书' }}
+          </span>
+          <span><strong>{{ preview.filename }}</strong></span>
+          <span>格式 <strong>{{ preview.detected_format.toUpperCase() }}</strong></span>
+          <span>编码 <strong>{{ preview.encoding }}</strong></span>
+          <span v-if="preview.delimiter">分隔符 <strong>{{ preview.delimiter }}</strong></span>
+          <span>有效期至 <strong>{{ formatDate(preview.expires_at) }}</strong></span>
         </div>
 
         <div v-if="previewExpired" class="alert alert-warning" role="alert">
           <strong>预览令牌已过期</strong>
           <p>必须重新上传并预览，不能继续使用旧令牌确认导入。</p>
-          <button class="button-secondary" type="button" @click="resetPreview">重新预览</button>
+          <button class="button-secondary" type="button" @click="resetPreview">返回文件</button>
         </div>
+
+        <div class="wordbook-preview-summary">
+          <div><strong>{{ preview.total_rows }}</strong><span>总行数</span></div>
+          <div><strong>{{ preview.valid_rows }}</strong><span>有效行</span></div>
+          <div><strong>{{ preview.warning_count }}</strong><span>警告</span></div>
+          <div :class="{ 'wordbook-summary-error': previewHasErrors }"><strong>{{ preview.error_count }}</strong><span>错误</span></div>
+        </div>
+
+        <section v-if="preview.errors.length" class="wordbook-subpanel" aria-labelledby="wordbook-errors-title">
+          <div class="section-heading">
+            <div>
+              <h3 id="wordbook-errors-title">服务端预览错误</h3>
+              <p class="field-hint">错误未清零前禁止确认导入。</p>
+            </div>
+            <span class="count-pill">{{ preview.error_count }} 条</span>
+          </div>
+          <ul class="wordbook-error-list">
+            <li v-for="(item, index) in preview.errors" :key="`${item.line_number}-${item.code}-${index}`">
+              <strong>{{ item.line_number ? `第 ${item.line_number} 行` : '文件级错误' }}</strong>
+              <span v-if="item.code">· {{ item.code }}</span>
+              <p>{{ item.message }}</p>
+            </li>
+          </ul>
+        </section>
+
+        <section v-if="preview.warnings.length" class="wordbook-subpanel" aria-labelledby="wordbook-warnings-title">
+          <div class="section-heading">
+            <div>
+              <h3 id="wordbook-warnings-title">服务端预览警告</h3>
+              <p class="field-hint">警告不会阻止导入，但请在确认前检查映射。</p>
+            </div>
+            <span class="count-pill">{{ preview.warning_count }} 条</span>
+          </div>
+          <ul class="wordbook-warning-list">
+            <li v-for="(item, index) in preview.warnings" :key="`${item.line_number}-${item.code}-warning-${index}`">
+              <strong>{{ item.line_number ? `第 ${item.line_number} 行` : '文件级警告' }}</strong>
+              <span v-if="item.code">· {{ item.code }}</span>
+              <p>{{ item.message }}</p>
+            </li>
+          </ul>
+        </section>
 
         <section class="wordbook-subpanel" aria-labelledby="wordbook-mapping-title">
           <div class="section-heading">
             <div>
               <h3 id="wordbook-mapping-title">字段映射</h3>
-              <p class="field-hint">headword 与 definition 必填；同一源列不能映射到多个字段。</p>
+              <p class="field-hint">确认前会先 PATCH remap，再使用响应中的新 preview_hash 创建导入任务。</p>
             </div>
           </div>
           <div class="wordbook-form-grid wordbook-mapping-grid">
             <label v-for="field in fields" :key="field.key" class="field">
               <span>{{ field.label }}<b v-if="field.required" aria-label="必填"> *</b></span>
-              <select v-model="mapping[field.key]" :disabled="confirming">
+              <select v-model="mapping[field.key]" :disabled="taskRunning">
                 <option :value="null">忽略此字段</option>
                 <option v-for="column in preview.columns" :key="column" :value="column">{{ column }}</option>
               </select>
             </label>
           </div>
           <p v-if="mappingError" class="field-error" role="alert">{{ mappingError }}</p>
-          <p v-if="ignoredColumns.length" class="field-hint">将被忽略的列：{{ ignoredColumns.join('、') }}</p>
-          <label class="field">
-            <span>重复行处理</span>
-            <select v-model="form.duplicate_strategy" :disabled="confirming">
-              <option value="merge">合并到同一词条（推荐）</option>
-              <option value="reject">遇到重复时阻止导入</option>
-            </select>
-          </label>
+          <p v-if="ignoredColumns.length" class="field-hint">忽略列：{{ ignoredColumns.join('、') }}</p>
         </section>
 
         <section v-if="preview.sample_rows.length" class="wordbook-subpanel" aria-labelledby="wordbook-sample-title">
-          <h3 id="wordbook-sample-title">服务端样例</h3>
-          <div class="table-wrap">
-            <table class="data-table wordbook-sample-table">
-              <thead>
-                <tr><th v-for="column in preview.columns" :key="column">{{ column }}</th></tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in preview.sample_rows" :key="index">
-                  <td v-for="column in preview.columns" :key="column">{{ row[column] || '—' }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section v-if="preview.errors.length" class="wordbook-subpanel" aria-labelledby="wordbook-errors-title">
           <div class="section-heading">
             <div>
-              <h3 id="wordbook-errors-title">前 100 条预览错误</h3>
-              <p class="field-hint">错误定位到服务端返回的行列；不会用通用失败覆盖。</p>
+              <h3 id="wordbook-sample-title">服务端结构化样例</h3>
+              <p class="field-hint">样例行已经按映射归一化，不是原始列对象。</p>
             </div>
-            <span class="count-pill">{{ preview.error_count }} 条</span>
           </div>
-          <ul class="wordbook-error-list">
-            <li v-for="(item, index) in preview.errors" :key="`${item.row_number}-${item.column}-${index}`">
-              <strong>{{ item.row_number ? `第 ${item.row_number} 行` : '文件级错误' }}</strong>
-              <span v-if="item.column">· {{ item.column }}</span>
-              <p>{{ item.message }}</p>
-            </li>
-          </ul>
+          <div class="wordbook-sample-list">
+            <article v-for="(row, index) in preview.sample_rows" :key="`${row.line_number}-${row.headword}-${index}`" class="wordbook-sample-row">
+              <header>
+                <strong>{{ row.headword }}</strong>
+                <span v-if="row.phonetic">{{ row.phonetic }}</span>
+                <span v-if="row.line_number">第 {{ row.line_number }} 行</span>
+              </header>
+              <p v-if="row.normalized_headword" class="field-hint">归一化：{{ row.normalized_headword }}</p>
+              <div v-if="row.definitions.length" class="wordbook-sample-definitions">
+                <div v-for="(definition, definitionIndex) in row.definitions" :key="`${row.headword}-sample-${definitionIndex}`">
+                  <span v-if="definition.part_of_speech" class="part-of-speech">{{ definition.part_of_speech }}</span>
+                  <p v-if="definition.definition_en"><b>EN</b> {{ definition.definition_en }}</p>
+                  <p v-if="definition.definition_zh"><b>ZH</b> {{ definition.definition_zh }}</p>
+                  <p v-if="definition.example_en" class="muted">例：{{ definition.example_en }}</p>
+                  <p v-if="definition.example_translation" class="muted">{{ definition.example_translation }}</p>
+                </div>
+              </div>
+              <p v-else class="muted">映射后暂无释义。</p>
+            </article>
+          </div>
         </section>
 
         <ErrorNotice v-if="importError" :error="importError" :show-retry="false" />
 
-        <div v-if="confirming || importProgress !== null" class="wordbook-task-card" aria-live="polite">
+        <div v-if="taskRunning || job" class="wordbook-task-card" aria-live="polite">
           <div class="wordbook-task-heading">
-            <strong>{{ importProgress !== null ? '后台导入中' : '已提交导入任务' }}</strong>
-            <span>{{ importProgress !== null ? `${importProgress}%` : '等待状态' }}</span>
+            <strong>{{ completed ? '导入已完成' : remapping ? '正在更新字段映射' : job?.status === 'queued' ? '导入任务排队中' : '后台导入中' }}</strong>
+            <span>{{ job ? `${job.progress}%` : '等待任务' }}</span>
           </div>
-          <div
-            v-if="importProgress !== null"
-            class="progress-track"
-            role="progressbar"
-            :aria-valuenow="importProgress"
-            aria-valuemin="0"
-            aria-valuemax="100"
-          >
-            <span :style="{ width: `${importProgress}%` }"></span>
+          <div class="progress-track" role="progressbar" :aria-valuenow="job?.progress ?? 0" aria-valuemin="0" aria-valuemax="100">
+            <span :style="{ width: `${job?.progress ?? 0}%` }"></span>
           </div>
-          <p v-if="importWordbookId" class="field-hint">词书 ID：<code>{{ importWordbookId }}</code></p>
+          <p v-if="job" class="field-hint">任务 ID：<code>{{ job.job_id }}</code> · 状态：{{ job.status }} · 清理：{{ job.cleanup_status }}</p>
+          <p v-if="completed" class="alert alert-success" role="status">服务端任务已成功，词书列表将刷新。</p>
         </div>
 
         <footer class="dialog-actions button-row">
-          <button type="button" :disabled="!canConfirm" @click="confirmImport">
-            {{ confirming ? '正在确认并轮询…' : '确认导入' }}
+          <button type="button" :disabled="!canConfirm || completed" @click="confirmImport">
+            {{ confirming ? (remapping ? '正在 remap…' : '正在确认并轮询…') : '确认导入' }}
           </button>
-          <button class="button-secondary" type="button" :disabled="confirming" @click="resetPreview">重新预览</button>
-          <button class="button-secondary" type="button" :disabled="confirming" @click="close">取消</button>
+          <button class="button-secondary" type="button" :disabled="taskRunning || completed" @click="resetPreview">返回文件</button>
+          <button class="button-secondary" type="button" :disabled="taskRunning" @click="close">{{ completed ? '完成' : '取消' }}</button>
         </footer>
+
+        <p v-if="previewRestartSuggested" class="field-hint">预览凭证已失效或不匹配，请返回文件重新上传预览。</p>
       </template>
     </section>
   </div>

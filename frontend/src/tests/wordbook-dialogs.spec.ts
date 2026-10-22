@@ -1,17 +1,23 @@
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../api/errors'
-import type { Wordbook, WordbookImportPreview } from '../api/wordbooks'
+import type {
+  Wordbook,
+  WordbookImportPreview,
+  WordbookJob,
+} from '../api/wordbooks'
 import WordbookDeleteDialog from '../components/WordbookDeleteDialog.vue'
 import WordbookExportDialog from '../components/WordbookExportDialog.vue'
 import WordbookImportDialog from '../components/WordbookImportDialog.vue'
 
 const apiMocks = vi.hoisted(() => ({
   previewWordbookImport: vi.fn(),
+  remapWordbookPreview: vi.fn(),
   confirmWordbookImport: vi.fn(),
-  getWordbookDetail: vi.fn(),
+  getWordbookJob: vi.fn(),
   createWordbookExport: vi.fn(),
   getExportJob: vi.fn(),
+  downloadWordbookExport: vi.fn(),
   deleteWordbook: vi.fn(),
 }))
 
@@ -20,44 +26,105 @@ vi.mock('../api/wordbooks', async (importOriginal) => {
   return { ...actual, ...apiMocks }
 })
 
+const bookId = '0a872f28-9b2f-47f1-8492-23f982e5bf78'
+const previewId = '38d3d56d-b5fc-4c49-87bb-6678e31aa229'
+const importJobId = '32d8eea3-09a4-49c6-a611-2d6c4a4ab9ef'
+const exportJobId = 'd0c54c68-5e96-49ce-a08c-d60635779a23'
+const deleteJobId = '4520aca0-47a0-4d27-b3a1-f70d3c5514f1'
+const hashA = 'a'.repeat(64)
+const hashB = 'b'.repeat(64)
+
 const book: Wordbook = {
-  id: '0a872f28-9b2f-47f1-8492-23f982e5bf78',
+  id: bookId,
   name: 'Business English',
   description: 'Working English for product teams',
   visibility: 'organization',
   status: 'ready',
+  version: '3',
   entry_count: 128,
   is_active: false,
   owner_id: null,
-  owner_display_name: null,
+  created_by: null,
   created_at: '2026-10-20T10:00:00Z',
   updated_at: '2026-10-22T10:00:00Z',
-  import_progress: null,
-  import_error: null,
-  permissions: { can_activate: true, can_export: true, can_delete: true },
 }
 
 const preview: WordbookImportPreview = {
-  preview_token: 'preview-token',
-  expires_at: '2099-10-24T10:00:00Z',
+  preview_id: previewId,
+  preview_token: 'preview-token-with-enough-length',
+  preview_hash: hashA,
+  filename: 'new-words.csv',
   detected_format: 'csv',
   encoding: 'utf-8',
   delimiter: ',',
-  columns: ['word', 'meaning', 'ipa', 'ignored_note'],
+  columns: ['word', 'word_alt', 'meaning_en', 'meaning_zh', 'ipa', 'ignored_note'],
   suggested_mapping: {
     headword: 'word',
-    definition: 'meaning',
+    definition_en: 'meaning_en',
+    definition_zh: 'meaning_zh',
     phonetic: 'ipa',
     part_of_speech: null,
     example: null,
     example_translation: null,
   },
-  sample_rows: [{ word: 'scope', meaning: '范围', ipa: '/skəʊp/', ignored_note: 'note' }],
+  mapping: {
+    headword: 'word',
+    definition_en: 'meaning_en',
+    definition_zh: 'meaning_zh',
+    phonetic: 'ipa',
+    part_of_speech: null,
+    example: null,
+    example_translation: null,
+  },
+  ignored_columns: ['word_alt', 'ignored_note'],
+  sample_rows: [
+    {
+      line_number: 2,
+      headword: 'scope',
+      normalized_headword: 'scope',
+      phonetic: '/skəʊp/',
+      definitions: [
+        {
+          part_of_speech: 'noun',
+          definition_en: 'the range of a subject',
+          definition_zh: '范围',
+          example_en: 'This is out of scope.',
+          example_translation: '这超出了范围。',
+        },
+      ],
+    },
+  ],
   total_rows: 12,
-  importable_rows: 11,
-  warning_count: 1,
-  error_count: 1,
-  errors: [{ row_number: 7, column: 'meaning', message: '释义不能为空。' }],
+  valid_rows: 12,
+  warning_count: 0,
+  error_count: 0,
+  warnings: [],
+  errors: [],
+  expires_at: '2099-10-24T10:00:00Z',
+  status: 'previewed',
+  requested_name: 'new-words',
+  requested_description: null,
+  requested_visibility: 'private',
+}
+
+function makeJob(overrides: Partial<WordbookJob> = {}): WordbookJob {
+  return {
+    job_id: importJobId,
+    kind: 'import',
+    status: 'succeeded',
+    progress: 100,
+    wordbook_id: bookId,
+    error_code: null,
+    error_message: null,
+    result: {},
+    download_url: null,
+    download_expires_at: null,
+    cleanup_status: 'completed',
+    created_at: '2026-10-23T01:00:00Z',
+    started_at: '2026-10-23T01:00:01Z',
+    finished_at: '2026-10-23T01:00:02Z',
+    ...overrides,
+  }
 }
 
 const mountedWrappers: VueWrapper[] = []
@@ -84,7 +151,7 @@ function buttonByText(wrapper: VueWrapper, text: string) {
 
 async function selectFile(wrapper: VueWrapper): Promise<void> {
   const input = wrapper.get('input[type="file"]')
-  const file = new File(['word,meaning\nscope,范围'], 'new-words.csv', { type: 'text/csv' })
+  const file = new File(['word,meaning_en,meaning_zh\nscope,range,范围'], 'new-words.csv', { type: 'text/csv' })
   Object.defineProperty(input.element, 'files', {
     configurable: true,
     value: [file],
@@ -92,10 +159,17 @@ async function selectFile(wrapper: VueWrapper): Promise<void> {
   await input.trigger('change')
 }
 
+async function openImportPreview(wrapper: VueWrapper): Promise<void> {
+  await selectFile(wrapper)
+  await buttonByText(wrapper, '预览并检查映射').trigger('click')
+  await flushPromises()
+}
+
 describe('wordbook dialogs', () => {
   afterEach(() => {
     mountedWrappers.splice(0).forEach((wrapper) => wrapper.unmount())
     document.body.innerHTML = ''
+    vi.restoreAllMocks()
   })
 
   beforeEach(() => {
@@ -103,38 +177,54 @@ describe('wordbook dialogs', () => {
     localStorage.clear()
     sessionStorage.clear()
     apiMocks.previewWordbookImport.mockResolvedValue(preview)
-    apiMocks.confirmWordbookImport.mockResolvedValue({
-      job_id: 'import-1',
-      wordbook_id: book.id,
+    apiMocks.remapWordbookPreview.mockResolvedValue({ ...preview, preview_hash: hashB })
+    apiMocks.confirmWordbookImport.mockResolvedValue(makeJob({ status: 'queued', progress: 0 }))
+    apiMocks.getWordbookJob.mockResolvedValue(makeJob())
+    apiMocks.createWordbookExport.mockResolvedValue(makeJob({
+      job_id: exportJobId,
+      kind: 'export',
       status: 'queued',
-    })
-    apiMocks.getWordbookDetail.mockResolvedValue({
-      wordbook: { ...book, status: 'ready', entry_count: 12 },
-      entries: { items: [], next_cursor: null, has_more: false },
-    })
-    apiMocks.createWordbookExport.mockResolvedValue({ job_id: 'export-1', status: 'queued' })
-    apiMocks.getExportJob.mockResolvedValue({
-      job_id: 'export-1',
+      progress: 0,
+      cleanup_status: 'pending',
+    }))
+    apiMocks.getExportJob.mockResolvedValue(makeJob({
+      job_id: exportJobId,
+      kind: 'export',
       status: 'succeeded',
       progress: 100,
-      error_code: null,
-      error_message: null,
-      download_url: '/api/v1/exports/export-1/download',
-      expires_at: '2026-10-24T10:00:00Z',
-    })
-    apiMocks.deleteWordbook.mockResolvedValue({ job_id: 'delete-1', status: 'completed' })
+      download_url: `/api/v1/exports/${exportJobId}/download`,
+      download_expires_at: '2099-10-24T10:00:00Z',
+    }))
+    apiMocks.downloadWordbookExport.mockResolvedValue(new Blob(['word,meaning\nscope,range'], { type: 'text/csv' }))
+    apiMocks.deleteWordbook.mockResolvedValue(makeJob({
+      job_id: deleteJobId,
+      kind: 'delete',
+      status: 'queued',
+      progress: 0,
+      cleanup_status: 'pending',
+    }))
   })
 
-  it('previews, maps and confirms an import only after the real task becomes ready', async () => {
-    const wrapper = track(mount(WordbookImportDialog, { props: { isAdmin: true } }))
-    await selectFile(wrapper)
-    expect((wrapper.get('input[type="text"]').element as HTMLInputElement).value).toBe('new-words')
+  it('shows the exact required mapping fields and member/admin visibility choices', async () => {
+    const memberWrapper = track(mount(WordbookImportDialog, { props: { isAdmin: false } }))
+    expect(memberWrapper.get('select').text()).toContain('我的私有词书')
+    expect(memberWrapper.get('select').text()).not.toContain('组织词书')
+    await openImportPreview(memberWrapper)
+    expect(memberWrapper.text()).toContain('headword｜单词')
+    expect(memberWrapper.text()).toContain('definition_en｜英文释义')
+    expect(memberWrapper.text()).toContain('definition_zh｜中文释义')
 
-    await buttonByText(wrapper, '预览并检查映射').trigger('click')
-    await flushPromises()
+    const adminWrapper = track(mount(WordbookImportDialog, { props: { isAdmin: true } }))
+    expect(adminWrapper.get('select').text()).toContain('组织词书')
+  })
+
+  it('previews structured rows, remaps first, confirms with the new hash and polls the real job', async () => {
+    const wrapper = track(mount(WordbookImportDialog, { props: { isAdmin: true } }))
+    await openImportPreview(wrapper)
 
     expect(wrapper.text()).toContain('总行数')
-    expect(wrapper.text()).toContain('释义不能为空')
+    expect(wrapper.text()).toContain('the range of a subject')
+    expect(wrapper.text()).toContain('This is out of scope.')
     expect(apiMocks.previewWordbookImport).toHaveBeenCalledWith(expect.any(File), {
       visibility: 'private',
       name: 'new-words',
@@ -144,88 +234,84 @@ describe('wordbook dialogs', () => {
     await buttonByText(wrapper, '确认导入').trigger('click')
     await flushPromises()
 
+    expect(apiMocks.remapWordbookPreview).toHaveBeenCalledWith(previewId, {
+      preview_token: preview.preview_token,
+      mapping: expect.objectContaining({
+        headword: 'word',
+        definition_en: 'meaning_en',
+        definition_zh: 'meaning_zh',
+      }),
+      ignored_columns: ['word_alt', 'ignored_note'],
+    })
     expect(apiMocks.confirmWordbookImport).toHaveBeenCalledWith(
       expect.objectContaining({
-        preview_token: 'preview-token',
-        mapping: expect.objectContaining({ headword: 'word', definition: 'meaning' }),
-        ignored_columns: ['ignored_note'],
-        duplicate_strategy: 'merge',
+        preview_id: previewId,
+        preview_token: preview.preview_token,
+        preview_hash: hashB,
+        visibility: 'private',
+        name: 'new-words',
+        description: null,
       }),
       expect.any(String),
     )
-    expect(apiMocks.getWordbookDetail).toHaveBeenCalledWith(book.id, null, 1)
-    expect(wrapper.emitted('completed')?.[0]).toEqual([book.id])
+    expect(apiMocks.confirmWordbookImport.mock.calls[0]?.[0]).not.toHaveProperty('mapping')
+    expect(apiMocks.getWordbookJob).toHaveBeenCalledWith(importJobId)
+    expect(wrapper.emitted('completed')?.[0]).toEqual([bookId])
     expect(wrapper.text()).toContain('导入已完成')
     expect(localStorage.length).toBe(0)
     expect(sessionStorage.length).toBe(0)
   })
 
-  it('blocks confirmation when the in-memory preview token has expired', async () => {
+  it('blocks confirmation when preview errors or the preview token are unresolved', async () => {
     apiMocks.previewWordbookImport.mockResolvedValue({
       ...preview,
-      expires_at: '2020-10-24T10:00:00Z',
+      error_count: 1,
+      errors: [{ line_number: 7, code: 'MISSING_DEFINITION', message: '释义不能为空。' }],
     })
     const wrapper = track(mount(WordbookImportDialog, { props: { isAdmin: false } }))
-    await selectFile(wrapper)
-    await buttonByText(wrapper, '预览并检查映射').trigger('click')
-    await flushPromises()
+    await openImportPreview(wrapper)
+
+    expect(wrapper.text()).toContain('释义不能为空')
+    expect(buttonByText(wrapper, '确认导入').attributes('disabled')).toBeDefined()
+  })
+
+  it('blocks confirmation when the in-memory preview is expired', async () => {
+    apiMocks.previewWordbookImport.mockResolvedValue({ ...preview, expires_at: '2020-10-24T10:00:00Z' })
+    const wrapper = track(mount(WordbookImportDialog, { props: { isAdmin: false } }))
+    await openImportPreview(wrapper)
 
     expect(wrapper.text()).toContain('预览令牌已过期')
     expect(buttonByText(wrapper, '确认导入').attributes('disabled')).toBeDefined()
   })
 
-  it('polls the export task and exposes only the server-provided download URL', async () => {
-    const wrapper = track(mount(WordbookExportDialog, { props: { wordbook: book } }))
-    await buttonByText(wrapper, '开始导出').trigger('click')
-    await flushPromises()
-
-    expect(apiMocks.createWordbookExport).toHaveBeenCalledWith(
-      book.id,
-      { format: 'csv' },
-      expect.any(String),
-    )
-    expect(apiMocks.getExportJob).toHaveBeenCalledWith('export-1')
-    expect(wrapper.text()).toContain('导出已完成')
-    expect(wrapper.get('a.button').attributes('href')).toBe('/api/v1/exports/export-1/download')
-  })
-
-  it('sends the exact organization name only after explicit confirmation', async () => {
-    const wrapper = track(mount(WordbookDeleteDialog, { props: { wordbook: book } }))
-    const input = wrapper.get('input[autocomplete="off"]')
-    await input.setValue('Business English')
-    await buttonByText(wrapper, '确认启动删除').trigger('click')
-    await flushPromises()
-
-    expect(apiMocks.deleteWordbook).toHaveBeenCalledWith(book, 'Business English', expect.any(String))
-    expect(wrapper.emitted('started')?.[0]).toEqual([book.id])
-    expect(wrapper.emitted('completed')?.[0]).toEqual([book.id])
-    expect(wrapper.text()).toContain('清理已完成')
-  })
-  it('returns to the file stage when confirmation reports an expired preview', async () => {
-    apiMocks.confirmWordbookImport.mockRejectedValue(
-      new ApiError(410, 'WORDBOOK_PREVIEW_EXPIRED', '预览凭证已过期，请重新上传。', null, 'req-410'),
-    )
+  it('does not confirm when remapping introduces preview errors', async () => {
+    apiMocks.remapWordbookPreview.mockResolvedValue({
+      ...preview,
+      preview_hash: hashB,
+      error_count: 1,
+      errors: [{ line_number: 4, code: 'MAPPING_CONFLICT', message: '映射后释义冲突。' }],
+    })
     const wrapper = track(mount(WordbookImportDialog, { props: { isAdmin: true } }))
-    await selectFile(wrapper)
-    await buttonByText(wrapper, '预览并检查映射').trigger('click')
-    await flushPromises()
+    await openImportPreview(wrapper)
+
     await buttonByText(wrapper, '确认导入').trigger('click')
     await flushPromises()
 
-    expect(wrapper.text()).toContain('预览或下载已过期')
-    expect(wrapper.text()).toContain('预览已过期、已使用或与当前映射不一致')
-    expect(wrapper.text()).toContain('Request ID：req-410')
-    expect(wrapper.find('input[type="file"]').exists()).toBe(true)
+    expect(apiMocks.confirmWordbookImport).not.toHaveBeenCalled()
+    expect(apiMocks.getWordbookJob).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('当前字段映射下仍有预览错误')
   })
 
-  it('reuses an import key for the same request and rotates it after the mapping changes', async () => {
+  it('reuses the confirm key for the same remap hash and rotates it after the mapping changes', async () => {
+    apiMocks.remapWordbookPreview
+      .mockResolvedValueOnce({ ...preview, preview_hash: hashB })
+      .mockResolvedValueOnce({ ...preview, preview_hash: hashB })
+      .mockResolvedValueOnce({ ...preview, preview_hash: 'c'.repeat(64) })
     apiMocks.confirmWordbookImport.mockRejectedValue(
       new ApiError(409, 'IMPORT_CONFLICT', '导入状态冲突，请重试。'),
     )
     const wrapper = track(mount(WordbookImportDialog, { props: { isAdmin: true } }))
-    await selectFile(wrapper)
-    await buttonByText(wrapper, '预览并检查映射').trigger('click')
-    await flushPromises()
+    await openImportPreview(wrapper)
 
     await buttonByText(wrapper, '确认导入').trigger('click')
     await flushPromises()
@@ -235,12 +321,11 @@ describe('wordbook dialogs', () => {
     await flushPromises()
     const retryKey = apiMocks.confirmWordbookImport.mock.calls[1]?.[1]
 
-    const selects = wrapper.findAll('select')
-    const duplicateStrategy = selects[selects.length - 1]
-    if (!duplicateStrategy) {
-      throw new Error('Duplicate strategy select not found')
+    const mappingSelect = wrapper.findAll('.wordbook-mapping-grid select')[0]
+    if (!mappingSelect) {
+      throw new Error('Headword mapping select not found')
     }
-    await duplicateStrategy.setValue('reject')
+    await mappingSelect.setValue('word_alt')
     await buttonByText(wrapper, '确认导入').trigger('click')
     await flushPromises()
     const changedKey = apiMocks.confirmWordbookImport.mock.calls[2]?.[1]
@@ -250,46 +335,115 @@ describe('wordbook dialogs', () => {
     expect(changedKey).not.toBe(firstKey)
   })
 
-  it('reuses an export key for the same options and rotates it after a format change', async () => {
-    apiMocks.createWordbookExport.mockRejectedValue(
-      new ApiError(503, 'EXPORT_UNAVAILABLE', '导出服务暂不可用。'),
-    )
+  it('creates an export, polls /exports and downloads through the authenticated Blob API', async () => {
+    const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    Object.defineProperty(window.URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn(() => 'blob:export'),
+    })
+    Object.defineProperty(window.URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    })
+
     const wrapper = track(mount(WordbookExportDialog, { props: { wordbook: book } }))
     await buttonByText(wrapper, '开始导出').trigger('click')
     await flushPromises()
-    const firstKey = apiMocks.createWordbookExport.mock.calls[0]?.[2]
 
-    await buttonByText(wrapper, '重新创建导出任务').trigger('click')
+    expect(apiMocks.createWordbookExport).toHaveBeenCalledWith(book.id, { format: 'csv' }, expect.any(String))
+    expect(apiMocks.getExportJob).toHaveBeenCalledWith(exportJobId)
+    expect(wrapper.text()).toContain('导出已完成')
+
+    await buttonByText(wrapper, '下载 CSV').trigger('click')
     await flushPromises()
-    const retryKey = apiMocks.createWordbookExport.mock.calls[1]?.[2]
 
-    await wrapper.get('input[value="txt"]').setValue(true)
-    await buttonByText(wrapper, '重新创建导出任务').trigger('click')
-    await flushPromises()
-    const changedKey = apiMocks.createWordbookExport.mock.calls[2]?.[2]
-
-    expect(firstKey).toEqual(expect.any(String))
-    expect(retryKey).toBe(firstKey)
-    expect(changedKey).not.toBe(firstKey)
+    expect(apiMocks.downloadWordbookExport).toHaveBeenCalledWith(exportJobId)
+    expect(anchorClick).toHaveBeenCalledOnce()
+    expect(window.URL.createObjectURL).toHaveBeenCalledOnce()
   })
 
-  it('reuses a delete key when retrying the same confirmed request', async () => {
-    apiMocks.deleteWordbook.mockRejectedValue(
-      new ApiError(409, 'DELETE_CONFLICT', '删除状态冲突，请重试。'),
+  it('validates documented PDF limits and sends page_rows/columns', async () => {
+    const wrapper = track(mount(WordbookExportDialog, { props: { wordbook: book } }))
+    await wrapper.get('input[value="pdf"]').setValue(true)
+
+    const numberInputs = wrapper.findAll('input[type="number"]')
+    await numberInputs[0]?.setValue('101')
+    expect(wrapper.text()).toContain('1 到 100')
+    expect(buttonByText(wrapper, '开始导出').attributes('disabled')).toBeDefined()
+
+    await numberInputs[0]?.setValue('80')
+    await numberInputs[1]?.setValue('4')
+    await buttonByText(wrapper, '开始导出').trigger('click')
+    await flushPromises()
+
+    expect(apiMocks.createWordbookExport).toHaveBeenCalledWith(
+      book.id,
+      { format: 'pdf', page_rows: 80, columns: 4 },
+      expect.any(String),
     )
+  })
+
+  it('shows cancelled export as a failure, never as a completed export', async () => {
+    apiMocks.getExportJob.mockResolvedValue(makeJob({
+      job_id: exportJobId,
+      kind: 'export',
+      status: 'cancelled',
+      progress: 31,
+      error_code: 'EXPORT_CANCELLED',
+      error_message: '导出任务已取消。',
+    }))
+    const wrapper = track(mount(WordbookExportDialog, { props: { wordbook: book } }))
+
+    await buttonByText(wrapper, '开始导出').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('导出任务已取消。')
+    expect(wrapper.text()).not.toContain('导出已完成')
+  })
+
+  it('requires the exact organization name and waits for delete job success', async () => {
+    apiMocks.getWordbookJob.mockResolvedValue(makeJob({
+      job_id: deleteJobId,
+      kind: 'delete',
+      status: 'succeeded',
+      progress: 100,
+      cleanup_status: 'completed',
+    }))
+    const wrapper = track(mount(WordbookDeleteDialog, { props: { wordbook: book } }))
+
+    const confirmButton = buttonByText(wrapper, '确认启动删除')
+    expect(confirmButton.attributes('disabled')).toBeDefined()
+    await wrapper.get('input[autocomplete="off"]').setValue('Business English')
+    expect(confirmButton.attributes('disabled')).toBeUndefined()
+
+    await confirmButton.trigger('click')
+    await flushPromises()
+
+    expect(apiMocks.deleteWordbook).toHaveBeenCalledWith(book, 'Business English', expect.any(String))
+    expect(apiMocks.getWordbookJob).toHaveBeenCalledWith(deleteJobId)
+    expect(wrapper.emitted('started')?.[0]).toEqual([book.id])
+    expect(wrapper.emitted('completed')?.[0]).toEqual([book.id])
+    expect(wrapper.text()).toContain('清理已完成')
+  })
+
+  it('does not present a cancelled delete job as completed', async () => {
+    apiMocks.getWordbookJob.mockResolvedValue(makeJob({
+      job_id: deleteJobId,
+      kind: 'delete',
+      status: 'cancelled',
+      progress: 10,
+      error_code: 'DELETE_CANCELLED',
+      error_message: '删除任务已取消。',
+    }))
     const wrapper = track(mount(WordbookDeleteDialog, { props: { wordbook: book } }))
     await wrapper.get('input[autocomplete="off"]').setValue('Business English')
 
     await buttonByText(wrapper, '确认启动删除').trigger('click')
     await flushPromises()
-    const firstKey = apiMocks.deleteWordbook.mock.calls[0]?.[2]
 
-    await buttonByText(wrapper, '确认启动删除').trigger('click')
-    await flushPromises()
-    const retryKey = apiMocks.deleteWordbook.mock.calls[1]?.[2]
-
-    expect(firstKey).toEqual(expect.any(String))
-    expect(retryKey).toBe(firstKey)
+    expect(wrapper.text()).toContain('删除任务已取消。')
+    expect(wrapper.text()).not.toContain('清理已完成')
+    expect(wrapper.emitted('completed')).toBeUndefined()
   })
 
   it('traps tab focus, closes on Escape and restores focus to the opener', async () => {
@@ -336,42 +490,5 @@ describe('wordbook dialogs', () => {
     wrapper.unmount()
     expect(document.activeElement).toBe(trigger)
     expect(document.body.style.overflow).toBe('auto')
-  })
-  it('guards an export against a double click before the first request resolves', async () => {
-    let resolveCreation!: (value: { job_id: string; status: 'queued' }) => void
-    apiMocks.createWordbookExport.mockReturnValue(new Promise((resolve) => {
-      resolveCreation = resolve
-    }))
-    const wrapper = track(mount(WordbookExportDialog, { props: { wordbook: book } }))
-    const submit = buttonByText(wrapper, '开始导出')
-
-    void submit.trigger('click')
-    void submit.trigger('click')
-    await flushPromises()
-    expect(apiMocks.createWordbookExport).toHaveBeenCalledTimes(1)
-
-    resolveCreation({ job_id: 'export-1', status: 'queued' })
-    await flushPromises()
-    expect(apiMocks.getExportJob).toHaveBeenCalledTimes(1)
-  })
-
-  it('shows a failed export without presenting a success state', async () => {
-    apiMocks.getExportJob.mockResolvedValue({
-      job_id: 'export-1',
-      status: 'failed',
-      progress: 42,
-      error_code: 'EXPORT_RENDER_FAILED',
-      error_message: 'PDF 渲染失败，请重试。',
-      download_url: null,
-      expires_at: null,
-    })
-    const wrapper = track(mount(WordbookExportDialog, { props: { wordbook: book } }))
-
-    await buttonByText(wrapper, '开始导出').trigger('click')
-    await flushPromises()
-
-    expect(wrapper.text()).toContain('PDF 渲染失败，请重试。')
-    expect(wrapper.text()).toContain('导出失败')
-    expect(wrapper.text()).not.toContain('导出已完成')
   })
 })

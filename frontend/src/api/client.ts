@@ -9,6 +9,7 @@ export interface RequestOptions {
   signal?: AbortSignal
   retryCount?: number
   skipAuthRefresh?: boolean
+  responseType?: 'json' | 'text' | 'blob'
 }
 
 const JSON_CONTENT_TYPE = 'application/json'
@@ -134,7 +135,7 @@ export class ApiClient {
     const retryCount = options.retryCount ?? (method === 'GET' ? 1 : 0)
     const requestHeaders = new Headers(options.headers)
 
-    requestHeaders.set('Accept', JSON_CONTENT_TYPE)
+    requestHeaders.set('Accept', options.responseType === 'blob' ? 'application/octet-stream' : JSON_CONTENT_TYPE)
 
     if (this.accessToken) {
       requestHeaders.set('Authorization', `Bearer ${this.accessToken}`)
@@ -206,6 +207,9 @@ export class ApiClient {
     const contentType = response.headers.get('content-type') ?? ''
     if (response.status === 204) {
       return undefined as T
+    }
+    if (options.responseType === 'blob') {
+      return (await response.blob()) as T
     }
     if (contentType.includes(JSON_CONTENT_TYPE)) {
       return (await response.json()) as T
