@@ -278,4 +278,3 @@ onMounted(() => {
     </template>
   </article>
 </template>
-

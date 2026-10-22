@@ -204,4 +204,3 @@ export async function fetchMistakes(
   })
   return parseMistakes(payload)
 }
-

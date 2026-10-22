@@ -171,4 +171,3 @@ describe('study heartbeat', () => {
     expect(sessionGet).not.toHaveBeenCalled()
   })
 })
-

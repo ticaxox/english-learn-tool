@@ -150,4 +150,3 @@ export function isSpellingBlankType(value: unknown): value is SpellingBlankType 
 export function isExamTarget(value: unknown): value is ExamTarget {
   return typeof value === 'string' && (EXAM_TARGETS as readonly string[]).includes(value)
 }
-

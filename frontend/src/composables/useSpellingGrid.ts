@@ -155,5 +155,3 @@ export function useSpellingGrid() {
 }
 
 export type SpellingGrid = ReturnType<typeof useSpellingGrid>
-
-

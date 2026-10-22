@@ -144,5 +144,3 @@ function submit(): void {
     <p class="inline-note">大小写不影响判分；正确性由服务端判定，本页不会预先比对答案。</p>
   </section>
 </template>
-
-

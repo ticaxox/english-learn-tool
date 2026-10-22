@@ -92,4 +92,3 @@ function rate(rating: FlashcardRating): void {
     </div>
   </section>
 </template>
-

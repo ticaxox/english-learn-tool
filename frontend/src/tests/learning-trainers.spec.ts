@@ -309,4 +309,3 @@ describe('SpellingTrainer', () => {
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
 })
-
