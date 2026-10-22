@@ -324,23 +324,69 @@ async def test_cors_preflight_allows_idempotency_key(client: httpx.AsyncClient) 
     assert "idempotency-key" in response.headers["access-control-allow-headers"].lower()
 
 
+@pytest.mark.parametrize("file_format", ["csv", "json", "txt"])
 async def test_private_wordbook_api_lifecycle_uses_durable_worker_jobs(
     client: httpx.AsyncClient,
     app,
     admin_user,
+    file_format: str,
 ) -> None:
     headers = await _login_headers(client, admin_user.username)
-    csv_content = _csv_payload([_minimal_row("harbor")])
+    headword = f"harbor-{file_format}"
+    if file_format == "csv":
+        filename = "words.csv"
+        content_type = "text/csv"
+        content = _csv_payload([_minimal_row(headword)])
+    elif file_format == "json":
+        filename = "words.json"
+        content_type = "application/json"
+        content = json.dumps(
+            [
+                {
+                    "headword": headword,
+                    "phonetic": "ˈhɑːrbər",
+                    "part_of_speech": "n.",
+                    "definition_en": [
+                        "a place where ships stop",
+                        "a sheltered area for boats",
+                    ],
+                    "definition_zh": ["港口", "避风港"],
+                    "example": ["The ship entered the harbor.", "The boats waited in the harbor."],
+                    "example_translation": ["船驶入港口。", "船只停在港内。"],
+                }
+            ],
+            ensure_ascii=False,
+        ).encode("utf-8")
+    else:
+        filename = "words.txt"
+        content_type = "text/plain"
+        content = ("\t".join(_minimal_row(headword)) + "\n").encode("utf-8")
+
     preview_response = await client.post(
         f"{WORDBOOKS_PATH}/import/preview",
         headers=headers,
-        data={"visibility": "private", "name": "API lifecycle book"},
-        files={"file": ("words.csv", csv_content, "text/csv")},
+        data={"visibility": "private", "name": f"{file_format} API lifecycle book"},
+        files={"file": (filename, content, content_type)},
     )
     assert preview_response.status_code == 201, preview_response.text
     preview = preview_response.json()
+    assert preview["detected_format"] == file_format
     assert preview["error_count"] == 0
     assert preview["valid_rows"] == 1
+
+    remap_response = await client.patch(
+        f"{WORDBOOKS_PATH}/import/previews/{preview['preview_id']}",
+        headers=headers,
+        json={
+            "preview_token": preview["preview_token"],
+            "mapping": preview["mapping"],
+            "ignored_columns": preview["ignored_columns"],
+        },
+    )
+    assert remap_response.status_code == 200, remap_response.text
+    preview = remap_response.json()
+    assert preview["detected_format"] == file_format
+    assert preview["status"] == "previewed"
 
     confirm_response = await client.post(
         f"{WORDBOOKS_PATH}/import",
@@ -369,7 +415,15 @@ async def test_private_wordbook_api_lifecycle_uses_durable_worker_jobs(
 
     detail = await client.get(f"{WORDBOOKS_PATH}/{wordbook_id}", headers=headers)
     assert detail.status_code == 200
-    assert detail.json()["entries"][0]["headword"] == "harbor"
+    detail_body = detail.json()
+    assert detail_body["entries"][0]["headword"] == headword
+    if file_format == "json":
+        definitions = detail_body["entries"][0]["definitions"]
+        assert len(definitions) == 2
+        assert all(len(definition["examples"]) == 2 for definition in definitions)
+        assert {definition["examples"][0]["example_en"] for definition in definitions} == {
+            "The ship entered the harbor."
+        }
 
     activation = await client.post(f"{WORDBOOKS_PATH}/{wordbook_id}/activate", headers=headers)
     assert activation.status_code == 200

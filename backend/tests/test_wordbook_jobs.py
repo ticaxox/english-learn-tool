@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import csv
 import io
+import json
 from datetime import timedelta
 from uuid import UUID, uuid4
 
@@ -16,7 +17,9 @@ from app.models.identity import AuditLog, User, UserProfile
 from app.models.wordbooks import (
     Wordbook,
     WordbookActivation,
+    WordbookDefinition,
     WordbookEntry,
+    WordbookExample,
     WordbookImportPreview,
     WordbookJob,
 )
@@ -61,6 +64,26 @@ def _csv_bytes(headword: str = "harbor") -> bytes:
     return output.getvalue().encode("utf-8")
 
 
+def _json_bytes(headword: str = "harbor") -> bytes:
+    return json.dumps(
+        [
+            {
+                "headword": headword,
+                "phonetic": "ˈhɑːrbər",
+                "part_of_speech": "n.",
+                "definition_en": [
+                    "a place where ships stop",
+                    "a sheltered area for boats",
+                ],
+                "definition_zh": ["港口", "避风港"],
+                "example": ["The ship entered the harbor.", "The boats waited in the harbor."],
+                "example_translation": ["船驶入港口。", "船只停在港内。"],
+            }
+        ],
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
 async def _create_actor(app, *, role: str = "member") -> tuple[User, object]:
     factory = app.state.session_factory.__class__(
         bind=app.state.engine,
@@ -96,8 +119,19 @@ async def _cleanup_actor(factory, actor_id: UUID) -> None:
         await session.commit()
 
 
-async def _create_preview(app, factory, actor: User, *, headword: str = "harbor"):
-    upload = UploadFile(filename="words.csv", file=io.BytesIO(_csv_bytes(headword)))
+async def _create_preview(
+    app,
+    factory,
+    actor: User,
+    *,
+    headword: str = "harbor",
+    raw: bytes | None = None,
+    filename: str = "words.csv",
+):
+    upload = UploadFile(
+        filename=filename,
+        file=io.BytesIO(raw if raw is not None else _csv_bytes(headword)),
+    )
     try:
         async with factory() as session:
             return await create_import_preview(
@@ -310,6 +344,86 @@ async def test_import_worker_replay_is_idempotent(app) -> None:
         assert persisted is not None
         assert persisted.status == "succeeded"
         assert persisted.attempts == 1
+    finally:
+        await _cleanup_actor(factory, actor.id)
+
+
+async def test_import_worker_persists_json_entry_definition_example_fk_chain(app) -> None:
+    actor, factory = await _create_actor(app)
+    try:
+        preview = await _create_preview(
+            app,
+            factory,
+            actor,
+            raw=_json_bytes(),
+            filename="fk-order.json",
+        )
+        payload = ImportConfirmRequest(
+            preview_id=preview.preview_id,
+            preview_token=preview.preview_token,
+            preview_hash=preview.preview_hash,
+            name=preview.requested_name,
+            visibility="private",
+        )
+        async with factory() as session:
+            job = await confirm_wordbook_import(
+                session,
+                actor,
+                settings=app.state.settings,
+                payload=payload,
+                idempotency_key=f"import-fk-{uuid4().hex}",
+            )
+
+        result = await process_wordbook_job(_job_context(app, factory), str(job.id))
+
+        assert result["entry_count"] == 1
+        assert result["definition_count"] == 2
+        assert result["example_count"] == 4
+        assert result["format"] == "json"
+        async with factory() as session:
+            entries = list(
+                (
+                    await session.scalars(
+                        select(WordbookEntry).where(WordbookEntry.wordbook_id == job.wordbook_id)
+                    )
+                ).all()
+            )
+            assert len(entries) == 1
+            definitions = list(
+                (
+                    await session.scalars(
+                        select(WordbookDefinition)
+                        .where(WordbookDefinition.entry_id == entries[0].id)
+                        .order_by(WordbookDefinition.sequence)
+                    )
+                ).all()
+            )
+            examples = list(
+                (
+                    await session.scalars(
+                        select(WordbookExample)
+                        .where(
+                            WordbookExample.definition_id.in_(
+                                [definition.id for definition in definitions]
+                            )
+                        )
+                        .order_by(WordbookExample.sequence)
+                    )
+                ).all()
+            )
+        assert [definition.definition_zh for definition in definitions] == ["港口", "避风港"]
+        assert {example.definition_id for example in examples} == {
+            definition.id for definition in definitions
+        }
+        assert len(examples) == 4
+        for definition in definitions:
+            definition_examples = [
+                example for example in examples if example.definition_id == definition.id
+            ]
+            assert {example.example_zh for example in definition_examples} == {
+                "船驶入港口。",
+                "船只停在港内。",
+            }
     finally:
         await _cleanup_actor(factory, actor.id)
 
