@@ -232,6 +232,92 @@ describe('AdminUsersView', () => {
     expect(wrapper.text()).toContain('服务端状态：已导入')
   })
 
+  it('retries a failed import-status read with the confirmed import id', async () => {
+    apiMocks.previewAdminUserImport.mockResolvedValue({
+      preview_id: 'preview-1',
+      preview_hash: 'a'.repeat(64),
+      expires_at: '2026-10-22T15:00:00Z',
+      total_rows: 1,
+      valid_rows: 1,
+      invalid_rows: 0,
+      rows: [
+        {
+          line_number: 2,
+          username: memberUser.username,
+          display_name: memberUser.display_name,
+          department: memberUser.department,
+          learning_group: memberUser.learning_group,
+          status: 'valid',
+          errors: [],
+        },
+      ],
+    })
+    apiMocks.confirmAdminUserImport.mockResolvedValue({
+      import_id: 'import-1',
+      status: 'imported',
+      created_count: 1,
+      created_users: [
+        {
+          id: memberUser.id,
+          username: memberUser.username,
+          display_name: memberUser.display_name,
+          temporary_password: 'Imported-Pass-123!',
+        },
+      ],
+    })
+    apiMocks.getAdminUserImportStatus
+      .mockRejectedValueOnce(new Error('状态读取失败'))
+      .mockResolvedValueOnce({
+        import_id: 'import-1',
+        status: 'imported',
+        created_count: 1,
+        created_users: [
+          {
+            id: memberUser.id,
+            username: memberUser.username,
+            display_name: memberUser.display_name,
+          },
+        ],
+        expires_at: '2026-10-22T15:00:00Z',
+        used_at: '2026-10-22T14:31:00Z',
+      })
+
+    const wrapper = mount(AdminUsersView)
+    await flushPromises()
+
+    const fileInput = wrapper.get('input[type="file"]')
+    const file = new File(
+      [[
+        'username,display_name,initial_password,department,learning_group',
+        'member_one,成员一号,,产品组,学习一组',
+      ].join('\n')],
+      'members.csv',
+      { type: 'text/csv' },
+    )
+    Object.defineProperty(fileInput.element, 'files', {
+      configurable: true,
+      value: [file],
+    })
+
+    await fileInput.trigger('change')
+    await wrapper.get('.import-picker > button').trigger('click')
+    await flushPromises()
+    await wrapper.get('.import-preview .button-row > button').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('CSV 批次已导入')
+    expect(wrapper.text()).toContain('状态读取失败')
+    expect(apiMocks.getAdminUserImportStatus).toHaveBeenCalledTimes(1)
+
+    await wrapper.get('.alert-success .button-secondary').trigger('click')
+    await flushPromises()
+
+    expect(apiMocks.getAdminUserImportStatus).toHaveBeenCalledTimes(2)
+    expect(apiMocks.getAdminUserImportStatus).toHaveBeenNthCalledWith(1, 'import-1')
+    expect(apiMocks.getAdminUserImportStatus).toHaveBeenNthCalledWith(2, 'import-1')
+    expect(wrapper.text()).toContain('服务端状态：已导入')
+  })
+
   it('loads privacy-safe account aggregates through the real detail endpoint', async () => {
     const wrapper = mount(AdminUsersView)
     await flushPromises()

@@ -518,14 +518,15 @@ function importStatusLabel(status: ImportStatusResult['status']): string {
 }
 
 async function refreshImportStatus(): Promise<void> {
-  if (!importStatus.value) {
+  const importId = importStatus.value?.import_id ?? importResult.value?.import_id
+  if (!importId) {
     return
   }
 
   importStatusLoading.value = true
   importError.value = null
   try {
-    importStatus.value = await getAdminUserImportStatus(importStatus.value.import_id)
+    importStatus.value = await getAdminUserImportStatus(importId)
   } catch (error) {
     importError.value = error
   } finally {
