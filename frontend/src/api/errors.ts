@@ -87,6 +87,51 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       }
     }
 
+    if (error.status === 404) {
+      return {
+        title: '资源不存在或不可见',
+        message: error.message || '目标资源可能已删除，或当前账号无权查看。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.status === 409) {
+      return {
+        title: '当前状态不允许此操作',
+        message: error.message || '资源状态可能已变化，请刷新后重试。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.status === 410) {
+      return {
+        title: '预览或下载已过期',
+        message: error.message || '短期凭证已失效，请重新预览或创建新的导出任务。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.status === 413) {
+      return {
+        title: '文件超过服务端限制',
+        message: error.message || '请缩小文件后重新预览；服务端大小限制是最终判断。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.status === 415) {
+      return {
+        title: '文件格式或媒体类型不受支持',
+        message: error.message || '请使用 .csv、.json 或 .txt 文件重新预览。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
     if (error.status === 401) {
       return {
         title: '认证状态已失效',
