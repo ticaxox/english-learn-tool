@@ -146,6 +146,12 @@ export interface ChoiceOption {
   label: string
 }
 
+/**
+ * The product contract fixes the choice module at four distinct options. Kept
+ * as a named constant so the trainer and its tests cannot drift apart.
+ */
+export const CHOICE_OPTION_COUNT = 4
+
 export interface ChoiceQuestion {
   kind: 'choice'
   questionId: string

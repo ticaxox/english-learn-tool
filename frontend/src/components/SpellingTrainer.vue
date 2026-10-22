@@ -109,7 +109,7 @@ function submit(): void {
       <span>剩余 {{ props.question.remaining }} 张</span>
     </p>
 
-    <h2 id="spelling-definition" class="study-card__prompt">{{ props.question.definition }}</h2>
+    <h2 id="spelling-definition" class="study-card__prompt" tabindex="-1">{{ props.question.definition }}</h2>
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
 
     <div class="spelling-grid" role="group" aria-label="按字母顺序填写单词">

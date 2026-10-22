@@ -4,8 +4,8 @@
  * marker, so there is nothing in the DOM or in local state that reveals the
  * answer. Submitting only sends the chosen option id; the server grades.
  */
-import { computed, ref, watch } from 'vue'
-import type { ChoiceQuestion } from '../types/learning'
+import { computed, nextTick, ref, watch } from 'vue'
+import { CHOICE_OPTION_COUNT, type ChoiceQuestion } from '../types/learning'
 
 const props = defineProps<{
   question: ChoiceQuestion
@@ -17,15 +17,38 @@ const emit = defineEmits<{
 }>()
 
 const selected = ref<string | null>(null)
+const promptHeading = ref<HTMLElement | null>(null)
+
+/**
+ * Product rule: a choice question shows four distinct options. A payload that
+ * breaks that rule is a contract defect, not something to paper over — a
+ * duplicated option would let the learner submit a label twice, and a short list
+ * would make "the answer is there" untrue. The server keeps grading either way,
+ * but the UI must say the payload is wrong instead of rendering it as normal.
+ */
+const optionsWellFormed = computed(() => {
+  const options = props.question.options
+  if (options.length !== CHOICE_OPTION_COUNT) {
+    return false
+  }
+  const ids = new Set(options.map((option) => option.optionId))
+  const labels = new Set(options.map((option) => option.label.trim()))
+  return ids.size === options.length && labels.size === options.length
+})
 
 watch(
   () => props.question.questionId,
   () => {
     selected.value = null
+    // Focus follows the new prompt; the radios of the old card are gone, so
+    // leaving focus behind would strand keyboard users.
+    void nextTick(() => promptHeading.value?.focus())
   },
 )
 
-const canSubmit = computed(() => selected.value !== null && !props.disabled)
+const canSubmit = computed(
+  () => selected.value !== null && !props.disabled && optionsWellFormed.value,
+)
 
 function choose(optionId: string): void {
   if (props.disabled) {
@@ -49,10 +72,15 @@ function submit(): void {
       <span>剩余 {{ props.question.remaining }} 张</span>
     </p>
 
-    <h2 id="choice-prompt" class="study-card__prompt">{{ props.question.prompt }}</h2>
+    <h2 id="choice-prompt" ref="promptHeading" class="study-card__prompt" tabindex="-1">{{ props.question.prompt }}</h2>
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
 
-    <fieldset class="choice-list" :disabled="props.disabled">
+    <p v-if="!optionsWellFormed" class="alert alert-warning" role="alert">
+      服务端返回的选项不符合「四个不重复选项」的契约（当前 {{ props.question.options.length }} 个）。
+      本页不会按这份数据判分，请刷新或联系管理员；提交按钮保持不可用。
+    </p>
+
+    <fieldset v-else class="choice-list" :disabled="props.disabled" aria-describedby="choice-hint">
       <legend class="visually-hidden">选择一个答案</legend>
       <label
         v-for="(option, index) in props.question.options"
@@ -75,6 +103,6 @@ function submit(): void {
     <div class="button-row">
       <button class="button" type="button" :disabled="!canSubmit" @click="submit">提交答案</button>
     </div>
-    <p class="inline-note">提交后由服务端判分并返回解析；本页不会提前得知正确答案。</p>
+    <p id="choice-hint" class="inline-note">提交后由服务端判分并返回解析；本页不会提前得知正确答案。</p>
   </section>
 </template>

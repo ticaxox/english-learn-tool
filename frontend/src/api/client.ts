@@ -1,4 +1,5 @@
 import { ApiError, ContractError, isApiError } from './errors'
+import { parseValidationIssues } from './validation-errors'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -289,6 +290,21 @@ export class ApiClient {
         ? (payload as Record<string, unknown>).details
         : null
     const retryable = response.status === 429 || response.status >= 500
+
+    // 422 uses the documented `HTTPValidationError` envelope instead of
+    // `ErrorResponse`, so it carries no `code`. Keep those issues reachable for
+    // the form instead of degrading the learner's only feedback to `HTTP_422`.
+    const validationIssues = response.status === 422 ? parseValidationIssues(payload) : []
+    if (validationIssues.length > 0) {
+      return new ApiError(
+        response.status,
+        'VALIDATION_ERROR',
+        bodyMessage ?? '提交的内容未通过服务端校验。',
+        { issues: validationIssues },
+        requestId,
+        false,
+      )
+    }
 
     return new ApiError(response.status, code, message, details, requestId, retryable)
   }

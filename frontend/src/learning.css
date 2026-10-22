@@ -120,6 +120,21 @@ input[aria-invalid='true'] {
   background: var(--danger-soft);
 }
 
+/* Server-reported 422 issues: shown verbatim so the learner can act on them. */
+.field-issue-list {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.field-issue-list code {
+  margin-right: 0.15rem;
+  overflow-wrap: anywhere;
+}
+
 /* ---------- contract gate ---------- */
 
 .contract-gate {

@@ -112,6 +112,21 @@ describe('FlashcardTrainer', () => {
     expect(wrapper.text()).toContain('seldom')
   })
 
+  it('moves focus to the next card so keyboard users are not stranded', async () => {
+    const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() }, attachTo: document.body })
+    await wrapper.get('button.study-card__flip').trigger('click')
+    // Flipping unmounts the button, so focus must move to the revealed answer.
+    expect(document.activeElement).toBe(wrapper.get('.study-card__back').element)
+
+    await wrapper.setProps({ question: flashcard({ questionId: 'q-9', front: 'seldom', back: '很少' }) })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    // Focus lands on the new prompt, which is programmatically focusable.
+    expect(document.activeElement).toBe(wrapper.get('#flashcard-front').element)
+    wrapper.unmount()
+  })
+
   it('blocks rating while disabled', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard(), disabled: true } })
     await wrapper.get('button.study-card__flip').trigger('click')
@@ -132,6 +147,64 @@ describe('ChoiceTrainer', () => {
     expect(html).not.toContain('correct')
     expect(html).not.toContain('data-answer')
     expect(html).not.toContain('is-right')
+  })
+
+  it('refuses to grade a payload that is not four distinct options', async () => {
+    // A duplicate label would let the learner submit the same answer twice and a
+    // short list breaks the "answer is among them" promise: both are contract
+    // defects, so the trainer must say so instead of rendering them.
+    const wrapper = mount(ChoiceTrainer, {
+      props: {
+        question: choice({
+          options: [
+            { optionId: 'o-1', label: '有弹性的' },
+            { optionId: 'o-2', label: '有弹性的' },
+            { optionId: 'o-3', label: '沉默的' },
+            { optionId: 'o-4', label: '昂贵的' },
+          ],
+        }),
+      },
+    })
+
+    expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
+    expect(wrapper.text()).toContain('四个不重复选项')
+    expect(wrapper.findAll('button').find((button) => button.text() === '提交答案')!.attributes('disabled')).toBeDefined()
+  })
+
+  it('rejects a three-option payload instead of submitting it', () => {
+    const wrapper = mount(ChoiceTrainer, {
+      props: {
+        question: choice({
+          options: [
+            { optionId: 'o-1', label: '有弹性的' },
+            { optionId: 'o-2', label: '沉默的' },
+            { optionId: 'o-3', label: '昂贵的' },
+          ],
+        }),
+      },
+    })
+
+    expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
+    expect(wrapper.text()).toContain('当前 3 个')
+    expect(wrapper.emitted('answer')).toBeUndefined()
+  })
+
+  it('treats options sharing one id as a contract defect', () => {
+    const wrapper = mount(ChoiceTrainer, {
+      props: {
+        question: choice({
+          options: [
+            { optionId: 'o-1', label: '有弹性的' },
+            { optionId: 'o-1', label: '沉默的' },
+            { optionId: 'o-3', label: '昂贵的' },
+            { optionId: 'o-4', label: '临时的' },
+          ],
+        }),
+      },
+    })
+
+    expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
+    expect(wrapper.text()).toContain('四个不重复选项')
   })
 
   it('sends only the chosen option id, never an answer key', async () => {
@@ -159,6 +232,18 @@ describe('ChoiceTrainer', () => {
     for (const radio of radios) {
       expect(radio.attributes('value')).toBeTruthy()
     }
+  })
+
+  it('moves focus to the new prompt when the question changes', async () => {
+    const wrapper = mount(ChoiceTrainer, { props: { question: choice() }, attachTo: document.body })
+    await wrapper.findAll('input[type="radio"]')[1].setValue()
+
+    await wrapper.setProps({ question: choice({ questionId: 'q-7', prompt: '选择「fragile」的正确释义' }) })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    expect(document.activeElement).toBe(wrapper.get('#choice-prompt').element)
+    wrapper.unmount()
   })
 
   it('resets the selection when the question changes', async () => {

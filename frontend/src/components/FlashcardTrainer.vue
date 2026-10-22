@@ -4,7 +4,7 @@
  * back after an explicit flip. The back is never rendered into the DOM before
  * that point, so it cannot be read from the page source.
  */
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import type { FlashcardQuestion, FlashcardRating } from '../types/learning'
 
 const props = defineProps<{
@@ -19,11 +19,18 @@ const emit = defineEmits<{
 }>()
 
 const revealed = ref(false)
+const frontHeading = ref<HTMLElement | null>(null)
+const backRegion = ref<HTMLElement | null>(null)
 
 watch(
   () => props.question.questionId,
   () => {
     revealed.value = false
+    // The next card replaces the previous one without a navigation, so focus
+    // would otherwise stay on a button from a card that no longer exists.
+    // Moving it to the new prompt keeps keyboard and screen-reader users at the
+    // content instead of at a dead control.
+    void nextTick(() => frontHeading.value?.focus())
   },
 )
 
@@ -35,6 +42,9 @@ function flip(): void {
   }
   revealed.value = true
   emit('reveal')
+  // The flip button unmounts, so focus would silently fall back to <body>.
+  // Move it to the newly revealed answer instead of losing it.
+  void nextTick(() => backRegion.value?.focus())
 }
 
 function rate(rating: FlashcardRating): void {
@@ -52,7 +62,7 @@ function rate(rating: FlashcardRating): void {
       <span>剩余 {{ props.question.remaining }} 张</span>
     </p>
 
-    <h2 id="flashcard-front" class="study-card__word">{{ props.question.front }}</h2>
+    <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
 
     <!--
@@ -69,7 +79,7 @@ function rate(rating: FlashcardRating): void {
       翻到背面
     </button>
 
-    <div v-else class="study-card__back" aria-live="polite">
+    <div v-else ref="backRegion" class="study-card__back" aria-live="polite" tabindex="-1">
       <p class="study-card__definition">{{ props.question.back }}</p>
       <p v-if="props.question.example" class="study-card__example">{{ props.question.example }}</p>
       <div class="button-row">
