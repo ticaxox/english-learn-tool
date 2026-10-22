@@ -8,7 +8,7 @@
 
 ## 使用方式
 
-在任务工作树 `E:\agent workspace\英语学习工具\worktrees\A30-TEST` 中执行：
+在包含本质量清单的代码工作树中执行；`--workspace-root` 必须指向项目根目录。
 
 ```powershell
 # 校验结构，并检查 PASS/CONDITIONAL 门禁引用的证据文件
@@ -37,13 +37,14 @@ python tests\quality-baseline\validate_manifest.py --workspace-root ..\.. --requ
 
 ## 当前快照
 
-2026-10-22 二次复审输入为后端 PR #2（`9ac4590`）和前端 PR #1（`9718fc2`）。旧证据仍在 `04-qa/evidence/T-QA-001/`；本轮证据在 `04-qa/evidence/T-QA-001/retest-20261022-2146/`。清单共 47 条：13 条 `PASS`、3 条 `CONDITIONAL`、30 条 `FAIL`、1 条 `NOT_RUN`。
+2026-10-23 认证域合并后输入为 PR #6（`bd50685`）与 PR #7（`f7bc303`），主线合并提交为 `da24cd2` → `aea77d3`，main push CI `39829763790` 为 5/5 PASS。AUTH-INT-001 真实 API `202/202`、真实浏览器 `32/32`；权威清单共 47 条：16 条 `PASS`、6 条 `CONDITIONAL`、24 条 `FAIL`、1 条 `NOT_RUN`。
 
-- QA-D-001、QA-D-002、QA-D-003 均已关闭；Stage A 工程基线为 `PASS`。
-- `S-FE-04` 仍为 `CONDITIONAL`，条件是 `AUTH-INT-001` 的真实认证联调；该条件是已登记后续依赖，不是本轮三项缺陷或新阻断。
-- 最终 MVP 仍为 `FAIL / NOT_READY`；普通清单校验通过只表示结构、引用和当前阶段记录一致。
+- `S-FE-04`、`F-AUTH-01`、`F-ADMIN-01` 已按 AUTH-INT-001 真实证据转为 `PASS`。
+- `F-PRIV-01`、`F-E2E-01`、`F-SEC-01`、`F-AUDIT-01` 保留 `CONDITIONAL`，分别等待学习正文域真实数据、完整业务旅程、CSP/安全响应头、审计保留/备份恢复。
+- `F-GIT-01` 仍为 `CONDITIONAL`，条件是版本标签与发布历史 `GAP-RELEASE-HISTORY`。
+- 最终 MVP 仍为 `FAIL / NOT_READY`；普通清单校验通过只表示结构、证据引用和当前阶段记录一致，不代表最终 PASS。
 
-不能把 Stage A 的 `PASS` 解释为真实认证、完整业务闭环、E2E、AI、容器、CI、部署或最终 MVP 已完成。
+不能把认证、成员管理、CSV、审计和隐私联调的 `PASS` 解释为词书、FSRS、今日任务、AI、完整 E2E、部署或最终 MVP 已完成。
 
 ## 维护规则
 
