@@ -21,6 +21,16 @@ export interface ChangePasswordPayload {
   new_password: string
 }
 
+export class PasswordChangedLoginRequiredError extends Error {
+  readonly cause: unknown
+
+  constructor(cause: unknown) {
+    super('密码已更新，但自动重新登录失败。请使用新密码重新登录。')
+    this.name = 'PasswordChangedLoginRequiredError'
+    this.cause = cause
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<CurrentUser | null>(null)
   const status = ref<AuthStatus>('idle')
@@ -130,20 +140,47 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function changePassword(payload: ChangePasswordPayload): Promise<void> {
+    const currentUsername = user.value?.username
+    if (!currentUsername) {
+      throw new Error('当前账号信息缺失，无法安全修改密码。')
+    }
+
     lastError.value = null
     await apiClient.post<void>('/auth/change-password', payload)
-    await loadCurrentUser()
+
+    // The backend revokes every refresh session and clears both cookies after a password change.
+    // Re-authenticate with the new password so /auth/me and page reloads use a fresh real session.
+    apiClient.clearCredentials()
+    user.value = null
+    status.value = 'anonymous'
+    initialized.value = true
+
+    try {
+      await login({ username: currentUsername, password: payload.new_password })
+    } catch (error) {
+      const reauthError = new PasswordChangedLoginRequiredError(error)
+      lastError.value = reauthError
+      throw reauthError
+    }
   }
 
   async function logout(): Promise<void> {
+    let logoutError: unknown = null
     try {
       await apiClient.post<void>(
         '/auth/logout',
         undefined,
-        { skipAuthRefresh: true, retryCount: 0 },
+        { retryCount: 0 },
       )
+    } catch (error) {
+      logoutError = error
     } finally {
       markSessionExpired()
+    }
+
+    if (logoutError) {
+      lastError.value = logoutError
+      throw logoutError
     }
   }
 

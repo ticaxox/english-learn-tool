@@ -4,7 +4,7 @@ export type UserRole = 'admin' | 'member'
 
 export interface AuthTokenResponse {
   access_token: string
-  csrf_token?: string
+  csrf_token: string
   token_type?: string
   expires_in?: number
 }
@@ -17,6 +17,7 @@ export interface CurrentUser {
   must_change_password: boolean
   status?: string
   department?: string | null
+  learning_group?: string | null
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -29,8 +30,8 @@ export function parseAuthTokenResponse(payload: unknown): AuthTokenResponse {
   }
 
   const csrfToken = payload.csrf_token
-  if (csrfToken !== undefined && typeof csrfToken !== 'string') {
-    throw new ContractError('认证接口返回的 csrf_token 类型不正确。')
+  if (typeof csrfToken !== 'string' || !csrfToken.trim()) {
+    throw new ContractError('认证接口未返回 csrf_token。请核对 Cookie/CSRF 契约。')
   }
 
   return {
@@ -72,5 +73,9 @@ export function parseCurrentUser(payload: unknown): CurrentUser {
     must_change_password: mustChangePassword,
     status: typeof payload.status === 'string' ? payload.status : undefined,
     department: typeof payload.department === 'string' || payload.department === null ? payload.department : undefined,
+    learning_group:
+      typeof payload.learning_group === 'string' || payload.learning_group === null
+        ? payload.learning_group
+        : undefined,
   }
 }
