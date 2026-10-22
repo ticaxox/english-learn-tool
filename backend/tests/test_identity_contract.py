@@ -123,6 +123,11 @@ async def test_identity_openapi_documents_bearer_cookie_csrf_and_privacy_contrac
     assert "403" in logout_operation["responses"]
     assert "429" not in logout_operation["responses"]
 
+    delete_operation = paths["/api/v1/admin/users/{user_id}"]["delete"]
+    delete_conflict = delete_operation["responses"]["409"]["description"]
+    assert "SELF_DELETE_FORBIDDEN" in delete_conflict
+    assert "LAST_ADMIN_PROTECTED" in delete_conflict
+
     login_contract = paths[LOGIN_PATH]["post"]
     assert login_contract.get("security") is None
     assert "403" not in login_contract["responses"]

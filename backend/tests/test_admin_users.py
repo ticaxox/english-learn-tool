@@ -2,6 +2,7 @@ import asyncio
 from uuid import UUID, uuid4
 
 import httpx
+import pytest
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -10,7 +11,7 @@ from app.core.errors import AppError
 from app.core.security import hash_password, password_policy_error
 from app.models.identity import AuditLog, User, UserProfile
 from app.schemas.users import AdminUserPatch
-from app.services.users import update_user
+from app.services.users import delete_user, update_user
 from tests.conftest import TEST_USER_PASSWORD
 
 ADMIN_PATH = "/api/v1/admin/users"
@@ -225,12 +226,12 @@ async def test_generated_password_and_reset_are_returned_once_and_revoke_session
     assert "password" not in str(events[0].context).lower()
 
 
-async def test_last_admin_delete_disable_and_demote_are_protected(client, admin_user) -> None:
+async def test_last_admin_self_delete_disable_and_demote_are_protected(client, admin_user) -> None:
     headers, _ = await admin_headers(client, admin_user)
 
     delete_response = await client.delete(f"{ADMIN_PATH}/{admin_user.id}", headers=headers)
     assert delete_response.status_code == 409
-    assert delete_response.json()["code"] == "LAST_ADMIN_PROTECTED"
+    assert delete_response.json()["code"] == "SELF_DELETE_FORBIDDEN"
 
     disable_response = await client.patch(
         f"{ADMIN_PATH}/{admin_user.id}",
@@ -249,15 +250,35 @@ async def test_last_admin_delete_disable_and_demote_are_protected(client, admin_
     assert demote_response.json()["code"] == "LAST_ADMIN_PROTECTED"
 
 
-async def test_self_delete_is_allowed_only_when_another_active_admin_remains(
+async def test_last_admin_delete_service_guard_remains(app, admin_user) -> None:
+    unrelated_actor = User(
+        id=uuid4(),
+        username="service_guard_admin",
+        username_normalized="service_guard_admin",
+        display_name="Service Guard Administrator",
+        role="admin",
+        status="active",
+        password_hash="not-used-by-the-service-guard",
+        must_change_password=False,
+    )
+
+    async with app.state.session_factory() as db:
+        with pytest.raises(AppError) as exc_info:
+            await delete_user(db, unrelated_actor, admin_user.id)
+
+    assert exc_info.value.code == "LAST_ADMIN_PROTECTED"
+
+
+async def test_self_delete_is_forbidden_even_when_another_active_admin_remains(
     client, app, admin_user, user_factory
 ) -> None:
     headers, access_token = await admin_headers(client, admin_user)
     second_admin = await user_factory(role="admin", display_name="Second Administrator")
 
     deleted = await client.delete(f"{ADMIN_PATH}/{admin_user.id}", headers=headers)
-    assert deleted.status_code == 204
-    assert (await client.get(ME_PATH, headers=bearer(access_token))).status_code == 401
+    assert deleted.status_code == 409
+    assert deleted.json()["code"] == "SELF_DELETE_FORBIDDEN"
+    assert (await client.get(ME_PATH, headers=bearer(access_token))).status_code == 200
 
     second_login = await login(client, second_admin.username)
     assert second_login.status_code == 200
@@ -268,10 +289,22 @@ async def test_self_delete_is_allowed_only_when_another_active_admin_remains(
     assert remaining.json()["account"]["role"] == "admin"
 
     async with app.state.session_factory() as db:
+        target = await db.get(User, admin_user.id)
+        failure_audit = await db.scalar(
+            select(AuditLog).where(
+                AuditLog.action == "admin.user.delete",
+                AuditLog.target_id == admin_user.id,
+                AuditLog.reason_code == "SELF_DELETE_FORBIDDEN",
+            )
+        )
         active_admins = await db.scalar(
             select(func.count(User.id)).where(User.role == "admin", User.status == "active")
         )
-    assert active_admins == 1
+    assert target is not None
+    assert failure_audit is not None
+    assert failure_audit.outcome == "failure"
+    assert "password" not in str(failure_audit.context).lower()
+    assert active_admins == 2
 
 
 async def test_concurrent_demotions_cannot_remove_every_active_admin(app) -> None:

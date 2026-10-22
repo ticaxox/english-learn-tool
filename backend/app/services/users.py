@@ -389,6 +389,21 @@ async def delete_user(session: AsyncSession, actor: User, user_id: UUID) -> None
         action="admin.user.delete",
         target_id=user_id,
     )
+    if actor.id == user_id:
+        await commit_failure_audit(
+            session,
+            actor=actor,
+            action="admin.user.delete",
+            target_type="user",
+            target_id=user_id,
+            target_username=actor.username_normalized,
+            reason_code="SELF_DELETE_FORBIDDEN",
+        )
+        raise AppError(
+            status_code=409,
+            code="SELF_DELETE_FORBIDDEN",
+            message="Administrators cannot delete their own account.",
+        )
     await _acquire_admin_lock(session)
     target = await _get_user(session, user_id, lock=True)
     if target is None:

@@ -55,6 +55,9 @@ token is an opaque random value stored in an `HttpOnly` cookie limited to
 `document.cookie` on any application route. Both cookies use `SameSite=Lax`; production also sets
 `Secure`.
 
+Administrators cannot delete their own account, even when another active administrator exists. The
+API returns `409 SELF_DELETE_FORBIDDEN` and records a sanitized failure audit event.
+
 Refresh and logout require:
 
 1. the refresh cookie where applicable;

@@ -174,7 +174,17 @@ async def update_user_endpoint(
 @router.delete(
     "/users/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    responses={**_ADMIN_RESPONSES, 404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+    responses={
+        **_ADMIN_RESPONSES,
+        404: {"model": ErrorResponse},
+        409: {
+            "model": ErrorResponse,
+            "description": (
+                "SELF_DELETE_FORBIDDEN when deleting the current account; "
+                "LAST_ADMIN_PROTECTED when removing the last active administrator."
+            ),
+        },
+    },
     summary="Hard-delete an account after frontend confirmation",
 )
 async def delete_user_endpoint(
