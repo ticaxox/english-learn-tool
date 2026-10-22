@@ -37,12 +37,13 @@ python tests\quality-baseline\validate_manifest.py --workspace-root ..\.. --requ
 
 ## 当前快照
 
-2026-10-22 的审查输入为后端 PR #2（`01386cb`）和前端 PR #1（`c7fbe02`）。清单共 47 条：10 条 `PASS`、3 条 `CONDITIONAL`、33 条 `FAIL`、1 条 `NOT_RUN`。因此：
+2026-10-22 二次复审输入为后端 PR #2（`9ac4590`）和前端 PR #1（`9718fc2`）。旧证据仍在 `04-qa/evidence/T-QA-001/`；本轮证据在 `04-qa/evidence/T-QA-001/retest-20261022-2146/`。清单共 47 条：13 条 `PASS`、3 条 `CONDITIONAL`、30 条 `FAIL`、1 条 `NOT_RUN`。
 
-- 普通清单校验通过，表示结构、引用和当前阶段记录一致；
-- 最终 MVP 判定失败，结论为 `FAIL / NOT_READY`。
+- QA-D-001、QA-D-002、QA-D-003 均已关闭；Stage A 工程基线为 `PASS`。
+- `S-FE-04` 仍为 `CONDITIONAL`，条件是 `AUTH-INT-001` 的真实认证联调；该条件是已登记后续依赖，不是本轮三项缺陷或新阻断。
+- 最终 MVP 仍为 `FAIL / NOT_READY`；普通清单校验通过只表示结构、引用和当前阶段记录一致。
 
-不能把 `RESULT=PASS` 的普通校验结果解释为业务功能已经验收通过。
+不能把 Stage A 的 `PASS` 解释为真实认证、完整业务闭环、E2E、AI、容器、CI、部署或最终 MVP 已完成。
 
 ## 维护规则
 

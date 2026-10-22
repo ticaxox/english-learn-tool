@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task": "T-QA-001",
   "title": "AI 英语学习工具验收门禁清单",
-  "updated_at": "2026-10-22T21:00:00+08:00",
+  "updated_at": "2026-10-22T22:02:00+08:00",
   "sources": [
     "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
     "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
@@ -34,10 +34,10 @@
         "uv sync --locked --all-groups"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-uv-sync.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-uv-sync.log"
       ],
       "status": "PASS",
-      "reason": "锁文件安装成功，EXIT_CODE=0。"
+      "reason": "锁定依赖安装成功，EXIT_CODE=0；隔离快照使用提交 9ac4590。"
     },
     {
       "id": "S-BE-02",
@@ -60,11 +60,11 @@
         "uv run ruff format --check ."
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-ruff-check.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-ruff-format.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-ruff-check.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-ruff-format.log"
       ],
       "status": "PASS",
-      "reason": "两条命令均 EXIT_CODE=0；格式检查日志有一次非阻断 cache 写警告。"
+      "reason": "Ruff lint 与 format check 均 EXIT_CODE=0。"
     },
     {
       "id": "S-BE-03",
@@ -91,11 +91,11 @@
         "uv run pytest"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-pytest-run1.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-pytest-run2-repeatability.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-pytest-run1.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-pytest-run2.log"
       ],
       "status": "PASS",
-      "reason": "两次连续运行均为 16 passed；现有测试不写入持久业务状态。"
+      "reason": "同一专用 PostgreSQL/Redis DB 连续两次完整套件均 18 passed；未手工重置，结束后数据库探针和 Redis DB 14 键数均为 0。"
     },
     {
       "id": "S-BE-04",
@@ -108,8 +108,8 @@
       "layer": "migration",
       "owner": "A10 / A30",
       "preconditions": [
-        "专用空数据库 english_learn_qa_a30_migration",
-        "真实 PostgreSQL"
+        "专用空数据库 english_learn_qa_a30_retest_migration_2146",
+        "真实 PostgreSQL 16.10"
       ],
       "data": [
         "Alembic baseline 20261022_0001"
@@ -121,13 +121,13 @@
         "uv run alembic upgrade head"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-upgrade-empty.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-check.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-downgrade-base.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-reupgrade.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-alembic-upgrade-empty.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-alembic-check-empty.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-alembic-downgrade-base.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-alembic-reupgrade.log"
       ],
       "status": "PASS",
-      "reason": "空库升级、无漂移、降级后 system_metadata 消失、再次升级均成功。"
+      "reason": "空库升级、drift check、降级和再升级均成功；最终 revision 为 20261022_0001。"
     },
     {
       "id": "S-BE-05",
@@ -154,12 +154,12 @@
         "GET /api/v1/qa-not-found"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/api/smoke-summary.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/api/body-assertions.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/api/error-envelope-404.json"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/api/smoke-summary.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/api/not-found.json",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/api/request-id-valid.json"
       ],
       "status": "PASS",
-      "reason": "状态码、组件就绪、X-Request-ID 透传及错误四字段均通过。"
+      "reason": "live/ready/service/OpenAPI 均 200，未知路由 404 且错误四字段完整；合法 X-Request-ID 原样回传。"
     },
     {
       "id": "S-BE-06",
@@ -172,7 +172,7 @@
       "layer": "security",
       "owner": "A10 / A30",
       "preconditions": [
-        "审查提交 01386cb",
+        "审查提交 9ac4590",
         "tracked files only"
       ],
       "data": [
@@ -185,12 +185,12 @@
         "custom tracked-secret scan"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/security/tracked-secret-scan.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/security/backend-tracked-secret-scan.json"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/repository-hygiene.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/tracked-secret-scan.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/backend-tracked-secret-scan.json"
       ],
       "status": "PASS",
-      "reason": "44 个文件全部位于 backend/**；无二进制、真实 .env、私钥或未分类高置信度密钥。"
+      "reason": "45 个变更文件全部位于 backend/**；无二进制、真实 .env 或 review-required 泄露。"
     },
     {
       "id": "S-BE-07",
@@ -203,23 +203,26 @@
       "layer": "integration",
       "owner": "A10",
       "preconditions": [
-        "专用 QA 数据库",
-        "测试夹具当前实现"
+        "专用 QA 数据库 english_learn_qa_a30_retest_2146",
+        "测试夹具事务/savepoint + 专用 Redis DB 14"
       ],
       "data": [
-        "QA-only 持久化探针 test_qa_isolation_probe.py"
+        "状态性数据库探针",
+        "Redis 探针",
+        "非目标数据库/Redis DB canary"
       ],
       "command": [
-        "连续运行同一持久化测试两次",
-        "检查第二次是否出现前次状态"
+        "uv run pytest tests/test_state_isolation.py -q（连续两次）",
+        "uv run pytest（连续两次）"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/probes/test_qa_isolation_probe.py",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-isolation-probe-run1.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-isolation-probe-run2.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-isolation-run1.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-isolation-run2.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/backend-isolation-scope.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/inputs/test-targets.log"
       ],
-      "status": "FAIL",
-      "reason": "第一次 1 passed，第二次因前次数据残留断言失败；conftest 仅执行迁移，没有每测试回滚或清理。缺陷 QA-D-001。"
+      "status": "PASS",
+      "reason": "逐测试 PostgreSQL 外层事务/savepoint 回滚与专用 Redis DB flush 已生效；隔离回归连续两次 2 passed，完整套件连续两次 18 passed；非目标 DB canary 与 Redis DB 13 sentinel 未被触碰。"
     },
     {
       "id": "S-BE-08",
@@ -241,11 +244,11 @@
         "uvx pip-audit --path <isolated-venv-site-packages> --format json"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/security/backend-pip-audit.json",
-        "ai-workspace/04-qa/evidence/T-QA-001/security/backend-pip-audit.stderr.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/backend-pip-audit.json",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/backend-pip-audit.stderr.log"
       ],
-      "status": "FAIL",
-      "reason": "pytest 8.4.2 命中 PYSEC-2026-1845；修复版本 9.0.3，当前 <9 约束阻止升级。缺陷 QA-D-002。"
+      "status": "PASS",
+      "reason": "锁定解析 pytest 9.1.1、pytest-asyncio 1.4.0；pip-audit 审计 42 个依赖，0 个已知漏洞。"
     },
     {
       "id": "S-FE-01",
@@ -271,8 +274,8 @@
         "npm run build"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-npm-ci.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-build.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/frontend-npm-ci.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/frontend-build.log"
       ],
       "status": "PASS",
       "reason": "npm ci 安装 161 包且 0 vulnerabilities；vue-tsc 与 Vite 构建成功。"
@@ -298,10 +301,10 @@
         "npm test"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-test.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/frontend-test.log"
       ],
       "status": "PASS",
-      "reason": "4 个测试文件、11 项测试通过；仅有 3 条 jsdom scrollTo 未实现警告。"
+      "reason": "4 个测试文件、11 项测试通过；日志仅有 jsdom scrollTo 未实现警告。"
     },
     {
       "id": "S-FE-03",
@@ -325,10 +328,10 @@
         "检查 fetch 调用"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/frontend-static-boundaries.log"
       ],
       "status": "PASS",
-      "reason": "生产代码仅使用真实 fetch；无 localStorage/sessionStorage 调用；mock 仅出现在 tests。"
+      "reason": "18 个生产前端文件中无 localStorage/sessionStorage 代码写入、无 mock/fake/fixture；存在真实 fetch 调用。"
     },
     {
       "id": "S-FE-04",
@@ -352,14 +355,13 @@
         "后续真实认证接口联调"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-test.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/inputs/review-snapshot.md"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/logs/frontend-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/inputs/run-state.json"
       ],
       "status": "CONDITIONAL",
-      "reason": "前端逻辑和测试存在，但无法对真实 /auth/* 做端到端验证；A10 尚未实现认证。",
+      "reason": "前端逻辑和路由/API 单元测试通过；真实 /auth/* 端到端联调仍依赖 AUTH-INT-001，未在本次三项缺陷修复范围内。",
       "conditions": [
-        "AUTH-INT-001",
-        "QA-D-003"
+        "AUTH-INT-001"
       ]
     },
     {
@@ -382,11 +384,11 @@
         "npm audit --json"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/security/frontend-npm-audit.json",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/frontend-npm-audit-command.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/frontend-npm-audit.json",
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/frontend-npm-audit-command.log"
       ],
       "status": "PASS",
-      "reason": "npm audit 报告 0 vulnerabilities。"
+      "reason": "npm audit 审计 186 个依赖，0 vulnerabilities。"
     },
     {
       "id": "S-FE-06",
@@ -408,10 +410,10 @@
         "git -C worktrees/A20-VIEW diff --check 922ff98..HEAD"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/security/repository-hygiene.log"
+        "ai-workspace/04-qa/evidence/T-QA-001/retest-20261022-2146/security/repository-hygiene.log"
       ],
-      "status": "FAIL",
-      "reason": "两个测试文件存在 EOF 空行警告，命令退出 2。缺陷 QA-D-003；无运行时影响。"
+      "status": "PASS",
+      "reason": "git diff --check 922ff98..9718fc2 返回 0；两处 EOF 空行已清除。"
     },
     {
       "id": "F-AUTH-01",
