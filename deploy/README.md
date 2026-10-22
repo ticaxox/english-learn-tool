@@ -14,6 +14,7 @@ cloud server and does not modify the existing OpenResty or 1Panel services.
 - `api`: FastAPI on port 8000 inside the Compose network.
 - `worker`: ARQ worker.
 - `scheduler`: ARQ scheduler.
+- `api`, `worker` and `scheduler`: share the `wordbook-data` named volume at `/app/var/wordbooks`.
 - `frontend`: non-root Nginx serving the built Vue application.
 - `reverse-proxy`: non-root Nginx routing `/` to the frontend and `/api`, `/health` to the API.
 
@@ -50,6 +51,26 @@ docker compose --env-file .env config --quiet
 The script deliberately recreates the same sequence used by CI. A successful YAML parse
 alone is not treated as container verification.
 
+Run the merged-config contract before starting a disposable stack:
+
+```bash
+python -m unittest discover -s deploy/tests -p "test_*.py" -v
+python deploy/tests/check_compose_storage.py --env-file .env --compose-file docker-compose.yml
+```
+
+After the stack is healthy, verify the real cross-container file contract:
+
+```bash
+EVIDENCE_FILE=deploy/backups/wordbook-storage-evidence.json \
+  ./deploy/scripts/verify-wordbook-storage.sh
+```
+
+This probe creates random, non-sensitive marker files, exercises API/worker/scheduler
+read-write-delete flows, restarts the three services, reads the surviving marker, checks
+runtime UID/GID and security options, and removes its files. Run it only against a
+disposable project; it restarts application containers. It writes metadata-only JSON and
+does not emit file contents or credentials.
+
 ## CI
 
 `.github/workflows/ci.yml` runs on every pull request and on pushes to `main`:
@@ -59,11 +80,14 @@ alone is not treated as container verification.
 - Frontend: locked npm install, production build and Vitest.
 - Quality: quality-manifest validator and its unit tests.
 - Security: Gitleaks scan with secrets redacted.
-- Compose integration: clean image build, empty-database migration, service startup,
-  non-root checks and live/readiness checks through the reverse proxy.
+- Compose integration: contract and cross-container wordbook tests, clean image build,
+  empty-database migration, service startup, non-root/read-only checks, restart
+  persistence, static-path probes and live/readiness checks through the reverse proxy.
 
-The Compose job is the independent runtime evidence required by `T-SHIP-001`; it runs on
-an ephemeral GitHub-hosted runner.
+The Compose job is the independent runtime evidence required by `T-SHIP-001` and
+`T-SHIP-STORAGE-001`; it runs on an ephemeral GitHub-hosted runner with a unique Compose
+project name. The runner uploads a metadata-only JSON artifact and removes that isolated
+project with `down --volumes` after collection.
 
 ## Release images
 
@@ -137,7 +161,83 @@ ENV_FILE=/secure/path/english-learn.env \
 
 `rollback.sh` does not reverse migrations automatically. If the prior application is
 schema-incompatible with the current database, stop the rollout and restore the matching
-pre-deployment backup through an approved manual procedure.
+pre-deployment backup through an approved manual procedure. Application rollback must
+keep the same `wordbook-data` volume name; it must not create a blank replacement volume.
+
+Database backups do not include the wordbook named volume. Preview/export files also are
+not reconstructed by a database restore. If file-level RPO is required, use an approved
+volume snapshot or file-level backup and restore procedure; do not infer recoverability
+from a PostgreSQL dump alone.
+
+## Wordbook storage security and lifecycle
+
+### Invariants
+
+The private wordbook store is a named Docker volume, `wordbook-data`, mounted at the fixed
+container path `/app/var/wordbooks` on `api`, `worker` and `scheduler` only. All three use
+the same source and set `WORDBOOK_STORAGE_DIR=/app/var/wordbooks`.
+
+The backend image creates that directory before dropping privileges. Its expected owner
+is UID/GID `10001:10001`, its directory mode is `0750`, and application files are created
+privately. Do not use `chmod 777`, run these services as root, or add capabilities to work
+around an ownership error. The container root filesystem remains read-only; only the
+wordbook named volume and the existing `/tmp` tmpfs are writable.
+
+On first attachment to an empty named volume, Docker initializes the volume from the
+image directory metadata. Existing volume data is not overwritten. Do not replace it with
+a host bind mount, an anonymous volume or a separate volume per service. Never mount the
+directory into the frontend or reverse proxy. There is no static URL for these files:
+every download must use the authenticated API and its existing short-lived token and
+path-safety checks.
+
+### Stop and delete semantics
+
+`docker compose down` stops and removes containers and networks but preserves named
+volumes, including the wordbook files. `docker compose down -v` permanently removes every
+named volume in that Compose project, including PostgreSQL, Redis and wordbook data. The
+latter is allowed only for a disposable isolated CI project or after explicit approval of
+an irreversible clean-up. Never use `docker volume prune`, `docker system prune --volumes`
+or a broad volume-name wildcard on a shared host.
+
+### Cleanup responsibility
+
+Expired preview, export and temporary artifacts are application data and must be removed
+by the scheduler's TTL-based retention job, not by an ad hoc whole-directory delete. A
+manual cleanup requires all of the following:
+
+1. A documented TTL and an explicit allowlist of randomized key prefixes.
+2. A dry-run count using metadata only, with no file bodies copied to logs or tickets.
+3. Worker/scheduler quiescence or an approved maintenance window.
+4. A current backup or snapshot when recovery is required by policy.
+5. An audit record of actor, time, selection rule, count and result.
+
+Never delete the volume root, remove files by a guessed user identifier, or expose private
+content while investigating. A compliance or incident deletion that needs immediate
+removal is a separate approved incident action.
+
+### Release and rollback
+
+Rolling releases, migrations and application rollbacks must not rename, recreate or
+automatically delete `wordbook-data`. Reuse the existing volume and verify directory
+ownership after any image change. Before a release that changes storage semantics, take
+the approved backup and verify a restore path in a disposable project. If old code is
+incompatible with new files, stop the rollout instead of deleting the evidence or the
+volume.
+
+### Monitoring, recovery and backup
+
+Use `docker system df -v` or the platform's approved volume metrics to monitor capacity;
+do not print host mount paths, credentials or file contents in shared evidence. Alert on
+sustained disk growth, and inspect container health and volume attachment metadata before
+changing permissions. If the volume is missing or mounted read-only, stop the affected
+services and investigate the Compose project/volume identity; do not create a replacement
+volume silently.
+
+For file-level RPO, use an approved snapshot or controlled backup workflow and record the
+snapshot identifier, time, project and restore test result. A restore must target a new
+reviewed volume first, then be attached only after owner/mode and application checks pass.
+The database backup script intentionally covers PostgreSQL only; it does not back up the
+wordbook files.
 
 ## Environment notes
 
