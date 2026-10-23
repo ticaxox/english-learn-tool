@@ -207,6 +207,12 @@ switch ($Action) {
             Invoke-Wslc @(
                 'build', '-t', $ApiImage, '-f', 'deploy/backend/Dockerfile', '--progress', 'plain', '.'
             ) | Out-Null
+            Invoke-Wslc @(
+                'build', '-t', $FrontendImage, '-f', 'deploy/frontend/Dockerfile', '--progress', 'plain', '.'
+            ) | Out-Null
+            Invoke-Wslc @(
+                'build', '-t', $ProxyImage, '-f', 'deploy/reverse-proxy/Dockerfile', '--progress', 'plain', '.'
+            ) | Out-Null
         } finally {
             Pop-Location
         }

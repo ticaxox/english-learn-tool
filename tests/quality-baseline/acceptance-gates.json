@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task": "T-QA-001",
   "title": "AI 英语学习工具验收门禁清单",
-  "updated_at": "2026-10-23T07:55:00+08:00",
+  "updated_at": "2026-10-23T12:35:00+08:00",
   "sources": [
     "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
     "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
@@ -633,11 +633,18 @@
         "pytest -q tests/integration/test_memory_fsrs.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/p1/wordbook-switch-session-contamination.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/results/phase-b-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/results/phase-b-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/logs/backend-pytest.log"
       ],
       "status": "FAIL",
-      "reason": "无单词状态、记忆会话、FSRS 或记忆界面。"
+      "reason": "M2-CORE-INT-001 Phase B 真实跨容器栈下，除词书切换一致性外的主链路通过：API 58 项中 55 项 PASS，真实浏览器 24/24 PASS；但发现 P1：激活词书切换后，新 session 的 7 条 items 与 7 条 user word states 把旧计划词条挂到新词书，会话内容与状态跨书错位。",
+      "conditions": [
+        "A10 修复词书切换后的 plan/session/state/entry 词书一致性，并由 A30 在真实跨容器栈复测 0 mismatch",
+        "P1 修复后再复测 FSRS 新词/到期复习/Again 重学、会话恢复、错词与删除零残留"
+      ]
     },
     {
       "id": "F-PROFILE-01",
@@ -661,11 +668,18 @@
         "pytest -q tests/integration/test_daily_plan.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/results/phase-b-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/results/phase-b-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/logs/frontend-npm-test.log"
       ],
-      "status": "FAIL",
-      "reason": "无档案/计划业务；前端 /overview 仅显示真实响应摘要骨架。"
+      "status": "CONDITIONAL",
+      "reason": "M2-CORE-INT-001 Phase B 已验证学习档案边界（5/100、15/180、过去日期拒绝）、今日计划快照稳定、单日计划唯一、改档案当日目标不变、30 秒心跳与暂停/恢复。真实浏览器也覆盖档案与今日页。尚未验证连续天数完整统计页与长期跨日 rollover。",
+      "conditions": [
+        "跨日 rollover 与连续天数完整统计页真实数据验证",
+        "学习时长统计面板与后端 sources 一致性复核"
+      ]
     },
     {
       "id": "F-PRACTICE-01",
@@ -972,10 +986,11 @@
         "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json",
         "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
         "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final1/browser-acceptance.json",
-        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final2/browser-acceptance.json"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/results/phase-a-browser-cleanstack-final2/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/results/phase-b-run8/browser-acceptance.json"
       ],
       "status": "CONDITIONAL",
-      "reason": "真实 Chromium 认证/成员管理闭环 32/32 通过；M2-CORE-INT-001 Phase A 又补充了管理员与成员的词书浏览器闭环 30/30（真实文件上传、预览映射、导出下载、删除确认点击、成员激活与私有隔离）。尚未包含今日计划、记忆/FSRS、练习、AI 教练等完整业务旅程，完整演示闭环仍未达成。",
+      "reason": "真实 Chromium 认证/成员管理闭环 32/32 通过；M2 Phase A 词书浏览器闭环 30/30；M2 Phase B 学习/记忆浏览器闭环 24/24。仍未构成完整 MVP 旅程，且 Phase B 存在词书切换 P1。",
       "conditions": [
         "F-BOOK-01",
         "F-MEM-01",
@@ -1155,13 +1170,13 @@
         "alembic check"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/README.md",
-        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/logs/migration-empty-db.log"
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/README.md",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/logs/migration-phaseb.log"
       ],
       "status": "CONDITIONAL",
-      "reason": "当前完整业务迁移链（20261022_0001 → 20261022_0002 → f1b8d947271c，含身份、会话、审计、导入预览、词书与后台任务）在全新空库执行 upgrade → downgrade base → upgrade 全部 EXIT=0，`alembic check` 无 drift。M2 Phase B 的记忆/计划/事件表尚未进入冻结输入，故“完整业务 Schema”条件未满足。",
+      "reason": "M2-CORE-INT-001 Phase B 后，完整当前业务迁移链含身份、会话、审计、导入预览、词书、后台任务、学习档案、今日计划、记忆与错词；空库 upgrade → downgrade base → upgrade 与 alembic check 全部 EXIT=0、无 drift。AI、挑战、教练、通知等后续里程碑表尚未进入冻结输入。",
       "conditions": [
-        "Phase B 记忆、今日计划、训练事件与心跳表落地后重跑空库 upgrade/downgrade/upgrade 与 drift check",
+        "AI、挑战、教练、通知等 Schema 落地后重跑空库 upgrade/downgrade/upgrade 与 drift check",
         "最终 MVP 前对全量 Schema 做一次回放与演示数据迁移演练"
       ]
     },
