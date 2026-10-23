@@ -12,6 +12,7 @@ from app.models.learning import (
     MistakeFlag,
     UserWordState,
 )
+from app.models.notifications import Notification, NotificationOutbox
 from app.models.practice import (
     PracticeDeletion,
     PracticeEvent,
@@ -48,6 +49,8 @@ __all__ = [
     "MemorySession",
     "MemorySessionItem",
     "MistakeFlag",
+    "Notification",
+    "NotificationOutbox",
     "PracticeDeletion",
     "PracticeEvent",
     "PracticeGeneration",

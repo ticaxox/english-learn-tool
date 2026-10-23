@@ -640,6 +640,18 @@ async def _apply_practice_failure(session: AsyncSession, job: AiJob) -> None:
         await mark_practice_grading_failed(session, job)
 
 
+async def _notify_ai_terminal(session: AsyncSession, job: AiJob, *, succeeded: bool) -> None:
+    from app.services.notifications import notify_ai_job
+
+    try:
+        await notify_ai_job(session, job, succeeded=succeeded)
+    except Exception:
+        logger.exception(
+            "ai.job.notification_outbox_failed",
+            extra={"job_id": str(job.id), "succeeded": succeeded},
+        )
+
+
 async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
     factory = ctx["session_factory"]
     settings: Settings = ctx["settings"]
@@ -680,6 +692,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 job.finished_at = utcnow()
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": exc.code}))
                 await _apply_practice_failure(session, job)
+                await _notify_ai_terminal(session, job, succeeded=False)
                 await _release_quota(session, job.id)
                 await session.commit()
             else:
@@ -698,6 +711,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 job.finished_at = utcnow()
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": job.error_code}))
                 await _apply_practice_failure(session, job)
+                await _notify_ai_terminal(session, job, succeeded=False)
                 await _release_quota(session, job.id)
                 await session.commit()
             else:
@@ -726,6 +740,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
         session.add(_event(job, "ai.job.succeeded"))
         try:
             await _apply_practice_success(session, job)
+            await _notify_ai_terminal(session, job, succeeded=True)
         except Exception:
             logger.exception("ai.job.practice_hook_failed", extra={"job_id": job_id})
             await session.rollback()
@@ -788,6 +803,7 @@ async def reconcile_stale_ai_jobs(
         job.finished_at = utcnow()
         session.add(_event(job, "ai.job.stale"))
         await _apply_practice_failure(session, job)
+        await _notify_ai_terminal(session, job, succeeded=False)
         await _release_quota(session, job.id)
         await release_concurrency_slot(redis, user_id=job.user_id, job_id=job.id)
     if jobs:

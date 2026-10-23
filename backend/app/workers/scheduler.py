@@ -11,6 +11,11 @@ from sqlalchemy import or_, select
 from app.models.wordbooks import WordbookJob
 from app.services.ai_jobs import reconcile_stale_ai_jobs
 from app.services.auth import utcnow
+from app.services.notifications import (
+    cleanup_expired_notifications,
+    enqueue_scheduled_notification_events,
+    process_notification_outbox,
+)
 from app.services.wordbook_queue import (
     SCHEDULER_QUEUE_NAME,
     QueueDispatchKind,
@@ -159,6 +164,22 @@ async def scheduler_tick(ctx: dict[str, Any]) -> None:
             session,
             ctx["wordbook_storage"],
         )
+        notification_now = utcnow()
+        notification_created = await enqueue_scheduled_notification_events(
+            session,
+            settings,
+            now=notification_now,
+        )
+        notification_processed = await process_notification_outbox(
+            session,
+            settings,
+            now=notification_now,
+        )
+        notification_cleaned = await cleanup_expired_notifications(
+            session,
+            settings,
+            now=notification_now,
+        )
         candidate_ids = list(
             (
                 await session.scalars(
@@ -192,6 +213,9 @@ async def scheduler_tick(ctx: dict[str, Any]) -> None:
             "expired_jobs": cleanup["jobs"],
             "expired_previews": cleanup["previews"],
             "stale_ai_jobs": ai_stale_count,
+            "notification_events_created": notification_created,
+            "notification_events_processed": notification_processed,
+            "expired_notifications": notification_cleaned,
         },
     )
 

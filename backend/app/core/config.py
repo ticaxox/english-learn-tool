@@ -85,6 +85,10 @@ class Settings(BaseSettings):
     ai_daily_question_generation: int = Field(default=20, ge=1, le=500)
     ai_daily_subjective_grading: int = Field(default=50, ge=1, le=1000)
 
+    notification_daily_limit: int = Field(default=3, ge=0, le=20)
+    notification_ttl_days: int = Field(default=30, ge=1, le=365)
+    notification_outbox_batch_size: int = Field(default=100, ge=1, le=1000)
+
     @model_validator(mode="after")
     def validate_ai_security(self) -> Settings:
         if self.app_env == "production" and self.ai_allow_private_provider_urls:
