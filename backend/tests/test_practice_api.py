@@ -264,6 +264,13 @@ async def test_four_practice_types_draft_regenerate_submit_records_and_delete(
         )
         assert translation_submit.status_code == 202, translation_submit.text
         assert translation_submit.json()["status"] == "scoring"
+        admin_usage = await client.get("/api/v1/admin/ai/usage", headers=admin_headers)
+        subjective_reserved = next(
+            item
+            for item in admin_usage.json()["quotas"]
+            if item["quota_kind"] == "subjective_grading"
+        )
+        assert subjective_reserved["reserved"] == 3
         server.queue_json(
             200,
             _grading_output([str(question.id) for question in translation_questions], score=55),

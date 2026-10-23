@@ -150,7 +150,15 @@ async def admin_usage(
                 AiUsageLedger.quota_kind,
                 func.count(func.distinct(AiUsageLedger.user_id)),
                 func.coalesce(func.sum(AiUsageLedger.consumed), 0),
-                func.coalesce(func.sum(case((AiUsageLedger.status == "reserved", 1), else_=0)), 0),
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (AiUsageLedger.status == "reserved", AiUsageLedger.reserved),
+                            else_=0,
+                        )
+                    ),
+                    0,
+                ),
                 func.coalesce(func.sum(AiUsageLedger.released), 0),
             )
             .where(AiUsageLedger.local_date.between(start, end))
