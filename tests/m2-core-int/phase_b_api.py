@@ -168,7 +168,7 @@ def json_object(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def key(prefix: str) -> str:
+def new_key(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex}"
 
 
@@ -226,7 +226,7 @@ def csv_bytes(entries: list[tuple[str, str, str, str, str, str]]) -> bytes:
 def import_book(client: Client, admin_token: str, *, name: str, entries: list[tuple[str, str, str, str, str, str]]) -> dict[str, Any]:
     preview = client.request("POST", "/wordbooks/import/preview", label=f"import-preview-{name}", token=admin_token, files={"file": (f"{name}.csv", csv_bytes(entries), "text/csv")}, data={"visibility": "organization", "name": name, "description": "M2 Phase B synthetic"}, expect=201).json()
     EVIDENCE.check(f"setup.import-preview.{name}", preview["valid_rows"] == len(entries) and preview["error_count"] == 0, valid_rows=preview["valid_rows"], error_count=preview["error_count"], detected_format=preview.get("detected_format"))
-    confirm = client.request("POST", "/wordbooks/import", label=f"import-confirm-{name}", token=admin_token, idempotency_key=key("m2-phase-b-import"), json={"preview_id": preview["preview_id"], "preview_token": preview["preview_token"], "preview_hash": preview["preview_hash"], "name": name, "visibility": "organization"}, expect=202).json()
+    confirm = client.request("POST", "/wordbooks/import", label=f"import-confirm-{name}", token=admin_token, idempotency_key=new_key("m2-phase-b-import"), json={"preview_id": preview["preview_id"], "preview_token": preview["preview_token"], "preview_hash": preview["preview_hash"], "name": name, "visibility": "organization"}, expect=202).json()
     job = poll_job(client, admin_token, confirm["job_id"], label=f"import-{name}")
     if job["status"] != "succeeded":
         raise CheckFailure(f"import {name} failed: {job}")
@@ -280,7 +280,7 @@ def create_session(client: Client, token: str, module: str, *, label: str, wordb
 
 
 def submit_event(client: Client, token: str, session_id: str, item_id: str, action: str, *, label: str, answer: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]:
-    return client.request("POST", f"/memory/sessions/{session_id}/events", label=label, token=token, idempotency_key=idempotency_key or key("event"), json={"item_id": item_id, "action": action, "answer": answer, "duration_ms": 1500}, expect=200).json()
+    return client.request("POST", f"/memory/sessions/{session_id}/events", label=label, token=token, idempotency_key=idempotency_key or new_key("event"), json={"item_id": item_id, "action": action, "answer": answer, "duration_ms": 1500}, expect=200).json()
 
 
 def complete_session(client: Client, token: str, session_id: str, *, label: str) -> dict[str, Any]:
@@ -410,14 +410,14 @@ async def main() -> int:
         stable_today = today(client, api_token, label="today-after-profile-change")
         EVIDENCE.check("today.profile-change-does-not-mutate-snapshot", stable_today["new_words"]["target"] == 8, target=stable_today["new_words"]["target"])
 
-        hb1 = client.request("POST", "/learning/heartbeat", label="heartbeat-1", token=api_token, idempotency_key=key("hb"), json={"session_id": None}, expect=200).json()
+        hb1 = client.request("POST", "/learning/heartbeat", label="heartbeat-1", token=api_token, idempotency_key=new_key("hb"), json={"session_id": None}, expect=200).json()
         time.sleep(31)
-        hb2 = client.request("POST", "/learning/heartbeat", label="heartbeat-2", token=api_token, idempotency_key=key("hb"), json={"session_id": None}, expect=200).json()
-        replay_key = key("hb-replay")
+        hb2 = client.request("POST", "/learning/heartbeat", label="heartbeat-2", token=api_token, idempotency_key=new_key("hb"), json={"session_id": None}, expect=200).json()
+        replay_key = new_key("hb-replay")
         hb3 = client.request("POST", "/learning/heartbeat", label="heartbeat-replay-1", token=api_token, idempotency_key=replay_key, json={"session_id": None}, expect=200).json()
         hb4 = client.request("POST", "/learning/heartbeat", label="heartbeat-replay-2", token=api_token, idempotency_key=replay_key, json={"session_id": None}, expect=200).json()
         await pg.execute("UPDATE daily_activities SET last_heartbeat_at = now() - interval '200 seconds' WHERE user_id=$1", members["api"]["id"])
-        stale = client.request("POST", "/learning/heartbeat", label="heartbeat-stale", token=api_token, idempotency_key=key("hb"), json={"session_id": None}, expect=200).json()
+        stale = client.request("POST", "/learning/heartbeat", label="heartbeat-stale", token=api_token, idempotency_key=new_key("hb"), json={"session_id": None}, expect=200).json()
         EVIDENCE.check("heartbeat.30s-window", hb1["credited_seconds"] == 0 and 0 < hb2["credited_seconds"] <= 30, first=hb1["credited_seconds"], second=hb2["credited_seconds"])
         EVIDENCE.check("heartbeat.idempotent-replay", 0 <= hb3["credited_seconds"] <= 1 and hb4["credited_seconds"] == 0 and hb3["heartbeat_count"] == hb4["heartbeat_count"], first_credit=hb3["credited_seconds"], replay_credit=hb4["credited_seconds"], counts=[hb3["heartbeat_count"], hb4["heartbeat_count"]])
         EVIDENCE.check("heartbeat.stale-window-zero", stale["credited_seconds"] == 0, credited=stale["credited_seconds"])
@@ -567,7 +567,7 @@ async def main() -> int:
             "small": await snapshot_cleanup_ids(pg, small["id"]),
         }
         for book in (primary, small):
-            delete = client.request("DELETE", f"/wordbooks/{book['id']}", label=f"delete-{book['name']}", token=admin_token, idempotency_key=key("delete"), json={"confirm_name": book["name"]}, expect=202).json()
+            delete = client.request("DELETE", f"/wordbooks/{book['id']}", label=f"delete-{book['name']}", token=admin_token, idempotency_key=new_key("delete"), json={"confirm_name": book["name"]}, expect=202).json()
             job = poll_job(client, admin_token, delete["job_id"], label=f"delete-{book['name']}")
             EVIDENCE.check(f"delete.{book['name']}.succeeds", job["status"] == "succeeded", job_id=str(job["job_id"]), result=job.get("result"))
         for name, book in (("primary", primary), ("small", small)):
