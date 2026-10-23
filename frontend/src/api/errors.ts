@@ -41,6 +41,44 @@ export interface ErrorPresentation {
   retryable: boolean
 }
 
+export interface FieldIssue {
+  path: string
+  message: string
+}
+
+/**
+ * Validation issues the server reported for a 422, or an empty array.
+ *
+ * Typed here rather than in the form so every surface renders the same list and
+ * no view re-implements payload parsing.
+ */
+export function fieldIssues(error: unknown): FieldIssue[] {
+  if (!isApiError(error) || error.status !== 422) {
+    return []
+  }
+  const details = error.details
+  if (typeof details !== 'object' || details === null || !('issues' in details)) {
+    return []
+  }
+  const issues = (details as { issues: unknown }).issues
+  if (!Array.isArray(issues)) {
+    return []
+  }
+  return issues.flatMap((issue) => {
+    if (typeof issue !== 'object' || issue === null) {
+      return []
+    }
+    const candidate = issue as { path?: unknown; message?: unknown }
+    if (typeof candidate.message !== 'string') {
+      return []
+    }
+    return [{
+      path: typeof candidate.path === 'string' ? candidate.path : '',
+      message: candidate.message,
+    }]
+  })
+}
+
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError
 }
@@ -118,6 +156,20 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       return {
         title: '文件超过服务端限制',
         message: error.message || '请缩小文件后重新预览；服务端大小限制是最终判断。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.status === 422) {
+      // The server rejected the payload. Its issue messages stay verbatim, but
+      // the learner needs one sentence saying the input (not the service) is at
+      // fault, plus the request id support will ask for.
+      return {
+        title: '提交内容未通过服务端校验',
+        message: fieldIssues(error).length > 0
+          ? '请按下面列出的字段提示修改后重新提交；服务端校验是最终判断。'
+          : (error.message || '服务端拒绝了本次提交，请检查填写内容后重试。'),
         requestId: error.requestId,
         retryable: false,
       }

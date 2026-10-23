@@ -110,6 +110,60 @@ describe('ApiClient', () => {
     expect(refreshHandler).toHaveBeenCalledOnce()
     expect(onSessionExpired).toHaveBeenCalledOnce()
   })
+  it('turns the documented 422 envelope into reusable validation issues', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            detail: [
+              { loc: ['body', 'daily_new_words'], msg: 'Input should be <= 100', type: 'less_than_equal' },
+              { loc: ['body', 'exam_date'], msg: 'Date must be in the future', type: 'value_error' },
+            ],
+          }),
+          {
+            status: 422,
+            statusText: 'Unprocessable Entity',
+            headers: { 'Content-Type': 'application/json', 'X-Request-ID': 'validation-request' },
+          },
+        ),
+      ),
+    )
+
+    await expect(
+      client.patch('/users/me/profile', { daily_new_words: 500 }, { retryCount: 0 }),
+    ).rejects.toMatchObject({
+      status: 422,
+      // Without this the learner would only ever see the opaque `HTTP_422`.
+      code: 'VALIDATION_ERROR',
+      requestId: 'validation-request',
+      retryable: false,
+      details: {
+        issues: [
+          { path: 'daily_new_words', message: 'Input should be <= 100', type: 'less_than_equal' },
+          { path: 'exam_date', message: 'Date must be in the future', type: 'value_error' },
+        ],
+      },
+    } satisfies Partial<ApiError>)
+  })
+
+  it('keeps a 422 without the documented envelope on the generic error path', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response('upstream said no', {
+          status: 422,
+          headers: { 'Content-Type': 'text/plain' },
+        }),
+      ),
+    )
+
+    await expect(client.patch('/users/me/profile', {}, { retryCount: 0 })).rejects.toMatchObject({
+      status: 422,
+      code: 'HTTP_422',
+    } satisfies Partial<ApiError>)
+  })
+
   it('restores the double-submit CSRF header from the readable cookie after reload', async () => {
     document.cookie = 'csrf_token=restored-csrf; path=/'
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }))

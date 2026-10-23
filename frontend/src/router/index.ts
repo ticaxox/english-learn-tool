@@ -11,7 +11,11 @@ import AdminUsersView from '../views/AdminUsersView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
+import LearningSettingsView from '../views/LearningSettingsView.vue'
+import MemoryPracticeView from '../views/MemoryPracticeView.vue'
+import MistakesView from '../views/MistakesView.vue'
 import RemoteDataPage from '../views/RemoteDataPage.vue'
+import TodayView from '../views/TodayView.vue'
 import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
 
@@ -38,12 +42,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'overview',
         name: 'overview',
-        component: RemoteDataPage,
-        props: {
-          title: '学习概览',
-          description: '读取真实的今日学习计划与任务进度。完整业务界面将在后续任务实现。',
-          endpoint: '/learning/today',
-        },
+        component: TodayView,
       },
       {
         path: 'wordbooks',
@@ -53,12 +52,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'memory',
         name: 'memory',
-        component: RemoteDataPage,
-        props: {
-          title: '记忆练习',
-          description: '真实读取当前记忆模块配置；卡片与会话界面将在后续任务实现。',
-          endpoint: '/memory/config',
-        },
+        component: MemoryPracticeView,
+      },
+      {
+        path: 'memory/mistakes',
+        name: 'memory-mistakes',
+        component: MistakesView,
       },
       {
         path: 'practice',
@@ -123,12 +122,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'settings',
         name: 'settings',
-        component: RemoteDataPage,
-        props: {
-          title: '学习设置',
-          description: '真实读取本人学习档案；目标与偏好表单将在后续任务实现。',
-          endpoint: '/users/me/profile',
-        },
+        component: LearningSettingsView,
       },
       {
         path: 'admin/dashboard',
