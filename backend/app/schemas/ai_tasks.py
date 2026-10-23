@@ -39,6 +39,7 @@ class PracticeGenerationContext(StrictModel):
     difficulty: ExamType | None = None
     wordbook_id: UUID | None = None
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=100)
+    practice_session_id: UUID | None = None
 
     @model_validator(mode="after")
     def validate_count_and_source(self) -> PracticeGenerationContext:
@@ -52,12 +53,22 @@ class PracticeGenerationContext(StrictModel):
         return self
 
 
+class BatchGradingItemContext(StrictModel):
+    question_id: str = Field(min_length=1, max_length=64)
+    source_text: str = Field(min_length=1, max_length=20_000)
+    user_answer: str = Field(min_length=1, max_length=20_000)
+    exam_type: ExamType
+    target_entry_ids: list[UUID] = Field(default_factory=list, max_length=100)
+
+
 class SubjectiveGradingContext(StrictModel):
     practice_type: Literal["translation", "writing"]
     source_text: str = Field(min_length=1, max_length=20_000)
     user_answer: str = Field(min_length=1, max_length=20_000)
     exam_type: ExamType
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=100)
+    practice_submission_id: UUID | None = None
+    items: list[BatchGradingItemContext] = Field(default_factory=list, max_length=20)
 
 
 class CoachReplyContext(StrictModel):
@@ -256,6 +267,21 @@ class SubjectiveGradingOutput(StrictModel):
             raise ValueError("dimension max scores must add up to 100")
         if abs(sum(dimension.score for dimension in self.dimensions) - self.total_score) > 0.01:
             raise ValueError("total_score must equal the sum of dimension scores")
+        return self
+
+
+class BatchGradingItemOutput(SubjectiveGradingOutput):
+    question_id: str = Field(min_length=1, max_length=64)
+
+
+class PracticeGradingBatchOutput(StrictModel):
+    items: list[BatchGradingItemOutput] = Field(min_length=1, max_length=20)
+
+    @model_validator(mode="after")
+    def unique_question_ids(self) -> PracticeGradingBatchOutput:
+        ids = [item.question_id for item in self.items]
+        if len(set(ids)) != len(ids):
+            raise ValueError("grading question ids must be unique")
         return self
 
 

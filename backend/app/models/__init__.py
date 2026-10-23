@@ -12,6 +12,14 @@ from app.models.learning import (
     MistakeFlag,
     UserWordState,
 )
+from app.models.practice import (
+    PracticeDeletion,
+    PracticeEvent,
+    PracticeGeneration,
+    PracticeQuestion,
+    PracticeSession,
+    PracticeSubmission,
+)
 from app.models.system import SystemMetadata
 from app.models.wordbooks import (
     Wordbook,
@@ -40,6 +48,12 @@ __all__ = [
     "MemorySession",
     "MemorySessionItem",
     "MistakeFlag",
+    "PracticeDeletion",
+    "PracticeEvent",
+    "PracticeGeneration",
+    "PracticeQuestion",
+    "PracticeSession",
+    "PracticeSubmission",
     "RefreshToken",
     "SystemMetadata",
     "User",

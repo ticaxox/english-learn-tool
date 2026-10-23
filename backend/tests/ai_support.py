@@ -99,6 +99,7 @@ class FakeProviderServer:
     def __init__(self) -> None:
         self.responses: list[tuple[int, dict[str, Any] | str]] = []
         self.requests: list[dict[str, Any]] = []
+        self.sent: list[tuple[int, dict[str, Any] | str]] = []
         self.models = ["fake-model", "fake-model-2"]
         owner = self
 
@@ -144,6 +145,7 @@ class FakeProviderServer:
                 status, response = owner.responses.pop(0)
                 if isinstance(response, dict) and "choices" not in response:
                     response = {"choices": [{"message": {"content": json.dumps(response)}}]}
+                owner.sent.append((status, response))
                 self._send(status, response)
 
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)

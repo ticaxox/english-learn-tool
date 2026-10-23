@@ -404,6 +404,7 @@ async def cancel_user_job(
     job.error_message = "The AI task was cancelled."
     job.retryable = False
     session.add(_event(job, "ai.job.cancelled"))
+    await _apply_practice_failure(session, job)
     await _release_quota(session, job.id)
     await session.commit()
     await release_concurrency_slot(pool, user_id=user.id, job_id=job.id)
@@ -467,7 +468,7 @@ async def generate_structured(
             message="No enabled AI provider is available.",
             retryable=True,
         )
-    schema = output_schema(job.task_type)
+    schema = output_schema(job.task_type, job.input_context)
     client = ProviderHttpClient(settings)
     attempts = 0
     repairs = 0
@@ -569,6 +570,30 @@ async def generate_structured(
     )
 
 
+async def _apply_practice_success(session: AsyncSession, job: AiJob) -> None:
+    from app.services.practice import (
+        materialize_practice_generation,
+        materialize_practice_grading,
+    )
+
+    if job.task_type == "practice_generation":
+        await materialize_practice_generation(session, job)
+    elif job.task_type == "subjective_grading" and job.input_context.get("practice_submission_id"):
+        await materialize_practice_grading(session, job)
+
+
+async def _apply_practice_failure(session: AsyncSession, job: AiJob) -> None:
+    from app.services.practice import (
+        mark_practice_generation_failed,
+        mark_practice_grading_failed,
+    )
+
+    if job.task_type == "practice_generation":
+        await mark_practice_generation_failed(session, job)
+    elif job.task_type == "subjective_grading" and job.input_context.get("practice_submission_id"):
+        await mark_practice_grading_failed(session, job)
+
+
 async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
     factory = ctx["session_factory"]
     settings: Settings = ctx["settings"]
@@ -608,6 +633,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 job.model_id = exc.model_id or job.model_id
                 job.finished_at = utcnow()
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": exc.code}))
+                await _apply_practice_failure(session, job)
                 await _release_quota(session, job.id)
                 await session.commit()
             else:
@@ -625,6 +651,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 job.retryable = True
                 job.finished_at = utcnow()
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": job.error_code}))
+                await _apply_practice_failure(session, job)
                 await _release_quota(session, job.id)
                 await session.commit()
             else:
@@ -651,6 +678,35 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
         job.retryable = False
         job.finished_at = utcnow()
         session.add(_event(job, "ai.job.succeeded"))
+        try:
+            await _apply_practice_success(session, job)
+        except Exception:
+            logger.exception("ai.job.practice_hook_failed", extra={"job_id": job_id})
+            await session.rollback()
+            async with factory() as failure_session:
+                failed = await failure_session.scalar(
+                    select(AiJob).where(AiJob.id == job_uuid).with_for_update()
+                )
+                if failed is not None and failed.status == "running":
+                    failed.status = "failed"
+                    failed.error_code = "AI_PRACTICE_HOOK_FAILED"
+                    failed.error_message = "The generated practice result could not be persisted."
+                    failed.retryable = True
+                    failed.finished_at = utcnow()
+                    failure_session.add(
+                        _event(
+                            failed,
+                            "ai.job.failed",
+                            metadata={"error_code": failed.error_code},
+                        )
+                    )
+                    await _apply_practice_failure(failure_session, failed)
+                    await _release_quota(failure_session, failed.id)
+                    await failure_session.commit()
+                else:
+                    await failure_session.rollback()
+            await release_concurrency_slot(redis, user_id=user.id, job_id=job_uuid)
+            return {"status": "failed", "error_code": "AI_PRACTICE_HOOK_FAILED"}
         await _consume_quota(session, job.id)
         await session.commit()
     await release_concurrency_slot(redis, user_id=user.id, job_id=job_uuid)
@@ -685,6 +741,7 @@ async def reconcile_stale_ai_jobs(
         job.retryable = True
         job.finished_at = utcnow()
         session.add(_event(job, "ai.job.stale"))
+        await _apply_practice_failure(session, job)
         await _release_quota(session, job.id)
         await release_concurrency_slot(redis, user_id=job.user_id, job_id=job.id)
     if jobs:

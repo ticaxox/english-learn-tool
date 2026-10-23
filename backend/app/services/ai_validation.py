@@ -13,6 +13,7 @@ from app.schemas.ai_tasks import (
     ChallengePlanOutput,
     PracticeGenerationContext,
     PracticeGenerationOutput,
+    PracticeGradingBatchOutput,
     SubjectiveGradingOutput,
 )
 
@@ -29,7 +30,9 @@ def sanitize_untrusted_json(value: Any) -> Any:
     return value
 
 
-def output_schema(task_type: str) -> dict[str, Any]:
+def output_schema(task_type: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
+    if task_type == "subjective_grading" and context and context.get("items"):
+        return PracticeGradingBatchOutput.model_json_schema()
     model = TASK_OUTPUT_MODELS[task_type]
     return model.model_json_schema()
 
@@ -57,7 +60,11 @@ def validate_task_output(
     if not isinstance(parsed, dict):
         raise ValueError("AI_JSON_OBJECT_REQUIRED")
     parsed = sanitize_untrusted_json(parsed)
-    model = TASK_OUTPUT_MODELS[task_type]
+    model = (
+        PracticeGradingBatchOutput
+        if task_type == "subjective_grading" and context.get("items")
+        else TASK_OUTPUT_MODELS[task_type]
+    )
     try:
         validated = model.model_validate(parsed)
     except ValidationError as exc:
@@ -98,9 +105,18 @@ def validate_task_output(
             if node.practice_type and node.practice_type not in challenge.allowed_practice_types:
                 raise ValueError("AI_PRACTICE_TYPE_NOT_ALLOWED")
     elif task_type == "subjective_grading":
-        output = SubjectiveGradingOutput.model_validate(validated)
-        if not 0 <= output.total_score <= 100:
-            raise ValueError("AI_SCORE_OUT_OF_RANGE")
+        if context.get("items"):
+            output = PracticeGradingBatchOutput.model_validate(validated)
+            expected_ids = {item["question_id"] for item in context["items"]}
+            actual_ids = {item.question_id for item in output.items}
+            if actual_ids != expected_ids:
+                raise ValueError("AI_GRADING_QUESTION_IDS_MISMATCH")
+            if any(not 0 <= item.total_score <= 100 for item in output.items):
+                raise ValueError("AI_SCORE_OUT_OF_RANGE")
+        else:
+            output = SubjectiveGradingOutput.model_validate(validated)
+            if not 0 <= output.total_score <= 100:
+                raise ValueError("AI_SCORE_OUT_OF_RANGE")
 
     summary: dict[str, Any] = {}
     if task_type == "practice_generation":
@@ -111,7 +127,15 @@ def validate_task_output(
         if result["practice_type"] == "reading":
             summary["question_count"] = sum(len(item["questions"]) for item in result["items"])
     elif task_type == "subjective_grading":
-        summary = {"total_score": result["total_score"]}
+        if context.get("items"):
+            summary = {
+                "item_count": len(result["items"]),
+                "average_score": round(
+                    sum(item["total_score"] for item in result["items"]) / len(result["items"]), 2
+                ),
+            }
+        else:
+            summary = {"total_score": result["total_score"]}
     elif task_type == "coach_reply":
         summary = {"message_length": len(result["message"]), "action_count": len(result["actions"])}
     elif task_type == "challenge_plan":
