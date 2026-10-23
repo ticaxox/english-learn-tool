@@ -30,11 +30,13 @@ async def _run_job(app, job_id: UUID) -> dict:
     )
 
 
-async def _create_message(client, headers, conversation_id: str, key: str) -> dict:
+async def _create_message(
+    client, headers, conversation_id: str, key: str, content: str = "请根据我的进度安排学习。"
+) -> dict:
     response = await client.post(
         f"/api/v1/coach/conversations/{conversation_id}/messages",
         headers={**headers, "Idempotency-Key": key},
-        json={"content": "请根据我的进度安排学习。", "page_context": {"page_route": "/today"}},
+        json={"content": content, "page_context": {"page_route": "/today"}},
     )
     assert response.status_code == 202, response.text
     return response.json()
@@ -62,6 +64,13 @@ async def test_coach_message_sse_actions_undo_and_idempotency(client, app, admin
 
         replay = await _create_message(client, headers, conversation_id, "coach-key-1")
         assert replay["message_id"] == accepted["message_id"]
+        conflict = await client.post(
+            f"/api/v1/coach/conversations/{conversation_id}/messages",
+            headers={**headers, "Idempotency-Key": "coach-key-1"},
+            json={"content": "不同的消息", "page_context": {"page_route": "/today"}},
+        )
+        assert conflict.status_code == 409
+        assert conflict.json()["code"] == "COACH_IDEMPOTENCY_CONFLICT"
 
         server.queue_json(
             200,

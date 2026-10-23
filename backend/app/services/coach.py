@@ -362,6 +362,8 @@ async def create_coach_message(
             code="COACH_IDEMPOTENCY_KEY_INVALID",
             message="The Idempotency-Key must be between 1 and 128 characters.",
         )
+    content = payload.content.strip()
+    context = sanitize_untrusted_json(payload.page_context)
     conversation = await _load_conversation(session, user, conversation_id, lock=True)
     existing_user = await session.scalar(
         select(CoachMessage).where(
@@ -370,6 +372,12 @@ async def create_coach_message(
         )
     )
     if existing_user is not None:
+        if existing_user.content != content or existing_user.conversation_id != conversation.id:
+            raise AppError(
+                status_code=409,
+                code="COACH_IDEMPOTENCY_CONFLICT",
+                message="The Idempotency-Key was used for a different coach message.",
+            )
         assistant = await session.scalar(
             select(CoachMessage).where(
                 CoachMessage.conversation_id == existing_user.conversation_id,
@@ -389,8 +397,6 @@ async def create_coach_message(
             stream_url=f"{settings.api_v1_prefix}/coach/streams/{assistant.id}",
         )
 
-    content = payload.content.strip()
-    context = sanitize_untrusted_json(payload.page_context)
     last_sequence = int(
         await session.scalar(
             select(func.coalesce(func.max(CoachMessage.sequence), 0)).where(
