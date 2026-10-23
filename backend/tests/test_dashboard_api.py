@@ -303,13 +303,45 @@ async def test_admin_dashboard_aggregates_filters_and_privacy(
     assert after_delete.json()["metrics"]["study_minutes"] == 45.0
 
 
-async def test_dashboard_openapi_and_empty_range(client, app, admin_user, user_factory):
+async def test_dashboard_zero_members_is_normal_empty_state(client, admin_user, user_factory):
+    await user_factory(role="member", department="Engineering", learning_group="Core")
+    admin_headers = await login(client, admin_user.username)
+    response = await client.get(
+        "/api/v1/admin/dashboard?department=Sales&learning_group=Sales",
+        headers=admin_headers,
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["privacy"]["suppressed"] is False
+    assert body["privacy"]["reason"] is None
+    assert body["metrics"]["total_members"] == 0
+    assert body["metrics"]["active_members"] is None
+    assert body["trend"] == []
+    assert body["groups"] == []
+    assert body["suppressed_group_count"] == 0
+    assert body["risk_hints"] == {
+        "inactive_members_3d": None,
+        "high_mistake_members": None,
+        "ai_failure_alert": None,
+    }
+
+
+async def test_dashboard_openapi_and_small_sample_privacy(client, app, admin_user, user_factory):
     await user_factory(role="member", department="Engineering", learning_group="Core")
     admin_headers = await login(client, admin_user.username)
     response = await client.get("/api/v1/admin/dashboard", headers=admin_headers)
     assert response.status_code == 200
     assert response.json()["privacy"]["suppressed"] is True
     assert response.json()["metrics"]["total_members"] == 1
+    assert response.json()["metrics"]["active_members"] is None
+
+    await user_factory(role="member", department="Engineering", learning_group="Core")
+    two_members = await client.get("/api/v1/admin/dashboard", headers=admin_headers)
+    assert two_members.status_code == 200
+    assert two_members.json()["privacy"]["suppressed"] is True
+    assert two_members.json()["metrics"]["total_members"] == 2
+    assert two_members.json()["metrics"]["active_members"] is None
+
     openapi = await client.get("/api/v1/openapi.json")
     assert openapi.status_code == 200
     paths = openapi.json()["paths"]

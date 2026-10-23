@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from datetime import UTC, date, datetime
+from uuid import uuid4
+
 from sqlalchemy import select
 
-from app.models.ai import AiPrompt, AiProvider
+from app.models.ai import AiJob, AiPrompt, AiProvider, AiUsageLedger
 from app.models.identity import AuditLog
+from app.services import ai_usage as ai_usage_service
 from tests.ai_support import (
     PROMPTS_PATH,
     PROVIDERS_PATH,
@@ -11,6 +15,41 @@ from tests.ai_support import (
     fake_provider_server,
     login,
 )
+
+
+async def _seed_usage_job(app, user_id, *, created_at: datetime, local_date: date) -> None:
+    key = f"admin-usage-{uuid4()}"
+    async with app.state.session_factory() as session:
+        job = AiJob(
+            user_id=user_id,
+            task_type="coach_reply",
+            status="succeeded",
+            quota_kind="coach_messages",
+            provider_name="Usage Provider",
+            model_id="usage-model",
+            prompt_key="coach_reply",
+            prompt_snapshot="safe prompt",
+            input_context={},
+            idempotency_key=key,
+            request_hash="a" * 64,
+            created_at=created_at,
+        )
+        session.add(job)
+        await session.flush()
+        session.add(
+            AiUsageLedger(
+                user_id=user_id,
+                job_id=job.id,
+                local_date=local_date,
+                quota_kind="coach_messages",
+                quota_item="job",
+                reserved=0,
+                consumed=1,
+                released=0,
+                status="consumed",
+            )
+        )
+        await session.commit()
 
 
 async def test_ai_admin_provider_crud_masks_keys_and_checks_real_http(
@@ -147,6 +186,78 @@ async def test_ai_prompt_put_cors_preflight_allows_method(client) -> None:
     )
     assert response.status_code == 200
     assert "PUT" in response.headers["access-control-allow-methods"]
+
+
+async def test_admin_usage_uses_app_timezone_for_default_and_explicit_dates(
+    client, app, admin_user, monkeypatch
+) -> None:
+    await _seed_usage_job(
+        app,
+        admin_user.id,
+        created_at=datetime(2026, 10, 23, 15, 30, tzinfo=UTC),
+        local_date=date(2026, 10, 23),
+    )
+    await _seed_usage_job(
+        app,
+        admin_user.id,
+        created_at=datetime(2026, 10, 23, 16, 30, tzinfo=UTC),
+        local_date=date(2026, 10, 24),
+    )
+    monkeypatch.setattr(
+        ai_usage_service,
+        "utcnow",
+        lambda: datetime(2026, 10, 23, 17, 0, tzinfo=UTC),
+    )
+    headers = await login(client, admin_user.username)
+
+    default = await client.get("/api/v1/admin/ai/usage", headers=headers)
+    assert default.status_code == 200, default.text
+    default_body = default.json()
+    assert default_body["date_from"] == "2026-10-18"
+    assert default_body["date_to"] == "2026-10-24"
+    assert default_body["total_jobs"] == 2
+    coach_quota = next(
+        item for item in default_body["quotas"] if item["quota_kind"] == "coach_messages"
+    )
+    assert coach_quota["users_with_usage"] == 1
+    assert coach_quota["consumed"] == 2
+
+    shanghai_23rd = await client.get(
+        "/api/v1/admin/ai/usage?date_from=2026-10-23&date_to=2026-10-23",
+        headers=headers,
+    )
+    assert shanghai_23rd.status_code == 200, shanghai_23rd.text
+    body_23 = shanghai_23rd.json()
+    assert body_23["date_from"] == "2026-10-23"
+    assert body_23["date_to"] == "2026-10-23"
+    assert body_23["total_jobs"] == 1
+    assert (
+        next(item for item in body_23["quotas"] if item["quota_kind"] == "coach_messages")[
+            "consumed"
+        ]
+        == 1
+    )
+
+    shanghai_24th = await client.get(
+        "/api/v1/admin/ai/usage?date_from=2026-10-24&date_to=2026-10-24",
+        headers=headers,
+    )
+    assert shanghai_24th.status_code == 200, shanghai_24th.text
+    body_24 = shanghai_24th.json()
+    assert body_24["total_jobs"] == 1
+    assert (
+        next(item for item in body_24["quotas"] if item["quota_kind"] == "coach_messages")[
+            "consumed"
+        ]
+        == 1
+    )
+
+    invalid = await client.get(
+        "/api/v1/admin/ai/usage?date_from=2026-10-24&date_to=2026-10-23",
+        headers=headers,
+    )
+    assert invalid.status_code == 422
+    assert invalid.json()["code"] == "AI_USAGE_DATE_RANGE_INVALID"
 
 
 async def test_admin_usage_is_aggregate_only(client, admin_user) -> None:

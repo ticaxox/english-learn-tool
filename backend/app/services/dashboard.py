@@ -150,9 +150,9 @@ async def get_admin_dashboard(
             calculation_version=DASHBOARD_VERSION,
             filters=filters,
             privacy=DashboardPrivacy(
-                suppressed=True,
+                suppressed=False,
                 minimum_group_size=MINIMUM_GROUP_SIZE,
-                reason="aggregate sample below minimum size",
+                reason=None,
             ),
             metrics=DashboardMetrics(total_members=0),
         )
