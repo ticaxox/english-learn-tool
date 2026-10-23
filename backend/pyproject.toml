@@ -12,6 +12,7 @@ dependencies = [
     "cryptography>=50,<51",
     "fastapi>=0.115,<1",
     "fsrs==6.3.2",
+    "httpx>=0.28,<1",
     "pydantic>=2.10,<3",
     "pydantic-settings>=2.6,<3",
     "pyjwt>=2.9,<3",
@@ -25,7 +26,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28,<1",
     "pypdf>=5,<7",
     "pytest>=9.0.3,<10",
     "pytest-asyncio>=1.4,<2",
