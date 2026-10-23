@@ -81,6 +81,81 @@
         "title": "AdminAiUsageResponse",
         "type": "object"
       },
+      "AdminDashboardResponse": {
+        "properties": {
+          "calculation_version": {
+            "title": "Calculation Version",
+            "type": "string"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/DashboardFilters"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "group_has_more": {
+            "default": false,
+            "title": "Group Has More",
+            "type": "boolean"
+          },
+          "group_page": {
+            "default": 1,
+            "title": "Group Page",
+            "type": "integer"
+          },
+          "group_page_size": {
+            "default": 10,
+            "title": "Group Page Size",
+            "type": "integer"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardGroupRow"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/DashboardMetrics"
+          },
+          "privacy": {
+            "$ref": "#/components/schemas/DashboardPrivacy"
+          },
+          "quota_usage": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardQuotaUsage"
+            },
+            "title": "Quota Usage",
+            "type": "array"
+          },
+          "risk_hints": {
+            "$ref": "#/components/schemas/DashboardRiskHints"
+          },
+          "suppressed_group_count": {
+            "default": 0,
+            "title": "Suppressed Group Count",
+            "type": "integer"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardTrendPoint"
+            },
+            "title": "Trend",
+            "type": "array"
+          }
+        },
+        "required": [
+          "generated_at",
+          "calculation_version",
+          "filters",
+          "privacy",
+          "metrics"
+        ],
+        "title": "AdminDashboardResponse",
+        "type": "object"
+      },
       "AdminProviderAggregate": {
         "properties": {
           "failed": {
@@ -2271,6 +2346,601 @@
           "remaining"
         ],
         "title": "DailyQuotaUsage",
+        "type": "object"
+      },
+      "DashboardFilters": {
+        "properties": {
+          "date_from": {
+            "format": "date",
+            "title": "Date From",
+            "type": "string"
+          },
+          "date_to": {
+            "format": "date",
+            "title": "Date To",
+            "type": "string"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "learning_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Learning Group"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date_from",
+          "date_to",
+          "timezone"
+        ],
+        "title": "DashboardFilters",
+        "type": "object"
+      },
+      "DashboardGroupRow": {
+        "properties": {
+          "active_members": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Members"
+          },
+          "ai_failure_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Failure Rate"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "learning_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Learning Group"
+          },
+          "member_count": {
+            "title": "Member Count",
+            "type": "integer"
+          },
+          "mistake_flags": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mistake Flags"
+          },
+          "practice_correct_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Correct Rate"
+          },
+          "study_minutes": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Study Minutes"
+          },
+          "task_completion_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Completion Rate"
+          }
+        },
+        "required": [
+          "member_count"
+        ],
+        "title": "DashboardGroupRow",
+        "type": "object"
+      },
+      "DashboardMetrics": {
+        "properties": {
+          "active_member_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Member Rate"
+          },
+          "active_members": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Members"
+          },
+          "ai_failed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Failed"
+          },
+          "ai_failure_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Failure Rate"
+          },
+          "ai_jobs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Jobs"
+          },
+          "average_current_streak_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Current Streak Days"
+          },
+          "challenges_completed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Challenges Completed"
+          },
+          "due_words_completed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Words Completed"
+          },
+          "high_priority_mistakes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High Priority Mistakes"
+          },
+          "members_with_streak_7d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Members With Streak 7D"
+          },
+          "memory_events": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Events"
+          },
+          "mistake_flags": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mistake Flags"
+          },
+          "new_words_completed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Words Completed"
+          },
+          "plans_completed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plans Completed"
+          },
+          "plans_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plans Total"
+          },
+          "practice_correct_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Correct Rate"
+          },
+          "practice_submissions": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Submissions"
+          },
+          "study_minutes": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Study Minutes"
+          },
+          "task_completion_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Completion Rate"
+          },
+          "total_members": {
+            "title": "Total Members",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_members"
+        ],
+        "title": "DashboardMetrics",
+        "type": "object"
+      },
+      "DashboardPrivacy": {
+        "properties": {
+          "minimum_group_size": {
+            "default": 3,
+            "title": "Minimum Group Size",
+            "type": "integer"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "suppressed": {
+            "title": "Suppressed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "suppressed"
+        ],
+        "title": "DashboardPrivacy",
+        "type": "object"
+      },
+      "DashboardQuotaUsage": {
+        "properties": {
+          "consumed": {
+            "title": "Consumed",
+            "type": "integer"
+          },
+          "quota_kind": {
+            "enum": [
+              "coach_messages",
+              "question_generation",
+              "subjective_grading"
+            ],
+            "title": "Quota Kind",
+            "type": "string"
+          },
+          "released": {
+            "title": "Released",
+            "type": "integer"
+          },
+          "reserved": {
+            "title": "Reserved",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "quota_kind",
+          "consumed",
+          "reserved",
+          "released"
+        ],
+        "title": "DashboardQuotaUsage",
+        "type": "object"
+      },
+      "DashboardRiskHints": {
+        "properties": {
+          "ai_failure_alert": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Failure Alert"
+          },
+          "high_mistake_members": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High Mistake Members"
+          },
+          "inactive_members_3d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inactive Members 3D"
+          }
+        },
+        "title": "DashboardRiskHints",
+        "type": "object"
+      },
+      "DashboardTrendPoint": {
+        "properties": {
+          "active_members": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Members"
+          },
+          "ai_failed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Failed"
+          },
+          "ai_jobs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Jobs"
+          },
+          "challenges_completed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Challenges Completed"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "memory_events": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Events"
+          },
+          "mistakes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mistakes"
+          },
+          "plans_completed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plans Completed"
+          },
+          "practice_correct_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Correct Rate"
+          },
+          "practice_submissions": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Submissions"
+          },
+          "study_minutes": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Study Minutes"
+          }
+        },
+        "required": [
+          "local_date"
+        ],
+        "title": "DashboardTrendPoint",
         "type": "object"
       },
       "DeleteWordbookRequest": {
@@ -8467,6 +9137,156 @@
         "tags": [
           "system",
           "admin ai"
+        ]
+      }
+    },
+    "/api/v1/admin/dashboard": {
+      "get": {
+        "operationId": "dashboard_endpoint_api_v1_admin_dashboard_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date_from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "in": "query",
+            "name": "department",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department"
+            }
+          },
+          {
+            "in": "query",
+            "name": "learning_group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Learning Group"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDashboardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The dashboard filters are invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read organization-level learning aggregates without member content",
+        "tags": [
+          "system",
+          "admin-dashboard"
         ]
       }
     },
