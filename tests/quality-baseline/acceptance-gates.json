@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task": "T-QA-001",
   "title": "AI 英语学习工具验收门禁清单",
-  "updated_at": "2026-10-23T02:19:00+08:00",
+  "updated_at": "2026-10-23T22:55:00+08:00",
   "sources": [
     "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
     "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
@@ -497,15 +497,21 @@
         "pytest -q tests/security/test_admin_privacy.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log",
+        "ai-workspace/04-qa/evidence/M2-CORE-INT-001/phase-b/results/phase-b-postfix-run1/api-acceptance.json"
       ],
       "status": "CONDITIONAL",
-      "reason": "认证/成员管理 API、Schema、页面与审计未暴露学习私有正文；当前学习正文域尚未落地，不能完成真实私有数据边界回归。",
+      "reason": "M3 真实验证成员不能读取他人练习/结果/通知/额度/provider，管理员不能读取练习正文；M4 教练正文和更完整学习正文域仍未进入本分支。",
       "conditions": [
-        "学习正文域落地后，对管理接口与管理页面重新执行真实私有数据隐私回归"
+        "M4 教练正文落地后补充管理员不可读与跨用户隔离",
+        "完整学习正文域加入后重跑隐私矩阵"
       ]
     },
     {
@@ -558,11 +564,18 @@
         "pytest -q tests/ai_contract/test_provider_failover.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pip-audit-final.json"
       ],
-      "status": "FAIL",
-      "reason": "无 AI 提供商/提示词模型、API、加密或连接测试。"
+      "status": "PASS",
+      "reason": "T-QA-002 在真实 PG16/Redis7/ARQ 栈验证 provider CRUD、Key 掩码与密文、连接检查、模型列表、默认/备用切换、元数据 URL 拦截、提示词覆盖、结构化生成、JSON 修复一次、失败额度释放、并发上限、取消和 provider failover。"
     },
     {
       "id": "F-BOOK-01",
@@ -672,11 +685,17 @@
         "playwright test practice.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
-      "status": "FAIL",
-      "reason": "无练习领域与业务 API；前端只有列表 GET 骨架。"
+      "status": "PASS",
+      "reason": "四类练习均真实生成：填空/阅读客观评分、翻译/作文 AI 评分；覆盖草稿保存/恢复、乐观锁冲突、未作答重生成、已提交禁止重生成、记录、错题与本人批量删除。"
     },
     {
       "id": "F-ANSWER-01",
@@ -698,11 +717,17 @@
         "pytest -q tests/security/test_answer_non_leak.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
-      "status": "FAIL",
-      "reason": "无题目数据模型或序列化脱敏实现。"
+      "status": "PASS",
+      "reason": "生成响应在提交前不含 correct_option_id、explanation、reference_translation、reference_essay 或 score；浏览器 DOM 也无可评分答案区；提交后才显示正确选项、解析、参考内容和分数。"
     },
     {
       "id": "F-RECORD-01",
@@ -725,11 +750,17 @@
         "pytest -q tests/integration/test_practice_records.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
-      "status": "FAIL",
-      "reason": "无练习记录表或批量删除 API。"
+      "status": "PASS",
+      "reason": "真实记录列表、错题过滤、结果详情、本人批量删除与跨用户 404 已通过；管理员无法读取用户练习正文。"
     },
     {
       "id": "F-COACH-01",
@@ -861,11 +892,18 @@
         "pytest -q tests/integration/test_notifications.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-scheduler-run2/scheduler-notifications.json"
       ],
-      "status": "FAIL",
-      "reason": "无通知模型/API/worker 业务任务。"
+      "status": "PASS",
+      "reason": "真实通知 API/浏览器覆盖收件箱、游标、未读计数、单条已读、偏好、DND、类别开关、AI 例外、dedupe_key、AI 失败通知；独立 live scheduler 测试验证 due_review/today_incomplete/streak_risk 三类事件和重跑去重。"
     },
     {
       "id": "F-FAIL-01",
@@ -888,11 +926,21 @@
         "playwright test failure-states.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
-      "status": "FAIL",
-      "reason": "传统学习/业务前端尚未实现；当前只能验证壳层网络失败提示。"
+      "status": "CONDITIONAL",
+      "reason": "受控 provider 失败时 AI 生成任务 failed、无伪造题目/分数、额度 reserved 释放，浏览器显示生成失败和新练习入口；传统词书/记忆入口在失败态下的独立浏览器回归仍未单列。",
+      "conditions": [
+        "补充 AI 不可用时词书与记忆训练的浏览器连续回归",
+        "M4 教练/挑战失败态完成后重跑失败态矩阵"
+      ]
     },
     {
       "id": "F-IDEM-01",
@@ -913,11 +961,17 @@
         "pytest -q tests/integration/test_idempotency.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
-      "status": "FAIL",
-      "reason": "无业务幂等表或写接口，当前只能验证基础事务配置。"
+      "status": "PASS",
+      "reason": "真实 AI 任务同键同体复用、同键异体 409、两人并发上限、取消释放槽位、worker 重启后完成；练习草稿版本冲突、提交幂等和通知 dedupe 均通过。"
     },
     {
       "id": "F-E2E-01",
@@ -939,18 +993,20 @@
         "playwright test e2e/admin-member-journey.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
       "status": "CONDITIONAL",
-      "reason": "真实 Chromium 认证/成员管理闭环 32/32 通过；尚未包含词书、练习、记忆/FSRS 等完整业务旅程。",
+      "reason": "M3 真实 Chromium 管理员/成员闭环通过：provider/提示词、四类练习中的真实作答、失败态、通知收件箱与偏好；仍缺 M4/M5 教练、挑战、看板、部署和最终 MVP 旅程。",
       "conditions": [
-        "F-BOOK-01",
-        "F-MEM-01",
-        "F-PRACTICE-01",
-        "完整业务演示旅程"
+        "M4/M5 完整业务旅程",
+        "最终部署与演示数据验收"
       ]
     },
     {
@@ -973,11 +1029,17 @@
         "pytest -q tests/ai_contract"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/results/m3-run8/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/frontend-npm-build.log",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
-      "status": "FAIL",
-      "reason": "无 AI adapter、Schema、额度或切换实现。"
+      "status": "PASS",
+      "reason": "冻结 OpenAPI 3.1.0 67 paths / 124 schemas；AI 任务响应不返回模型原始正文，结构化 Schema/Pydantic 校验、修复一次、任务状态与额度字段均通过真实 API/浏览器验证。"
     },
     {
       "id": "F-SEC-01",
@@ -1116,13 +1178,15 @@
         "alembic upgrade head"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-upgrade-empty.log",
-        "ai-workspace/04-qa/evidence/T-QA-001/logs/backend-alembic-downgrade-base.log"
+        "ai-workspace/04-qa/evidence/T-QA-002/README.md",
+        "ai-workspace/10-collaboration/reports/T-QA-002-TEST.md",
+        "ai-workspace/04-qa/evidence/T-QA-002/logs/migration.log"
       ],
       "status": "CONDITIONAL",
-      "reason": "当前单一 system_metadata 迁移已通过；完整业务迁移尚不存在。",
+      "reason": "当前 M3 全量迁移链在空库 upgrade→downgrade→upgrade→alembic check 全部 0、无 drift；M4/M5 Schema 尚未纳入本分支。",
       "conditions": [
-        "GAP-FINAL-SCHEMA"
+        "M4/M5 Schema 落地后重跑全量空库回放与 drift check",
+        "最终 MVP 前做一次完整演示数据迁移演练"
       ]
     },
     {
