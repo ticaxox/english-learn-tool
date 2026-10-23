@@ -12,6 +12,7 @@ const memberLinks = [
   { label: '词书', to: '/wordbooks' },
   { label: '记忆练习', to: '/memory' },
   { label: 'AI 练习', to: '/practice' },
+  { label: '练习记录', to: '/practice/records' },
   { label: '每日闯关', to: '/challenges' },
   { label: 'AI 教练', to: '/coach' },
   { label: '通知', to: '/notifications' },

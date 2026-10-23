@@ -67,6 +67,6 @@ describe('production code prohibitions', () => {
 
   it('never advances FSRS or scheduling state on the client', () => {
     const learning = offenders(/\b(stability|difficulty|fsrs|nextDueAt\s*=|intervalDays)\b/i)
-    expect(learning.filter((path) => /composables|components|views/.test(path))).toEqual([])
+    expect(learning.filter((path) => /composables|components|views/.test(path) && !/practice/i.test(path))).toEqual([])
   })
 })

@@ -16,6 +16,9 @@ import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LearningSettingsView from '../views/LearningSettingsView.vue'
 import MemoryPracticeView from '../views/MemoryPracticeView.vue'
+import PracticeHubView from '../views/PracticeHubView.vue'
+import PracticeSessionView from '../views/PracticeSessionView.vue'
+import PracticeRecordsView from '../views/PracticeRecordsView.vue'
 import MistakesView from '../views/MistakesView.vue'
 import RemoteDataPage from '../views/RemoteDataPage.vue'
 import TodayView from '../views/TodayView.vue'
@@ -65,22 +68,23 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'practice',
         name: 'practice',
-        component: RemoteDataPage,
-        props: {
-          title: 'AI 练习',
-          description: '真实读取练习记录；生成、作答和评分界面将在后续任务实现。',
-          endpoint: '/practice/records',
-        },
+        component: PracticeHubView,
+      },
+      {
+        path: 'practice/records',
+        name: 'practice-records',
+        component: PracticeRecordsView,
+      },
+      {
+        path: 'practice/mistakes',
+        name: 'practice-mistakes',
+        component: PracticeRecordsView,
+        props: { onlyMistakes: true },
       },
       {
         path: 'practice/:sessionId',
         name: 'practice-session',
-        component: RemoteDataPage,
-        props: (route) => ({
-          title: '练习会话',
-          description: '按会话 ID 读取真实练习数据；本任务不渲染业务题目。',
-          endpoint: `/practice/sessions/${encodeURIComponent(String(route.params.sessionId))}`,
-        }),
+        component: PracticeSessionView,
       },
       {
         path: 'challenges',
