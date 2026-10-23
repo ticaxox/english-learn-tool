@@ -69,12 +69,18 @@ const mainNodes = [
 ]
 const optionalNode = makeNode({ id: '44444444-4444-4444-8444-444444444444', clientKey: 'side-1', nodeType: 'OPTIONAL_SIDE', orderIndex: 4, title: '可选支线', optional: true, status: 'unlocked' })
 
+function shanghaiToday(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date())
+}
+
+const currentLocalDate = shanghaiToday()
+
 function makePlan(overrides: Partial<ChallengePlan> = {}): ChallengePlan {
   return {
-    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', localDate: '2026-10-23', status: 'ready', title: '今日闯关',
+    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', localDate: currentLocalDate, status: 'ready', title: '今日闯关',
     summary: '先复习，再学习，最后完成挑战。', targetMinutes: 30, dailyPlanId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     aiJobId: null, generatedAt: '2026-10-23T08:00:00Z', lockedAt: '2026-10-23T08:00:00Z', challengeCompletedAt: null,
-    expiresAt: '2026-10-24T00:00:00Z', errorCode: null, errorMessage: null, mainCompleted: 0, mainTotal: 3,
+    expiresAt: '2099-10-24T00:00:00Z', errorCode: null, errorMessage: null, mainCompleted: 0, mainTotal: 3,
     nodes: [...mainNodes, optionalNode], ...overrides,
   }
 }
@@ -90,7 +96,7 @@ describe('challenge view', () => {
     challengeMocks.getChallenge.mockResolvedValue(makePlan())
     challengeMocks.generateTodayChallenge.mockResolvedValue({ challengeId: makePlan().id, status: 'ready', jobId: null, statusUrl: null, replayed: false })
     challengeMocks.getChallengeJob.mockResolvedValue({ jobId: 'job-1', challengeId: makePlan().id, status: 'succeeded', errorCode: null, errorMessage: null, retryable: false })
-    challengeMocks.getChallengeHistory.mockResolvedValue({ items: [{ id: makePlan().id, localDate: '2026-10-23', status: 'ready', title: '今日闯关', summary: '地图已生成', targetMinutes: 30, mainCompleted: 0, mainTotal: 3, challengeCompletedAt: null }], nextCursor: null, hasMore: false })
+    challengeMocks.getChallengeHistory.mockResolvedValue({ items: [{ id: makePlan().id, localDate: currentLocalDate, status: 'ready', title: '今日闯关', summary: '地图已生成', targetMinutes: 30, mainCompleted: 0, mainTotal: 3, challengeCompletedAt: null }], nextCursor: null, hasMore: false })
     challengeMocks.getChallengeNodeDetail.mockResolvedValue(detail(mainNodes[0], ['start']))
     challengeMocks.startChallengeNode.mockResolvedValue({ challengeId: makePlan().id, nodeId: mainNodes[0].id, status: 'in_progress', resourceType: 'memory', resourceId: 'memory-session-1', jobId: null, message: 'The memory task is ready.' })
   })
