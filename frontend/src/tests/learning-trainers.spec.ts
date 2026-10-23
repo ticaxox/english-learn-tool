@@ -13,9 +13,12 @@ function flashcard(overrides: Partial<FlashcardQuestion> = {}): FlashcardQuestio
   return {
     kind: 'flashcard',
     questionId: 'q-1',
+    wordbookId: 'book-1',
+    entryId: 'entry-1',
     front: 'probably',
     back: '很可能；大概',
     phonetic: '/ˈprɒbəbli/',
+    partOfSpeech: 'adv.',
     example: 'She is probably right.',
     remaining: 3,
     ...overrides,
@@ -34,6 +37,7 @@ function choice(overrides: Partial<ChoiceQuestion> = {}): ChoiceQuestion {
       { optionId: 'o-3', label: '昂贵的' },
       { optionId: 'o-4', label: '临时的' },
     ],
+    optionCount: 4,
     remaining: 5,
     ...overrides,
   }
@@ -46,6 +50,7 @@ function spelling(overrides: Partial<SpellingQuestion> = {}): SpellingQuestion {
     definition: 'n. 机会；可能性',
     phonetic: '/ˌɒpəˈtjuːnəti/',
     blankType: 'first_letter',
+    cloze: 'o________',
     blanks: [
       { index: 0, prefilled: true, character: 'o' },
       { index: 1, prefilled: false, character: null },
@@ -167,11 +172,11 @@ describe('ChoiceTrainer', () => {
     })
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
-    expect(wrapper.text()).toContain('四个不重复选项')
+    expect(wrapper.text()).toContain('option_count')
     expect(wrapper.findAll('button').find((button) => button.text() === '提交答案')!.attributes('disabled')).toBeDefined()
   })
 
-  it('rejects a three-option payload instead of submitting it', () => {
+  it('rejects an option list that disagrees with option_count', () => {
     const wrapper = mount(ChoiceTrainer, {
       props: {
         question: choice({
@@ -189,6 +194,25 @@ describe('ChoiceTrainer', () => {
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
 
+  it('accepts a smaller server-declared option set from a small wordbook', async () => {
+    const wrapper = mount(ChoiceTrainer, {
+      props: {
+        question: choice({
+          optionCount: 2,
+          options: [
+            { optionId: '有弹性的', label: '有弹性的' },
+            { optionId: '沉默的', label: '沉默的' },
+          ],
+        }),
+      },
+    })
+    const inputs = wrapper.findAll('input[type="radio"]')
+    expect(inputs).toHaveLength(2)
+    await inputs[0].setValue()
+    await wrapper.findAll('button').find((button) => button.text() === '提交答案')!.trigger('click')
+    expect(wrapper.emitted('answer')).toEqual([['有弹性的']])
+  })
+
   it('treats options sharing one id as a contract defect', () => {
     const wrapper = mount(ChoiceTrainer, {
       props: {
@@ -204,7 +228,7 @@ describe('ChoiceTrainer', () => {
     })
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
-    expect(wrapper.text()).toContain('四个不重复选项')
+    expect(wrapper.text()).toContain('option_count')
   })
 
   it('sends only the chosen option id, never an answer key', async () => {

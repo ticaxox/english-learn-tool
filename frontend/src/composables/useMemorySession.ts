@@ -108,6 +108,11 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
       } else {
         const summary = await api.start(target)
         sessionId.value = summary.sessionId
+        if (summary.remaining <= 0) {
+          finished.value = true
+          question.value = null
+          return
+        }
       }
       const next = await api.loadQuestion(sessionId.value as string, target)
       question.value = next
@@ -150,6 +155,23 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
       throw error
     } finally {
       busy.value = false
+    }
+  }
+
+  /** Record that the learner saw the back, without advancing the queue. */
+  async function recordReveal(questionId: string): Promise<void> {
+    if (!sessionId.value || busy.value) return
+    const key = keyFor(`flashcard-reveal:${questionId}`)
+    try {
+      await api.submit(
+        sessionId.value,
+        { kind: 'flashcard-reveal', questionId },
+        key,
+      )
+      clearPendingKey()
+      lastError.value = null
+    } catch (error) {
+      lastError.value = error
     }
   }
 
@@ -237,6 +259,7 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
     remaining,
     open,
     refreshQuestion,
+    recordReveal,
     rateFlashcard,
     answerChoice,
     answerSpelling,

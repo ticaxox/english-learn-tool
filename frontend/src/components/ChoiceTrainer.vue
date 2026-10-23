@@ -5,7 +5,7 @@
  * answer. Submitting only sends the chosen option id; the server grades.
  */
 import { computed, nextTick, ref, watch } from 'vue'
-import { CHOICE_OPTION_COUNT, type ChoiceQuestion } from '../types/learning'
+import type { ChoiceQuestion } from '../types/learning'
 
 const props = defineProps<{
   question: ChoiceQuestion
@@ -20,20 +20,18 @@ const selected = ref<string | null>(null)
 const promptHeading = ref<HTMLElement | null>(null)
 
 /**
- * Product rule: a choice question shows four distinct options. A payload that
- * breaks that rule is a contract defect, not something to paper over — a
- * duplicated option would let the learner submit a label twice, and a short list
- * would make "the answer is there" untrue. The server keeps grading either way,
- * but the UI must say the payload is wrong instead of rendering it as normal.
+ * `option_count` is the server's authority. Small wordbooks can legitimately
+ * return fewer than four options; the UI only verifies that the declared count
+ * matches the rendered labels and that labels are non-empty and distinct.
  */
 const optionsWellFormed = computed(() => {
   const options = props.question.options
-  if (options.length !== CHOICE_OPTION_COUNT) {
+  if (props.question.optionCount < 1 || options.length !== props.question.optionCount) {
     return false
   }
   const ids = new Set(options.map((option) => option.optionId))
   const labels = new Set(options.map((option) => option.label.trim()))
-  return ids.size === options.length && labels.size === options.length
+  return labels.size === options.length && !labels.has('') && ids.size === options.length
 })
 
 watch(
@@ -76,7 +74,7 @@ function submit(): void {
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
 
     <p v-if="!optionsWellFormed" class="alert alert-warning" role="alert">
-      服务端返回的选项不符合「四个不重复选项」的契约（当前 {{ props.question.options.length }} 个）。
+      服务端返回的选项未通过 option_count 与去重校验（声明 {{ props.question.optionCount }} 个，当前 {{ props.question.options.length }} 个）。
       本页不会按这份数据判分，请刷新或联系管理员；提交按钮保持不可用。
     </p>
 

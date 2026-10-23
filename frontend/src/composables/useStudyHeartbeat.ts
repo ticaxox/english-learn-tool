@@ -27,8 +27,10 @@ export interface HeartbeatOptions {
   enabled: () => boolean
   /** Injectable for tests. */
   now?: () => number
+  /** Session sent with each beat; null is allowed by the server. */
+  sessionId?: () => string | null
   /** Injectable for tests; defaults to the real API call. */
-  send?: (windowSeconds: number, idempotencyKey: string) => Promise<void>
+  send?: (sessionId: string | null, idempotencyKey: string) => Promise<void>
 }
 
 function newIdempotencyKey(): string {
@@ -44,7 +46,7 @@ export function useStudyHeartbeat(options: HeartbeatOptions) {
   const sentCount = ref(0)
 
   const now = options.now ?? (() => Date.now())
-  const send = options.send ?? ((windowSeconds: number, key: string) => sendHeartbeat({ windowSeconds }, key))
+  const send = options.send ?? ((sessionId: string | null, key: string) => sendHeartbeat({ sessionId }, key))
 
   let intervalId: number | null = null
   let lastInteractionAt = now()
@@ -96,7 +98,7 @@ export function useStudyHeartbeat(options: HeartbeatOptions) {
     }
 
     try {
-      await send(HEARTBEAT_WINDOW_SECONDS, newIdempotencyKey())
+      await send(options.sessionId?.() ?? null, newIdempotencyKey())
       sentCount.value += 1
       lastError.value = null
     } catch (error) {

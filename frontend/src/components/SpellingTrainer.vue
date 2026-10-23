@@ -30,7 +30,9 @@ watch(
 )
 
 const canSubmit = computed(() => grid.complete.value && !props.disabled)
-const blankLabel = computed(() => SPELLING_BLANK_LABELS[props.question.blankType])
+const blankLabel = computed(() =>
+  props.question.blankType ? SPELLING_BLANK_LABELS[props.question.blankType] : '按服务端挖空提示',
+)
 
 function setInputRef(element: Element | null, index: number): void {
   if (element instanceof HTMLInputElement) {

@@ -12,9 +12,12 @@ function card(remaining = 3): StudyQuestion {
   return {
     kind: 'flashcard',
     questionId: 'q-1',
+    wordbookId: 'book-1',
+    entryId: 'entry-1',
     front: 'probably',
     back: '很可能',
     phonetic: null,
+    partOfSpeech: null,
     example: null,
     remaining,
   }
@@ -27,6 +30,7 @@ function feedback(remaining: number, requeued = false): StudyFeedback {
     removed: false,
     requeued,
     remaining,
+    sessionCompleted: remaining === 0,
   }
 }
 
@@ -68,6 +72,17 @@ describe('memory session orchestration', () => {
 
     expect(api.start).not.toHaveBeenCalled()
     expect(api.loadQuestion).toHaveBeenCalledWith('session-existing', 'flashcard')
+  })
+
+  it('records a reveal without advancing the server queue', async () => {
+    const api = makeApi()
+    const session = useMemorySession({ api })
+    await session.open('flashcard')
+    await session.recordReveal('q-1')
+
+    const [, event] = api.submit.mock.calls[0]
+    expect(event).toMatchObject({ kind: 'flashcard-reveal', questionId: 'q-1' })
+    expect(api.loadQuestion).toHaveBeenCalledTimes(1)
   })
 
   it('submits a rated flashcard with elapsed time, not a computed grade', async () => {

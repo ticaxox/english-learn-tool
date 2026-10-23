@@ -62,7 +62,9 @@ const today = todayIsoDate()
 
 function applyProfile(value: LearningProfile): void {
   profile.value = value
-  form.examTarget = value.examTarget
+  if (value.examTarget) {
+    form.examTarget = value.examTarget
+  }
   form.examDate = value.examDate
   form.dailyNewWords = value.dailyNewWords
   form.dailyMinutes = value.dailyMinutes
@@ -74,6 +76,7 @@ function cloneConfig(config: MemoryConfig): MemoryConfig {
     flashcard: { ...config.flashcard },
     choice: { ...config.choice },
     spelling: { ...config.spelling },
+    preferences: { ...config.preferences },
   }
 }
 
@@ -234,10 +237,11 @@ onMounted(() => {
               <label :for="`blank-${module}`">挖空方式</label>
               <select
                 :id="`blank-${module}`"
-                :value="form.memoryConfig.spelling.blankType ?? 'full'"
+                :value="form.memoryConfig.spelling.blankType ?? ''"
                 :disabled="!form.memoryConfig.spelling.enabled"
-                @change="form.memoryConfig.spelling.blankType = ($event.target as HTMLSelectElement).value as SpellingBlankType"
+                @change="form.memoryConfig.spelling.blankType = ($event.target as HTMLSelectElement).value ? (($event.target as HTMLSelectElement).value as SpellingBlankType) : null"
               >
+                <option value="">服务端默认</option>
                 <option v-for="blank in blankTypes" :key="blank" :value="blank">
                   {{ SPELLING_BLANK_LABELS[blank] }}
                 </option>

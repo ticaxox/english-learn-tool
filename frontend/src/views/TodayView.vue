@@ -114,6 +114,7 @@ onMounted(() => {
       <div v-if="plan" class="today-hero__badge">
         <span class="today-hero__date">{{ plan.localDate }}</span>
         <span class="today-hero__status">{{ statusLabel }}</span>
+        <span v-if="plan.wordbook" class="inline-note">{{ plan.wordbook.name }}</span>
       </div>
     </header>
 
@@ -207,7 +208,7 @@ onMounted(() => {
           <RouterLink class="button-secondary" to="/settings">调整学习档案</RouterLink>
         </div>
         <p v-if="plan.extraDueAvailable" class="inline-note">
-          目标之外还有新的到期词，可继续加练；它们不会改变今天的固定目标。
+          目标之外还有 {{ plan.extraDueCount }} 个到期词，可继续加练；它们不会改变今天的固定目标。
         </p>
         <p class="inline-note">
           修改学习档案后新目标从次日起生效，今日快照保持不变。

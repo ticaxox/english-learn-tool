@@ -38,6 +38,7 @@ const session = useMemorySession()
 
 const heartbeat = useStudyHeartbeat({
   enabled: () => session.hasSession.value && !session.finished.value,
+  sessionId: () => session.sessionId.value,
 })
 
 const activeModules = computed<MemoryModule[]>(() => {
@@ -188,7 +189,7 @@ onMounted(() => {
           >
             <span class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</span>
             <span class="module-card__hint">
-              {{ module === 'flashcard' ? '正面认识，翻面回忆' : module === 'choice' ? '四选一，服务端判分' : '按提示拼出完整单词' }}
+              {{ module === 'flashcard' ? '正面认识，翻面回忆' : module === 'choice' ? '按服务端选项作答' : '按提示拼出完整单词' }}
             </span>
           </button>
         </div>
@@ -222,6 +223,7 @@ onMounted(() => {
         v-else-if="session.question.value?.kind === 'flashcard'"
         :question="session.question.value"
         :disabled="session.busy.value"
+        @reveal="() => session.recordReveal(session.question.value!.questionId)"
         @rate="(rating) => rateFlashcard(session.question.value!.questionId, rating)"
         @master="() => master(session.question.value!.questionId)"
       />

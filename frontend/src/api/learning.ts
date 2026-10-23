@@ -8,6 +8,7 @@
  * surface an explicit "pending" state instead of fabricated data.
  */
 import { apiClient } from './client'
+import { getWordbookDetail } from './wordbooks'
 import {
   parseLearningProfile,
   parseLearningStats,
@@ -31,6 +32,7 @@ import type {
   LearningProfileUpdate,
   LearningStats,
   LearnedWordState,
+  FlashcardQuestion,
   MasteryOutcome,
   MemoryConfig,
   MemoryModule,
@@ -49,8 +51,11 @@ export interface FetchOptions {
 }
 
 export async function fetchLearningProfile(options: FetchOptions = {}): Promise<LearningProfile> {
-  const payload = await apiClient.get('/users/me/profile', { signal: options.signal })
-  return parseLearningProfile(payload)
+  const [profilePayload, configPayload] = await Promise.all([
+    apiClient.get('/users/me/profile', { signal: options.signal }),
+    apiClient.get('/memory/config', { signal: options.signal }),
+  ])
+  return parseLearningProfile(profilePayload, parseMemoryConfig(configPayload))
 }
 
 export async function updateLearningProfile(
@@ -61,7 +66,8 @@ export async function updateLearningProfile(
     signal: options.signal,
     retryCount: 0,
   })
-  return parseLearningProfile(payload)
+  const config = await saveMemoryConfig(update.memoryConfig, options)
+  return parseLearningProfile(payload, config)
 }
 
 export async function fetchTodayPlan(options: FetchOptions = {}): Promise<TodayPlan> {
@@ -89,7 +95,7 @@ export async function fetchLearningStats(options: FetchOptions = {}): Promise<Le
  * accumulated total).
  */
 export async function sendHeartbeat(
-  input: { windowSeconds: number },
+  input: { sessionId: string | null },
   idempotencyKey: string,
   options: FetchOptions = {},
 ): Promise<void> {
@@ -135,7 +141,34 @@ export async function fetchMemorySession(
   const payload = await apiClient.get(`/memory/sessions/${encodeURIComponent(sessionId)}`, {
     signal: options.signal,
   })
-  return parseStudyQuestion(payload, module)
+  const question = parseStudyQuestion(payload, module)
+  return question.kind === 'flashcard' ? await resolveFlashcardAnswer(question) : question
+}
+
+async function resolveFlashcardAnswer(question: FlashcardQuestion): Promise<FlashcardQuestion> {
+  try {
+    let offset = 0
+    while (true) {
+      const detail = await getWordbookDetail(question.wordbookId, offset, 100)
+      const entry = detail.entries.find((candidate) => candidate.id === question.entryId)
+      if (entry) {
+        const definition = entry.definitions.find((item) => item.definition_zh || item.definition_en) ?? entry.definitions[0]
+        const example = definition?.examples[0]
+        return {
+          ...question,
+          back: definition?.definition_zh ?? definition?.definition_en ?? null,
+          partOfSpeech: question.partOfSpeech ?? definition?.part_of_speech ?? null,
+          example: example?.example_en ?? null,
+        }
+      }
+      offset += detail.entries.length
+      if (offset >= detail.total_entries || detail.entries.length === 0) break
+    }
+  } catch {
+    // The definition lookup is supplementary; a failed read leaves the card
+    // usable and the trainer states that no definition was returned.
+  }
+  return question
 }
 
 /**
@@ -212,10 +245,9 @@ export async function fetchMistakes(
   options: FetchOptions = {},
 ): Promise<PagedMistakes> {
   const params = new URLSearchParams()
-  params.set('offset', String(query.offset ?? 0))
-  params.set('limit', String(query.limit ?? 20))
-  if (query.module) {
-    params.set('module', query.module)
+  params.set('limit', String(query.limit ?? 50))
+  if (query.cursor) {
+    params.set('cursor', query.cursor)
   }
   const payload = await apiClient.get(`/memory/mistakes?${params.toString()}`, {
     signal: options.signal,

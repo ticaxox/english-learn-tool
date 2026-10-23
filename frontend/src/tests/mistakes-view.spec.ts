@@ -16,52 +16,42 @@ vi.mock('../api/learning', async (importOriginal) => {
   return { ...actual, ...apiMocks }
 })
 
-// The view renders the contract gate while T-BE-004 is unfrozen, so the
-// table-level behaviour is exercised by flipping the gate for this file only.
-vi.mock('../api/contract-adapter', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../api/contract-adapter')>()
-  return {
-    ...actual,
-    isContractFrozen: () => true,
-    contractCoordinateLabel: () => 'test coordinates',
-  }
-})
-
 const StubPage = defineComponent({ render: () => h('div') })
 
 function page(overrides: Partial<PagedMistakes> = {}): PagedMistakes {
   return {
     items: [
       {
+        entryId: 'entry-1',
         stateId: 'state-1',
         headword: 'resilient',
         definition: '有弹性的',
-        module: 'flashcard',
+        module: null,
         lastMistakeAt: '2026-10-23T01:00:00Z',
         mistakeCount: 2,
         priorityReview: false,
+        status: 'relearning',
       },
       {
+        entryId: 'entry-2',
         stateId: 'state-2',
         headword: 'fragile',
         definition: '易碎的',
-        module: 'spelling',
+        module: null,
         lastMistakeAt: '2026-10-22T09:00:00Z',
         mistakeCount: 1,
         priorityReview: true,
+        status: 'review',
       },
     ],
-    total: 2,
-    offset: 0,
-    limit: 20,
+    nextCursor: null,
+    hasMore: false,
     ...overrides,
   }
 }
 
 async function flush(): Promise<void> {
-  for (let index = 0; index < 4; index += 1) {
-    await Promise.resolve()
-  }
+  for (let index = 0; index < 5; index += 1) await Promise.resolve()
 }
 
 async function mountView() {
@@ -83,13 +73,13 @@ describe('MistakesView', () => {
     apiMocks.setMistakePriority.mockResolvedValue(undefined)
   })
 
-  it('lists the real mistakes with their source module and count', async () => {
+  it('lists real memory mistakes without inventing a source module', async () => {
     const wrapper = await mountView()
     const rows = wrapper.findAll('.mistake-table tbody tr')
     expect(rows).toHaveLength(2)
     expect(rows[0].text()).toContain('resilient')
-    expect(rows[0].text()).toContain('翻卡')
-    expect(rows[1].text()).toContain('拼写')
+    expect(rows[0].text()).toContain('背词训练')
+    expect(rows[0].text()).toContain('重新学习')
     expect(rows[1].text()).toContain('1')
   })
 
@@ -103,18 +93,17 @@ describe('MistakesView', () => {
     expect(toggles[1].text()).toBe('已标记重点')
   })
 
-  it('toggles priority through the server and then reloads the same page', async () => {
+  it('toggles priority by entry id and reloads the same cursor', async () => {
     const wrapper = await mountView()
     await wrapper.findAll('.link-button')[0].trigger('click')
     await flush()
 
-    expect(apiMocks.setMistakePriority).toHaveBeenCalledWith('state-1', { priorityReview: true })
-    // The flag only changes after the server confirms; the view refetches.
+    expect(apiMocks.setMistakePriority).toHaveBeenCalledWith('entry-1', { priorityReview: true })
     expect(apiMocks.fetchMistakes).toHaveBeenCalledTimes(2)
-    expect(apiMocks.fetchMistakes).toHaveBeenLastCalledWith({ offset: 0, limit: 20 })
+    expect(apiMocks.fetchMistakes).toHaveBeenLastCalledWith({ cursor: null, limit: 50 })
   })
 
-  it('never reorders or re-flags a row locally before the reload lands', async () => {
+  it('never re-flags a row locally before the reload lands', async () => {
     let release: (value: PagedMistakes) => void = () => {}
     apiMocks.fetchMistakes
       .mockResolvedValueOnce(page())
@@ -124,9 +113,7 @@ describe('MistakesView', () => {
     await wrapper.findAll('.link-button')[0].trigger('click')
     await flush()
 
-    // Still the original server flag while the refetch is in flight.
     expect(wrapper.findAll('.link-button')[0].attributes('aria-pressed')).toBe('false')
-
     release(page())
     await flush()
     expect(apiMocks.fetchMistakes).toHaveBeenCalledTimes(2)
@@ -143,8 +130,19 @@ describe('MistakesView', () => {
     expect(apiMocks.fetchMistakes).toHaveBeenCalledTimes(1)
   })
 
+  it('uses the server cursor for the next page', async () => {
+    apiMocks.fetchMistakes
+      .mockResolvedValueOnce(page({ nextCursor: 'cursor-2', hasMore: true }))
+      .mockResolvedValueOnce(page({ items: [] }))
+    const wrapper = await mountView()
+    const next = wrapper.findAll('.pager button').find((button) => button.text() === '下一页')
+    await next!.trigger('click')
+    await flush()
+    expect(apiMocks.fetchMistakes).toHaveBeenLastCalledWith({ cursor: 'cursor-2', limit: 50 })
+  })
+
   it('says when there are no mistakes instead of rendering an empty table', async () => {
-    apiMocks.fetchMistakes.mockResolvedValue(page({ items: [], total: 0 }))
+    apiMocks.fetchMistakes.mockResolvedValue(page({ items: [], hasMore: false }))
     const wrapper = await mountView()
     expect(wrapper.text()).toContain('暂时没有错词')
     expect(wrapper.find('.mistake-table').exists()).toBe(false)

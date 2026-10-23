@@ -135,6 +135,7 @@ export function defaultMemoryConfig(): MemoryConfig {
     flashcard: { enabled: true, blankType: null },
     choice: { enabled: true, blankType: null },
     spelling: { enabled: true, blankType: 'full' },
+    preferences: {},
   }
 }
 

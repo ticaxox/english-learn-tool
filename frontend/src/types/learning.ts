@@ -59,10 +59,12 @@ export interface MemoryConfig {
   flashcard: MemoryModulePreference
   choice: MemoryModulePreference
   spelling: MemoryModulePreference
+  /** Raw server preference keys preserved across a PUT. */
+  preferences: Record<string, unknown>
 }
 
 export interface LearningProfile {
-  examTarget: ExamTarget
+  examTarget: ExamTarget | null
   /** ISO calendar date `YYYY-MM-DD`, or null when unset. */
   examDate: string | null
   dailyNewWords: number
@@ -104,6 +106,7 @@ export interface TodayPlan {
   newWords: ProgressCounter
   dueReviews: ProgressCounter
   extraDueAvailable: boolean
+  extraDueCount: number
   minutes: { active: number; goal: number }
   status: TodayStatus
   aiPractice: AiPracticeSummary
@@ -133,10 +136,13 @@ export interface SessionSummary {
 export interface FlashcardQuestion {
   kind: 'flashcard'
   questionId: string
+  wordbookId: string
+  entryId: string
   front: string
-  /** Only rendered after the learner flips the card. */
-  back: string
+  /** Server-backed definition, or null when the wordbook has no definition. */
+  back: string | null
   phonetic: string | null
+  partOfSpeech: string | null
   example: string | null
   remaining: number
 }
@@ -146,17 +152,13 @@ export interface ChoiceOption {
   label: string
 }
 
-/**
- * The product contract fixes the choice module at four distinct options. Kept
- * as a named constant so the trainer and its tests cannot drift apart.
- */
-export const CHOICE_OPTION_COUNT = 4
-
 export interface ChoiceQuestion {
   kind: 'choice'
   questionId: string
   prompt: string
   options: ChoiceOption[]
+  /** Server-declared option count; it is authoritative, not a UI constant. */
+  optionCount: number
   phonetic: string | null
   remaining: number
 }
@@ -180,7 +182,8 @@ export interface SpellingQuestion {
   questionId: string
   definition: string
   phonetic: string | null
-  blankType: SpellingBlankType
+  blankType: SpellingBlankType | null
+  cloze: string
   blanks: SpellingBlank[]
   remaining: number
 }
@@ -199,6 +202,7 @@ export interface StudyFeedback {
   /** Server asks for a later re-queue instead of completing. */
   requeued: boolean
   remaining: number
+  sessionCompleted: boolean
 }
 
 /** Result of a server-confirmed "已记住" action. */
@@ -210,21 +214,25 @@ export interface MasteryOutcome {
   message: string | null
 }
 
+export type WordStateStatus = 'new' | 'learning' | 'review' | 'relearning' | 'mastered' | 'suspended'
+
 export interface MistakeEntry {
+  entryId: string
   stateId: string
   headword: string
-  definition: string
-  module: MemoryModule
+  definition: string | null
+  /** The mistake endpoint does not expose the originating module. */
+  module: MemoryModule | null
   lastMistakeAt: string | null
   mistakeCount: number
   priorityReview: boolean
+  status: WordStateStatus
 }
 
 export interface PagedMistakes {
   items: MistakeEntry[]
-  total: number
-  offset: number
-  limit: number
+  nextCursor: string | null
+  hasMore: boolean
 }
 
 export interface LearnedWordState {
@@ -256,9 +264,8 @@ export interface MistakePriorityUpdate {
 }
 
 export interface MistakeQuery {
-  offset?: number
+  cursor?: string | null
   limit?: number
-  module?: MemoryModule
 }
 
 /** One learner action inside a memory session. */

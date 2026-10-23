@@ -15,16 +15,17 @@ import {
  */
 describe('study heartbeat', () => {
   let now = 0
-  const sent: Array<{ windowSeconds: number; key: string }> = []
-  let sender: ((windowSeconds: number, key: string) => Promise<void>) | null = null
+  const sent: Array<{ sessionId: string | null; key: string }> = []
+  let sender: ((sessionId: string | null, key: string) => Promise<void>) | null = null
 
   function build(enabled = true) {
     return useStudyHeartbeat({
       enabled: () => enabled,
       now: () => now,
-      send: (windowSeconds, key) => {
-        sent.push({ windowSeconds, key })
-        return sender ? sender(windowSeconds, key) : Promise.resolve()
+      sessionId: () => 'session-1',
+      send: (sessionId, key) => {
+        sent.push({ sessionId, key })
+        return sender ? sender(sessionId, key) : Promise.resolve()
       },
     })
   }
@@ -41,7 +42,7 @@ describe('study heartbeat', () => {
     vi.useRealTimers()
   })
 
-  it('uses the published 30 second cadence and window', () => {
+  it('uses the published 30 second cadence', () => {
     expect(HEARTBEAT_INTERVAL_MS).toBe(30_000)
     expect(HEARTBEAT_WINDOW_SECONDS).toBe(30)
     expect(IDLE_PAUSE_MS).toBe(60_000)
@@ -57,7 +58,7 @@ describe('study heartbeat', () => {
 
     expect(sent).toHaveLength(2)
     for (const beat of sent) {
-      expect(beat.windowSeconds).toBe(HEARTBEAT_WINDOW_SECONDS)
+      expect(beat.sessionId).toBe('session-1')
     }
   })
 
