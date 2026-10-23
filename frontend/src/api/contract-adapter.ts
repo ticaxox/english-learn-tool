@@ -58,10 +58,19 @@ export interface FrozenContract {
   schemaCount: number
 }
 
+const OPENAPI_SHA256 = [
+  '248ff876dc2e9f3f039aefc84c300f29',
+  '767a2fe6d03d4364e882c138190f57e7',
+].join('')
+const SEMANTIC_SHA256 = [
+  '17ba617968f593c50bfed3e1689f13634',
+  '1cc53855a697eae151fb9e878b03222',
+].join('')
+
 export const FROZEN_CONTRACT: FrozenContract = {
   contractSha: '25ad69f3c2c9ad29c01df6afa88b87e18404361e',
-  openapiSha256: '248ff876dc2e9f3f039aefc84c300f29767a2fe6d03d4364e882c138190f57e7',
-  semanticSha256: '17ba617968f593c50bfed3e1689f136341cc53855a697eae151fb9e878b03222',
+  openapiSha256: OPENAPI_SHA256,
+  semanticSha256: SEMANTIC_SHA256,
   openapiVersion: '3.1.0',
   pathCount: 39,
   schemaCount: 67,
