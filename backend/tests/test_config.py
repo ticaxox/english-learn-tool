@@ -26,3 +26,17 @@ def test_cors_origins_are_normalized() -> None:
 def test_configuration_rejects_cors_paths() -> None:
     with pytest.raises(ValidationError):
         Settings(cors_origins="https://example.test/not-an-origin")
+
+
+def test_configuration_rejects_invalid_app_timezone() -> None:
+    with pytest.raises(ValidationError):
+        Settings(app_timezone="Mars/Olympus")
+
+
+def test_default_app_timezone_is_shanghai() -> None:
+    assert Settings().app_timezone == "Asia/Shanghai"
+
+
+def test_wordbook_job_stale_window_cannot_precede_worker_timeout() -> None:
+    with pytest.raises(ValidationError):
+        Settings(wordbook_job_stale_seconds=299)

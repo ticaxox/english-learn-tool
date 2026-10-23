@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 
+from arq.connections import RedisSettings, create_pool
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
@@ -12,6 +13,7 @@ from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import RequestIDMiddleware, SecurityHeadersMiddleware
 from app.db.session import create_engine, create_session_factory
+from app.services.wordbook_storage import LocalFileStorage
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +28,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "application.started",
             extra={"environment": runtime_settings.app_env},
         )
-        yield
-        await app.state.redis.aclose()
-        await app.state.engine.dispose()
+        app.state.arq = await create_pool(RedisSettings.from_dsn(runtime_settings.redis_url))
+        try:
+            yield
+        finally:
+            await app.state.arq.aclose()
+            await app.state.redis.aclose()
+            await app.state.engine.dispose()
         logger.info("application.stopped")
 
     application = FastAPI(
@@ -53,13 +59,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         socket_connect_timeout=runtime_settings.health_check_timeout_seconds,
         socket_timeout=runtime_settings.health_check_timeout_seconds,
     )
+    application.state.wordbook_storage = LocalFileStorage(runtime_settings.wordbook_storage_dir)
 
     application.add_middleware(
         CORSMiddleware,
         allow_origins=runtime_settings.cors_origin_list,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "X-CSRF-Token", "X-Request-ID"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "Idempotency-Key",
+            "Last-Event-ID",
+            "X-CSRF-Token",
+            "X-Request-ID",
+        ],
         expose_headers=["X-Request-ID", "Retry-After"],
     )
     application.add_middleware(SecurityHeadersMiddleware)

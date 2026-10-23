@@ -3,6 +3,8 @@ set -Eeuo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
+# shellcheck source=lib-compose.sh
+. "$ROOT/deploy/scripts/lib-compose.sh"
 
 ENV_FILE="${ENV_FILE:-$ROOT/.env}"
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -14,11 +16,11 @@ set -a
 # shellcheck disable=SC1090
 . "$ENV_FILE"
 set +a
+load_release_env
+configure_compose "$ROOT" "$ENV_FILE"
 
-compose=(docker compose --env-file "$ENV_FILE" -f "$ROOT/docker-compose.yml")
-
-mapfile -t expected_heads < <("${compose[@]}" exec -T api alembic heads | awk 'NF {print $1}' | sort)
-mapfile -t current_heads < <("${compose[@]}" exec -T api alembic current | awk 'NF {print $1}' | sort)
+mapfile -t expected_heads < <("${COMPOSE[@]}" exec -T api alembic heads | awk 'NF {print $1}' | sort)
+mapfile -t current_heads < <("${COMPOSE[@]}" exec -T api alembic current | awk 'NF {print $1}' | sort)
 
 if [[ "${#expected_heads[@]}" -eq 0 ]]; then
   echo "No Alembic head was reported" >&2
@@ -32,7 +34,7 @@ if [[ "$(printf '%s\n' "${expected_heads[@]}")" != "$(printf '%s\n' "${current_h
   exit 1
 fi
 
-metadata_table="$("${compose[@]}" exec -T postgres psql \
+metadata_table="$("${COMPOSE[@]}" exec -T postgres psql \
   -U "${POSTGRES_USER:-english_learn}" \
   -d "${POSTGRES_DB:-english_learn}" \
   -v ON_ERROR_STOP=1 \

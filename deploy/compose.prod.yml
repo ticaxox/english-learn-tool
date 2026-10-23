@@ -1,30 +1,41 @@
+x-prod-logging: &prod-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
+  postgres:
+    logging: *prod-logging
+  redis:
+    logging: *prod-logging
   migrate:
     image: ${API_IMAGE:?API_IMAGE is required}
     pull_policy: always
     restart: "no"
-
+    logging: *prod-logging
   api:
     image: ${API_IMAGE:?API_IMAGE is required}
     pull_policy: always
     restart: unless-stopped
-
+    logging: *prod-logging
   worker:
     image: ${API_IMAGE:?API_IMAGE is required}
     pull_policy: always
     restart: unless-stopped
-
+    logging: *prod-logging
   scheduler:
     image: ${API_IMAGE:?API_IMAGE is required}
     pull_policy: always
     restart: unless-stopped
-
+    logging: *prod-logging
   frontend:
     image: ${FRONTEND_IMAGE:?FRONTEND_IMAGE is required}
     pull_policy: always
     restart: unless-stopped
-
+    logging: *prod-logging
   reverse-proxy:
     image: ${REVERSE_PROXY_IMAGE:?REVERSE_PROXY_IMAGE is required}
     pull_policy: always
     restart: unless-stopped
+    logging: *prod-logging

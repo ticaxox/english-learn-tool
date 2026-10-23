@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { toErrorPresentation } from '../api/errors'
+import { fieldIssues, toErrorPresentation } from '../api/errors'
 
 const props = withDefaults(
   defineProps<{
@@ -19,6 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const presentation = computed(() => toErrorPresentation(props.error))
+const issues = computed(() => fieldIssues(props.error))
 const canRetry = computed(() => props.showRetry ?? presentation.value.retryable)
 </script>
 
@@ -26,6 +27,12 @@ const canRetry = computed(() => props.showRetry ?? presentation.value.retryable)
   <section class="alert alert-error" role="alert" aria-live="polite">
     <strong>{{ presentation.title }}</strong>
     <p>{{ presentation.message }}</p>
+    <ul v-if="issues.length > 0" class="field-issue-list">
+      <li v-for="issue in issues" :key="`${issue.path}-${issue.message}`">
+        <strong v-if="issue.path"><code>{{ issue.path }}</code></strong>
+        {{ issue.message }}
+      </li>
+    </ul>
     <p v-if="presentation.requestId" class="request-id">
       Request ID：<code>{{ presentation.requestId }}</code>
     </p>

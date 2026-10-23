@@ -12,9 +12,11 @@ const memberLinks = [
   { label: '词书', to: '/wordbooks' },
   { label: '记忆练习', to: '/memory' },
   { label: 'AI 练习', to: '/practice' },
+  { label: '练习记录', to: '/practice/records' },
   { label: '每日闯关', to: '/challenges' },
   { label: 'AI 教练', to: '/coach' },
   { label: '通知', to: '/notifications' },
+  { label: '通知偏好', to: '/notifications/preferences' },
   { label: '学习设置', to: '/settings' },
 ]
 
@@ -23,6 +25,7 @@ const adminLinks = [
   { label: '成员管理', to: '/admin/users' },
   { label: 'AI 提供商', to: '/admin/ai/providers' },
   { label: 'AI 提示词', to: '/admin/ai/prompts' },
+  { label: 'AI 用量', to: '/admin/ai/usage' },
 ]
 
 const accessDenied = computed(() => route.query.access === 'denied')
@@ -84,7 +87,7 @@ async function signOut(): Promise<void> {
       <header class="topbar">
         <p>以下页面只展示真实 API 响应或明确错误，不使用模拟业务数据。</p>
         <div class="topbar-actions">
-          <span class="inline-note">真实账号与成员管理 · M2</span>
+          <span class="inline-note">真实账号、学习与 AI 平台管理 · M2–M3</span>
         </div>
       </header>
 

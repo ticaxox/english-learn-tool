@@ -19,12 +19,37 @@ if [[ "${ALLOW_INSECURE_EXAMPLE_ENV:-0}" != "1" ]] \
   exit 2
 fi
 
-compose=(docker compose --env-file "$ENV_FILE" -f "$ROOT/docker-compose.yml")
+set -a
+# shellcheck disable=SC1090
+. "$ENV_FILE"
+set +a
+case "${DEPLOYMENT_PROFILE:-local}" in
+  local)
+    files=(-f "$ROOT/docker-compose.yml")
+    ;;
+  local-lightweight)
+    files=(-f "$ROOT/docker-compose.yml" -f "$ROOT/deploy/compose.lightweight.yml")
+    ;;
+  *)
+    echo "start-stack.sh supports only local and local-lightweight profiles" >&2
+    exit 2
+    ;;
+esac
+if [[ "${ENABLE_DEMO_TUNNEL:-0}" == "1" ]]; then
+  files+=(-f "$ROOT/deploy/compose.tunnel.yml")
+fi
+compose=(docker compose --env-file "$ENV_FILE" "${files[@]}")
+
 "${compose[@]}" config --quiet
 "${compose[@]}" build --pull
 "${compose[@]}" up -d --wait --wait-timeout "$WAIT_TIMEOUT" postgres redis
 "${compose[@]}" run --rm migrate
-"${compose[@]}" up -d --wait --wait-timeout "$WAIT_TIMEOUT" api worker scheduler frontend reverse-proxy
+app_services=(api worker scheduler frontend reverse-proxy)
+if [[ "${ENABLE_DEMO_TUNNEL:-0}" == "1" ]]; then
+  app_services+=(cloudflared)
+fi
 
-ENV_FILE="$ENV_FILE" "$ROOT/deploy/scripts/verify-stack.sh"
-ENV_FILE="$ENV_FILE" "$ROOT/deploy/scripts/verify-database.sh"
+"${compose[@]}" up -d --wait --wait-timeout "$WAIT_TIMEOUT" "${app_services[@]}"
+
+ENV_FILE="$ENV_FILE" DEPLOYMENT_PROFILE="$DEPLOYMENT_PROFILE" "$ROOT/deploy/scripts/verify-stack.sh"
+ENV_FILE="$ENV_FILE" DEPLOYMENT_PROFILE="$DEPLOYMENT_PROFILE" "$ROOT/deploy/scripts/verify-database.sh"

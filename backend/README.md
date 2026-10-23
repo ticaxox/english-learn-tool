@@ -1,8 +1,9 @@
 # Backend
 
-FastAPI backend for the private English learning platform. The current identity slice implements
-real PostgreSQL-backed accounts, rotating Redis-aware authentication sessions, administrator member
-management, CSV member import, audit records, and Alembic migrations.
+FastAPI backend for the private English learning platform. The implemented M2 slices provide real
+PostgreSQL-backed accounts, rotating Redis-aware authentication sessions, administrator member
+management, member and wordbook imports, durable ARQ wordbook jobs, audited activation/deletion, and
+Alembic migrations.
 
 ## Requirements
 
@@ -100,8 +101,155 @@ uv run arq app.workers.worker.WorkerSettings
 uv run arq app.workers.scheduler.SchedulerSettings
 ```
 
-The worker and scheduler are infrastructure entrypoints only. Business jobs belong to later
-domain tasks.
+The worker consumes `english-learn:wordbooks` and executes the durable `process_wordbook_job`
+function for import, export, and deletion. The scheduler consumes the separate
+`english-learn:scheduler` queue, recovers persisted queued jobs and stale interrupted runs, repairs
+terminal or stale same-ID ARQ entries, and removes expired preview/export artifacts. The scheduler
+must never share the business worker queue. `WORDBOOK_JOB_STALE_SECONDS` defaults to 600 seconds,
+which is longer than the worker's 300-second job timeout; queue-delivery and processing failures are
+persisted and bounded by `WORDBOOK_JOB_MAX_ATTEMPTS`. Job state, ownership, progress, results, retry
+counts, and failure codes are stored in PostgreSQL; Redis is the queue transport, not the business
+source of truth.
+
+## Wordbook API
+
+- `GET /api/v1/wordbooks` - visible organization/private list with pagination.
+- `GET /api/v1/wordbooks/{wordbook_id}` - confirmed entries and definitions with pagination.
+- `PATCH /api/v1/wordbooks/{wordbook_id}` - metadata-only update.
+- `POST /api/v1/wordbooks/{wordbook_id}/activate` - idempotent ready-book activation.
+- `DELETE /api/v1/wordbooks/{wordbook_id}` - idempotent deletion task; organization books require
+  exact `confirm_name` confirmation.
+- `POST /api/v1/wordbooks/import/preview` - CSV/JSON/TXT upload preview, valid for 24 hours.
+- `PATCH /api/v1/wordbooks/import/previews/{preview_id}` - column remapping.
+- `POST /api/v1/wordbooks/import` - confirmed asynchronous import.
+- `POST /api/v1/wordbooks/{wordbook_id}/export` - CSV/TXT/PDF asynchronous export.
+- `GET /api/v1/wordbooks/jobs/{job_id}` - import/export/delete polling.
+- `GET /api/v1/exports/{job_id}` - export-only polling and short-lived download metadata.
+- `GET /api/v1/exports/{job_id}/download` - owner or authorized organization administrator download.
+
+Import confirmation, export creation, and deletion require an `Idempotency-Key` header. Preview
+tokens are hashed at rest. Organization wordbooks are visible to active members but only
+administrators can mutate or export them; private wordbooks remain restricted to their owner, even
+when the requester is an administrator. Deleting a book immediately changes it to `deleting`, which
+blocks activation and export. Cleanup removes entries, definitions, examples, activation state,
+previews, related jobs, and isolated files while retaining a tombstone and the delete job for safe
+polling.
+
+Wordbook imports accept at most 10 MiB and 20,000 logical entries after duplicate merging. The parser
+supports UTF-8 BOM, UTF-8, GB18030, and UTF-16 LE/BE; CSV comma/tab/semicolon/pipe delimiters; JSON
+top-level arrays or `{"words": [...]}`; and structured TXT lines. Invalid rows are reported rather
+than silently dropped, and a confirmed import commits all entry/definition/example rows atomically.
+
+PDFs are rendered with bundled, OFL-licensed Noto Sans and Noto Sans SC fonts. See
+`app/assets/fonts/FONT_MANIFEST.md`. The PDF renderer supports configurable page rows and columns and
+uses the Latin font for IPA while using the SC font for Chinese text.
+
+Convert approved CSV/JSON/TXT input with the same production normalization and validation rules:
+
+```powershell
+uv run python -m app.cli convert-wordbook .\input.csv .\wordbook.json --report .\report.json
+```
+
+The output identifies `english-learn-wordbook-converter/1.0.0`; a non-zero exit status means rejected
+rows were reported.
+
+`WORDBOOK_STORAGE_DIR` must be an absolute path and defaults to `/app/var/wordbooks`. The Compose
+deployment mounts that directory from the same writable persistent volume into the API, ARQ worker,
+and scheduler because preview and export artifacts must cross service-process boundaries. A
+process-local directory is not a valid deployment. Uploaded data remains private and must not be
+served from a public directory.
+
+## Learning profile, daily plan, and memory training
+
+- `GET`/`PATCH /api/v1/users/me/profile` - learning profile. `daily_new_words` is 5-100 (default 20)
+  and `daily_study_minutes` is 15-180 (default 30); changing them only affects the next daily plan.
+- `GET /api/v1/learning/today` and `POST /api/v1/learning/daily-plan/ensure` - the local-date plan
+  snapshot (`Asia/Shanghai`). The word set, targets, and `calculation_version` freeze at generation
+  time; a later due word is reported only through `extra_due_available`.
+- `POST /api/v1/learning/heartbeat` - credits at most 30 seconds per server-measured window and needs
+  an `Idempotency-Key`. Stale or idle windows credit nothing.
+- `GET /api/v1/learning/stats` and `GET /api/v1/learning/events` - personal statistics and paged events
+  derived only from persisted rows.
+- `GET`/`PUT /api/v1/memory/config`, `POST /api/v1/memory/sessions`,
+  `GET /api/v1/memory/sessions/{session_id}`, `POST /api/v1/memory/sessions/{session_id}/events`,
+  `POST /api/v1/memory/sessions/{session_id}/complete`,
+  `PATCH /api/v1/memory/words/{state_id}/master`, `PATCH /api/v1/memory/words/{state_id}/restore`,
+  `GET /api/v1/memory/mistakes`, `PATCH /api/v1/memory/mistakes/{entry_id}/priority`.
+
+Scheduling uses pinned `fsrs==6.3.2` on the server only. Clients submit a card operation or answer and
+an `Idempotency-Key`; stability, difficulty, due timestamps, and the rating are never client input.
+A new word needs two `Good` ratings in one session and reappears after at least four other cards; an
+`Again` never resets the first `Good` but requeues the card. An overdue review completes with one
+`Good` and enters `relearning` after `Again`. Choice and spelling prompts never include the correct
+answer or option identifiers before submission, and spelling grading ignores case.
+
+Deleting a wordbook also removes the learner states, sessions, session items, events, plans, and
+mistake markers that referenced it, so no ghost learning rows survive the tombstone.
+
+## AI provider, prompt, structured generation, and quota foundation
+
+- Administrators configure OpenAI-compatible providers through `/api/v1/admin/ai/providers` and can
+  run a real `/models` connection check or fetch the model list. API keys are encrypted with AES-GCM
+  using `SECRET_ENCRYPTION_KEY`; every response contains only a mask such as `sk-****abcd`.
+- Provider URLs are checked for protocol, credentials, DNS resolution, blocked metadata hosts,
+  loopback/private targets, and cross-origin redirects. `AI_ALLOW_PRIVATE_PROVIDER_URLS` exists only
+  for local protocol tests and is rejected when `APP_ENV=production`.
+- Prompts are seeded by the `c5ab093fd0f9` migration and can be overwritten through
+  `/api/v1/admin/ai/prompts`. A job stores a prompt snapshot, so later edits apply only to new jobs.
+- `/api/v1/ai/jobs` creates durable structured jobs. The worker requests JSON Schema/JSON Mode,
+  validates with Pydantic v2, enforces business rules, performs at most one JSON repair and three
+  logical generation attempts, and never returns partial results. The member status endpoint exposes
+  only status, provider/model, attempt counts, error, and a privacy-safe result summary.
+- `ai_usage_ledger` reserves quota before provider work, consumes only after success, and releases on
+  failure, cancellation, or stale reconciliation. Redis enforces at most two active AI jobs per user.
+  Daily defaults are 100 coach messages, 20 question-generation jobs, and 50 subjective gradings.
+- The existing business ARQ queue is reused for AI jobs, while the scheduler queue remains isolated.
+  AI provider failure does not block learning, wordbooks, or persisted records.
+
+Set a deployment-owned master secret of at least 32 characters:
+
+```dotenv
+SECRET_ENCRYPTION_KEY=<strong-random-secret>
+```
+
+For local OpenAI-compatible tests only:
+
+```dotenv
+AI_ALLOW_PRIVATE_PROVIDER_URLS=true
+```
+
+Never commit provider keys, real prompts containing member data, or the master encryption secret.
+
+## AI practice sessions, drafts, grading, and records
+
+- `POST /api/v1/practice/sessions` creates fill-in-the-blank, reading, translation, or writing
+  practice and enqueues structured generation through the shared AI job queue.
+- `GET /api/v1/practice/sessions/{id}` returns only answer-safe public question fields. Correct
+  options, explanations, reference translations, reference essays, and grading remain in private
+  payloads until the session is submitted.
+- `PUT /api/v1/practice/sessions/{id}/draft` saves the caller's draft with optimistic version checks;
+  `POST /regenerate` is limited to unanswered sessions and invalidates the old generation.
+- Objective practice is graded synchronously by the server. Translation and writing use one bounded
+  batch grading AI job; a failed grading task returns an explicit failure and never a default score.
+- `GET /records`, `GET /mistakes`, `GET /records/{id}`, `DELETE /records/bulk`, and `GET /events`
+  are owner-scoped. Deleting a record cascades its questions, submission, draft, and learning events.
+- Migration `fbff60ce778f` adds practice sessions, generations, questions, submissions, events, and
+  idempotent deletion records; AI usage ledger amounts support per-question subjective grading.
+
+## In-app notifications, preferences, DND, and dedupe
+
+- `GET /api/v1/notifications` provides owner-scoped cursor pagination; `PATCH /notifications/{id}/read`
+  and `POST /notifications/read-all` change notification state only and never write learning or AI state.
+- `GET`/`PUT /api/v1/notifications/preferences` manage category switches, DND (`22:00-08:00` by default),
+  the active-learning daily limit, and the IANA timezone.
+- Notifications are generated through `notification_outbox` from real AI terminal states and scheduler
+  learning checks. `dedupe_key` is unique per user; suppressed and same-category merged records are
+  retained instead of being reported as sent.
+- AI completion/failure bypasses DND and is emitted once per terminal job. Other active learning
+  reminders honor category switches, DND, the daily limit, and same-category merging.
+- The scheduler handles due-review checks, 20:00 incomplete/streak-risk checks, outbox processing,
+  and expired-notification cleanup. v1 is in-app only; no email, SMS, or Web Push is implemented.
+- Migration `cd6e2b2dd57e` adds the notification inbox and outbox tables.
 
 ## Verification
 
@@ -118,6 +266,8 @@ uv run pytest
 uv run pytest
 uv run pytest tests/test_state_isolation.py -q
 uv run pytest tests/test_state_isolation.py -q
+uv run pytest tests/test_wordbooks.py -q
+uv run pytest tests/test_wordbook_jobs.py -q
 ```
 
 `pytest` always replaces application database and Redis settings with `TEST_*` values so a developer

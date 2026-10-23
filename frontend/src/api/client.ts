@@ -1,4 +1,5 @@
 import { ApiError, ContractError, isApiError } from './errors'
+import { parseValidationIssues } from './validation-errors'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -9,8 +10,14 @@ export interface RequestOptions {
   signal?: AbortSignal
   retryCount?: number
   skipAuthRefresh?: boolean
+  responseType?: 'json' | 'text' | 'blob'
 }
 
+export interface StreamOptions {
+  headers?: HeadersInit
+  signal?: AbortSignal
+  skipAuthRefresh?: boolean
+}
 const JSON_CONTENT_TYPE = 'application/json'
 
 function delay(milliseconds: number): Promise<void> {
@@ -128,13 +135,62 @@ export class ApiClient {
     return this.request<T>(path, { ...options, method: 'DELETE' })
   }
 
+  async stream(path: string, options: StreamOptions = {}): Promise<Response> {
+    const url = this.buildUrl(path)
+    const requestHeaders = new Headers(options.headers)
+    requestHeaders.set('Accept', 'text/event-stream')
+
+    if (this.accessToken) {
+      requestHeaders.set('Authorization', `Bearer ${this.accessToken}`)
+    }
+
+    const response = await this.fetchWithNetworkRetries(
+      url,
+      {
+        method: 'GET',
+        headers: requestHeaders,
+        credentials: 'include',
+        signal: options.signal,
+      },
+      0,
+    )
+
+    this.captureCsrfToken(response)
+    this.lastRequestId = response.headers.get('x-request-id')
+
+    if (!response.ok) {
+      const apiError = await this.createApiError(response, this.lastRequestId)
+
+      if (apiError.status === 401 && !options.skipAuthRefresh && this.accessToken && this.refreshHandler) {
+        try {
+          await this.refreshAccessTokenOnce()
+        } catch (refreshError) {
+          if (isApiError(refreshError) && refreshError.status === 401) {
+            this.sessionExpiredHandler?.()
+            throw apiError
+          }
+          throw refreshError
+        }
+
+        return this.stream(path, { ...options, skipAuthRefresh: true })
+      }
+
+      if (apiError.status === 401) {
+        this.sessionExpiredHandler?.()
+      }
+
+      throw apiError
+    }
+
+    return response
+  }
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const method = options.method ?? 'GET'
     const url = this.buildUrl(path)
     const retryCount = options.retryCount ?? (method === 'GET' ? 1 : 0)
     const requestHeaders = new Headers(options.headers)
 
-    requestHeaders.set('Accept', JSON_CONTENT_TYPE)
+    requestHeaders.set('Accept', options.responseType === 'blob' ? 'application/octet-stream' : JSON_CONTENT_TYPE)
 
     if (this.accessToken) {
       requestHeaders.set('Authorization', `Bearer ${this.accessToken}`)
@@ -206,6 +262,9 @@ export class ApiClient {
     const contentType = response.headers.get('content-type') ?? ''
     if (response.status === 204) {
       return undefined as T
+    }
+    if (options.responseType === 'blob') {
+      return (await response.blob()) as T
     }
     if (contentType.includes(JSON_CONTENT_TYPE)) {
       return (await response.json()) as T
@@ -285,6 +344,21 @@ export class ApiClient {
         ? (payload as Record<string, unknown>).details
         : null
     const retryable = response.status === 429 || response.status >= 500
+
+    // 422 uses the documented `HTTPValidationError` envelope instead of
+    // `ErrorResponse`, so it carries no `code`. Keep those issues reachable for
+    // the form instead of degrading the learner's only feedback to `HTTP_422`.
+    const validationIssues = response.status === 422 ? parseValidationIssues(payload) : []
+    if (validationIssues.length > 0) {
+      return new ApiError(
+        response.status,
+        'VALIDATION_ERROR',
+        bodyMessage ?? '提交的内容未通过服务端校验。',
+        { issues: validationIssues },
+        requestId,
+        false,
+      )
+    }
 
     return new ApiError(response.status, code, message, details, requestId, retryable)
   }
