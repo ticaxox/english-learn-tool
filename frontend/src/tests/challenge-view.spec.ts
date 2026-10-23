@@ -1,7 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import ChallengeView from '../views/ChallengeView.vue'
 import { ApiError } from '../api/errors'
 import type { ChallengeNode, ChallengeNodeDetail, ChallengePlan } from '../api/challenge'
@@ -26,7 +26,31 @@ vi.mock('../components/ChallengeBossPanel.vue', () => ({
   default: defineComponent({
     props: ['challengeId', 'nodeId', 'sessionId'],
     emits: ['completed'],
-    render() { return h('div', { 'data-test': 'boss-panel' }, 'BOSS panel') },
+    setup(_, { emit }) {
+      const completed = ref(false)
+      return () => h('div', { 'data-test': 'boss-panel' }, [
+        h('span', completed.value ? 'BOSS completed' : 'BOSS ready'),
+        h('button', {
+          class: 'emit-boss-completed',
+          type: 'button',
+          onClick: () => {
+            completed.value = true
+            emit('completed', {
+              challengeId: makePlan().id,
+              nodeId: mainNodes[2].id,
+              status: 'completed',
+              score: 80,
+              completed: true,
+              submissionId: 'submission-1',
+              result: { question_stats: { total: 5, correct: 4, mistakes: 1 } },
+              errorCode: null,
+              errorMessage: null,
+              message: 'The final challenge is complete.',
+            })
+          },
+        }, 'emit completed'),
+      ])
+    },
   }),
 }))
 
@@ -91,6 +115,8 @@ function detail(node: ChallengeNode, actions: ChallengeNodeDetail['allowedAction
 
 describe('challenge view', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-10-23T12:00:00+08:00'))
     vi.clearAllMocks()
     challengeMocks.getTodayChallenge.mockResolvedValue(makePlan())
     challengeMocks.getChallenge.mockResolvedValue(makePlan())
@@ -99,6 +125,10 @@ describe('challenge view', () => {
     challengeMocks.getChallengeHistory.mockResolvedValue({ items: [{ id: makePlan().id, localDate: currentLocalDate, status: 'ready', title: '今日闯关', summary: '地图已生成', targetMinutes: 30, mainCompleted: 0, mainTotal: 3, challengeCompletedAt: null }], nextCursor: null, hasMore: false })
     challengeMocks.getChallengeNodeDetail.mockResolvedValue(detail(mainNodes[0], ['start']))
     challengeMocks.startChallengeNode.mockResolvedValue({ challengeId: makePlan().id, nodeId: mainNodes[0].id, status: 'in_progress', resourceType: 'memory', resourceId: 'memory-session-1', jobId: null, message: 'The memory task is ready.' })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('renders the server map, statuses, progress, optional branch, and history', async () => {
@@ -159,6 +189,76 @@ describe('challenge view', () => {
     expect(wrapper.find('[data-test="boss-panel"]').exists()).toBe(true)
   })
 
+  it('keeps the BOSS result panel mounted while the completed map refreshes from the server', async () => {
+    const initial = makePlan({
+      mainCompleted: 2,
+      nodes: [
+        { ...mainNodes[0], status: 'completed', completedAt: '2026-10-23T09:00:00Z' },
+        { ...mainNodes[1], status: 'completed', completedAt: '2026-10-23T09:10:00Z' },
+        { ...mainNodes[2], status: 'in_progress', resourceType: 'practice', resourceId: 'boss-session-1' },
+        optionalNode,
+      ],
+    })
+    const completed = makePlan({
+      status: 'completed', mainCompleted: 3, challengeCompletedAt: '2026-10-23T09:30:00Z',
+      nodes: [
+        { ...mainNodes[0], status: 'completed', completedAt: '2026-10-23T09:00:00Z' },
+        { ...mainNodes[1], status: 'completed', completedAt: '2026-10-23T09:10:00Z' },
+        { ...mainNodes[2], status: 'completed', resourceType: 'practice', resourceId: 'boss-session-1', completedAt: '2026-10-23T09:30:00Z' },
+        optionalNode,
+      ],
+    })
+    challengeMocks.getTodayChallenge.mockResolvedValueOnce(initial).mockResolvedValueOnce(completed)
+    challengeMocks.getChallengeNodeDetail.mockResolvedValueOnce(detail(initial.nodes[2], ['resume']))
+    challengeMocks.startChallengeNode.mockResolvedValueOnce({ challengeId: initial.id, nodeId: mainNodes[2].id, status: 'in_progress', resourceType: 'practice', resourceId: 'boss-session-1', jobId: 'job-1', message: 'The practice task is ready.' })
+    const { wrapper } = await mountView()
+    await wrapper.findAll('.challenge-node')[2].get('button').trigger('click')
+    await flushPromises()
+    await wrapper.findAll('.challenge-node-detail button').find((button) => button.text() === '继续节点')!.trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-test="boss-panel"]').exists()).toBe(true)
+    await wrapper.get('.emit-boss-completed').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-test="boss-panel"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('BOSS completed')
+    expect(wrapper.text()).not.toContain('BOSS ready')
+    expect(wrapper.text()).toContain('主线 3 / 3')
+    expect(challengeMocks.getTodayChallenge).toHaveBeenCalledTimes(2)
+  })
+
+  it('opens the real completed BOSS result from an already completed node', async () => {
+    const completedBoss = makeNode({
+      id: mainNodes[2].id,
+      clientKey: 'boss-1',
+      nodeType: 'BOSS',
+      orderIndex: 3,
+      title: '终点挑战',
+      status: 'completed',
+      resourceType: 'practice',
+      resourceId: 'boss-session-1',
+      completedAt: '2026-10-23T09:30:00Z',
+      practiceSpec: { practice_type: 'fill_blank', count: 5 },
+    })
+    const completedPlan = makePlan({
+      status: 'completed', mainCompleted: 3, challengeCompletedAt: '2026-10-23T09:30:00Z',
+      nodes: [
+        { ...mainNodes[0], status: 'completed', completedAt: '2026-10-23T09:00:00Z' },
+        { ...mainNodes[1], status: 'completed', completedAt: '2026-10-23T09:10:00Z' },
+        completedBoss,
+        optionalNode,
+      ],
+    })
+    challengeMocks.getTodayChallenge.mockResolvedValueOnce(completedPlan)
+    challengeMocks.getChallengeNodeDetail.mockResolvedValueOnce(detail(completedBoss, ['view_result']))
+    const { wrapper, router } = await mountView()
+    await wrapper.findAll('.challenge-node')[2].get('button').trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('终点挑战结果由服务端保存，可查看完整结果')
+    await wrapper.findAll('.challenge-node-detail button').find((button) => button.text() === '查看节点结果')!.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.fullPath).toBe('/practice/boss-session-1')
+    expect(challengeMocks.startChallengeNode).not.toHaveBeenCalled()
+  })
   it('keeps a past map read-only even when the server allows no mutation', async () => {
     challengeMocks.getTodayChallenge.mockResolvedValueOnce(makePlan({ localDate: '2026-10-20' }))
     const { wrapper } = await mountView()
