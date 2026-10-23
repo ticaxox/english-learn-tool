@@ -82,8 +82,6 @@ let requestSerial = 0
 const hasNoAggregate = computed(() => {
   if (!dashboard.value || dashboard.value.privacy.suppressed) return false
   return dashboard.value.metrics.totalMembers === 0
-    && dashboard.value.trend.length === 0
-    && dashboard.value.groups.length === 0
 })
 
 const summaryCards = computed(() => {
@@ -285,9 +283,9 @@ onMounted(() => {
       </section>
 
       <section v-else-if="hasNoAggregate" class="panel dashboard-empty" role="status">
-        <p class="eyebrow">No aggregate data</p>
-        <h2>当前范围没有可展示数据</h2>
-        <p>服务端返回了空的组织范围。请调整日期、部门或学习小组后重试；空范围不会显示为完成的 0。</p>
+        <p class="eyebrow">No members in scope</p>
+        <h2>当前筛选范围内没有成员</h2>
+        <p>服务端确认该筛选范围没有成员。请调整日期、部门或学习小组；这不是系统故障，也不会把空范围显示成完成的 0 指标。</p>
       </section>
 
       <template v-else>

@@ -88,15 +88,33 @@ describe('admin dashboard view', () => {
     expect(wrapper.find('.dashboard-summary').exists()).toBe(false)
   })
 
-  it('shows an explicit empty range state', async () => {
+  it('shows a normal no-members state even when the server returns zero trend points', async () => {
+    const zeroTrend = makeDashboard().trend.map((point, index) => ({
+      ...point,
+      localDate: `2026-10-${String(17 + index).padStart(2, '0')}`,
+      activeMembers: 0,
+      studyMinutes: 0,
+      plansCompleted: 0,
+      practiceSubmissions: 0,
+      practiceCorrectRate: null,
+      mistakes: 0,
+      memoryEvents: 0,
+      aiJobs: 0,
+      aiFailed: 0,
+      challengesCompleted: 0,
+    }))
     dashboardMocks.fetchAdminDashboard.mockResolvedValue(makeDashboard({
-      metrics: { ...makeDashboard().metrics, totalMembers: 0, activeMembers: null, studyMinutes: null },
-      trend: [],
+      privacy: { suppressed: false, minimumGroupSize: 3, reason: null },
+      metrics: { ...makeDashboard().metrics, totalMembers: 0, activeMembers: 0, studyMinutes: 0 },
+      trend: zeroTrend,
       groups: [],
+      suppressedGroupCount: 0,
       quotaUsage: [],
     }))
     const wrapper = await mountView()
-    expect(wrapper.text()).toContain('当前范围没有可展示数据')
+    expect(wrapper.text()).toContain('当前筛选范围内没有成员')
+    expect(wrapper.text()).toContain('这不是系统故障')
+    expect(wrapper.text()).not.toContain('聚合结果已按隐私规则抑制')
     expect(wrapper.find('.dashboard-summary').exists()).toBe(false)
   })
 

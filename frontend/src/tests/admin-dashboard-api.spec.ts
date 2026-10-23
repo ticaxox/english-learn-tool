@@ -103,6 +103,31 @@ describe('admin dashboard API contract', () => {
     expect(response.quotaUsage).toEqual([])
   })
 
+  it('distinguishes zero-member empty scope from small-sample privacy suppression', () => {
+    const empty = payload()
+    empty.metrics.total_members = 0
+    empty.privacy.suppressed = false
+    empty.groups = []
+    empty.suppressed_group_count = 0
+    const emptyResponse = parseAdminDashboard(empty)
+    expect(emptyResponse.metrics.totalMembers).toBe(0)
+    expect(emptyResponse.privacy.suppressed).toBe(false)
+
+    const small = payload()
+    small.metrics.total_members = 2
+    const smallMetrics = small.metrics as Record<string, unknown>
+    smallMetrics.active_members = null
+    smallMetrics.study_minutes = null
+    const smallPrivacy = small.privacy as Record<string, unknown>
+    smallPrivacy.suppressed = true
+    smallPrivacy.reason = 'aggregate sample below minimum size'
+    small.groups = []
+    small.suppressed_group_count = 1
+    const smallResponse = parseAdminDashboard(small)
+    expect(smallResponse.metrics.totalMembers).toBe(2)
+    expect(smallResponse.privacy.suppressed).toBe(true)
+    expect(smallResponse.privacy.reason).toBe('aggregate sample below minimum size')
+  })
   it('rejects malformed dates and unknown quota kinds', () => {
     const badDate = payload()
     badDate.filters.date_from = '2026/10/17'
