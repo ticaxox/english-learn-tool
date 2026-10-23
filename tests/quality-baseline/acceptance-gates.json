@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task": "T-QA-001",
   "title": "AI 英语学习工具验收门禁清单",
-  "updated_at": "2026-10-24T00:15:00+08:00",
+  "updated_at": "2026-10-24T01:00:00+08:00",
   "sources": [
     "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
     "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
@@ -1206,11 +1206,12 @@
         "gh workflow run / 检查 PR checks"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-003/logs/ci-39987401510-run.json",
+        "ai-workspace/04-qa/evidence/T-QA-003/logs/ci-39987401510-jobs.json",
+        "ai-workspace/04-qa/evidence/T-QA-003/T-QA-003-review.md"
       ],
-      "status": "FAIL",
-      "reason": "main 无 .github/workflows；PR #1/#2 无 CI 检查。"
+      "status": "PASS",
+      "reason": "PR #29 的 GitHub Actions run 39987401510 5/5 job 全部成功：后端真实 PG16/Redis7、前端构建/测试、Compose/迁移/存储、质量清单和 gitleaks 均通过。"
     },
     {
       "id": "F-DOC-01",

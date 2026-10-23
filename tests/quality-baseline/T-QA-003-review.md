@@ -50,6 +50,7 @@
 | F-IDEM-01 | PASS | 教练消息、撤销、BOSS 提交幂等/冲突 |
 | F-FAIL-01 | PASS | provider 失败、额度、重试、跨日失败态 |
 | F-MIG-01 | PASS | 空库升级/回滚/再升级/drift 0 |
+| F-CI-01 | PASS | PR #29 CI `39987401510` 5/5 jobs |
 | F-E2E-01 | CONDITIONAL | BOSS 结果面板缺口与空态口径 |
 | F-AI-CONTRACT-01 | CONDITIONAL | M4 只验证 coach_reply/challenge_plan 子集 |
 
