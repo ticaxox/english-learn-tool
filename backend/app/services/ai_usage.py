@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 
 from redis.asyncio import Redis
 from sqlalchemy import case, func, select
@@ -100,7 +101,8 @@ async def admin_usage(
     date_to: date | None = None,
 ) -> AdminAiUsageResponse:
     require_admin(actor)
-    today = utcnow().date()
+    zone = ZoneInfo(settings.app_timezone)
+    today = utcnow().astimezone(zone).date()
     start = date_from or today - timedelta(days=6)
     end = date_to or today
     if end < start or (end - start).days > 366:
@@ -109,8 +111,8 @@ async def admin_usage(
             code="AI_USAGE_DATE_RANGE_INVALID",
             message="The usage date range is invalid.",
         )
-    start_at = datetime.combine(start, time.min, tzinfo=UTC)
-    end_at = datetime.combine(end + timedelta(days=1), time.min, tzinfo=UTC)
+    start_at = datetime.combine(start, time.min, tzinfo=zone).astimezone(UTC)
+    end_at = datetime.combine(end + timedelta(days=1), time.min, tzinfo=zone).astimezone(UTC)
     job_filters = (AiJob.created_at >= start_at, AiJob.created_at < end_at)
     total_jobs = int(await session.scalar(select(func.count(AiJob.id)).where(*job_filters)) or 0)
     active_jobs = int(
