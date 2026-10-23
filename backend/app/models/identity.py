@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Index,
@@ -66,6 +67,20 @@ class User(Base):
 
 class UserProfile(Base):
     __tablename__ = "user_profiles"
+    __table_args__ = (
+        CheckConstraint(
+            "target_exam IS NULL OR target_exam IN ('CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL')",
+            name="user_profile_target_exam_valid",
+        ),
+        CheckConstraint(
+            "daily_new_words >= 5 AND daily_new_words <= 100",
+            name="user_profile_daily_new_words_range",
+        ),
+        CheckConstraint(
+            "daily_study_minutes >= 15 AND daily_study_minutes <= 180",
+            name="user_profile_daily_study_minutes_range",
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(
@@ -76,6 +91,26 @@ class UserProfile(Base):
     )
     department: Mapped[str | None] = mapped_column(String(100))
     learning_group: Mapped[str | None] = mapped_column(String(100))
+    target_exam: Mapped[str | None] = mapped_column(String(16))
+    exam_date: Mapped[date | None] = mapped_column(Date)
+    daily_new_words: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=20, server_default=text("20")
+    )
+    daily_study_minutes: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=30, server_default=text("30")
+    )
+    timezone: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default="Asia/Shanghai",
+        server_default=text("'Asia/Shanghai'"),
+    )
+    onboarding_completed: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
+    notification_preferences: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

@@ -1,11 +1,72 @@
+from app.models.ai import AiJob, AiJobEvent, AiPrompt, AiProvider, AiUsageLedger
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
+from app.models.learning import (
+    DailyActivity,
+    DailyPlan,
+    DailyPlanWord,
+    LearningHeartbeat,
+    MemoryConfig,
+    MemoryEvent,
+    MemorySession,
+    MemorySessionItem,
+    MistakeFlag,
+    UserWordState,
+)
+from app.models.notifications import Notification, NotificationOutbox
+from app.models.practice import (
+    PracticeDeletion,
+    PracticeEvent,
+    PracticeGeneration,
+    PracticeQuestion,
+    PracticeSession,
+    PracticeSubmission,
+)
 from app.models.system import SystemMetadata
+from app.models.wordbooks import (
+    Wordbook,
+    WordbookActivation,
+    WordbookDefinition,
+    WordbookEntry,
+    WordbookExample,
+    WordbookImportPreview,
+    WordbookJob,
+)
 
 __all__ = [
+    "AiJob",
+    "AiJobEvent",
+    "AiPrompt",
+    "AiProvider",
+    "AiUsageLedger",
     "AuditLog",
+    "DailyActivity",
+    "DailyPlan",
+    "DailyPlanWord",
     "ImportPreview",
+    "LearningHeartbeat",
+    "MemoryConfig",
+    "MemoryEvent",
+    "MemorySession",
+    "MemorySessionItem",
+    "MistakeFlag",
+    "Notification",
+    "NotificationOutbox",
+    "PracticeDeletion",
+    "PracticeEvent",
+    "PracticeGeneration",
+    "PracticeQuestion",
+    "PracticeSession",
+    "PracticeSubmission",
     "RefreshToken",
     "SystemMetadata",
     "User",
     "UserProfile",
+    "UserWordState",
+    "Wordbook",
+    "WordbookActivation",
+    "WordbookDefinition",
+    "WordbookEntry",
+    "WordbookExample",
+    "WordbookImportPreview",
+    "WordbookJob",
 ]

@@ -3,9 +3,13 @@ from __future__ import annotations
 import argparse
 import asyncio
 import getpass
+import json
 import os
 import sys
+import tempfile
 from collections.abc import Sequence
+from pathlib import Path
+from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -13,6 +17,13 @@ from app.core.config import get_settings
 from app.core.errors import AppError
 from app.db.session import create_engine, create_session_factory
 from app.services.users import bootstrap_admin
+from app.services.wordbook_parser import (
+    WordbookParseError,
+    parse_wordbook_bytes,
+    parse_wordbook_json_document,
+)
+
+WORDBOOK_CONVERTER_VERSION = "english-learn-wordbook-converter/1.0.0"
 
 
 class CliError(RuntimeError):
@@ -74,6 +85,81 @@ async def _bootstrap(username: str, display_name: str, password: str) -> str:
         await engine.dispose()
 
 
+def _atomic_write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            temporary_path.chmod(0o600)
+        except OSError:
+            pass
+        os.replace(temporary_path, path)
+    except Exception:
+        temporary_path.unlink(missing_ok=True)
+        raise
+
+
+def _convert_wordbook(
+    input_path: Path,
+    output_path: Path,
+    report_path: Path | None,
+) -> tuple[int, int, int]:
+    raw = input_path.read_bytes()
+    report: dict[str, Any] = {
+        "converter_version": WORDBOOK_CONVERTER_VERSION,
+        "source_filename": input_path.name,
+    }
+    try:
+        parsed = parse_wordbook_bytes(raw, input_path.name)
+    except WordbookParseError as exc:
+        report.update(
+            {
+                "status": "failed",
+                "error": {"code": exc.code, "message": exc.message, "details": exc.details},
+            }
+        )
+        if report_path is not None:
+            _atomic_write(
+                report_path,
+                json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            )
+        raise CliError(f"{exc.code}: {exc.message}") from exc
+
+    document = {
+        **parse_wordbook_json_document(parsed),
+        "converter_version": WORDBOOK_CONVERTER_VERSION,
+    }
+    report.update(
+        {
+            "status": "completed" if parsed.error_count == 0 else "completed_with_errors",
+            "detected_format": parsed.detected_format,
+            "encoding": parsed.encoding,
+            "delimiter": parsed.delimiter,
+            "total_rows": parsed.total_rows,
+            "valid_entries": len(parsed.entries),
+            "error_count": parsed.error_count,
+            "warning_count": parsed.warning_count,
+            "errors": parsed.errors,
+            "warnings": parsed.warnings,
+        }
+    )
+    _atomic_write(
+        output_path,
+        json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+    )
+    if report_path is not None:
+        _atomic_write(
+            report_path,
+            json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        )
+    return len(parsed.entries), parsed.warning_count, parsed.error_count
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m app.cli",
@@ -89,12 +175,43 @@ def _build_parser() -> argparse.ArgumentParser:
             "BOOTSTRAP_ADMIN_PASSWORD, or prompted without echoing the password."
         ),
     )
+    convert_parser = subcommands.add_parser(
+        "convert-wordbook",
+        help="Convert a supported import file to deterministic wordbook JSON.",
+        description=(
+            "Run the production normalizer, duplicate merger, and validation rules, then "
+            f"write deterministic JSON using {WORDBOOK_CONVERTER_VERSION}."
+        ),
+    )
+    convert_parser.add_argument("input", type=Path, help="Approved CSV, JSON, or TXT source.")
+    convert_parser.add_argument("output", type=Path, help="Destination canonical JSON file.")
+    convert_parser.add_argument(
+        "--report",
+        type=Path,
+        help="Optional JSON report containing warnings and rejected rows.",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     arguments = parser.parse_args(argv)
+    if arguments.command == "convert-wordbook":
+        try:
+            valid, warnings, errors = _convert_wordbook(
+                arguments.input,
+                arguments.output,
+                arguments.report,
+            )
+        except (CliError, OSError) as exc:
+            print(f"Conversion failed: {exc}", file=sys.stderr)
+            return 2
+        print(
+            f"Converted {valid} entries with {warnings} warnings and {errors} rejected rows "
+            f"to {arguments.output}."
+        )
+        return 0 if errors == 0 else 2
+
     if arguments.command != "bootstrap-admin":
         parser.error("Unsupported command.")
 
