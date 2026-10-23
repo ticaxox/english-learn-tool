@@ -98,7 +98,29 @@ describe('challenge BOSS panel', () => {
       expect.arrayContaining([{ questionId: 'q-1', answer: 'answer-1' }]),
       expect.any(String),
     )
-    expect(wrapper.text()).toContain('得分：80')
+    expect(wrapper.text()).toContain('终点挑战已完成')
+    expect(wrapper.text()).toContain('得分')
+    expect(wrapper.text()).toContain('共 5 题')
+    expect(wrapper.text()).not.toContain('题已作答')
+    expect(wrapper.findAll('.question-answer')).toHaveLength(0)
+    expect(wrapper.find('.challenge-boss__submit').exists()).toBe(false)
+    expect(wrapper.get('a').attributes('href')).toBe('/practice/boss-session-1')
+    expect(wrapper.emitted('completed')).toHaveLength(1)
+  })
+
+  it('keeps a safe completed state when the server omits score and stats', async () => {
+    challengeMocks.submitChallengeBoss.mockResolvedValueOnce({
+      ...completedResult(), score: null, result: null, message: '',
+    })
+    const wrapper = mount(ChallengeBossPanel, { props: { challengeId: 'challenge-1', nodeId: 'boss-1', sessionId: 'boss-session-1' } })
+    await flushPromises()
+    const inputs = wrapper.findAll('.question-answer')
+    for (let index = 0; index < inputs.length; index += 1) await inputs[index].setValue(`answer-${index + 1}`)
+    await wrapper.findAll('button').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('终点挑战已完成')
+    expect(wrapper.text()).toContain('服务端已确认本次终点挑战完成')
+    expect(wrapper.text()).not.toContain('0 / 5 题已作答')
     expect(wrapper.emitted('completed')).toHaveLength(1)
   })
 

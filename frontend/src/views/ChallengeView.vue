@@ -39,6 +39,7 @@ const nodeLoading = ref(false)
 const nodeError = ref<unknown>(null)
 const nodeStarting = ref(false)
 const bossSession = ref<{ nodeId: string; sessionId: string } | null>(null)
+const planRefreshError = ref<unknown>(null)
 
 const historyItems = ref<ChallengeHistoryItem[]>([])
 const historyOffset = ref(0)
@@ -85,14 +86,19 @@ function nodeActionLabel(node: ChallengeNode): string {
   return '开始节点'
 }
 
+async function fetchPlan(): Promise<ChallengePlan> {
+  return routeChallengeId.value
+    ? await getChallenge(routeChallengeId.value)
+    : await getTodayChallenge()
+}
+
 async function loadPlan(): Promise<void> {
   loading.value = true
   error.value = null
   notGenerated.value = false
+  planRefreshError.value = null
   try {
-    plan.value = routeChallengeId.value
-      ? await getChallenge(routeChallengeId.value)
-      : await getTodayChallenge()
+    plan.value = await fetchPlan()
     if (selectedNode.value) selectedNode.value = null
   } catch (requestError) {
     if (!routeChallengeId.value && isNotGenerated(requestError)) {
@@ -104,6 +110,16 @@ async function loadPlan(): Promise<void> {
     }
   } finally {
     loading.value = false
+  }
+}
+
+async function refreshPlanSilently(): Promise<void> {
+  planRefreshError.value = null
+  try {
+    plan.value = await fetchPlan()
+    if (selectedNode.value) selectedNode.value = null
+  } catch (requestError) {
+    planRefreshError.value = requestError
   }
 }
 
@@ -190,7 +206,7 @@ async function startNode(detail: ChallengeNodeDetail): Promise<void> {
 }
 
 async function viewResult(detail: ChallengeNodeDetail): Promise<void> {
-  if (!plan.value || !detail.node.resourceId || detail.node.nodeType === 'BOSS') return
+  if (!plan.value || !detail.node.resourceId) return
   if (detail.node.resourceType === 'memory') {
     await router.push({
       name: 'memory',
@@ -233,7 +249,7 @@ async function loadHistory(reset = true): Promise<void> {
 }
 
 function onBossCompleted(_result: ChallengeBossResult): void {
-  void loadPlan()
+  void refreshPlanSilently()
   void loadHistory(true)
 }
 
@@ -361,16 +377,18 @@ onMounted(() => {
         <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
         <p v-if="selectedNode.node.status === 'locked'" class="inline-note">前一个主线节点完成后，服务端才会解锁此节点。</p>
         <p v-else-if="readOnly" class="inline-note">跨日地图只读，不能开始或重做节点。</p>
+        <p v-else-if="selectedNode.node.nodeType === 'BOSS' && selectedNode.node.status === 'completed'" class="inline-note">终点挑战结果由服务端保存，可查看完整结果。</p>
         <ErrorNotice v-if="nodeError" :error="nodeError" :show-retry="false" />
         <div class="button-row">
           <button v-if="selectedNode.allowedActions.includes('start') || selectedNode.allowedActions.includes('resume')" class="button" type="button" :disabled="readOnly || nodeStarting" @click="startNode(selectedNode)">
             {{ nodeStarting ? '正在启动…' : (selectedNode.allowedActions.includes('resume') ? '继续节点' : '开始节点') }}
           </button>
-          <button v-if="selectedNode.allowedActions.includes('view_result') && selectedNode.node.nodeType !== 'BOSS'" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
+          <button v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
           <RouterLink class="button-secondary" to="/overview">传统学习入口</RouterLink>
         </div>
       </section>
 
+      <ErrorNotice v-if="planRefreshError" :error="planRefreshError" :show-retry="false" />
       <ChallengeBossPanel v-if="bossSession" :key="bossSession.sessionId" :challenge-id="plan.id" :node-id="bossSession.nodeId" :session-id="bossSession.sessionId" @completed="onBossCompleted" />
 
       <section id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">

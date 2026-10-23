@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+
 import ErrorNotice from './ErrorNotice.vue'
 import LoadingState from './LoadingState.vue'
 import PracticeQuestionCard from './PracticeQuestionCard.vue'
@@ -26,6 +27,24 @@ const questions = computed(() => practice.session.value?.questions ?? [])
 const allAnswered = computed(() =>
   questions.value.length > 0 && questions.value.every((question) => Boolean(answers[question.id]?.trim())),
 )
+const completed = computed(() => bossResult.value?.completed === true && bossResult.value.status === 'completed')
+const resultStatusLabel = computed(() => {
+  if (completed.value) return '已完成'
+  if (bossResult.value?.status === 'scoring') return '正在评分'
+  if (bossResult.value?.status === 'failed') return '提交失败'
+  return '进行中'
+})
+const questionStats = computed(() => {
+  const value = bossResult.value?.result?.question_stats
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return null
+  const record = value as Record<string, unknown>
+  return {
+    total: typeof record.total === 'number' ? record.total : null,
+    correct: typeof record.correct === 'number' ? record.correct : null,
+    mistakes: typeof record.mistakes === 'number' ? record.mistakes : null,
+  }
+})
+const resultLink = computed(() => `/practice/${encodeURIComponent(props.sessionId)}`)
 
 function newKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
@@ -99,7 +118,7 @@ onMounted(() => {
         <h2 id="challenge-boss-title">终点挑战</h2>
         <p class="field-hint">固定 5–10 题；分数不会阻止当天通关，提交后不可重做。</p>
       </div>
-      <span class="challenge-node__status">{{ bossResult?.status === 'completed' ? '已完成' : bossResult?.status === 'scoring' ? '正在评分' : '进行中' }}</span>
+      <span class="challenge-node__status">{{ resultStatusLabel }}</span>
     </div>
 
     <LoadingState v-if="practice.loading.value || practice.generating.value" label="正在读取真实 BOSS 题目…" />
@@ -109,6 +128,26 @@ onMounted(() => {
       retry-label="重新读取 BOSS"
       @retry="load"
     />
+
+    <section v-else-if="completed" class="challenge-boss__result challenge-boss__result--completed" aria-live="polite">
+      <p class="eyebrow">Server-confirmed result</p>
+      <h3>终点挑战已完成</h3>
+      <p>{{ bossResult?.message || '服务端已确认本次终点挑战完成。' }}</p>
+      <dl class="challenge-boss__summary">
+        <div v-if="bossResult?.score !== null && bossResult?.score !== undefined">
+          <dt>得分</dt><dd>{{ bossResult.score }}</dd>
+        </div>
+        <div v-if="questionStats">
+          <dt>题目</dt>
+          <dd>
+            共 {{ questionStats.total ?? '—' }} 题 · 正确 {{ questionStats.correct ?? '—' }} · 错题 {{ questionStats.mistakes ?? '—' }}
+          </dd>
+        </div>
+      </dl>
+      <p class="field-hint">结果已由服务端保存；刷新页面或重新进入已完成节点仍可查看。</p>
+      <a class="button-secondary" :href="resultLink">查看完整结果</a>
+    </section>
+
     <div v-else-if="questions.length === 0" class="alert alert-warning">
       <strong>服务端尚未返回 BOSS 题目</strong>
       <p>页面不会生成替代题；请稍后刷新。</p>
@@ -141,4 +180,3 @@ onMounted(() => {
     </template>
   </section>
 </template>
-
