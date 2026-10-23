@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from app.models.practice import PracticeQuestion, PracticeSession, PracticeSubmission
 from app.services.ai_jobs import process_ai_job
+from app.services.learning import local_date_for
 from tests.ai_support import (
     create_provider,
     fake_provider_server,
@@ -264,7 +265,12 @@ async def test_four_practice_types_draft_regenerate_submit_records_and_delete(
         )
         assert translation_submit.status_code == 202, translation_submit.text
         assert translation_submit.json()["status"] == "scoring"
-        admin_usage = await client.get("/api/v1/admin/ai/usage", headers=admin_headers)
+        usage_date = local_date_for(app.state.settings, member_user)
+        admin_usage = await client.get(
+            "/api/v1/admin/ai/usage",
+            headers=admin_headers,
+            params={"date_from": usage_date.isoformat(), "date_to": usage_date.isoformat()},
+        )
         subjective_reserved = next(
             item
             for item in admin_usage.json()["quotas"]
