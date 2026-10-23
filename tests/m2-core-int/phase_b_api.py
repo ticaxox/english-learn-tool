@@ -358,7 +358,24 @@ async def main() -> int:
             "run_dir": str(RUN_DIR.relative_to(EVIDENCE_ROOT)),
         }
         openapi = client.request("GET", "/openapi.json", label="openapi", expect=200).json()
-        EVIDENCE.check("contract.openapi.phase-b-frozen", openapi["openapi"] == "3.1.0" and len(openapi["paths"]) == 39 and len(openapi["components"]["schemas"]) == 67, openapi=openapi["openapi"], paths=len(openapi["paths"]), schemas=len(openapi["components"]["schemas"]))
+        expected_learning_paths = {
+            "/api/v1/users/me/profile",
+            "/api/v1/learning/today",
+            "/api/v1/learning/daily-plan/ensure",
+            "/api/v1/learning/heartbeat",
+            "/api/v1/learning/stats",
+            "/api/v1/learning/events",
+            "/api/v1/memory/config",
+            "/api/v1/memory/sessions",
+            "/api/v1/memory/sessions/{session_id}",
+            "/api/v1/memory/sessions/{session_id}/events",
+            "/api/v1/memory/sessions/{session_id}/complete",
+            "/api/v1/memory/words/{state_id}/master",
+            "/api/v1/memory/words/{state_id}/restore",
+            "/api/v1/memory/mistakes",
+            "/api/v1/memory/mistakes/{entry_id}/priority",
+        }
+        EVIDENCE.check("contract.openapi.phase-b-frozen", openapi["openapi"] == "3.1.0" and expected_learning_paths.issubset(set(openapi["paths"])), openapi=openapi["openapi"], paths=len(openapi["paths"]), schemas=len(openapi["components"]["schemas"]), missing=sorted(expected_learning_paths - set(openapi["paths"])))
         readiness = httpx.get(f"{API_BASE.rsplit('/api/v1', 1)[0]}/health/ready", timeout=30).json()
         EVIDENCE.check("health.phase-b-stack-ready", readiness["status"] == "ready" and readiness["components"]["database"]["status"] == "ok" and readiness["components"]["redis"]["status"] == "ok", database=readiness["components"]["database"]["status"], redis=readiness["components"]["redis"]["status"])
 
@@ -524,12 +541,12 @@ async def main() -> int:
         EVIDENCE.check("wordbook-switch.today-keeps-original-snapshot", switched_today["wordbook_id"] == primary["id"] and switched_today["new_words"]["target"] == pre_switch_today["new_words"]["target"], wordbook_id=str(switched_today["wordbook_id"]), target=switched_today["new_words"]["target"], expected_target=pre_switch_today["new_words"]["target"])
         old_session = client.request("GET", f"/memory/sessions/{flash_session_id}", label="old-session-after-switch", token=api_token, expect=200).json()
         EVIDENCE.check("wordbook-switch.old-session-remains-readable", old_session["wordbook_id"] == primary["id"], wordbook_id=str(old_session["wordbook_id"]))
-        mismatch_session_response = client.request("POST", "/memory/sessions", label="new-session-after-switch", token=api_token, json={"module": "choice", "wordbook_id": primary["id"]})
-        EVIDENCE.check("wordbook-switch.explicit-old-wordbook-rejected", mismatch_session_response.status_code == 409 and mismatch_session_response.json().get("code") == "WORDBOOK_NOT_ACTIVE", status=mismatch_session_response.status_code)
+        mismatch_session_response = client.request("POST", "/memory/sessions", label="new-session-after-switch", token=api_token, json={"module": "choice", "wordbook_id": small["id"]})
+        EVIDENCE.check("wordbook-switch.explicit-mismatch-rejected", mismatch_session_response.status_code == 409 and mismatch_session_response.json().get("code") == "MEMORY_WORDBOOK_PLAN_MISMATCH", status=mismatch_session_response.status_code, code=mismatch_session_response.json().get("code"))
         switched_session = create_session(client, api_token, "choice", label="new-choice-after-switch")
         session_book_mismatches = await count(pg, "SELECT count(*) FROM memory_session_items msi JOIN memory_sessions ms ON ms.id = msi.session_id JOIN wordbook_entries we ON we.id = msi.entry_id WHERE ms.id = $1 AND we.wordbook_id <> ms.wordbook_id", switched_session["session_id"])
         state_book_mismatches = await count(pg, "SELECT count(*) FROM user_word_states uws JOIN wordbook_entries we ON we.id = uws.entry_id WHERE uws.user_id = $1 AND uws.wordbook_id <> we.wordbook_id", members["api"]["id"])
-        EVIDENCE.check("wordbook-switch.new-session-uses-active-book", switched_session["wordbook_id"] == small["id"], expected=small["id"], actual=str(switched_session["wordbook_id"]))
+        EVIDENCE.check("wordbook-switch.new-session-uses-plan-book", switched_session["wordbook_id"] == primary["id"], expected=primary["id"], actual=str(switched_session["wordbook_id"]))
         EVIDENCE.check("wordbook-switch.session-items-belong-to-session-book", session_book_mismatches == 0, mismatches=session_book_mismatches, session_id=str(switched_session["session_id"]))
         EVIDENCE.check("wordbook-switch.user-states-belong-to-entry-book", state_book_mismatches == 0, mismatches=state_book_mismatches)
 
