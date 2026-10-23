@@ -16,6 +16,8 @@ import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LearningSettingsView from '../views/LearningSettingsView.vue'
 import MemoryPracticeView from '../views/MemoryPracticeView.vue'
+import NotificationsView from '../views/NotificationsView.vue'
+import NotificationPreferencesView from '../views/NotificationPreferencesView.vue'
 import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeSessionView from '../views/PracticeSessionView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
@@ -119,12 +121,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'notifications',
         name: 'notifications',
-        component: RemoteDataPage,
-        props: {
-          title: '通知',
-          description: '真实读取当前成员的通知；通知操作将在后续任务实现。',
-          endpoint: '/notifications',
-        },
+        component: NotificationsView,
+      },
+      {
+        path: 'notifications/preferences',
+        name: 'notification-preferences',
+        component: NotificationPreferencesView,
       },
       {
         path: 'settings',

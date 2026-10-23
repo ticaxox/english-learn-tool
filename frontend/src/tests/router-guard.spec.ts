@@ -62,6 +62,32 @@ describe('route guards', () => {
     expect(router.currentRoute.value.query.access).toBe('denied')
   })
 
+  it('allows members to open the notification center and preferences', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/notifications')
+    expect(router.currentRoute.value.name).toBe('notifications')
+
+    await router.push('/notifications/preferences')
+    expect(router.currentRoute.value.name).toBe('notification-preferences')
+  })
+
+  it('redirects unauthenticated notification access to login with a return path', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.clearSession()
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/notifications/preferences')
+
+    expect(router.currentRoute.value.name).toBe('login')
+    expect(router.currentRoute.value.query.redirect).toBe('/notifications/preferences')
+  })
   it('forces a password change before other authenticated routes', async () => {
     const pinia = createPinia()
     const auth = useAuthStore(pinia)

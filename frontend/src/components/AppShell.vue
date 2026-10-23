@@ -16,6 +16,7 @@ const memberLinks = [
   { label: '每日闯关', to: '/challenges' },
   { label: 'AI 教练', to: '/coach' },
   { label: '通知', to: '/notifications' },
+  { label: '通知偏好', to: '/notifications/preferences' },
   { label: '学习设置', to: '/settings' },
 ]
 
