@@ -322,6 +322,7 @@ async def process_notification_outbox(
                     select(func.count(Notification.id)).where(
                         Notification.user_id == user.id,
                         Notification.status == "sent",
+                        Notification.category.notin_(AI_CATEGORIES),
                         Notification.sent_at >= start_at,
                         Notification.sent_at < end_at,
                     )
