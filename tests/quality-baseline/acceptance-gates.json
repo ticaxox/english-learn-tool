@@ -2,14 +2,15 @@
   "schema_version": 1,
   "task": "T-QA-001",
   "title": "AI 英语学习工具验收门禁清单",
-  "updated_at": "2026-10-24T01:00:00+08:00",
+  "updated_at": "2026-10-24T03:20:00+08:00",
   "sources": [
     "ai-workspace/02-product/decisions/USER-DELIVERY-001.md",
     "ai-workspace/02-product/AI英语学习工具_v1.1_落地开发文档.md",
     "ai-workspace/10-collaboration/tasks/T-BE-001.md",
     "ai-workspace/10-collaboration/tasks/T-FE-001.md",
     "ai-workspace/10-collaboration/tasks/T-QA-001.md",
-    "ai-workspace/10-collaboration/tasks/T-QA-003.md"
+    "ai-workspace/10-collaboration/tasks/T-QA-003.md",
+    "ai-workspace/10-collaboration/tasks/T-QA-004.md"
   ],
   "gates": [
     {
@@ -556,11 +557,13 @@
         "pytest -q tests/ai_contract/test_provider_failover.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无 AI 提供商/提示词模型、API、加密或连接测试。"
+      "status": "PASS",
+      "reason": "M3/M4 真实 provider、提示词、模型连接、额度、备用切换与失败态在真实 PG/Redis/ARQ 链路通过。"
     },
     {
       "id": "F-BOOK-01",
@@ -585,11 +588,14 @@
         "playwright test wordbooks.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "前端只有 /wordbooks 真实 GET 骨架；后端无词书 API/表。"
+      "status": "PASS",
+      "reason": "词书导入/预览/映射/激活/删除及组织/私有边界由 M3/M4 链路、后端全量和前端全量覆盖。"
     },
     {
       "id": "F-MEM-01",
@@ -613,11 +619,13 @@
         "pytest -q tests/integration/test_memory_fsrs.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无单词状态、记忆会话、FSRS 或记忆界面。"
+      "status": "PASS",
+      "reason": "翻卡/选择/拼写、FSRS 会话、Again/Good、计划同步与 M4 共享进度均通过。"
     },
     {
       "id": "F-PROFILE-01",
@@ -641,11 +649,13 @@
         "pytest -q tests/integration/test_daily_plan.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无档案/计划业务；前端 /overview 仅显示真实响应摘要骨架。"
+      "status": "PASS",
+      "reason": "学习档案、每日计划、ensure、心跳、今日统计和跨用户边界通过。"
     },
     {
       "id": "F-PRACTICE-01",
@@ -670,11 +680,14 @@
         "playwright test practice.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-frontend-npm-test.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无练习领域与业务 API；前端只有列表 GET 骨架。"
+      "status": "PASS",
+      "reason": "填空/阅读/翻译/作文、草稿、提交、评分、历史与记录真实链路通过。"
     },
     {
       "id": "F-ANSWER-01",
@@ -696,11 +709,13 @@
         "pytest -q tests/security/test_answer_non_leak.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无题目数据模型或序列化脱敏实现。"
+      "status": "PASS",
+      "reason": "四类练习和 BOSS 提交前无答案/解析/分数，提交后按服务端结果返回。"
     },
     {
       "id": "F-RECORD-01",
@@ -723,11 +738,12 @@
         "pytest -q tests/integration/test_practice_records.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无练习记录表或批量删除 API。"
+      "status": "PASS",
+      "reason": "练习记录、错题本、私密草稿、所有与本人批量删除均在真实链路通过。"
     },
     {
       "id": "F-COACH-01",
@@ -862,11 +878,13 @@
         "pytest -q tests/integration/test_notifications.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无通知模型/API/worker 业务任务。"
+      "status": "PASS",
+      "reason": "通知偏好、DND、AI 例外、去重、额度与 scheduler 真实通知链路通过。"
     },
     {
       "id": "F-FAIL-01",
@@ -941,16 +959,12 @@
         "playwright test e2e/admin-member-journey.spec.ts"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-003/results/m4-20261024-0020/api-acceptance.json",
-        "ai-workspace/04-qa/evidence/T-QA-003/results/m4-20261024-0020/browser-acceptance.json",
-        "ai-workspace/04-qa/evidence/T-QA-003/T-QA-003-review.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/browser-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "CONDITIONAL",
-      "reason": "主链路浏览器 20/20 PASS，但 BOSS 提交后结果面板未保留，且真正零成员空态被隐私抑制优先覆盖。",
-      "conditions": [
-        "A20 修复 BOSS 提交后结果面板在父页面刷新期间丢失，并补浏览器结果态复验。",
-        "A10/A20 明确零成员组织范围应显示隐私抑制还是独立空态，并补一致浏览器证据。"
-      ]
+      "status": "PASS",
+      "reason": "管理员/成员、词书/AI/练习/通知/教练/闯关/看板连续真实浏览器链路通过。"
     },
     {
       "id": "F-AI-CONTRACT-01",
@@ -972,14 +986,13 @@
         "pytest -q tests/ai_contract"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-003/results/m4-20261024-0020/api-acceptance.json",
-        "ai-workspace/04-qa/evidence/T-QA-003/T-QA-003-review.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m4r-20261024-0242/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "CONDITIONAL",
-      "reason": "M4 的 coach_reply/challenge_plan Schema、真实 provider 输出与失败态通过；练习生成/评分等其他 AI 合同不在本任务范围。",
-      "conditions": [
-        "在后续 M5/最终 QA 中合并验证全部 AI 任务类型的 Schema、答案防泄露与失败态。"
-      ]
+      "status": "PASS",
+      "reason": "全部 AI 任务类型 Schema、答案防泄露、失败态和 M4 coach/challenge 合同均有真实证据。"
     },
     {
       "id": "F-SEC-01",
@@ -1000,15 +1013,14 @@
         "pytest -q tests/security/test_app_security.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-probe-20261024-0312/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
       "status": "CONDITIONAL",
-      "reason": "认证、CSRF/Origin、限流、Cookie、Refresh 重放与越权检查已通过；CSP/安全响应头尚无证据。",
+      "reason": "基本安全响应头通过，但反向代理未配置 CSP，不能把安全头门禁视为完全通过。",
       "conditions": [
-        "补验 CSP 与安全响应头"
+        "补齐并验证 CSP 与安全响应头策略后再将 F-SEC-01 改为 PASS。"
       ]
     },
     {
@@ -1030,11 +1042,13 @@
         "pytest -q tests/security/test_ai_security.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-m3-20261024-0235/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-probe-20261024-0312/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无 AI 配置/调用实现，相关安全门无法执行。"
+      "status": "PASS",
+      "reason": "AI Key 掩码/密文、provider 私有 URL/元数据 SSRF 拒绝、异常输入和失败态通过。"
     },
     {
       "id": "F-SEC-03",
@@ -1055,11 +1069,12 @@
         "pytest -q tests/security/test_upload_security.py"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-probe-20261024-0312/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "无上传/导出实现。"
+      "status": "PASS",
+      "reason": "上传路径穿越、大小/编码、词书文件与 PDF/SVG/HTML 相关边界由真实探针和后端安全回归通过。"
     },
     {
       "id": "F-AUDIT-01",
@@ -1082,16 +1097,14 @@
         "执行备份恢复演练"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/AUTH-INT-001-TEST.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/README.md",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/live-api/20261023-012847/api-e2e-result.json",
-        "ai-workspace/04-qa/evidence/AUTH-INT-001/browser/20261023-013511/browser-e2e-result.json"
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backend-pytest.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/m5-backup-restore.log",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
       "status": "CONDITIONAL",
-      "reason": "真实审计事件 51 条、账号写事件 21 条且未包含秘密或私有学习正文；数据保留与备份恢复仍未验证。",
+      "reason": "审计日志和合成库备份恢复演练通过；生产备份审批、RPO/RTO 与 A40 恢复演练尚未完成。",
       "conditions": [
-        "验证审计保留策略/轮转",
-        "完成备份恢复演练"
+        "A40 完成生产备份/恢复审批并记录 RPO/RTO 演练，关闭后才能 PASS。"
       ]
     },
     {
@@ -1151,11 +1164,12 @@
         "健康检查"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/ci-39999074319-run.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/ci-39999074319-jobs.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "FAIL",
-      "reason": "仓库 main 当前只有 AGENTS.md；无 Compose、Dockerfile 或启动证据。"
+      "status": "PASS",
+      "reason": "CI run 39999074319 的 Compose 构建、空库迁移、存储、启动与健康检查 5/5 通过。"
     },
     {
       "id": "F-DEMO-01",
@@ -1179,11 +1193,11 @@
         "按 README 登录复核"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/README.md",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
       "status": "FAIL",
-      "reason": "无演示数据初始化脚本或评审账号说明。"
+      "reason": "根目录仍无可由普通用户执行的比赛演示数据初始化入口与账号说明。"
     },
     {
       "id": "F-CI-01",
@@ -1206,12 +1220,12 @@
         "gh workflow run / 检查 PR checks"
       ],
       "evidence": [
-        "ai-workspace/04-qa/evidence/T-QA-003/logs/ci-39987401510-run.json",
-        "ai-workspace/04-qa/evidence/T-QA-003/logs/ci-39987401510-jobs.json",
-        "ai-workspace/04-qa/evidence/T-QA-003/T-QA-003-review.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/ci-39999074319-run.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/logs/ci-39999074319-jobs.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
       "status": "PASS",
-      "reason": "PR #29 的 GitHub Actions run 39987401510 5/5 job 全部成功：后端真实 PG16/Redis7、前端构建/测试、Compose/迁移/存储、质量清单和 gitleaks 均通过。"
+      "reason": "基线 CI run 39999074319 的 5/5 作业通过，包含后端、前端、Compose、迁移、质量清单和 gitleaks。"
     },
     {
       "id": "F-DOC-01",
@@ -1233,11 +1247,11 @@
         "按 README 在 10 分钟内完成本地/容器启动"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/README.md",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
       "status": "FAIL",
-      "reason": "当前只有 backend/frontend 组件 README；main 无根 README、部署说明或比赛文档。"
+      "reason": "根 README 仍描述旧工程骨架，未更新 M2–M4 完成能力、演示步骤与比赛文档正文。"
     },
     {
       "id": "F-GIT-01",
@@ -1290,11 +1304,12 @@
         "SSE timing probe"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/results/m5-probe-20261024-0312/api-acceptance.json",
+        "ai-workspace/04-qa/evidence/T-QA-004/README.md",
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
-      "status": "NOT_RUN",
-      "reason": "业务接口与部署环境尚未存在，当前无可测负载路径。"
+      "status": "PASS",
+      "reason": "真实栈读 P95 0.031 ms、提交 47 ms、5000 行导入 1.92 s、SSE 首事件 31 ms，均在阈值内。"
     },
     {
       "id": "F-COMP-01",
@@ -1316,11 +1331,10 @@
         "执行最终演示清单与安全检查"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md"
       ],
       "status": "FAIL",
-      "reason": "最终 MVP、部署和比赛材料未交付。"
+      "reason": "比赛视频、演示截图/事实清单和最终材料尚未交付。"
     },
     {
       "id": "F-FINAL-01",
@@ -1342,11 +1356,11 @@
         "python tests/quality-baseline/validate_manifest.py --workspace-root ..\\.. --require-final-pass"
       ],
       "evidence": [
-        "ai-workspace/10-collaboration/reports/T-QA-001-TEST.md",
-        "ai-workspace/04-qa/plans/T-QA-001-acceptance-matrix.md"
+        "ai-workspace/04-qa/evidence/T-QA-004/T-QA-004-review.md",
+        "ai-workspace/04-qa/evidence/T-QA-004/README.md"
       ],
       "status": "FAIL",
-      "reason": "当前仅有 Stage A 工程基线；不得把阶段完成当作最终 MVP 完成。"
+      "reason": "M5 仍有 CSP、生产备份、发布标签、演示数据和比赛文档/视频条件；最终 MVP 不得 PASS。"
     }
   ]
 }
