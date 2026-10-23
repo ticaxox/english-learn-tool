@@ -1,6 +1,6 @@
 # AI 英语学习工具｜前端
 
-这是 v1.1 的 Vue 3 应用，覆盖真实认证、成员管理、词书工作区、T-FE-004 学习工作区、T-FE-005 AI 管理员页面，T-FE-006 的四类 AI 练习、草稿、结果、记录与错题，以及 T-FE-007 的站内通知中心与通知偏好。所有业务状态、评分、队列、连接检查和用量均以服务端为唯一真相，不使用静态业务假数据。
+这是 v1.1 的 Vue 3 应用，覆盖真实认证、成员管理、词书工作区、T-FE-004 学习工作区、T-FE-005 AI 管理员页面，T-FE-006 的四类 AI 练习、草稿、结果、记录与错题，T-FE-007 的站内通知中心与通知偏好，以及 T-FE-008 的长期 AI 教练、真实 SSE 与动作撤销。所有业务状态、评分、队列、连接检查和用量均以服务端为唯一真相，不使用静态业务假数据。
 
 ## 环境
 
@@ -84,13 +84,15 @@ API client 优先读取响应头 `X-Request-ID`，并在错误界面展示。对
 - T-BE-006 最终契约为 `d6dcdbf`；提交前页面与 API 解析均拒绝答案、解析、参考内容或评分字段。
 - 站内通知：游标分页、未读筛选、单条/全部已读、未读数、类别偏好、免打扰时间、每日非 AI 上限与 AI 例外说明；正文只按纯文本渲染。
 - T-BE-007 通知契约坐标固定为 `fe52cf2` / raw `8309ee03…` / semantic `82a08895…`，实时 OpenAPI semantic 与冻结值一致。
+- AI 教练：长期会话 CRUD、游标消息分页、202 消息任务、真实 SSE 增量、usage、刷新/断线恢复、action receipt 与 24 小时撤销。
+- T-BE-008 教练契约固定为 `44f49ca` / raw `99026f88…` / semantic `dfe1ca30…`；不保存对话正文或回执到浏览器存储。
 - Vitest 测试基线。
 
 ## 路由
 
 `/login`、`/change-password`、`/overview`、`/wordbooks`、`/memory`、`/practice`、`/practice/:sessionId`、`/practice/records`、`/practice/mistakes`、`/challenges`、`/challenges/:challengeId`、`/coach`、`/notifications`、`/notifications/preferences`、`/settings`、`/admin/dashboard`、`/admin/users`、`/admin/ai/providers`、`/admin/ai/prompts`、`/admin/ai/usage`。
 
-成员管理页使用真实成员接口；其余未实现业务页只显示真实接口响应摘要或真实错误，完整题目、进度和 AI 对话界面由后续任务实现。
+成员管理、词书、学习、AI 练习、通知与 AI 教练均使用真实接口；每日闯关和看板等未实现页面只显示真实接口响应摘要或真实错误。
 
 ## 验证
 
@@ -103,7 +105,7 @@ git diff --check
 
 ## 暂不包含
 
-- AI 教练、挑战和控制台图表。
+- 每日闯关和控制台图表。
 - 前端自行推进 FSRS、静态评分、离线计时或浏览器存储学习状态。
 - 复杂动画、游戏化皮肤、图片或图标素材。
 - 后端、CI、Docker、部署与服务器操作。

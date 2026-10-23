@@ -85,6 +85,31 @@ describe('ApiClient', () => {
     expect(secondCall[1].credentials).toBe('include')
   })
 
+  it('opens an authenticated SSE response and refreshes once on 401', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ code: 'AUTH_EXPIRED', message: 'Expired.' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', 'X-Request-ID': 'stream-401' },
+      }))
+      .mockResolvedValueOnce(new Response('id: 1\nevent: done\ndata: {"status":"completed"}\n\n', {
+        status: 200,
+        headers: { 'Content-Type': 'text/event-stream', 'X-Request-ID': 'stream-200' },
+      }))
+    vi.stubGlobal('fetch', fetchMock)
+    client.setAccessToken('old-token')
+    client.setRefreshHandler(async () => client.setAccessToken('new-token'))
+
+    const response = await client.stream('/coach/streams/message-1')
+
+    expect(await response.text()).toContain('event: done')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const firstHeaders = new Headers((fetchMock.mock.calls[0] as [string, RequestInit])[1].headers)
+    const secondHeaders = new Headers((fetchMock.mock.calls[1] as [string, RequestInit])[1].headers)
+    expect(firstHeaders.get('Accept')).toBe('text/event-stream')
+    expect(firstHeaders.get('Authorization')).toBe('Bearer old-token')
+    expect(secondHeaders.get('Authorization')).toBe('Bearer new-token')
+    expect(client.getLastRequestId()).toBe('stream-200')
+  })
   it('expires the session when token refresh is rejected', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ code: 'AUTH_EXPIRED', message: '登录已过期。' }), {

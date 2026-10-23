@@ -13,6 +13,11 @@ export interface RequestOptions {
   responseType?: 'json' | 'text' | 'blob'
 }
 
+export interface StreamOptions {
+  headers?: HeadersInit
+  signal?: AbortSignal
+  skipAuthRefresh?: boolean
+}
 const JSON_CONTENT_TYPE = 'application/json'
 
 function delay(milliseconds: number): Promise<void> {
@@ -130,6 +135,55 @@ export class ApiClient {
     return this.request<T>(path, { ...options, method: 'DELETE' })
   }
 
+  async stream(path: string, options: StreamOptions = {}): Promise<Response> {
+    const url = this.buildUrl(path)
+    const requestHeaders = new Headers(options.headers)
+    requestHeaders.set('Accept', 'text/event-stream')
+
+    if (this.accessToken) {
+      requestHeaders.set('Authorization', `Bearer ${this.accessToken}`)
+    }
+
+    const response = await this.fetchWithNetworkRetries(
+      url,
+      {
+        method: 'GET',
+        headers: requestHeaders,
+        credentials: 'include',
+        signal: options.signal,
+      },
+      0,
+    )
+
+    this.captureCsrfToken(response)
+    this.lastRequestId = response.headers.get('x-request-id')
+
+    if (!response.ok) {
+      const apiError = await this.createApiError(response, this.lastRequestId)
+
+      if (apiError.status === 401 && !options.skipAuthRefresh && this.accessToken && this.refreshHandler) {
+        try {
+          await this.refreshAccessTokenOnce()
+        } catch (refreshError) {
+          if (isApiError(refreshError) && refreshError.status === 401) {
+            this.sessionExpiredHandler?.()
+            throw apiError
+          }
+          throw refreshError
+        }
+
+        return this.stream(path, { ...options, skipAuthRefresh: true })
+      }
+
+      if (apiError.status === 401) {
+        this.sessionExpiredHandler?.()
+      }
+
+      throw apiError
+    }
+
+    return response
+  }
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const method = options.method ?? 'GET'
     const url = this.buildUrl(path)

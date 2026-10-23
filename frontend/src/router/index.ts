@@ -12,6 +12,7 @@ import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
 import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
 import AdminAiUsageView from '../views/AdminAiUsageView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
+import CoachView from '../views/CoachView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LearningSettingsView from '../views/LearningSettingsView.vue'
@@ -111,12 +112,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'coach',
         name: 'coach',
-        component: RemoteDataPage,
-        props: {
-          title: 'AI 教练',
-          description: '真实读取教练会话列表；流式对话界面将在后续任务实现。',
-          endpoint: '/coach/conversations',
-        },
+        component: CoachView,
       },
       {
         path: 'notifications',

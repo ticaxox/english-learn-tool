@@ -62,6 +62,17 @@ describe('route guards', () => {
     expect(router.currentRoute.value.query.access).toBe('denied')
   })
 
+  it('allows members to open the AI coach workspace', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/coach')
+    expect(router.currentRoute.value.name).toBe('coach')
+  })
   it('allows members to open the notification center and preferences', async () => {
     const pinia = createPinia()
     const auth = useAuthStore(pinia)
