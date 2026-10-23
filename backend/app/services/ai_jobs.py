@@ -415,6 +415,7 @@ async def create_ai_job(
                     _event(stored, "ai.job.failed", metadata={"error_code": stored.error_code})
                 )
                 await _apply_coach_failure(session, stored)
+                await _apply_challenge_failure(session, stored)
                 await _release_quota(session, stored.id)
         await release_concurrency_slot(pool, user_id=user.id, job_id=job.id)
         raise AppError(
@@ -464,6 +465,7 @@ async def cancel_user_job(
     session.add(_event(job, "ai.job.cancelled"))
     await _apply_practice_failure(session, job)
     await _apply_coach_failure(session, job)
+    await _apply_challenge_failure(session, job)
     await _release_quota(session, job.id)
     await session.commit()
     await release_concurrency_slot(pool, user_id=user.id, job_id=job.id)
@@ -735,6 +737,20 @@ async def _enqueue_deferred_coach_jobs(
             await release_concurrency_slot(redis, user_id=user_id, job_id=job_id)
 
 
+async def _apply_challenge_success(session: AsyncSession, job: AiJob, settings: Settings) -> None:
+    from app.services.challenge import materialize_challenge_plan
+
+    await materialize_challenge_plan(session, job, settings)
+
+
+async def _apply_challenge_failure(session: AsyncSession, job: AiJob) -> None:
+    if job.task_type != "challenge_plan":
+        return
+    from app.services.challenge import mark_challenge_failed
+
+    await mark_challenge_failed(session, job)
+
+
 async def _notify_ai_terminal(session: AsyncSession, job: AiJob, *, succeeded: bool) -> None:
     from app.services.notifications import notify_ai_job
 
@@ -788,6 +804,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": exc.code}))
                 await _apply_practice_failure(session, job)
                 await _apply_coach_failure(session, job)
+                await _apply_challenge_failure(session, job)
                 await _notify_ai_terminal(session, job, succeeded=False)
                 await _release_quota(session, job.id)
                 await session.commit()
@@ -808,6 +825,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": job.error_code}))
                 await _apply_practice_failure(session, job)
                 await _apply_coach_failure(session, job)
+                await _apply_challenge_failure(session, job)
                 await _notify_ai_terminal(session, job, succeeded=False)
                 await _release_quota(session, job.id)
                 await session.commit()
@@ -842,6 +860,8 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
             if job.task_type == "coach_reply":
                 deferred_coach_jobs = await _apply_coach_success(session, job, settings, redis)
                 await _finalize_coach_success(session, job, settings)
+            elif job.task_type == "challenge_plan":
+                await _apply_challenge_success(session, job, settings)
             await _notify_ai_terminal(session, job, succeeded=True)
         except Exception:
             logger.exception("ai.job.result_hook_failed", extra={"job_id": job_id})
@@ -874,6 +894,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                     )
                     await _apply_practice_failure(failure_session, failed)
                     await _apply_coach_failure(failure_session, failed)
+                    await _apply_challenge_failure(failure_session, failed)
                     await _release_quota(failure_session, failed.id)
                     await failure_session.commit()
                 else:
@@ -922,6 +943,7 @@ async def reconcile_stale_ai_jobs(
         session.add(_event(job, "ai.job.stale"))
         await _apply_practice_failure(session, job)
         await _apply_coach_failure(session, job)
+        await _apply_challenge_failure(session, job)
         await _notify_ai_terminal(session, job, succeeded=False)
         await _release_quota(session, job.id)
         await release_concurrency_slot(redis, user_id=job.user_id, job_id=job.id)

@@ -37,6 +37,16 @@ def output_schema(task_type: str, context: dict[str, Any] | None = None) -> dict
     return model.model_json_schema()
 
 
+def _contains_markup(value: Any) -> bool:
+    if isinstance(value, str):
+        return "<" in value or ">" in value
+    if isinstance(value, list):
+        return any(_contains_markup(item) for item in value)
+    if isinstance(value, dict):
+        return any(_contains_markup(item) for item in value.values())
+    return False
+
+
 def _uuid_set(values: list[UUID]) -> set[str]:
     return {str(value) for value in values}
 
@@ -59,6 +69,8 @@ def validate_task_output(
         raise ValueError(f"AI_JSON_INVALID: {exc.msg}") from exc
     if not isinstance(parsed, dict):
         raise ValueError("AI_JSON_OBJECT_REQUIRED")
+    if task_type == "challenge_plan" and _contains_markup(parsed):
+        raise ValueError("AI_HTML_NOT_ALLOWED")
     parsed = sanitize_untrusted_json(parsed)
     model = (
         PracticeGradingBatchOutput
@@ -95,18 +107,35 @@ def validate_task_output(
         allowed = _uuid_set(challenge.new_entry_ids + challenge.due_entry_ids)
         node_ids: set[str] = set()
         new_word_node_ids: set[str] = set()
+        review_node_ids: set[str] = set()
+        main_minutes = 0
         for node in output.nodes:
             node_entry_ids = _uuid_set(node.word_entry_ids)
             node_ids.update(node_entry_ids)
             if node.node_type == "NEW_WORDS":
                 new_word_node_ids.update(node_entry_ids)
+            elif node.node_type == "REVIEW":
+                review_node_ids.update(node_entry_ids)
+            if node.node_type != "OPTIONAL_SIDE":
+                main_minutes += node.estimated_minutes
             if not node_entry_ids.issubset(allowed):
                 raise ValueError("AI_ENTRY_ID_OUT_OF_SCOPE")
         if not _uuid_set(challenge.new_entry_ids).issubset(new_word_node_ids):
             raise ValueError("AI_NEW_WORD_COVERAGE_INCOMPLETE")
+        if challenge.due_entry_ids and not _uuid_set(challenge.due_entry_ids).issubset(
+            review_node_ids
+        ):
+            raise ValueError("AI_DUE_WORD_COVERAGE_INCOMPLETE")
+        allowed_practice_types = set(challenge.allowed_practice_types)
         for node in output.nodes:
-            if node.practice_type and node.practice_type not in challenge.allowed_practice_types:
+            if node.practice_type and node.practice_type not in allowed_practice_types:
                 raise ValueError("AI_PRACTICE_TYPE_NOT_ALLOWED")
+            if node.drill_mode and node.drill_mode not in challenge.allowed_drill_modes:
+                raise ValueError("AI_DRILL_MODE_NOT_ALLOWED")
+        minimum_minutes = challenge.target_minutes * 0.8
+        maximum_minutes = challenge.target_minutes * 1.2
+        if not minimum_minutes <= main_minutes <= maximum_minutes:
+            raise ValueError("AI_CHALLENGE_MINUTES_OUT_OF_RANGE")
     elif task_type == "subjective_grading":
         if context.get("items"):
             output = PracticeGradingBatchOutput.model_validate(validated)

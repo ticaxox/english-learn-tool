@@ -85,6 +85,12 @@ class ChallengePlanContext(StrictModel):
     new_entry_ids: list[UUID] = Field(default_factory=list, max_length=200)
     due_entry_ids: list[UUID] = Field(default_factory=list, max_length=500)
     allowed_practice_types: list[PracticeType] = Field(default_factory=list)
+    allowed_drill_modes: list[Literal["choice", "spelling"]] = Field(
+        default_factory=lambda: ["choice", "spelling"]
+    )
+    plan_id: UUID | None = None
+    wordbook_id: UUID | None = None
+    target_new_words: int = Field(default=0, ge=0, le=200)
 
 
 class JsonRepairContext(StrictModel):
@@ -309,6 +315,7 @@ class CoachReplyOutput(StrictModel):
 
 class ChallengeNodeOutput(StrictModel):
     id: str = Field(min_length=1, max_length=64)
+    client_key: str | None = Field(default=None, min_length=1, max_length=64)
     node_type: ChallengeNodeType
     title: str = Field(min_length=1, max_length=200)
     description: str = Field(min_length=1, max_length=1_000)
@@ -317,22 +324,71 @@ class ChallengeNodeOutput(StrictModel):
     optional: bool = False
     practice_type: PracticeType | None = None
     practice_count: int | None = Field(default=None, ge=1, le=20)
+    drill_mode: Literal["choice", "spelling"] | None = None
+    order: int | None = Field(default=None, ge=1, le=100)
+
+    @field_validator("title", "description")
+    @classmethod
+    def safe_text(cls, value: str) -> str:
+        if "<" in value or ">" in value:
+            raise ValueError("challenge copy must not contain HTML")
+        cleaned = plain_text(value)
+        if not cleaned:
+            raise ValueError("challenge copy must not be blank")
+        return cleaned
 
     @model_validator(mode="after")
     def validate_optional_and_practice(self) -> ChallengeNodeOutput:
+        if self.client_key is None:
+            self.client_key = self.id
         if self.node_type == "OPTIONAL_SIDE" and not self.optional:
             raise ValueError("OPTIONAL_SIDE nodes must be optional")
         if self.optional and self.node_type != "OPTIONAL_SIDE":
             raise ValueError("only OPTIONAL_SIDE nodes may be optional")
         if self.node_type == "AI_PRACTICE" and self.practice_type is None:
             raise ValueError("AI_PRACTICE nodes require practice_type")
-        if self.node_type != "AI_PRACTICE" and self.practice_type is not None:
-            raise ValueError("practice_type is only valid on AI_PRACTICE nodes")
+        if self.node_type == "AI_PRACTICE" and self.practice_count is None:
+            raise ValueError("AI_PRACTICE nodes require practice_count")
+        if self.node_type == "BOSS":
+            if self.practice_type is None:
+                self.practice_type = "fill_blank"
+            if self.practice_type != "fill_blank":
+                raise ValueError("BOSS nodes require fill_blank practice")
+            if self.practice_count is None:
+                self.practice_count = 5
+            if self.practice_count not in {5, 10}:
+                raise ValueError("BOSS practice_count must be 5 or 10")
+        if self.node_type not in {"AI_PRACTICE", "BOSS"} and self.practice_type is not None:
+            raise ValueError("practice_type is only valid on AI_PRACTICE and BOSS nodes")
+        if self.node_type == "WORD_DRILL":
+            if self.drill_mode is None:
+                self.drill_mode = "choice"
+        elif self.drill_mode is not None:
+            raise ValueError("drill_mode is only valid on WORD_DRILL nodes")
+        if self.practice_type is not None and self.practice_count is not None:
+            allowed = {1} if self.practice_type == "writing" else {3, 5, 10, 15, 20}
+            if self.practice_count not in allowed:
+                raise ValueError("practice_count does not match practice_type")
         return self
 
 
 class ChallengePlanOutput(StrictModel):
+    version: Literal["challenge-plan-v1"] = "challenge-plan-v1"
+    title: str = Field(default="今天的英语闯关", min_length=1, max_length=200)
+    summary: str = Field(
+        default="按顺序完成今日学习节点，最后挑战终点。", min_length=1, max_length=1_000
+    )
     nodes: list[ChallengeNodeOutput] = Field(min_length=3, max_length=7)
+
+    @field_validator("title", "summary")
+    @classmethod
+    def safe_plan_text(cls, value: str) -> str:
+        if "<" in value or ">" in value:
+            raise ValueError("challenge copy must not contain HTML")
+        cleaned = plain_text(value)
+        if not cleaned:
+            raise ValueError("challenge copy must not be blank")
+        return cleaned
 
     @model_validator(mode="after")
     def validate_map(self) -> ChallengePlanOutput:
@@ -348,6 +404,17 @@ class ChallengePlanOutput(StrictModel):
             raise ValueError("BOSS may only appear as the final main node")
         if sum(node.node_type == "AI_PRACTICE" for node in main) > 1:
             raise ValueError("at most one main AI_PRACTICE node is allowed")
+        for index, node in enumerate(main, start=1):
+            if node.order is None:
+                node.order = index
+        for node in optional:
+            if node.order is None:
+                node.order = 100
+        orders = [node.order for node in self.nodes]
+        if len(set(orders)) != len(orders):
+            raise ValueError("challenge node order values must be unique")
+        if len({node.client_key for node in self.nodes}) != len(self.nodes):
+            raise ValueError("challenge node client keys must be unique")
         return self
 
 

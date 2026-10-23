@@ -1194,3 +1194,137 @@ async def mark_practice_grading_failed(session: AsyncSession, job: AiJob) -> Non
             )
         )
     await session.flush()
+
+
+async def create_practice_for_challenge(
+    session: AsyncSession,
+    pool: ArqRedis,
+    user: User,
+    settings: Settings,
+    payload: PracticeCreateRequest,
+    *,
+    idempotency_key: str,
+    target_entry_ids: list[UUID] | None = None,
+) -> tuple[PracticeSession, UUID | None]:
+    """Create a practice session without committing or enqueueing its generation job.
+
+    Challenge starts own the surrounding transaction so the node progress and practice
+    resource become visible atomically. The caller commits, then enqueues the returned job.
+    """
+    if not idempotency_key or len(idempotency_key) > 128:
+        raise AppError(
+            status_code=422,
+            code="PRACTICE_IDEMPOTENCY_KEY_INVALID",
+            message="The practice idempotency key is invalid.",
+        )
+    request_hash = _hash_request(payload.model_dump(mode="json"))
+    existing = await session.scalar(
+        select(PracticeSession).where(
+            PracticeSession.user_id == user.id,
+            PracticeSession.idempotency_key == idempotency_key,
+        )
+    )
+    if existing is not None:
+        if existing.request_hash != request_hash:
+            raise AppError(
+                status_code=409,
+                code="PRACTICE_IDEMPOTENCY_CONFLICT",
+                message="The practice idempotency key was used for a different request.",
+            )
+        return existing, None
+
+    if target_entry_ids is None:
+        wordbook_id, resolved_entry_ids = await _resolve_target_entries(
+            session, user, settings, payload
+        )
+    else:
+        wordbook_id = payload.wordbook_id
+        if wordbook_id is None:
+            raise AppError(
+                status_code=422,
+                code="PRACTICE_WORDBOOK_REQUIRED",
+                message="A wordbook is required for challenge practice.",
+            )
+        book = await session.scalar(
+            select(Wordbook).where(
+                Wordbook.id == wordbook_id,
+                Wordbook.status == "ready",
+                (Wordbook.visibility == "organization") | (Wordbook.owner_id == user.id),
+            )
+        )
+        resolved_entry_ids = list(
+            (
+                await session.scalars(
+                    select(WordbookEntry.id).where(
+                        WordbookEntry.wordbook_id == wordbook_id,
+                        WordbookEntry.id.in_(target_entry_ids),
+                    )
+                )
+            ).all()
+        )
+        if book is None or len(resolved_entry_ids) != len(set(target_entry_ids)):
+            raise AppError(
+                status_code=404,
+                code="PRACTICE_WORDBOOK_NOT_FOUND",
+                message="The practice wordbook entries were not found.",
+            )
+    target_entry_ids = resolved_entry_ids
+    session_id = uuid4()
+    generation_id = uuid4()
+    practice = PracticeSession(
+        id=session_id,
+        user_id=user.id,
+        practice_type=payload.practice_type,
+        source=payload.source,
+        difficulty=payload.difficulty,
+        wordbook_id=wordbook_id,
+        question_count=payload.count,
+        status="generating",
+        generation_number=1,
+        current_generation_id=generation_id,
+        source_context={
+            "practice_type": payload.practice_type,
+            "source": payload.source,
+            "count": payload.count,
+            "difficulty": payload.difficulty,
+            "wordbook_id": str(wordbook_id) if wordbook_id else None,
+            "target_entry_ids": [str(entry_id) for entry_id in target_entry_ids],
+        },
+        idempotency_key=idempotency_key,
+        request_hash=request_hash,
+    )
+    generation = PracticeGeneration(
+        id=generation_id,
+        session_id=session_id,
+        generation_number=1,
+        status="generating",
+    )
+    session.add(practice)
+    await session.flush()
+    session.add(generation)
+    await session.flush()
+    session.add(_event(practice, "practice.created", metadata={"source": "challenge"}))
+    request = PracticeGenerationRequest(
+        task_type="practice_generation",
+        context=PracticeGenerationContext(
+            practice_type=payload.practice_type,
+            count=payload.count,
+            source=payload.source,
+            difficulty=payload.difficulty,
+            wordbook_id=wordbook_id,
+            target_entry_ids=target_entry_ids,
+            practice_session_id=session_id,
+        ),
+    )
+    job, _ = await create_ai_job(
+        session,
+        pool,
+        user,
+        settings,
+        request,
+        idempotency_key=f"challenge-practice:{idempotency_key}",
+        commit=False,
+    )
+    practice.ai_job_id = job.id
+    generation.ai_job_id = job.id
+    return practice, job.id

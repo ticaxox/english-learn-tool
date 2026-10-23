@@ -1,4 +1,11 @@
 from app.models.ai import AiJob, AiJobEvent, AiPrompt, AiProvider, AiUsageLedger
+from app.models.challenge import (
+    ChallengeBossResult,
+    ChallengeNode,
+    ChallengeNodeProgress,
+    ChallengePlanContext,
+    DailyChallengePlan,
+)
 from app.models.coach import (
     CoachActionReceipt,
     CoachContextSnapshot,
@@ -50,7 +57,12 @@ __all__ = [
     "CoachContextSnapshot",
     "CoachConversation",
     "CoachMessage",
+    "ChallengeBossResult",
+    "ChallengeNode",
+    "ChallengeNodeProgress",
+    "ChallengePlanContext",
     "CoachStreamEvent",
+    "DailyChallengePlan",
     "DailyActivity",
     "DailyPlan",
     "DailyPlanWord",
