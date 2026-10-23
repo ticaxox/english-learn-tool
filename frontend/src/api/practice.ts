@@ -1,7 +1,7 @@
 /**
  * T-FE-006 practice client.
  *
- * Candidate contract: 32f63b4ae2ff69430071e388b5f6fac1175a032d
+ * Final contract: d6dcdbf8be4468526a01e33ed1cc77fc116d7c19
  * raw 636592305ffc9eee418287c57dfe99898a101c4cb1c7c9bdc3e43598b63d73a7
  * semantic a4560add2686b806ee5a5fa766d74b44688b3b223b69a5b2ade227e9a136b32e
  *
