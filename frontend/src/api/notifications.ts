@@ -2,8 +2,8 @@
  * T-FE-007 notification client.
  *
  * Frozen contract: fe52cf2b3c1a7b5fe6e7bb0dd9ba8ee67796c7bc
- * OpenAPI raw: 8309ee0357078fd33a3aa2a86fe295be3066cfefa8e64eeb8a1e39a43e7feb26
- * OpenAPI semantic: 82a0889527c26881013f62e211228cb63866216a3ef27b558c8122f58dfd1aa8
+ * OpenAPI raw: 8309ee03…feb26
+ * OpenAPI semantic: 82a08895…d1aa8
  *
  * The server is the only source of truth for inbox items, read state, unread
  * counts, and preferences. This module never persists business state locally.
