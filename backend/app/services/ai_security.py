@@ -20,7 +20,7 @@ _BLOCKED_HOSTS = {
 _TRANSIENT_STATUS = {408, 425, 429, 500, 502, 503, 504}
 
 
-@dataclass(frozen=True)
+@dataclass
 class ProviderRequestError(Exception):
     code: str
     message: str

@@ -99,7 +99,14 @@ async def create_provider(
     payload: ProviderCreateRequest,
 ) -> ProviderResponse:
     require_admin(actor)
-    base_url = await validate_provider_url(payload.base_url, settings)
+    try:
+        base_url = await validate_provider_url(payload.base_url, settings)
+    except ProviderRequestError as exc:
+        raise AppError(
+            status_code=422,
+            code=exc.code,
+            message=exc.message,
+        ) from exc
     if payload.is_default:
         await session.execute(update(AiProvider).values(is_default=False))
     elif not await _has_default(session):
@@ -159,7 +166,14 @@ async def update_provider(
         )
     was_default = provider.is_default
     if payload.base_url is not None:
-        provider.base_url = await validate_provider_url(payload.base_url, settings)
+        try:
+            provider.base_url = await validate_provider_url(payload.base_url, settings)
+        except ProviderRequestError as exc:
+            raise AppError(
+                status_code=422,
+                code=exc.code,
+                message=exc.message,
+            ) from exc
     if payload.name is not None:
         provider.name = payload.name
         provider.name_normalized = _normalize_name(payload.name)

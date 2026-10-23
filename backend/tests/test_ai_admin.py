@@ -69,6 +69,21 @@ async def test_ai_admin_provider_crud_masks_keys_and_checks_real_http(
         listed = await client.get(PROVIDERS_PATH, headers=headers)
         assert sum(item["is_default"] for item in listed.json()["items"]) == 1
 
+        disabled = await client.patch(
+            f"{PROVIDERS_PATH}/{backup['id']}",
+            headers=headers,
+            json={"enabled": False},
+        )
+        assert disabled.status_code == 200, disabled.text
+        assert disabled.json()["is_default"] is False
+        listed = await client.get(PROVIDERS_PATH, headers=headers)
+        assert (
+            next(item for item in listed.json()["items"] if item["id"] == primary["id"])[
+                "is_default"
+            ]
+            is True
+        )
+
         deleted = await client.delete(f"{PROVIDERS_PATH}/{backup['id']}", headers=headers)
         assert deleted.status_code == 204
         listed = await client.get(PROVIDERS_PATH, headers=headers)
@@ -121,6 +136,19 @@ async def test_ai_prompts_are_seeded_and_overwrite_affects_future_jobs(
         assert prompt.template == "Use only the supplied IDs and return strict JSON."
 
 
+async def test_ai_prompt_put_cors_preflight_allows_method(client) -> None:
+    response = await client.options(
+        f"{PROMPTS_PATH}/practice_generation",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "PUT",
+            "Access-Control-Request-Headers": "authorization,content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert "PUT" in response.headers["access-control-allow-methods"]
+
+
 async def test_admin_usage_is_aggregate_only(client, admin_user) -> None:
     headers = await login(client, admin_user.username)
     response = await client.get("/api/v1/admin/ai/usage", headers=headers)
@@ -129,3 +157,20 @@ async def test_admin_usage_is_aggregate_only(client, admin_user) -> None:
     assert body["total_jobs"] == 0
     assert len(body["quotas"]) == 3
     assert "users" not in body
+
+
+async def test_ai_provider_url_block_is_a_safe_422(client, admin_user) -> None:
+    headers = await login(client, admin_user.username)
+    response = await client.post(
+        PROVIDERS_PATH,
+        headers=headers,
+        json={
+            "name": "Blocked",
+            "base_url": "http://169.254.169.254/v1",
+            "api_key": "sk-blocked-secret-1234",
+            "model_id": "blocked-model",
+        },
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "AI_PROVIDER_URL_BLOCKED"
+    assert "169.254.169.254" not in response.json()["message"]

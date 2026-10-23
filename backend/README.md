@@ -186,6 +186,40 @@ answer or option identifiers before submission, and spelling grading ignores cas
 Deleting a wordbook also removes the learner states, sessions, session items, events, plans, and
 mistake markers that referenced it, so no ghost learning rows survive the tombstone.
 
+## AI provider, prompt, structured generation, and quota foundation
+
+- Administrators configure OpenAI-compatible providers through `/api/v1/admin/ai/providers` and can
+  run a real `/models` connection check or fetch the model list. API keys are encrypted with AES-GCM
+  using `SECRET_ENCRYPTION_KEY`; every response contains only a mask such as `sk-****abcd`.
+- Provider URLs are checked for protocol, credentials, DNS resolution, blocked metadata hosts,
+  loopback/private targets, and cross-origin redirects. `AI_ALLOW_PRIVATE_PROVIDER_URLS` exists only
+  for local protocol tests and is rejected when `APP_ENV=production`.
+- Prompts are seeded by the `c5ab093fd0f9` migration and can be overwritten through
+  `/api/v1/admin/ai/prompts`. A job stores a prompt snapshot, so later edits apply only to new jobs.
+- `/api/v1/ai/jobs` creates durable structured jobs. The worker requests JSON Schema/JSON Mode,
+  validates with Pydantic v2, enforces business rules, performs at most one JSON repair and three
+  logical generation attempts, and never returns partial results. The member status endpoint exposes
+  only status, provider/model, attempt counts, error, and a privacy-safe result summary.
+- `ai_usage_ledger` reserves quota before provider work, consumes only after success, and releases on
+  failure, cancellation, or stale reconciliation. Redis enforces at most two active AI jobs per user.
+  Daily defaults are 100 coach messages, 20 question-generation jobs, and 50 subjective gradings.
+- The existing business ARQ queue is reused for AI jobs, while the scheduler queue remains isolated.
+  AI provider failure does not block learning, wordbooks, or persisted records.
+
+Set a deployment-owned master secret of at least 32 characters:
+
+```dotenv
+SECRET_ENCRYPTION_KEY=<strong-random-secret>
+```
+
+For local OpenAI-compatible tests only:
+
+```dotenv
+AI_ALLOW_PRIVATE_PROVIDER_URLS=true
+```
+
+Never commit provider keys, real prompts containing member data, or the master encryption secret.
+
 ## Verification
 
 Create a dedicated integration database and Redis database, then run the checks:

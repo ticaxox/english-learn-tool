@@ -237,3 +237,26 @@ def test_subjective_grading_rejects_inconsistent_dimensions() -> None:
             context=context,
             raw_text=json.dumps(output),
         )
+
+
+def test_openapi_publishes_ai_admin_and_job_contracts(app) -> None:
+    document = app.openapi()
+    paths = document["paths"]
+    expected = {
+        "/api/v1/admin/ai/providers",
+        "/api/v1/admin/ai/providers/{provider_id}",
+        "/api/v1/admin/ai/providers/{provider_id}/test",
+        "/api/v1/admin/ai/providers/{provider_id}/models",
+        "/api/v1/admin/ai/prompts",
+        "/api/v1/admin/ai/prompts/{prompt_key}",
+        "/api/v1/admin/ai/usage",
+        "/api/v1/ai/jobs",
+        "/api/v1/ai/jobs/{job_id}",
+        "/api/v1/ai/jobs/{job_id}/cancel",
+        "/api/v1/ai/usage/me",
+    }
+    assert expected.issubset(paths)
+    assert document["openapi"] == "3.1.0"
+    assert "ProviderCreateRequest" in document["components"]["schemas"]
+    assert "PracticeGenerationRequest" in document["components"]["schemas"]
+    assert "ChallengePlanRequest" in document["components"]["schemas"]

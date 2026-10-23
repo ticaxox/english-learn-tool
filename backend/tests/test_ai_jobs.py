@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+from uuid import UUID
+
 import pytest
 
-from app.services.ai_jobs import process_ai_job
+from app.models.ai import AiJob
+from app.services.ai_jobs import process_ai_job, reconcile_stale_ai_jobs
 from app.services.ai_security import ProviderRequestError, validate_provider_url
 from tests.ai_support import (
     JOBS_PATH,
+    PROMPTS_PATH,
     USAGE_PATH,
     create_provider,
     fake_provider_server,
@@ -46,12 +51,26 @@ async def test_ai_job_idempotency_quota_concurrency_and_cancel(
     context, entry_ids = practice_context()
     with fake_provider_server() as server:
         await create_provider(client, headers, base_url=server.base_url)
+        prompt_update = await client.put(
+            f"{PROMPTS_PATH}/practice_generation",
+            headers=headers,
+            json={
+                "name": "Snapshot prompt",
+                "summary": "Prompt snapshot test",
+                "template": "Return strict JSON for the snapshot test.",
+            },
+        )
+        assert prompt_update.status_code == 200, prompt_update.text
 
         first = await _create_job(client, member_headers, context, "job-key-1")
         assert first.status_code == 202, first.text
         first_body = first.json()
         assert first_body["status"] == "queued"
         assert first_body["replayed"] is False
+        async with app.state.session_factory() as session:
+            stored_job = await session.get(AiJob, UUID(first_body["job_id"]))
+            assert stored_job is not None
+            assert stored_job.prompt_snapshot == "Return strict JSON for the snapshot test."
 
         replay = await _create_job(client, member_headers, context, "job-key-1")
         assert replay.status_code == 202
@@ -188,3 +207,59 @@ async def test_provider_url_blocks_metadata_and_private_targets_by_default() -> 
     with pytest.raises(ProviderRequestError) as loopback:
         await validate_provider_url("http://127.0.0.1:8080/v1", settings)
     assert loopback.value.code == "AI_PROVIDER_URL_BLOCKED"
+
+
+async def test_stale_reconciliation_releases_quota_and_concurrency(
+    client, app, admin_user, member_user
+) -> None:
+    admin_headers = await login(client, admin_user.username)
+    member_headers = await login(client, member_user.username)
+    context, _ = practice_context()
+    with fake_provider_server() as server:
+        await create_provider(client, admin_headers, base_url=server.base_url)
+        created = await _create_job(client, member_headers, context, "stale-key")
+        assert created.status_code == 202, created.text
+        job_id = UUID(created.json()["job_id"])
+
+        async with app.state.session_factory() as session:
+            job = await session.get(AiJob, job_id)
+            assert job is not None
+            job.updated_at = datetime.now(UTC) - timedelta(seconds=1200)
+            await session.commit()
+
+        async with app.state.session_factory() as session:
+            count = await reconcile_stale_ai_jobs(
+                session,
+                app.state.redis,
+                app.state.settings,
+                stale_before=datetime.now(UTC) - timedelta(seconds=900),
+            )
+        assert count == 1
+
+        status = await client.get(f"{JOBS_PATH}/{job_id}", headers=member_headers)
+        assert status.status_code == 200
+        assert status.json()["status"] == "stale"
+        usage = await client.get(USAGE_PATH, headers=member_headers)
+        assert usage.json()["quotas"][1]["reserved"] == 0
+        assert usage.json()["quotas"][1]["remaining"] == 20
+        assert usage.json()["concurrency"]["in_use"] == 0
+
+
+async def test_ai_job_status_is_private_to_its_owner(
+    client, app, admin_user, member_user, user_factory
+) -> None:
+    admin_headers = await login(client, admin_user.username)
+    owner_headers = await login(client, member_user.username)
+    other_user = await user_factory(role="member")
+    other_headers = await login(client, other_user.username)
+    context, _ = practice_context()
+    with fake_provider_server() as server:
+        await create_provider(client, admin_headers, base_url=server.base_url)
+        created = await _create_job(client, owner_headers, context, "private-key")
+        assert created.status_code == 202, created.text
+        hidden = await client.get(
+            f"{JOBS_PATH}/{created.json()['job_id']}",
+            headers=other_headers,
+        )
+        assert hidden.status_code == 404
+        assert hidden.json()["code"] == "AI_JOB_NOT_FOUND"

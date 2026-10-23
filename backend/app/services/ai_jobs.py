@@ -51,7 +51,7 @@ class ProviderRuntime:
     timeout_seconds: int
 
 
-@dataclass(frozen=True)
+@dataclass
 class AiGenerationError(Exception):
     code: str
     message: str
