@@ -154,6 +154,7 @@ async def _reserve_quota(
     settings: Settings,
     user: User,
     job: AiJob,
+    amount: int = 1,
 ) -> None:
     if job.quota_kind is None:
         return
@@ -185,7 +186,7 @@ async def _reserve_quota(
         )
         or 0
     )
-    if used + reserved >= limit:
+    if used + reserved + amount > limit:
         raise AppError(
             status_code=429,
             code="AI_QUOTA_EXHAUSTED",
@@ -198,6 +199,7 @@ async def _reserve_quota(
             job_id=job.id,
             local_date=local_date,
             quota_kind=job.quota_kind,
+            reserved=amount,
             status="reserved",
         )
     )
@@ -208,9 +210,10 @@ async def _consume_quota(session: AsyncSession, job_id: UUID) -> None:
         select(AiUsageLedger).where(AiUsageLedger.job_id == job_id).with_for_update()
     )
     if ledger is not None and ledger.status == "reserved":
+        amount = ledger.reserved
         ledger.status = "consumed"
         ledger.reserved = 0
-        ledger.consumed = 1
+        ledger.consumed = amount
         ledger.released = 0
 
 
@@ -219,10 +222,11 @@ async def _release_quota(session: AsyncSession, job_id: UUID) -> None:
         select(AiUsageLedger).where(AiUsageLedger.job_id == job_id).with_for_update()
     )
     if ledger is not None and ledger.status == "reserved":
+        amount = ledger.reserved
         ledger.status = "released"
         ledger.reserved = 0
         ledger.consumed = 0
-        ledger.released = 1
+        ledger.released = amount
 
 
 def _event(job: AiJob, event_type: str, *, metadata: dict[str, Any] | None = None) -> AiJobEvent:
@@ -242,12 +246,19 @@ async def create_ai_job(
     payload: AiJobCreateRequest,
     *,
     idempotency_key: str,
+    quota_amount: int = 1,
 ) -> tuple[AiJobStatusResponse, bool]:
     if not idempotency_key or len(idempotency_key) > 128:
         raise AppError(
             status_code=422,
             code="AI_IDEMPOTENCY_KEY_INVALID",
             message="The Idempotency-Key must be between 1 and 128 characters.",
+        )
+    if not 1 <= quota_amount <= 50:
+        raise AppError(
+            status_code=422,
+            code="AI_QUOTA_AMOUNT_INVALID",
+            message="The AI quota amount is invalid.",
         )
     task_type = payload.task_type
     context = payload.context.model_dump(mode="json")
@@ -317,7 +328,7 @@ async def create_ai_job(
     try:
         session.add(job)
         await session.flush()
-        await _reserve_quota(session, settings=settings, user=user, job=job)
+        await _reserve_quota(session, settings=settings, user=user, job=job, amount=quota_amount)
         session.add(_event(job, "ai.job.created", metadata={"task_type": task_type}))
         await session.commit()
     except IntegrityError:

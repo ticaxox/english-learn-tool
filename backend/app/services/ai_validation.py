@@ -84,8 +84,11 @@ def validate_task_output(
         elif len(output.items) != practice.count:
             raise ValueError("AI_QUESTION_COUNT_MISMATCH")
         for item in output.items:
-            if not _collect_entry_ids(item).issubset(allowed):
+            item_entry_ids = _collect_entry_ids(item)
+            if not item_entry_ids.issubset(allowed):
                 raise ValueError("AI_ENTRY_ID_OUT_OF_SCOPE")
+            if practice.source != "difficulty" and not item_entry_ids:
+                raise ValueError("AI_TARGET_ENTRY_REQUIRED")
     elif task_type == "challenge_plan":
         challenge = ChallengePlanContext.model_validate(context)
         output = ChallengePlanOutput.model_validate(validated)

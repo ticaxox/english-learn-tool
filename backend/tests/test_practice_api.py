@@ -278,6 +278,12 @@ async def test_four_practice_types_draft_regenerate_submit_records_and_delete(
         assert translation_result.json()["status"] == "completed"
         assert translation_result.json()["score"] == 55.0
         assert translation_result.json()["wrong_count"] == 3
+        usage = await client.get("/api/v1/ai/usage/me", headers=member_headers)
+        subjective = next(
+            item for item in usage.json()["quotas"] if item["quota_kind"] == "subjective_grading"
+        )
+        assert subjective["used"] == 3
+        assert subjective["reserved"] == 0
 
         writing = await _generate(app, client, member_headers, server, "writing", 1)
         writing_questions = await _questions(app, writing["id"])

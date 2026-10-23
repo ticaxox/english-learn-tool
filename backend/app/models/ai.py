@@ -193,9 +193,9 @@ class AiUsageLedger(Base):
     __table_args__ = (
         CheckConstraint(f"quota_kind IN ({AI_QUOTA_KINDS})", name="quota_kind_valid"),
         CheckConstraint("status IN ('reserved', 'consumed', 'released')", name="status_valid"),
-        CheckConstraint("reserved IN (0, 1)", name="reserved_valid"),
-        CheckConstraint("consumed IN (0, 1)", name="consumed_valid"),
-        CheckConstraint("released IN (0, 1)", name="released_valid"),
+        CheckConstraint("reserved >= 0", name="reserved_nonnegative"),
+        CheckConstraint("consumed >= 0", name="consumed_nonnegative"),
+        CheckConstraint("released >= 0", name="released_nonnegative"),
         UniqueConstraint("job_id", name="uq_ai_usage_ledger_job"),
         Index("ix_ai_usage_ledger_user_date_kind", "user_id", "local_date", "quota_kind"),
         Index("ix_ai_usage_ledger_status_updated", "status", "updated_at"),

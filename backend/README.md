@@ -220,6 +220,22 @@ AI_ALLOW_PRIVATE_PROVIDER_URLS=true
 
 Never commit provider keys, real prompts containing member data, or the master encryption secret.
 
+## AI practice sessions, drafts, grading, and records
+
+- `POST /api/v1/practice/sessions` creates fill-in-the-blank, reading, translation, or writing
+  practice and enqueues structured generation through the shared AI job queue.
+- `GET /api/v1/practice/sessions/{id}` returns only answer-safe public question fields. Correct
+  options, explanations, reference translations, reference essays, and grading remain in private
+  payloads until the session is submitted.
+- `PUT /api/v1/practice/sessions/{id}/draft` saves the caller's draft with optimistic version checks;
+  `POST /regenerate` is limited to unanswered sessions and invalidates the old generation.
+- Objective practice is graded synchronously by the server. Translation and writing use one bounded
+  batch grading AI job; a failed grading task returns an explicit failure and never a default score.
+- `GET /records`, `GET /mistakes`, `GET /records/{id}`, `DELETE /records/bulk`, and `GET /events`
+  are owner-scoped. Deleting a record cascades its questions, submission, draft, and learning events.
+- Migration `fbff60ce778f` adds practice sessions, generations, questions, submissions, events, and
+  idempotent deletion records; AI usage ledger amounts support per-question subjective grading.
+
 ## Verification
 
 Create a dedicated integration database and Redis database, then run the checks:

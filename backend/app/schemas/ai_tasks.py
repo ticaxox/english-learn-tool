@@ -147,7 +147,7 @@ class FillBlankItem(StrictModel):
     options: list[OptionOutput] = Field(min_length=4, max_length=4)
     correct_option_id: str = Field(min_length=1, max_length=16)
     explanation: str = Field(min_length=1, max_length=2_000)
-    target_entry_ids: list[UUID] = Field(min_length=1, max_length=10)
+    target_entry_ids: list[UUID] = Field(default_factory=list, max_length=10)
 
     @model_validator(mode="after")
     def validate_answer(self) -> FillBlankItem:
