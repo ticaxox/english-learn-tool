@@ -1,3 +1,4 @@
+from app.models.ai import AiJob, AiJobEvent, AiPrompt, AiProvider, AiUsageLedger
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
 from app.models.learning import (
     DailyActivity,
@@ -23,6 +24,11 @@ from app.models.wordbooks import (
 )
 
 __all__ = [
+    "AiJob",
+    "AiJobEvent",
+    "AiPrompt",
+    "AiProvider",
+    "AiUsageLedger",
     "AuditLog",
     "DailyActivity",
     "DailyPlan",

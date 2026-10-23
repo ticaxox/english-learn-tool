@@ -28,6 +28,7 @@ os.environ["CORS_ORIGINS"] = "http://localhost:5173,http://testserver"
 os.environ["JWT_SECRET"] = "test-jwt-secret-with-at-least-32-chars"
 os.environ["REFRESH_TOKEN_PEPPER"] = "test-refresh-pepper-with-at-least-32-chars"
 os.environ["SECRET_ENCRYPTION_KEY"] = "test-encryption-key-with-at-least-32-chars"
+os.environ["AI_ALLOW_PRIVATE_PROVIDER_URLS"] = "true"
 TEST_WORDBOOK_STORAGE_DIR = Path(tempfile.gettempdir()) / "english-learn-wordbook-tests"
 os.environ["WORDBOOK_STORAGE_DIR"] = str(TEST_WORDBOOK_STORAGE_DIR)
 

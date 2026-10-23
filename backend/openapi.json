@@ -27,6 +27,181 @@
         "title": "ActivationResponse",
         "type": "object"
       },
+      "AdminAiUsageResponse": {
+        "properties": {
+          "active_jobs": {
+            "title": "Active Jobs",
+            "type": "integer"
+          },
+          "date_from": {
+            "format": "date",
+            "title": "Date From",
+            "type": "string"
+          },
+          "date_to": {
+            "format": "date",
+            "title": "Date To",
+            "type": "string"
+          },
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/AdminProviderAggregate"
+            },
+            "title": "Providers",
+            "type": "array"
+          },
+          "quotas": {
+            "items": {
+              "$ref": "#/components/schemas/AdminQuotaAggregate"
+            },
+            "title": "Quotas",
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/AdminTaskAggregate"
+            },
+            "title": "Tasks",
+            "type": "array"
+          },
+          "total_jobs": {
+            "title": "Total Jobs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date_from",
+          "date_to",
+          "total_jobs",
+          "active_jobs",
+          "quotas",
+          "tasks",
+          "providers"
+        ],
+        "title": "AdminAiUsageResponse",
+        "type": "object"
+      },
+      "AdminProviderAggregate": {
+        "properties": {
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "jobs": {
+            "title": "Jobs",
+            "type": "integer"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Id"
+          },
+          "provider_name": {
+            "title": "Provider Name",
+            "type": "string"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "provider_name",
+          "jobs",
+          "succeeded",
+          "failed"
+        ],
+        "title": "AdminProviderAggregate",
+        "type": "object"
+      },
+      "AdminQuotaAggregate": {
+        "properties": {
+          "consumed": {
+            "title": "Consumed",
+            "type": "integer"
+          },
+          "limit_per_user": {
+            "title": "Limit Per User",
+            "type": "integer"
+          },
+          "quota_kind": {
+            "enum": [
+              "coach_messages",
+              "question_generation",
+              "subjective_grading"
+            ],
+            "title": "Quota Kind",
+            "type": "string"
+          },
+          "released": {
+            "title": "Released",
+            "type": "integer"
+          },
+          "reserved": {
+            "title": "Reserved",
+            "type": "integer"
+          },
+          "users_with_usage": {
+            "title": "Users With Usage",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "quota_kind",
+          "limit_per_user",
+          "users_with_usage",
+          "consumed",
+          "reserved",
+          "released"
+        ],
+        "title": "AdminQuotaAggregate",
+        "type": "object"
+      },
+      "AdminTaskAggregate": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled",
+              "stale"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "task_type": {
+            "enum": [
+              "practice_generation",
+              "subjective_grading",
+              "coach_reply",
+              "challenge_plan",
+              "json_repair"
+            ],
+            "title": "Task Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_type",
+          "status",
+          "count"
+        ],
+        "title": "AdminTaskAggregate",
+        "type": "object"
+      },
       "AdminUserCreate": {
         "properties": {
           "department": {
@@ -168,6 +343,210 @@
         "title": "AdminUserPatch",
         "type": "object"
       },
+      "AiErrorDetail": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "retryable": {
+            "default": false,
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "AiErrorDetail",
+        "type": "object"
+      },
+      "AiJobAcceptedResponse": {
+        "properties": {
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "replayed": {
+            "default": false,
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled",
+              "stale"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "status_url": {
+            "title": "Status Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id",
+          "status",
+          "status_url"
+        ],
+        "title": "AiJobAcceptedResponse",
+        "type": "object"
+      },
+      "AiJobStatusResponse": {
+        "properties": {
+          "attempt_count": {
+            "title": "Attempt Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AiErrorDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Id"
+          },
+          "provider_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Name"
+          },
+          "quota_kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "coach_messages",
+                  "question_generation",
+                  "subjective_grading"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quota Kind"
+          },
+          "repair_count": {
+            "title": "Repair Count",
+            "type": "integer"
+          },
+          "result_summary": {
+            "additionalProperties": true,
+            "title": "Result Summary",
+            "type": "object"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled",
+              "stale"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "task_type": {
+            "enum": [
+              "practice_generation",
+              "subjective_grading",
+              "coach_reply",
+              "challenge_plan",
+              "json_repair"
+            ],
+            "title": "Task Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "task_type",
+          "status",
+          "attempt_count",
+          "repair_count",
+          "created_at"
+        ],
+        "title": "AiJobStatusResponse",
+        "type": "object"
+      },
       "AiPracticeSummary": {
         "properties": {
           "reason": {
@@ -183,6 +562,32 @@
           }
         },
         "title": "AiPracticeSummary",
+        "type": "object"
+      },
+      "AiUserUsageResponse": {
+        "properties": {
+          "concurrency": {
+            "$ref": "#/components/schemas/ConcurrencyUsage"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "quotas": {
+            "items": {
+              "$ref": "#/components/schemas/DailyQuotaUsage"
+            },
+            "title": "Quotas",
+            "type": "array"
+          }
+        },
+        "required": [
+          "local_date",
+          "quotas",
+          "concurrency"
+        ],
+        "title": "AiUserUsageResponse",
         "type": "object"
       },
       "AuthSessionResponse": {
@@ -281,6 +686,78 @@
         "title": "Body_preview_wordbook_import_endpoint_api_v1_wordbooks_import_preview_post",
         "type": "object"
       },
+      "ChallengePlanContext": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_practice_types": {
+            "items": {
+              "enum": [
+                "fill_blank",
+                "reading",
+                "translation",
+                "writing"
+              ],
+              "type": "string"
+            },
+            "title": "Allowed Practice Types",
+            "type": "array"
+          },
+          "due_entry_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 500,
+            "title": "Due Entry Ids",
+            "type": "array"
+          },
+          "local_date": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "new_entry_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "New Entry Ids",
+            "type": "array"
+          },
+          "target_minutes": {
+            "maximum": 180.0,
+            "minimum": 15.0,
+            "title": "Target Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "local_date",
+          "target_minutes"
+        ],
+        "title": "ChallengePlanContext",
+        "type": "object"
+      },
+      "ChallengePlanRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/ChallengePlanContext"
+          },
+          "task_type": {
+            "const": "challenge_plan",
+            "title": "Task Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_type",
+          "context"
+        ],
+        "title": "ChallengePlanRequest",
+        "type": "object"
+      },
       "ChangePasswordRequest": {
         "properties": {
           "new_password": {
@@ -301,6 +778,46 @@
           "new_password"
         ],
         "title": "ChangePasswordRequest",
+        "type": "object"
+      },
+      "CoachReplyContext": {
+        "additionalProperties": false,
+        "properties": {
+          "learning_summary": {
+            "additionalProperties": true,
+            "title": "Learning Summary",
+            "type": "object"
+          },
+          "user_message": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "User Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_message"
+        ],
+        "title": "CoachReplyContext",
+        "type": "object"
+      },
+      "CoachReplyRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/CoachReplyContext"
+          },
+          "task_type": {
+            "const": "coach_reply",
+            "title": "Task Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_type",
+          "context"
+        ],
+        "title": "CoachReplyRequest",
         "type": "object"
       },
       "ComponentHealth": {
@@ -340,6 +857,62 @@
           "status"
         ],
         "title": "ComponentHealth",
+        "type": "object"
+      },
+      "ConcurrencyUsage": {
+        "properties": {
+          "in_use": {
+            "title": "In Use",
+            "type": "integer"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "limit",
+          "in_use"
+        ],
+        "title": "ConcurrencyUsage",
+        "type": "object"
+      },
+      "DailyQuotaUsage": {
+        "properties": {
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "quota_kind": {
+            "enum": [
+              "coach_messages",
+              "question_generation",
+              "subjective_grading"
+            ],
+            "title": "Quota Kind",
+            "type": "string"
+          },
+          "remaining": {
+            "title": "Remaining",
+            "type": "integer"
+          },
+          "reserved": {
+            "title": "Reserved",
+            "type": "integer"
+          },
+          "used": {
+            "title": "Used",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "quota_kind",
+          "limit",
+          "used",
+          "reserved",
+          "remaining"
+        ],
+        "title": "DailyQuotaUsage",
         "type": "object"
       },
       "DeleteWordbookRequest": {
@@ -762,6 +1335,51 @@
           "display_name"
         ],
         "title": "ImportedUser",
+        "type": "object"
+      },
+      "JsonRepairContext": {
+        "additionalProperties": false,
+        "properties": {
+          "raw_text": {
+            "maxLength": 30000,
+            "minLength": 1,
+            "title": "Raw Text",
+            "type": "string"
+          },
+          "validation_errors": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Validation Errors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "raw_text",
+          "validation_errors"
+        ],
+        "title": "JsonRepairContext",
+        "type": "object"
+      },
+      "JsonRepairRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/JsonRepairContext"
+          },
+          "task_type": {
+            "const": "json_repair",
+            "title": "Task Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_type",
+          "context"
+        ],
+        "title": "JsonRepairRequest",
         "type": "object"
       },
       "LearningEventListResponse": {
@@ -1460,6 +2078,654 @@
         "title": "PlanWordResponse",
         "type": "object"
       },
+      "PracticeGenerationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "enum": [
+                  "CET4",
+                  "CET6",
+                  "POSTGRAD",
+                  "IELTS",
+                  "TOEFL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difficulty"
+          },
+          "practice_type": {
+            "enum": [
+              "fill_blank",
+              "reading",
+              "translation",
+              "writing"
+            ],
+            "title": "Practice Type",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "today_new",
+              "today_review",
+              "memory_mistakes",
+              "whole_book",
+              "difficulty"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "target_entry_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Target Entry Ids",
+            "type": "array"
+          },
+          "wordbook_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wordbook Id"
+          }
+        },
+        "required": [
+          "practice_type",
+          "count",
+          "source"
+        ],
+        "title": "PracticeGenerationContext",
+        "type": "object"
+      },
+      "PracticeGenerationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/PracticeGenerationContext"
+          },
+          "task_type": {
+            "const": "practice_generation",
+            "title": "Task Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_type",
+          "context"
+        ],
+        "title": "PracticeGenerationRequest",
+        "type": "object"
+      },
+      "PromptDetail": {
+        "properties": {
+          "key": {
+            "enum": [
+              "practice_generation",
+              "subjective_grading",
+              "coach_reply",
+              "challenge_plan",
+              "json_repair"
+            ],
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "template": {
+            "title": "Template",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "summary",
+          "updated_at",
+          "template"
+        ],
+        "title": "PromptDetail",
+        "type": "object"
+      },
+      "PromptListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PromptSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "PromptListResponse",
+        "type": "object"
+      },
+      "PromptSummary": {
+        "properties": {
+          "key": {
+            "enum": [
+              "practice_generation",
+              "subjective_grading",
+              "coach_reply",
+              "challenge_plan",
+              "json_repair"
+            ],
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "summary",
+          "updated_at"
+        ],
+        "title": "PromptSummary",
+        "type": "object"
+      },
+      "PromptUpdateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Summary",
+            "type": "string"
+          },
+          "template": {
+            "maxLength": 100000,
+            "minLength": 1,
+            "title": "Template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "summary",
+          "template"
+        ],
+        "title": "PromptUpdateRequest",
+        "type": "object"
+      },
+      "ProviderCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "api_key": {
+            "maxLength": 4096,
+            "minLength": 8,
+            "title": "Api Key",
+            "type": "string"
+          },
+          "base_url": {
+            "maxLength": 500,
+            "minLength": 8,
+            "title": "Base Url",
+            "type": "string"
+          },
+          "custom_headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Custom Headers",
+            "type": "object"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "is_default": {
+            "default": false,
+            "title": "Is Default",
+            "type": "boolean"
+          },
+          "model_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Model Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "priority": {
+            "default": 100,
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "timeout_seconds": {
+            "default": 60,
+            "maximum": 120.0,
+            "minimum": 1.0,
+            "title": "Timeout Seconds",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "base_url",
+          "api_key",
+          "model_id"
+        ],
+        "title": "ProviderCreateRequest",
+        "type": "object"
+      },
+      "ProviderListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProviderResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ProviderListResponse",
+        "type": "object"
+      },
+      "ProviderModelsResponse": {
+        "properties": {
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "title": "ProviderModelsResponse",
+        "type": "object"
+      },
+      "ProviderPatchRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "api_key": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "minLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "minLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "custom_headers": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Headers"
+          },
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "is_default": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Default"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "timeout_seconds": {
+            "anyOf": [
+              {
+                "maximum": 120.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timeout Seconds"
+          }
+        },
+        "title": "ProviderPatchRequest",
+        "type": "object"
+      },
+      "ProviderResponse": {
+        "properties": {
+          "api_key_masked": {
+            "title": "Api Key Masked",
+            "type": "string"
+          },
+          "base_url": {
+            "title": "Base Url",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "custom_headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Custom Headers",
+            "type": "object"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_default": {
+            "title": "Is Default",
+            "type": "boolean"
+          },
+          "last_test_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test At"
+          },
+          "last_test_error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Error Code"
+          },
+          "last_test_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Latency Ms"
+          },
+          "last_test_status": {
+            "enum": [
+              "untested",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Last Test Status",
+            "type": "string"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          },
+          "timeout_seconds": {
+            "title": "Timeout Seconds",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "base_url",
+          "api_key_masked",
+          "model_id",
+          "priority",
+          "is_default",
+          "timeout_seconds",
+          "enabled",
+          "custom_headers",
+          "last_test_status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ProviderResponse",
+        "type": "object"
+      },
+      "ProviderTestResponse": {
+        "properties": {
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "untested",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "status"
+        ],
+        "title": "ProviderTestResponse",
+        "type": "object"
+      },
       "ReadinessResponse": {
         "properties": {
           "components": {
@@ -1975,6 +3241,78 @@
           "session_count"
         ],
         "title": "StatsSourceBreakdown",
+        "type": "object"
+      },
+      "SubjectiveGradingContext": {
+        "additionalProperties": false,
+        "properties": {
+          "exam_type": {
+            "enum": [
+              "CET4",
+              "CET6",
+              "POSTGRAD",
+              "IELTS",
+              "TOEFL"
+            ],
+            "title": "Exam Type",
+            "type": "string"
+          },
+          "practice_type": {
+            "enum": [
+              "translation",
+              "writing"
+            ],
+            "title": "Practice Type",
+            "type": "string"
+          },
+          "source_text": {
+            "maxLength": 20000,
+            "minLength": 1,
+            "title": "Source Text",
+            "type": "string"
+          },
+          "target_entry_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Target Entry Ids",
+            "type": "array"
+          },
+          "user_answer": {
+            "maxLength": 20000,
+            "minLength": 1,
+            "title": "User Answer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "practice_type",
+          "source_text",
+          "user_answer",
+          "exam_type"
+        ],
+        "title": "SubjectiveGradingContext",
+        "type": "object"
+      },
+      "SubjectiveGradingRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/SubjectiveGradingContext"
+          },
+          "task_type": {
+            "const": "subjective_grading",
+            "title": "Task Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_type",
+          "context"
+        ],
+        "title": "SubjectiveGradingRequest",
         "type": "object"
       },
       "TodayResponse": {
@@ -3350,6 +4688,899 @@
         ]
       }
     },
+    "/api/v1/admin/ai/prompts": {
+      "get": {
+        "operationId": "list_prompts_endpoint_api_v1_admin_ai_prompts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List editable AI prompts",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/prompts/{prompt_key}": {
+      "get": {
+        "operationId": "get_prompt_endpoint_api_v1_admin_ai_prompts__prompt_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "prompt_key",
+            "required": true,
+            "schema": {
+              "title": "Prompt Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read one editable AI prompt",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      },
+      "put": {
+        "operationId": "update_prompt_endpoint_api_v1_admin_ai_prompts__prompt_key__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "prompt_key",
+            "required": true,
+            "schema": {
+              "title": "Prompt Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Overwrite an AI prompt for future tasks",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/providers": {
+      "get": {
+        "operationId": "list_providers_endpoint_api_v1_admin_ai_providers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List encrypted AI providers with masked credentials",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      },
+      "post": {
+        "operationId": "create_provider_endpoint_api_v1_admin_ai_providers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create an OpenAI-compatible provider with an encrypted key",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/providers/{provider_id}": {
+      "delete": {
+        "operationId": "delete_provider_endpoint_api_v1_admin_ai_providers__provider_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Provider Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete a provider and promote the next enabled backup",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      },
+      "patch": {
+        "operationId": "update_provider_endpoint_api_v1_admin_ai_providers__provider_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Provider Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderPatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update provider configuration while preserving masked keys",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/providers/{provider_id}/models": {
+      "post": {
+        "operationId": "provider_models_endpoint_api_v1_admin_ai_providers__provider_id__models_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Provider Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderModelsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fetch the provider model list or return a manual-entry fallback code",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/providers/{provider_id}/test": {
+      "post": {
+        "operationId": "test_provider_endpoint_api_v1_admin_ai_providers__provider_id__test_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Provider Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderTestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Perform a real provider connection check",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/usage": {
+      "get": {
+        "operationId": "usage_endpoint_api_v1_admin_ai_usage_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date_from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAiUsageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Administrator permission is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI resource conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read privacy-safe aggregate AI usage and task status",
+        "tags": [
+          "system",
+          "admin ai"
+        ]
+      }
+    },
     "/api/v1/admin/users": {
       "get": {
         "operationId": "list_users_endpoint_api_v1_admin_users_get",
@@ -4155,6 +6386,487 @@
         "tags": [
           "system",
           "admin"
+        ]
+      }
+    },
+    "/api/v1/ai/jobs": {
+      "post": {
+        "operationId": "create_ai_job_endpoint_api_v1_ai_jobs_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "discriminator": {
+                  "mapping": {
+                    "challenge_plan": "#/components/schemas/ChallengePlanRequest",
+                    "coach_reply": "#/components/schemas/CoachReplyRequest",
+                    "json_repair": "#/components/schemas/JsonRepairRequest",
+                    "practice_generation": "#/components/schemas/PracticeGenerationRequest",
+                    "subjective_grading": "#/components/schemas/SubjectiveGradingRequest"
+                  },
+                  "propertyName": "task_type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/PracticeGenerationRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SubjectiveGradingRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CoachReplyRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ChallengePlanRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/JsonRepairRequest"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiJobAcceptedResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not use AI tasks."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI quota or concurrency limit is exhausted."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI provider or queue is unavailable."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create a durable structured AI generation task",
+        "tags": [
+          "system",
+          "ai"
+        ]
+      }
+    },
+    "/api/v1/ai/jobs/{job_id}": {
+      "get": {
+        "operationId": "get_ai_job_endpoint_api_v1_ai_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiJobStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not use AI tasks."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI quota or concurrency limit is exhausted."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI provider or queue is unavailable."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read the durable status and privacy-safe summary of an AI task",
+        "tags": [
+          "system",
+          "ai"
+        ]
+      }
+    },
+    "/api/v1/ai/jobs/{job_id}/cancel": {
+      "post": {
+        "operationId": "cancel_ai_job_endpoint_api_v1_ai_jobs__job_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiJobStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not use AI tasks."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI quota or concurrency limit is exhausted."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI provider or queue is unavailable."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel a queued or running AI task and release its quota reservation",
+        "tags": [
+          "system",
+          "ai"
+        ]
+      }
+    },
+    "/api/v1/ai/usage/me": {
+      "get": {
+        "operationId": "my_ai_usage_endpoint_api_v1_ai_usage_me_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "local_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Local Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiUserUsageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not use AI tasks."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI task conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI quota or concurrency limit is exhausted."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The AI provider or queue is unavailable."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read personal daily AI quotas and concurrency usage",
+        "tags": [
+          "system",
+          "ai"
         ]
       }
     },

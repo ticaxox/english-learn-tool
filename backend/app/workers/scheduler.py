@@ -9,6 +9,7 @@ from arq import cron
 from sqlalchemy import or_, select
 
 from app.models.wordbooks import WordbookJob
+from app.services.ai_jobs import reconcile_stale_ai_jobs
 from app.services.auth import utcnow
 from app.services.wordbook_queue import (
     SCHEDULER_QUEUE_NAME,
@@ -146,7 +147,14 @@ async def scheduler_tick(ctx: dict[str, Any]) -> None:
         return
     settings = ctx["settings"]
     stale_before = utcnow() - timedelta(seconds=settings.wordbook_job_stale_seconds)
+    ai_stale_before = utcnow() - timedelta(seconds=settings.ai_job_stale_seconds)
     async with factory() as session:
+        ai_stale_count = await reconcile_stale_ai_jobs(
+            session,
+            ctx["redis"],
+            settings,
+            stale_before=ai_stale_before,
+        )
         cleanup = await cleanup_expired_wordbook_artifacts(
             session,
             ctx["wordbook_storage"],
@@ -183,6 +191,7 @@ async def scheduler_tick(ctx: dict[str, Any]) -> None:
             "outcomes": results,
             "expired_jobs": cleanup["jobs"],
             "expired_previews": cleanup["previews"],
+            "stale_ai_jobs": ai_stale_count,
         },
     )
 
