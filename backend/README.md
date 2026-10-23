@@ -236,6 +236,21 @@ Never commit provider keys, real prompts containing member data, or the master e
 - Migration `fbff60ce778f` adds practice sessions, generations, questions, submissions, events, and
   idempotent deletion records; AI usage ledger amounts support per-question subjective grading.
 
+## In-app notifications, preferences, DND, and dedupe
+
+- `GET /api/v1/notifications` provides owner-scoped cursor pagination; `PATCH /notifications/{id}/read`
+  and `POST /notifications/read-all` change notification state only and never write learning or AI state.
+- `GET`/`PUT /api/v1/notifications/preferences` manage category switches, DND (`22:00-08:00` by default),
+  the active-learning daily limit, and the IANA timezone.
+- Notifications are generated through `notification_outbox` from real AI terminal states and scheduler
+  learning checks. `dedupe_key` is unique per user; suppressed and same-category merged records are
+  retained instead of being reported as sent.
+- AI completion/failure bypasses DND and is emitted once per terminal job. Other active learning
+  reminders honor category switches, DND, the daily limit, and same-category merging.
+- The scheduler handles due-review checks, 20:00 incomplete/streak-risk checks, outbox processing,
+  and expired-notification cleanup. v1 is in-app only; no email, SMS, or Web Push is implemented.
+- Migration `cd6e2b2dd57e` adds the notification inbox and outbox tables.
+
 ## Verification
 
 Create a dedicated integration database and Redis database, then run the checks:
