@@ -11,6 +11,7 @@ import AdminUsersView from '../views/AdminUsersView.vue'
 import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
 import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
 import AdminAiUsageView from '../views/AdminAiUsageView.vue'
+import AdminDashboardView from '../views/AdminDashboardView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import ChallengeView from '../views/ChallengeView.vue'
 import CoachView from '../views/CoachView.vue'
@@ -24,7 +25,6 @@ import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeSessionView from '../views/PracticeSessionView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
 import MistakesView from '../views/MistakesView.vue'
-import RemoteDataPage from '../views/RemoteDataPage.vue'
 import TodayView from '../views/TodayView.vue'
 import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
@@ -123,13 +123,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'admin/dashboard',
         name: 'admin-dashboard',
-        component: RemoteDataPage,
+        component: AdminDashboardView,
         meta: { requiresRole: 'admin' },
-        props: {
-          title: '组织看板',
-          description: '真实读取组织聚合数据；图表和指标界面将在后续任务实现。',
-          endpoint: '/admin/dashboard',
-        },
       },
       {
         path: 'admin/users',
