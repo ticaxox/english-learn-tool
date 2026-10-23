@@ -8,10 +8,23 @@ import {
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import AdminUsersView from '../views/AdminUsersView.vue'
+import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
+import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
+import AdminAiUsageView from '../views/AdminAiUsageView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
+import LearningSettingsView from '../views/LearningSettingsView.vue'
+import MemoryPracticeView from '../views/MemoryPracticeView.vue'
+import NotificationsView from '../views/NotificationsView.vue'
+import NotificationPreferencesView from '../views/NotificationPreferencesView.vue'
+import PracticeHubView from '../views/PracticeHubView.vue'
+import PracticeSessionView from '../views/PracticeSessionView.vue'
+import PracticeRecordsView from '../views/PracticeRecordsView.vue'
+import MistakesView from '../views/MistakesView.vue'
 import RemoteDataPage from '../views/RemoteDataPage.vue'
+import TodayView from '../views/TodayView.vue'
+import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes: RouteRecordRaw[] = [
@@ -37,52 +50,43 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'overview',
         name: 'overview',
-        component: RemoteDataPage,
-        props: {
-          title: '学习概览',
-          description: '读取真实的今日学习计划与任务进度。完整业务界面将在后续任务实现。',
-          endpoint: '/learning/today',
-        },
+        component: TodayView,
       },
       {
         path: 'wordbooks',
         name: 'wordbooks',
-        component: RemoteDataPage,
-        props: {
-          title: '词书',
-          description: '真实请求当前账号可见的词书；本阶段只验证接入与错误状态。',
-          endpoint: '/wordbooks',
-        },
+        component: WordbooksView,
       },
       {
         path: 'memory',
         name: 'memory',
-        component: RemoteDataPage,
-        props: {
-          title: '记忆练习',
-          description: '真实读取当前记忆模块配置；卡片与会话界面将在后续任务实现。',
-          endpoint: '/memory/config',
-        },
+        component: MemoryPracticeView,
+      },
+      {
+        path: 'memory/mistakes',
+        name: 'memory-mistakes',
+        component: MistakesView,
       },
       {
         path: 'practice',
         name: 'practice',
-        component: RemoteDataPage,
-        props: {
-          title: 'AI 练习',
-          description: '真实读取练习记录；生成、作答和评分界面将在后续任务实现。',
-          endpoint: '/practice/records',
-        },
+        component: PracticeHubView,
+      },
+      {
+        path: 'practice/records',
+        name: 'practice-records',
+        component: PracticeRecordsView,
+      },
+      {
+        path: 'practice/mistakes',
+        name: 'practice-mistakes',
+        component: PracticeRecordsView,
+        props: { onlyMistakes: true },
       },
       {
         path: 'practice/:sessionId',
         name: 'practice-session',
-        component: RemoteDataPage,
-        props: (route) => ({
-          title: '练习会话',
-          description: '按会话 ID 读取真实练习数据；本任务不渲染业务题目。',
-          endpoint: `/practice/sessions/${encodeURIComponent(String(route.params.sessionId))}`,
-        }),
+        component: PracticeSessionView,
       },
       {
         path: 'challenges',
@@ -117,22 +121,17 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'notifications',
         name: 'notifications',
-        component: RemoteDataPage,
-        props: {
-          title: '通知',
-          description: '真实读取当前成员的通知；通知操作将在后续任务实现。',
-          endpoint: '/notifications',
-        },
+        component: NotificationsView,
+      },
+      {
+        path: 'notifications/preferences',
+        name: 'notification-preferences',
+        component: NotificationPreferencesView,
       },
       {
         path: 'settings',
         name: 'settings',
-        component: RemoteDataPage,
-        props: {
-          title: '学习设置',
-          description: '真实读取本人学习档案；目标与偏好表单将在后续任务实现。',
-          endpoint: '/users/me/profile',
-        },
+        component: LearningSettingsView,
       },
       {
         path: 'admin/dashboard',
@@ -154,24 +153,20 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'admin/ai/providers',
         name: 'admin-providers',
-        component: RemoteDataPage,
+        component: AdminAiProvidersView,
         meta: { requiresRole: 'admin' },
-        props: {
-          title: 'AI 提供商',
-          description: '真实读取已配置的提供商；编辑和连接测试将在后续任务实现。',
-          endpoint: '/admin/ai/providers',
-        },
       },
       {
         path: 'admin/ai/prompts',
         name: 'admin-prompts',
-        component: RemoteDataPage,
+        component: AdminAiPromptsView,
         meta: { requiresRole: 'admin' },
-        props: {
-          title: 'AI 提示词',
-          description: '真实读取提示词列表；覆盖编辑将在后续任务实现。',
-          endpoint: '/admin/ai/prompts',
-        },
+      },
+      {
+        path: 'admin/ai/usage',
+        name: 'admin-ai-usage',
+        component: AdminAiUsageView,
+        meta: { requiresRole: 'admin' },
       },
       {
         path: ':pathMatch(.*)*',
