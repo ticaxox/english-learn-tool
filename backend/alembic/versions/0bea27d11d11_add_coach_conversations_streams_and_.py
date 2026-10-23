@@ -8,9 +8,10 @@ Create Date: 2026-10-23 14:15:06.058635
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "0bea27d11d11"
@@ -206,7 +207,8 @@ def upgrade() -> None:
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("undone_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint(
-            "action_type IN ('adjust_daily_plan', 'adjust_notification_preferences', 'start_practice', 'activate_wordbook', 'mark_review_focus')",
+            "action_type IN ('adjust_daily_plan', 'adjust_notification_preferences', "
+            "'start_practice', 'activate_wordbook', 'mark_review_focus')",
             name=op.f("ck_coach_action_receipts_action_type_valid"),
         ),
         sa.CheckConstraint(
