@@ -62,6 +62,19 @@ describe('route guards', () => {
     expect(router.currentRoute.value.query.access).toBe('denied')
   })
 
+  it('allows members to open challenge list and read-only detail routes', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/challenges')
+    expect(router.currentRoute.value.name).toBe('challenges')
+    await router.push('/challenges/challenge-1')
+    expect(router.currentRoute.value.name).toBe('challenge-detail')
+  })
   it('allows members to open the AI coach workspace', async () => {
     const pinia = createPinia()
     const auth = useAuthStore(pinia)

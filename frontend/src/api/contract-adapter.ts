@@ -526,7 +526,7 @@ function blanksFromCloze(cloze: string): SpellingBlank[] {
   }))
 }
 
-export function parseStudyQuestion(payload: unknown, module: MemoryModule): StudyQuestion {
+export function parseStudyQuestion(payload: unknown, module: MemoryModule): StudyQuestion | null {
   const endpoint = `GET /memory/sessions/{id} (${module})`
   const body = requireRecord(payload, endpoint, '响应体')
   const actualModule = requireEnum(body[CONTRACT.session.module], MEMORY_MODULES, endpoint, 'module')
@@ -534,6 +534,7 @@ export function parseStudyQuestion(payload: unknown, module: MemoryModule): Stud
     fail(endpoint, `module 应为 ${module}，实际为 ${actualModule}。`)
   }
   requireEnum(body[CONTRACT.session.status], SESSION_STATUSES, endpoint, 'status')
+  if (body[CONTRACT.session.nextItem] === null) return null
   const item = requireRecord(body[CONTRACT.session.nextItem], endpoint, 'next_item')
   const card = requireRecord(body[CONTRACT.session.card], endpoint, 'card')
   const questionId = requireString(item[CONTRACT.item.itemId], endpoint, 'next_item.item_id')

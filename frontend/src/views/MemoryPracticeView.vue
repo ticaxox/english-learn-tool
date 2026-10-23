@@ -7,7 +7,7 @@
  * idempotency keys. Heartbeats run while a session is open.
  */
 import { computed, onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
@@ -27,7 +27,14 @@ import {
 } from '../types/learning'
 import '../learning.css'
 
+const route = useRoute()
 const frozen = computed(() => isContractFrozen())
+const challengeSessionId = computed(() => typeof route.query.sessionId === 'string' ? route.query.sessionId : null)
+const challengeId = computed(() => typeof route.query.challengeId === 'string' ? route.query.challengeId : null)
+const challengeModule = computed<MemoryModule | null>(() => {
+  const value = route.query.module
+  return value === 'flashcard' || value === 'choice' || value === 'spelling' ? value : null
+})
 
 const config = ref<MemoryConfig | null>(null)
 const configError = ref<unknown>(null)
@@ -69,10 +76,10 @@ async function loadConfig(): Promise<void> {
   }
 }
 
-async function begin(module: MemoryModule): Promise<void> {
+async function begin(module: MemoryModule, existingSessionId?: string): Promise<void> {
   selectedModule.value = module
   try {
-    await session.open(module)
+    await session.open(module, existingSessionId)
     heartbeat.start()
   } catch {
     // Error already captured by the session composable for display.
@@ -127,8 +134,11 @@ function restart(): void {
   void loadConfig()
 }
 
-onMounted(() => {
-  void loadConfig()
+onMounted(async () => {
+  await loadConfig()
+  if (challengeSessionId.value && challengeModule.value) {
+    await begin(challengeModule.value, challengeSessionId.value)
+  }
 })
 </script>
 
@@ -142,13 +152,19 @@ onMounted(() => {
           所有卡片、选项与评分来自服务端；本页不会提前知道答案，也不会自行推进复习间隔。
         </p>
       </div>
-      <div v-if="session.hasSession.value && !session.finished.value" class="memory-hero__actions">
+      <div v-if="session.hasSession.value" class="memory-hero__actions">
         <span class="memory-hero__state" :class="`memory-hero__state--${heartbeat.state.value}`">
           {{ heartbeat.state.value === 'active' ? '计时中' : '已暂停' }}
         </span>
         <button class="button-secondary button-small" type="button" @click="endSession">结束本次</button>
       </div>
     </header>
+
+    <div v-if="challengeId" class="inline-note challenge-memory-banner">
+      <strong>当前记忆训练来自每日闯关节点。</strong>
+      完成后返回地图刷新，服务端会同步节点状态。
+      <RouterLink :to="`/challenges/${challengeId}`">返回今日闯关</RouterLink>
+    </div>
 
     <ContractGate
       v-if="!frozen"

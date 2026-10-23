@@ -34,7 +34,7 @@ export interface MemorySessionOptions {
   /** Injected for tests; defaults to the real endpoints. */
   api?: {
     start: (module: MemoryModule) => Promise<SessionSummary>
-    loadQuestion: (sessionId: string, module: MemoryModule) => Promise<StudyQuestion>
+    loadQuestion: (sessionId: string, module: MemoryModule) => Promise<StudyQuestion | null>
     submit: (sessionId: string, event: StudyEventInput, key: string) => Promise<StudyFeedback>
     complete: (sessionId: string) => Promise<void>
   }
@@ -115,6 +115,11 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
         }
       }
       const next = await api.loadQuestion(sessionId.value as string, target)
+      if (!next) {
+        finished.value = true
+        question.value = null
+        return
+      }
       question.value = next
       beginCard()
     } catch (error) {
@@ -132,6 +137,11 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
       return
     }
     const next = await api.loadQuestion(sessionId.value, module.value)
+    if (!next) {
+      finished.value = true
+      question.value = null
+      return
+    }
     question.value = next
     beginCard()
   }

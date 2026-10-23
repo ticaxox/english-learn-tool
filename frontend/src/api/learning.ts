@@ -137,11 +137,12 @@ export async function fetchMemorySession(
   sessionId: string,
   module: MemoryModule,
   options: FetchOptions = {},
-): Promise<StudyQuestion> {
+): Promise<StudyQuestion | null> {
   const payload = await apiClient.get(`/memory/sessions/${encodeURIComponent(sessionId)}`, {
     signal: options.signal,
   })
   const question = parseStudyQuestion(payload, module)
+  if (!question) return null
   return question.kind === 'flashcard' ? await resolveFlashcardAnswer(question) : question
 }
 

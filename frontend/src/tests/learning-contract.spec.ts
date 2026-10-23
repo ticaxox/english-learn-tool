@@ -211,11 +211,17 @@ describe('today, heartbeat and mistakes', () => {
 describe('session question and event mapping', () => {
   it('uses server option_count instead of a hard-coded four-option rule', () => {
     const question = parseStudyQuestion(sessionPayload(), 'choice')
-    expect(question.kind).toBe('choice')
-    if (question.kind !== 'choice') throw new Error('unexpected question kind')
+    if (!question || question.kind !== 'choice') throw new Error('unexpected question kind')
     expect(question.optionCount).toBe(3)
     expect(question.options).toHaveLength(3)
     expect(JSON.stringify(question)).not.toMatch(/correct|answer_key|is_right/)
+  })
+
+  it('treats a completed queue as no next question instead of failing the contract', () => {
+    const payload = sessionPayload() as Record<string, unknown>
+    payload.next_item = null
+    payload.card = null
+    expect(parseStudyQuestion(payload, 'choice')).toBeNull()
   })
 
   it('rejects a payload whose option_count disagrees with options', () => {

@@ -12,6 +12,7 @@ import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
 import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
 import AdminAiUsageView from '../views/AdminAiUsageView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
+import ChallengeView from '../views/ChallengeView.vue'
 import CoachView from '../views/CoachView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
@@ -92,22 +93,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'challenges',
         name: 'challenges',
-        component: RemoteDataPage,
-        props: {
-          title: '每日闯关',
-          description: '真实读取今日闯关地图。若后端尚未生成地图，页面会显示真实 404 响应。',
-          endpoint: '/challenges/today',
-        },
+        component: ChallengeView,
       },
       {
         path: 'challenges/:challengeId',
         name: 'challenge-detail',
-        component: RemoteDataPage,
-        props: (route) => ({
-          title: '闯关详情',
-          description: '按挑战 ID 读取真实地图数据；关卡交互将在后续任务实现。',
-          endpoint: `/challenges/${encodeURIComponent(String(route.params.challengeId))}`,
-        }),
+        component: ChallengeView,
       },
       {
         path: 'coach',
