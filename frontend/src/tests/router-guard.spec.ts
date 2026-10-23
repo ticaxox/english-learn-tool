@@ -48,6 +48,84 @@ describe('route guards', () => {
     expect(router.currentRoute.value.query.access).toBe('denied')
   })
 
+  it('blocks member access to the organization dashboard', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/admin/dashboard')
+
+    expect(router.currentRoute.value.name).toBe('overview')
+    expect(router.currentRoute.value.query.access).toBe('denied')
+  })
+
+  it('blocks member access to admin AI usage routes', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/admin/ai/usage')
+
+    expect(router.currentRoute.value.name).toBe('overview')
+    expect(router.currentRoute.value.query.access).toBe('denied')
+  })
+
+  it('allows members to open challenge list and read-only detail routes', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/challenges')
+    expect(router.currentRoute.value.name).toBe('challenges')
+    await router.push('/challenges/challenge-1')
+    expect(router.currentRoute.value.name).toBe('challenge-detail')
+  })
+  it('allows members to open the AI coach workspace', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/coach')
+    expect(router.currentRoute.value.name).toBe('coach')
+  })
+  it('allows members to open the notification center and preferences', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/notifications')
+    expect(router.currentRoute.value.name).toBe('notifications')
+
+    await router.push('/notifications/preferences')
+    expect(router.currentRoute.value.name).toBe('notification-preferences')
+  })
+
+  it('redirects unauthenticated notification access to login with a return path', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.clearSession()
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/notifications/preferences')
+
+    expect(router.currentRoute.value.name).toBe('login')
+    expect(router.currentRoute.value.query.redirect).toBe('/notifications/preferences')
+  })
   it('forces a password change before other authenticated routes', async () => {
     const pinia = createPinia()
     const auth = useAuthStore(pinia)
