@@ -186,6 +186,71 @@ answer or option identifiers before submission, and spelling grading ignores cas
 Deleting a wordbook also removes the learner states, sessions, session items, events, plans, and
 mistake markers that referenced it, so no ghost learning rows survive the tombstone.
 
+## AI provider, prompt, structured generation, and quota foundation
+
+- Administrators configure OpenAI-compatible providers through `/api/v1/admin/ai/providers` and can
+  run a real `/models` connection check or fetch the model list. API keys are encrypted with AES-GCM
+  using `SECRET_ENCRYPTION_KEY`; every response contains only a mask such as `sk-****abcd`.
+- Provider URLs are checked for protocol, credentials, DNS resolution, blocked metadata hosts,
+  loopback/private targets, and cross-origin redirects. `AI_ALLOW_PRIVATE_PROVIDER_URLS` exists only
+  for local protocol tests and is rejected when `APP_ENV=production`.
+- Prompts are seeded by the `c5ab093fd0f9` migration and can be overwritten through
+  `/api/v1/admin/ai/prompts`. A job stores a prompt snapshot, so later edits apply only to new jobs.
+- `/api/v1/ai/jobs` creates durable structured jobs. The worker requests JSON Schema/JSON Mode,
+  validates with Pydantic v2, enforces business rules, performs at most one JSON repair and three
+  logical generation attempts, and never returns partial results. The member status endpoint exposes
+  only status, provider/model, attempt counts, error, and a privacy-safe result summary.
+- `ai_usage_ledger` reserves quota before provider work, consumes only after success, and releases on
+  failure, cancellation, or stale reconciliation. Redis enforces at most two active AI jobs per user.
+  Daily defaults are 100 coach messages, 20 question-generation jobs, and 50 subjective gradings.
+- The existing business ARQ queue is reused for AI jobs, while the scheduler queue remains isolated.
+  AI provider failure does not block learning, wordbooks, or persisted records.
+
+Set a deployment-owned master secret of at least 32 characters:
+
+```dotenv
+SECRET_ENCRYPTION_KEY=<strong-random-secret>
+```
+
+For local OpenAI-compatible tests only:
+
+```dotenv
+AI_ALLOW_PRIVATE_PROVIDER_URLS=true
+```
+
+Never commit provider keys, real prompts containing member data, or the master encryption secret.
+
+## AI practice sessions, drafts, grading, and records
+
+- `POST /api/v1/practice/sessions` creates fill-in-the-blank, reading, translation, or writing
+  practice and enqueues structured generation through the shared AI job queue.
+- `GET /api/v1/practice/sessions/{id}` returns only answer-safe public question fields. Correct
+  options, explanations, reference translations, reference essays, and grading remain in private
+  payloads until the session is submitted.
+- `PUT /api/v1/practice/sessions/{id}/draft` saves the caller's draft with optimistic version checks;
+  `POST /regenerate` is limited to unanswered sessions and invalidates the old generation.
+- Objective practice is graded synchronously by the server. Translation and writing use one bounded
+  batch grading AI job; a failed grading task returns an explicit failure and never a default score.
+- `GET /records`, `GET /mistakes`, `GET /records/{id}`, `DELETE /records/bulk`, and `GET /events`
+  are owner-scoped. Deleting a record cascades its questions, submission, draft, and learning events.
+- Migration `fbff60ce778f` adds practice sessions, generations, questions, submissions, events, and
+  idempotent deletion records; AI usage ledger amounts support per-question subjective grading.
+
+## In-app notifications, preferences, DND, and dedupe
+
+- `GET /api/v1/notifications` provides owner-scoped cursor pagination; `PATCH /notifications/{id}/read`
+  and `POST /notifications/read-all` change notification state only and never write learning or AI state.
+- `GET`/`PUT /api/v1/notifications/preferences` manage category switches, DND (`22:00-08:00` by default),
+  the active-learning daily limit, and the IANA timezone.
+- Notifications are generated through `notification_outbox` from real AI terminal states and scheduler
+  learning checks. `dedupe_key` is unique per user; suppressed and same-category merged records are
+  retained instead of being reported as sent.
+- AI completion/failure bypasses DND and is emitted once per terminal job. Other active learning
+  reminders honor category switches, DND, the daily limit, and same-category merging.
+- The scheduler handles due-review checks, 20:00 incomplete/streak-risk checks, outbox processing,
+  and expired-notification cleanup. v1 is in-app only; no email, SMS, or Web Push is implemented.
+- Migration `cd6e2b2dd57e` adds the notification inbox and outbox tables.
+
 ## Verification
 
 Create a dedicated integration database and Redis database, then run the checks:

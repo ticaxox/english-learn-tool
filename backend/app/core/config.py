@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from functools import lru_cache
 from pathlib import PurePosixPath, PureWindowsPath
 from typing import Literal
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -69,6 +71,32 @@ class Settings(BaseSettings):
     wordbook_pdf_page_rows: int = Field(default=18, ge=1, le=100)
     wordbook_pdf_columns: int = Field(default=2, ge=1, le=4)
     wordbook_pdf_font_path: str | None = None
+
+    # AI controls. Private/loopback provider URLs are test-only and never allowed in production.
+    ai_allow_private_provider_urls: bool = False
+    ai_provider_redirect_limit: int = Field(default=2, ge=0, le=5)
+    ai_provider_retry_limit: int = Field(default=2, ge=0, le=2)
+    ai_provider_retry_backoff_seconds: float = Field(default=0.25, ge=0, le=5)
+    ai_job_stale_seconds: int = Field(default=900, ge=300, le=86400)
+    ai_job_max_context_bytes: int = Field(default=64_000, ge=1024, le=1_000_000)
+    ai_concurrency_limit: int = Field(default=2, ge=1, le=2)
+    ai_prompt_max_chars: int = Field(default=100_000, ge=1000, le=200_000)
+    ai_daily_coach_messages: int = Field(default=100, ge=1, le=1000)
+    coach_message_retention_days: int = Field(default=7, ge=1, le=30)
+    coach_context_ttl_days: int = Field(default=7, ge=1, le=30)
+    coach_action_undo_hours: int = Field(default=24, ge=1, le=168)
+    ai_daily_question_generation: int = Field(default=20, ge=1, le=500)
+    ai_daily_subjective_grading: int = Field(default=50, ge=1, le=1000)
+
+    notification_daily_limit: int = Field(default=3, ge=0, le=20)
+    notification_ttl_days: int = Field(default=30, ge=1, le=365)
+    notification_outbox_batch_size: int = Field(default=100, ge=1, le=1000)
+
+    @model_validator(mode="after")
+    def validate_ai_security(self) -> Settings:
+        if self.app_env == "production" and self.ai_allow_private_provider_urls:
+            raise ValueError("AI private provider URLs cannot be enabled in production")
+        return self
 
     @field_validator("database_url")
     @classmethod

@@ -444,7 +444,9 @@ async def _plan_entries(
     rows = (
         await session.execute(
             select(DailyPlanWord.reason, DailyPlanWord.entry_id)
+            .join(WordbookEntry, WordbookEntry.id == DailyPlanWord.entry_id)
             .where(DailyPlanWord.plan_id == plan.id)
+            .where(WordbookEntry.wordbook_id == plan.wordbook_id)
             .order_by(DailyPlanWord.position)
         )
     ).all()
@@ -460,13 +462,42 @@ async def start_session(
     settings: Settings,
     payload: SessionCreateRequest,
 ) -> SessionResponse:
-    book = await _active_wordbook(session, user)
-    if payload.wordbook_id is not None and payload.wordbook_id != book.id:
-        raise AppError(
-            status_code=409,
-            code="WORDBOOK_NOT_ACTIVE",
-            message="Only the active wordbook can be studied.",
+    local_date = local_date_for(settings, user)
+    daily_plan = await session.scalar(
+        select(DailyPlan).where(
+            DailyPlan.user_id == user.id,
+            DailyPlan.local_date == local_date,
         )
+    )
+    if daily_plan is not None:
+        # The daily plan is the source of truth for today's study snapshot. An
+        # activation switch must not attach the old plan entries to a new book.
+        book = await session.scalar(
+            select(Wordbook).where(
+                Wordbook.id == daily_plan.wordbook_id,
+                Wordbook.status == "ready",
+            )
+        )
+        if book is None:
+            raise AppError(
+                status_code=409,
+                code="MEMORY_PLAN_WORDBOOK_UNAVAILABLE",
+                message="The wordbook for today's plan is unavailable.",
+            )
+        if payload.wordbook_id is not None and payload.wordbook_id != book.id:
+            raise AppError(
+                status_code=409,
+                code="MEMORY_WORDBOOK_PLAN_MISMATCH",
+                message="The requested wordbook does not match today's plan.",
+            )
+    else:
+        book = await _active_wordbook(session, user)
+        if payload.wordbook_id is not None and payload.wordbook_id != book.id:
+            raise AppError(
+                status_code=409,
+                code="WORDBOOK_NOT_ACTIVE",
+                message="Only the active wordbook can be studied.",
+            )
     config = await _config_row(session, user)
     if not getattr(config, _ENABLED_ATTR[payload.module]):
         raise AppError(
@@ -475,7 +506,6 @@ async def start_session(
             message="This training module is disabled in the memory configuration.",
         )
     preferences = dict(config.preferences or {})
-    local_date = local_date_for(settings, user)
     existing = await session.scalar(
         select(MemorySession).where(
             MemorySession.user_id == user.id,

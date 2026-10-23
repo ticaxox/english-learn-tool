@@ -37,6 +37,7 @@ from tests.learning_support import (
     SESSIONS_PATH,
     STATS_PATH,
     TODAY_PATH,
+    WORDBOOKS_PATH,
     activate,
     entry_facts,
     login,
@@ -205,6 +206,92 @@ async def test_new_word_needs_two_goods_with_a_four_card_gap(app, client, member
     refreshed = await client.get(TODAY_PATH, headers=headers)
     assert refreshed.status_code == 200
     assert refreshed.json()["new_words"]["completed"] >= 1
+
+
+async def test_wordbook_switch_keeps_plan_session_items_and_states_consistent(
+    app, client, member_user
+) -> None:
+    headers = await login(client, member_user.username)
+    primary_id = await seed_wordbook(app, owner_id=member_user.id, entries=8, prefix="primary")
+    small_id = await seed_wordbook(app, owner_id=member_user.id, entries=4, prefix="small")
+    await activate(app, user_id=member_user.id, wordbook_id=primary_id)
+
+    today = await client.get(TODAY_PATH, headers=headers)
+    assert today.status_code == 200, today.text
+    assert today.json()["wordbook_id"] == primary_id
+
+    first = await client.post(SESSIONS_PATH, headers=headers, json={"module": "flashcard"})
+    assert first.status_code == 201, first.text
+    first_session_id = first.json()["session_id"]
+    assert first.json()["wordbook_id"] == primary_id
+
+    switched = await client.post(f"{WORDBOOKS_PATH}/{small_id}/activate", headers=headers)
+    assert switched.status_code == 200, switched.text
+
+    today_after_switch = await client.get(TODAY_PATH, headers=headers)
+    assert today_after_switch.status_code == 200, today_after_switch.text
+    assert today_after_switch.json()["wordbook_id"] == primary_id
+    assert {item["entry_id"] for item in today_after_switch.json()["items"]} == {
+        item["entry_id"] for item in today.json()["items"]
+    }
+
+    resumed = await client.post(SESSIONS_PATH, headers=headers, json={"module": "flashcard"})
+    assert resumed.status_code == 201, resumed.text
+    assert resumed.json()["session_id"] == first_session_id
+    assert resumed.json()["wordbook_id"] == primary_id
+
+    choice = await client.post(SESSIONS_PATH, headers=headers, json={"module": "choice"})
+    assert choice.status_code == 201, choice.text
+    assert choice.json()["wordbook_id"] == primary_id
+
+    mismatched = await client.post(
+        SESSIONS_PATH,
+        headers=headers,
+        json={"module": "spelling", "wordbook_id": small_id},
+    )
+    assert mismatched.status_code == 409
+    assert mismatched.json()["code"] == "MEMORY_WORDBOOK_PLAN_MISMATCH"
+
+    session_ids = [UUID(first_session_id), UUID(choice.json()["session_id"])]
+    async with app.state.session_factory() as session:
+        for session_id in session_ids:
+            memory_session = await session.get(MemorySession, session_id)
+            assert memory_session is not None
+            assert str(memory_session.wordbook_id) == primary_id
+
+            items = list(
+                (
+                    await session.scalars(
+                        select(MemorySessionItem).where(MemorySessionItem.session_id == session_id)
+                    )
+                ).all()
+            )
+            assert items
+            for item in items:
+                entry = await session.get(WordbookEntry, item.entry_id)
+                state = await session.get(UserWordState, item.word_state_id)
+                assert entry is not None
+                assert state is not None
+                assert str(entry.wordbook_id) == primary_id
+                assert str(state.wordbook_id) == primary_id
+                assert state.entry_id == entry.id
+
+        cross_book_states = await session.scalar(
+            select(func.count(UserWordState.id))
+            .join(WordbookEntry, WordbookEntry.id == UserWordState.entry_id)
+            .where(
+                UserWordState.user_id == member_user.id,
+                UserWordState.wordbook_id != WordbookEntry.wordbook_id,
+            )
+        )
+        small_states = await session.scalar(
+            select(func.count(UserWordState.id)).where(
+                UserWordState.user_id == member_user.id,
+                UserWordState.wordbook_id == UUID(small_id),
+            )
+        )
+    assert cross_book_states == 0
+    assert small_states == 0
 
 
 async def test_due_review_completes_with_one_good_and_again_relearns(

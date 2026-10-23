@@ -1,3 +1,18 @@
+from app.models.ai import AiJob, AiJobEvent, AiPrompt, AiProvider, AiUsageLedger
+from app.models.challenge import (
+    ChallengeBossResult,
+    ChallengeNode,
+    ChallengeNodeProgress,
+    ChallengePlanContext,
+    DailyChallengePlan,
+)
+from app.models.coach import (
+    CoachActionReceipt,
+    CoachContextSnapshot,
+    CoachConversation,
+    CoachMessage,
+    CoachStreamEvent,
+)
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
 from app.models.learning import (
     DailyActivity,
@@ -11,6 +26,15 @@ from app.models.learning import (
     MistakeFlag,
     UserWordState,
 )
+from app.models.notifications import Notification, NotificationOutbox
+from app.models.practice import (
+    PracticeDeletion,
+    PracticeEvent,
+    PracticeGeneration,
+    PracticeQuestion,
+    PracticeSession,
+    PracticeSubmission,
+)
 from app.models.system import SystemMetadata
 from app.models.wordbooks import (
     Wordbook,
@@ -23,7 +47,22 @@ from app.models.wordbooks import (
 )
 
 __all__ = [
+    "AiJob",
+    "AiJobEvent",
+    "AiPrompt",
+    "AiProvider",
+    "AiUsageLedger",
     "AuditLog",
+    "CoachActionReceipt",
+    "CoachContextSnapshot",
+    "CoachConversation",
+    "CoachMessage",
+    "ChallengeBossResult",
+    "ChallengeNode",
+    "ChallengeNodeProgress",
+    "ChallengePlanContext",
+    "CoachStreamEvent",
+    "DailyChallengePlan",
     "DailyActivity",
     "DailyPlan",
     "DailyPlanWord",
@@ -34,6 +73,14 @@ __all__ = [
     "MemorySession",
     "MemorySessionItem",
     "MistakeFlag",
+    "Notification",
+    "NotificationOutbox",
+    "PracticeDeletion",
+    "PracticeEvent",
+    "PracticeGeneration",
+    "PracticeQuestion",
+    "PracticeSession",
+    "PracticeSubmission",
     "RefreshToken",
     "SystemMetadata",
     "User",
