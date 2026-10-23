@@ -168,6 +168,23 @@
         "title": "AdminUserPatch",
         "type": "object"
       },
+      "AiPracticeSummary": {
+        "properties": {
+          "reason": {
+            "default": "AI practice is not implemented in this milestone.",
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "const": "not_available",
+            "default": "not_available",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "AiPracticeSummary",
+        "type": "object"
+      },
       "AuthSessionResponse": {
         "properties": {
           "access_token": {
@@ -435,6 +452,68 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HeartbeatRequest": {
+        "properties": {
+          "session_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "title": "HeartbeatRequest",
+        "type": "object"
+      },
+      "HeartbeatResponse": {
+        "properties": {
+          "active_minutes_today": {
+            "title": "Active Minutes Today",
+            "type": "integer"
+          },
+          "active_seconds_today": {
+            "title": "Active Seconds Today",
+            "type": "integer"
+          },
+          "credited_seconds": {
+            "title": "Credited Seconds",
+            "type": "integer"
+          },
+          "goal_reached": {
+            "title": "Goal Reached",
+            "type": "boolean"
+          },
+          "heartbeat_count": {
+            "title": "Heartbeat Count",
+            "type": "integer"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "study_minutes_target": {
+            "title": "Study Minutes Target",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "local_date",
+          "credited_seconds",
+          "active_seconds_today",
+          "active_minutes_today",
+          "study_minutes_target",
+          "goal_reached",
+          "heartbeat_count"
+        ],
+        "title": "HeartbeatResponse",
+        "type": "object"
+      },
       "ImportAcceptedResponse": {
         "properties": {
           "created_count": {
@@ -685,6 +764,357 @@
         "title": "ImportedUser",
         "type": "object"
       },
+      "LearningEventListResponse": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LearningEventResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "LearningEventListResponse",
+        "type": "object"
+      },
+      "LearningEventResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "duration_ms": {
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "entry_id": {
+            "format": "uuid",
+            "title": "Entry Id",
+            "type": "string"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "enum": [
+              "shown",
+              "answer",
+              "mastered",
+              "restore"
+            ],
+            "title": "Event Type",
+            "type": "string"
+          },
+          "is_correct": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Correct"
+          },
+          "module": {
+            "enum": [
+              "flashcard",
+              "choice",
+              "spelling"
+            ],
+            "title": "Module",
+            "type": "string"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "again",
+                  "good"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "wordbook_id": {
+            "format": "uuid",
+            "title": "Wordbook Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "event_type",
+          "module",
+          "duration_ms",
+          "wordbook_id",
+          "entry_id",
+          "session_id",
+          "created_at"
+        ],
+        "title": "LearningEventResponse",
+        "type": "object"
+      },
+      "LearningProfilePatch": {
+        "properties": {
+          "daily_new_words": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily New Words"
+          },
+          "daily_study_minutes": {
+            "anyOf": [
+              {
+                "maximum": 180.0,
+                "minimum": 15.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily Study Minutes"
+          },
+          "exam_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exam Date"
+          },
+          "notification_preferences": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notification Preferences"
+          },
+          "onboarding_completed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboarding Completed"
+          },
+          "target_exam": {
+            "anyOf": [
+              {
+                "enum": [
+                  "CET4",
+                  "CET6",
+                  "POSTGRAD",
+                  "IELTS",
+                  "TOEFL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Exam"
+          }
+        },
+        "title": "LearningProfilePatch",
+        "type": "object"
+      },
+      "LearningProfileResponse": {
+        "properties": {
+          "daily_new_words": {
+            "title": "Daily New Words",
+            "type": "integer"
+          },
+          "daily_study_minutes": {
+            "title": "Daily Study Minutes",
+            "type": "integer"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "exam_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exam Date"
+          },
+          "learning_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Learning Group"
+          },
+          "notification_preferences": {
+            "additionalProperties": true,
+            "title": "Notification Preferences",
+            "type": "object"
+          },
+          "onboarding_completed": {
+            "title": "Onboarding Completed",
+            "type": "boolean"
+          },
+          "target_exam": {
+            "anyOf": [
+              {
+                "enum": [
+                  "CET4",
+                  "CET6",
+                  "POSTGRAD",
+                  "IELTS",
+                  "TOEFL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Exam"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "daily_new_words",
+          "daily_study_minutes",
+          "timezone",
+          "onboarding_completed",
+          "updated_at"
+        ],
+        "title": "LearningProfileResponse",
+        "type": "object"
+      },
+      "LearningStatsResponse": {
+        "properties": {
+          "active_minutes_today": {
+            "title": "Active Minutes Today",
+            "type": "integer"
+          },
+          "current_streak_days": {
+            "title": "Current Streak Days",
+            "type": "integer"
+          },
+          "due_words_completed_today": {
+            "title": "Due Words Completed Today",
+            "type": "integer"
+          },
+          "goal_reached": {
+            "title": "Goal Reached",
+            "type": "boolean"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "new_words_completed_today": {
+            "title": "New Words Completed Today",
+            "type": "integer"
+          },
+          "sources": {
+            "$ref": "#/components/schemas/StatsSourceBreakdown"
+          },
+          "study_minutes_target": {
+            "title": "Study Minutes Target",
+            "type": "integer"
+          },
+          "total_reviews": {
+            "title": "Total Reviews",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "local_date",
+          "active_minutes_today",
+          "study_minutes_target",
+          "goal_reached",
+          "current_streak_days",
+          "new_words_completed_today",
+          "due_words_completed_today",
+          "total_reviews",
+          "sources"
+        ],
+        "title": "LearningStatsResponse",
+        "type": "object"
+      },
       "LivenessResponse": {
         "properties": {
           "service": {
@@ -731,6 +1161,187 @@
         "title": "LoginRequest",
         "type": "object"
       },
+      "MemoryConfigResponse": {
+        "properties": {
+          "choice_enabled": {
+            "default": true,
+            "title": "Choice Enabled",
+            "type": "boolean"
+          },
+          "flashcard_enabled": {
+            "default": true,
+            "title": "Flashcard Enabled",
+            "type": "boolean"
+          },
+          "preferences": {
+            "additionalProperties": true,
+            "title": "Preferences",
+            "type": "object"
+          },
+          "spelling_enabled": {
+            "default": true,
+            "title": "Spelling Enabled",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "updated_at"
+        ],
+        "title": "MemoryConfigResponse",
+        "type": "object"
+      },
+      "MemoryModuleConfig": {
+        "properties": {
+          "choice_enabled": {
+            "default": true,
+            "title": "Choice Enabled",
+            "type": "boolean"
+          },
+          "flashcard_enabled": {
+            "default": true,
+            "title": "Flashcard Enabled",
+            "type": "boolean"
+          },
+          "preferences": {
+            "additionalProperties": true,
+            "title": "Preferences",
+            "type": "object"
+          },
+          "spelling_enabled": {
+            "default": true,
+            "title": "Spelling Enabled",
+            "type": "boolean"
+          }
+        },
+        "title": "MemoryModuleConfig",
+        "type": "object"
+      },
+      "MistakeListResponse": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MistakeResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "MistakeListResponse",
+        "type": "object"
+      },
+      "MistakePriorityRequest": {
+        "properties": {
+          "is_priority": {
+            "title": "Is Priority",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "is_priority"
+        ],
+        "title": "MistakePriorityRequest",
+        "type": "object"
+      },
+      "MistakeResponse": {
+        "properties": {
+          "again_count": {
+            "title": "Again Count",
+            "type": "integer"
+          },
+          "definition_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Zh"
+          },
+          "entry_id": {
+            "format": "uuid",
+            "title": "Entry Id",
+            "type": "string"
+          },
+          "headword": {
+            "title": "Headword",
+            "type": "string"
+          },
+          "is_priority": {
+            "title": "Is Priority",
+            "type": "boolean"
+          },
+          "last_again_at": {
+            "format": "date-time",
+            "title": "Last Again At",
+            "type": "string"
+          },
+          "phonetic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phonetic"
+          },
+          "status": {
+            "enum": [
+              "new",
+              "learning",
+              "review",
+              "relearning",
+              "mastered",
+              "suspended"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "word_state_id": {
+            "format": "uuid",
+            "title": "Word State Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "word_state_id",
+          "entry_id",
+          "headword",
+          "again_count",
+          "last_again_at",
+          "is_priority",
+          "status"
+        ],
+        "title": "MistakeResponse",
+        "type": "object"
+      },
       "PasswordResetResponse": {
         "properties": {
           "must_change_password": {
@@ -754,6 +1365,99 @@
           "temporary_password"
         ],
         "title": "PasswordResetResponse",
+        "type": "object"
+      },
+      "PlanSectionProgress": {
+        "properties": {
+          "completed": {
+            "title": "Completed",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "not_started",
+              "in_progress",
+              "completed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "target",
+          "completed",
+          "status"
+        ],
+        "title": "PlanSectionProgress",
+        "type": "object"
+      },
+      "PlanWordResponse": {
+        "properties": {
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "definition_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Zh"
+          },
+          "entry_id": {
+            "format": "uuid",
+            "title": "Entry Id",
+            "type": "string"
+          },
+          "headword": {
+            "title": "Headword",
+            "type": "string"
+          },
+          "is_extra": {
+            "default": false,
+            "title": "Is Extra",
+            "type": "boolean"
+          },
+          "phonetic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phonetic"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "reason": {
+            "enum": [
+              "new",
+              "due"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entry_id",
+          "headword",
+          "reason",
+          "position",
+          "completed"
+        ],
+        "title": "PlanWordResponse",
         "type": "object"
       },
       "ReadinessResponse": {
@@ -804,6 +1508,574 @@
           "environment"
         ],
         "title": "ServiceInfo",
+        "type": "object"
+      },
+      "SessionCardPrompt": {
+        "properties": {
+          "cloze": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cloze"
+          },
+          "module": {
+            "enum": [
+              "flashcard",
+              "choice",
+              "spelling"
+            ],
+            "title": "Module",
+            "type": "string"
+          },
+          "option_count": {
+            "default": 0,
+            "title": "Option Count",
+            "type": "integer"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "part_of_speech": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part Of Speech"
+          },
+          "phonetic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phonetic"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "prompt_label": {
+            "enum": [
+              "headword",
+              "definition",
+              "phonetic",
+              "cloze"
+            ],
+            "title": "Prompt Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "module",
+          "prompt",
+          "prompt_label"
+        ],
+        "title": "SessionCardPrompt",
+        "type": "object"
+      },
+      "SessionCompleteRequest": {
+        "properties": {},
+        "title": "SessionCompleteRequest",
+        "type": "object"
+      },
+      "SessionCreateRequest": {
+        "properties": {
+          "limit": {
+            "default": 20,
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "module": {
+            "enum": [
+              "flashcard",
+              "choice",
+              "spelling"
+            ],
+            "title": "Module",
+            "type": "string"
+          },
+          "wordbook_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wordbook Id"
+          }
+        },
+        "required": [
+          "module"
+        ],
+        "title": "SessionCreateRequest",
+        "type": "object"
+      },
+      "SessionEventRequest": {
+        "properties": {
+          "action": {
+            "enum": [
+              "again",
+              "good",
+              "mastered",
+              "shown"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "duration_ms": {
+            "default": 0,
+            "maximum": 600000.0,
+            "minimum": 0.0,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "item_id": {
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "action"
+        ],
+        "title": "SessionEventRequest",
+        "type": "object"
+      },
+      "SessionEventResponse": {
+        "properties": {
+          "action": {
+            "enum": [
+              "again",
+              "good",
+              "mastered",
+              "shown"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "correct_answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correct Answer"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "is_correct": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Correct"
+          },
+          "item_completed": {
+            "title": "Item Completed",
+            "type": "boolean"
+          },
+          "item_id": {
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "again",
+                  "good"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "session": {
+            "$ref": "#/components/schemas/SessionResponse"
+          },
+          "session_completed": {
+            "title": "Session Completed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "event_id",
+          "item_id",
+          "action",
+          "item_completed",
+          "session_completed",
+          "session"
+        ],
+        "title": "SessionEventResponse",
+        "type": "object"
+      },
+      "SessionItemResponse": {
+        "properties": {
+          "again_count": {
+            "title": "Again Count",
+            "type": "integer"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "entry_id": {
+            "format": "uuid",
+            "title": "Entry Id",
+            "type": "string"
+          },
+          "good_count": {
+            "title": "Good Count",
+            "type": "integer"
+          },
+          "is_extra": {
+            "default": false,
+            "title": "Is Extra",
+            "type": "boolean"
+          },
+          "item_id": {
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "last_rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "again",
+                  "good"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Rating"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "reason": {
+            "enum": [
+              "new",
+              "due",
+              "mistake"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "relearn_count": {
+            "title": "Relearn Count",
+            "type": "integer"
+          },
+          "word_state_id": {
+            "format": "uuid",
+            "title": "Word State Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "entry_id",
+          "word_state_id",
+          "reason",
+          "position",
+          "completed",
+          "good_count",
+          "again_count",
+          "relearn_count"
+        ],
+        "title": "SessionItemResponse",
+        "type": "object"
+      },
+      "SessionResponse": {
+        "properties": {
+          "calculation_version": {
+            "title": "Calculation Version",
+            "type": "string"
+          },
+          "card": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionCardPrompt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "config_snapshot": {
+            "additionalProperties": true,
+            "title": "Config Snapshot",
+            "type": "object"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "items_completed": {
+            "title": "Items Completed",
+            "type": "integer"
+          },
+          "items_total": {
+            "title": "Items Total",
+            "type": "integer"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "module": {
+            "enum": [
+              "flashcard",
+              "choice",
+              "spelling"
+            ],
+            "title": "Module",
+            "type": "string"
+          },
+          "next_item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionItemResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "stats": {
+            "additionalProperties": true,
+            "title": "Stats",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "completed",
+              "abandoned"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "wordbook_id": {
+            "format": "uuid",
+            "title": "Wordbook Id",
+            "type": "string"
+          },
+          "wordbook_name": {
+            "title": "Wordbook Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "module",
+          "status",
+          "wordbook_id",
+          "wordbook_name",
+          "local_date",
+          "config_snapshot",
+          "stats",
+          "calculation_version",
+          "items_total",
+          "items_completed",
+          "started_at"
+        ],
+        "title": "SessionResponse",
+        "type": "object"
+      },
+      "StatsSourceBreakdown": {
+        "properties": {
+          "heartbeat_seconds": {
+            "title": "Heartbeat Seconds",
+            "type": "integer"
+          },
+          "memory_event_count": {
+            "title": "Memory Event Count",
+            "type": "integer"
+          },
+          "session_count": {
+            "title": "Session Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "memory_event_count",
+          "heartbeat_seconds",
+          "session_count"
+        ],
+        "title": "StatsSourceBreakdown",
+        "type": "object"
+      },
+      "TodayResponse": {
+        "properties": {
+          "active_minutes_today": {
+            "title": "Active Minutes Today",
+            "type": "integer"
+          },
+          "ai_practice": {
+            "$ref": "#/components/schemas/AiPracticeSummary"
+          },
+          "calculation_version": {
+            "title": "Calculation Version",
+            "type": "string"
+          },
+          "due_reviews": {
+            "$ref": "#/components/schemas/PlanSectionProgress"
+          },
+          "extra_due_available": {
+            "default": false,
+            "title": "Extra Due Available",
+            "type": "boolean"
+          },
+          "extra_due_count": {
+            "default": 0,
+            "title": "Extra Due Count",
+            "type": "integer"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "goal_reached": {
+            "title": "Goal Reached",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlanWordResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "new_word_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Word Reason"
+          },
+          "new_words": {
+            "$ref": "#/components/schemas/PlanSectionProgress"
+          },
+          "status": {
+            "enum": [
+              "not_started",
+              "in_progress",
+              "completed",
+              "extra_available"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "study_minutes_target": {
+            "title": "Study Minutes Target",
+            "type": "integer"
+          },
+          "wordbook_id": {
+            "format": "uuid",
+            "title": "Wordbook Id",
+            "type": "string"
+          },
+          "wordbook_name": {
+            "title": "Wordbook Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "local_date",
+          "wordbook_id",
+          "wordbook_name",
+          "status",
+          "new_words",
+          "due_reviews",
+          "study_minutes_target",
+          "active_minutes_today",
+          "goal_reached",
+          "calculation_version",
+          "generated_at"
+        ],
+        "title": "TodayResponse",
         "type": "object"
       },
       "UserAggregates": {
@@ -1180,6 +2452,83 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "WordStateResponse": {
+        "properties": {
+          "algorithm_version": {
+            "title": "Algorithm Version",
+            "type": "string"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "entry_id": {
+            "format": "uuid",
+            "title": "Entry Id",
+            "type": "string"
+          },
+          "headword": {
+            "title": "Headword",
+            "type": "string"
+          },
+          "lapse_count": {
+            "title": "Lapse Count",
+            "type": "integer"
+          },
+          "mastered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mastered At"
+          },
+          "review_count": {
+            "title": "Review Count",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "new",
+              "learning",
+              "review",
+              "relearning",
+              "mastered",
+              "suspended"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "word_state_id": {
+            "format": "uuid",
+            "title": "Word State Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "word_state_id",
+          "entry_id",
+          "headword",
+          "status",
+          "review_count",
+          "lapse_count",
+          "algorithm_version"
+        ],
+        "title": "WordStateResponse",
         "type": "object"
       },
       "WordbookDefinitionResponse": {
@@ -3343,6 +4692,1247 @@
         "tags": [
           "system",
           "wordbook exports"
+        ]
+      }
+    },
+    "/api/v1/learning/daily-plan/ensure": {
+      "post": {
+        "operationId": "ensure_daily_plan_endpoint_api_v1_learning_daily_plan_ensure_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The current state conflicts."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Idempotently create or read the local-date plan snapshot",
+        "tags": [
+          "system",
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/learning/events": {
+      "get": {
+        "operationId": "events_endpoint_api_v1_learning_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningEventListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Page through only the signed-in member's own learning events",
+        "tags": [
+          "system",
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/learning/heartbeat": {
+      "post": {
+        "operationId": "heartbeat_endpoint_api_v1_learning_heartbeat_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Credit at most 30 seconds of server-measured study activity",
+        "tags": [
+          "system",
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/learning/stats": {
+      "get": {
+        "operationId": "stats_endpoint_api_v1_learning_stats_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningStatsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Personal study statistics derived from persisted events and heartbeats",
+        "tags": [
+          "system",
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/learning/today": {
+      "get": {
+        "operationId": "today_endpoint_api_v1_learning_today_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The current state conflicts."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read today's plan snapshot, progress, and extra due reviews",
+        "tags": [
+          "system",
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/memory/config": {
+      "get": {
+        "operationId": "get_config_endpoint_api_v1_memory_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryConfigResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read the caller's memory module configuration",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      },
+      "put": {
+        "operationId": "put_config_endpoint_api_v1_memory_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryModuleConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryConfigResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replace the caller's memory module configuration",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/mistakes": {
+      "get": {
+        "operationId": "list_mistakes_endpoint_api_v1_memory_mistakes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MistakeListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List the caller's memory mistakes ordered by the most recent Again",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/mistakes/{entry_id}/priority": {
+      "patch": {
+        "operationId": "mistake_priority_endpoint_api_v1_memory_mistakes__entry_id__priority_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entry Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MistakePriorityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MistakeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Toggle the review marker without altering recorded events",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/sessions": {
+      "post": {
+        "operationId": "create_session_endpoint_api_v1_memory_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The current state conflicts."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create or resume today's training session for one module",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/sessions/{session_id}": {
+      "get": {
+        "operationId": "get_session_endpoint_api_v1_memory_sessions__session_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read a session, its next real card, and any correct-answer-free prompt",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/sessions/{session_id}/complete": {
+      "post": {
+        "operationId": "complete_session_endpoint_api_v1_memory_sessions__session_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionCompleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Explicitly end a session; unfinished targets stay unfinished",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/sessions/{session_id}/events": {
+      "post": {
+        "operationId": "submit_event_endpoint_api_v1_memory_sessions__session_id__events_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEventResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resource was not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The current state conflicts."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit one card action or answer; replay-safe through Idempotency-Key",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/words/{state_id}/master": {
+      "patch": {
+        "operationId": "master_word_endpoint_api_v1_memory_words__state_id__master_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "state_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "State Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WordStateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mark one of the caller's words as mastered",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/words/{state_id}/restore": {
+      "patch": {
+        "operationId": "restore_word_endpoint_api_v1_memory_words__state_id__restore_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "state_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "State Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WordStateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Restore a mastered word with a freshly computed safe due time",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/users/me/profile": {
+      "get": {
+        "operationId": "get_learning_profile_endpoint_api_v1_users_me_profile_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read the signed-in member learning profile",
+        "tags": [
+          "system",
+          "learning"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_learning_profile_endpoint_api_v1_users_me_profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningProfilePatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update the learning profile; targets apply to the next daily plan",
+        "tags": [
+          "system",
+          "learning"
         ]
       }
     },

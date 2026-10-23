@@ -23,6 +23,7 @@ from app.models.wordbooks import (
 )
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
+from app.services.learning import delete_learning_data_for_wordbook
 from app.services.wordbook_exports import (
     DEFAULT_CJK_FONT,
     ExportDefinition,
@@ -507,6 +508,9 @@ async def _process_delete(
     for storage_key in storage_keys:
         await storage.delete(storage_key)
 
+    # Learning rows are removed before the entry rows so the FK cascade cannot hide their
+    # counts; this also clears plans, sessions, events, and mistake markers.
+    learning_cleanup = await delete_learning_data_for_wordbook(session, book.id)
     await session.execute(
         delete(WordbookActivation).where(WordbookActivation.wordbook_id == book.id)
     )
@@ -522,6 +526,7 @@ async def _process_delete(
         delete(WordbookImportPreview).where(WordbookImportPreview.wordbook_id == book.id)
     )
     result = {
+        **learning_cleanup,
         "deleted_entries": entry_count,
         "deleted_definitions": definition_count,
         "deleted_examples": example_count,

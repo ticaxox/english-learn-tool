@@ -1,4 +1,16 @@
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
+from app.models.learning import (
+    DailyActivity,
+    DailyPlan,
+    DailyPlanWord,
+    LearningHeartbeat,
+    MemoryConfig,
+    MemoryEvent,
+    MemorySession,
+    MemorySessionItem,
+    MistakeFlag,
+    UserWordState,
+)
 from app.models.system import SystemMetadata
 from app.models.wordbooks import (
     Wordbook,
@@ -12,11 +24,21 @@ from app.models.wordbooks import (
 
 __all__ = [
     "AuditLog",
+    "DailyActivity",
+    "DailyPlan",
+    "DailyPlanWord",
     "ImportPreview",
+    "LearningHeartbeat",
+    "MemoryConfig",
+    "MemoryEvent",
+    "MemorySession",
+    "MemorySessionItem",
+    "MistakeFlag",
     "RefreshToken",
     "SystemMetadata",
     "User",
     "UserProfile",
+    "UserWordState",
     "Wordbook",
     "WordbookActivation",
     "WordbookDefinition",

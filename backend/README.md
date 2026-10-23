@@ -159,6 +159,33 @@ and scheduler because preview and export artifacts must cross service-process bo
 process-local directory is not a valid deployment. Uploaded data remains private and must not be
 served from a public directory.
 
+## Learning profile, daily plan, and memory training
+
+- `GET`/`PATCH /api/v1/users/me/profile` - learning profile. `daily_new_words` is 5-100 (default 20)
+  and `daily_study_minutes` is 15-180 (default 30); changing them only affects the next daily plan.
+- `GET /api/v1/learning/today` and `POST /api/v1/learning/daily-plan/ensure` - the local-date plan
+  snapshot (`Asia/Shanghai`). The word set, targets, and `calculation_version` freeze at generation
+  time; a later due word is reported only through `extra_due_available`.
+- `POST /api/v1/learning/heartbeat` - credits at most 30 seconds per server-measured window and needs
+  an `Idempotency-Key`. Stale or idle windows credit nothing.
+- `GET /api/v1/learning/stats` and `GET /api/v1/learning/events` - personal statistics and paged events
+  derived only from persisted rows.
+- `GET`/`PUT /api/v1/memory/config`, `POST /api/v1/memory/sessions`,
+  `GET /api/v1/memory/sessions/{session_id}`, `POST /api/v1/memory/sessions/{session_id}/events`,
+  `POST /api/v1/memory/sessions/{session_id}/complete`,
+  `PATCH /api/v1/memory/words/{state_id}/master`, `PATCH /api/v1/memory/words/{state_id}/restore`,
+  `GET /api/v1/memory/mistakes`, `PATCH /api/v1/memory/mistakes/{entry_id}/priority`.
+
+Scheduling uses pinned `fsrs==6.3.2` on the server only. Clients submit a card operation or answer and
+an `Idempotency-Key`; stability, difficulty, due timestamps, and the rating are never client input.
+A new word needs two `Good` ratings in one session and reappears after at least four other cards; an
+`Again` never resets the first `Good` but requeues the card. An overdue review completes with one
+`Good` and enters `relearning` after `Again`. Choice and spelling prompts never include the correct
+answer or option identifiers before submission, and spelling grading ignores case.
+
+Deleting a wordbook also removes the learner states, sessions, session items, events, plans, and
+mistake markers that referenced it, so no ghost learning rows survive the tombstone.
+
 ## Verification
 
 Create a dedicated integration database and Redis database, then run the checks:
