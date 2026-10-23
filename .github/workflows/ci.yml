@@ -131,6 +131,7 @@ jobs:
         run: |
           cp .env.example .env
           sed -i "s/^COMPOSE_PROJECT_NAME=.*/COMPOSE_PROJECT_NAME=english-learn-storage-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/" .env
+          sed -i "s/^DEPLOYMENT_PROFILE=.*/DEPLOYMENT_PROFILE=local-lightweight/" .env
       - name: Show tool versions
         run: |
           docker --version
@@ -142,6 +143,29 @@ jobs:
         run: |
           python -m unittest discover -s deploy/tests -p "test_*.py" -v
           python deploy/tests/check_compose_storage.py --env-file .env --compose-file docker-compose.yml
+      - name: Validate production profile contract
+        env:
+          DEPLOYMENT_PROFILE: lightweight
+          EDGE_PORT: "8090"
+          LIGHTWEIGHT_MEMORY_BUDGET_MB: "528"
+        run: |
+          python deploy/scripts/validate_release_manifest.py deploy/tests/fixtures/release-manifest.json --write-env /tmp/release.env
+          set -a
+          . /tmp/release.env
+          set +a
+          docker compose --env-file .env \
+            -f docker-compose.yml \
+            -f deploy/compose.prod.yml \
+            -f deploy/compose.lightweight.yml \
+            -f deploy/compose.tunnel.yml \
+            config --format json > /tmp/compose-production.json
+          python deploy/tests/check_production_contract.py \
+            /tmp/compose-production.json \
+            --memory-budget-mb 528
+      - name: Shell script syntax
+        run: |
+          shellcheck --version
+          shellcheck -x -e SC1091 deploy/scripts/*.sh
       - name: Build, migrate and verify
         run: ./deploy/scripts/start-stack.sh
       - name: Verify cross-container wordbook storage
