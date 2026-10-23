@@ -8,6 +8,9 @@ import {
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import AdminUsersView from '../views/AdminUsersView.vue'
+import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
+import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
+import AdminAiUsageView from '../views/AdminAiUsageView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
@@ -144,24 +147,20 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'admin/ai/providers',
         name: 'admin-providers',
-        component: RemoteDataPage,
+        component: AdminAiProvidersView,
         meta: { requiresRole: 'admin' },
-        props: {
-          title: 'AI 提供商',
-          description: '真实读取已配置的提供商；编辑和连接测试将在后续任务实现。',
-          endpoint: '/admin/ai/providers',
-        },
       },
       {
         path: 'admin/ai/prompts',
         name: 'admin-prompts',
-        component: RemoteDataPage,
+        component: AdminAiPromptsView,
         meta: { requiresRole: 'admin' },
-        props: {
-          title: 'AI 提示词',
-          description: '真实读取提示词列表；覆盖编辑将在后续任务实现。',
-          endpoint: '/admin/ai/prompts',
-        },
+      },
+      {
+        path: 'admin/ai/usage',
+        name: 'admin-ai-usage',
+        component: AdminAiUsageView,
+        meta: { requiresRole: 'admin' },
       },
       {
         path: ':pathMatch(.*)*',

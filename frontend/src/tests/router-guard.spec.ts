@@ -48,6 +48,20 @@ describe('route guards', () => {
     expect(router.currentRoute.value.query.access).toBe('denied')
   })
 
+  it('blocks member access to admin AI usage routes', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/admin/ai/usage')
+
+    expect(router.currentRoute.value.name).toBe('overview')
+    expect(router.currentRoute.value.query.access).toBe('denied')
+  })
+
   it('forces a password change before other authenticated routes', async () => {
     const pinia = createPinia()
     const auth = useAuthStore(pinia)

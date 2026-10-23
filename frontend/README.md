@@ -1,6 +1,6 @@
 # AI 英语学习工具｜前端
 
-这是 v1.1 的 Vue 3 应用，覆盖真实认证、成员管理、词书工作区，以及 T-FE-004 的学习档案、今日计划、翻卡/选择/拼写、统计、错词与已记住/恢复页面。所有学习状态、评分、队列和 FSRS 推进均以服务端为唯一真相，不使用静态业务假数据。
+这是 v1.1 的 Vue 3 应用，覆盖真实认证、成员管理、词书工作区、T-FE-004 学习工作区，以及 T-FE-005 的 AI Provider、提示词与聚合用量管理员页面。所有业务状态、评分、队列、连接检查和用量均以服务端为唯一真相，不使用静态业务假数据。
 
 ## 环境
 
@@ -77,11 +77,13 @@ API client 优先读取响应头 `X-Request-ID`，并在错误界面展示。对
 - 翻卡、选择、拼写三种训练；服务端判分、事件幂等键、会话刷新恢复与 30 秒心跳/后台暂停。
 - 错词列表、重点复习、已记住/恢复，以及真实空态和失败态。
 - T-BE-004 契约坐标固定为 `contract_sha 25ad69f` / OpenAPI raw `248ff876…f57e7`；字段映射集中在 `src/api/contract-adapter.ts`。
+- AI 管理员页面：Provider 列表/创建/编辑/启停/默认与备用顺序、真实连接检查、模型列表与手填回退、提示词读取/覆盖保存、隐私安全聚合用量。
+- T-BE-005 管理员契约固定为 `6c72f19` / OpenAPI raw `7a0463b5…` / semantic `8497bc98…`；API Key 只存在于当前表单内存，列表仅显示服务端掩码。
 - Vitest 测试基线。
 
 ## 路由
 
-`/login`、`/change-password`、`/overview`、`/wordbooks`、`/memory`、`/practice`、`/practice/:sessionId`、`/challenges`、`/challenges/:challengeId`、`/coach`、`/notifications`、`/settings`、`/admin/dashboard`、`/admin/users`、`/admin/ai/providers`、`/admin/ai/prompts`。
+`/login`、`/change-password`、`/overview`、`/wordbooks`、`/memory`、`/practice`、`/practice/:sessionId`、`/challenges`、`/challenges/:challengeId`、`/coach`、`/notifications`、`/settings`、`/admin/dashboard`、`/admin/users`、`/admin/ai/providers`、`/admin/ai/prompts`、`/admin/ai/usage`。
 
 成员管理页使用真实成员接口；其余未实现业务页只显示真实接口响应摘要或真实错误，完整题目、进度和 AI 对话界面由后续任务实现。
 

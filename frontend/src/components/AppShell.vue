@@ -23,6 +23,7 @@ const adminLinks = [
   { label: '成员管理', to: '/admin/users' },
   { label: 'AI 提供商', to: '/admin/ai/providers' },
   { label: 'AI 提示词', to: '/admin/ai/prompts' },
+  { label: 'AI 用量', to: '/admin/ai/usage' },
 ]
 
 const accessDenied = computed(() => route.query.access === 'denied')
@@ -84,7 +85,7 @@ async function signOut(): Promise<void> {
       <header class="topbar">
         <p>以下页面只展示真实 API 响应或明确错误，不使用模拟业务数据。</p>
         <div class="topbar-actions">
-          <span class="inline-note">真实账号与成员管理 · M2</span>
+          <span class="inline-note">真实账号、学习与 AI 平台管理 · M2–M3</span>
         </div>
       </header>
 
