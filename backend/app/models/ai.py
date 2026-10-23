@@ -196,7 +196,7 @@ class AiUsageLedger(Base):
         CheckConstraint("reserved >= 0", name="reserved_nonnegative"),
         CheckConstraint("consumed >= 0", name="consumed_nonnegative"),
         CheckConstraint("released >= 0", name="released_nonnegative"),
-        UniqueConstraint("job_id", name="uq_ai_usage_ledger_job"),
+        UniqueConstraint("job_id", "quota_item", name="uq_ai_usage_ledger_job_item"),
         Index("ix_ai_usage_ledger_user_date_kind", "user_id", "local_date", "quota_kind"),
         Index("ix_ai_usage_ledger_status_updated", "status", "updated_at"),
     )
@@ -210,6 +210,9 @@ class AiUsageLedger(Base):
     )
     local_date: Mapped[date] = mapped_column(Date, nullable=False)
     quota_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    quota_item: Mapped[str] = mapped_column(
+        String(64), nullable=False, default="job", server_default=text("'job'")
+    )
     reserved: Mapped[int] = mapped_column(
         Integer, nullable=False, default=1, server_default=text("1")
     )

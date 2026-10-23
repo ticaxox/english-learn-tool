@@ -633,7 +633,7 @@ async def _create_subjective_grading_job(
         settings,
         SubjectiveGradingRequest(task_type="subjective_grading", context=context),
         idempotency_key=f"practice-grade:{submission.id}",
-        quota_amount=len(items),
+        quota_items=[item.question_id for item in items],
     )
     submission.ai_job_id = job.id
     session.add(
