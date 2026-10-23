@@ -82,6 +82,9 @@ class Settings(BaseSettings):
     ai_concurrency_limit: int = Field(default=2, ge=1, le=2)
     ai_prompt_max_chars: int = Field(default=100_000, ge=1000, le=200_000)
     ai_daily_coach_messages: int = Field(default=100, ge=1, le=1000)
+    coach_message_retention_days: int = Field(default=7, ge=1, le=30)
+    coach_context_ttl_days: int = Field(default=7, ge=1, le=30)
+    coach_action_undo_hours: int = Field(default=24, ge=1, le=168)
     ai_daily_question_generation: int = Field(default=20, ge=1, le=500)
     ai_daily_subjective_grading: int = Field(default=50, ge=1, le=1000)
 

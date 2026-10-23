@@ -269,6 +269,7 @@ async def create_ai_job(
     idempotency_key: str,
     quota_amount: int = 1,
     quota_items: list[str] | None = None,
+    commit: bool = True,
 ) -> tuple[AiJobStatusResponse, bool]:
     if not idempotency_key or len(idempotency_key) > 128:
         raise AppError(
@@ -365,10 +366,17 @@ async def create_ai_job(
             quota_items=quota_items,
         )
         session.add(_event(job, "ai.job.created", metadata={"task_type": task_type}))
-        await session.commit()
+        if commit:
+            await session.commit()
     except IntegrityError:
-        await session.rollback()
         await release_concurrency_slot(pool, user_id=user.id, job_id=job_id)
+        if not commit:
+            raise AppError(
+                status_code=409,
+                code="AI_IDEMPOTENCY_CONFLICT",
+                message="The AI task could not be created because its idempotency key is in use.",
+            ) from None
+        await session.rollback()
         existing = await session.scalar(
             select(AiJob).where(AiJob.user_id == user.id, AiJob.idempotency_key == idempotency_key)
         )
@@ -380,9 +388,12 @@ async def create_ai_job(
             message="The AI task could not be created because its idempotency key is in use.",
         ) from None
     except AppError:
-        await session.rollback()
         await release_concurrency_slot(pool, user_id=user.id, job_id=job_id)
+        if commit:
+            await session.rollback()
         raise
+    if not commit:
+        return _job_response(job), False
     try:
         await pool.enqueue_job(
             "process_ai_job",
@@ -403,6 +414,7 @@ async def create_ai_job(
                 session.add(
                     _event(stored, "ai.job.failed", metadata={"error_code": stored.error_code})
                 )
+                await _apply_coach_failure(session, stored)
                 await _release_quota(session, stored.id)
         await release_concurrency_slot(pool, user_id=user.id, job_id=job.id)
         raise AppError(
@@ -451,6 +463,7 @@ async def cancel_user_job(
     job.retryable = False
     session.add(_event(job, "ai.job.cancelled"))
     await _apply_practice_failure(session, job)
+    await _apply_coach_failure(session, job)
     await _release_quota(session, job.id)
     await session.commit()
     await release_concurrency_slot(pool, user_id=user.id, job_id=job.id)
@@ -640,6 +653,88 @@ async def _apply_practice_failure(session: AsyncSession, job: AiJob) -> None:
         await mark_practice_grading_failed(session, job)
 
 
+async def _apply_coach_success(
+    session: AsyncSession,
+    job: AiJob,
+    settings: Settings,
+    redis: ArqRedis,
+) -> list[tuple[UUID, UUID]]:
+    from app.services.coach import materialize_coach_success
+
+    return await materialize_coach_success(session, job, settings, redis)
+
+
+async def _finalize_coach_success(session: AsyncSession, job: AiJob, settings: Settings) -> None:
+    from app.services.coach import finalize_coach_success
+
+    await finalize_coach_success(session, job, settings)
+
+
+async def _apply_coach_failure(session: AsyncSession, job: AiJob) -> None:
+    if job.task_type != "coach_reply":
+        return
+    from app.services.coach import mark_coach_failed
+
+    await mark_coach_failed(session, job)
+
+
+async def _enqueue_deferred_coach_jobs(
+    redis: ArqRedis,
+    session_factory,
+    deferred: list[tuple[UUID, UUID]],
+    *,
+    user_id: UUID,
+) -> None:
+    from app.models.coach import CoachActionReceipt
+    from app.models.practice import PracticeGeneration, PracticeSession
+
+    for job_id, receipt_id in deferred:
+        try:
+            await redis.enqueue_job(
+                "process_ai_job",
+                str(job_id),
+                _job_id=f"ai:{job_id}",
+                _queue_name=WORDBOOK_QUEUE_NAME,
+            )
+        except Exception:
+            logger.exception("ai.job.deferred_enqueue_failed", extra={"job_id": str(job_id)})
+            async with session_factory() as session:
+                job = await session.scalar(
+                    select(AiJob).where(AiJob.id == job_id).with_for_update()
+                )
+                if job is not None and job.status == "queued":
+                    job.status = "failed"
+                    job.error_code = "AI_QUEUE_UNAVAILABLE"
+                    job.error_message = "The AI task queue is unavailable."
+                    job.retryable = True
+                    job.finished_at = utcnow()
+                    session.add(
+                        _event(job, "ai.job.failed", metadata={"error_code": job.error_code})
+                    )
+                    await _release_quota(session, job.id)
+                practice = await session.scalar(
+                    select(PracticeSession).where(PracticeSession.ai_job_id == job_id)
+                )
+                if practice is not None:
+                    practice.status = "failed"
+                    practice.error_code = "AI_QUEUE_UNAVAILABLE"
+                    practice.error_message = "The practice queue is unavailable."
+                    generation = await session.scalar(
+                        select(PracticeGeneration).where(PracticeGeneration.ai_job_id == job_id)
+                    )
+                    if generation is not None:
+                        generation.status = "failed"
+                        generation.error_code = "AI_QUEUE_UNAVAILABLE"
+                        generation.error_message = "The practice queue is unavailable."
+                receipt = await session.get(CoachActionReceipt, receipt_id, with_for_update=True)
+                if receipt is not None:
+                    receipt.status = "conflict"
+                    receipt.conflict_code = "COACH_ACTION_QUEUE_UNAVAILABLE"
+                    receipt.conflict_message = "The requested practice could not be queued."
+                await session.commit()
+            await release_concurrency_slot(redis, user_id=user_id, job_id=job_id)
+
+
 async def _notify_ai_terminal(session: AsyncSession, job: AiJob, *, succeeded: bool) -> None:
     from app.services.notifications import notify_ai_job
 
@@ -692,6 +787,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 job.finished_at = utcnow()
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": exc.code}))
                 await _apply_practice_failure(session, job)
+                await _apply_coach_failure(session, job)
                 await _notify_ai_terminal(session, job, succeeded=False)
                 await _release_quota(session, job.id)
                 await session.commit()
@@ -711,6 +807,7 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 job.finished_at = utcnow()
                 session.add(_event(job, "ai.job.failed", metadata={"error_code": job.error_code}))
                 await _apply_practice_failure(session, job)
+                await _apply_coach_failure(session, job)
                 await _notify_ai_terminal(session, job, succeeded=False)
                 await _release_quota(session, job.id)
                 await session.commit()
@@ -738,20 +835,34 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
         job.retryable = False
         job.finished_at = utcnow()
         session.add(_event(job, "ai.job.succeeded"))
+        deferred_coach_jobs: list[tuple[UUID, UUID]] = []
         try:
             await _apply_practice_success(session, job)
+            await _consume_quota(session, job.id)
+            if job.task_type == "coach_reply":
+                deferred_coach_jobs = await _apply_coach_success(session, job, settings, redis)
+                await _finalize_coach_success(session, job, settings)
             await _notify_ai_terminal(session, job, succeeded=True)
         except Exception:
-            logger.exception("ai.job.practice_hook_failed", extra={"job_id": job_id})
+            logger.exception("ai.job.result_hook_failed", extra={"job_id": job_id})
             await session.rollback()
+            failed: AiJob | None = None
             async with factory() as failure_session:
                 failed = await failure_session.scalar(
                     select(AiJob).where(AiJob.id == job_uuid).with_for_update()
                 )
                 if failed is not None and failed.status == "running":
                     failed.status = "failed"
-                    failed.error_code = "AI_PRACTICE_HOOK_FAILED"
-                    failed.error_message = "The generated practice result could not be persisted."
+                    failed.error_code = (
+                        "AI_COACH_HOOK_FAILED"
+                        if failed.task_type == "coach_reply"
+                        else "AI_PRACTICE_HOOK_FAILED"
+                    )
+                    failed.error_message = (
+                        "The generated coach result could not be persisted."
+                        if failed.task_type == "coach_reply"
+                        else "The generated practice result could not be persisted."
+                    )
                     failed.retryable = True
                     failed.finished_at = utcnow()
                     failure_session.add(
@@ -762,14 +873,21 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                         )
                     )
                     await _apply_practice_failure(failure_session, failed)
+                    await _apply_coach_failure(failure_session, failed)
                     await _release_quota(failure_session, failed.id)
                     await failure_session.commit()
                 else:
                     await failure_session.rollback()
             await release_concurrency_slot(redis, user_id=user.id, job_id=job_uuid)
-            return {"status": "failed", "error_code": "AI_PRACTICE_HOOK_FAILED"}
-        await _consume_quota(session, job.id)
+            return {
+                "status": "failed",
+                "error_code": failed.error_code
+                if failed is not None
+                else "AI_PRACTICE_HOOK_FAILED",
+            }
         await session.commit()
+    if deferred_coach_jobs:
+        await _enqueue_deferred_coach_jobs(redis, factory, deferred_coach_jobs, user_id=user.id)
     await release_concurrency_slot(redis, user_id=user.id, job_id=job_uuid)
     return {"status": "succeeded"}
 
@@ -803,6 +921,7 @@ async def reconcile_stale_ai_jobs(
         job.finished_at = utcnow()
         session.add(_event(job, "ai.job.stale"))
         await _apply_practice_failure(session, job)
+        await _apply_coach_failure(session, job)
         await _notify_ai_terminal(session, job, succeeded=False)
         await _release_quota(session, job.id)
         await release_concurrency_slot(redis, user_id=job.user_id, job_id=job.id)

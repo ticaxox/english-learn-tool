@@ -1,4 +1,11 @@
 from app.models.ai import AiJob, AiJobEvent, AiPrompt, AiProvider, AiUsageLedger
+from app.models.coach import (
+    CoachActionReceipt,
+    CoachContextSnapshot,
+    CoachConversation,
+    CoachMessage,
+    CoachStreamEvent,
+)
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
 from app.models.learning import (
     DailyActivity,
@@ -39,6 +46,11 @@ __all__ = [
     "AiProvider",
     "AiUsageLedger",
     "AuditLog",
+    "CoachActionReceipt",
+    "CoachContextSnapshot",
+    "CoachConversation",
+    "CoachMessage",
+    "CoachStreamEvent",
     "DailyActivity",
     "DailyPlan",
     "DailyPlanWord",

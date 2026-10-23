@@ -74,6 +74,9 @@ class SubjectiveGradingContext(StrictModel):
 class CoachReplyContext(StrictModel):
     user_message: str = Field(min_length=1, max_length=8_000)
     learning_summary: dict[str, Any] = Field(default_factory=dict)
+    conversation_id: UUID | None = None
+    message_id: UUID | None = None
+    page_context: dict[str, Any] = Field(default_factory=dict)
 
 
 class ChallengePlanContext(StrictModel):
