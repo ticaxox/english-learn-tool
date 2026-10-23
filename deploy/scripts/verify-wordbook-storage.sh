@@ -3,6 +3,8 @@ set -Eeuo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
+# shellcheck source=lib-compose.sh
+. "$ROOT/deploy/scripts/lib-compose.sh"
 
 ENV_FILE="${ENV_FILE:-$ROOT/.env}"
 EVIDENCE_FILE="${EVIDENCE_FILE:-$ROOT/deploy/backups/wordbook-storage-evidence.json}"
@@ -21,9 +23,10 @@ set -a
 . "$ENV_FILE"
 set +a
 
-compose=(docker compose --env-file "$ENV_FILE" -f "$ROOT/docker-compose.yml")
+load_release_env
+configure_compose "$ROOT" "$ENV_FILE"
 BASE_URL="http://127.0.0.1:${EDGE_PORT:-8080}"
-COMMIT_SHA="$(git rev-parse HEAD)"
+COMMIT_SHA="${COMMIT_SHA:-$(git rev-parse HEAD 2>/dev/null || printf unknown)}"
 COMPOSE_PROJECT="${COMPOSE_PROJECT_NAME:-unknown}"
 RUN_STAMP="$(date -u +%Y%m%dT%H%M%SZ)-$$-${RANDOM}"
 RUN_HEX="$(printf '%s' "$RUN_STAMP" | sha256sum | cut -c1-32)"
@@ -48,14 +51,14 @@ die() {
 }
 
 container_id() {
-  "${compose[@]}" ps -q "$1" | head -n 1
+  "${COMPOSE[@]}" ps -q "$1" | head -n 1
 }
 
 service_python() {
   local service="$1"
   local code="$2"
   shift 2
-  "${compose[@]}" exec -T "$service" python -c "$code" "$@"
+  "${COMPOSE[@]}" exec -T "$service" python -c "$code" "$@"
 }
 
 delete_test_files() {
@@ -96,10 +99,10 @@ for service in "${APP_SERVICES[@]}"; do
   [[ -n "$container" ]] || die "$service has no running container"
 
   SERVICE_UID["$service"]="$(
-    "${compose[@]}" exec -T "$service" id -u | tr -d '\r'
+    "${COMPOSE[@]}" exec -T "$service" id -u | tr -d '\r'
   )"
   SERVICE_GID["$service"]="$(
-    "${compose[@]}" exec -T "$service" id -g | tr -d '\r'
+    "${COMPOSE[@]}" exec -T "$service" id -g | tr -d '\r'
   )"
   [[ "${SERVICE_UID[$service]}" == "10001" ]] \
     || die "$service runs as UID ${SERVICE_UID[$service]}, expected 10001"
@@ -107,7 +110,7 @@ for service in "${APP_SERVICES[@]}"; do
     || die "$service runs as GID ${SERVICE_GID[$service]}, expected 10001"
 
   storage_env="$(
-    "${compose[@]}" exec -T "$service" printenv WORDBOOK_STORAGE_DIR | tr -d '\r'
+    "${COMPOSE[@]}" exec -T "$service" printenv WORDBOOK_STORAGE_DIR | tr -d '\r'
   )"
   [[ "$storage_env" == "$STORAGE_DIR" ]] \
     || die "$service has WORDBOOK_STORAGE_DIR=$storage_env"
@@ -222,8 +225,8 @@ if (Path(sys.argv[1]) / sys.argv[2]).exists():
 ' "$STORAGE_DIR" "$WORKER_FILE"
 done
 
-"${compose[@]}" restart api worker scheduler
-"${compose[@]}" up -d --wait --wait-timeout "$WAIT_TIMEOUT" api worker scheduler
+"${COMPOSE[@]}" restart api worker scheduler
+"${COMPOSE[@]}" up -d --wait --wait-timeout "$WAIT_TIMEOUT" api worker scheduler
 
 for service in "${APP_SERVICES[@]}"; do
   service_python "$service" \
@@ -348,6 +351,6 @@ cat > "$EVIDENCE_FILE" <<JSON
 }
 JSON
 
-python -m json.tool "$EVIDENCE_FILE" >/dev/null
+python3 -m json.tool "$EVIDENCE_FILE" >/dev/null
 echo "Cross-container wordbook storage verification passed."
 echo "Evidence: $EVIDENCE_FILE"
