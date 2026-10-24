@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import LoadingState from '../components/LoadingState.vue'
 import { COACH_ACTION_LABELS, type CoachActionReceipt, type CoachMessage } from '../api/coach'
 import { isApiError } from '../api/errors'
@@ -15,6 +17,11 @@ const renameId = ref<string | null>(null)
 const renameTitle = ref('')
 const composer = ref<HTMLTextAreaElement | null>(null)
 const messageArea = ref<HTMLElement | null>(null)
+const suggestedPrompts = [
+  '帮我看看今天应该先复习什么？',
+  '用一个真实场景解释我今天遇到的词。',
+  '给我一个不焦虑的 10 分钟学习计划。',
+]
 
 const lastMessage = computed(() => coach.messages.value[coach.messages.value.length - 1] ?? null)
 const streamErrorRetryable = computed(() =>
@@ -57,6 +64,11 @@ function usageText(): string {
 async function focusComposer(): Promise<void> {
   await nextTick()
   composer.value?.focus()
+}
+
+async function useSuggestedPrompt(prompt: string): Promise<void> {
+  draft.value = prompt
+  await focusComposer()
 }
 
 async function scrollToBottom(): Promise<void> {
@@ -146,16 +158,19 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <article class="coach-page">
-    <header class="coach-hero">
+  <article class="coach-page member-coach-page">
+    <header class="coach-hero member-page-heading coach-letter-hero">
       <div>
-        <p class="eyebrow">Moustache Coach · 长期学习对话</p>
-        <h1>AI 教练工作区</h1>
+        <p class="eyebrow">THE LETTER ROOM <span>•</span> REAL SSE</p>
+        <h1>Letters to <em>Mr. Whisker.</em></h1>
         <p class="lead">
           教练会读取当前账号允许的学习数据，通过真实 SSE 给出建议。只有服务端回执确认的动作才会显示为已应用。
         </p>
       </div>
-      <div class="coach-orbit" aria-hidden="true"><span></span></div>
+      <div class="coach-letter-mascot">
+        <WhiskerCrumbMark size="hero" />
+        <span class="coach-privacy-stamp"><AppIcon name="lock" /> PRIVATE TO YOU</span>
+      </div>
     </header>
 
     <div class="coach-layout">
@@ -231,10 +246,14 @@ onBeforeUnmount(() => {
 
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
-          <div class="coach-empty-mark" aria-hidden="true">〰</div>
+          <div class="coach-empty-mark"><WhiskerCrumbMark size="hero" /></div>
+          <p class="eyebrow">A PRIVATE LETTER ROOM</p>
           <h2>从一段长期对话开始</h2>
           <p>选择左侧会话，或新建一个。这里不会用静态回复填充空状态。</p>
-          <button class="button" type="button" @click="showCreate = true">新建对话</button>
+          <div class="coach-suggested-prompts" aria-label="建议提问">
+            <button v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</button>
+          </div>
+          <button class="button member-primary-button" type="button" @click="showCreate = true">新建对话 <AppIcon name="arrow" /></button>
         </div>
 
         <template v-else>
@@ -347,8 +366,8 @@ onBeforeUnmount(() => {
             />
             <div class="coach-composer__footer">
               <span class="field-hint">{{ draft.length }} / 8000</span>
-              <button class="button" type="submit" :disabled="!draft.trim() || coach.sending.value || Boolean(coach.streamingMessageId.value)">
-                {{ coach.sending.value || coach.streamingMessageId.value ? '正在接收回复…' : '发送消息' }}
+              <button class="button member-primary-button" type="submit" :disabled="!draft.trim() || coach.sending.value || Boolean(coach.streamingMessageId.value)">
+                {{ coach.sending.value || coach.streamingMessageId.value ? '正在接收回复…' : '发送消息' }} <AppIcon name="send" />
               </button>
             </div>
           </form>

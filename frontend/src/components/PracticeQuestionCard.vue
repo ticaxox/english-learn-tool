@@ -27,8 +27,11 @@ function update(value: string): void {
 <template>
   <section class="panel practice-question-card" :aria-labelledby="promptId">
     <header class="practice-question-card__header">
-      <span class="status-badge">{{ questionLabel }}</span>
-      <span class="inline-note">答案由服务端评分，提交前不会显示解析或分数。</span>
+      <div class="practice-question-step">
+        <span class="practice-question-number">{{ String(index + 1).padStart(2, '0') }}</span>
+        <div><span class="status-badge">{{ questionLabel }}</span><p>答案由服务端评分，提交前不会显示解析或分数。</p></div>
+      </div>
+      <span class="practice-question-type">{{ question.questionType.replaceAll('_', ' ') }}</span>
     </header>
 
     <div v-if="question.questionType === 'reading'" class="practice-reading">

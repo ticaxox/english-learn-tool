@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import { createPracticeSession, fetchPracticeUsage, listPracticeRecords, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import '../practice.css'
@@ -122,16 +124,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="practice-page practice-hub">
-    <header class="practice-hero">
-      <div>
-        <p class="eyebrow">AI 练习</p>
-        <h1>把今天的词，练成真正会用的能力</h1>
+  <article class="practice-page practice-hub member-practice-page">
+    <header class="practice-hero member-page-heading practice-room-hero">
+      <div class="practice-room-copy">
+        <p class="eyebrow">THE PRACTICE ROOM <span>•</span> REAL AI TASKS</p>
+        <h1>A tiny challenge. <em>Rather good.</em></h1>
         <p class="lead">四类练习由服务端生成和评分。提交前只展示题面，不展示答案、解析、参考内容或分数。</p>
+        <div class="practice-hero__actions">
+          <RouterLink class="button-secondary" to="/practice/records">练习记录</RouterLink>
+          <RouterLink class="button-secondary" to="/practice/mistakes">错题本</RouterLink>
+        </div>
       </div>
-      <div class="practice-hero__actions">
-        <RouterLink class="button-secondary" to="/practice/records">练习记录</RouterLink>
-        <RouterLink class="button-secondary" to="/practice/mistakes">错题</RouterLink>
+      <div class="practice-room-mascot">
+        <WhiskerCrumbMark size="hero" />
+        <span>“One question at a time.<br>That is how sentences behave.”</span>
       </div>
     </header>
 
@@ -143,8 +149,8 @@ onMounted(() => {
       <ErrorNotice v-else-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
     </section>
 
-    <div class="practice-hub-grid">
-      <section class="panel practice-create-panel">
+    <div class="practice-hub-grid member-practice-grid">
+      <section class="panel practice-create-panel member-practice-create">
         <div class="section-heading">
           <div><p class="eyebrow">新建练习</p><h2>选择练习方式</h2></div>
         </div>
@@ -197,13 +203,18 @@ onMounted(() => {
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="button-row">
-            <button class="button" type="submit" :disabled="creating">{{ creating ? '正在提交生成任务…' : '生成练习' }}</button>
+            <button class="button member-primary-button" type="submit" :disabled="creating">{{ creating ? '正在提交生成任务…' : '生成练习' }} <AppIcon name="arrow" /></button>
             <span class="inline-note">创建请求返回 202 后进入真实生成/轮询页面。</span>
           </div>
         </form>
       </section>
 
-      <aside class="practice-side-stack">
+      <aside class="practice-side-stack member-practice-side">
+        <section class="member-coach-break">
+          <WhiskerCrumbMark size="medium" />
+          <div><p class="eyebrow">A NOTE FROM THE HAT</p><p>额度、并发和评分状态都来自服务端。Mr. Whisker 只会在真实任务完成后替你盖章。</p></div>
+          <RouterLink class="member-text-link" to="/coach">Open the letter room <AppIcon name="arrow" /></RouterLink>
+        </section>
         <section class="panel">
           <div class="section-heading"><h2>最近记录</h2><RouterLink to="/practice/records">全部</RouterLink></div>
           <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
