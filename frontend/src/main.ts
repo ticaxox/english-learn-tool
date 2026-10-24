@@ -5,6 +5,7 @@ import { apiClient } from './api/client'
 import { createAppRouter } from './router'
 import { useAuthStore } from './stores/auth'
 import './style.css'
+import './cookie-theme.css'
 
 const app = createApp(App)
 const pinia = createPinia()
