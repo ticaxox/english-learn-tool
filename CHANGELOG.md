@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-24｜v0.1.2 成员端结构重构预览
+
+- 临时 HTTP IP 预览升级到 `v0.1.2`，commit `8d5cb83`，Whisker Crumb 主题。
+- 成员端新骨架 `member-rail`、`member-topbar`、移动导航、Word shelf、Practice room、Mr. Whisker 上线。
+- Today、Word shelf、Practice、Mr. Whisker 使用真实 API 数据；7 张真实截图，page errors/request failures/external requests 均为 0。
+- release workflow `40094317102` success；三应用镜像 digest 已记录。
+- `v0.1.2 → v0.1.1 → v0.1.2` 应用回滚通过，数据库 head 未变化。
+- 仍是临时 HTTP 预览；稳定 HTTPS、最终视频和最终 MVP 验收未完成。
+
 ## 2026-10-24｜v0.1.1 Whisker Crumb 主题预览
 
 - 临时 HTTP IP 预览升级到 `v0.1.1`，commit `a6ac195`，主题 Whisker Crumb。

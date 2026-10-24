@@ -2,7 +2,7 @@
 
 - 版本：T-DOC-002 / 2026-10-24
 - 代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb；HTTP）
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.2`，commit `8d5cb83`，主题 Whisker Crumb；HTTP）
 - 目标规格：1080p 以上、普通话、真实浏览器录屏、5–8 分钟
 - 当前状态：脚本已准备；临时 HTTP 预览已通过；最终视频 **TODO**
 - 演示数据：[demo-data.md](demo-data.md)
@@ -16,7 +16,7 @@
 - 远端预览已由 A40 准备合成数据；不要在公网预览重复执行 seed。演示账号为 `demo_admin`、`demo_member`，密码只从 A40 的 ACL 本地凭据文件安全获取。
 - 浏览器地址栏不显示真实服务器 IP、内部域名、Token 或密钥。
 - AI provider 为受控演示配置；失败态可重复展示。
-- 固定 `v0.1.1`、commit `a6ac195`、主题 Whisker Crumb、镜像 digest 和 Actions run。
+- 固定 `v0.1.2`、commit `8d5cb83`、主题 Whisker Crumb、镜像 digest 和 Actions run。
 - 未部署时不得展示假公网 URL，不得用 PPT 冒充真实产品操作。
 
 ## 2. 推荐时间轴
@@ -28,9 +28,9 @@
 | 1:10–2:10 | 管理员登录、成员、词书 | 打开临时预览，成员管理、最后管理员保护、组织词书 |
 | 2:10–2:50 | AI provider/提示词/用量 | Key 掩码、加密、连接检查、额度和备用 |
 | 2:50–3:30 | 管理员看板 | 3 人聚合、隐私边界、小分组抑制 |
-| 3:30–4:20 | 成员今日计划 + 记忆训练 | 新词/到期复习、FSRS 服务端更新 |
-| 4:20–5:20 | 四类 AI 练习 | 提交前无答案、提交后评分/错题/记录 |
-| 5:20–6:00 | AI 教练 SSE + receipt | 流式回复、adjust_daily_plan、24h 撤销 |
+| 3:30–4:20 | 成员新骨架 + Today + 记忆训练 | `member-rail`、`member-topbar`、移动导航、新词/到期复习、FSRS 服务端更新 |
+| 4:20–5:20 | Word shelf / Practice room / 四类 AI 练习 | 书架实体卡、练习工作台、提交前无答案、提交后评分/错题/记录 |
+| 5:20–6:00 | Mr. Whisker 教练 SSE + receipt | Letters to Mr. Whisker、流式回复、adjust_daily_plan、24h 撤销 |
 | 6:00–6:45 | 每日闯关 + BOSS | 5 节点、共享进度、刷新后结果保留 |
 | 6:45–7:20 | 通知 + 失败态 | DND、去重、真实错误码/Request ID |
 | 7:20–7:50 | 总结 | 创新点、边界、完整 MVP 仍 FAIL/NOT_READY |
@@ -91,9 +91,9 @@
 画面：
 
 1. 登录 `demo_member`。
-2. 今日计划：新词/到期复习。
-3. 记忆训练：翻卡、选择或拼写。
-4. 刷新后仍能看到服务端状态。
+2. 展示 `member-rail`、`member-topbar` 和 390px 底部导航。
+3. Today：品牌 hero、Daily Trail、当前词书、统计和新词/到期复习。
+4. 记忆训练：翻卡、选择或拼写；刷新后仍能看到服务端状态。
 
 旁白：
 
@@ -103,21 +103,22 @@
 
 画面：
 
-1. `/practice` 创建填空练习。
-2. 提交前页面没有正确选项/解析。
-3. 提交后显示 66.67 分、解析和错题。
-4. 打开练习记录和错题本。
-5. 可切到失败态：provider 不可用，显示错误码和 Request ID。
+1. 打开 Word shelf，展示真实词书实体卡与激活/导出/删除入口。
+2. 进入 Practice room，创建填空练习。
+3. 提交前页面没有正确选项/解析。
+4. 提交后显示 66.67 分、解析和错题。
+5. 打开练习记录和错题本。
+6. 可切到失败态：provider 不可用，显示错误码和 Request ID。
 
 旁白：
 
 > 练习生成、草稿、提交和评分都是持久任务。提交前 API 不返回答案；失败时不使用静态假题兜底。
 
-### 5:20–6:00｜AI 教练
+### 5:20–6:00｜Mr. Whisker 教练 SSE
 
 画面：
 
-1. 打开 `/coach` 对话。
+1. 打开 “Letters to Mr. Whisker” 信件房。
 2. 展示流式回复和 `adjust_daily_plan` receipt。
 3. 展示撤销入口和前后状态。
 
@@ -152,7 +153,7 @@
 
 旁白：
 
-> 我们的创新点是 FSRS 与 AI 决策分离、结构化 AI 合同、受控可撤销教练和隐私优先看板。代码内硬化、v0.1.1 发布和临时 HTTP 预览已通过，但稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，完整 MVP 仍为 FAIL / NOT_READY。
+> 我们的创新点是 FSRS 与 AI 决策分离、结构化 AI 合同、受控可撤销教练和隐私优先看板。代码内硬化、v0.1.2 发布和临时 HTTP 预览已通过，但稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，完整 MVP 仍为 FAIL / NOT_READY。
 
 ## 4. 录制材料
 
@@ -160,7 +161,8 @@
 - 普通话旁白；语速稳定。
 - 临时预览入口 `http://23.94.141.170:18080`。
 - 演示账号 `demo_admin`、`demo_member`；密码从 A40 ACL 本地凭据文件安全获取。
-- `v0.1.1`、commit `a6ac195`、主题 Whisker Crumb、Actions run 和镜像 digest。
+- `v0.1.2`、commit `8d5cb83`、主题 Whisker Crumb、Actions run 和镜像 digest。
+- 7 张 v0.1.2 截图：登录、Today、Word shelf、Practice、Mr. Whisker、移动端 Today、管理员看板。
 - 截图路径：[screenshots/README.md](screenshots/README.md)
 - 演示数据路径：[demo-data.md](demo-data.md)
 

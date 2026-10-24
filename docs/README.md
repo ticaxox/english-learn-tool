@@ -11,7 +11,7 @@
 | **未验证 / TODO** | 依赖稳定 HTTPS、A00 决策、真实 provider 或最终录屏。 |
 | **FAIL / NOT_READY** | 完整 MVP 或质量门禁未通过，不得对外写成完成。 |
 
-当前代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`。临时公网预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb，HTTP）。迁移 head：`844c0d89f737`。OpenAPI：84 路径 / 153 schema。
+当前代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`。临时公网预览：`http://23.94.141.170:18080`（`v0.1.2`，commit `8d5cb83`，主题 Whisker Crumb，HTTP）。迁移 head：`844c0d89f737`。OpenAPI：84 路径 / 153 schema。
 
 ## 核心文档
 
@@ -24,7 +24,7 @@
 | [安全与隐私](security-privacy.md) | 身份、权限、AI Key、容器、CSP/备份条件 | 部分 PASS，仍有 CONDITIONS |
 | [测试](testing.md) | QA 证据、命令、性能、门禁和演示数据验证 | M5 PASS_WITH_CONDITIONS |
 | [部署](deployment.md) | Compose、CI、GHCR、临时 IP 预览、备份与限制 | 临时 HTTP 预览 PASS；稳定 HTTPS 未验证 |
-| [演示](demo.md) | 合成账号、演示路径、失败态和限制 | v0.1.1 预览可用；最终录屏 TODO |
+| [演示](demo.md) | 合成账号、成员端结构、演示路径、失败态和限制 | v0.1.2 成员端结构已上线；最终录屏 TODO |
 | [事实核对](fact-check.md) | 文档陈述到代码/证据的映射 | 持续维护 |
 
 ## 比赛材料
@@ -33,7 +33,7 @@
 |---|---|---|
 | [技术文档正文](competition/technical-document.md) | 面向评委的完整技术说明，目标不超过 30 页 | 正文已生成；6 页草稿 PDF 保存在任务证据目录，待最终模板复核 |
 | [演示数据与账号](competition/demo-data.md) | 合成数据脚本、账号、重置和验证 | 脚本首次/重复初始化 PASS |
-| [演示截图清单](competition/screenshots/README.md) | 5 张 v0.1.1 真实预览截图 + 9 张历史 QA 截图、SHA256、事实边界 | 已准备，临时 HTTP 预览 |
+| [演示截图清单](competition/screenshots/README.md) | 7 张 v0.1.2 真实预览截图 + 9 张历史 QA 截图、SHA256、事实边界 | 已准备，临时 HTTP 预览 |
 | [视频脚本](competition/demo-video-script.md) | 5–8 分钟普通话真实录屏脚本 | 脚本已准备，最终视频 TODO |
 | [最终提交清单](competition/submission-checklist.md) | 仓库、文档、部署、账号、视频和安全检查 | 部分完成；稳定 HTTPS/最终视频/A00 验收待完成 |
 | [来源与许可证](competition/licensing.md) | 数据来源、第三方依赖、许可证状态 | 许可证待 A00 决策 |

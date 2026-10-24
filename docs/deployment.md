@@ -1,8 +1,9 @@
 # 部署说明
 
 - 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 当前临时公网预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`）
+- 当前临时公网预览：`http://23.94.141.170:18080`（`v0.1.2`，commit `8d5cb83`）
 - 主题：Whisker Crumb
+- 成员端结构：`member-rail`、`member-topbar`、移动导航、Word shelf、Practice room、Mr. Whisker
 - 部署结论：A00 授权的临时 HTTP IP 预览 **PASS**；稳定 HTTPS **未验证/不在本次授权范围**
 - 最终 MVP：**FAIL / NOT_READY**，不得把预览通过写成最终验收通过
 
@@ -13,7 +14,7 @@ Internet / Reviewer
         │  HTTP（临时预览；不是稳定 HTTPS）
         ▼
 reverse-proxy（公网 0.0.0.0:18080）
-        ├── frontend（Whisker Crumb 主题）
+        ├── frontend（Whisker Crumb + 成员端新骨架）
         ├── /api → API
         └── /health → health routes
                 │
@@ -28,52 +29,54 @@ reverse-proxy（公网 0.0.0.0:18080）
 ## 2. 临时公网预览
 
 - 入口：`http://23.94.141.170:18080`
-- 版本：`v0.1.1`
-- 源码 commit：`a6ac195e571230270c1b4c35895059b31d2cc4ba`
+- 版本：`v0.1.2`
+- 源码 commit：`8d5cb83a40eefe5d848a1d9085ed9a7fe149be9a`
 - 主题：Whisker Crumb
+- 成员端结构：`member-rail`、`member-topbar`、移动导航、Word shelf、Practice room、Mr. Whisker
 - 演示用户名：`demo_admin`、`demo_member`
 - 密码：只从 A40 的 ACL 本地凭据文件安全获取；不写入仓库、文档、截图、视频或聊天
-- 验收结果：七个服务 healthy；`/health/live` 返回 `v0.1.1`；`/health/ready` 为 `ready`；登录、Cookie/CSRF、SSE、SPA、主题资源和真实回滚通过
+- 验收结果：七服务 healthy；`/health/live` 返回 `v0.1.2`；`/health/ready` 为 `ready`；登录、Cookie/CSRF、SSE、SPA、成员新骨架、主题资源和真实回滚通过
 - 安全边界：临时 HTTP 没有传输加密；响应中的 HSTS 头不能替代 HTTPS；`Secure=false` Cookie 是 `APP_ENV=test` 预览开关的预期结果
 
-T-SHIP-003 证据：
+T-SHIP-004 证据：
 
-- `ai-workspace/10-collaboration/reports/T-SHIP-003-SHIP.md`
-- `ai-workspace/10-collaboration/sessions/A40-SHIP/test-artifacts/T-SHIP-003-20261024/README.md`
+- `ai-workspace/10-collaboration/reports/T-SHIP-004-SHIP.md`
+- `ai-workspace/10-collaboration/reports/T-FE-014-VIEW.md`
+- `ai-workspace/10-collaboration/sessions/A40-SHIP/test-artifacts/T-SHIP-004-20261024/README.md`
 - `.../racknerd/public-smoke.json`
 - `.../racknerd/public-headers.txt`
 - `.../racknerd/public-routes.txt`
 - `.../racknerd/theme-assets.txt`
 - `.../racknerd/visual-evidence.json`
 - `.../racknerd/screenshots/`
-- `.../racknerd/deployment-evidence-v0.1.1.json`
-- `.../racknerd/rollback-evidence-v0.1.1.json`
+- `.../racknerd/deployment-evidence-v0.1.2.json`
+- `.../racknerd/rollback-evidence-v0.1.2.json`
 
 本任务轻量核验：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/public-preview-check.json`。
 
 ## 3. 版本、镜像与发布
 
-- Release：`v0.1.1`
-- Release workflow：`40066904977`，success
-- GitHub Release：`https://github.com/ticaxox/english-learn-tool/releases/tag/v0.1.1`
-- Artifact：`12550340024`，`release-v0.1.1`
-- 主题源码：T-FE-013，PR #37 合并为 `a6ac195`
-- 迁移 head：`844c0d89f737`（主题升级未改变数据库）
+- Release：`v0.1.2`
+- Release workflow：`40094317102`，success
+- GitHub Release：`https://github.com/ticaxox/english-learn-tool/releases/tag/v0.1.2`
+- Artifact：`12560168389`，`release-v0.1.2`
+- 成员端源码：T-FE-014，PR #38 合并为 `8d5cb83`
+- 迁移 head：`844c0d89f737`（成员端结构升级未改变数据库）
 
 应用镜像 digest：
 
-- API：`ghcr.io/ticaxox/english-learn-api@sha256:0758ca7092f8a509e380a9a29c3a8871ce3023aa3176d40bef4e26055a7474a0`
-- Frontend：`ghcr.io/ticaxox/english-learn-frontend@sha256:c0ecbb7fa8f95116900c864d56585bc131b3b26d8f0dc4da86dee275a6c831e7`
-- Reverse proxy：`ghcr.io/ticaxox/english-learn-reverse-proxy@sha256:6c49cf9654448a1ae79975645a2f3beaa9485a556e2096f1a408b96f32d2cd12`
+- API：`ghcr.io/ticaxox/english-learn-api@sha256:d2e2e1b1c9b42fb6817c8e6bc3a63d1cb85a9864d756c509361a1990757a3f08`
+- Frontend：`ghcr.io/ticaxox/english-learn-frontend@sha256:cbf2d84c1262046bfbfa4accfe397a78d01a4f2a0560d6a2347eeaceade9f3b0`
+- Reverse proxy：`ghcr.io/ticaxox/english-learn-reverse-proxy@sha256:4cad0acb21703a942506521d2084a4747686ab3284616e89f4f6eda8a4db68e8`
 
 服务器使用下载并校验后的 release bundle；未使用 GHCR 登录。GHCR 在线拉取流程仍未单独验证。
 
 ## 4. 健康检查
 
-- `/health/live`：进程存活，不访问依赖；当前返回 `v0.1.1`。
+- `/health/live`：进程存活，不访问依赖；当前返回 `v0.1.2`。
 - `/health/ready`：配置、PostgreSQL、Redis 就绪。
 - `/healthz`：反向代理/前端健康入口。
-- `/api/v1`：API 元数据；当前返回 `v0.1.1` / `test`。
+- `/api/v1`：API 元数据；当前返回 `v0.1.2` / `test`。
 - `/api/v1/docs`、`/api/v1/openapi.json`：OpenAPI。
 
 失败态返回真实 503/错误码，不返回数据库连接串、Key 或内部堆栈。
@@ -122,11 +125,11 @@ A01 已批准演示/比赛环境策略：RPO 24 小时、RTO 2 小时、备份�
 - PostgreSQL custom dump + SHA256 sidecar；隔离恢复库的表清单和行数一致；
 - 词书卷归档、隔离恢复卷、UID/GID `10001`、mode `0750`、标记完整性；
 - 临时恢复库和恢复卷已清理；
-- `v0.1.1 → v0.1.0 → v0.1.1` 应用回滚演练通过，数据库 head 未变化；
-- 回滚后验证健康、管理员登录、主题资源存在/不存在及恢复；
-- 应用回滚没有反向执行迁移，因为主题升级没有迁移变化。
+- `v0.1.2 → v0.1.1 → v0.1.2` 应用回滚演练通过，数据库 head 未变化；
+- 回滚后验证健康、管理员登录、成员新骨架标记存在/不存在及恢复；
+- 应用回滚没有反向执行迁移，因为成员端结构升级没有迁移变化。
 
-数据库 dump 与词书归档包含演示私有数据，未复制进 Git、聊天或公开证据。历史兼容业务版本回滚仍未验证；本次只证明主题版本的切换/健康/回切机制。
+数据库 dump 与词书归档包含演示私有数据，未复制进 Git、聊天或公开证据。历史兼容业务版本回滚仍未验证；本次只证明版本切换/健康/回切机制。
 
 ## 7. 资源与限制
 

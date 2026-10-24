@@ -138,5 +138,5 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/v1/learning/today' -Headers $h
 ## 8. 已知限制
 
 - `GET /learning/today` 的 `ai_practice` 摘要目前仍返回旧 `not_available` 字段；已实现的 AI 练习使用 `/practice`，不要据此认为 AI 练习整体未实现。
-- 临时 HTTP 预览和公网 SSE 已由 T-SHIP-003 验证；稳定 TLS、限流、真实生产 provider 和长期部署仍未验证。
+- 临时 HTTP 预览和公网 SSE 已由 T-SHIP-004 验证；稳定 TLS、限流、真实生产 provider 和长期部署仍未验证。
 - API 文档中的状态必须与 `docs/fact-check.md` 和 QA 证据同步更新。

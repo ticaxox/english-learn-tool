@@ -1,7 +1,7 @@
 # AI 链路
 
 - 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 状态：M3/M4 代码内实现与真实链路验证；临时 HTTP 预览已由 T-SHIP-003 验证；稳定 HTTPS/生产 provider 未验证
+- 状态：M3/M4 代码内实现与真实链路验证；临时 HTTP 预览已由 T-SHIP-004 验证；稳定 HTTPS/生产 provider 未验证
 - 相关代码：`backend/app/models/ai.py`、`services/ai_*.py`、`services/practice.py`、`services/coach.py`、`services/challenge.py`
 
 ## 1. 分层
@@ -78,6 +78,6 @@ AI 不是数据库权限主体。所有写入必须由后端服务完成，AI �
 ## 9. 未验证边界
 
 - 真实生产 provider 凭据、配额和网络策略未冻结。
-- 公网 SSE 不缓冲已由 T-SHIP-003 验证；稳定 TLS/域名尚未验证。
+- 公网 SSE 不缓冲已由 T-SHIP-004 验证；稳定 TLS/域名尚未验证。
 - `GET /learning/today` 的 AI 摘要仍为旧字段；AI 练习入口是 `/practice`。
 - 不把受控测试 provider 的结果写成真实生产模型效果。

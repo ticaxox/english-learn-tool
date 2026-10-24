@@ -21,8 +21,8 @@
 | 备份恢复 | 合成库 dump/restore 关键表计数一致 | T-QA-004 |
 | 依赖审计 | 后端 0、前端 0 已知漏洞 | T-QA-004 |
 | 47 门禁 | 40 PASS / 3 CONDITIONAL / 4 FAIL / 0 NOT_RUN | `tests/quality-baseline/acceptance-gates.json` |
-| 临时 HTTP 公网预览 | PASS：`http://23.94.141.170:18080`，`v0.1.1`，commit `a6ac195`，Whisker Crumb | T-SHIP-003 / A40 evidence |
-| 发布镜像 digest | API/frontend/reverse-proxy 三镜像已记录 | release `v0.1.1` / workflow `40066904977` |
+| 临时 HTTP 公网预览 | PASS：`http://23.94.141.170:18080`，`v0.1.2`，commit `8d5cb83`，Whisker Crumb | T-SHIP-004 / A40 evidence |
+| 发布镜像 digest | API/frontend/reverse-proxy 三镜像已记录 | release `v0.1.2` / workflow `40094317102` |
 
 T-QA-004 的 PR CI run `40006774365` 为 5/5 PASS；基线 CI run `39999074319` 为 5/5 PASS。
 
@@ -74,7 +74,7 @@ uv run --project backend python docs/competition/seed_demo_data.py --apply
 
 说明：`GET /learning/today` 的 `ai_practice` 字段仍返回旧 `not_available`；已实现的 AI 练习从 `/practice` 使用。该差异不隐藏、不伪修，作为当前已知限制记录。
 
-公网轻量核验：`/health/live`、`/health/ready`、首页均 HTTP 200；`/api/v1` 返回 `v0.1.1` / `test`。登录、SSE、Cookie/CSRF、共享词书卷、备份恢复和机械回滚引用 T-SHIP-003，不在本任务重复全量测试。
+公网轻量核验：`/health/live`、`/health/ready`、首页均 HTTP 200；`/api/v1` 返回 `v0.1.2` / `test`。登录、SSE、Cookie/CSRF、共享词书卷、备份恢复和机械回滚引用 T-SHIP-004，不在本任务重复全量测试。
 
 ## 5. 47 门禁状态
 
@@ -82,12 +82,12 @@ uv run --project backend python docs/competition/seed_demo_data.py --apply
 
 保留条件/失败：
 
-- `F-SEC-01` CONDITIONAL：v0.1.1 预览响应已有 CSP/安全头，但仍待 A30/A01 按最终证据重新分类。
+- `F-SEC-01` CONDITIONAL：v0.1.2 预览响应已有 CSP/安全头，但仍待 A30/A01 按最终证据重新分类。
 - `F-AUDIT-01` CONDITIONAL：演示环境 RPO/RTO 与数据库/词书恢复已通过；生产级审批和历史兼容业务回滚仍待复核。
-- `F-GIT-01` CONDITIONAL：`v0.1.1` tag/release 已完成；质量门禁的最终发布历史分类仍待 A30/A01 复核。
+- `F-GIT-01` CONDITIONAL：`v0.1.2` tag/release 已完成；质量门禁的最终发布历史分类仍待 A30/A01 复核。
 - `F-DEMO-01` FAIL：本任务已增加可执行演示数据脚本和账号说明，但最终状态仍由 A30/A01 复验后更新。
 - `F-DOC-01` FAIL：本任务更新 README、技术文档和专题文档，但最终状态仍由 A30/A01 复验后更新。
-- `F-COMP-01` FAIL：v0.1.1 临时 HTTP 预览和 5 张真实截图已准备；最终视频、稳定 HTTPS 截图和最终提交验收仍待完成。
+- `F-COMP-01` FAIL：v0.1.2 临时 HTTP 预览和 7 张真实截图已准备；最终视频、稳定 HTTPS 截图和最终提交验收仍待完成。
 - `F-FINAL-01` FAIL：最终 MVP 未验收。
 
 ## 6. 不重复执行的范围

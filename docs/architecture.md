@@ -104,7 +104,7 @@
 
 ## 6. 当前限制
 
-- T-SHIP-003 已验证临时 HTTP IP 预览、`v0.1.1` 镜像 digest、备份恢复和机械回滚；稳定 HTTPS/DNS 不在本次授权范围。
+- T-SHIP-004 已验证临时 HTTP IP 预览、`v0.1.2` 镜像 digest、备份恢复和机械回滚；稳定 HTTPS/DNS 不在本次授权范围。
 - `GET /learning/today` 的 `ai_practice` 摘要仍是旧 `not_available` 字段；已实现 AI 练习从 `/practice` 进入。
 - 质量清单仍为 40 PASS / 3 CONDITIONAL / 4 FAIL；不能把 M5 代码内 PASS_WITH_CONDITIONS 写成最终 MVP PASS。
 - 前端视觉允许简洁，当前重点是真实业务闭环而不是复杂动画或素材系统。

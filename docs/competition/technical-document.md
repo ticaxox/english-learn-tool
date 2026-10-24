@@ -2,7 +2,7 @@
 
 - 文档版本：T-DOC-002 / 2026-10-24
 - 代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 临时 HTTP 预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb）
+- 临时 HTTP 预览：`http://23.94.141.170:18080`（`v0.1.2`，commit `8d5cb83`，主题 Whisker Crumb）
 - 迁移 head：`844c0d89f737`
 - 结论：M5 代码内硬化 `PASS_WITH_CONDITIONS`；完整 MVP `FAIL / NOT_READY`
 - 页数：6 页（ReportLab 草稿 PDF 保存在任务证据目录，未纳入 Git；最终比赛模板复核 TODO）
@@ -13,7 +13,7 @@ AI 英语学习工具是面向学校、企业培训项目或学习组织内部�
 
 系统采用模块化单体：Vue 3 前端通过 `/api` 访问 FastAPI；PostgreSQL 是业务权威源，Redis 与 ARQ 承担队列、任务调度和短期并发协调；worker 与 scheduler 共享私有词书卷。管理员可以管理成员、词书和 AI 平台，但看不到成员答题正文、草稿、教练对话或私有词书正文。
 
-本交付已完成认证、成员、词书、记忆、AI 平台、四类练习、教练 SSE/撤销、挑战、通知和看板，并通过真实 PostgreSQL/Redis/ARQ、API 和浏览器验证。容器/CI 基线已通过七服务健康、空库迁移、非 root 和回环端口检查。T-SHIP-003 已验证临时 HTTP IP 预览、`v0.1.1` 三镜像 digest、备份恢复和机械回滚；稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，因此不能把本文当作最终 MVP 验收通过。
+本交付已完成认证、成员、词书、记忆、AI 平台、四类练习、教练 SSE/撤销、挑战、通知和看板，并通过真实 PostgreSQL/Redis/ARQ、API 和浏览器验证。容器/CI 基线已通过七服务健康、空库迁移、非 root 和回环端口检查。T-SHIP-004 已验证临时 HTTP IP 预览、`v0.1.2` 三镜像 digest、备份恢复和机械回滚；稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，因此不能把本文当作最终 MVP 验收通过。
 
 ## 1. 背景与目标
 
@@ -290,6 +290,17 @@ FastAPI /api/v1
 
 脚本只删除固定 demo UUID 命名空间内的数据，支持重复初始化；密码从环境变量读取，不提交到仓库。
 
+## 11.4 成员端结构重构（v0.1.2）
+
+- T-FE-014 / PR #38 完成成员端独立骨架，合并提交 `8d5cb83`。
+- 新结构：`MemberShell.vue`、`member-rail`、`member-topbar`、管家抽屉、390px 底部导航、内联 SVG `AppIcon`。
+- Today：品牌叙事 hero、管家计划便签、真实 Daily Trail、当前词书、统计与计划注记；新词/复习/学习分钟来自 `GET /learning/today`。
+- Word shelf：词书以书架实体卡呈现，保留组织/私有分组、分页、激活、导出、删除、详情、空态和错误态。
+- Practice：练习中心重排为 practice room；会话页使用 workbench + live progress，提交前仍不显示答案、解析、参考内容或评分。
+- Mr. Whisker：AI 教练改为 “Letters to Mr. Whisker” 信件房，保留真实 SSE、action receipt、撤销、断线恢复和隐私说明。
+- 移动端 Today 与管理员看板使用真实数据；1440px/390px 无横向溢出，page errors 0。
+- 管理员端本轮只做不回归检查，没有重做页面结构。
+
 ## 12. 测试、性能与部署
 
 ### 12.1 全量验证
@@ -313,8 +324,9 @@ FastAPI /api/v1
 ### 12.3 部署状态
 
 - Compose/CI 已验证七服务、空库迁移、非 root、回环端口和健康路由。
-- T-SHIP-003 临时 HTTP IP 预览 PASS：`http://23.94.141.170:18080`，`v0.1.1`，commit `a6ac195`；七个服务 healthy，登录/Cookie/CSRF/SSE/SPA/共享词书卷和 Whisker Crumb 主题通过。
-- `v0.1.1` release workflow `40066904977` success；API/frontend/reverse-proxy 三镜像 digest 已记录。
+- T-SHIP-004 临时 HTTP IP 预览 PASS：`http://23.94.141.170:18080`，`v0.1.2`，commit `8d5cb83`；七个服务 healthy，登录/Cookie/CSRF/SSE/SPA/共享词书卷、Whisker Crumb 主题和成员端结构重构通过。
+- 7 张真实截图覆盖登录、Today、Word shelf、Practice、Mr. Whisker、移动端 Today 和管理员看板。
+- `v0.1.2` release workflow `40094317102` success；API/frontend/reverse-proxy 三镜像 digest 已记录。
 - 演示环境完成 RPO 24h / RTO 2h / 保留 7 天策略、数据库与词书恢复、机械回滚；无历史兼容业务版本，不能宣称旧业务回归。
 - 稳定 HTTPS、DNS 和长期生产 SLA 不在本次授权范围；这是临时 HTTP 预览，不是最终 MVP PASS。
 - 本机 `docker` 是 `wslc`，无 Compose；容器运行证据来自 GitHub Actions 干净 runner。
@@ -331,7 +343,8 @@ FastAPI /api/v1
 ## 14. 局限与后续
 
 - 稳定 HTTPS、TLS、DNS 或长期生产 SLA 未完成；当前只有临时 HTTP IP 预览。
-- 历史兼容业务版本回滚未验证；现有回滚是机械演练。
+- 历史兼容业务版本回滚未验证；现有回滚是 `v0.1.2 → v0.1.1 → v0.1.2` 机械演练。
+- 管理员端本轮只做不回归检查，未重做结构。
 - CSP/安全头已出现在预览响应，但 `F-SEC-01` 仍待 A30/A01 重新分类。
 - Today 页面 AI 摘要仍是旧字段；修复需代码任务。
 - 最终视频、公网截图和 A00 最终验收未完成。
@@ -342,8 +355,8 @@ FastAPI /api/v1
 
 - T-QA-004 报告：`ai-workspace/10-collaboration/reports/T-QA-004-TEST.md`
 - T-QA-004 证据：`ai-workspace/04-qa/evidence/T-QA-004/README.md`
-- T-SHIP-003 报告：`ai-workspace/10-collaboration/reports/T-SHIP-003-SHIP.md`
-- T-SHIP-003 公网证据：`ai-workspace/10-collaboration/sessions/A40-SHIP/test-artifacts/T-SHIP-003-20261024/racknerd/`
+- T-SHIP-004 报告：`ai-workspace/10-collaboration/reports/T-SHIP-004-SHIP.md`
+- T-SHIP-004 公网证据：`ai-workspace/10-collaboration/sessions/A40-SHIP/test-artifacts/T-SHIP-004-20261024/racknerd/`
 - 本任务公网轻量核验：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/public-preview-check.json`
 - 演示数据验证：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`
 - 截图清单：`docs/competition/screenshots/README.md`
