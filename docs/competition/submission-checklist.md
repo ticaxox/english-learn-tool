@@ -2,7 +2,7 @@
 
 - 版本：T-DOC-002 / 2026-10-24
 - 代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`）
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb）
 - 当前状态：**部分完成**；临时 HTTP 预览已 PASS，稳定 HTTPS/最终视频/A00 最终验收未完成
 - 使用规则：只有证据可回读时才能把 `TODO` 改为完成
 
@@ -13,7 +13,7 @@
 | Git 仓库与分支历史 | 完成 | `ticaxox/english-learn-tool`，真实分支/PR/提交 |
 | 本任务分支 | 完成 | `docs/competition-delivery-002` |
 | 本任务 PR | 完成 | PR #35，OPEN/MERGEABLE/未合并；CI 5/5（最终 run 见 PR） |
-| 版本标签/Release | 完成 | `v0.1.0`；release workflow `40023555751` success |
+| 版本标签/Release | 完成 | `v0.1.1`；release workflow `40066904977` success |
 | 许可证 | TODO | A00 决策，见 `licensing.md` |
 | 当前质量门禁 | 保留 FAIL/CONDITIONAL | 47 门禁 40/3/4/0；不得改写成 PASS |
 
@@ -45,11 +45,12 @@
 
 | 项目 | 状态 | 证据/动作 |
 |---|---|---|
-| QA 合成截图 | 完成 | `screenshots/` 9 张，含 SHA256 |
+| v0.1.1 公网截图 | 完成 | 5 张 Whisker Crumb 真实截图，含 SHA256 |
+| 历史 QA 功能截图 | 完成 | 9 张，保留 AI/教练/BOSS 证据 |
 | 事实清单 | 完成 | `screenshots/README.md` |
 | 5–8 分钟视频脚本 | 完成 | `demo-video-script.md` |
 | 1080p 最终视频 | TODO | 使用临时预览录制，完成后补路径 |
-| 公网截图 | TODO | 使用 A40 ACL 凭据，不提交密码/Token |
+| 稳定 HTTPS 截图 | TODO | 当前只有临时 HTTP IP 截图 |
 | 视频安全审查 | TODO | 录屏后执行 |
 
 ## 5. 部署与发布
@@ -57,10 +58,10 @@
 | 项目 | 状态 | 证据/动作 |
 |---|---|---|
 | Compose/CI 七服务与迁移 | 完成 | T-SHIP-001 run `39801657963` |
-| 临时 HTTP 公网预览 | 完成 | `http://23.94.141.170:18080`；`v0.1.0`；commit `4ee1a71` |
-| 七个服务健康/登录/Cookie/CSRF/SSE/SPA | 完成 | T-SHIP-002 public-ip evidence |
+| 临时 HTTP 公网预览 | 完成 | `http://23.94.141.170:18080`；`v0.1.1`；commit `a6ac195` |
+| 七个服务健康/登录/Cookie/CSRF/SSE/SPA/主题 | 完成 | T-SHIP-003 public-smoke/visual evidence |
 | 不可变镜像 tag + digest | 完成 | release manifest；三镜像 digest |
-| GHCR 发布 | 完成 | release workflow `40023555751` |
+| GHCR 发布 | 完成 | release workflow `40066904977` |
 | GHCR 在线拉取 | 未单独验证 | 服务器使用校验后的 release bundle |
 | 稳定 HTTPS/TLS/DNS | 范围外/未验证 | A00 只授权临时 HTTP IP 预览 |
 | 备份/RPO/RTO/恢复 | 完成 | RPO 24h / RTO 2h / 保留 7 天；数据库与词书恢复 |
@@ -83,7 +84,7 @@
 
 - 稳定 HTTPS、TLS 或长期生产 SLA 已完成。
 - 历史兼容业务版本回滚已通过。
-- 最终视频已录制、公网截图已取得。
+- 最终视频已录制；稳定 HTTPS 截图已取得。
 - 完整 MVP 已 PASS。
 
 ## 8. 完成定义
@@ -91,8 +92,8 @@
 只有以下同时满足，才可把比赛提交标记为完成：
 
 1. PR 合并且 `main` CI 5/5。
-2. 固定 `v0.1.0` 镜像 digest 和可回读部署证据。
+2. 固定 `v0.1.1` 镜像 digest 和可回读部署证据。
 3. 临时预览入口/SSE/账号可用；若 A00 要求稳定 HTTPS，则另立任务完成。
 4. 备份恢复和机械回滚证据已归档。
-5. 1080p 最终视频和公网截图完成。
+5. 1080p 最终视频完成；临时 HTTP 公网截图已归档，稳定 HTTPS 截图按 A00 要求补充。
 6. A30/A01 复核，A00 最终验收。

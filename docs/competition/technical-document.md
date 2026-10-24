@@ -2,7 +2,7 @@
 
 - 文档版本：T-DOC-002 / 2026-10-24
 - 代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 临时 HTTP 预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`）
+- 临时 HTTP 预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb）
 - 迁移 head：`844c0d89f737`
 - 结论：M5 代码内硬化 `PASS_WITH_CONDITIONS`；完整 MVP `FAIL / NOT_READY`
 - 页数：6 页（ReportLab 草稿 PDF 保存在任务证据目录，未纳入 Git；最终比赛模板复核 TODO）
@@ -13,7 +13,7 @@ AI 英语学习工具是面向学校、企业培训项目或学习组织内部�
 
 系统采用模块化单体：Vue 3 前端通过 `/api` 访问 FastAPI；PostgreSQL 是业务权威源，Redis 与 ARQ 承担队列、任务调度和短期并发协调；worker 与 scheduler 共享私有词书卷。管理员可以管理成员、词书和 AI 平台，但看不到成员答题正文、草稿、教练对话或私有词书正文。
 
-本交付已完成认证、成员、词书、记忆、AI 平台、四类练习、教练 SSE/撤销、挑战、通知和看板，并通过真实 PostgreSQL/Redis/ARQ、API 和浏览器验证。容器/CI 基线已通过七服务健康、空库迁移、非 root 和回环端口检查。T-SHIP-002 已验证临时 HTTP IP 预览、`v0.1.0` 三镜像 digest、备份恢复和机械回滚；稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，因此不能把本文当作最终 MVP 验收通过。
+本交付已完成认证、成员、词书、记忆、AI 平台、四类练习、教练 SSE/撤销、挑战、通知和看板，并通过真实 PostgreSQL/Redis/ARQ、API 和浏览器验证。容器/CI 基线已通过七服务健康、空库迁移、非 root 和回环端口检查。T-SHIP-003 已验证临时 HTTP IP 预览、`v0.1.1` 三镜像 digest、备份恢复和机械回滚；稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，因此不能把本文当作最终 MVP 验收通过。
 
 ## 1. 背景与目标
 
@@ -313,8 +313,8 @@ FastAPI /api/v1
 ### 12.3 部署状态
 
 - Compose/CI 已验证七服务、空库迁移、非 root、回环端口和健康路由。
-- T-SHIP-002 临时 HTTP IP 预览 PASS：`http://23.94.141.170:18080`，`v0.1.0`，commit `4ee1a71`；七个服务 healthy，登录/Cookie/CSRF/SSE/SPA/共享词书卷通过。
-- `v0.1.0` release workflow `40023555751` success；API/frontend/reverse-proxy 三镜像 digest 已记录。
+- T-SHIP-003 临时 HTTP IP 预览 PASS：`http://23.94.141.170:18080`，`v0.1.1`，commit `a6ac195`；七个服务 healthy，登录/Cookie/CSRF/SSE/SPA/共享词书卷和 Whisker Crumb 主题通过。
+- `v0.1.1` release workflow `40066904977` success；API/frontend/reverse-proxy 三镜像 digest 已记录。
 - 演示环境完成 RPO 24h / RTO 2h / 保留 7 天策略、数据库与词书恢复、机械回滚；无历史兼容业务版本，不能宣称旧业务回归。
 - 稳定 HTTPS、DNS 和长期生产 SLA 不在本次授权范围；这是临时 HTTP 预览，不是最终 MVP PASS。
 - 本机 `docker` 是 `wslc`，无 Compose；容器运行证据来自 GitHub Actions 干净 runner。
@@ -342,8 +342,8 @@ FastAPI /api/v1
 
 - T-QA-004 报告：`ai-workspace/10-collaboration/reports/T-QA-004-TEST.md`
 - T-QA-004 证据：`ai-workspace/04-qa/evidence/T-QA-004/README.md`
-- T-SHIP-002 报告：`ai-workspace/10-collaboration/reports/T-SHIP-002-SHIP.md`
-- T-SHIP-002 公网证据：`ai-workspace/10-collaboration/sessions/A40-SHIP/test-artifacts/T-SHIP-002-20261024/racknerd/`
+- T-SHIP-003 报告：`ai-workspace/10-collaboration/reports/T-SHIP-003-SHIP.md`
+- T-SHIP-003 公网证据：`ai-workspace/10-collaboration/sessions/A40-SHIP/test-artifacts/T-SHIP-003-20261024/racknerd/`
 - 本任务公网轻量核验：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/public-preview-check.json`
 - 演示数据验证：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`
 - 截图清单：`docs/competition/screenshots/README.md`

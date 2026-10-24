@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-24｜v0.1.1 Whisker Crumb 主题预览
+
+- 临时 HTTP IP 预览升级到 `v0.1.1`，commit `a6ac195`，主题 Whisker Crumb。
+- 七服务健康、`/health/live` v0.1.1、管理员/成员登录、CSRF、SSE、SPA 和主题资源通过。
+- 5 张真实截图：登录、成员概览、成员词书、移动端概览、管理员看板。
+- release workflow `40066904977` success；API/frontend/reverse-proxy 三镜像 digest 已记录。
+- `v0.1.1 → v0.1.0 → v0.1.1` 应用回滚通过，数据库 head 未变化。
+- 仍是临时 HTTP 预览；稳定 HTTPS、最终视频和最终 MVP 验收未完成；5 张公网预览截图已归档。
+
 ## 2026-10-24｜v0.1.0 临时 HTTP IP 预览
 
 - A00 授权的临时公网预览已通过：`http://23.94.141.170:18080`，版本 `v0.1.0`，commit `4ee1a71`。

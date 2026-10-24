@@ -4,7 +4,7 @@
 - 数据性质：合成演示数据；不含真实成员、真实对话、真实词书正文或真实 Key
 - 已验证：一次性 PostgreSQL 数据库首次初始化、重复初始化、真实 API 读取
 - 证据：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`
-- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`；HTTP）
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb；HTTP）
 
 ## 1. 账号
 
@@ -101,7 +101,7 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:8080/health/ready'
 
 - `GET /learning/today` 的 `ai_practice` 字段仍返回旧 `not_available`；已实现 AI 练习从 `/practice` 使用。
 - 脚本创建的是可展示的合成数据，不代表真实生产 provider 或公网部署已完成。
-- 最终评审账号由 T-SHIP-002/受控渠道交付；不要把密码写进公开视频、截图或 Git。
+- 最终评审账号由 T-SHIP-003/受控渠道交付；不要把密码写进公开视频、截图或 Git。
 
 ## 7. 清理
 

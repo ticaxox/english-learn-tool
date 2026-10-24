@@ -2,7 +2,7 @@
 
 - 版本：T-DOC-002 / 2026-10-24
 - 代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`；HTTP）
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb；HTTP）
 - 目标规格：1080p 以上、普通话、真实浏览器录屏、5–8 分钟
 - 当前状态：脚本已准备；临时 HTTP 预览已通过；最终视频 **TODO**
 - 演示数据：[demo-data.md](demo-data.md)
@@ -16,7 +16,7 @@
 - 远端预览已由 A40 准备合成数据；不要在公网预览重复执行 seed。演示账号为 `demo_admin`、`demo_member`，密码只从 A40 的 ACL 本地凭据文件安全获取。
 - 浏览器地址栏不显示真实服务器 IP、内部域名、Token 或密钥。
 - AI provider 为受控演示配置；失败态可重复展示。
-- 固定 `v0.1.0`、commit `4ee1a71`、镜像 digest 和 Actions run。
+- 固定 `v0.1.1`、commit `a6ac195`、主题 Whisker Crumb、镜像 digest 和 Actions run。
 - 未部署时不得展示假公网 URL，不得用 PPT 冒充真实产品操作。
 
 ## 2. 推荐时间轴
@@ -61,7 +61,7 @@
 
 画面：
 
-1. 打开 `http://23.94.141.170:18080`，登录 `demo_admin`（密码从 A40 ACL 本地凭据文件获取）。
+1. 打开 `http://23.94.141.170:18080`，确认 Whisker Crumb 主题并登录 `demo_admin`（密码从 A40 ACL 本地凭据文件获取）。
 2. 成员管理：3 个合成成员。
 3. 词书列表：Aurora 20 词组织词书。
 4. 创建一个合成成员或展示 CSV 预览（若时间允许）。
@@ -152,7 +152,7 @@
 
 旁白：
 
-> 我们的创新点是 FSRS 与 AI 决策分离、结构化 AI 合同、受控可撤销教练和隐私优先看板。代码内硬化、v0.1.0 发布和临时 HTTP 预览已通过，但稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，完整 MVP 仍为 FAIL / NOT_READY。
+> 我们的创新点是 FSRS 与 AI 决策分离、结构化 AI 合同、受控可撤销教练和隐私优先看板。代码内硬化、v0.1.1 发布和临时 HTTP 预览已通过，但稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，完整 MVP 仍为 FAIL / NOT_READY。
 
 ## 4. 录制材料
 
@@ -160,7 +160,7 @@
 - 普通话旁白；语速稳定。
 - 临时预览入口 `http://23.94.141.170:18080`。
 - 演示账号 `demo_admin`、`demo_member`；密码从 A40 ACL 本地凭据文件安全获取。
-- `v0.1.0`、commit `4ee1a71`、Actions run 和镜像 digest。
+- `v0.1.1`、commit `a6ac195`、主题 Whisker Crumb、Actions run 和镜像 digest。
 - 截图路径：[screenshots/README.md](screenshots/README.md)
 - 演示数据路径：[demo-data.md](demo-data.md)
 
@@ -172,4 +172,4 @@
 - 所有功能声明与当前 SHA/部署一致。
 - 明确字幕/旁白为“临时 HTTP 预览”，不得说成稳定 HTTPS。
 - 未完成项用 `TODO` 或“未验证”说明。
-- 最终视频路径和公网入口在 T-SHIP-002 后补入提交清单。
+- 最终视频路径和稳定 HTTPS 入口在后续任务补入提交清单。

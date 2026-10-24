@@ -1,7 +1,7 @@
 # 演示说明
 
 - 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`；HTTP，不是稳定 HTTPS）
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.1`，commit `a6ac195`，主题 Whisker Crumb；HTTP，不是稳定 HTTPS）
 - 演示数据脚本：[`competition/seed_demo_data.py`](competition/seed_demo_data.py)
 - 演示数据说明：[`competition/demo-data.md`](competition/demo-data.md)
 - 截图清单：[`competition/screenshots/README.md`](competition/screenshots/README.md)
@@ -94,6 +94,6 @@ uv run --project backend python docs/competition/seed_demo_data.py --apply
 
 - 使用合成数据；允许显示本次临时 IP 预览地址，但不得显示 ACL 密码、Token、真实成员或私有正文。
 - 不显示 `.env`、Key、密码或令牌。
-- 固定 `v0.1.0`、commit `4ee1a71` 和演示数据版本。
+- 固定 `v0.1.1`、commit `a6ac195` 和演示数据版本。
 - 截图/视频与当前代码一致。
 - 稳定 HTTPS、最终截图和视频仍保留 `TODO`。
