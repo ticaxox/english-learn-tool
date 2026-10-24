@@ -16,6 +16,8 @@ const stats = ref<LearningStats | null>(null)
 const loading = ref(false)
 const error = ref<unknown>(null)
 
+const streakStamps = computed(() => Math.min(stats.value?.streakDays ?? 0, 7))
+
 const percent = computed(() => {
   if (!stats.value || stats.value.goalMinutes <= 0) {
     return 0
@@ -44,7 +46,7 @@ defineExpose({ load })
 </script>
 
 <template>
-  <section class="panel study-stats" aria-labelledby="study-stats-title">
+  <section class="panel study-stats member-stats-panel" aria-labelledby="study-stats-title">
     <div class="study-stats__heading">
       <h2 id="study-stats-title">今日统计</h2>
       <button class="button-secondary button-small" type="button" :disabled="loading" @click="load">
@@ -76,7 +78,12 @@ defineExpose({ load })
       >
         <span :style="{ width: `${percent}%` }"></span>
       </div>
-      <p v-if="stats.streakDays !== null" class="inline-note">连续学习 {{ stats.streakDays }} 天。</p>
+      <div v-if="stats.streakDays !== null" class="member-streak-block">
+        <div class="member-stamp-row" aria-hidden="true">
+          <span v-for="index in 7" :key="index" :class="{ 'is-filled': index <= streakStamps, 'is-today': index === streakStamps }">{{ index }}</span>
+        </div>
+        <p class="inline-note">连续学习 {{ stats.streakDays }} 天。</p>
+      </div>
       <p class="inline-note">
         统计日期 {{ stats.localDate }} · 数据来源：
         <span v-if="stats.sources.length === 0">服务端未标注</span>
