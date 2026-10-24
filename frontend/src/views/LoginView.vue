@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiClient } from '../api/client'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import { useAuthStore } from '../stores/auth'
 import { safeInternalRedirect, validateUsername } from '../lib/validation'
 
@@ -76,6 +77,10 @@ async function retryConnection(): Promise<void> {
 <template>
   <main class="auth-page">
     <section class="auth-card" aria-labelledby="login-title">
+      <div class="auth-card__masthead">
+        <WhiskerCrumbMark size="medium" />
+        <span class="auth-card__seal">CURIOUS ENGLISH CLUB</span>
+      </div>
       <p class="eyebrow">组织内部学习平台</p>
       <h1 id="login-title">登录学习空间</h1>
       <p class="lead">

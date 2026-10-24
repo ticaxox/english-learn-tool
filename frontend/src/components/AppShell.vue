@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import WhiskerCrumbMark from './WhiskerCrumbMark.vue'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -44,10 +45,10 @@ async function signOut(): Promise<void> {
 <template>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
 
-  <div class="app-shell">
+  <div class="app-shell" :class="{ 'app-shell--admin': auth.isAdmin }">
     <aside class="sidebar">
       <div class="brand-row">
-        <span class="brand-mark" aria-hidden="true">EN</span>
+        <span class="brand-mark"><WhiskerCrumbMark size="small" /></span>
         <div class="brand-copy">
           <strong>AI 英语学习平台</strong>
           <span>组织内部学习空间</span>
@@ -85,7 +86,7 @@ async function signOut(): Promise<void> {
 
     <div class="main-area">
       <header class="topbar">
-        <p>以下页面只展示真实 API 响应或明确错误，不使用模拟业务数据。</p>
+        <p><span class="topbar-kicker">WHISKER CRUMB</span> 以下页面只展示真实 API 响应或明确错误，不使用模拟业务数据。</p>
         <div class="topbar-actions">
           <span class="inline-note">真实账号、学习与 AI 平台管理 · M2–M3</span>
         </div>
