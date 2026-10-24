@@ -1,97 +1,100 @@
 # 演示说明
 
-- 事实基线：`caa731c`；容器/CI 证据对应 `a5bf49b` / run `39801657963`
-- 当前可演示：工程启动、健康检查、基础 API、前端壳层、错误状态，以及固定 run 的 CI/Compose 证据
-- 当前不可演示：真实登录、成员管理、词书、FSRS、AI 练习、教练、每日闯关、GHCR 发布或公网部署
+- 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.2`，commit `8d5cb83`，主题 Whisker Crumb；HTTP，不是稳定 HTTPS）
+- 演示数据脚本：[`competition/seed_demo_data.py`](competition/seed_demo_data.py)
+- 演示数据说明：[`competition/demo-data.md`](competition/demo-data.md)
+- 截图清单：[`competition/screenshots/README.md`](competition/screenshots/README.md)
+- 视频脚本：[`competition/demo-video-script.md`](competition/demo-video-script.md)
 
-## 1. 启动入口
+## 1. 当前可演示范围
 
-### 后端
+已可由真实 API/浏览器展示：
+
+- 成员端新骨架：`member-rail`、`member-topbar`、移动导航、Word shelf、Practice room、Mr. Whisker。
+- 管理员登录、成员管理、词书管理、AI provider/提示词、组织看板。
+- 成员登录、学习档案、词书激活、今日计划、记忆训练。
+- 四类 AI 练习、提交/评分、练习记录、错题。
+- AI 教练 SSE、受控 action receipt、撤销。
+- 每日闯关、节点状态、BOSS 结果。
+- 通知、DND、偏好和未读数。
+- 失败态、Request ID、隐私边界和管理员聚合看板。
+
+## 2. 演示账号
+
+脚本创建以下合成账号：
+
+| 用户名 | 角色 | 用途 |
+|---|---|---|
+| `demo_admin` | admin | 管理员流程、看板、AI 配置 |
+| `demo_member` | member | 主要成员闭环 |
+| `demo_member2` | member | 组织聚合/多成员对比 |
+| `demo_member3` | member | 组织聚合/最小分组 |
+
+公网预览使用 `demo_admin`、`demo_member`；密码只从 A40 的 ACL 本地凭据文件安全获取，不写入仓库/文档/截图/视频。本地脚本仍通过 `DEMO_ADMIN_PASSWORD` 与 `DEMO_MEMBER_PASSWORD` 环境变量设置，不要把真实管理员密码用于演示。
+
+## 3. 初始化
+
+公网预览已由 A40 准备合成数据，不要在远端重复执行 seed。若需要本地/独立环境演示，再执行以下命令。
+
+在一次性或专用演示数据库执行：
 
 ```powershell
-cd backend
-uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
+$env:DEMO_SEED_CONFIRM = 'YES'
+$env:DEMO_ADMIN_PASSWORD = '<unique demo admin password>'
+$env:DEMO_MEMBER_PASSWORD = '<different unique demo member password>'
+uv run --project backend python docs/competition/seed_demo_data.py --apply
 ```
 
-入口：
+脚本只删除固定 demo UUID 命名空间内的数据；不会删除非 demo 用户或词书。重复执行会重建同一套合成数据。
 
-- `http://127.0.0.1:8000/health/live`
-- `http://127.0.0.1:8000/health/ready`
-- `http://127.0.0.1:8000/api/v1`
-- `http://127.0.0.1:8000/api/v1/docs`
+## 4. 推荐演示路径
 
-启动前需按 `README.md` 准备 PostgreSQL、Redis 和本地 `.env`。
+### 管理员（约 3 分钟）
 
-### 前端
+1. 打开 `http://23.94.141.170:18080`，登录 `demo_admin`。
+2. 打开成员管理，展示 3 个成员、角色/状态和隐私安全的聚合字段。
+3. 打开词书列表，展示 20 词组织词书。
+4. 打开 AI provider/提示词页面，展示 Key 掩码、模型、提示词和连接检查入口。
+5. 打开组织看板，展示 3 个成员聚合、分组隐私和最小分组抑制。
+6. 说明管理员看不到成员答题正文、草稿、教练对话和私有词书正文。
 
-```powershell
-cd frontend
-npm run dev
-```
+### 成员（约 4 分钟）
 
-入口：`http://127.0.0.1:5173`
+1. 登录 `demo_member`。
+2. 展示今日计划、到期复习和新词目标。
+3. 打开记忆训练，完成一次翻卡/选择/拼写。
+4. 打开 AI 练习，展示填空练习、提交前无答案、提交后结果和错题。
+5. 打开练习记录，展示已完成 3 题、66.67 分和 1 个错题。
+6. 打开 AI 教练，展示 SSE 回复、`adjust_daily_plan` action receipt 和撤销入口。
+7. 打开每日闯关，展示 5 个节点、2 个已完成、3 个未完成状态。
+8. 打开通知，展示 3 条合成通知和未读数。
 
-## 2. 当前可展示内容
+## 5. 失败态与边界
 
-可以真实展示：
+可展示：
 
-1. 前端应用壳层和路由渲染。
-2. `/api` 代理到真实 FastAPI 服务。
-3. `GET /api/v1` 返回服务元数据。
-4. `/health/live` 返回 `200`。
-5. 后端不可用或接口返回错误时，前端显示真实错误、Request ID 和重试入口。
-6. 健康检查对 PostgreSQL/Redis/配置的依赖状态。
-7. GitHub Actions run `39801657963` 在 `a5bf49b` 上的五作业通过记录，以及 Compose 七服务、空库迁移和非 root 检查证据。
+- AI provider 不可用时的真实错误码和 Request ID。
+- 题目生成失败不出现假题。
+- 未登录访问受保护页面时跳转登录。
+- 成员访问管理员路由被拒绝。
+- 管理员看板在成员不足最小分组时抑制分组明细。
 
-不得展示为已实现：
+不可宣称：
 
-- 真实用户名密码登录。
-- 管理员创建成员或查看组织看板。
-- 词书导入、FSRS 复习、AI 题目和评分。
-- AI 教练 SSE、受控操作或撤销回执。
-- 每日闯关地图和终点挑战。
-- GHCR 镜像发布完成、公网地址、TLS、评审账号或云服务器已部署。
+- 稳定 HTTPS、TLS 或长期生产 SLA 已完成；当前只是临时 HTTP IP 预览。
+- 最终视频已录制完成。
+- 真实生产 AI 模型效果已被验证。
+- 完整 MVP 已 PASS。
 
-## 3. 当前演示风险
+## 6. 已知差异
 
-- 前端登录页会调用尚未实现的后端 `/auth/*`，不能作为成功登录证明。
-- 没有合成演示组织、成员或学习数据。
-- 没有演示账号或评审账号。
-- 本机没有可用 Docker Compose；容器证据只能展示 GitHub Actions 固定 run，不能把 CI 结果说成本机运行。
-- 没有 GHCR 发布实跑、公网 HTTPS 或云服务器部署。
-- 质量清单的最终 MVP 状态仍为 `FAIL / NOT_READY`。
+`GET /learning/today` 的 `ai_practice` 字段仍返回旧 `not_available`；已实现的 AI 练习从 `/practice` 进入。演示时不要用 Today 摘要证明 AI 练习未实现，也不要把该旧字段说成生产故障已修复。
 
-因此当前只能做“工程与交付基线演示”，不能做完整比赛产品演示。
+## 7. 录屏前检查
 
-## 4. 后续演示流程结构
-
-产品能力完成后，演示应按以下闭环组织，而不是逐页展示：
-
-1. 管理员登录，展示真实 AI provider 配置和成员创建。
-2. 成员首次登录、改密、填写学习档案并激活词书。
-3. 完成翻卡、选择、拼写，展示 FSRS 到期变化。
-4. 生成并提交客观题和主观题，展示评分、解析和错题。
-5. 向 AI 教练提问，展示上下文读取、受控操作和撤销回执。
-6. 生成每日闯关地图，完成主线节点并提交终点挑战。
-7. 次日展示挑战结果如何进入下一日计划上下文。
-8. 管理员展示聚合指标，并证明无法读取答案、草稿和对话正文。
-
-每一步都必须使用真实 API、真实数据库和真实 AI provider；失败路径应展示明确错误和重试，不得用预录假数据掩盖失败。
-
-## 5. 演示数据边界
-
-- 只能使用虚构组织、合成账号、合成词书和合成学习数据。
-- 公开截图、视频和日志不得出现真实成员姓名、部门、答案或对话。
-- 演示账号密码与真实管理员密码必须不同。
-- 真实 API Key 不得出现在浏览器、截图、视频、日志或录屏准备文件中。
-- 演示环境如果无法连接 AI，应展示真实配置错误和重试入口，而不是切换 mock。
-
-## 6. 演示前检查
-
-- 按 README 在干净环境启动。
-- `/health/ready` 检查通过。
-- 前后端代理可达。
-- 使用合成数据完成一次完整流程。
-- 确认失败态可解释且不伪造结果。
-- 若展示容器/CI，固定引用 `a5bf49b` 与 run `39801657963`；若展示公网部署，必须另有云部署、域名和 TLS 证据。
-- 记录演示日期、提交 SHA、镜像 digest（如有）和环境限制。
+- 使用合成数据；允许显示本次临时 IP 预览地址，但不得显示 ACL 密码、Token、真实成员或私有正文。
+- 不显示 `.env`、Key、密码或令牌。
+- 固定 `v0.1.2`、commit `8d5cb83` 和演示数据版本。
+- 截图/视频与当前代码一致。
+- 稳定 HTTPS、最终截图和视频仍保留 `TODO`。

@@ -1,211 +1,111 @@
 # 测试与验证记录
 
-- 应用层基线：`caa731c`
-- 容器/CI 基线：`a5bf49b`；GitHub Actions run `39801657963` 第 2 次尝试
-- 验证日期：2026-10-22
-- 环境：Windows；`uv` 0.11.28；Python 3.12（`uv` 解析为 3.12.13）；Node.js 24.18.0；npm 11.16.0；本地 PostgreSQL 16.10 与 Redis 7.0.15 可访问
-- 测试资源：一次性独立 PostgreSQL 数据库与 Redis DB `15`，不使用生产资源。若共享测试库含有其他分支的 revision，不得直接复跑；应创建独立空库。
+- 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
+- M5 代码内结论：`PASS_WITH_CONDITIONS`
+- 最终 MVP：`FAIL / NOT_READY`
+- QA 证据：`ai-workspace/04-qa/evidence/T-QA-004/`
+- 本任务新增演示数据证据：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`
 
-## 1. 后端验证
+## 1. 已验证结果
 
-### 依赖安装
+| 范围 | 结果 | 证据 |
+|---|---|---|
+| 后端全量 | 156 passed；Ruff lint/format PASS | T-QA-004 |
+| 前端全量 | 310 passed；`npm ci`/build PASS；0 已知漏洞 | T-QA-004 |
+| M3 真实 API | 54/54 PASS | `results/m5-m3-20261024-0235/api-acceptance.json` |
+| M3 真实浏览器 | 13/13 PASS | 同目录 `browser-acceptance.json` |
+| M4R 条件链路 API | 21/21 PASS | `results/m5-m4r-20261024-0242/api-acceptance.json` |
+| M4R 真实浏览器 | 14/14 PASS，0 缺口 | 同目录 `browser-acceptance.json` |
+| 性能 | 读 P95 0.031 ms、提交 47 ms、5000 行导入 1.92 s、SSE 首事件 31 ms | `results/m5-probe-20261024-0312/api-acceptance.json` |
+| 迁移 | 空库 upgrade/check/downgrade/re-upgrade PASS，drift 0 | T-QA-004 日志 |
+| 备份恢复 | 合成库 dump/restore 关键表计数一致 | T-QA-004 |
+| 依赖审计 | 后端 0、前端 0 已知漏洞 | T-QA-004 |
+| 47 门禁 | 40 PASS / 3 CONDITIONAL / 4 FAIL / 0 NOT_RUN | `tests/quality-baseline/acceptance-gates.json` |
+| 临时 HTTP 公网预览 | PASS：`http://23.94.141.170:18080`，`v0.1.2`，commit `8d5cb83`，Whisker Crumb | T-SHIP-004 / A40 evidence |
+| 发布镜像 digest | API/frontend/reverse-proxy 三镜像已记录 | release `v0.1.2` / workflow `40094317102` |
+
+T-QA-004 的 PR CI run `40006774365` 为 5/5 PASS；基线 CI run `39999074319` 为 5/5 PASS。
+
+## 2. 后端命令
 
 ```powershell
 cd backend
 uv sync --locked --all-groups
-```
-
-结果：成功；创建隔离 `.venv` 并安装 42 个包。日志提示目标盘与缓存盘不支持 hardlink，自动 fallback 为复制，不影响通过结果。
-
-### Ruff
-
-```powershell
 uv run ruff check .
 uv run ruff format --check .
-```
-
-结果：
-
-- `All checks passed!`
-- `38 files already formatted`
-
-### 真实数据库/Redis 测试
-
-```powershell
-$env:TEST_DATABASE_URL = '<dedicated PostgreSQL test URL>'
-$env:TEST_REDIS_URL = 'redis://127.0.0.1:6379/15'
 uv run pytest
-```
-
-结果：`18 passed in 4.43s`。
-
-当前 18 项覆盖：
-
-- API 契约、Request ID 和统一错误结构。
-- 配置拒绝短密钥、错误数据库驱动和非法 CORS。
-- 数据库迁移版本与 `system_metadata` 存在性。
-- `/health/live`、`/health/ready` 及依赖失败状态。
-- 结构化日志基础。
-- 测试 PostgreSQL 事务回滚与 Redis 专用 DB 清理。
-- ARQ worker/scheduler 心跳入口。
-
-测试使用真实 PostgreSQL/Redis；依赖不可用时失败，不会自动跳过或改用内存数据库。
-
-### 本地迁移
-
-使用一次性独立 PostgreSQL 空库执行：
-
-```powershell
 uv run alembic upgrade head
 uv run alembic check
 ```
 
-结果：
+测试必须使用真实 PostgreSQL/Redis；`TEST_DATABASE_URL` 和 `TEST_REDIS_URL` 指向隔离资源。不得使用内存数据库、生产连接串或真实成员数据。
 
-- `upgrade head` 从空库成功迁移到 `20261022_0001`。
-- `check` 返回 `No new upgrade operations detected.`
-
-容器空库迁移由下面第 4 节的 CI Compose 作业独立覆盖。
-
-### ARQ 心跳入口
-
-在本地 `.env` 已准备且测试 Redis 可访问时：
-
-```powershell
-uv run arq app.workers.worker.WorkerSettings
-uv run arq app.workers.scheduler.SchedulerSettings
-```
-
-结果：
-
-- worker 启动 1 个函数 `worker_heartbeat`，Redis 7.0.15 连接成功。
-- scheduler 启动 `scheduler_tick` 与对应 cron，Redis 连接成功。
-- 两个进程均在确认启动后通过 Ctrl+C 停止；人工中断不作为业务测试失败。
-
-该冒烟只证明入口可导入、配置可加载、Redis 可连接，不证明存在业务异步任务。
-
-## 2. 前端验证
-
-### 安装
+## 3. 前端命令
 
 ```powershell
 cd frontend
 npm ci
-```
-
-结果：成功，新增 161 个包，`found 0 vulnerabilities`。
-
-### 测试
-
-```powershell
 npm test
-```
-
-结果：4 个测试文件、11 项测试通过，耗时约 3.03 秒。测试环境输出 `Window scrollTo()` 未实现警告，不影响测试通过。
-
-覆盖方向：
-
-- API client 的请求、错误和 Request ID 处理。
-- 认证 store 的内存令牌与状态流转。
-- 错误展示。
-- 路由守卫。
-
-这只是前端组件/逻辑测试；真实 `/auth/*` 联调仍未完成。
-
-### 生产构建
-
-```powershell
 npm run build
 ```
 
-结果：`vue-tsc -b && vite build` 成功，43 个模块转换完成。
+T-QA-004 已覆盖认证、成员管理、词书、记忆、练习、教练、挑战、通知、看板和错误态。视觉截图来自真实浏览器，不是 PPT 或静态 mock。
 
-生成文件示例：
+## 4. 演示数据初始化验证
 
-- `dist/index.html`
-- `dist/assets/index-*.css`
-- `dist/assets/index-*.js`
-
-## 3. 前后端代理冒烟
-
-验证步骤：
-
-1. 使用非生产测试数据库/Redis 启动 FastAPI：`127.0.0.1:8000`。
-2. 启动 Vite 开发服务器：`127.0.0.1:5173`。
-3. 请求前端代理路径 `/api/v1`。
+在一次性 PostgreSQL 数据库中执行：
 
 ```powershell
-Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:5173/api/v1' -Headers @{'X-Request-ID'='docs-proxy-smoke'}
-Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8000/health/live'
+$env:DEMO_SEED_CONFIRM = 'YES'
+$env:DEMO_ADMIN_PASSWORD = '<unique demo admin password>'
+$env:DEMO_MEMBER_PASSWORD = '<different unique demo member password>'
+uv run --project backend python docs/competition/seed_demo_data.py --apply
 ```
 
-结果：
+验证结果：
 
-- `/api/v1` 经 Vite 代理返回 `200`。
-- 响应头保留 `X-Request-ID: docs-proxy-smoke`。
-- `/health/live` 直接返回 `200`。
-- 测试完成后两个开发进程均已关闭。
+- 首次初始化：PASS。
+- 重复初始化：PASS。
+- 数据库 revision：`844c0d89f737`。
+- 4 个合成账号、20 个词条、60 个记忆状态、3 个每日计划、1 个练习记录、1 个教练会话、5 个挑战节点、3 个通知。
+- 真实 API：管理员登录/看板/成员/词书，成员登录/今日计划/档案/挑战/练习记录/练习详情/教练会话/教练消息/未读数，共 13 项均返回 200。
+- 管理员看板显示 3 个活跃成员和 1 个隐私安全分组，不返回成员正文。
+- 练习详情包含 3 题、1 个错题；教练消息包含 `adjust_daily_plan` applied receipt；挑战地图包含 5 个节点。
 
-该冒烟只证明前端代理与基础 API 可达，不证明登录、业务 CRUD、SSE、AI 或公网部署可用。
+说明：`GET /learning/today` 的 `ai_practice` 字段仍返回旧 `not_available`；已实现的 AI 练习从 `/practice` 使用。该差异不隐藏、不伪修，作为当前已知限制记录。
 
-## 4. CI 与容器运行验证
+公网轻量核验：`/health/live`、`/health/ready`、首页均 HTTP 200；`/api/v1` 返回 `v0.1.2` / `test`。登录、SSE、Cookie/CSRF、共享词书卷、备份恢复和机械回滚引用 T-SHIP-004，不在本任务重复全量测试。
 
-证据固定在：
+## 5. 47 门禁状态
 
-- 代码提交：`a5bf49b038800003549b218278c146777dc2b096`
-- 合并主线：`caa731cb2481a4aef50f3ff16f0d2fb811bcf9dc`
-- GitHub Actions run：`39801657963`
-- 结果：第 2 次尝试 5/5 作业通过；第 1 次失败是 Docker Hub 临时 `500`，不是配置回归。
+已 PASS 的核心门禁包括认证、成员管理、词书、记忆、档案、四类 AI 练习、答案防泄露、记录、通知、E2E、AI 合同、安全头部分项、Docker、性能和迁移。
 
-| 作业 | 验证内容 | 结果 |
-|---|---|---|
-| Backend | 锁定依赖、Ruff lint/format、真实 PostgreSQL/Redis pytest | PASS |
-| Frontend | `npm ci`、生产构建、Vitest | PASS |
-| Quality | 校验器单测与质量清单结构校验 | PASS |
-| Security | Gitleaks 全历史敏感信息扫描 | PASS |
-| Compose | 干净构建、空库迁移、启动、健康、权限和 HTTP 验证 | PASS |
+保留条件/失败：
 
-Compose 作业在 GitHub 托管的干净 Ubuntu runner 上验证：
+- `F-SEC-01` CONDITIONAL：v0.1.2 预览响应已有 CSP/安全头，但仍待 A30/A01 按最终证据重新分类。
+- `F-AUDIT-01` CONDITIONAL：演示环境 RPO/RTO 与数据库/词书恢复已通过；生产级审批和历史兼容业务回滚仍待复核。
+- `F-GIT-01` CONDITIONAL：`v0.1.2` tag/release 已完成；质量门禁的最终发布历史分类仍待 A30/A01 复核。
+- `F-DEMO-01` FAIL：本任务已增加可执行演示数据脚本和账号说明，但最终状态仍由 A30/A01 复验后更新。
+- `F-DOC-01` FAIL：本任务更新 README、技术文档和专题文档，但最终状态仍由 A30/A01 复验后更新。
+- `F-COMP-01` FAIL：v0.1.2 临时 HTTP 预览和 7 张真实截图已准备；最终视频、稳定 HTTPS 截图和最终提交验收仍待完成。
+- `F-FINAL-01` FAIL：最终 MVP 未验收。
 
-- PostgreSQL、Redis、API、worker、scheduler、frontend 和 reverse proxy 七个常驻服务健康。
-- 一次性 `migrate` 服务先于应用启动并完成 `alembic upgrade head`。
-- 数据库 revision 为 `20261022_0001`，`system_metadata` 表存在。
-- API、worker、scheduler、frontend 和 reverse proxy 的 UID 非 `0`，实测为 `10001`。
-- 只有反向代理默认绑定 `127.0.0.1:8080`；PostgreSQL 与 Redis 不发布宿主端口。
-- 反向代理 `/health/live`、`/health/ready`、`/api/v1` 通过，`/healthz` 与 `/` 返回成功。
+## 6. 不重复执行的范围
 
-本机 `docker` 实际指向 `wslc`，没有可用的 `docker compose`。因此以上是 CI 运行时证据，不是本机 Compose 实测；本地配置解析也不能替代运行验证。
+A01 明确要求复用 T-QA-004 的 M3/M4R/性能/安全证据，不重复全量测试。本任务没有把旧的 156/310 数字冒充当前文档分支新跑结果；它们是固定 QA 基线证据，文档分支只新增 Markdown、截图和演示数据脚本。
 
-## 5. 质量门禁现状
+## 7. 提交前检查
 
-`tests/quality-baseline/acceptance-gates.json` 在本次文档基线前记录：
+- `git diff --check`
+- Markdown 链接、图片路径、UTF-8、无 BOM、最终换行、无尾随空白
+- 敏感信息扫描
+- 截图 SHA256 与 QA 来源一致
+- 演示脚本语法、`--help`、首次/重复初始化
+- PR CI 5/5
 
-- 共 47 条门禁：13 PASS、3 CONDITIONAL、30 FAIL、1 NOT_RUN。
-- Stage A 工程基线为 PASS。
-- `S-FE-04` 仍为 CONDITIONAL，等待真实认证联调。
-- 最终 MVP 为 `FAIL / NOT_READY`。
+## 8. 相关文档
 
-因此：
-
-- 阶段基线测试通过不等于完整产品完成。
-- 根 README/文档结构完成后，`F-DOC-01` 仍需 A30/A40 按最终验收标准更新。
-- 不能把本地命令结果解释为 GHCR 发布、云部署、AI 或生产环境通过；容器/CI 只按第 4 节的固定 run 记录。
-
-## 6. 尚未验证
-
-| 项目 | 状态 | 后续条件 |
-|---|---|---|
-| GHCR release workflow 与三个发布镜像 | 未实际触发/未推送 | 创建版本 tag 或手动触发后回读镜像与权限 |
-| 云服务器部署 | 未执行 | 独立 A40 部署任务 |
-| 域名、TLS、公网入口 | 未配置 | 主机、DNS、证书和代理联合验证 |
-| 生产备份恢复/回滚演练 | 未执行 | 获批的恢复任务与脱敏证据 |
-| 真实认证与管理员隐私边界 | 未实现/待联调 | AUTH-INT-001 |
-| 词书导入导出、FSRS、AI、教练、挑战 | 未实现 | 后续业务任务 |
-| 评审账号与完整比赛演示 | 未交付 | 业务闭环和合成数据完成后再准备 |
-
-## 7. 复测规则
-
-1. 每次代码变化后重新运行受影响命令，不复制旧结果冒充当前通过。
-2. 容器/CI 结论必须固定提交、Actions run 和结果；发布与云部署必须引用各自证据。
-3. 提交文档前至少检查 `git diff --cached --check`、敏感信息和相对链接。
-4. 记录测试环境，但不记录密码、API Key、生产连接串或真实成员数据。
+- [事实核对](fact-check.md)
+- [部署](deployment.md)
+- [演示数据](competition/demo-data.md)
+- [截图清单](competition/screenshots/README.md)
