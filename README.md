@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-本交付分支基于 T-QA-004 冻结提交 `efc6bcbd2679eca02613a7143c68d04dddc36a59`，当前是**可运行、可联调、可容器化的 M5 代码基线**。M5 代码内硬化结论为 `PASS_WITH_CONDITIONS`，完整 MVP 仍为 `FAIL / NOT_READY`，不得把本页面的能力清单解释为最终比赛验收通过。
+本交付分支基于 T-QA-004 冻结提交 `efc6bcbd2679eca02613a7143c68d04dddc36a59`，当前是**可运行、可联调、可容器化的 M5 代码基线**。T-SHIP-002 已通过 A00 授权的临时 HTTP IP 预览（`v0.1.0`，commit `4ee1a71`）；稳定 HTTPS 未验证，完整 MVP 仍为 `FAIL / NOT_READY`，不得把预览通过解释为最终比赛验收通过。
 
 | 范围 | 当前状态 | 证据 |
 |---|---|---|
@@ -18,7 +18,8 @@
 | 通知、DND、去重与 AI 例外 | 已实现；真实链路验证 | `backend/tests/test_notifications.py` |
 | 管理员组织聚合看板与隐私边界 | 已实现；0/1/2/3 成员聚合与隐私测试通过 | `backend/tests/test_dashboard_api.py` |
 | Docker Compose、CI、空库迁移、健康检查 | 已验证；Compose 七服务、非 root、回环端口与迁移通过 | T-SHIP-001、run `39801657963` |
-| 生产部署、公网 URL、TLS、GHCR digest | **未验证**；T-SHIP-002 正在执行 | `docs/deployment.md`、`docs/fact-check.md` |
+| 临时 HTTP 公网预览 | **已验证**：`http://23.94.141.170:18080`，`v0.1.0`，commit `4ee1a71`；仅临时 HTTP | T-SHIP-002 / A40 证据 |
+| 稳定 HTTPS、最终 MVP | **未验证/未通过**；不能宣称稳定 HTTPS 或最终 MVP PASS | `docs/deployment.md`、`docs/fact-check.md` |
 | 比赛视频、公网截图、最终提交清单 | 脚本、合成数据和 QA 截图已准备；最终录屏与公网入口待 T-SHIP-002 | `docs/competition/` |
 
 > 事实规则：只有代码、测试、真实 API/浏览器、固定 CI run 或部署证据支持的能力才能标记为“已验证”。计划、占位值、QA 截图和容器构建不能冒充生产完成。
@@ -196,6 +197,7 @@ T-QA-004 的冻结结果：后端 156 passed、前端 310 passed、M3 API 54/54�
 
 ## 演示与比赛材料
 
+- **临时预览**：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`；HTTP，不是稳定 HTTPS）
 - [演示数据与账号说明](docs/competition/demo-data.md)
 - [可执行合成数据脚本](docs/competition/seed_demo_data.py)
 - [演示截图与事实清单](docs/competition/screenshots/README.md)
@@ -204,7 +206,7 @@ T-QA-004 的冻结结果：后端 156 passed、前端 310 passed、M3 API 54/54�
 - [最终提交清单](docs/competition/submission-checklist.md)
 - [来源、许可证与素材边界](docs/competition/licensing.md)
 
-比赛最终视频、公网 URL、镜像 digest 和评审账号必须等待 T-SHIP-002 的固定证据；未完成项在材料中保留 `TODO`，不写成已完成。
+临时 HTTP 预览已可用；演示用户名 `demo_admin`、`demo_member`，密码只从 A40 的 ACL 本地凭据文件安全获取，不写入仓库/文档/证据。稳定 HTTPS、最终视频、公网截图和最终 MVP 验收仍未完成，相关项保留 `TODO`。
 
 ## GitHub、CI 与发布
 
@@ -212,13 +214,13 @@ T-QA-004 的冻结结果：后端 156 passed、前端 310 passed、M3 API 54/54�
 - `main` 只由 A01 SYNC 协调合并；执行 Agent 使用独立分支和 PR。
 - CI 覆盖后端、前端、质量清单、敏感信息扫描和 Compose 集成五类作业。
 - 发布工作流会构建 API、frontend 与 reverse-proxy 三个 GHCR 镜像，并要求完整 Git SHA/不可变 tag。
-- 当前版本标签、GHCR 实际推送、digest 与生产拉取仍未验证。
+- `v0.1.0` 版本标签、release workflow `40023555751` 和三镜像 digest 已验证；服务器使用校验后的 release bundle，GHCR 在线拉取流程仍未单独验证。
 
 ## 已知限制
 
-1. **部署未完成**：T-SHIP-002 正在执行，公网 URL、TLS、镜像 digest、备份恢复和回滚尚未冻结。
-2. **CSP 未配置**：安全头部分通过，但 `F-SEC-01` 仍为 CONDITIONAL。
-3. **生产备份未验收**：合成库恢复通过，但生产 RPO/RTO 与 A40 演练未完成。
+1. **临时 HTTP 预览可用，稳定 HTTPS 未验证**：T-SHIP-002 只验证 A00 授权的 IP + 高位端口预览，不代表稳定 HTTPS、DNS 或长期生产 SLA。
+2. **CSP 状态待复核**：预览响应已带 CSP 头，但 T-QA-004 的 `F-SEC-01` 仍保留 CONDITIONAL，需 A30/A01 按最终证据重新分类。
+3. **回滚边界**：演示环境已做数据库/词书恢复和机械回滚；没有历史兼容业务版本，不能宣称旧业务功能回滚已验证。
 4. **Today 页面 AI 摘要仍是旧字段**：后端 `GET /learning/today` 的 `ai_practice` 目前仍返回 `not_available`；已实现的四类 AI 练习从 `/practice` 使用，不能把 Today 摘要当作 AI 练习未实现。
 5. **最终 MVP 未验收**：47 门禁仍有 3 CONDITIONAL、4 FAIL；完整 MVP 为 `FAIL / NOT_READY`。
 6. **许可证未决定**：仓库未添加开源许可证，公开提交前需 A00 决策；见 [licensing](docs/competition/licensing.md)。

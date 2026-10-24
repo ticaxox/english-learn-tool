@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-24｜v0.1.0 临时 HTTP IP 预览
+
+- A00 授权的临时公网预览已通过：`http://23.94.141.170:18080`，版本 `v0.1.0`，commit `4ee1a71`。
+- 七个服务 healthy；健康、登录、Cookie/CSRF、SSE、SPA 路径、共享词书卷和备份恢复通过。
+- 记录 API/frontend/reverse-proxy 三镜像 digest；release workflow `40023555751` success。
+- 明确这是临时 HTTP 预览：稳定 HTTPS、DNS 和长期生产 SLA 未验证，最终 MVP 仍为 `FAIL / NOT_READY`。
+
 ## 2026-10-24｜M5 比赛交付文档与演示材料
 
 - 将根 README 从旧工程骨架更新为 M2–M5 真实能力、启动、演示、安全和部署边界。

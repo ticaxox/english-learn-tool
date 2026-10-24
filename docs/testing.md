@@ -21,6 +21,8 @@
 | 备份恢复 | 合成库 dump/restore 关键表计数一致 | T-QA-004 |
 | 依赖审计 | 后端 0、前端 0 已知漏洞 | T-QA-004 |
 | 47 门禁 | 40 PASS / 3 CONDITIONAL / 4 FAIL / 0 NOT_RUN | `tests/quality-baseline/acceptance-gates.json` |
+| 临时 HTTP 公网预览 | PASS：`http://23.94.141.170:18080`，`v0.1.0`，commit `4ee1a71` | T-SHIP-002 / A40 evidence |
+| 发布镜像 digest | API/frontend/reverse-proxy 三镜像已记录 | release `v0.1.0` / workflow `40023555751` |
 
 T-QA-004 的 PR CI run `40006774365` 为 5/5 PASS；基线 CI run `39999074319` 为 5/5 PASS。
 
@@ -71,6 +73,8 @@ uv run --project backend python docs/competition/seed_demo_data.py --apply
 - 练习详情包含 3 题、1 个错题；教练消息包含 `adjust_daily_plan` applied receipt；挑战地图包含 5 个节点。
 
 说明：`GET /learning/today` 的 `ai_practice` 字段仍返回旧 `not_available`；已实现的 AI 练习从 `/practice` 使用。该差异不隐藏、不伪修，作为当前已知限制记录。
+
+公网轻量核验：`/health/live`、`/health/ready`、首页均 HTTP 200；`/api/v1` 返回 `v0.1.0` / `test`。登录、SSE、Cookie/CSRF、共享词书卷、备份恢复和机械回滚引用 T-SHIP-002，不在本任务重复全量测试。
 
 ## 5. 47 门禁状态
 

@@ -62,7 +62,8 @@ T-SHIP-001 的 Actions run `39801657963` 已验证：
 - **CSP**：`F-SEC-01` 仍为 CONDITIONAL；当前覆盖 `X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy`，反向代理未配置 CSP。
 - **生产备份**：`F-AUDIT-01` 仍为 CONDITIONAL；合成库恢复通过，但生产备份审批、RPO/RTO 和 A40 恢复演练未完成。
 - **发布历史**：`F-GIT-01` 仍为 CONDITIONAL；版本标签和 GHCR 发布历史未建立。
-- **公网安全**：TLS、域名、WAF/边缘限流、真实反向代理和公网 SSE 尚未验证。
+- **预览传输**：`http://23.94.141.170:18080` 是临时 HTTP IP 预览；HSTS 头不能替代 HTTPS，稳定 TLS/域名仍不在本次授权范围。
+- **公网安全**：WAF/边缘限流、长期监控和稳定 HTTPS 尚未验证；预览 SSE 不缓冲已由 T-SHIP-002 验证。
 - **真实成员数据**：演示和测试只使用合成数据；真实组织数据导入必须另立治理任务。
 
 ## 7. 提交前检查

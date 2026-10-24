@@ -11,7 +11,7 @@
 | **未验证 / TODO** | 依赖 T-SHIP-002、A00 决策、真实 provider 或最终录屏。 |
 | **FAIL / NOT_READY** | 完整 MVP 或质量门禁未通过，不得对外写成完成。 |
 
-当前交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`。迁移 head：`844c0d89f737`。OpenAPI：84 路径 / 153 schema。
+当前代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`。临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`，HTTP）。迁移 head：`844c0d89f737`。OpenAPI：84 路径 / 153 schema。
 
 ## 核心文档
 
@@ -23,7 +23,7 @@
 | [AI 链路](ai-pipeline.md) | provider、提示词、额度、练习、教练、挑战 | 已验证（受控 provider） |
 | [安全与隐私](security-privacy.md) | 身份、权限、AI Key、容器、CSP/备份条件 | 部分 PASS，仍有 CONDITIONS |
 | [测试](testing.md) | QA 证据、命令、性能、门禁和演示数据验证 | M5 PASS_WITH_CONDITIONS |
-| [部署](deployment.md) | Compose、CI、GHCR 设计、生产前置和 TODO | 未完成生产部署 |
+| [部署](deployment.md) | Compose、CI、GHCR、临时 IP 预览、备份与限制 | 临时 HTTP 预览 PASS；稳定 HTTPS 未验证 |
 | [演示](demo.md) | 合成账号、演示路径、失败态和限制 | 可准备，最终录屏待部署 |
 | [事实核对](fact-check.md) | 文档陈述到代码/证据的映射 | 持续维护 |
 

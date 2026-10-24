@@ -4,6 +4,7 @@
 - 数据性质：合成演示数据；不含真实成员、真实对话、真实词书正文或真实 Key
 - 已验证：一次性 PostgreSQL 数据库首次初始化、重复初始化、真实 API 读取
 - 证据：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`；HTTP）
 
 ## 1. 账号
 
@@ -14,7 +15,9 @@
 | `demo_member2` | member | 多成员组织聚合 |
 | `demo_member3` | member | 最小分组/组织看板 |
 
-密码不写入仓库。运行者必须在环境变量中设置：
+远端预览使用 `demo_admin`、`demo_member`。密码不写入仓库/文档/证据；只从 A40 的 ACL 本地凭据文件安全获取。
+
+本地/独立环境脚本仍要求：
 
 - `DEMO_ADMIN_PASSWORD`
 - `DEMO_MEMBER_PASSWORD`
@@ -36,6 +39,8 @@
 - 最近 4 天的合成学习活动，用于管理员聚合看板。
 
 ## 3. 初始化
+
+> 公网预览已由 A40 准备合成数据；不要在远端重复执行 seed。以下命令用于本地/独立环境。
 
 ### 前置
 

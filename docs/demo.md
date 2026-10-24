@@ -1,6 +1,7 @@
 # 演示说明
 
 - 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`；HTTP，不是稳定 HTTPS）
 - 演示数据脚本：[`competition/seed_demo_data.py`](competition/seed_demo_data.py)
 - 演示数据说明：[`competition/demo-data.md`](competition/demo-data.md)
 - 截图清单：[`competition/screenshots/README.md`](competition/screenshots/README.md)
@@ -29,9 +30,11 @@
 | `demo_member2` | member | 组织聚合/多成员对比 |
 | `demo_member3` | member | 组织聚合/最小分组 |
 
-密码由运行者在 `DEMO_ADMIN_PASSWORD` 与 `DEMO_MEMBER_PASSWORD` 环境变量中设置，不提交到仓库。不要把真实管理员密码用于演示。
+公网预览使用 `demo_admin`、`demo_member`；密码只从 A40 的 ACL 本地凭据文件安全获取，不写入仓库/文档/截图/视频。本地脚本仍通过 `DEMO_ADMIN_PASSWORD` 与 `DEMO_MEMBER_PASSWORD` 环境变量设置，不要把真实管理员密码用于演示。
 
 ## 3. 初始化
+
+公网预览已由 A40 准备合成数据，不要在远端重复执行 seed。若需要本地/独立环境演示，再执行以下命令。
 
 在一次性或专用演示数据库执行：
 
@@ -48,7 +51,7 @@ uv run --project backend python docs/competition/seed_demo_data.py --apply
 
 ### 管理员（约 3 分钟）
 
-1. 登录 `demo_admin`。
+1. 打开 `http://23.94.141.170:18080`，登录 `demo_admin`。
 2. 打开成员管理，展示 3 个成员、角色/状态和隐私安全的聚合字段。
 3. 打开词书列表，展示 20 词组织词书。
 4. 打开 AI provider/提示词页面，展示 Key 掩码、模型、提示词和连接检查入口。
@@ -78,7 +81,7 @@ uv run --project backend python docs/competition/seed_demo_data.py --apply
 
 不可宣称：
 
-- 公网 URL、TLS、GHCR digest 或生产部署已完成。
+- 稳定 HTTPS、TLS 或长期生产 SLA 已完成；当前只是临时 HTTP IP 预览。
 - 最终视频已录制完成。
 - 真实生产 AI 模型效果已被验证。
 - 完整 MVP 已 PASS。
@@ -89,8 +92,8 @@ uv run --project backend python docs/competition/seed_demo_data.py --apply
 
 ## 7. 录屏前检查
 
-- 使用合成数据，浏览器地址栏不含真实服务器信息。
-- 不显示 `.env`、Key、密码、令牌、真实成员或私有正文。
-- 固定提交 SHA 和演示数据版本。
+- 使用合成数据；允许显示本次临时 IP 预览地址，但不得显示 ACL 密码、Token、真实成员或私有正文。
+- 不显示 `.env`、Key、密码或令牌。
+- 固定 `v0.1.0`、commit `4ee1a71` 和演示数据版本。
 - 截图/视频与当前代码一致。
-- 未完成的公网和视频项保留 `TODO`。
+- 稳定 HTTPS、最终截图和视频仍保留 `TODO`。

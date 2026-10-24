@@ -2,8 +2,9 @@
 
 - 版本：T-DOC-002 / 2026-10-24
 - 代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
+- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.0`，commit `4ee1a71`；HTTP）
 - 目标规格：1080p 以上、普通话、真实浏览器录屏、5–8 分钟
-- 当前状态：脚本已准备；最终视频 **TODO**，等待 T-SHIP-002 公网/部署证据冻结
+- 当前状态：脚本已准备；临时 HTTP 预览已通过；最终视频 **TODO**
 - 演示数据：[demo-data.md](demo-data.md)
 - 截图清单：[screenshots/README.md](screenshots/README.md)
 
@@ -12,10 +13,10 @@
 必须满足：
 
 - 使用合成账号和合成词书，不使用真实成员、真实对话或私有正文。
-- 演示数据库已执行 `seed_demo_data.py --apply`，且使用独立 demo 密码。
+- 远端预览已由 A40 准备合成数据；不要在公网预览重复执行 seed。演示账号为 `demo_admin`、`demo_member`，密码只从 A40 的 ACL 本地凭据文件安全获取。
 - 浏览器地址栏不显示真实服务器 IP、内部域名、Token 或密钥。
 - AI provider 为受控演示配置；失败态可重复展示。
-- 固定代码 SHA、镜像 digest（如 T-SHIP-002 已提供）和 Actions run。
+- 固定 `v0.1.0`、commit `4ee1a71`、镜像 digest 和 Actions run。
 - 未部署时不得展示假公网 URL，不得用 PPT 冒充真实产品操作。
 
 ## 2. 推荐时间轴
@@ -23,8 +24,8 @@
 | 时间 | 画面 | 讲解重点 |
 |---|---|---|
 | 0:00–0:30 | 标题 + 产品一句话 | 组织内部私有英语学习平台；管理员/成员闭环 |
-| 0:30–1:10 | 架构图 + CI/Compose 证据 | 模块化单体、PostgreSQL/Redis/ARQ、七服务 CI |
-| 1:10–2:10 | 管理员登录、成员、词书 | 成员管理、最后管理员保护、组织词书 |
+| 0:30–1:10 | 架构图 + CI/Compose/预览证据 | 模块化单体、PostgreSQL/Redis/ARQ、七服务 CI、临时 HTTP 预览 |
+| 1:10–2:10 | 管理员登录、成员、词书 | 打开临时预览，成员管理、最后管理员保护、组织词书 |
 | 2:10–2:50 | AI provider/提示词/用量 | Key 掩码、加密、连接检查、额度和备用 |
 | 2:50–3:30 | 管理员看板 | 3 人聚合、隐私边界、小分组抑制 |
 | 3:30–4:20 | 成员今日计划 + 记忆训练 | 新词/到期复习、FSRS 服务端更新 |
@@ -52,15 +53,15 @@
 
 旁白：
 
-> 系统采用模块化单体。Vue 前端通过 API 访问 FastAPI，PostgreSQL 保存业务真相，Redis 和 ARQ 负责队列，worker 和 scheduler 共享私有词书卷。CI 已验证七个容器服务、空库迁移、非 root 和回环端口。
+> 系统采用模块化单体。Vue 前端通过 API 访问 FastAPI，PostgreSQL 保存业务真相，Redis 和 ARQ 负责队列，worker 和 scheduler 共享私有词书卷。CI 已验证七个容器服务、空库迁移、非 root 和回环端口；A40 还在临时 HTTP IP 预览上验证了健康、登录、SSE 和备份恢复。
 
-边界：这是 CI/Compose 证据，不是公网部署完成。
+边界：这是临时 HTTP IP 预览，不是稳定 HTTPS，也不是最终 MVP PASS。
 
 ### 1:10–2:10｜管理员配置
 
 画面：
 
-1. 登录 `demo_admin`。
+1. 打开 `http://23.94.141.170:18080`，登录 `demo_admin`（密码从 A40 ACL 本地凭据文件获取）。
 2. 成员管理：3 个合成成员。
 3. 词书列表：Aurora 20 词组织词书。
 4. 创建一个合成成员或展示 CSV 预览（若时间允许）。
@@ -151,14 +152,15 @@
 
 旁白：
 
-> 我们的创新点是 FSRS 与 AI 决策分离、结构化 AI 合同、受控可撤销教练和隐私优先看板。当前代码内硬化通过，但生产部署、TLS、GHCR digest 和生产恢复仍未完成，完整 MVP 仍为 FAIL / NOT_READY。
+> 我们的创新点是 FSRS 与 AI 决策分离、结构化 AI 合同、受控可撤销教练和隐私优先看板。代码内硬化、v0.1.0 发布和临时 HTTP 预览已通过，但稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，完整 MVP 仍为 FAIL / NOT_READY。
 
 ## 4. 录制材料
 
 - 1080p 以上原始录屏。
 - 普通话旁白；语速稳定。
-- 演示账号入口（脱敏）。
-- 代码 SHA、Actions run、镜像 digest（如已有）。
+- 临时预览入口 `http://23.94.141.170:18080`。
+- 演示账号 `demo_admin`、`demo_member`；密码从 A40 ACL 本地凭据文件安全获取。
+- `v0.1.0`、commit `4ee1a71`、Actions run 和镜像 digest。
 - 截图路径：[screenshots/README.md](screenshots/README.md)
 - 演示数据路径：[demo-data.md](demo-data.md)
 
@@ -168,5 +170,6 @@
 - 真实浏览器操作，不使用纯 PPT 冒充。
 - 不出现真实 Key、密码、Token、服务器地址、成员数据或私有正文。
 - 所有功能声明与当前 SHA/部署一致。
+- 明确字幕/旁白为“临时 HTTP 预览”，不得说成稳定 HTTPS。
 - 未完成项用 `TODO` 或“未验证”说明。
 - 最终视频路径和公网入口在 T-SHIP-002 后补入提交清单。
