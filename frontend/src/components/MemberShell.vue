@@ -14,16 +14,16 @@ const route = useRoute()
 const drawerOpen = ref(false)
 
 const primaryLinks = [
-  { label: 'Today', to: '/overview', icon: 'today' as const },
-  { label: 'Word shelf', to: '/wordbooks', icon: 'book' as const },
-  { label: 'Memory', to: '/memory', icon: 'spark' as const },
-  { label: 'Practice', to: '/practice', icon: 'cards' as const },
-  { label: 'Daily trail', to: '/challenges', icon: 'trail' as const },
-  { label: 'Mr. Whisker', to: '/coach', icon: 'coach' as const },
+  { label: '今日学习', to: '/overview', icon: 'today' as const },
+  { label: '词书', to: '/wordbooks', icon: 'book' as const },
+  { label: '记忆', to: '/memory', icon: 'spark' as const },
+  { label: 'AI 练习', to: '/practice', icon: 'cards' as const },
+  { label: '每日闯关', to: '/challenges', icon: 'trail' as const },
+  { label: '学习管家', to: '/coach', icon: 'coach' as const },
 ]
 const secondaryLinks = [
-  { label: 'Notices', to: '/notifications', icon: 'bell' as const },
-  { label: 'Preferences', to: '/settings', icon: 'settings' as const },
+  { label: '通知', to: '/notifications', icon: 'bell' as const },
+  { label: '设置', to: '/settings', icon: 'settings' as const },
 ]
 
 const currentDate = computed(() =>
@@ -56,13 +56,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
         <span class="member-brand-mark"><WhiskerCrumbMark size="small" /></span>
         <span class="member-brand-copy">
           <strong>WHISKER</strong>
-          <em>crumbs &amp; clauses</em>
+          <em>AI 英语学习</em>
         </span>
       </RouterLink>
 
       <nav class="member-nav-groups">
         <div class="member-nav-group">
-          <p class="member-nav-label">The daily edition</p>
+          <p class="member-nav-label">学习</p>
           <RouterLink v-for="link in primaryLinks" :key="link.to" class="member-nav-link" :to="link.to">
             <AppIcon :name="link.icon" />
             <span>{{ link.label }}</span>
@@ -70,7 +70,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
           </RouterLink>
         </div>
         <div class="member-nav-group member-nav-group--quiet">
-          <p class="member-nav-label">Your club</p>
+          <p class="member-nav-label">更多</p>
           <RouterLink v-for="link in secondaryLinks" :key="link.to" class="member-nav-link" :to="link.to">
             <AppIcon :name="link.icon" />
             <span>{{ link.label }}</span>
@@ -84,7 +84,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
           <span><strong>{{ props.displayName }}</strong><small>@{{ props.username }}</small></span>
         </div>
         <button class="member-concierge-link" type="button" @click="drawerOpen = true">
-          Ask the concierge <span>↗</span>
+          问问管家 <span>↗</span>
         </button>
         <button class="member-signout" type="button" @click="emit('signout')">退出登录</button>
       </div>
@@ -100,7 +100,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
           <span class="member-live-dot" aria-hidden="true"></span>
           <span>{{ currentDate }}</span>
           <span class="member-topbar-divider" aria-hidden="true"></span>
-          <span>真实学习数据 · 今日计划由服务端生成</span>
+          <span>今天也学一点</span>
         </div>
         <div class="member-topbar-actions">
           <RouterLink class="member-icon-link member-notices-link" to="/notifications" aria-label="通知">
@@ -108,7 +108,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
           </RouterLink>
           <button class="member-concierge-button" type="button" @click="drawerOpen = true">
             <WhiskerCrumbMark size="small" />
-            <span>Ask Mr. Whisker</span>
+            <span>问问管家</span>
           </button>
           <RouterLink class="member-avatar-button" to="/settings" :aria-label="props.displayName + ' 的偏好设置'">
             {{ props.displayName.slice(0, 2).toUpperCase() }}
@@ -131,22 +131,22 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
     <div v-if="drawerOpen" class="member-drawer-backdrop" @click="closeDrawer"></div>
     <aside v-if="drawerOpen" class="member-concierge-drawer" aria-labelledby="member-drawer-title">
       <div class="member-drawer-top">
-        <div><p class="eyebrow">A PRIVATE NOTE</p><h2 id="member-drawer-title">Ask Mr. Whisker</h2></div>
+        <div><p class="eyebrow">学习管家</p><h2 id="member-drawer-title">问问 Mr. Whisker</h2></div>
         <button class="member-drawer-close" type="button" aria-label="关闭学习管家" @click="closeDrawer">
           <AppIcon name="close" />
         </button>
       </div>
       <div class="member-drawer-mascot"><WhiskerCrumbMark size="hero" /></div>
       <p class="member-drawer-copy">
-        “The full letter room is where our real conversation lives. I can take you there, or return you to today's trail.”
+        “有问题，或有一句话想说，都可以先交给我。”
       </p>
       <div class="member-drawer-actions">
-        <RouterLink class="button" to="/coach">Open the letter room <AppIcon name="arrow" /></RouterLink>
-        <RouterLink class="button-secondary" to="/overview">Return to today's trail</RouterLink>
-        <RouterLink class="button-secondary" to="/wordbooks">Browse the word shelf</RouterLink>
+        <RouterLink class="button" to="/coach">进入对话 <AppIcon name="arrow" /></RouterLink>
+        <RouterLink class="button-secondary" to="/overview">回到今日学习</RouterLink>
+        <RouterLink class="button-secondary" to="/wordbooks">浏览词书</RouterLink>
       </div>
       <p class="member-drawer-note">
-        对话、建议和可撤销动作只在 AI 教练页面通过真实 SSE 与服务端回执执行。
+        对话仅你可见。
       </p>
     </aside>
   </div>

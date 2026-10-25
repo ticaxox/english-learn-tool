@@ -172,7 +172,7 @@ describe('ChoiceTrainer', () => {
     })
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
-    expect(wrapper.text()).toContain('option_count')
+    expect(wrapper.text()).toContain('选项暂时不可用')
     expect(wrapper.findAll('button').find((button) => button.text() === '提交答案')!.attributes('disabled')).toBeDefined()
   })
 
@@ -190,7 +190,7 @@ describe('ChoiceTrainer', () => {
     })
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
-    expect(wrapper.text()).toContain('当前 3 个')
+    expect(wrapper.text()).toContain('选项暂时不可用')
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
 
@@ -228,7 +228,7 @@ describe('ChoiceTrainer', () => {
     })
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
-    expect(wrapper.text()).toContain('option_count')
+    expect(wrapper.text()).toContain('选项暂时不可用')
   })
 
   it('sends only the chosen option id, never an answer key', async () => {

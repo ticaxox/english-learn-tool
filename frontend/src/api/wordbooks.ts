@@ -673,7 +673,7 @@ export function validateWordbookFile(file: File, maxBytes = 10 * 1024 * 1024): s
     return '仅支持 .csv、.json、.txt 文件。'
   }
   if (file.size > maxBytes) {
-    return '文件不能超过 10 MiB；最终大小限制以服务端校验为准。'
+    return '文件不能超过 10 MiB。'
   }
   return null
 }

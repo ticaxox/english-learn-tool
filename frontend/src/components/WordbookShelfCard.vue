@@ -35,8 +35,8 @@ const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
       </div>
       <strong class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
       <h3>{{ book.name }}</h3>
-      <span class="wordbook-cover-meta">{{ book.entry_count.toLocaleString('zh-CN') }} words · v{{ book.version }}</span>
-      <span class="wordbook-cover-stamp">{{ book.is_active ? 'IN USE' : 'ON SHELF' }}</span>
+      <span class="wordbook-cover-meta">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
+      <span class="wordbook-cover-stamp">{{ book.is_active ? '使用中' : '书架中' }}</span>
     </div>
 
     <div class="wordbook-card-body">

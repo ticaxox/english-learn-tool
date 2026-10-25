@@ -11,7 +11,7 @@ const scoreLabel = computed(() => (props.result.score === null ? '—' : `${prop
   <section class="practice-result" aria-labelledby="practice-result-title">
     <header class="practice-result__hero">
       <div>
-        <p class="eyebrow">服务端评分结果</p>
+        <p class="eyebrow">练习结果</p>
         <h2 id="practice-result-title">本次练习结果</h2>
         <p class="inline-note">{{ PRACTICE_SUBMISSION_LABELS[result.status] }} · {{ result.totalQuestions }} 题</p>
       </div>

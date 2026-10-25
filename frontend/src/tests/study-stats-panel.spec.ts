@@ -97,7 +97,7 @@ describe('StudyStatsPanel', () => {
     apiMocks.fetchLearningStats.mockResolvedValue(stats({ sources: [], streakDays: null }))
     const wrapper = mount(StudyStatsPanel)
     await flush()
-    expect(wrapper.text()).toContain('服务端未标注')
+    expect(wrapper.text()).toContain('未标注')
     expect(wrapper.text()).not.toContain('连续学习')
   })
 })

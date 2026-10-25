@@ -53,7 +53,7 @@ describe('member redesign', () => {
     expect(wrapper.findAll('.member-nav-link')).toHaveLength(8)
     expect(wrapper.findAll('.member-mobile-nav a')).toHaveLength(6)
     expect(wrapper.text()).toContain('@demo_member')
-    expect(wrapper.text()).toContain('真实学习数据')
+    expect(wrapper.text()).toContain('今天也学一点')
     expect(wrapper.find('.member-mobile-nav a[href="/memory"]').exists()).toBe(true)
   })
 
@@ -65,7 +65,7 @@ describe('member redesign', () => {
     })
     await wrapper.get('.member-concierge-link').trigger('click')
 
-    expect(wrapper.get('.member-concierge-drawer').text()).toContain('真实 SSE')
+    expect(wrapper.get('.member-concierge-drawer').text()).toContain('对话仅你可见')
     expect(wrapper.find('.member-drawer-actions a[href="/coach"]').exists()).toBe(true)
     expect(wrapper.find('.member-drawer-actions a[href="/overview"]').exists()).toBe(true)
   })
@@ -86,8 +86,8 @@ describe('member redesign', () => {
 
     const card = wrapper.get('.wordbook-card')
     expect(card.text()).toContain('Business English')
-    expect(card.text()).toContain('128 words')
-    expect(card.get('.wordbook-cover .wordbook-cover-stamp').text()).toBe('ON SHELF')
+    expect(card.text()).toContain('128 词条')
+    expect(card.get('.wordbook-cover .wordbook-cover-stamp').text()).toBe('书架中')
 
     await card.get('[aria-label="查看 Business English 的词条"]').trigger('click')
     await card.get('[aria-label="将 Business English 设为当前主词书"]').trigger('click')

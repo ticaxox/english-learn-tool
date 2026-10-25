@@ -43,7 +43,7 @@ const aiUnavailableLabel = computed(() => {
   if (!aiPractice.value) return null
   switch (aiPractice.value.state) {
     case 'not_available':
-      return 'AI 练习尚未开放'
+      return 'AI 练习准备中'
     case 'not_configured':
       return 'AI 练习尚未配置'
     case 'available':
@@ -63,21 +63,21 @@ const todayTasks = computed(() => {
   return [
     {
       key: 'new-words',
-      eyebrow: 'WARM-UP',
+      eyebrow: '热身',
       label: '新词',
-      title: '唤醒今天的新词',
+      title: '学习今天的新词',
       completed: plan.value.newWords.completed,
       target: plan.value.newWords.target,
       unit: '词',
       icon: 'cards' as const,
       to: '/memory',
-      cta: '进入记忆训练',
+      cta: '开始学习',
     },
     {
       key: 'due-reviews',
-      eyebrow: 'MEMORY TUNE-UP',
+      eyebrow: '复习',
       label: '到期复习',
-      title: '把到期词汇重新叫醒',
+      title: '完成到期复习',
       completed: plan.value.dueReviews.completed,
       target: plan.value.dueReviews.target,
       unit: '词',
@@ -87,17 +87,17 @@ const todayTasks = computed(() => {
     },
     {
       key: 'learning-minutes',
-      eyebrow: 'STEADY MINUTES',
+      eyebrow: '专注',
       label: '学习分钟',
-      title: '留下今天的学习时间',
+      title: '积累学习时间',
       completed: plan.value.minutes.active,
       target: plan.value.minutes.goal,
       unit: '分钟',
       icon: 'today' as const,
       to: '/settings',
-      cta: '调整学习目标',
+      cta: '调整目标',
     },
-  ].map((task) => ({
+  ].filter((task) => task.target > 0 || task.key === 'learning-minutes').map((task) => ({
     ...task,
     percent: percent(task.completed, task.target),
     done: task.target > 0 && task.completed >= task.target,
@@ -117,16 +117,19 @@ const overallProgress = computed(() => {
 })
 
 const heroNote = computed(() => {
-  if (!plan.value) return '等待服务端生成本日计划。'
+  if (!plan.value) return '正在准备今天的学习计划。'
   if (!plan.value.wordbook) {
-    return '先为学习空间选择一本词书。计划不会在缺少词书来源时凭空生成。'
+    return '先选一本词书，再开始今天的学习。'
   }
   if (plan.value.status === 'completed') {
-    return `“${plan.value.wordbook.name}” 的今日目标已由服务端标记完成。可以加练，但不必把休息当成退步。`
+    return "“" + plan.value.wordbook.name + "” 今日目标已完成。想继续也可以加练。"
   }
   const pendingNew = Math.max(plan.value.newWords.target - plan.value.newWords.completed, 0)
   const pendingReview = Math.max(plan.value.dueReviews.target - plan.value.dueReviews.completed, 0)
-  return `从 “${plan.value.wordbook.name}” 开始：还有 ${pendingNew} 个新词、${pendingReview} 个到期复习。一次只处理一小口。`
+  const pending = []
+  if (pendingNew > 0) pending.push(pendingNew + ' 个新词')
+  if (pendingReview > 0) pending.push(pendingReview + ' 个复习')
+  return pending.length ? '今天还有 ' + pending.join('、') + '。慢慢来。' : '今天的任务已经完成。'
 })
 
 async function load(createIfMissing = false): Promise<void> {
@@ -175,25 +178,24 @@ onMounted(() => {
       <ErrorNotice :error="error" retry-label="重新读取今日计划" @retry="load()" />
       <div v-if="needsActiveWordbook" class="alert alert-warning">
         <strong>还没有激活的词书</strong>
-        <p>激活一本词书后，服务端才会为你生成今日计划。</p>
+        <p>选一本词书，就能开始今天的学习。</p>
         <RouterLink class="button" to="/wordbooks">前往词书页</RouterLink>
       </div>
-      <p v-if="requestId" class="inline-note">Request ID：<code>{{ requestId }}</code></p>
+
     </section>
 
     <template v-else-if="plan">
       <header class="member-hero today-hero">
         <div class="member-hero-copy">
-          <p class="eyebrow">THE DAILY EDITION <span>•</span> {{ plan.localDate }}</p>
-          <h1><span>A little curious.</span><em>A lot fluent.</em></h1>
+          <p class="eyebrow">今日学习 <span>•</span> {{ plan.localDate }}</p>
+          <h1><span>今天，</span><em>学一点。</em></h1>
           <p class="lead">
-            今日计划由服务端根据你的学习档案和词书状态生成。这里展示的是当天固定快照，档案改动从次日起生效。
+            按今天的计划，一步一步来。
           </p>
           <div class="member-hero-actions">
             <RouterLink class="button member-primary-button" to="/memory">
-              继续今日路线 <AppIcon name="arrow" />
+              继续学习 <AppIcon name="arrow" />
             </RouterLink>
-            <RouterLink class="button-secondary" to="/settings">调整学习档案</RouterLink>
             <span class="member-status-stamp">{{ statusLabel }}</span>
           </div>
           <div class="member-hero-progress">
@@ -213,7 +215,7 @@ onMounted(() => {
 
         <aside class="member-concierge-card">
           <div class="member-speech-note">
-            <span>MR. WHISKER'S READING OF THE PLAN</span>
+            <span>管家提示</span>
             <p>{{ heroNote }}</p>
           </div>
           <div class="member-hero-mascot">
@@ -238,10 +240,10 @@ onMounted(() => {
         <section class="panel member-trail-panel" aria-labelledby="daily-trail-title">
           <div class="member-section-heading">
             <div>
-              <p class="eyebrow">THE DAILY TRAIL <span>•</span> REAL SERVER SNAPSHOT</p>
-              <h2 id="daily-trail-title">One curious turn at a time.</h2>
+              <p class="eyebrow">今日任务</p>
+              <h2 id="daily-trail-title">先完成这一件。</h2>
             </div>
-            <span class="member-hand-badge">今日共 3 站</span>
+            <span class="member-hand-badge">今日共 {{ todayTasks.length }} 站</span>
           </div>
 
           <ol class="member-trail-list" aria-label="今日任务">
@@ -258,7 +260,7 @@ onMounted(() => {
                 <h3>{{ task.title }}</h3>
                 <p class="member-stop-meta">
                   <span class="today-tile__value"><strong>{{ task.completed }}</strong><span>/ {{ task.target }} {{ task.unit }}</span></span>
-                  <span>{{ task.done ? '服务端已完成' : '等待继续' }}</span>
+                  <span>{{ task.done ? '已完成' : '进行中' }}</span>
                 </p>
                 <div
                   class="progress member-task-progress"
@@ -279,7 +281,7 @@ onMounted(() => {
 
           <div class="member-trail-footer">
             <span v-if="plan.shortfallReason">{{ plan.shortfallReason }}</span>
-            <span v-else>目标与集合来自服务端；页面不会在本地自行推进复习间隔。</span>
+            <span v-else>按顺序完成即可，进度会自动保存。</span>
             <p v-if="plan.extraDueAvailable" class="inline-note">
               目标之外还有 {{ plan.extraDueCount }} 个到期词，可继续加练。
             </p>
@@ -289,21 +291,21 @@ onMounted(() => {
         <aside class="member-side-stack">
           <section class="member-wordbook-slip" aria-labelledby="active-wordbook-title">
             <div class="member-slip-topline">
-              <span>ACTIVE VOLUME</span>
-              <span>{{ plan.wordbook ? 'READY' : 'NONE' }}</span>
+              <span>当前词书</span>
+              <span>{{ plan.wordbook ? '可用' : '未选择' }}</span>
             </div>
             <div class="member-book-object" aria-hidden="true">
               <span>WHISKER PRESS</span>
               <strong>{{ plan.wordbook?.name.slice(0, 1) ?? 'W' }}</strong>
-              <i>{{ plan.wordbook ? 'OPEN' : 'PICK' }}</i>
+              <i>{{ plan.wordbook ? '打开' : '选择' }}</i>
             </div>
             <h2 id="active-wordbook-title">{{ plan.wordbook?.name ?? '尚未激活词书' }}</h2>
             <p>
               {{ plan.wordbook
-                ? '当前词书由服务端学习计划引用。词条数量与学习状态在词书工作区读取。'
-                : '今日计划没有词书来源；不会在本地补造词汇集合。' }}
+                ? '今天从这本词书开始。'
+                : '选择一本词书开始学习。' }}
             </p>
-            <RouterLink class="member-text-link" to="/wordbooks">Browse the word shelf <AppIcon name="arrow" /></RouterLink>
+            <RouterLink class="member-text-link" to="/wordbooks">更换词书 <AppIcon name="arrow" /></RouterLink>
           </section>
 
           <StudyStatsPanel />
@@ -314,26 +316,22 @@ onMounted(() => {
         <section class="panel member-ai-card" aria-live="polite">
           <div class="member-ai-mark"><AppIcon name="spark" /></div>
           <div>
-            <p class="eyebrow">AI PRACTICE</p>
+            <p class="eyebrow">AI 练习</p>
             <h2>{{ aiUnavailableLabel }}</h2>
-            <p v-if="plan.aiPractice.message">{{ plan.aiPractice.message }}</p>
-            <p v-else class="inline-note">当前状态由服务端返回，不会在本地把不可用能力标记为已完成。</p>
+            <p v-if="aiPractice?.state === 'available'" class="inline-note">现在可以做一次短练习。</p>
+            <p v-else class="inline-note">准备好后就来试试。</p>
           </div>
-          <RouterLink class="button-secondary" to="/practice">前往练习室</RouterLink>
+          <RouterLink class="button-secondary" to="/practice">去练习</RouterLink>
         </section>
 
         <section class="member-margin-note">
           <span class="member-note-pin" aria-hidden="true"></span>
-          <p class="eyebrow">PLAN MARGIN NOTE</p>
-          <p>修改学习档案后，新目标从次日起生效；今日快照保持不变。</p>
-          <RouterLink class="member-text-link" to="/settings">调整学习偏好 <AppIcon name="arrow" /></RouterLink>
+          <p class="eyebrow">小提示</p>
+          <p>调整目标后，新计划从明天开始。</p>
+          <RouterLink class="member-text-link" to="/settings">调整目标 <AppIcon name="arrow" /></RouterLink>
         </section>
       </div>
 
-      <footer v-if="plan.calculationVersion || plan.generatedAt" class="panel member-plan-meta">
-        <span v-if="plan.generatedAt">计划生成时间：{{ plan.generatedAt }}</span>
-        <span v-if="plan.calculationVersion">版本：<code>{{ plan.calculationVersion }}</code></span>
-      </footer>
     </template>
   </article>
 </template>

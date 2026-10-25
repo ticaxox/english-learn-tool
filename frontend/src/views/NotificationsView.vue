@@ -65,12 +65,6 @@ function businessLinkLabel(item: NotificationItem): string {
   return '前往学习概览'
 }
 
-function businessReferenceLabel(item: NotificationItem): string | null {
-  if (!item.businessRefType) return null
-  return item.businessRefId
-    ? `${item.businessRefType} · ${item.businessRefId}`
-    : item.businessRefType
-}
 
 async function refreshUnreadCount(): Promise<void> {
   unreadCountError.value = null
@@ -136,7 +130,7 @@ async function markOneRead(item: NotificationItem): Promise<void> {
     notifications.value = unreadOnly.value
       ? notifications.value.filter((candidate) => candidate.id !== updated.id)
       : notifications.value.map((candidate) => candidate.id === updated.id ? updated : candidate)
-    actionMessage.value = '服务端已确认该通知为已读。'
+    actionMessage.value = '已标记为已读。'
     await refreshUnreadCount()
   } catch (requestError) {
     actionError.value = requestError
@@ -153,8 +147,8 @@ async function markAllRead(): Promise<void> {
   try {
     const result = await markAllNotificationsRead()
     actionMessage.value = result.updatedCount > 0
-      ? `服务端已确认将 ${result.updatedCount} 条通知标记为已读。`
-      : '服务端确认当前没有需要更新的未读通知。'
+      ? '已将 ' + result.updatedCount + ' 条通知标为已读。'
+      : '没有未读通知。'
     await loadFirstPage()
   } catch (requestError) {
     actionError.value = requestError
@@ -177,11 +171,9 @@ onMounted(() => {
   <article class="notifications-page">
     <header class="notifications-hero">
       <div class="notifications-hero__copy">
-        <p class="eyebrow">Moustache Inbox · 站内通知</p>
+        <p class="eyebrow">站内通知</p>
         <h1>通知中心</h1>
-        <p class="lead">
-          学习节奏、任务进度与 AI 结果会在这里安静排队。正文按纯文本展示，已读状态只以服务端确认结果为准。
-        </p>
+        <p class="lead">重要提醒都会放在这里。</p>
         <div class="notification-hero-badges" aria-label="通知摘要">
           <span class="notification-unread-pill" :class="{ 'notification-unread-pill--error': unreadCountError }">
             {{ unreadCountLabel }}
@@ -207,7 +199,7 @@ onMounted(() => {
           刷新
         </button>
         <button class="button button-small" type="button" :disabled="!canMarkAll" @click="markAllRead">
-          {{ markingAll ? '正在确认…' : '全部标记已读' }}
+          {{ markingAll ? '正在处理…' : '全部已读' }}
         </button>
       </div>
     </section>
@@ -232,7 +224,7 @@ onMounted(() => {
     <NotificationStatePanel
       v-if="loading && notifications.length === 0"
       state="loading"
-      message="正在读取当前账号的真实通知…"
+      message="正在加载通知…"
     />
     <NotificationStatePanel
       v-else-if="error"
@@ -245,7 +237,7 @@ onMounted(() => {
       v-else-if="notifications.length === 0"
       state="empty"
       :title="unreadOnly ? '没有未读通知' : '通知箱暂时空着'"
-      :message="unreadOnly ? '服务端确认当前筛选下没有未读通知。' : '服务端确认当前账号还没有可见通知。'"
+      :message="unreadOnly ? '暂时没有未读通知。' : '暂时没有通知。'"
     />
 
     <section v-else class="notification-list" aria-label="通知列表" aria-live="polite">
@@ -266,9 +258,6 @@ onMounted(() => {
           </div>
           <h2>{{ item.title }}</h2>
           <NotificationPlainText :text="item.body" />
-          <p v-if="businessReferenceLabel(item)" class="notification-business-ref">
-            关联内容：<code>{{ businessReferenceLabel(item) }}</code>
-          </p>
           <div class="notification-item__actions">
             <RouterLink class="notification-business-link" :to="businessLink(item)">
               {{ businessLinkLabel(item) }}
@@ -287,7 +276,7 @@ onMounted(() => {
       </article>
 
       <div class="notification-list__footer">
-        <p class="inline-note">通知正文按纯文本展示，不执行 HTML 或 AI Markdown；答案、草稿和私密词书正文不会出现在这里。</p>
+        <p class="inline-note">这里只显示站内通知。</p>
         <button
           v-if="hasMore"
           class="button-secondary"

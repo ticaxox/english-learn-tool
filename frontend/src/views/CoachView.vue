@@ -43,7 +43,7 @@ function roleLabel(message: CoachMessage): string {
 function actionStatusLabel(receipt: CoachActionReceipt): string {
   if (receipt.status === 'undone') return '已撤销'
   if (receipt.status === 'conflict') return '不可撤销'
-  return isExpired(receipt) ? '撤销窗口已过期' : '已应用'
+  return isExpired(receipt) ? '已无法撤销' : '已应用'
 }
 
 function isExpired(receipt: CoachActionReceipt): boolean {
@@ -58,7 +58,7 @@ function canUndo(receipt: CoachActionReceipt): boolean {
 function usageText(): string {
   const usage = coach.latestUsage.value
   if (!usage) return ''
-  return `本次教练用量：${usage.units} / ${usage.limit}（${usage.quotaKind}）`
+  return '本次可用：' + usage.units + ' / ' + usage.limit
 }
 
 async function focusComposer(): Promise<void> {
@@ -161,15 +161,15 @@ onBeforeUnmount(() => {
   <article class="coach-page member-coach-page">
     <header class="coach-hero member-page-heading coach-letter-hero">
       <div>
-        <p class="eyebrow">THE LETTER ROOM <span>•</span> REAL SSE</p>
-        <h1>Letters to <em>Mr. Whisker.</em></h1>
+        <p class="eyebrow">学习管家</p>
+        <h1>和 <em>Mr. Whisker</em> 聊聊。</h1>
         <p class="lead">
-          教练会读取当前账号允许的学习数据，通过真实 SSE 给出建议。只有服务端回执确认的动作才会显示为已应用。
+          把想说的话交给我，一起把它说得更自然。
         </p>
       </div>
       <div class="coach-letter-mascot">
         <WhiskerCrumbMark size="hero" />
-        <span class="coach-privacy-stamp"><AppIcon name="lock" /> PRIVATE TO YOU</span>
+        <span class="coach-privacy-stamp"><AppIcon name="lock" /> 仅你可见</span>
       </div>
     </header>
 
@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
       <aside class="panel coach-sidebar" aria-label="教练会话列表">
         <div class="coach-sidebar__heading">
           <div>
-            <p class="eyebrow">Conversations</p>
+            <p class="eyebrow">对话</p>
             <h2>长期对话</h2>
           </div>
           <button class="button-secondary button-small" type="button" @click="showCreate = !showCreate">
@@ -196,7 +196,7 @@ onBeforeUnmount(() => {
           </div>
         </form>
 
-        <LoadingState v-if="coach.conversationsLoading.value && coach.conversations.value.length === 0" label="正在读取真实会话…" />
+        <LoadingState v-if="coach.conversationsLoading.value && coach.conversations.value.length === 0" label="正在加载对话…" />
         <ErrorNotice
           v-else-if="coach.conversationsError.value"
           :error="coach.conversationsError.value"
@@ -206,7 +206,7 @@ onBeforeUnmount(() => {
 
         <div v-else-if="coach.conversations.value.length === 0" class="coach-sidebar-empty">
           <p>还没有长期对话。</p>
-          <p class="field-hint">创建一个对话后，消息和动作回执才会由服务端持久化。</p>
+          <p class="field-hint">有需要时，随时回来继续。</p>
         </div>
 
         <ul v-else class="coach-conversation-list">
@@ -247,19 +247,19 @@ onBeforeUnmount(() => {
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <div class="coach-empty-mark"><WhiskerCrumbMark size="hero" /></div>
-          <p class="eyebrow">A PRIVATE LETTER ROOM</p>
+          <p class="eyebrow">学习管家</p>
           <h2>从一段长期对话开始</h2>
-          <p>选择左侧会话，或新建一个。这里不会用静态回复填充空状态。</p>
+          <p>选择一段对话，或开始新的对话。</p>
           <div class="coach-suggested-prompts" aria-label="建议提问">
             <button v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</button>
           </div>
-          <button class="button member-primary-button" type="button" @click="showCreate = true">新建对话 <AppIcon name="arrow" /></button>
+          <button class="button member-primary-button" type="button" @click="showCreate = true">开始对话 <AppIcon name="arrow" /></button>
         </div>
 
         <template v-else>
           <header class="coach-main-header">
             <div>
-              <p class="eyebrow">Current conversation</p>
+              <p class="eyebrow">当前对话</p>
               <h2>{{ coach.selectedConversation.value.title }}</h2>
               <p class="field-hint">{{ coach.selectedConversation.value.messageCount }} 条消息 · 只对当前账号可见</p>
             </div>
@@ -286,7 +286,7 @@ onBeforeUnmount(() => {
           />
 
           <div ref="messageArea" class="coach-messages" aria-live="polite">
-            <LoadingState v-if="coach.messagesLoading.value && coach.messages.value.length === 0" label="正在读取真实消息…" />
+            <LoadingState v-if="coach.messagesLoading.value && coach.messages.value.length === 0" label="正在加载消息…" />
             <button
               v-if="coach.messagesHasMore.value"
               class="button-secondary button-small coach-load-older"
@@ -297,7 +297,7 @@ onBeforeUnmount(() => {
               加载更早消息
             </button>
             <div v-if="coach.messages.value.length === 0 && !coach.messagesLoading.value" class="coach-messages-empty">
-              <p>这段对话还没有消息。输入一句学习问题开始。</p>
+              <p>这段对话还没有消息，先说一句吧。</p>
             </div>
 
             <article
@@ -309,22 +309,22 @@ onBeforeUnmount(() => {
               <div class="coach-message__meta">
                 <strong>{{ roleLabel(message) }}</strong>
                 <span>{{ formatTime(message.createdAt) }}</span>
-                <span v-if="message.status === 'streaming' || coach.streamingMessageId.value === message.id" class="coach-streaming-chip">流式接收中</span>
-                <span v-else-if="message.status === 'failed'" class="coach-failed-chip">失败</span>
+                <span v-if="message.status === 'streaming' || coach.streamingMessageId.value === message.id" class="coach-streaming-chip">正在回复</span>
+                <span v-else-if="message.status === 'failed'" class="coach-failed-chip">发送失败</span>
               </div>
-              <p class="coach-message__text">{{ coach.messageText(message) || (message.status === 'queued' ? '服务端已排队，等待流式内容…' : '') }}</p>
+              <p class="coach-message__text">{{ coach.messageText(message) || (message.status === 'queued' ? '正在组织回复…' : '') }}</p>
               <p v-if="message.errorMessage" class="field-error" role="alert">{{ message.errorMessage }}</p>
               <p v-if="coach.actionNotices[message.id]" class="coach-action-notice">{{ coach.actionNotices[message.id] }}</p>
 
-              <section v-if="message.actions.length > 0" class="coach-actions" aria-label="教练动作回执">
-                <h3>动作回执</h3>
+              <section v-if="message.actions.length > 0" class="coach-actions" aria-label="已执行的调整">
+                <h3>已执行的调整</h3>
                 <article v-for="receipt in message.actions" :key="receipt.id" class="coach-receipt">
                   <div class="coach-receipt__heading">
                     <strong>{{ COACH_ACTION_LABELS[receipt.actionType] }}</strong>
                     <span class="coach-receipt__status" :class="`coach-receipt__status--${receipt.status}`">{{ actionStatusLabel(receipt) }}</span>
                   </div>
                   <p>{{ receipt.summary }}</p>
-                  <p class="field-hint">回执窗口截止：{{ formatTime(receipt.expiresAt) }}</p>
+                  <p class="field-hint">可撤销至：{{ formatTime(receipt.expiresAt) }}</p>
                   <p v-if="receipt.conflictMessage" class="field-error" role="alert">{{ receipt.conflictMessage }}</p>
                   <button
                     v-if="receipt.status === 'applied'"
@@ -333,7 +333,7 @@ onBeforeUnmount(() => {
                     :disabled="!canUndo(receipt) || coach.undoingReceiptId.value === receipt.id"
                     @click="undo(receipt)"
                   >
-                    {{ coach.undoingReceiptId.value === receipt.id ? '正在撤销…' : (canUndo(receipt) ? '撤销这次调整' : '撤销窗口已过期') }}
+                    {{ coach.undoingReceiptId.value === receipt.id ? '正在撤销…' : (canUndo(receipt) ? '撤销这次调整' : '已无法撤销') }}
                   </button>
                 </article>
               </section>
@@ -343,7 +343,7 @@ onBeforeUnmount(() => {
               v-if="coach.streamError.value"
               :error="coach.streamError.value"
               :show-retry="streamErrorRetryable"
-              retry-label="重新连接 SSE"
+              retry-label="重新连接"
               @retry="retryStream(lastMessage)"
             />
           </div>

@@ -55,7 +55,7 @@ defineExpose({ load })
     </div>
 
     <p v-if="!stats && !error && !loading" class="inline-note">
-      尚未读取统计。学习分钟由服务端按心跳时间窗累计，本页不会自行估算。
+      尚未记录学习时间。
     </p>
 
     <LoadingState v-else-if="loading" label="正在读取今日统计…" />
@@ -86,7 +86,7 @@ defineExpose({ load })
       </div>
       <p class="inline-note">
         统计日期 {{ stats.localDate }} · 数据来源：
-        <span v-if="stats.sources.length === 0">服务端未标注</span>
+        <span v-if="stats.sources.length === 0">未标注</span>
         <span v-else>{{ stats.sources.join('、') }}</span>
       </p>
     </template>

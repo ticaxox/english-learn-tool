@@ -82,7 +82,7 @@ function rate(rating: FlashcardRating): void {
     <div v-else ref="backRegion" class="study-card__back" aria-live="polite" tabindex="-1">
       <p v-if="props.question.partOfSpeech" class="study-card__phonetic">{{ props.question.partOfSpeech }}</p>
       <p v-if="props.question.back" class="study-card__definition">{{ props.question.back }}</p>
-      <p v-else class="inline-note">服务端词条没有返回释义；请按自己的回忆如实选择印象程度。</p>
+      <p v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</p>
       <p v-if="props.question.example" class="study-card__example">{{ props.question.example }}</p>
       <div class="button-row">
         <button class="button-secondary" type="button" :disabled="!canRate" @click="rate('again')">
@@ -100,7 +100,7 @@ function rate(rating: FlashcardRating): void {
           已记住
         </button>
       </div>
-      <p class="inline-note">评分由服务端判定并推进复习计划；本页不会自行调整间隔。</p>
+      <p class="inline-note">选择后会自动安排下次复习。</p>
     </div>
   </section>
 </template>

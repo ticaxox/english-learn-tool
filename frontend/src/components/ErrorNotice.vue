@@ -34,7 +34,7 @@ const canRetry = computed(() => props.showRetry ?? presentation.value.retryable)
       </li>
     </ul>
     <p v-if="presentation.requestId" class="request-id">
-      Request ID：<code>{{ presentation.requestId }}</code>
+      问题编号：<code>{{ presentation.requestId }}</code>
     </p>
     <div v-if="canRetry" class="button-row">
       <button class="button-secondary" type="button" @click="emit('retry')">

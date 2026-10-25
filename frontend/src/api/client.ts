@@ -353,7 +353,7 @@ export class ApiClient {
       return new ApiError(
         response.status,
         'VALIDATION_ERROR',
-        bodyMessage ?? '提交的内容未通过服务端校验。',
+        bodyMessage ?? '提交内容有误，请检查后重试。',
         { issues: validationIssues },
         requestId,
         false,

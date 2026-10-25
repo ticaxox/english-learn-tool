@@ -26,6 +26,14 @@ import '../challenge.css'
 const route = useRoute()
 const router = useRouter()
 
+const PLAN_STATUS_LABELS = {
+  generating: '生成中',
+  ready: '进行中',
+  failed: '生成失败',
+  completed: '已完成',
+  expired: '已过期',
+}
+
 const plan = ref<ChallengePlan | null>(null)
 const loading = ref(true)
 const error = ref<unknown>(null)
@@ -127,7 +135,7 @@ async function generateMap(): Promise<void> {
   if (generating.value) return
   generating.value = true
   generationError.value = null
-  generationStatus.value = '正在请求服务端生成今日地图…'
+  generationStatus.value = '正在生成今日地图…'
   try {
     const accepted = await generateTodayChallenge()
     if (accepted.status === 'ready' || accepted.status === 'completed' || !accepted.jobId) {
@@ -135,7 +143,7 @@ async function generateMap(): Promise<void> {
       return
     }
     for (let attempt = 0; attempt < 120; attempt += 1) {
-      generationStatus.value = `地图生成中，服务端状态：${accepted.status}`
+      generationStatus.value = '地图生成中…'
       await new Promise((resolve) => window.setTimeout(resolve, 1000))
       const job = await getChallengeJob(accepted.jobId)
       generationStatus.value = `地图生成中，任务状态：${job.status}`
@@ -268,31 +276,31 @@ onMounted(() => {
   <article class="challenge-page">
     <header class="challenge-hero">
       <div>
-        <p class="eyebrow">Daily Quest · 每日闯关</p>
+        <p class="eyebrow">每日闯关</p>
         <h1>{{ plan?.title || '今天的学习地图' }}</h1>
-        <p class="lead">地图、节点顺序和完成状态全部来自服务端。传统学习任务完成后，刷新页面会自动同步节点进度。</p>
+        <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>
       <div class="challenge-hero__actions">
-        <RouterLink class="button-secondary" to="/overview">传统学习入口</RouterLink>
+        <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         <button class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</button>
       </div>
     </header>
 
-    <LoadingState v-if="loading" label="正在读取真实闯关地图…" />
+    <LoadingState v-if="loading" label="正在加载地图…" />
     <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取地图" @retry="loadPlan" />
 
     <section v-else-if="notGenerated" class="panel challenge-generate" aria-labelledby="challenge-generate-title">
       <div class="challenge-generate__mark" aria-hidden="true">✦</div>
       <div>
-        <p class="eyebrow">No map yet</p>
+        <p class="eyebrow">今日路线</p>
         <h2 id="challenge-generate-title">今天的地图还没有生成</h2>
-        <p>生成由服务端 AI 任务完成；页面不会用静态地图替代真实结果。</p>
+        <p>生成一条今天的学习路线。</p>
         <ErrorNotice v-if="generationError" :error="generationError" :show-retry="false" />
         <div class="button-row">
           <button class="button" type="button" :disabled="generating" @click="generateMap">
             {{ generating ? '正在生成…' : '生成今日地图' }}
           </button>
-          <RouterLink class="button-secondary" to="/overview">先进行传统学习</RouterLink>
+          <RouterLink class="button-secondary" to="/overview">先学习今日任务</RouterLink>
         </div>
         <p v-if="generating" class="inline-note" role="status">{{ generationStatus }}</p>
       </div>
@@ -301,8 +309,8 @@ onMounted(() => {
     <template v-else-if="plan">
       <section class="panel challenge-summary" aria-label="今日闯关摘要">
         <div class="challenge-summary__copy">
-          <p class="eyebrow">{{ plan.localDate }} · {{ plan.status }}</p>
-          <h2>{{ plan.summary || '按顺序完成主线节点，最后挑战终点 BOSS。' }}</h2>
+          <p class="eyebrow">{{ plan.localDate }} · {{ PLAN_STATUS_LABELS[plan.status] }}</p>
+          <h2>{{ plan.summary || '按顺序完成，最后挑战终点。' }}</h2>
           <p class="field-hint">预计 {{ plan.targetMinutes }} 分钟 · 主线 {{ plan.mainCompleted }} / {{ plan.mainTotal }}</p>
         </div>
         <div class="challenge-progress" role="progressbar" :aria-valuenow="progressPercent" aria-valuemin="0" aria-valuemax="100">
@@ -312,7 +320,7 @@ onMounted(() => {
 
       <div v-if="readOnly" class="alert alert-warning" role="status">
         <strong>跨日地图只读</strong>
-        <p>这份地图已过期或不属于今天，只能查看历史结果，不能开始节点或重新提交 BOSS。</p>
+        <p>这份地图已过期，只能查看结果。</p>
       </div>
 
       <section v-if="plan.status === 'failed'" class="panel">
@@ -326,7 +334,7 @@ onMounted(() => {
 
       <section class="challenge-map" aria-labelledby="challenge-map-title">
         <div class="challenge-map__heading">
-          <div><p class="eyebrow">Main route</p><h2 id="challenge-map-title">今日主线</h2></div>
+          <div><p class="eyebrow">主线</p><h2 id="challenge-map-title">今日主线</h2></div>
           <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
         </div>
         <div class="challenge-path">
@@ -350,7 +358,7 @@ onMounted(() => {
 
         <div v-if="optionalNodes.length > 0" class="challenge-optional">
           <div class="challenge-map__heading">
-            <div><p class="eyebrow">Optional branch</p><h2>可选支线</h2></div>
+            <div><p class="eyebrow">可选支线</p><h2>可选支线</h2></div>
             <span class="field-hint">不影响主线顺序</span>
           </div>
           <article v-for="node in optionalNodes" :key="node.id" class="challenge-node challenge-node--optional" :class="nodeStatusClass(node)">
@@ -370,21 +378,21 @@ onMounted(() => {
 
       <section v-if="selectedNode" class="panel challenge-node-detail" aria-live="polite">
         <div class="challenge-node-detail__heading">
-          <div><p class="eyebrow">Node detail</p><h2>{{ selectedNode.node.title }}</h2></div>
+          <div><p class="eyebrow">节点详情</p><h2>{{ selectedNode.node.title }}</h2></div>
           <button class="link-button" type="button" @click="selectedNode = null">关闭</button>
         </div>
         <p>{{ selectedNode.node.description }}</p>
         <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
-        <p v-if="selectedNode.node.status === 'locked'" class="inline-note">前一个主线节点完成后，服务端才会解锁此节点。</p>
+        <p v-if="selectedNode.node.status === 'locked'" class="inline-note">完成前一个节点后解锁。</p>
         <p v-else-if="readOnly" class="inline-note">跨日地图只读，不能开始或重做节点。</p>
-        <p v-else-if="selectedNode.node.nodeType === 'BOSS' && selectedNode.node.status === 'completed'" class="inline-note">终点挑战结果由服务端保存，可查看完整结果。</p>
+        <p v-else-if="selectedNode.node.nodeType === 'BOSS' && selectedNode.node.status === 'completed'" class="inline-note">终点挑战已完成，可查看结果。</p>
         <ErrorNotice v-if="nodeError" :error="nodeError" :show-retry="false" />
         <div class="button-row">
           <button v-if="selectedNode.allowedActions.includes('start') || selectedNode.allowedActions.includes('resume')" class="button" type="button" :disabled="readOnly || nodeStarting" @click="startNode(selectedNode)">
             {{ nodeStarting ? '正在启动…' : (selectedNode.allowedActions.includes('resume') ? '继续节点' : '开始节点') }}
           </button>
           <button v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
-          <RouterLink class="button-secondary" to="/overview">传统学习入口</RouterLink>
+          <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         </div>
       </section>
 
@@ -393,17 +401,17 @@ onMounted(() => {
 
       <section id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">
         <div class="challenge-map__heading">
-          <div><p class="eyebrow">History</p><h2 id="challenge-history-title">闯关历史</h2></div>
+          <div><p class="eyebrow">历史</p><h2 id="challenge-history-title">闯关历史</h2></div>
           <span class="field-hint">历史地图只读</span>
         </div>
-        <LoadingState v-if="historyLoading && historyItems.length === 0" label="正在读取真实历史…" />
+        <LoadingState v-if="historyLoading && historyItems.length === 0" label="正在加载历史…" />
         <ErrorNotice v-else-if="historyError" :error="historyError" retry-label="重新读取历史" @retry="loadHistory(true)" />
-        <div v-else-if="historyItems.length === 0" class="challenge-history__empty"><p>还没有闯关历史。生成今日地图后会从这里看到服务端记录。</p></div>
+        <div v-else-if="historyItems.length === 0" class="challenge-history__empty"><p>还没有闯关记录。</p></div>
         <ul v-else class="challenge-history__list">
           <li v-for="item in historyItems" :key="item.id">
             <RouterLink class="challenge-history__item" :to="`/challenges/${item.id}`">
-              <span><strong>{{ item.localDate }} · {{ item.title || '每日闯关' }}</strong><small>{{ item.summary || '服务端未提供摘要' }}</small></span>
-              <span class="challenge-history__meta"><span>{{ item.status }}</span><small>主线 {{ item.mainCompleted }} / {{ item.mainTotal }}</small></span>
+              <span><strong>{{ item.localDate }} · {{ item.title || '每日闯关' }}</strong><small>{{ item.summary || '没有摘要' }}</small></span>
+              <span class="challenge-history__meta"><span>{{ PLAN_STATUS_LABELS[item.status] }}</span><small>主线 {{ item.mainCompleted }} / {{ item.mainTotal }}</small></span>
             </RouterLink>
           </li>
         </ul>
