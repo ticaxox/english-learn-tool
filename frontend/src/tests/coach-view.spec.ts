@@ -113,7 +113,7 @@ describe('coach view', () => {
       'conversation-1', '帮我安排今天的复习。', expect.any(String), { page_route: '/coach' },
     )
     expect(wrapper.text()).toContain('先完成到期复习，再做 12 个新词。')
-    expect(wrapper.text()).toContain('本次教练用量：1 / 50')
+    expect(wrapper.text()).toContain('本次可用：1 / 50')
   })
 
   it('requires confirmation and distinguishes clear from delete', async () => {
@@ -146,8 +146,8 @@ describe('coach view', () => {
     const wrapper = await mountView()
     const button = wrapper.get('.coach-receipt button')
     expect(button.attributes('disabled')).toBeDefined()
-    expect(button.text()).toBe('撤销窗口已过期')
-    expect(wrapper.get('.coach-receipt').text()).toContain('撤销窗口已过期')
+    expect(button.text()).toBe('已无法撤销')
+    expect(wrapper.get('.coach-receipt').text()).toContain('已无法撤销')
   })
   it('shows quota errors with request id and keeps the draft', async () => {
     coachMocks.listCoachMessages.mockResolvedValue({ items: [], nextCursor: null, hasMore: false })

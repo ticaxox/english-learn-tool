@@ -168,7 +168,7 @@ describe('WordbooksView', () => {
     await buttonByText(wrapper, '我的私有').trigger('click')
     expect(wrapper.text()).not.toContain('Business English')
     expect(wrapper.text()).toContain('My Reading Notes')
-    expect(wrapper.text()).toContain('只作用于本页')
+    expect(wrapper.text()).toContain('筛选仅作用于当前页')
     expect(apiMocks.listWordbooks).toHaveBeenCalledTimes(callsBefore)
 
     await wrapper.get('input[type="search"]').setValue('Reading')
@@ -201,8 +201,8 @@ describe('WordbooksView', () => {
     const wrapper = mountView()
     await flushPromises()
 
-    expect(wrapper.text()).toContain('还没有可见词书')
-    expect(wrapper.text()).toContain('不会填充静态示例')
+    expect(wrapper.text()).toContain('还没有词书')
+    expect(wrapper.text()).toContain('导入一本词书')
     await wrapper.get('.wordbook-empty button').trigger('click')
     expect(wrapper.find('.wordbook-import-dialog').exists()).toBe(true)
   })

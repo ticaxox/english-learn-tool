@@ -149,7 +149,7 @@ onMounted(async () => {
         <p class="eyebrow">记忆训练</p>
         <h1>翻卡 · 选择 · 拼写</h1>
         <p class="lead">
-          所有卡片、选项与评分来自服务端；本页不会提前知道答案，也不会自行推进复习间隔。
+          翻卡、选择或拼写，选一种方式开始复习。
         </p>
       </div>
       <div v-if="session.hasSession.value" class="memory-hero__actions">
@@ -162,7 +162,7 @@ onMounted(async () => {
 
     <div v-if="challengeId" class="inline-note challenge-memory-banner">
       <strong>当前记忆训练来自每日闯关节点。</strong>
-      完成后返回地图刷新，服务端会同步节点状态。
+      完成后返回地图即可。
       <RouterLink :to="`/challenges/${challengeId}`">返回今日闯关</RouterLink>
     </div>
 
@@ -177,7 +177,7 @@ onMounted(async () => {
         'PATCH /memory/words/{state_id}/master',
         'POST /learning/heartbeat',
       ]"
-      title="记忆训练等待接口契约冻结"
+      title="记忆训练暂时不可用"
     />
 
     <LoadingState v-else-if="loadingConfig" label="正在读取记忆配置…" />
@@ -205,7 +205,7 @@ onMounted(async () => {
           >
             <span class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</span>
             <span class="module-card__hint">
-              {{ module === 'flashcard' ? '正面认识，翻面回忆' : module === 'choice' ? '按服务端选项作答' : '按提示拼出完整单词' }}
+              {{ module === 'flashcard' ? '看词回忆释义' : module === 'choice' ? '选出正确释义' : '按提示拼写' }}
             </span>
           </button>
         </div>
@@ -261,7 +261,7 @@ onMounted(async () => {
       <!-- Finished -->
       <section v-if="session.finished.value" class="panel">
         <h2>本次队列已完成</h2>
-        <p>服务端已确认当前队列没有剩余卡片。本次会话统计以服务端结果为准。</p>
+        <p>本轮复习完成，辛苦了。</p>
         <div class="button-row">
           <button class="button" type="button" @click="restart">返回训练选择</button>
           <RouterLink class="button-secondary" to="/overview">查看今日进度</RouterLink>
@@ -278,7 +278,7 @@ onMounted(async () => {
       </section>
 
       <p v-if="heartbeat.lastError.value" class="inline-note">
-        心跳上报失败，学习计时可能滞后；卡片操作不受影响，恢复后由服务端时间窗重新计算。
+        学习计时暂时未同步，卡片操作不受影响。
       </p>
     </template>
   </article>

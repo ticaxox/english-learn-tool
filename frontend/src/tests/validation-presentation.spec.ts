@@ -19,11 +19,11 @@ describe('422 validation presentation', () => {
     const presentation = toErrorPresentation(validationError([{ path: 'daily_new_words', message: 'must be <= 100' }]))
 
     expect(presentation).toMatchObject({
-      title: '提交内容未通过服务端校验',
+      title: '提交内容有误',
       requestId: 'req-422',
       retryable: false,
     })
-    expect(presentation.message).toContain('服务端校验是最终判断')
+    expect(presentation.message).toContain('请根据字段提示修改后重试')
   })
 
   it('exposes the server issue list without rewording it', () => {

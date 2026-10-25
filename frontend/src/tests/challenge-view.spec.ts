@@ -174,7 +174,7 @@ describe('challenge view', () => {
     const { wrapper } = await mountView()
     await wrapper.findAll('.challenge-node')[1].get('button').trigger('click')
     await flushPromises()
-    expect(wrapper.text()).toContain('前一个主线节点完成后，服务端才会解锁此节点')
+    expect(wrapper.text()).toContain('完成前一个节点后解锁')
     expect(wrapper.findAll('.challenge-node-detail button').some((button) => button.text() === '开始节点')).toBe(false)
   })
 
@@ -253,7 +253,7 @@ describe('challenge view', () => {
     const { wrapper, router } = await mountView()
     await wrapper.findAll('.challenge-node')[2].get('button').trigger('click')
     await flushPromises()
-    expect(wrapper.text()).toContain('终点挑战结果由服务端保存，可查看完整结果')
+    expect(wrapper.text()).toContain('终点挑战已完成，可查看结果')
     await wrapper.findAll('.challenge-node-detail button').find((button) => button.text() === '查看节点结果')!.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.fullPath).toBe('/practice/boss-session-1')

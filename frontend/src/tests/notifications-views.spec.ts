@@ -135,18 +135,18 @@ describe('notification views', () => {
     await flushPromises()
 
     expect(notificationMocks.markNotificationRead).toHaveBeenCalledWith(unreadNotification.id)
-    expect(wrapper.text()).toContain('服务端已确认该通知为已读')
+    expect(wrapper.text()).toContain('已标记为已读')
     expect(wrapper.findAll('button').some((candidate) => candidate.text() === '标记已读')).toBe(false)
   })
 
   it('marks all read through the server and reloads the inbox', async () => {
     const { wrapper } = await mountRoute(NotificationsView, '/notifications')
-    await wrapper.findAll('button').find((button) => button.text().includes('全部标记已读'))!.trigger('click')
+    await wrapper.findAll('button').find((button) => button.text().includes('全部已读'))!.trigger('click')
     await flushPromises()
 
     expect(notificationMocks.markAllNotificationsRead).toHaveBeenCalledOnce()
     expect(notificationMocks.listNotifications.mock.calls.length).toBeGreaterThanOrEqual(2)
-    expect(wrapper.text()).toContain('服务端已确认将 1 条通知标记为已读')
+    expect(wrapper.text()).toContain('已将 1 条通知标为已读')
   })
 
   it('surfaces 401 on inbox load with request id', async () => {
@@ -173,7 +173,7 @@ describe('notification views', () => {
       new ApiError(403, 'FORBIDDEN', 'Notification action denied.', null, 'notification-403', false),
     )
     const { wrapper } = await mountRoute(NotificationsView, '/notifications')
-    await wrapper.findAll('button').find((button) => button.text().includes('全部标记已读'))!.trigger('click')
+    await wrapper.findAll('button').find((button) => button.text().includes('全部已读'))!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('权限不足或操作被拒绝')
     expect(wrapper.text()).toContain('notification-403')
@@ -185,7 +185,7 @@ describe('notification views', () => {
     expect(wrapper.findAll('.notification-category-option')).toHaveLength(7)
     expect(wrapper.findAll('input[type="checkbox"]')).toHaveLength(7)
     expect(wrapper.text()).toContain('仅站内')
-    expect(wrapper.text()).toContain('AI 完成、AI 失败、计划调整和 AI 教练建议不受免打扰')
+    expect(wrapper.text()).toContain('AI 任务提醒不受免打扰和每日上限影响')
 
     const streakRisk = wrapper.findAll('input[type="checkbox"]')[2]
     await streakRisk.setValue(false)
@@ -197,7 +197,7 @@ describe('notification views', () => {
       categories: expect.objectContaining({ streakRisk: false }),
       dailyLimit: 5,
     }))
-    expect(wrapper.text()).toContain('偏好已保存，仅对后续通知生效')
+    expect(wrapper.text()).toContain('设置已保存')
   })
 
   it('surfaces 422 validation issues on preference save', async () => {
@@ -211,7 +211,7 @@ describe('notification views', () => {
     await wrapper.get('form').trigger('submit')
     await flushPromises()
 
-    expect(wrapper.text()).toContain('提交内容未通过服务端校验')
+    expect(wrapper.text()).toContain('提交内容有误')
     expect(wrapper.text()).toContain('time must use HH:MM')
     expect(wrapper.text()).toContain('notification-422')
   })

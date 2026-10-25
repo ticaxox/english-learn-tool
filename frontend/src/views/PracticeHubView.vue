@@ -127,9 +127,9 @@ onMounted(() => {
   <article class="practice-page practice-hub member-practice-page">
     <header class="practice-hero member-page-heading practice-room-hero">
       <div class="practice-room-copy">
-        <p class="eyebrow">THE PRACTICE ROOM <span>•</span> REAL AI TASKS</p>
-        <h1>A tiny challenge. <em>Rather good.</em></h1>
-        <p class="lead">四类练习由服务端生成和评分。提交前只展示题面，不展示答案、解析、参考内容或分数。</p>
+        <p class="eyebrow">AI 练习</p>
+        <h1>选一道小题，<em>认真做完。</em></h1>
+        <p class="lead">四种练习，随时开始。</p>
         <div class="practice-hero__actions">
           <RouterLink class="button-secondary" to="/practice/records">练习记录</RouterLink>
           <RouterLink class="button-secondary" to="/practice/mistakes">错题本</RouterLink>
@@ -137,16 +137,16 @@ onMounted(() => {
       </div>
       <div class="practice-room-mascot">
         <WhiskerCrumbMark size="hero" />
-        <span>“One question at a time.<br>That is how sentences behave.”</span>
+
       </div>
     </header>
 
     <section class="practice-quota-strip" aria-label="今日练习额度">
       <div><span>题目生成剩余</span><strong>{{ quotaRemaining('question_generation') ?? '—' }}</strong></div>
       <div><span>主观评分剩余</span><strong>{{ quotaRemaining('subjective_grading') ?? '—' }}</strong></div>
-      <div><span>并发占用</span><strong>{{ usage ? `${usage.concurrency.inUse} / ${usage.concurrency.limit}` : '—' }}</strong></div>
-      <p v-if="usage" class="inline-note">统计日期 {{ usage.localDate }} · 额度与并发由服务端实时返回。</p>
-      <ErrorNotice v-else-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
+      <div><span>进行中</span><strong>{{ usage ? `${usage.concurrency.inUse} / ${usage.concurrency.limit}` : '—' }}</strong></div>
+
+      <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
     </section>
 
     <div class="practice-hub-grid member-practice-grid">
@@ -204,7 +204,7 @@ onMounted(() => {
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="button-row">
             <button class="button member-primary-button" type="submit" :disabled="creating">{{ creating ? '正在提交生成任务…' : '生成练习' }} <AppIcon name="arrow" /></button>
-            <span class="inline-note">创建请求返回 202 后进入真实生成/轮询页面。</span>
+
           </div>
         </form>
       </section>
@@ -212,8 +212,8 @@ onMounted(() => {
       <aside class="practice-side-stack member-practice-side">
         <section class="member-coach-break">
           <WhiskerCrumbMark size="medium" />
-          <div><p class="eyebrow">A NOTE FROM THE HAT</p><p>额度、并发和评分状态都来自服务端。Mr. Whisker 只会在真实任务完成后替你盖章。</p></div>
-          <RouterLink class="member-text-link" to="/coach">Open the letter room <AppIcon name="arrow" /></RouterLink>
+          <div><p class="eyebrow">管家建议</p><p>状态不好时，先做三道题也可以。</p></div>
+          <RouterLink class="member-text-link" to="/coach">问问管家 <AppIcon name="arrow" /></RouterLink>
         </section>
         <section class="panel">
           <div class="section-heading"><h2>最近记录</h2><RouterLink to="/practice/records">全部</RouterLink></div>
@@ -227,12 +227,12 @@ onMounted(() => {
               </RouterLink>
             </li>
           </ul>
-          <p v-else class="inline-note">还没有练习记录。完成一次练习后，结果会保存在服务端。</p>
+          <p v-else class="inline-note">还没有练习记录。</p>
         </section>
 
         <section class="panel">
-          <h2>传统学习入口</h2>
-          <p class="inline-note">AI 不可用时，词书与记忆训练仍然可用。</p>
+          <h2>也可以这样学</h2>
+          <p class="inline-note">背词和复习随时都能继续。</p>
           <div class="button-row">
             <RouterLink class="button-secondary" to="/wordbooks">查看词书</RouterLink>
             <RouterLink class="button-secondary" to="/memory">记忆训练</RouterLink>

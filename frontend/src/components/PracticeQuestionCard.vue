@@ -29,7 +29,7 @@ function update(value: string): void {
     <header class="practice-question-card__header">
       <div class="practice-question-step">
         <span class="practice-question-number">{{ String(index + 1).padStart(2, '0') }}</span>
-        <div><span class="status-badge">{{ questionLabel }}</span><p>答案由服务端评分，提交前不会显示解析或分数。</p></div>
+        <div><span class="status-badge">{{ questionLabel }}</span><p>提交后查看结果。</p></div>
       </div>
       <span class="practice-question-type">{{ question.questionType.replaceAll('_', ' ') }}</span>
     </header>
@@ -93,7 +93,7 @@ function update(value: string): void {
         :disabled="disabled"
         maxlength="20000"
         rows="8"
-        placeholder="请在这里作答；草稿会保存到服务端。"
+        placeholder="请在这里作答"
         @input="update(($event.target as HTMLTextAreaElement).value)"
       ></textarea>
       <p class="field-hint">当前字数：{{ modelValue.length }} / 20000</p>

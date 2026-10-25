@@ -166,9 +166,9 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       // the learner needs one sentence saying the input (not the service) is at
       // fault, plus the request id support will ask for.
       return {
-        title: '提交内容未通过服务端校验',
+        title: '提交内容有误',
         message: fieldIssues(error).length > 0
-          ? '请按下面列出的字段提示修改后重新提交；服务端校验是最终判断。'
+          ? '请根据字段提示修改后重试。'
           : (error.message || '服务端拒绝了本次提交，请检查填写内容后重试。'),
         requestId: error.requestId,
         retryable: false,

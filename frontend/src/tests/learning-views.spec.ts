@@ -117,7 +117,7 @@ describe('learning surfaces with the frozen contract', () => {
     expect(apiMocks.fetchTodayPlan).toHaveBeenCalledTimes(1)
     expect(wrapper.findAll('.today-tile')).toHaveLength(3)
     expect(wrapper.text()).toContain('CET-6 核心词')
-    expect(wrapper.text()).toContain('AI 练习尚未开放')
+    expect(wrapper.text()).toContain('AI 练习准备中')
     expect(wrapper.findAll('[role="progressbar"]').length).toBeGreaterThanOrEqual(3)
   })
 
@@ -127,7 +127,7 @@ describe('learning surfaces with the frozen contract', () => {
     expect(wrapper.find('form').exists()).toBe(true)
     expect(wrapper.find('#daily-new-words').exists()).toBe(true)
     expect(wrapper.text()).toContain('学习部')
-    expect(wrapper.text()).toContain('服务端默认')
+    expect(wrapper.text()).toContain('系统默认')
   })
 
   it('shows only the modules enabled by the server config', async () => {

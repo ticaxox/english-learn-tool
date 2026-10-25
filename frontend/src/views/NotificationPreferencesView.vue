@@ -99,7 +99,7 @@ async function save(): Promise<void> {
     const result = await updateNotificationPreferences(draft.value)
     preferences.value = clonePreferences(result)
     draft.value = clonePreferences(result)
-    savedMessage.value = '偏好已保存，仅对后续通知生效；已经发送的历史通知不会被修改或撤回。'
+    savedMessage.value = '设置已保存。'
   } catch (requestError) {
     saveError.value = requestError
   } finally {
@@ -116,11 +116,9 @@ onMounted(() => {
   <article class="notifications-page notification-preferences-page">
     <header class="notifications-hero notifications-hero--preferences">
       <div class="notifications-hero__copy">
-        <p class="eyebrow">Moustache Rules · 通知设置</p>
+        <p class="eyebrow">通知设置</p>
         <h1>通知偏好</h1>
-        <p class="lead">
-          决定哪些站内提醒可以出现，以及它们何时安静下来。保存结果由服务端确认，不会用浏览器本地状态替代。
-        </p>
+        <p class="lead">决定接收哪些提醒，以及免打扰时间。</p>
       </div>
       <div class="notifications-hero__aside">
         <div class="notification-orbit notification-orbit--rules" aria-hidden="true">
@@ -133,7 +131,7 @@ onMounted(() => {
     <NotificationStatePanel
       v-if="loading"
       state="loading"
-      message="正在读取真实通知偏好…"
+      message="正在加载通知设置…"
     />
     <NotificationStatePanel
       v-else-if="loadError"
@@ -194,7 +192,7 @@ onMounted(() => {
             <input v-model="draft.dndEnd" type="time" required />
           </label>
         </div>
-        <p class="field-hint">开始与结束相同表示不启用免打扰；跨越午夜的时段会按当前时区解释。</p>
+        <p class="field-hint">开始与结束相同表示不启用。</p>
 
         <div class="field notification-daily-limit">
           <label for="notification-daily-limit">每日非 AI 通知上限</label>
@@ -207,18 +205,15 @@ onMounted(() => {
             step="1"
             required
           />
-          <p class="field-hint">范围 0–20；0 表示当天不发送非 AI 通知。AI 类别不受此上限抑制。</p>
+          <p class="field-hint">0 表示当天不发送非 AI 通知。</p>
         </div>
       </section>
 
       <aside class="notification-exception-note">
         <span class="notification-exception-note__mark" aria-hidden="true">AI</span>
         <div>
-          <strong>AI 完成与失败例外</strong>
-          <p>
-            AI 完成、AI 失败、计划调整和 AI 教练建议不受免打扰与每日条数上限抑制；
-            关闭对应类别仍会抑制该类通知。这里没有邮件、短信或浏览器推送开关。
-          </p>
+          <strong>AI 任务提醒</strong>
+          <p>AI 任务提醒不受免打扰和每日上限影响。</p>
         </div>
       </aside>
 
@@ -226,7 +221,7 @@ onMounted(() => {
         <div>
           <p v-if="localError" class="field-error" role="alert">{{ localError }}</p>
           <p v-else-if="savedMessage" class="alert alert-success" role="status">{{ savedMessage }}</p>
-          <p v-else class="field-hint">保存只影响后续通知，不追溯修改历史记录。</p>
+          <p v-else class="field-hint">设置会用于之后的提醒。</p>
         </div>
         <button class="button" type="submit" :disabled="saving || !dirty">
           {{ saving ? '正在保存…' : '保存偏好' }}

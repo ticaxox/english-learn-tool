@@ -74,7 +74,7 @@ function submit(): void {
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
 
     <p v-if="!optionsWellFormed" class="alert alert-warning" role="alert">
-      服务端返回的选项未通过 option_count 与去重校验（声明 {{ props.question.optionCount }} 个，当前 {{ props.question.options.length }} 个）。
+      选项暂时不可用，请稍后重试。
       本页不会按这份数据判分，请刷新或联系管理员；提交按钮保持不可用。
     </p>
 
@@ -101,6 +101,6 @@ function submit(): void {
     <div class="button-row">
       <button class="button" type="button" :disabled="!canSubmit" @click="submit">提交答案</button>
     </div>
-    <p id="choice-hint" class="inline-note">提交后由服务端判分并返回解析；本页不会提前得知正确答案。</p>
+    <p id="choice-hint" class="inline-note">提交后查看结果。</p>
   </section>
 </template>

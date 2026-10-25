@@ -125,7 +125,7 @@ async function submit(): Promise<void> {
 
 async function regenerate(): Promise<void> {
   if (!canRegenerate.value) return
-  const confirmed = window.confirm('当前练习尚未作答，确定重新生成整组题目吗？旧题会由服务端标记为已替代。')
+  const confirmed = window.confirm('当前练习尚未作答，确定重新生成整组题目吗？旧题会被替换。')
   if (!confirmed) return
   pendingRegenerateKey ??= newKey('practice-regenerate')
   await practice.regenerate(pendingRegenerateKey)
@@ -157,17 +157,17 @@ void practice.load()
 
     <template v-else-if="session">
       <section v-if="session.status === 'generating'" class="panel practice-generation-panel" aria-live="polite">
-        <p class="eyebrow">真实 AI 生成中</p>
+        <p class="eyebrow">正在生成练习</p>
         <h2>正在生成第 {{ session.generationNumber }} 组题目</h2>
-        <p>服务端任务状态：<code>{{ session.jobStatus ?? '排队中' }}</code>。页面会持续读取真实会话状态，不会展示占位题目。</p>
+        <p>题目正在生成，请稍候。</p>
         <div class="practice-generation-loader" aria-hidden="true"><span></span><span></span><span></span></div>
-        <p class="inline-note">生成失败时会保留服务端错误码和重试边界。</p>
+        <p class="inline-note">如果生成失败，可以直接重试。</p>
       </section>
 
       <section v-else-if="session.status === 'failed'" class="panel">
         <p class="eyebrow">生成失败</p>
-        <h2>{{ session.errorCode ?? 'AI 题目生成失败' }}</h2>
-        <p>{{ session.errorMessage ?? '服务端没有返回可展示的题目。' }}</p>
+        <h2>题目生成失败</h2>
+        <p>请稍后重试，或重新创建练习。</p>
         <div class="button-row">
           <button class="button" type="button" :disabled="practice.busy.value" @click="regenerate">重新生成</button>
           <RouterLink class="button-secondary" to="/practice">新建练习</RouterLink>
@@ -178,8 +178,8 @@ void practice.load()
 
       <section v-else-if="session.status === 'submitted'" class="panel" aria-live="polite">
         <p class="eyebrow">主观题评分中</p>
-        <h2>服务端正在评分，请稍候</h2>
-        <p>评分完成前不会显示默认分数、参考译文或参考范文。页面会自动轮询真实结果。</p>
+        <h2>正在评分，请稍候</h2>
+        <p>评分完成前不会显示答案和分数。</p>
         <p v-if="practice.submitError.value" class="alert alert-warning">{{ String(practice.submitError.value) }}</p>
       </section>
 
@@ -190,9 +190,9 @@ void practice.load()
               <div>
                 <strong>作答进度 {{ answeredCount }} / {{ questions.length }}</strong>
                 <p class="inline-note">
-                  <span v-if="practice.draftSaving.value">正在保存服务端草稿…</span>
+                  <span v-if="practice.draftSaving.value">正在保存草稿…</span>
                   <span v-else-if="draftSavedAt">草稿已保存：{{ draftSavedAt }}</span>
-                  <span v-else>答案会以服务端草稿恢复，不使用浏览器存储。</span>
+                  <span v-else>答案会自动保存。</span>
                 </p>
               </div>
               <div class="button-row">
@@ -203,7 +203,7 @@ void practice.load()
 
             <section v-if="draftConflict" class="alert alert-warning" role="alert">
               <strong>草稿版本冲突</strong>
-              <p>服务端草稿已被其他请求更新。当前页面不会自动覆盖最新版本，请重新读取后再编辑。</p>
+              <p>答案已在其他页面更新，请重新加载后再编辑。</p>
               <button class="button-secondary button-small" type="button" @click="retryDraftAfterConflict">读取最新草稿</button>
             </section>
             <ErrorNotice v-else-if="practice.draftError.value" :error="practice.draftError.value" :show-retry="false" retry-label="重试" @retry="saveDraft" />
@@ -226,7 +226,7 @@ void practice.load()
                 <button class="button member-primary-button" type="button" :disabled="practice.busy.value || !allAnswered" @click="submit">
                   {{ practice.busy.value ? '正在提交…' : '提交全部答案' }} <AppIcon name="arrow" />
                 </button>
-                <span class="inline-note">提交后才会展示服务端返回的答案、解析、评分和参考内容。</span>
+                <span class="inline-note">提交后查看答案和解析。</span>
               </div>
             </section>
           </div>
@@ -234,20 +234,20 @@ void practice.load()
           <aside class="member-practice-session-aside">
             <section class="member-session-mascot">
               <WhiskerCrumbMark size="hero" />
-              <p>“Read the question once for meaning, once for clues. Then trust the sentence.”</p>
+              <p>“先读意思，再找线索。相信句子本身。”</p>
             </section>
             <section class="member-session-progress-card">
-              <p class="eyebrow">LIVE PROGRESS</p>
+              <p class="eyebrow">作答进度</p>
               <strong>{{ answeredCount }} <span>/ {{ questions.length }}</span></strong>
               <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
               <p>{{ allAnswered ? '全部题目已作答，可以提交。' : `还有 ${questions.length - answeredCount} 题未作答。` }}</p>
             </section>
             <section class="member-session-note">
-              <p class="eyebrow">REAL DRAFT STATE</p>
-              <p v-if="practice.draftSaving.value">正在保存服务端草稿…</p>
+              <p class="eyebrow">草稿</p>
+              <p v-if="practice.draftSaving.value">正在保存草稿…</p>
               <p v-else-if="draftSavedAt">草稿已保存：{{ draftSavedAt }}</p>
-              <p v-else>答案恢复和保存都走服务端草稿，不使用浏览器业务存储。</p>
-              <RouterLink class="member-text-link" to="/coach">Ask Mr. Whisker for a hint <AppIcon name="arrow" /></RouterLink>
+              <p v-else>答案会自动保存。</p>
+              <RouterLink class="member-text-link" to="/coach">问问管家 <AppIcon name="arrow" /></RouterLink>
             </section>
           </aside>
         </div>

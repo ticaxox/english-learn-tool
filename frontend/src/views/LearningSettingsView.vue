@@ -116,7 +116,6 @@ async function save(): Promise<void> {
   }
 }
 
-const effectiveFrom = computed(() => profile.value?.planEffectiveFrom ?? null)
 const needsOnboarding = computed(() => profile.value?.needsOnboarding === true)
 
 onMounted(() => {
@@ -128,18 +127,16 @@ onMounted(() => {
   <article class="settings-page">
     <header class="settings-hero">
       <div>
-        <p class="eyebrow">学习档案</p>
-        <h1>目标与记忆偏好</h1>
-        <p class="lead">
-          档案决定每天生成多少新词与多久的学习目标。保存后新目标从次日计划生效，今天的快照不会改变。
-        </p>
+        <p class="eyebrow">学习设置</p>
+        <h1>学习设置</h1>
+        <p class="lead">设置目标、每日学习量和记忆方式。</p>
       </div>
     </header>
 
     <ContractGate
       v-if="!frozen"
       :endpoints="['GET /users/me/profile', 'PATCH /users/me/profile', 'GET/PUT /memory/config']"
-      title="学习档案等待接口契约冻结"
+      title="学习设置暂时不可用"
     />
 
     <LoadingState v-else-if="loading" label="正在读取学习档案…" />
@@ -151,7 +148,7 @@ onMounted(() => {
     <template v-else>
       <div v-if="needsOnboarding" class="alert alert-warning">
         <strong>还没有学习档案</strong>
-        <p>填写下面的目标即可创建档案；服务端会据此生成明日计划。</p>
+        <p>填写目标后，明天开始按新计划学习。</p>
       </div>
 
       <form class="panel settings-form" novalidate @submit.prevent="save">
@@ -221,7 +218,7 @@ onMounted(() => {
           </div>
 
           <p class="inline-note">
-            实际可用新词不足时，服务端会按真实数量调整并在今日页说明原因，不会补造词条。
+            可学新词不足时，今日任务会自动调整。
           </p>
         </fieldset>
 
@@ -241,14 +238,14 @@ onMounted(() => {
                 :disabled="!form.memoryConfig.spelling.enabled"
                 @change="form.memoryConfig.spelling.blankType = ($event.target as HTMLSelectElement).value ? (($event.target as HTMLSelectElement).value as SpellingBlankType) : null"
               >
-                <option value="">服务端默认</option>
+                <option value="">系统默认</option>
                 <option v-for="blank in blankTypes" :key="blank" :value="blank">
                   {{ SPELLING_BLANK_LABELS[blank] }}
                 </option>
               </select>
             </div>
           </div>
-          <p class="inline-note">至少保留一种训练方式；服务端也会拒绝全部关闭的配置。</p>
+          <p class="inline-note">至少保留一种训练方式。</p>
         </fieldset>
 
         <fieldset v-if="profile && (profile.department || profile.learningGroup)">
@@ -261,14 +258,14 @@ onMounted(() => {
 
         <div class="button-row">
           <button class="button" type="submit" :disabled="saving">
-            {{ saving ? '正在保存…' : '保存档案' }}
+            {{ saving ? '正在保存…' : '保存设置' }}
           </button>
         </div>
 
         <div v-if="saved" class="alert alert-success" role="status">
           <strong>档案已保存</strong>
-          <p>新目标从次日计划生效；今天的今日任务快照保持不变。</p>
-          <p v-if="effectiveFrom" class="inline-note">服务端生效时间：{{ effectiveFrom }}</p>
+          <p>新设置从下一次计划开始生效。</p>
+
         </div>
 
         <ErrorNotice

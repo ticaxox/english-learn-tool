@@ -94,7 +94,7 @@ function statusDescription(book: Wordbook): string {
     return '后台正在清理，操作已暂停'
   }
   if (book.status === 'deleted') {
-    return '服务端已标记删除，等待刷新移除'
+    return '删除处理中'
   }
   return `${book.entry_count.toLocaleString('zh-CN')} 个词条`
 }
@@ -192,13 +192,13 @@ function markDeleting(wordbookId: string): void {
 }
 
 async function deletionCompleted(): Promise<void> {
-  operationMessage.value = '词书清理已完成，列表已按服务端任务结果刷新。'
+  operationMessage.value = '词书已删除。'
   deleteTarget.value = null
   await reloadAfterMutation()
 }
 
 async function importCompleted(): Promise<void> {
-  operationMessage.value = '词书导入任务已完成，已刷新真实词书列表。'
+  operationMessage.value = '词书导入完成。'
   pageOffset.value = 0
   await load(0)
 }
@@ -223,9 +223,9 @@ onMounted(() => {
   <article class="wordbooks-page member-wordbooks-page">
     <header class="wordbooks-hero member-page-heading member-page-heading--shelf">
       <div>
-        <p class="eyebrow">THE WORD SHELF <span>•</span> REAL COLLECTIONS</p>
-        <h1>A library you can <em>carry.</em></h1>
-        <p class="lead">组织词书与私有词书放在同一只书架里。查看、导入、激活或导出，全部由当前账号的服务端权限决定。</p>
+        <p class="eyebrow">我的词书</p>
+        <h1>把词书带在<em>身边。</em></h1>
+        <p class="lead">组织词书和个人词书都在这里。</p>
       </div>
       <button class="button member-primary-button" type="button" @click="importOpen = true">
         <AppIcon name="plus" /> 导入词书
@@ -236,9 +236,9 @@ onMounted(() => {
       <div>
         <span class="wordbook-active-mark" aria-hidden="true">{{ activeBook?.name.slice(0, 1) ?? 'W' }}</span>
         <div>
-          <p class="eyebrow">CURRENT READER'S PICK</p>
+          <p class="eyebrow">当前主词书</p>
           <strong>{{ activeBook?.name ?? '本页未显示已激活词书' }}</strong>
-          <p>{{ activeBook ? `可用词条 ${activeBook.entry_count.toLocaleString('zh-CN')} 个 · 服务端当前主词书` : '激活状态只以当前页服务端返回为准，不会在前端推断。' }}</p>
+          <p>{{ activeBook ? `共 ${activeBook.entry_count.toLocaleString('zh-CN')} 个词条` : '选择一本词书开始学习。' }}</p>
         </div>
       </div>
       <span v-if="activeBook" class="wordbook-status wordbook-status--active">已激活</span>
@@ -246,7 +246,7 @@ onMounted(() => {
 
     <section class="panel wordbooks-panel">
       <div class="wordbook-toolbar">
-        <div class="wordbook-tabs" role="group" aria-label="当前页词书可见范围筛选">
+        <div class="wordbook-tabs" role="group" aria-label="筛选词书">
           <button
             type="button"
             :class="{ 'wordbook-tab--active': filters.visibility === '' }"
@@ -272,7 +272,7 @@ onMounted(() => {
           <input
             v-model="filters.search"
             type="search"
-            placeholder="当前页搜索名称或描述"
+            placeholder="搜索词书"
             autocomplete="off"
           />
         </label>
@@ -283,18 +283,18 @@ onMounted(() => {
       </div>
 
       <p v-if="filterActive" class="wordbook-filter-note" role="note">
-        当前搜索与范围筛选只作用于本页 {{ books.length }} 本；OpenAPI 列表接口没有服务端 search/visibility 参数。
+        筛选仅作用于当前页。
       </p>
 
       <p v-if="operationMessage" class="alert alert-success" role="status">{{ operationMessage }}</p>
 
-      <LoadingState v-if="loading && books.length === 0" label="正在读取真实词书列表…" />
+      <LoadingState v-if="loading && books.length === 0" label="正在加载词书…" />
       <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取词书" @retry="load(pageOffset)" />
 
       <div v-else-if="empty" class="empty-state wordbook-empty">
         <span class="wordbook-empty-mark" aria-hidden="true">Aa</span>
-        <strong>还没有可见词书</strong>
-        <p>你可以导入 CSV、JSON 或 TXT 创建第一本词书。空状态不会填充静态示例。</p>
+        <strong>还没有词书</strong>
+        <p>导入一本词书，开始你的学习。</p>
         <button type="button" @click="importOpen = true">导入第一本词书</button>
       </div>
 
@@ -310,7 +310,7 @@ onMounted(() => {
         <section v-if="organizationBooks.length" class="wordbook-group" aria-labelledby="organization-books-heading">
           <div class="wordbook-group-heading">
             <div>
-              <p class="eyebrow">共享书架</p>
+              <p class="eyebrow">共享词书</p>
               <h2 id="organization-books-heading">组织词书</h2>
             </div>
             <span class="count-pill">{{ organizationBooks.length }} 本</span>
@@ -338,7 +338,7 @@ onMounted(() => {
         <section v-if="privateBooks.length" class="wordbook-group" aria-labelledby="private-books-heading">
           <div class="wordbook-group-heading">
             <div>
-              <p class="eyebrow">只属于你</p>
+              <p class="eyebrow">个人词书</p>
               <h2 id="private-books-heading">我的私有词书</h2>
             </div>
             <span class="count-pill">{{ privateBooks.length }} 本</span>
