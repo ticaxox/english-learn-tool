@@ -60,6 +60,7 @@ const mainNodes = computed(() => (plan.value?.nodes ?? [])
   .filter((node) => !node.optional)
   .sort((left, right) => left.orderIndex - right.orderIndex))
 const optionalNodes = computed(() => (plan.value?.nodes ?? []).filter((node) => node.optional))
+const nextNode = computed(() => mainNodes.value.find((node) => node.status !== 'completed') ?? null)
 const todayLocalDate = computed(() => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date()))
 const readOnly = computed(() =>
   Boolean(plan.value && (plan.value.status === 'expired' || plan.value.localDate < todayLocalDate.value)),
@@ -295,6 +296,9 @@ onMounted(() => {
         <p class="eyebrow">今日路线</p>
         <h2 id="challenge-generate-title">今天的地图还没有生成</h2>
         <p>生成一条今天的学习路线。</p>
+        <div class="challenge-preview-route" aria-label="闯关路线结构">
+          <span>复习</span><i>→</i><span>新词</span><i>→</i><span>终点挑战</span>
+        </div>
         <ErrorNotice v-if="generationError" :error="generationError" :show-retry="false" />
         <div class="button-row">
           <button class="button" type="button" :disabled="generating" @click="generateMap">
@@ -318,6 +322,18 @@ onMounted(() => {
         </div>
       </section>
 
+      <section v-if="nextNode" class="challenge-next-step" aria-labelledby="challenge-next-title">
+        <div class="challenge-next-step__copy">
+          <p class="workspace-kicker">下一步</p>
+          <h2 id="challenge-next-title">{{ nextNode.title }}</h2>
+          <p>{{ nextNode.description }}</p>
+        </div>
+        <span class="challenge-node__status" :class="`challenge-node__status--${nextNode.status}`">{{ CHALLENGE_STATUS_LABELS[nextNode.status] }}</span>
+        <button class="button workspace-primary-button" type="button" :disabled="nodeLoading || readOnly" @click="openNode(nextNode)">
+          {{ nodeActionLabel(nextNode) }}
+        </button>
+      </section>
+
       <div v-if="readOnly" class="alert alert-warning" role="status">
         <strong>跨日地图只读</strong>
         <p>这份地图已过期，只能查看结果。</p>
@@ -335,10 +351,23 @@ onMounted(() => {
       <section class="challenge-map" aria-labelledby="challenge-map-title">
         <div class="challenge-map__heading">
           <div><p class="eyebrow">主线</p><h2 id="challenge-map-title">今日主线</h2></div>
-          <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
+          <div class="challenge-map__tools">
+            <div class="challenge-state-legend" aria-label="节点状态说明">
+              <span class="is-current">当前</span>
+              <span class="is-done">已完成</span>
+              <span class="is-locked">未解锁</span>
+            </div>
+            <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
+          </div>
         </div>
         <div class="challenge-path">
-          <article v-for="(node, index) in mainNodes" :key="node.id" class="challenge-node" :class="[nodeStatusClass(node), { 'challenge-node--boss': node.nodeType === 'BOSS' }]">
+          <article
+            v-for="(node, index) in mainNodes"
+            :key="node.id"
+            class="challenge-node"
+            :class="[nodeStatusClass(node), { 'challenge-node--boss': node.nodeType === 'BOSS' }]"
+            :aria-current="nextNode?.id === node.id ? 'step' : undefined"
+          >
             <div class="challenge-node__marker" aria-hidden="true">{{ node.nodeType === 'BOSS' ? '★' : node.orderIndex }}</div>
             <div class="challenge-node__body">
               <div class="challenge-node__heading">

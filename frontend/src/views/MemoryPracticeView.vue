@@ -216,17 +216,21 @@ onMounted(async () => {
             <span class="workspace-meta">{{ activeModules.length }} 种可用</span>
           </header>
 
-          <div v-if="activeModules.length === 0" class="workspace-empty-state">
-            <strong>还没有启用训练方式</strong>
-            <p>至少开启翻卡、选择或拼写中的一种。</p>
-            <RouterLink class="button workspace-primary-button" to="/settings">前往学习设置</RouterLink>
+          <div v-if="activeModules.length === 0" class="workspace-inline-banner memory-no-modules">
+            <span>还没有启用训练方式。</span>
+            <RouterLink to="/settings">去设置开启</RouterLink>
           </div>
-          <div v-else class="module-grid memory-action-grid">
+          <div class="module-grid memory-action-grid">
             <button
-              v-for="module in activeModules"
+              v-for="module in MEMORY_MODULES"
               :key="module"
               class="module-card memory-action-card"
+              :class="[
+                `memory-action-card--${module}`,
+                { 'is-disabled': !activeModules.includes(module) },
+              ]"
               type="button"
+              :disabled="!activeModules.includes(module)"
               @click="begin(module)"
             >
               <span class="memory-action-icon"><AppIcon :name="module === 'spelling' ? 'star' : module === 'choice' ? 'cards' : 'book'" /></span>
@@ -236,7 +240,11 @@ onMounted(async () => {
                   {{ module === 'flashcard' ? '看词回忆释义' : module === 'choice' ? '选出正确释义' : '按提示拼写' }}
                 </span>
               </span>
-              <AppIcon name="arrow" />
+              <span class="memory-action-status" :class="{ 'is-disabled': !activeModules.includes(module) }">
+                <strong>{{ activeModules.includes(module) ? (dueRemaining === null ? '读取中' : `${dueRemaining} 个待复习`) : '未启用' }}</strong>
+                <small>{{ activeModules.includes(module) ? '可开始' : '到设置开启' }}</small>
+              </span>
+              <AppIcon :name="activeModules.includes(module) ? 'arrow' : 'lock'" />
             </button>
           </div>
         </template>

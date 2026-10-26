@@ -12,6 +12,7 @@ import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
+import StudyStatsPanel from '../components/StudyStatsPanel.vue'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -106,6 +107,8 @@ const activeTaskIndex = computed(() => {
   const index = todayTasks.value.findIndex((task) => !task.done)
   return index === -1 ? todayTasks.value.length - 1 : index
 })
+
+const shortfallText = computed(() => plan.value?.shortfallReason ? '今天的目标尚未全部完成。' : '')
 
 const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? null)
 const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
@@ -244,7 +247,7 @@ onMounted(() => {
           <div class="today-task-footer">
             <div>
               <p v-if="plan.extraDueAvailable" class="today-extra-note">还有 {{ plan.extraDueCount }} 个到期词，可加练。</p>
-              <p v-else-if="plan.shortfallReason">{{ plan.shortfallReason }}</p>
+              <p v-else-if="shortfallText">{{ shortfallText }}</p>
               <p v-else>完成一项，就离今天的目标更近一点。</p>
             </div>
             <RouterLink
@@ -262,9 +265,11 @@ onMounted(() => {
             <div class="today-progress-heading">
               <div>
                 <span class="workspace-kicker">今日进度</span>
-                <strong>{{ overallProgress }}%</strong>
+                <p class="today-progress-caption">新词与到期复习</p>
               </div>
-              <span class="today-progress-ring" :style="{ '--today-progress': `${overallProgress * 3.6}deg` }" aria-hidden="true"></span>
+              <div class="today-progress-ring" :style="{ '--today-progress': `${overallProgress * 3.6}deg` }">
+                <span class="today-progress-ring__value">{{ overallProgress }}%</span>
+              </div>
             </div>
             <div
               class="workspace-progress"
@@ -282,6 +287,8 @@ onMounted(() => {
               <div><dt>学习时间</dt><dd>{{ plan.minutes.active }} / {{ plan.minutes.goal }} 分钟</dd></div>
             </dl>
           </section>
+
+          <StudyStatsPanel compact />
 
           <section class="workspace-card today-context-card">
             <div class="today-context-row">

@@ -130,14 +130,19 @@ describe('learning surfaces with the frozen contract', () => {
     expect(wrapper.text()).toContain('系统默认')
   })
 
-  it('shows only the modules enabled by the server config', async () => {
+  it('shows all three modules and marks disabled choices from the server config', async () => {
     const wrapper = await mountWithRouter(MemoryPracticeView)
     expect(apiMocks.fetchMemoryConfig).toHaveBeenCalledTimes(1)
     const cards = wrapper.findAll('.module-card')
     expect(cards.map((card) => card.text())).toEqual([
       expect.stringContaining('翻卡'),
+      expect.stringContaining('选择'),
       expect.stringContaining('拼写'),
     ])
+    const disabled = wrapper.findAll('.module-card[disabled]')
+    expect(disabled).toHaveLength(1)
+    expect(disabled[0].text()).toContain('选择')
+    expect(disabled[0].text()).toContain('未启用')
   })
 
   it('shows the real empty mistakes state', async () => {

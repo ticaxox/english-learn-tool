@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Wordbook } from '../api/wordbooks'
 
 const props = withDefaults(defineProps<{
@@ -23,15 +24,23 @@ const emit = defineEmits<{
 }>()
 
 const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
+const coverTone = computed(() => {
+  const total = Array.from(props.book.id).reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  return ['sage', 'ocean', 'clay', 'slate'][total % 4]
+})
 </script>
 
 <template>
   <article
     class="wordbook-card"
-    :class="[`wordbook-card--${book.visibility}`, { 'wordbook-card--compact': compact }]"
+    :class="[
+      `wordbook-card--${book.visibility}`,
+      { 'wordbook-card--compact': compact, 'wordbook-card--active': book.is_active },
+    ]"
   >
     <div
       class="wordbook-cover"
+      :class="`wordbook-cover--${coverTone}`"
       :style="book.visibility === 'private'
         ? 'background-color:#244b64; background-image:radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem)'
         : 'background-color:var(--forest); background-image:radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem)'"
@@ -57,10 +66,12 @@ const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
         <h3>{{ book.name }}</h3>
         <span class="wordbook-entry-count">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
       </template>
-      <p class="wordbook-description">{{ book.description || '暂无描述' }}</p>
-      <p class="wordbook-card-meta">
-        {{ statusDescription }}<span>·</span>{{ formattedDate }}
-      </p>
+      <template v-if="!compact">
+        <p class="wordbook-description">{{ book.description || '暂无描述' }}</p>
+        <p class="wordbook-card-meta">
+          {{ statusDescription }}<span>·</span>{{ formattedDate }}
+        </p>
+      </template>
       <div class="wordbook-card-actions">
         <button class="button-secondary button-small" type="button" :aria-label="`查看 ${book.name} 的词条`" @click="emit('detail')">查看词条</button>
         <button
