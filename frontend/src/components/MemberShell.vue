@@ -26,6 +26,24 @@ const secondaryLinks = [
   { label: '设置', to: '/settings', icon: 'settings' as const },
 ]
 
+const pageTitles: Record<string, string> = {
+  overview: '今日学习',
+  wordbooks: '我的词书',
+  memory: '记忆训练',
+  'memory-mistakes': '记忆错词',
+  practice: 'AI 练习',
+  'practice-records': '练习记录',
+  'practice-mistakes': '练习错题',
+  'practice-session': 'AI 练习',
+  challenges: '每日闯关',
+  'challenge-detail': '每日闯关',
+  coach: '学习管家',
+  notifications: '通知中心',
+  'notification-preferences': '通知设置',
+  settings: '学习设置',
+}
+
+const currentPageTitle = computed(() => pageTitles[String(route.name ?? '')] ?? '学习工作台')
 const currentDate = computed(() =>
   new Intl.DateTimeFormat('zh-CN', {
     month: 'long',
@@ -50,104 +68,109 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 <template>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
 
-  <div class="app-shell app-shell--member">
-    <aside class="member-rail" aria-label="成员端主导航">
-      <RouterLink class="member-brand" to="/overview" aria-label="Whisker Crumb 今日学习">
-        <span class="member-brand-mark"><WhiskerCrumbMark size="small" /></span>
-        <span class="member-brand-copy">
-          <strong>WHISKER</strong>
-          <em>AI 英语学习</em>
+  <div class="app-shell app-shell--member workspace-shell">
+    <aside class="workspace-sidebar" aria-label="成员端主导航">
+      <RouterLink class="workspace-brand" to="/overview" aria-label="Whisker 今日学习">
+        <span class="workspace-brand-mark"><WhiskerCrumbMark size="small" /></span>
+        <span class="workspace-brand-copy">
+          <strong>Whisker</strong>
+          <small>英语学习</small>
         </span>
       </RouterLink>
 
-      <nav class="member-nav-groups">
-        <div class="member-nav-group">
-          <p class="member-nav-label">学习</p>
-          <RouterLink v-for="link in primaryLinks" :key="link.to" class="member-nav-link" :to="link.to">
+      <nav class="workspace-nav" aria-label="学习导航">
+        <div class="workspace-nav-group">
+          <p class="workspace-nav-label">学习</p>
+          <RouterLink
+            v-for="link in primaryLinks"
+            :key="link.to"
+            class="workspace-nav-link member-nav-link"
+            :to="link.to"
+          >
             <AppIcon :name="link.icon" />
             <span>{{ link.label }}</span>
-            <i aria-hidden="true"></i>
           </RouterLink>
         </div>
-        <div class="member-nav-group member-nav-group--quiet">
-          <p class="member-nav-label">更多</p>
-          <RouterLink v-for="link in secondaryLinks" :key="link.to" class="member-nav-link" :to="link.to">
+
+        <div class="workspace-nav-group workspace-nav-group--utility">
+          <RouterLink
+            v-for="link in secondaryLinks"
+            :key="link.to"
+            class="workspace-nav-link member-nav-link"
+            :to="link.to"
+          >
             <AppIcon :name="link.icon" />
             <span>{{ link.label }}</span>
           </RouterLink>
         </div>
       </nav>
 
-      <div class="member-rail-footer">
-        <div class="member-profile">
-          <span class="member-avatar">{{ props.displayName.slice(0, 2).toUpperCase() }}</span>
-          <span><strong>{{ props.displayName }}</strong><small>@{{ props.username }}</small></span>
-        </div>
-        <button class="member-concierge-link" type="button" @click="drawerOpen = true">
-          问问管家 <span>↗</span>
+      <div class="workspace-sidebar-footer">
+        <button class="workspace-concierge-link member-concierge-link" type="button" @click="drawerOpen = true">
+          <AppIcon name="coach" />
+          <span>问问管家</span>
         </button>
-        <button class="member-signout" type="button" @click="emit('signout')">退出登录</button>
+        <RouterLink class="workspace-profile" to="/settings" :aria-label="displayName + ' 的设置'">
+          <span class="workspace-avatar">{{ displayName.slice(0, 2).toUpperCase() }}</span>
+          <span class="workspace-profile-copy">
+            <strong>{{ displayName }}</strong>
+            <small>@{{ username }}</small>
+          </span>
+        </RouterLink>
+        <button class="workspace-signout" type="button" @click="emit('signout')">退出登录</button>
       </div>
     </aside>
 
-    <div class="member-main-area">
-      <header class="member-topbar">
-        <RouterLink class="member-mobile-brand" to="/overview">
-          <span class="member-brand-mark"><WhiskerCrumbMark size="small" /></span>
-          <strong>WHISKER</strong>
-        </RouterLink>
-        <div class="member-topbar-center">
-          <span class="member-live-dot" aria-hidden="true"></span>
+    <div class="workspace-main">
+      <header class="workspace-topbar member-topbar">
+        <div class="workspace-topbar-heading">
+          <strong>{{ currentPageTitle }}</strong>
           <span>{{ currentDate }}</span>
-          <span class="member-topbar-divider" aria-hidden="true"></span>
-          <span>今天也学一点</span>
+          <span class="sr-only">今天也学一点</span>
         </div>
-        <div class="member-topbar-actions">
-          <RouterLink class="member-icon-link member-notices-link" to="/notifications" aria-label="通知">
+        <div class="workspace-topbar-actions">
+          <RouterLink class="workspace-icon-button member-notices-link" to="/notifications" aria-label="通知">
             <AppIcon name="bell" />
           </RouterLink>
-          <button class="member-concierge-button" type="button" @click="drawerOpen = true">
-            <WhiskerCrumbMark size="small" />
-            <span>问问管家</span>
+          <button class="workspace-coach-button member-concierge-button" type="button" @click="drawerOpen = true">
+            <AppIcon name="coach" />
+            <span>学习管家</span>
           </button>
-          <RouterLink class="member-avatar-button" to="/settings" :aria-label="props.displayName + ' 的偏好设置'">
-            {{ props.displayName.slice(0, 2).toUpperCase() }}
+          <RouterLink class="workspace-avatar-button" to="/settings" :aria-label="displayName + ' 的设置'">
+            {{ displayName.slice(0, 2).toUpperCase() }}
           </RouterLink>
         </div>
       </header>
 
-      <main id="main-content" class="page-content member-page-content" tabindex="-1">
+      <main id="main-content" class="workspace-content" tabindex="-1">
         <slot />
       </main>
     </div>
 
-    <nav class="member-mobile-nav" aria-label="成员端移动导航">
+    <nav class="workspace-mobile-nav member-mobile-nav" aria-label="成员端移动导航">
       <RouterLink v-for="link in primaryLinks" :key="link.to" :to="link.to">
         <AppIcon :name="link.icon" />
         <span>{{ link.label }}</span>
       </RouterLink>
     </nav>
 
-    <div v-if="drawerOpen" class="member-drawer-backdrop" @click="closeDrawer"></div>
-    <aside v-if="drawerOpen" class="member-concierge-drawer" aria-labelledby="member-drawer-title">
-      <div class="member-drawer-top">
-        <div><p class="eyebrow">学习管家</p><h2 id="member-drawer-title">问问 Mr. Whisker</h2></div>
-        <button class="member-drawer-close" type="button" aria-label="关闭学习管家" @click="closeDrawer">
+    <div v-if="drawerOpen" class="workspace-drawer-backdrop" @click="closeDrawer"></div>
+    <aside v-if="drawerOpen" class="workspace-drawer member-concierge-drawer" aria-labelledby="workspace-drawer-title">
+      <div class="workspace-drawer-heading">
+        <div>
+          <p class="workspace-kicker">学习管家</p>
+          <h2 id="workspace-drawer-title">需要时，先问一句</h2>
+        </div>
+        <button class="workspace-icon-button" type="button" aria-label="关闭学习管家" @click="closeDrawer">
           <AppIcon name="close" />
         </button>
       </div>
-      <div class="member-drawer-mascot"><WhiskerCrumbMark size="hero" /></div>
-      <p class="member-drawer-copy">
-        “有问题，或有一句话想说，都可以先交给我。”
-      </p>
-      <div class="member-drawer-actions">
-        <RouterLink class="button" to="/coach">进入对话 <AppIcon name="arrow" /></RouterLink>
-        <RouterLink class="button-secondary" to="/overview">回到今日学习</RouterLink>
-        <RouterLink class="button-secondary" to="/wordbooks">浏览词书</RouterLink>
+      <p>可以聊学习计划、复习顺序，也可以改一句英文。</p>
+      <div class="workspace-drawer-actions member-drawer-actions">
+        <RouterLink class="button workspace-primary-button" to="/coach">进入对话 <AppIcon name="arrow" /></RouterLink>
+        <RouterLink class="button workspace-secondary-button" to="/overview">回到今日学习</RouterLink>
       </div>
-      <p class="member-drawer-note">
-        对话仅你可见。
-      </p>
+      <p class="workspace-drawer-note">对话仅你可见。</p>
     </aside>
   </div>
 </template>

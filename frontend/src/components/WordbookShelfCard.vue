@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Wordbook } from '../api/wordbooks'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   book: Wordbook
   statusLabel: string
   statusDescription: string
@@ -10,7 +10,10 @@ const props = defineProps<{
   canExport: boolean
   canDelete: boolean
   activating: boolean
-}>()
+  compact?: boolean
+}>(), {
+  compact: false,
+})
 
 const emit = defineEmits<{
   detail: []
@@ -23,8 +26,16 @@ const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
 </script>
 
 <template>
-  <article class="wordbook-card" :class="`wordbook-card--${book.visibility}`">
-    <div class="wordbook-cover" :style="book.visibility === 'private' ? 'background-color:#244b64; background-image:radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem)' : 'background-color:var(--forest); background-image:radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem)'">
+  <article
+    class="wordbook-card"
+    :class="[`wordbook-card--${book.visibility}`, { 'wordbook-card--compact': compact }]"
+  >
+    <div
+      class="wordbook-cover"
+      :style="book.visibility === 'private'
+        ? 'background-color:#244b64; background-image:radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem)'
+        : 'background-color:var(--forest); background-image:radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem)'"
+    >
       <span class="wordbook-spine">WHISKER PRESS</span>
       <div class="wordbook-card-topline">
         <span class="wordbook-pill" :class="`wordbook-pill--${book.visibility}`">
@@ -34,12 +45,18 @@ const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
         <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
       </div>
       <strong class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
-      <h3>{{ book.name }}</h3>
-      <span class="wordbook-cover-meta">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
+      <template v-if="!compact">
+        <h3>{{ book.name }}</h3>
+        <span class="wordbook-cover-meta">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
+      </template>
       <span class="wordbook-cover-stamp">{{ book.is_active ? '使用中' : '书架中' }}</span>
     </div>
 
     <div class="wordbook-card-body">
+      <template v-if="compact">
+        <h3>{{ book.name }}</h3>
+        <span class="wordbook-entry-count">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
+      </template>
       <p class="wordbook-description">{{ book.description || '暂无描述' }}</p>
       <p class="wordbook-card-meta">
         {{ statusDescription }}<span>·</span>{{ formattedDate }}

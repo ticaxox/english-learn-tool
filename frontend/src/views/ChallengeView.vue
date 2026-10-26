@@ -273,14 +273,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="challenge-page">
-    <header class="challenge-hero">
+  <article class="challenge-page challenge-game-stage workspace-page">
+    <header class="workspace-page-header challenge-page-header">
       <div>
         <p class="eyebrow">每日闯关</p>
         <h1>{{ plan?.title || '今天的学习地图' }}</h1>
         <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>
-      <div class="challenge-hero__actions">
+      <div class="workspace-header-actions challenge-page-actions">
         <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         <button class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</button>
       </div>

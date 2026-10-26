@@ -81,10 +81,14 @@ describe('member redesign', () => {
         canExport: true,
         canDelete: true,
         activating: false,
+        compact: true,
       },
     })
 
     const card = wrapper.get('.wordbook-card')
+    expect(wrapper.classes()).toContain('wordbook-card--compact')
+    expect(card.get('.wordbook-card-body h3').text()).toBe('Business English')
+    expect(card.find('.wordbook-cover h3').exists()).toBe(false)
     expect(card.text()).toContain('Business English')
     expect(card.text()).toContain('128 词条')
     expect(card.get('.wordbook-cover .wordbook-cover-stamp').text()).toBe('书架中')
