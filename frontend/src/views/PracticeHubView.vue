@@ -3,8 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
-import { createPracticeSession, fetchPracticeUsage, listPracticeRecords, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
+import { createPracticeSession, fetchPracticeUsage, listPracticeMistakes, listPracticeRecords, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import '../practice.css'
 
@@ -20,6 +19,9 @@ const usage = ref<PracticeUsage | null>(null)
 const usageError = ref<unknown>(null)
 const records = ref<PracticeRecordSummary[]>([])
 const recordsError = ref<unknown>(null)
+const mistakes = ref<PracticeRecordSummary[]>([])
+const mistakesTotal = ref(0)
+const mistakesError = ref<unknown>(null)
 const wordbooks = ref<Wordbook[]>([])
 const wordbooksError = ref<unknown>(null)
 const formError = ref<string | null>(null)
@@ -103,6 +105,18 @@ async function loadRecords(): Promise<void> {
   }
 }
 
+async function loadMistakes(): Promise<void> {
+  try {
+    const page = await listPracticeMistakes({ limit: 5 })
+    mistakes.value = page.items
+    mistakesTotal.value = page.total
+    mistakesError.value = null
+  } catch (error) {
+    mistakes.value = []
+    mistakesTotal.value = 0
+    mistakesError.value = error
+  }
+}
 async function loadWordbooks(): Promise<void> {
   try {
     const page = await listWordbooks({ limit: 100 })
@@ -119,43 +133,63 @@ function quotaRemaining(kind: 'question_generation' | 'subjective_grading'): num
 }
 
 onMounted(() => {
-  void Promise.all([loadUsage(), loadRecords(), loadWordbooks()])
+  void Promise.all([loadUsage(), loadRecords(), loadMistakes(), loadWordbooks()])
 })
 </script>
 
 <template>
-  <article class="practice-page practice-hub member-practice-page">
-    <header class="practice-hero member-page-heading practice-room-hero">
-      <div class="practice-room-copy">
-        <p class="eyebrow">AI 练习</p>
-        <h1>选一道小题，<em>认真做完。</em></h1>
-        <p class="lead">四种练习，随时开始。</p>
-        <div class="practice-hero__actions">
-          <RouterLink class="button-secondary" to="/practice/records">练习记录</RouterLink>
-          <RouterLink class="button-secondary" to="/practice/mistakes">错题本</RouterLink>
-        </div>
+  <article class="practice-page practice-hub member-practice-page practice-workspace workspace-page">
+    <header class="workspace-page-header">
+      <div>
+        <p class="workspace-kicker">AI 练习</p>
+        <h1>做一组有针对性的练习</h1>
+        <p class="workspace-page-lead">从今天的学习内容里出题，提交后再看答案与解析。</p>
       </div>
-      <div class="practice-room-mascot">
-        <WhiskerCrumbMark size="hero" />
-
+      <div class="workspace-header-actions">
+        <RouterLink class="button workspace-secondary-button" to="/practice/records">练习记录</RouterLink>
+        <RouterLink class="button workspace-secondary-button" to="/practice/mistakes">错题本</RouterLink>
       </div>
     </header>
 
-    <section class="practice-quota-strip" aria-label="今日练习额度">
-      <div><span>题目生成剩余</span><strong>{{ quotaRemaining('question_generation') ?? '—' }}</strong></div>
-      <div><span>主观评分剩余</span><strong>{{ quotaRemaining('subjective_grading') ?? '—' }}</strong></div>
-      <div><span>进行中</span><strong>{{ usage ? `${usage.concurrency.inUse} / ${usage.concurrency.limit}` : '—' }}</strong></div>
-
-      <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
-    </section>
-
-    <div class="practice-hub-grid member-practice-grid">
-      <section class="panel practice-create-panel member-practice-create">
-        <div class="section-heading">
-          <div><p class="eyebrow">新建练习</p><h2>选择练习方式</h2></div>
+    <div class="practice-workspace-grid">
+      <aside class="workspace-card practice-records-rail" aria-label="最近练习">
+        <header class="workspace-section-header practice-rail-heading">
+          <div>
+            <h2>最近记录</h2>
+            <p>接着上次继续。</p>
+          </div>
+          <RouterLink to="/practice/records">全部</RouterLink>
+        </header>
+        <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
+        <ul v-else-if="records.length" class="practice-record-list">
+          <li v-for="record in records" :key="record.id">
+            <RouterLink :to="{ name: 'practice-session', params: { sessionId: record.id } }">
+              <span class="practice-record-type">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
+              <strong>{{ record.source ? PRACTICE_SOURCE_LABELS[record.source] : '专项练习' }}</strong>
+              <small>{{ record.totalQuestions }} 题 · {{ record.score === null ? '未评分' : `${record.score} 分` }}</small>
+            </RouterLink>
+          </li>
+        </ul>
+        <div v-else class="practice-rail-empty">
+          <strong>还没有记录</strong>
+          <p>生成第一组练习后，记录会出现在这里。</p>
         </div>
+      </aside>
 
-        <div class="practice-type-grid" role="group" aria-label="练习类型">
+      <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">
+        <header class="workspace-section-header practice-create-heading">
+          <div>
+            <p class="workspace-kicker">新建练习</p>
+            <h2 id="practice-create-title">今天想练什么</h2>
+          </div>
+          <div class="practice-quota-inline" aria-label="今日练习额度">
+            <span>生成 <strong>{{ quotaRemaining('question_generation') ?? '—' }}</strong></span>
+            <span>评分 <strong>{{ quotaRemaining('subjective_grading') ?? '—' }}</strong></span>
+          </div>
+        </header>
+        <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
+
+        <div class="practice-type-grid practice-type-switcher" role="group" aria-label="练习类型">
           <button
             v-for="type in types"
             :key="type"
@@ -202,42 +236,37 @@ onMounted(() => {
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
-          <div class="button-row">
-            <button class="button member-primary-button" type="submit" :disabled="creating">{{ creating ? '正在提交生成任务…' : '生成练习' }} <AppIcon name="arrow" /></button>
-
+          <div class="practice-create-footer">
+            <p>答案与解析只在提交后出现。</p>
+            <button class="button workspace-primary-button practice-generate-action" type="submit" :disabled="creating">
+              {{ creating ? '正在生成…' : '生成练习' }} <AppIcon name="arrow" />
+            </button>
           </div>
         </form>
       </section>
 
-      <aside class="practice-side-stack member-practice-side">
-        <section class="member-coach-break">
-          <WhiskerCrumbMark size="medium" />
-          <div><p class="eyebrow">管家建议</p><p>状态不好时，先做三道题也可以。</p></div>
-          <RouterLink class="member-text-link" to="/coach">问问管家 <AppIcon name="arrow" /></RouterLink>
-        </section>
-        <section class="panel">
-          <div class="section-heading"><h2>最近记录</h2><RouterLink to="/practice/records">全部</RouterLink></div>
-          <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
-          <ul v-else-if="records.length" class="record-mini-list">
-            <li v-for="record in records" :key="record.id">
-              <RouterLink :to="{ name: 'practice-session', params: { sessionId: record.id } }">
-                <strong>{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</strong>
-                <span>{{ PRACTICE_SOURCE_LABELS[record.source] }} · {{ record.totalQuestions }} 题</span>
-                <small>{{ record.score === null ? '评分中/未评分' : `${record.score} 分` }}</small>
-              </RouterLink>
-            </li>
-          </ul>
-          <p v-else class="inline-note">还没有练习记录。</p>
-        </section>
-
-        <section class="panel">
-          <h2>也可以这样学</h2>
-          <p class="inline-note">背词和复习随时都能继续。</p>
-          <div class="button-row">
-            <RouterLink class="button-secondary" to="/wordbooks">查看词书</RouterLink>
-            <RouterLink class="button-secondary" to="/memory">记忆训练</RouterLink>
+      <aside class="workspace-card practice-mistakes-rail" aria-label="错题概况">
+        <header class="practice-mistakes-heading">
+          <div>
+            <p class="workspace-kicker">错题概况</p>
+            <strong>{{ mistakesTotal }}</strong>
           </div>
-        </section>
+          <RouterLink to="/practice/mistakes">查看全部</RouterLink>
+        </header>
+        <ErrorNotice v-if="mistakesError" :error="mistakesError" :show-retry="false" retry-label="重试" @retry="loadMistakes" />
+        <ul v-else-if="mistakes.length" class="practice-mistake-list">
+          <li v-for="record in mistakes" :key="record.id">
+            <RouterLink :to="{ name: 'practice-session', params: { sessionId: record.id } }">
+              <strong>{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</strong>
+              <span>{{ record.totalQuestions }} 道待复习</span>
+            </RouterLink>
+          </li>
+        </ul>
+        <div v-else class="practice-rail-empty">
+          <strong>暂无错题</strong>
+          <p>完成练习后，需要回看的内容会自动整理在这里。</p>
+        </div>
+        <p class="practice-concurrency">进行中：{{ usage ? `${usage.concurrency.inUse} / ${usage.concurrency.limit}` : '—' }}</p>
       </aside>
     </div>
   </article>

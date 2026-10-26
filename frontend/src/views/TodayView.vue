@@ -12,8 +12,6 @@ import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
-import StudyStatsPanel from '../components/StudyStatsPanel.vue'
-import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -94,8 +92,8 @@ const todayTasks = computed(() => {
       target: plan.value.minutes.goal,
       unit: '分钟',
       icon: 'today' as const,
-      to: '/settings',
-      cta: '调整目标',
+      to: '/practice',
+      cta: '继续学习',
     },
   ].filter((task) => task.target > 0 || task.key === 'learning-minutes').map((task) => ({
     ...task,
@@ -109,6 +107,8 @@ const activeTaskIndex = computed(() => {
   return index === -1 ? todayTasks.value.length - 1 : index
 })
 
+const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? null)
+const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
 const overallProgress = computed(() => {
   if (!plan.value) return 0
   const completed = plan.value.newWords.completed + plan.value.dueReviews.completed
@@ -166,7 +166,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="today-page member-today-page">
+  <article class="today-page member-today-page today-workspace workspace-page">
     <ContractGate
       v-if="!frozen"
       :endpoints="['GET /learning/today', 'POST /learning/daily-plan/ensure']"
@@ -174,34 +174,100 @@ onMounted(() => {
 
     <LoadingState v-else-if="loading" label="正在读取今日计划…" />
 
-    <section v-else-if="error" class="panel member-error-panel">
+    <section v-else-if="error" class="panel workspace-card member-error-panel">
       <ErrorNotice :error="error" retry-label="重新读取今日计划" @retry="load()" />
-      <div v-if="needsActiveWordbook" class="alert alert-warning">
-        <strong>还没有激活的词书</strong>
-        <p>选一本词书，就能开始今天的学习。</p>
-        <RouterLink class="button" to="/wordbooks">前往词书页</RouterLink>
+      <div v-if="needsActiveWordbook" class="workspace-empty-state">
+        <strong>先选择一本词书</strong>
+        <p>选好词书后，今天的任务会自动出现。</p>
+        <RouterLink class="button workspace-secondary-button" to="/wordbooks">前往词书</RouterLink>
       </div>
-
     </section>
 
     <template v-else-if="plan">
-      <header class="member-hero today-hero">
-        <div class="member-hero-copy">
-          <p class="eyebrow">今日学习 <span>•</span> {{ plan.localDate }}</p>
-          <h1><span>今天，</span><em>学一点。</em></h1>
-          <p class="lead">
-            按今天的计划，一步一步来。
-          </p>
-          <div class="member-hero-actions">
-            <RouterLink class="button member-primary-button" to="/memory">
-              继续学习 <AppIcon name="arrow" />
-            </RouterLink>
-            <span class="member-status-stamp">{{ statusLabel }}</span>
+      <header class="workspace-page-header">
+        <div>
+          <p class="workspace-kicker">{{ plan.localDate }} · 今日学习</p>
+          <h1>今天先完成这几件事</h1>
+          <p class="workspace-page-lead">{{ heroNote }}</p>
+        </div>
+        <span class="workspace-status">{{ statusLabel }}</span>
+      </header>
+
+      <div class="today-workbench">
+        <section class="workspace-card today-task-card" aria-labelledby="today-task-title">
+          <header class="workspace-section-header">
+            <div>
+              <h2 id="today-task-title">今日任务</h2>
+              <p>按自己的节奏完成，进度会自动保存。</p>
+            </div>
+            <span class="workspace-meta">{{ completedTaskCount }} / {{ todayTasks.length }} 完成</span>
+          </header>
+
+          <div v-if="!plan.wordbook" class="today-inline-notice">
+            <span>今天还没有主词书。</span>
+            <RouterLink to="/wordbooks">去选择词书</RouterLink>
           </div>
-          <div class="member-hero-progress">
-            <div><span>今日目标进度</span><strong>{{ overallProgress }}%</strong></div>
+
+          <ol class="today-task-list" aria-label="今日任务">
+            <li
+              v-for="(task, index) in todayTasks"
+              :key="task.key"
+              class="today-tile today-task-row"
+              :class="{ 'is-done': task.done, 'is-current': index === activeTaskIndex && !task.done }"
+            >
+              <span class="today-task-icon"><AppIcon :name="task.icon" /></span>
+              <div class="today-task-copy">
+                <div class="today-task-titleline">
+                  <div>
+                    <span class="today-task-label">{{ task.label }}</span>
+                    <h3>{{ task.title }}</h3>
+                  </div>
+                  <span class="today-task-state">{{ task.done ? '已完成' : index === activeTaskIndex ? '现在做' : '待开始' }}</span>
+                </div>
+                <div class="today-task-progressline">
+                  <span class="today-tile__value"><strong>{{ task.completed }}</strong><span>/ {{ task.target }} {{ task.unit }}</span></span>
+                  <div
+                    class="workspace-progress today-task-progress"
+                    role="progressbar"
+                    :aria-valuenow="task.completed"
+                    :aria-valuemin="0"
+                    :aria-valuemax="Math.max(task.target, 1)"
+                    :aria-label="`${task.label}进度 ${task.completed} / ${task.target}`"
+                  >
+                    <span :style="{ width: `${task.percent}%` }"></span>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ol>
+
+          <div class="today-task-footer">
+            <div>
+              <p v-if="plan.extraDueAvailable" class="today-extra-note">还有 {{ plan.extraDueCount }} 个到期词，可加练。</p>
+              <p v-else-if="plan.shortfallReason">{{ plan.shortfallReason }}</p>
+              <p v-else>完成一项，就离今天的目标更近一点。</p>
+            </div>
+            <RouterLink
+              v-if="primaryTask"
+              class="button workspace-primary-button today-primary-action"
+              :to="primaryTask.to"
+            >
+              {{ completedTaskCount === todayTasks.length ? '再练一次' : '继续学习' }} <AppIcon name="arrow" />
+            </RouterLink>
+          </div>
+        </section>
+
+        <aside class="today-summary-aside" aria-label="今日学习摘要">
+          <section class="workspace-card today-progress-card">
+            <div class="today-progress-heading">
+              <div>
+                <span class="workspace-kicker">今日进度</span>
+                <strong>{{ overallProgress }}%</strong>
+              </div>
+              <span class="today-progress-ring" :style="{ '--today-progress': `${overallProgress * 3.6}deg` }" aria-hidden="true"></span>
+            </div>
             <div
-              class="progress member-progress"
+              class="workspace-progress"
               role="progressbar"
               :aria-valuenow="plan.newWords.completed + plan.dueReviews.completed"
               :aria-valuemin="0"
@@ -210,128 +276,32 @@ onMounted(() => {
             >
               <span :style="{ width: `${overallProgress}%` }"></span>
             </div>
-          </div>
-        </div>
-
-        <aside class="member-concierge-card">
-          <div class="member-speech-note">
-            <span>管家提示</span>
-            <p>{{ heroNote }}</p>
-          </div>
-          <div class="member-hero-mascot">
-            <WhiskerCrumbMark size="hero" />
-            <span class="member-mascot-tag">MR. WHISKER</span>
-          </div>
-          <div class="member-mini-vitals">
-            <div><span>新词</span><strong>{{ plan.newWords.completed }}/{{ plan.newWords.target }}</strong></div>
-            <div><span>复习</span><strong>{{ plan.dueReviews.completed }}/{{ plan.dueReviews.target }}</strong></div>
-            <div><span>分钟</span><strong>{{ plan.minutes.active }}/{{ plan.minutes.goal }}</strong></div>
-          </div>
-        </aside>
-      </header>
-
-      <section v-if="!plan.wordbook" class="alert alert-warning">
-        <strong>当前没有激活词书</strong>
-        <p>今日计划缺少词书来源。请先激活一本词书。</p>
-        <RouterLink class="button" to="/wordbooks">前往词书页</RouterLink>
-      </section>
-
-      <div class="member-dashboard-grid">
-        <section class="panel member-trail-panel" aria-labelledby="daily-trail-title">
-          <div class="member-section-heading">
-            <div>
-              <p class="eyebrow">今日任务</p>
-              <h2 id="daily-trail-title">先完成这一件。</h2>
-            </div>
-            <span class="member-hand-badge">今日共 {{ todayTasks.length }} 站</span>
-          </div>
-
-          <ol class="member-trail-list" aria-label="今日任务">
-            <li
-              v-for="(task, index) in todayTasks"
-              :key="task.key"
-              class="today-tile member-trail-stop"
-              :class="{ 'is-done': task.done, 'is-current': index === activeTaskIndex && !task.done }"
-            >
-              <span class="member-trail-node"><AppIcon :name="task.icon" /></span>
-              <div class="member-trail-copy">
-                <span class="member-stop-eyebrow">{{ task.eyebrow }}</span>
-                <p class="today-tile__label">{{ task.label }}</p>
-                <h3>{{ task.title }}</h3>
-                <p class="member-stop-meta">
-                  <span class="today-tile__value"><strong>{{ task.completed }}</strong><span>/ {{ task.target }} {{ task.unit }}</span></span>
-                  <span>{{ task.done ? '已完成' : '进行中' }}</span>
-                </p>
-                <div
-                  class="progress member-task-progress"
-                  role="progressbar"
-                  :aria-valuenow="task.completed"
-                  :aria-valuemin="0"
-                  :aria-valuemax="Math.max(task.target, 1)"
-                  :aria-label="`${task.label}进度 ${task.completed} / ${task.target}`"
-                >
-                  <span :style="{ width: `${task.percent}%` }"></span>
-                </div>
-              </div>
-              <RouterLink class="member-stop-action" :to="task.to">
-                {{ task.done ? '再次练习' : task.cta }} <AppIcon name="arrow" />
-              </RouterLink>
-            </li>
-          </ol>
-
-          <div class="member-trail-footer">
-            <span v-if="plan.shortfallReason">{{ plan.shortfallReason }}</span>
-            <span v-else>按顺序完成即可，进度会自动保存。</span>
-            <p v-if="plan.extraDueAvailable" class="inline-note">
-              目标之外还有 {{ plan.extraDueCount }} 个到期词，可继续加练。
-            </p>
-          </div>
-        </section>
-
-        <aside class="member-side-stack">
-          <section class="member-wordbook-slip" aria-labelledby="active-wordbook-title">
-            <div class="member-slip-topline">
-              <span>当前词书</span>
-              <span>{{ plan.wordbook ? '可用' : '未选择' }}</span>
-            </div>
-            <div class="member-book-object" aria-hidden="true">
-              <span>WHISKER PRESS</span>
-              <strong>{{ plan.wordbook?.name.slice(0, 1) ?? 'W' }}</strong>
-              <i>{{ plan.wordbook ? '打开' : '选择' }}</i>
-            </div>
-            <h2 id="active-wordbook-title">{{ plan.wordbook?.name ?? '尚未激活词书' }}</h2>
-            <p>
-              {{ plan.wordbook
-                ? '今天从这本词书开始。'
-                : '选择一本词书开始学习。' }}
-            </p>
-            <RouterLink class="member-text-link" to="/wordbooks">更换词书 <AppIcon name="arrow" /></RouterLink>
+            <dl class="today-metric-list">
+              <div><dt>新词</dt><dd>{{ plan.newWords.completed }} / {{ plan.newWords.target }}</dd></div>
+              <div><dt>复习</dt><dd>{{ plan.dueReviews.completed }} / {{ plan.dueReviews.target }}</dd></div>
+              <div><dt>学习时间</dt><dd>{{ plan.minutes.active }} / {{ plan.minutes.goal }} 分钟</dd></div>
+            </dl>
           </section>
 
-          <StudyStatsPanel />
+          <section class="workspace-card today-context-card">
+            <div class="today-context-row">
+              <span class="today-context-label">当前词书</span>
+              <strong>{{ plan.wordbook?.name ?? '尚未选择' }}</strong>
+              <RouterLink to="/wordbooks">{{ plan.wordbook ? '更换' : '选择' }}</RouterLink>
+            </div>
+            <div class="today-context-row">
+              <span class="today-context-label">AI 练习</span>
+              <strong>{{ aiUnavailableLabel }}</strong>
+              <RouterLink to="/practice">去看看</RouterLink>
+            </div>
+            <div class="today-coach-note">
+              <span>学习管家</span>
+              <p>卡住时，可以先问一句。</p>
+              <RouterLink to="/coach">去聊聊</RouterLink>
+            </div>
+          </section>
         </aside>
       </div>
-
-      <div class="member-lower-grid">
-        <section class="panel member-ai-card" aria-live="polite">
-          <div class="member-ai-mark"><AppIcon name="spark" /></div>
-          <div>
-            <p class="eyebrow">AI 练习</p>
-            <h2>{{ aiUnavailableLabel }}</h2>
-            <p v-if="aiPractice?.state === 'available'" class="inline-note">现在可以做一次短练习。</p>
-            <p v-else class="inline-note">准备好后就来试试。</p>
-          </div>
-          <RouterLink class="button-secondary" to="/practice">去练习</RouterLink>
-        </section>
-
-        <section class="member-margin-note">
-          <span class="member-note-pin" aria-hidden="true"></span>
-          <p class="eyebrow">小提示</p>
-          <p>调整目标后，新计划从明天开始。</p>
-          <RouterLink class="member-text-link" to="/settings">调整目标 <AppIcon name="arrow" /></RouterLink>
-        </section>
-      </div>
-
     </template>
   </article>
 </template>

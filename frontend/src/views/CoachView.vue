@@ -158,19 +158,17 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <article class="coach-page member-coach-page">
-    <header class="coach-hero member-page-heading coach-letter-hero">
-      <div>
-        <p class="eyebrow">学习管家</p>
-        <h1>和 <em>Mr. Whisker</em> 聊聊。</h1>
-        <p class="lead">
-          把想说的话交给我，一起把它说得更自然。
-        </p>
+  <article class="coach-page member-coach-page coach-workspace workspace-page">
+    <header class="workspace-page-header coach-page-header">
+      <div class="coach-heading-lockup">
+        <span class="coach-avatar"><WhiskerCrumbMark size="small" /></span>
+        <div>
+          <p class="workspace-kicker">学习管家</p>
+          <h1>和 Mr. Whisker 聊聊</h1>
+          <p class="workspace-page-lead">学习计划、复习顺序，或者一句想改得更自然的英文。</p>
+        </div>
       </div>
-      <div class="coach-letter-mascot">
-        <WhiskerCrumbMark size="hero" />
-        <span class="coach-privacy-stamp"><AppIcon name="lock" /> 仅你可见</span>
-      </div>
+      <span class="coach-privacy-stamp"><AppIcon name="lock" /> 仅你可见</span>
     </header>
 
     <div class="coach-layout">
@@ -246,7 +244,7 @@ onBeforeUnmount(() => {
 
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
-          <div class="coach-empty-mark"><WhiskerCrumbMark size="hero" /></div>
+          <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
           <p class="eyebrow">学习管家</p>
           <h2>从一段长期对话开始</h2>
           <p>选择一段对话，或开始新的对话。</p>

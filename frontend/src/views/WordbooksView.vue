@@ -220,31 +220,31 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="wordbooks-page member-wordbooks-page">
-    <header class="wordbooks-hero member-page-heading member-page-heading--shelf">
+  <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page">
+    <header class="workspace-page-header">
       <div>
-        <p class="eyebrow">我的词书</p>
-        <h1>把词书带在<em>身边。</em></h1>
-        <p class="lead">组织词书和个人词书都在这里。</p>
+        <p class="workspace-kicker">学习内容</p>
+        <h1>我的词书</h1>
+        <p class="workspace-page-lead">切换主词书，或导入一套自己的词汇。</p>
       </div>
-      <button class="button member-primary-button" type="button" @click="importOpen = true">
+      <button class="button workspace-primary-button" type="button" @click="importOpen = true">
         <AppIcon name="plus" /> 导入词书
       </button>
     </header>
 
-    <section class="wordbook-active-banner member-active-volume" :class="{ 'wordbook-active-banner--empty': !activeBook }">
-      <div>
+    <section class="workspace-card wordbook-active-banner wordbook-active-strip" :class="{ 'wordbook-active-banner--empty': !activeBook }">
+      <div class="wordbook-active-copy">
         <span class="wordbook-active-mark" aria-hidden="true">{{ activeBook?.name.slice(0, 1) ?? 'W' }}</span>
         <div>
-          <p class="eyebrow">当前主词书</p>
-          <strong>{{ activeBook?.name ?? '本页未显示已激活词书' }}</strong>
-          <p>{{ activeBook ? `共 ${activeBook.entry_count.toLocaleString('zh-CN')} 个词条` : '选择一本词书开始学习。' }}</p>
+          <p class="workspace-kicker">当前主词书</p>
+          <strong>{{ activeBook?.name ?? '还没有激活词书' }}</strong>
+          <p>{{ activeBook ? `${activeBook.entry_count.toLocaleString('zh-CN')} 个词条` : '从下方列表选择一本开始学习。' }}</p>
         </div>
       </div>
-      <span v-if="activeBook" class="wordbook-status wordbook-status--active">已激活</span>
+      <span v-if="activeBook" class="wordbook-status wordbook-status--active">使用中</span>
     </section>
 
-    <section class="panel wordbooks-panel">
+    <section class="workspace-card wordbooks-panel">
       <div class="wordbook-toolbar">
         <div class="wordbook-tabs" role="group" aria-label="筛选词书">
           <button
@@ -277,42 +277,36 @@ onMounted(() => {
           />
         </label>
 
-        <button class="button-secondary" type="button" :disabled="loading && books.length === 0" :aria-busy="loading" @click="load(pageOffset)">
+        <button class="button-secondary button-small" type="button" :disabled="loading && books.length === 0" :aria-busy="loading" @click="load(pageOffset)">
           {{ loading ? '读取中…' : '刷新' }}
         </button>
       </div>
 
-      <p v-if="filterActive" class="wordbook-filter-note" role="note">
-        筛选仅作用于当前页。
-      </p>
-
+      <p v-if="filterActive" class="wordbook-filter-note" role="note">筛选仅作用于当前页。</p>
       <p v-if="operationMessage" class="alert alert-success" role="status">{{ operationMessage }}</p>
 
       <LoadingState v-if="loading && books.length === 0" label="正在加载词书…" />
       <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取词书" @retry="load(pageOffset)" />
 
-      <div v-else-if="empty" class="empty-state wordbook-empty">
+      <div v-else-if="empty" class="workspace-empty-state wordbook-empty">
         <span class="wordbook-empty-mark" aria-hidden="true">Aa</span>
         <strong>还没有词书</strong>
-        <p>导入一本词书，开始你的学习。</p>
-        <button type="button" @click="importOpen = true">导入第一本词书</button>
+        <p>导入一套词书，今天的任务才能开始。</p>
+        <button class="button workspace-primary-button" type="button" @click="importOpen = true">导入一本词书</button>
       </div>
 
       <template v-else>
         <ErrorNotice v-if="activationError" :error="activationError" :show-retry="false" />
 
-        <div v-if="filteredEmpty" class="empty-state wordbook-empty">
-          <span class="wordbook-empty-mark" aria-hidden="true">??</span>
-          <strong>当前页筛选没有匹配项</strong>
-          <p>可以清除当前页筛选，或翻阅下一页继续查找。</p>
+        <div v-if="filteredEmpty" class="workspace-empty-state wordbook-empty">
+          <span class="wordbook-empty-mark" aria-hidden="true">Aa</span>
+          <strong>当前页没有匹配项</strong>
+          <p>清除筛选，或翻到下一页继续查找。</p>
         </div>
 
         <section v-if="organizationBooks.length" class="wordbook-group" aria-labelledby="organization-books-heading">
           <div class="wordbook-group-heading">
-            <div>
-              <p class="eyebrow">共享词书</p>
-              <h2 id="organization-books-heading">组织词书</h2>
-            </div>
+            <h2 id="organization-books-heading">组织词书</h2>
             <span class="count-pill">{{ organizationBooks.length }} 本</span>
           </div>
           <div class="wordbook-grid">
@@ -327,6 +321,7 @@ onMounted(() => {
               :can-export="canExport(book)"
               :can-delete="canDelete(book)"
               :activating="activatingId === book.id"
+              :compact="!auth.isAdmin"
               @detail="detailId = book.id"
               @activate="activate(book)"
               @export="exportTarget = book"
@@ -337,10 +332,7 @@ onMounted(() => {
 
         <section v-if="privateBooks.length" class="wordbook-group" aria-labelledby="private-books-heading">
           <div class="wordbook-group-heading">
-            <div>
-              <p class="eyebrow">个人词书</p>
-              <h2 id="private-books-heading">我的私有词书</h2>
-            </div>
+            <h2 id="private-books-heading">我的私有词书</h2>
             <span class="count-pill">{{ privateBooks.length }} 本</span>
           </div>
           <div class="wordbook-grid">
@@ -355,6 +347,7 @@ onMounted(() => {
               :can-export="canExport(book)"
               :can-delete="canDelete(book)"
               :activating="activatingId === book.id"
+              :compact="!auth.isAdmin"
               @detail="detailId = book.id"
               @activate="activate(book)"
               @export="exportTarget = book"
