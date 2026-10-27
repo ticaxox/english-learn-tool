@@ -126,7 +126,7 @@ onMounted(() => {
   <article class="ai-admin-page prompts-page">
     <header class="ai-admin-hero">
       <div>
-        <p class="eyebrow">管理员 · AI 平台</p>
+        <p class="eyebrow">管理员 · AI 配置</p>
         <h1>AI 提示词</h1>
         <p class="lead">按功能键读取并覆盖提示词。保存只影响后续 AI 任务，不会展示用户答案、密钥或教练正文。</p>
       </div>

@@ -45,7 +45,7 @@ const pageTitles: Record<string, string> = {
   'practice-session': 'AI 练习',
   challenges: '学习中心',
   'challenge-detail': '学习中心',
-  coach: '学习管家',
+  coach: 'AI 教练',
   notifications: '通知中心',
   'settings-learning': '设置',
   'settings-notifications': '设置',
@@ -221,13 +221,13 @@ onBeforeUnmount(() => {
           <button
             class="workspace-coach-button member-concierge-button ia-coach-toggle"
             type="button"
-            aria-label="打开学习管家"
+            aria-label="打开 AI 教练"
             :aria-expanded="coachOpen"
             aria-controls="global-coach-panel"
             @click="openCoach"
           >
             <AppIcon name="coach" />
-            <span>学习管家</span>
+            <span>AI 教练</span>
           </button>
 
           <div ref="profileArea" class="ia-profile-area">
@@ -282,14 +282,14 @@ onBeforeUnmount(() => {
     >
       <header class="ia-coach-panel-header">
         <div>
-          <p>学习管家</p>
+          <p>AI 教练</p>
           <h2 id="global-coach-title">随时问一句</h2>
         </div>
         <button
           ref="coachCloseButton"
           class="workspace-icon-button"
           type="button"
-          aria-label="关闭学习管家"
+          aria-label="关闭 AI 教练"
           @click="closeCoach"
         >
           <AppIcon name="close" />

@@ -280,3 +280,88 @@
 @media (prefers-reduced-motion: reduce) {
   .workspace-shell .challenge-self-study__card { transition: none; }
 }
+
+/* T-FE-019 review fixes: readable training controls and discoverable row actions. */
+.ia-settings-hub .field-inline {
+  grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
+}
+.workspace-shell .ia-settings-hub .field-inline > .checkbox {
+  width: fit-content;
+  min-width: 7rem;
+  flex-wrap: nowrap;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.workspace-shell .ia-settings-hub .checkbox input[type="checkbox"] {
+  width: 1.25rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  min-height: 1.25rem;
+  flex: 0 0 1.25rem;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.ia-settings-hub .checkbox span {
+  display: inline-block;
+  min-width: 3.5rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.member-table { min-width: 60rem; }
+.member-table .member-actions-cell {
+  position: sticky;
+  z-index: 2;
+  right: 0;
+  width: 6.5rem;
+  min-width: 6.5rem;
+  border-left: 1px solid var(--cookie-200);
+  background: var(--paper-white);
+  box-shadow: -5px 0 9px rgb(74 48 37 / 8%);
+}
+.member-table thead .member-actions-cell { z-index: 3; background: var(--cookie-50); }
+.member-table tbody tr:hover .member-actions-cell { background: #fff6df; }
+.member-actions-menu { min-width: 0; }
+.member-actions-menu summary {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border: 1px solid #caae87;
+  border-radius: 7px 10px 6px 9px;
+  background: var(--paper-white);
+  color: var(--cocoa-900);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  list-style: none;
+}
+.member-actions-menu summary::-webkit-details-marker { display: none; }
+.member-actions-menu summary::after { margin-left: 4px; content: "▾"; font-size: 9px; }
+.member-actions-menu[open] summary { border-color: var(--cocoa-700); background: var(--butter-soft); }
+.member-actions-menu__panel {
+  display: grid;
+  min-width: 100%;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 6px;
+  border: 1px solid #caae87;
+  border-radius: 7px 10px 6px 9px;
+  background: var(--cookie-50);
+}
+.workspace-shell .member-actions-menu__panel button {
+  min-height: 30px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .ia-settings-hub .field-inline { grid-template-columns: minmax(8.5rem, 10rem) minmax(0, 1fr); }
+  .member-table { min-width: 58rem; }
+}
+@media (max-width: 620px) {
+  .ia-settings-hub .field-inline { grid-template-columns: 1fr; }
+  .workspace-shell .ia-settings-hub .field-inline > .checkbox { min-width: 0; }
+}

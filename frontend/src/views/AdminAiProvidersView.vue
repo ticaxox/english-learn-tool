@@ -224,7 +224,7 @@ onMounted(() => {
   <article class="ai-admin-page providers-page">
     <header class="ai-admin-hero">
       <div>
-        <p class="eyebrow">管理员 · AI 平台</p>
+        <p class="eyebrow">管理员 · AI 配置</p>
         <h1>AI 提供商</h1>
         <p class="lead">配置 OpenAI 兼容提供商，查看服务端掩码、真实连接检查、模型列表与默认/备用顺序。</p>
       </div>

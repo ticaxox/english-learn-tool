@@ -306,6 +306,21 @@ async function submitCreate(): Promise<void> {
   }
 }
 
+function closeMemberActionMenu(event: MouseEvent): void {
+  const details = (event.currentTarget as HTMLElement).closest('details')
+  if (details) details.removeAttribute('open')
+}
+
+function openMemberDetail(event: MouseEvent, user: AdminUser): void {
+  closeMemberActionMenu(event)
+  void openDetail(user)
+}
+
+function openMemberAction(event: MouseEvent, user: AdminUser, kind: ActionKind): void {
+  closeMemberActionMenu(event)
+  openAction(user, kind)
+}
+
 function openAction(user: AdminUser, kind: ActionKind): void {
   actionUser.value = user
   actionKind.value = kind
@@ -313,7 +328,6 @@ function openAction(user: AdminUser, kind: ActionKind): void {
   deleteConfirmation.value = ''
   selectedRole.value = user.role === 'admin' ? 'member' : 'admin'
 }
-
 function closeAction(): void {
   if (actionSubmitting.value) {
     return
@@ -777,7 +791,7 @@ onMounted(() => loadUsers(null))
               <th scope="col">部门 / 小组</th>
               <th scope="col">最近登录</th>
               <th scope="col">创建时间</th>
-              <th scope="col"><span class="sr-only">操作</span></th>
+              <th scope="col" class="member-actions-cell">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -799,24 +813,19 @@ onMounted(() => loadUsers(null))
               </td>
               <td>{{ formatDate(user.last_login_at) }}</td>
               <td>{{ formatDate(user.created_at) }}</td>
-              <td>
-                <div class="row-actions">
-                  <button class="button-secondary button-small" type="button" @click="openDetail(user)">
-                    详情
-                  </button>
-                  <button class="button-secondary button-small" type="button" @click="openAction(user, 'toggle-status')">
-                    {{ isActive(user) ? '停用' : '启用' }}
-                  </button>
-                  <button class="button-secondary button-small" type="button" @click="openAction(user, 'change-role')">
-                    角色
-                  </button>
-                  <button class="button-secondary button-small" type="button" @click="openAction(user, 'reset-password')">
-                    重置密码
-                  </button>
-                  <button class="button-danger button-small" type="button" @click="openAction(user, 'delete')">
-                    删除
-                  </button>
-                </div>
+              <td class="member-actions-cell">
+                <details class="member-actions-menu">
+                  <summary :aria-label="`${user.display_name} 的更多操作`">更多</summary>
+                  <div class="member-actions-menu__panel">
+                    <button class="button-secondary button-small" type="button" @click="openMemberDetail($event, user)">详情</button>
+                    <button class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'toggle-status')">
+                      {{ isActive(user) ? '停用' : '启用' }}
+                    </button>
+                    <button class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'change-role')">角色</button>
+                    <button class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'reset-password')">重置密码</button>
+                    <button class="button-danger button-small" type="button" @click="openMemberAction($event, user, 'delete')">删除</button>
+                  </div>
+                </details>
               </td>
             </tr>
           </tbody>

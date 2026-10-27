@@ -37,7 +37,7 @@ function formatTime(value: string | null): string {
 }
 
 function roleLabel(message: CoachMessage): string {
-  return message.role === 'user' ? '你' : '学习管家'
+  return message.role === 'user' ? '你' : 'AI 教练'
 }
 
 function actionStatusLabel(receipt: CoachActionReceipt): string {
@@ -163,7 +163,7 @@ onBeforeUnmount(() => {
       <div class="coach-heading-lockup">
         <span class="coach-avatar"><WhiskerCrumbMark size="small" /></span>
         <div>
-          <p class="workspace-kicker">学习管家</p>
+          <p class="workspace-kicker">AI 教练</p>
           <h1>和 Mr. Whisker 聊聊</h1>
           <p class="workspace-page-lead">学习计划、复习顺序，或者一句想改得更自然的英文。</p>
         </div>
@@ -245,7 +245,7 @@ onBeforeUnmount(() => {
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
-          <p class="eyebrow">学习管家</p>
+          <p class="eyebrow">AI 教练</p>
           <h2>从一段长期对话开始</h2>
           <p>选择一段对话，或开始新的对话。</p>
           <div class="coach-suggested-prompts" aria-label="建议提问">
@@ -319,7 +319,7 @@ onBeforeUnmount(() => {
                   v-if="(message.status === 'queued' || message.status === 'streaming' || coach.streamingMessageId.value === message.id) && !coach.messageText(message)"
                   class="coach-thinking"
                   role="status"
-                  aria-label="学习管家正在思考"
+                  aria-label="AI 教练正在思考"
                 >
                   <span></span><span></span><span></span>
                   <em>正在思考</em>
@@ -366,7 +366,7 @@ onBeforeUnmount(() => {
           <ErrorNotice v-if="coach.sendError.value" :error="coach.sendError.value" :show-retry="false" />
 
           <form class="coach-composer" @submit.prevent="submitMessage">
-            <label for="coach-message-input">给学习管家发消息</label>
+            <label for="coach-message-input">给 AI 教练发消息</label>
             <textarea
               id="coach-message-input"
               ref="composer"

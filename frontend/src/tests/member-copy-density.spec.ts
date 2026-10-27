@@ -86,7 +86,7 @@ describe('member-facing Chinese copy density', () => {
     expect(shell).not.toContain("label: '每日闯关'")
     expect(shell).not.toContain("label: '记忆练习'")
     expect(shell).not.toContain("label: 'AI 练习'")
-    expect(shell).toContain('学习管家')
+    expect(shell).toContain('AI 教练')
     expect(shell).not.toContain("label: '通知'")
 
     const today = source('../views/TodayView.vue')
@@ -109,7 +109,7 @@ describe('member-facing Chinese copy density', () => {
     expect(challenge).toContain('今日主线')
 
     const coach = source('../views/CoachView.vue')
-    expect(coach).toContain('学习管家')
+    expect(coach).toContain('AI 教练')
     expect(coach).toContain('开始对话')
 
     const notices = source('../views/NotificationsView.vue')

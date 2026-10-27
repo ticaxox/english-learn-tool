@@ -322,7 +322,7 @@ describe('AdminUsersView', () => {
     const wrapper = mount(AdminUsersView)
     await flushPromises()
 
-    const detailButtons = wrapper.findAll('.row-actions button').filter((button) => button.text() === '详情')
+    const detailButtons = wrapper.findAll('.member-actions-menu__panel button').filter((button) => button.text() === '详情')
     await detailButtons[1].trigger('click')
     await flushPromises()
 
@@ -341,7 +341,7 @@ describe('AdminUsersView', () => {
     const wrapper = mount(AdminUsersView)
     await flushPromises()
 
-    const deleteButtons = wrapper.findAll('.row-actions button').filter((button) => button.text() === '删除')
+    const deleteButtons = wrapper.findAll('.member-actions-menu__panel button').filter((button) => button.text() === '删除')
     await deleteButtons[0].trigger('click')
 
     const confirmButton = wrapper.get('.dialog-actions button')

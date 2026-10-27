@@ -247,7 +247,7 @@ void practice.load()
               <p v-if="practice.draftSaving.value">正在保存草稿…</p>
               <p v-else-if="draftSavedAt">草稿已保存：{{ draftSavedAt }}</p>
               <p v-else>答案会自动保存。</p>
-              <RouterLink class="member-text-link" to="/coach">问问管家 <AppIcon name="arrow" /></RouterLink>
+              <RouterLink class="member-text-link" to="/coach">问问 AI 教练 <AppIcon name="arrow" /></RouterLink>
             </section>
           </aside>
         </div>

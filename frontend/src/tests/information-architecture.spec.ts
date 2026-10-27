@@ -73,7 +73,7 @@ describe('T-FE-019 information architecture', () => {
     expect(learning.text()).toContain('学习中心')
     expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(false)
     expect(wrapper.find('.workspace-nav a[href="/practice"]').exists()).toBe(false)
-    expect(wrapper.get('.workspace-nav').text()).not.toContain('学习管家')
+    expect(wrapper.get('.workspace-nav').text()).not.toContain('AI 教练')
     expect(wrapper.get('.workspace-nav').text()).not.toContain('通知')
     expect(wrapper.get('.ia-notification-button').attributes('href')).toBe('/notifications')
   })
@@ -92,13 +92,13 @@ describe('T-FE-019 information architecture', () => {
 
   it('opens the global coach panel and the /coach deep link without a left navigation item', async () => {
     const { wrapper, router } = await mountShell(false)
-    expect(wrapper.get('.ia-coach-toggle').attributes('aria-label')).toBe('打开学习管家')
+    expect(wrapper.get('.ia-coach-toggle').attributes('aria-label')).toBe('打开 AI 教练')
     await wrapper.get('.ia-coach-toggle').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('coach')
     expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
     await flushPromises()
-    await wrapper.get('.ia-coach-panel button[aria-label="关闭学习管家"]').trigger('click')
+    await wrapper.get('.ia-coach-panel button[aria-label="关闭 AI 教练"]').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('overview')
 
@@ -133,6 +133,22 @@ describe('T-FE-019 information architecture', () => {
     expect(settingsTabs.find((tab) => tab.classes().includes('ia-tab--active'))?.text()).toContain('通知与免打扰')
   })
 
+  it('keeps training controls horizontal and member actions discoverable at 1024', () => {
+    const settings = source('../views/LearningSettingsView.vue')
+    const adminUsers = source('../views/AdminUsersView.vue')
+    const css = source('../information-architecture.css')
+    expect(settings).toContain('class="field field-inline"')
+    expect(settings).toContain('class="checkbox"')
+    expect(css).toContain('.ia-settings-hub .checkbox input[type="checkbox"]')
+    expect(css).toContain('min-width: 3.5rem')
+    expect(css).toContain('white-space: nowrap')
+    expect(adminUsers).toContain('class="member-actions-menu"')
+    expect(adminUsers).toContain('的更多操作')
+    expect(adminUsers).toContain('重置密码')
+    expect(adminUsers).toContain('删除')
+    expect(css).toContain('.member-actions-cell')
+    expect(css).toContain('position: sticky')
+  })
   it('exposes the two self-study entries from the challenge page', () => {
     const challenge = source('../views/ChallengeView.vue')
     expect(challenge).toContain('challenge-self-study')

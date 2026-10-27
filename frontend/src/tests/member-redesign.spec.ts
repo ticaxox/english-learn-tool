@@ -74,7 +74,7 @@ describe('member redesign', () => {
 
     expect(router.currentRoute.value.name).toBe('coach')
     expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
-    expect(wrapper.find('.workspace-nav').text()).not.toContain('学习管家')
+    expect(wrapper.find('.workspace-nav').text()).not.toContain('AI 教练')
   })
 
   it('renders the real wordbook as a shelf object and emits guarded actions', async () => {
