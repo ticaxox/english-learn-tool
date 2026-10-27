@@ -7,6 +7,9 @@ import {
   type RouteRecordRaw,
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
+import AccountSecurityView from '../views/AccountSecurityView.vue'
+import AdminAiPlatformView from '../views/AdminAiPlatformView.vue'
+import AdminManagementView from '../views/AdminManagementView.vue'
 import AdminUsersView from '../views/AdminUsersView.vue'
 import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
 import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
@@ -14,7 +17,6 @@ import AdminAiUsageView from '../views/AdminAiUsageView.vue'
 import AdminDashboardView from '../views/AdminDashboardView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import ChallengeView from '../views/ChallengeView.vue'
-import CoachView from '../views/CoachView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LearningSettingsView from '../views/LearningSettingsView.vue'
@@ -25,6 +27,7 @@ import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeSessionView from '../views/PracticeSessionView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
 import MistakesView from '../views/MistakesView.vue'
+import SettingsHubView from '../views/SettingsHubView.vue'
 import TodayView from '../views/TodayView.vue'
 import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
@@ -58,6 +61,10 @@ const routes: RouteRecordRaw[] = [
         path: 'wordbooks',
         name: 'wordbooks',
         component: WordbooksView,
+      },
+      {
+        path: 'learning',
+        redirect: { name: 'challenges' },
       },
       {
         path: 'memory',
@@ -103,7 +110,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'coach',
         name: 'coach',
-        component: CoachView,
+        component: TodayView,
+        meta: { coachPanel: true },
       },
       {
         path: 'notifications',
@@ -113,42 +121,78 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'notifications/preferences',
         name: 'notification-preferences',
-        component: NotificationPreferencesView,
+        redirect: { name: 'settings-notifications' },
       },
       {
         path: 'settings',
-        name: 'settings',
-        component: LearningSettingsView,
+        component: SettingsHubView,
+        children: [
+          {
+            path: '',
+            redirect: { name: 'settings-learning' },
+          },
+          {
+            path: 'learning',
+            name: 'settings-learning',
+            component: LearningSettingsView,
+          },
+          {
+            path: 'notifications',
+            name: 'settings-notifications',
+            component: NotificationPreferencesView,
+          },
+          {
+            path: 'security',
+            name: 'settings-security',
+            component: AccountSecurityView,
+          },
+        ],
       },
       {
-        path: 'admin/dashboard',
-        name: 'admin-dashboard',
-        component: AdminDashboardView,
+        path: 'admin',
+        component: AdminManagementView,
         meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/users',
-        name: 'admin-users',
-        component: AdminUsersView,
-        meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/ai/providers',
-        name: 'admin-providers',
-        component: AdminAiProvidersView,
-        meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/ai/prompts',
-        name: 'admin-prompts',
-        component: AdminAiPromptsView,
-        meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/ai/usage',
-        name: 'admin-ai-usage',
-        component: AdminAiUsageView,
-        meta: { requiresRole: 'admin' },
+        children: [
+          {
+            path: '',
+            redirect: { name: 'admin-users' },
+          },
+          {
+            path: 'users',
+            name: 'admin-users',
+            component: AdminUsersView,
+          },
+          {
+            path: 'dashboard',
+            name: 'admin-dashboard',
+            component: AdminDashboardView,
+          },
+          {
+            path: 'ai',
+            component: AdminAiPlatformView,
+            children: [
+              {
+                path: '',
+                redirect: { name: 'admin-providers' },
+              },
+              {
+                path: 'providers',
+                name: 'admin-providers',
+                component: AdminAiProvidersView,
+              },
+              {
+                path: 'prompts',
+                name: 'admin-prompts',
+                component: AdminAiPromptsView,
+              },
+              {
+                path: 'usage',
+                name: 'admin-ai-usage',
+                component: AdminAiUsageView,
+              },
+            ],
+          },
+        ],
       },
       {
         path: ':pathMatch(.*)*',

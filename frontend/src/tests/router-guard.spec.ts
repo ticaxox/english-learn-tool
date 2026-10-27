@@ -112,7 +112,7 @@ describe('route guards', () => {
     expect(router.currentRoute.value.name).toBe('notifications')
 
     await router.push('/notifications/preferences')
-    expect(router.currentRoute.value.name).toBe('notification-preferences')
+    expect(router.currentRoute.value.name).toBe('settings-notifications')
   })
 
   it('redirects unauthenticated notification access to login with a return path', async () => {
@@ -124,7 +124,39 @@ describe('route guards', () => {
     await router.push('/notifications/preferences')
 
     expect(router.currentRoute.value.name).toBe('login')
-    expect(router.currentRoute.value.query.redirect).toBe('/notifications/preferences')
+    expect(router.currentRoute.value.query.redirect).toBe('/settings/notifications')
+  })
+  it('redirects learning-center and settings entry routes to their default tabs', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('member')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/learning')
+    expect(router.currentRoute.value.name).toBe('challenges')
+
+    await router.push('/settings')
+    expect(router.currentRoute.value.name).toBe('settings-learning')
+
+    await router.push('/settings/security')
+    expect(router.currentRoute.value.name).toBe('settings-security')
+  })
+
+  it('routes organization management defaults to members and AI providers', async () => {
+    const pinia = createPinia()
+    const auth = useAuthStore(pinia)
+    auth.user = user('admin')
+    auth.status = 'authenticated'
+    auth.initialized = true
+
+    const router = createAppRouter(pinia, createMemoryHistory())
+    await router.push('/admin')
+    expect(router.currentRoute.value.name).toBe('admin-users')
+
+    await router.push('/admin/ai')
+    expect(router.currentRoute.value.name).toBe('admin-providers')
   })
   it('forces a password change before other authenticated routes', async () => {
     const pinia = createPinia()

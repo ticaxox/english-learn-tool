@@ -1,9 +1,13 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import MemberShell from '../components/MemberShell.vue'
 import WordbookShelfCard from '../components/WordbookShelfCard.vue'
 import type { Wordbook } from '../api/wordbooks'
+
+vi.mock('../views/CoachView.vue', () => ({
+  default: { template: '<div class="coach-test-stub">对话仅你可见</div>' },
+}))
 
 const StubPage = { template: '<div />' }
 
@@ -41,33 +45,36 @@ function book(): Wordbook {
 }
 
 describe('member redesign', () => {
-  it('keeps member navigation compact and exposes real routes on mobile', async () => {
+  it('keeps member navigation compact and exposes five primary information groups', async () => {
     const router = makeRouter()
     await router.push('/overview')
     await router.isReady()
     const wrapper = mount(MemberShell, {
-      props: { displayName: 'Harold Chen', username: 'demo_member' },
+      props: { displayName: 'Harold Chen', username: 'demo_member', isAdmin: false },
       global: { plugins: [router] },
     })
 
-    expect(wrapper.findAll('.member-nav-link')).toHaveLength(8)
-    expect(wrapper.findAll('.member-mobile-nav a')).toHaveLength(6)
-    expect(wrapper.text()).toContain('@demo_member')
+    expect(wrapper.findAll('.ia-nav-group')).toHaveLength(4)
+    expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(3)
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
+    expect(wrapper.find('.ia-notification-button').attributes('href')).toBe('/notifications')
     expect(wrapper.text()).toContain('今天也学一点')
-    expect(wrapper.find('.member-mobile-nav a[href="/memory"]').exists()).toBe(true)
   })
 
-  it('opens the concierge as navigation guidance, not a fake AI response', async () => {
+  it('opens the coach as a global side panel instead of a left navigation item', async () => {
     const router = makeRouter()
+    await router.push('/overview')
+    await router.isReady()
     const wrapper = mount(MemberShell, {
-      props: { displayName: 'Harold Chen', username: 'demo_member' },
+      props: { displayName: 'Harold Chen', username: 'demo_member', isAdmin: false },
       global: { plugins: [router] },
     })
-    await wrapper.get('.member-concierge-link').trigger('click')
+    await wrapper.get('.ia-coach-toggle').trigger('click')
+    await flushPromises()
 
-    expect(wrapper.get('.member-concierge-drawer').text()).toContain('对话仅你可见')
-    expect(wrapper.find('.member-drawer-actions a[href="/coach"]').exists()).toBe(true)
-    expect(wrapper.find('.member-drawer-actions a[href="/overview"]').exists()).toBe(true)
+    expect(router.currentRoute.value.name).toBe('coach')
+    expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
+    expect(wrapper.find('.workspace-nav').text()).not.toContain('学习管家')
   })
 
   it('renders the real wordbook as a shelf object and emits guarded actions', async () => {

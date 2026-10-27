@@ -1,0 +1,307 @@
+/* T-FE-019 — information architecture and navigation integration. */
+.ia-workspace--admin .ia-content { width: min(100%, 1480px); }
+.ia-sidebar { gap: 18px; }
+.ia-nav { gap: 3px; }
+.ia-nav-group { gap: 1px; }
+.ia-nav-primary--section-active {
+  border: 0 !important;
+  background: var(--workspace-accent-soft) !important;
+  color: var(--workspace-accent-strong) !important;
+  font-weight: 700 !important;
+}
+.ia-nav-primary--section-active svg { color: var(--workspace-accent) !important; }
+
+.workspace-shell .ia-nav-children {
+  display: grid;
+  gap: 1px;
+  margin: 2px 0 8px 22px;
+  padding: 2px 0 2px 10px;
+  border-left: 1px dashed var(--workspace-line-strong);
+}
+.workspace-shell .ia-nav-subitem {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 7px;
+  color: var(--workspace-muted);
+  font-size: 12px;
+  font-weight: 550;
+  text-decoration: none;
+}
+.workspace-shell .ia-nav-subitem:hover { background: #eef2ef; color: var(--workspace-ink); }
+.workspace-shell .ia-nav-subitem.router-link-active {
+  background: var(--workspace-warm-soft);
+  color: var(--crumb-cocoa);
+  font-weight: 700;
+}
+
+.ia-topbar-actions { position: relative; }
+.ia-profile-area { position: relative; }
+.workspace-shell .ia-profile-trigger {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #bdd3c8;
+  border-radius: 50%;
+  background: var(--workspace-accent-soft);
+  color: var(--workspace-accent-strong);
+  font-size: 11px;
+  font-weight: 800;
+}
+.workspace-shell .ia-profile-trigger:hover { border-color: var(--crumb-pumpkin); background: var(--workspace-warm-soft); color: var(--crumb-cocoa); }
+.ia-profile-menu {
+  position: absolute;
+  z-index: 70;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: 244px;
+  overflow: hidden;
+  padding: 7px;
+  border: 2px solid var(--crumb-cocoa);
+  border-radius: 10px 16px 8px 14px;
+  background: var(--crumb-cream);
+  box-shadow: 4px 4px 0 var(--crumb-parchment-deep);
+}
+.ia-profile-summary {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 5px;
+  padding: 9px 10px 11px;
+  border-bottom: 1px dashed #b9a886;
+}
+.ia-profile-menu-label { color: var(--crumb-pumpkin); font-size: 9px; font-weight: 800; letter-spacing: 0.08em; }
+.ia-profile-summary strong { color: var(--crumb-cocoa); font-size: 13px; }
+.ia-profile-summary span { overflow: hidden; color: #7a5a49; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-shell .ia-profile-menu a,
+.workspace-shell .ia-profile-menu button {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--crumb-cocoa);
+  font-size: 12px;
+  font-weight: 650;
+  text-align: left;
+  text-decoration: none;
+}
+.workspace-shell .ia-profile-menu a:hover,
+.workspace-shell .ia-profile-menu button:hover { background: var(--crumb-parchment); color: var(--crumb-forest); }
+.workspace-shell .ia-profile-menu .ia-profile-signout { color: #8a3f2d; }
+
+.ia-coach-backdrop {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  background: rgb(25 63 50 / 28%);
+  backdrop-filter: blur(2px);
+}
+.ia-coach-panel {
+  position: fixed;
+  z-index: 90;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  width: min(760px, calc(100vw - 250px));
+  min-width: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border-left: 2px solid var(--crumb-forest);
+  background: var(--crumb-parchment);
+  box-shadow: -12px 0 34px rgb(25 63 50 / 20%);
+}
+.ia-coach-panel-header {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--crumb-forest);
+  background: var(--crumb-cream);
+}
+.ia-coach-panel-header p { margin: 0; color: #7a5a49; font-size: 10px; font-weight: 750; letter-spacing: 0.08em; }
+.ia-coach-panel-header h2 { margin: 0; color: var(--crumb-cocoa); font-size: 18px; }
+.ia-coach-panel-body { min-height: 0; overflow: hidden; }
+.ia-coach-panel-body .coach-page {
+  display: grid;
+  height: 100%;
+  gap: 0;
+  padding: 0;
+  background: transparent;
+}
+.ia-coach-panel-body .coach-page-header { display: none; }
+.ia-coach-panel-body .coach-layout {
+  height: 100%;
+  min-height: 0;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 0;
+}
+.ia-coach-panel-body .coach-sidebar {
+  min-height: 0;
+  border-width: 0 1px 0 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.ia-coach-panel-body .coach-main {
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.ia-coach-panel-body .coach-messages { min-height: 0; }
+
+.ia-admin-hub,
+.ia-settings-hub { display: grid; gap: 16px; }
+.ia-hub-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 2px solid var(--crumb-forest);
+  border-radius: 22px 9px 18px 11px;
+  background: var(--crumb-parchment);
+}
+.ia-hub-header h1 { margin: 0 0 5px; color: var(--crumb-cocoa); font-size: clamp(27px, 3vw, 38px); }
+.ia-hub-header p:not(.eyebrow) { margin: 0; color: #765241; font-size: 13px; }
+.ia-hub-badge {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid var(--crumb-cocoa);
+  border-radius: 5px 10px 4px 9px;
+  background: var(--crumb-gold);
+  color: var(--crumb-cocoa);
+  font-size: 11px;
+  font-weight: 750;
+}
+.ia-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--workspace-line);
+  border-radius: 11px;
+  background: var(--workspace-surface);
+}
+.workspace-shell .ia-tab {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 13px;
+  border: 1px solid transparent;
+  border-radius: 7px 11px 6px 10px;
+  background: transparent;
+  color: #675247;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.workspace-shell .ia-tab:hover { background: var(--crumb-parchment); color: var(--crumb-cocoa); }
+.workspace-shell .ia-tab--active {
+  border-color: var(--crumb-cocoa);
+  background: var(--crumb-pumpkin);
+  color: var(--crumb-cocoa);
+  box-shadow: 2px 2px 0 var(--crumb-gold);
+}
+.ia-subsection-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.ia-subsection-header h2 { margin: 0 0 4px; color: var(--crumb-cocoa); font-size: 22px; }
+.ia-subsection-header p:not(.eyebrow) { margin: 0; color: var(--workspace-muted); font-size: 12px; }
+.ia-ai-platform { display: grid; gap: 14px; }
+.ia-subtabs { width: fit-content; }
+.ia-subtabs .ia-tab { min-width: 92px; }
+.ia-settings-hub .settings-page,
+.ia-settings-hub .notifications-page { padding: 0; }
+.ia-settings-hub .settings-hero,
+.ia-settings-hub .notifications-hero { display: none; }
+.ia-settings-hub .settings-form,
+.ia-settings-hub .notification-preference-structure,
+.ia-settings-hub .notification-quiet-panel { width: 100%; }
+.ia-account-security { display: grid; gap: 14px; }
+.ia-security-form { max-width: 640px; }
+
+.challenge-self-study {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 2px solid var(--crumb-forest);
+  border-radius: 9px 20px 8px 17px;
+  background: var(--crumb-cream);
+}
+.challenge-self-study > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.challenge-self-study h2 { margin: 0; color: var(--crumb-cocoa); font-size: 20px; }
+.challenge-self-study > header > span { color: #7a5a49; font-size: 11px; }
+.challenge-self-study__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.workspace-shell .challenge-self-study__card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: center;
+  padding: 13px;
+  border: 2px solid var(--crumb-cocoa);
+  border-radius: 8px 15px 7px 13px;
+  background: var(--crumb-parchment);
+  color: var(--crumb-cocoa);
+  text-decoration: none;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.workspace-shell .challenge-self-study__card:hover { color: var(--crumb-cocoa); transform: translateY(-2px); box-shadow: 3px 3px 0 var(--crumb-gold); }
+.challenge-self-study__mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--crumb-cocoa);
+  border-radius: 50%;
+  background: var(--crumb-gold);
+  color: var(--crumb-cocoa);
+  font-size: 13px;
+  font-weight: 800;
+}
+.challenge-self-study__mark--ai { background: var(--crumb-pumpkin); }
+.challenge-self-study__card strong,
+.challenge-self-study__card small { display: block; }
+.challenge-self-study__card strong { font-size: 14px; }
+.challenge-self-study__card small { margin-top: 2px; color: #755445; font-size: 11px; line-height: 1.4; }
+.challenge-self-study__card > svg { width: 16px; height: 16px; }
+
+@media (max-width: 1024px) {
+  .ia-coach-panel { width: min(720px, calc(100vw - 160px)); }
+  .ia-coach-panel-body .coach-layout { grid-template-columns: 190px minmax(0, 1fr); }
+  .ia-admin-hub .workspace-page-header,
+  .ia-settings-hub .workspace-page-header { gap: 12px; }
+}
+@media (max-width: 860px) {
+  .ia-coach-backdrop { background: rgb(25 63 50 / 42%); }
+  .ia-coach-panel { width: 100%; border-left: 0; }
+  .ia-coach-panel-body .coach-layout { height: 100%; grid-template-columns: 1fr; }
+  .ia-coach-panel-body .coach-sidebar { display: block; max-height: 190px; overflow-y: auto; border-right: 0; border-bottom: 1px solid var(--workspace-line); }
+  .ia-coach-panel-body .coach-main { min-height: 0; }
+  .ia-hub-header { padding: 15px 16px; }
+  .challenge-self-study__grid { grid-template-columns: 1fr; }
+  .challenge-self-study > header { display: grid; gap: 5px; }
+}
+@media (max-width: 620px) {
+  .ia-mobile-nav { grid-auto-columns: minmax(62px, 1fr); }
+  .ia-mobile-nav span { overflow: hidden; max-width: 72px; text-overflow: ellipsis; white-space: nowrap; }
+  .ia-profile-menu { position: fixed; top: 58px; right: 10px; }
+  .ia-coach-panel-header { min-height: 58px; padding: 8px 12px; }
+  .ia-tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .workspace-shell .ia-tab { flex: 0 0 auto; }
+  .ia-subsection-header { display: grid; }
+  .ia-admin-hub,
+  .ia-settings-hub { gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-shell .challenge-self-study__card { transition: none; }
+}

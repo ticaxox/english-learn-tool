@@ -452,5 +452,33 @@ onMounted(() => {
         <button v-if="historyHasMore" class="button-secondary challenge-history__more" type="button" :disabled="historyLoading" @click="loadHistory(false)">{{ historyLoading ? '正在加载…' : '加载更多历史' }}</button>
       </section>
     </template>
+
+    <section v-if="!loading && !error" class="challenge-self-study" aria-labelledby="challenge-self-study-title">
+      <header>
+        <div>
+          <p class="eyebrow">学习中心</p>
+          <h2 id="challenge-self-study-title">今天想换个方式练？</h2>
+        </div>
+        <span>不进入闯关主线，按自己的节奏练习。</span>
+      </header>
+      <div class="challenge-self-study__grid">
+        <RouterLink class="challenge-self-study__card" to="/memory">
+          <span class="challenge-self-study__mark" aria-hidden="true">Aa</span>
+          <span>
+            <strong>记忆练习</strong>
+            <small>翻卡、选择与拼写，巩固今天遇到的词。</small>
+          </span>
+          <AppIcon name="arrow" />
+        </RouterLink>
+        <RouterLink class="challenge-self-study__card" to="/practice">
+          <span class="challenge-self-study__mark challenge-self-study__mark--ai" aria-hidden="true">✦</span>
+          <span>
+            <strong>AI 练习</strong>
+            <small>按题型或难度生成一组真实练习。</small>
+          </span>
+          <AppIcon name="arrow" />
+        </RouterLink>
+      </div>
+    </section>
   </article>
 </template>
