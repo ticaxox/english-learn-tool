@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import CrumboMark from '../components/CrumboMark.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ChallengeBossPanel from '../components/ChallengeBossPanel.vue'
 import {
@@ -274,7 +275,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="challenge-page challenge-game-stage workspace-page">
+  <article class="challenge-page challenge-game-stage crumb-challenge workspace-page">
     <header class="workspace-page-header challenge-page-header">
       <div>
         <p class="eyebrow">每日闯关</p>
@@ -323,6 +324,7 @@ onMounted(() => {
       </section>
 
       <section v-if="nextNode" class="challenge-next-step" aria-labelledby="challenge-next-title">
+        <CrumboMark size="medium" />
         <div class="challenge-next-step__copy">
           <p class="workspace-kicker">下一步</p>
           <h2 id="challenge-next-title">{{ nextNode.title }}</h2>
@@ -361,6 +363,9 @@ onMounted(() => {
           </div>
         </div>
         <div class="challenge-path">
+          <svg class="crumb-route-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M15 2 C70 8 88 18 50 31 S12 52 62 64 S82 82 48 98" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round" />
+          </svg>
           <article
             v-for="(node, index) in mainNodes"
             :key="node.id"

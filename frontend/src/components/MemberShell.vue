@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
-import WhiskerCrumbMark from './WhiskerCrumbMark.vue'
+import CrumboMark from './CrumboMark.vue'
 
 const props = defineProps<{
   displayName: string
@@ -70,11 +70,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
   <div class="app-shell app-shell--member workspace-shell">
     <aside class="workspace-sidebar" aria-label="成员端主导航">
-      <RouterLink class="workspace-brand" to="/overview" aria-label="Whisker 今日学习">
-        <span class="workspace-brand-mark"><WhiskerCrumbMark size="small" /></span>
+      <RouterLink class="workspace-brand" to="/overview" aria-label="CrumbTrail 今日学习">
+        <span class="workspace-brand-mark"><CrumboMark size="small" /></span>
         <span class="workspace-brand-copy">
-          <strong>Whisker</strong>
-          <small>英语学习</small>
+          <strong>CrumbTrail</strong>
+          <small>英语学习路线</small>
         </span>
       </RouterLink>
 

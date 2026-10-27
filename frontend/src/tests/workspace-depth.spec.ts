@@ -28,9 +28,9 @@ function book(): Wordbook {
 describe('T-FE-017 workspace depth', () => {
   it('adds a readable Today progress ring and real streak/goal support', () => {
     const today = source('../views/TodayView.vue')
-    expect(today).toContain('today-progress-ring__value')
+    expect(today).toContain('crumb-route-progress')
     expect(today).toContain('<StudyStatsPanel')
-    expect(today).toContain('today-task-state')
+    expect(today).toContain('crumb-stop-state')
   })
 
   it('keeps compact wordbook cards free of technical English metadata', () => {

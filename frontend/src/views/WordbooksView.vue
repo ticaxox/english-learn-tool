@@ -20,6 +20,7 @@ import WordbookExportDialog from '../components/WordbookExportDialog.vue'
 import WordbookImportDialog from '../components/WordbookImportDialog.vue'
 import WordbookShelfCard from '../components/WordbookShelfCard.vue'
 import AppIcon from '../components/AppIcon.vue'
+import CrumboMark from '../components/CrumboMark.vue'
 
 const PAGE_SIZE = 12
 const auth = useAuthStore()
@@ -220,19 +221,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page">
-    <header class="workspace-page-header">
-      <div>
-        <p class="workspace-kicker">学习内容</p>
-        <h1>我的词书</h1>
-        <p class="workspace-page-lead">切换主词书，或导入一套自己的词汇。</p>
+  <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page" :class="{ 'crumb-wordbooks': !auth.isAdmin }">
+    <template v-if="auth.isAdmin">
+      <header class="workspace-page-header">
+        <div>
+          <p class="workspace-kicker">学习内容</p>
+          <h1>我的词书</h1>
+          <p class="workspace-page-lead">切换主词书，或导入一套自己的词汇。</p>
+        </div>
+        <button class="button workspace-primary-button" type="button" @click="importOpen = true">
+          <AppIcon name="plus" /> 导入词书
+        </button>
+      </header>
+    </template>
+    <header v-else class="crumb-shelf-header">
+      <div class="crumb-shelf-heading">
+        <CrumboMark size="medium" />
+        <div>
+          <p class="crumb-brand-kicker">CRUMBTRAIL LIBRARY</p>
+          <h1>咬一口，多记一个词。</h1>
+          <p>每一本词书，都是 Crumbo 留下的一串面包屑。</p>
+        </div>
       </div>
-      <button class="button workspace-primary-button" type="button" @click="importOpen = true">
+      <button class="button crumb-import-button" type="button" @click="importOpen = true">
         <AppIcon name="plus" /> 导入词书
       </button>
     </header>
 
-    <section class="workspace-card wordbook-active-banner wordbook-active-strip" :class="{ 'wordbook-active-banner--empty': !activeBook }">
+    <section class="workspace-card wordbook-active-banner wordbook-active-strip crumb-current-book" :class="{ 'wordbook-active-banner--empty': !activeBook }">
       <div class="wordbook-active-copy">
         <span class="wordbook-active-mark" aria-hidden="true">{{ activeBook?.name.slice(0, 1) ?? 'W' }}</span>
         <div>
@@ -244,7 +260,7 @@ onMounted(() => {
       <span v-if="activeBook" class="wordbook-status wordbook-status--active">使用中</span>
     </section>
 
-    <section class="workspace-card wordbooks-panel">
+    <section class="workspace-card wordbooks-panel" :class="{ 'crumb-bookshelf': !auth.isAdmin }">
       <div class="wordbook-toolbar">
         <div class="wordbook-tabs" role="group" aria-label="筛选词书">
           <button
@@ -311,7 +327,7 @@ onMounted(() => {
           </div>
           <div class="wordbook-grid">
             <WordbookShelfCard
-              v-for="book in organizationBooks"
+              v-for="(book, index) in organizationBooks"
               :key="book.id"
               :book="book"
               :status-label="statusLabel(book.status)"
@@ -322,6 +338,7 @@ onMounted(() => {
               :can-delete="canDelete(book)"
               :activating="activatingId === book.id"
               :compact="!auth.isAdmin"
+              :sequence="pageOffset + index + 1"
               @detail="detailId = book.id"
               @activate="activate(book)"
               @export="exportTarget = book"
@@ -337,7 +354,7 @@ onMounted(() => {
           </div>
           <div class="wordbook-grid">
             <WordbookShelfCard
-              v-for="book in privateBooks"
+              v-for="(book, index) in privateBooks"
               :key="book.id"
               :book="book"
               :status-label="statusLabel(book.status)"
@@ -348,6 +365,7 @@ onMounted(() => {
               :can-delete="canDelete(book)"
               :activating="activatingId === book.id"
               :compact="!auth.isAdmin"
+              :sequence="pageOffset + index + 1"
               @detail="detailId = book.id"
               @activate="activate(book)"
               @export="exportTarget = book"

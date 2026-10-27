@@ -12,8 +12,10 @@ const props = withDefaults(defineProps<{
   canDelete: boolean
   activating: boolean
   compact?: boolean
+  sequence?: number
 }>(), {
   compact: false,
+  sequence: 0,
 })
 
 const emit = defineEmits<{
@@ -25,6 +27,8 @@ const emit = defineEmits<{
 
 const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
 const coverTone = computed(() => {
+  if (props.sequence > 0) return ['sage', 'ocean', 'clay', 'slate'][(props.sequence - 1) % 4]
+
   const total = Array.from(props.book.id).reduce((sum, char) => sum + char.charCodeAt(0), 0)
   return ['sage', 'ocean', 'clay', 'slate'][total % 4]
 })
@@ -53,6 +57,12 @@ const coverTone = computed(() => {
         <span class="wordbook-status" :class="`wordbook-status--${book.status}`">{{ statusLabel }}</span>
         <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
       </div>
+      <template v-if="compact">
+        <span class="crumb-book-number">#{{ String(sequence).padStart(2, '0') }}</span>
+        <span class="crumb-book-bite crumb-book-bite--one" aria-hidden="true"></span>
+        <span class="crumb-book-bite crumb-book-bite--two" aria-hidden="true"></span>
+        <span class="crumb-book-bite crumb-book-bite--three" aria-hidden="true"></span>
+      </template>
       <strong class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
       <template v-if="!compact">
         <h3>{{ book.name }}</h3>
