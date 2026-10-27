@@ -25,7 +25,7 @@ const emit = defineEmits<{
   delete: []
 }>()
 
-const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
+const coverLetter = computed(() => props.book.name.trim().slice(0, 1).toUpperCase() || 'W')
 const coverTone = computed(() => {
   if (props.sequence > 0) return ['sage', 'ocean', 'clay', 'slate'][(props.sequence - 1) % 4]
 

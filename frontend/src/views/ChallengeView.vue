@@ -295,8 +295,8 @@ onMounted(() => {
       <div class="challenge-generate__mark" aria-hidden="true">✦</div>
       <div>
         <p class="eyebrow">今日路线</p>
-        <h2 id="challenge-generate-title">今天的地图还没有生成</h2>
-        <p>生成一条今天的学习路线。</p>
+        <h2 id="challenge-generate-title">今日地图尚未生成</h2>
+        <p>今天还没有可用的闯关路线，生成后将按顺序解锁。</p>
         <div class="challenge-preview-route" aria-label="闯关路线结构">
           <span>复习</span><i>→</i><span>新词</span><i>→</i><span>终点挑战</span>
         </div>

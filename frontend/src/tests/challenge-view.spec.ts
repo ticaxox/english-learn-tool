@@ -150,7 +150,7 @@ describe('challenge view', () => {
       .mockRejectedValueOnce(new ApiError(404, 'CHALLENGE_NOT_GENERATED', 'Not generated.', null, 'not-generated', false))
       .mockResolvedValueOnce(makePlan())
     const { wrapper } = await mountView()
-    expect(wrapper.text()).toContain('今天的地图还没有生成')
+    expect(wrapper.text()).toContain('今日地图尚未生成')
     await wrapper.get('.challenge-generate .button').trigger('click')
     await flushPromises()
     expect(challengeMocks.generateTodayChallenge).toHaveBeenCalledOnce()

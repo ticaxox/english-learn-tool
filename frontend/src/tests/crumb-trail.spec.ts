@@ -51,7 +51,7 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(source('../components/WordbookShelfCard.vue')).toContain('crumb-book-number')
   })
 
-  it('renders numbered book covers with structural bite marks', () => {
+  it('renders numbered book covers with structural bite marks', async () => {
     const wrapper = mount(WordbookShelfCard, {
       props: {
         book,
@@ -70,6 +70,11 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(wrapper.get('.crumb-book-number').text()).toContain('03')
     expect(wrapper.findAll('.crumb-book-bite')).toHaveLength(3)
     expect(wrapper.get('.wordbook-cover').classes()).toContain('wordbook-cover--clay')
+    expect(wrapper.get('.wordbook-cover-letter').text()).toBe('C')
+    await wrapper.setProps({ book: { ...book, name: 'Harbor Reader' } })
+    expect(wrapper.get('.wordbook-cover-letter').text()).toBe('H')
+    await wrapper.setProps({ book: { ...book, name: '  journey workbook' } })
+    expect(wrapper.get('.wordbook-cover-letter').text()).toBe('J')
   })
 
   it('uses a curved CrumbTrail route and castle boss structure', () => {
