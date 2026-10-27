@@ -278,7 +278,7 @@ onMounted(() => {
   <article class="challenge-page challenge-game-stage crumb-challenge workspace-page">
     <header class="workspace-page-header challenge-page-header">
       <div>
-        <p class="eyebrow">每日闯关</p>
+        <p class="eyebrow">学习中心 · 每日闯关</p>
         <h1>{{ plan?.title || '今天的学习地图' }}</h1>
         <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>

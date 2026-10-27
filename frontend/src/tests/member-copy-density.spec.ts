@@ -83,9 +83,9 @@ describe('member-facing Chinese copy density', () => {
     expect(shell).toContain("label: '词书'")
     expect(shell).toContain("label: '组织管理'")
     expect(shell).toContain("label: '设置'")
-    expect(shell).toContain("label: '每日闯关'")
-    expect(shell).toContain("label: '记忆练习'")
-    expect(shell).toContain("label: 'AI 练习'")
+    expect(shell).not.toContain("label: '每日闯关'")
+    expect(shell).not.toContain("label: '记忆练习'")
+    expect(shell).not.toContain("label: 'AI 练习'")
     expect(shell).toContain('学习管家')
     expect(shell).not.toContain("label: '通知'")
 

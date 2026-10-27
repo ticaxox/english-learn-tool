@@ -66,14 +66,13 @@ describe('T-FE-019 information architecture', () => {
     expect(admin.wrapper.get('[data-nav-group="organization"] a').attributes('href')).toBe('/admin/users')
   })
 
-  it('keeps learning subitems below one learning-center group and removes coach/notifications from primary navigation', async () => {
+  it('keeps one learning-center entry without nested navigation and removes coach/notifications from primary navigation', async () => {
     const { wrapper } = await mountShell(false)
     const learning = wrapper.get('[data-nav-group="learning"]')
-    expect(learning.findAll('.ia-nav-subitem').map((link) => link.text())).toEqual([
-      '每日闯关',
-      '记忆练习',
-      'AI 练习',
-    ])
+    expect(learning.findAll('.ia-nav-subitem')).toHaveLength(0)
+    expect(learning.text()).toContain('学习中心')
+    expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(false)
+    expect(wrapper.find('.workspace-nav a[href="/practice"]').exists()).toBe(false)
     expect(wrapper.get('.workspace-nav').text()).not.toContain('学习管家')
     expect(wrapper.get('.workspace-nav').text()).not.toContain('通知')
     expect(wrapper.get('.ia-notification-button').attributes('href')).toBe('/notifications')
@@ -118,7 +117,7 @@ describe('T-FE-019 information architecture', () => {
     const adminHtml = source('../views/AdminManagementView.vue')
     expect(adminHtml).toContain("label: '成员管理'")
     expect(adminHtml).toContain("label: '组织看板'")
-    expect(adminHtml).toContain("label: 'AI 平台'")
+    expect(adminHtml).toContain("label: 'AI 配置'")
 
     const aiHtml = source('../views/AdminAiPlatformView.vue')
     expect(aiHtml).toContain("label: '提供商'")

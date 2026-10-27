@@ -23,21 +23,10 @@ const coachCloseButton = ref<HTMLButtonElement | null>(null)
 let previousFocus: HTMLElement | null = null
 let coachReturnPath = '/overview'
 
-const learningLinks = [
-  { label: '每日闯关', to: '/challenges' },
-  { label: '记忆练习', to: '/memory' },
-  { label: 'AI 练习', to: '/practice' },
-]
 
 const primaryLinks = computed(() => [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
-  {
-    key: 'learning',
-    label: '学习中心',
-    to: '/challenges',
-    icon: 'trail' as const,
-    children: learningLinks,
-  },
+  { key: 'learning', label: '学习中心', to: '/challenges', icon: 'trail' as const },
   { key: 'wordbooks', label: '词书', to: '/wordbooks', icon: 'book' as const },
   ...(props.isAdmin
     ? [{ key: 'organization', label: '组织管理', to: '/admin/users', icon: 'admin' as const }]
@@ -54,8 +43,8 @@ const pageTitles: Record<string, string> = {
   'practice-records': '练习记录',
   'practice-mistakes': '练习错题',
   'practice-session': 'AI 练习',
-  challenges: '每日闯关',
-  'challenge-detail': '每日闯关',
+  challenges: '学习中心',
+  'challenge-detail': '学习中心',
   coach: '学习管家',
   notifications: '通知中心',
   'settings-learning': '设置',
@@ -209,17 +198,6 @@ onBeforeUnmount(() => {
             <AppIcon :name="link.icon" />
             <span>{{ link.label }}</span>
           </RouterLink>
-
-          <div v-if="link.children" class="ia-nav-children" aria-label="学习中心子项">
-            <RouterLink
-              v-for="child in link.children"
-              :key="child.to"
-              :to="child.to"
-              class="ia-nav-subitem"
-            >
-              {{ child.label }}
-            </RouterLink>
-          </div>
         </section>
       </nav>
     </aside>

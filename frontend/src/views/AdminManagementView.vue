@@ -6,7 +6,7 @@ const route = useRoute()
 const tabs = [
   { label: '成员管理', to: '/admin/users', key: 'members' },
   { label: '组织看板', to: '/admin/dashboard', key: 'dashboard' },
-  { label: 'AI 平台', to: '/admin/ai/providers', key: 'ai' },
+  { label: 'AI 配置', to: '/admin/ai/providers', key: 'ai' },
 ]
 
 const activeTab = computed(() => {
@@ -22,7 +22,7 @@ const activeTab = computed(() => {
       <div>
         <p class="eyebrow">组织管理</p>
         <h1>组织管理</h1>
-        <p>成员、学习看板与 AI 平台都在这里管理。</p>
+        <p>成员、学习看板与 AI 配置都在这里管理。</p>
       </div>
       <span class="ia-hub-badge">管理员</span>
     </header>

@@ -11,13 +11,13 @@ const tabs = [
   <section class="ia-ai-platform">
     <header class="ia-subsection-header">
       <div>
-        <p class="eyebrow">AI 平台</p>
-        <h2>平台配置</h2>
+        <p class="eyebrow">AI 配置</p>
+        <h2>配置与用量</h2>
         <p>只展示真实 API 返回的提供商、提示词与用量数据。</p>
       </div>
     </header>
 
-    <nav class="ia-tabs ia-subtabs" aria-label="AI 平台页签">
+    <nav class="ia-tabs ia-subtabs" aria-label="AI 配置页签">
       <RouterLink
         v-for="tab in tabs"
         :key="tab.to"

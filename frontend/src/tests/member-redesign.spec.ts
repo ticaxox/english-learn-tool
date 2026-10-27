@@ -55,7 +55,7 @@ describe('member redesign', () => {
     })
 
     expect(wrapper.findAll('.ia-nav-group')).toHaveLength(4)
-    expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(3)
+    expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(0)
     expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
     expect(wrapper.find('.ia-notification-button').attributes('href')).toBe('/notifications')
     expect(wrapper.text()).toContain('今天也学一点')
