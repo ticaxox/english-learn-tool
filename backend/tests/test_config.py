@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -40,3 +42,24 @@ def test_default_app_timezone_is_shanghai() -> None:
 def test_wordbook_job_stale_window_cannot_precede_worker_timeout() -> None:
     with pytest.raises(ValidationError):
         Settings(wordbook_job_stale_seconds=299)
+
+
+def test_local_cors_defaults_cover_both_loopback_hosts() -> None:
+    repo = Path(__file__).resolve().parents[2]
+    expected = "http://localhost:8080,http://127.0.0.1:8080"
+
+    assert Settings(cors_origins=expected).cors_origin_list == expected.split(",")
+    assert f"CORS_ORIGINS={expected}" in (repo / ".env.example").read_text(encoding="utf-8")
+    compose = (repo / "docker-compose.yml").read_text(encoding="utf-8")
+    assert f"${{CORS_ORIGINS:-{expected}}}" in compose
+    backend_example = (repo / "backend/.env.example").read_text(encoding="utf-8")
+    assert "http://localhost:8080" in backend_example
+    assert "http://127.0.0.1:8080" in backend_example
+
+
+def test_explicit_cors_allowlist_rejects_wildcard() -> None:
+    settings = Settings(cors_origins="https://app.example")
+
+    assert settings.cors_origin_list == ["https://app.example"]
+    with pytest.raises(ValidationError):
+        Settings(cors_origins="*")
