@@ -189,7 +189,7 @@ function cancel(): void {
   <section class="panel ai-form-panel" aria-labelledby="provider-form-title">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Provider 配置</p>
+        <p class="eyebrow">AI 提供商</p>
         <h2 id="provider-form-title">{{ title }}</h2>
       </div>
       <button class="button-secondary button-small" type="button" @click="cancel">关闭</button>
@@ -224,7 +224,7 @@ function cancel(): void {
           <label class="radio-option"><input v-model="apiKeyMode" type="radio" value="preserve" /> 保留已有 Key</label>
           <label class="radio-option"><input v-model="apiKeyMode" type="radio" value="replace" /> 提交新 Key</label>
         </div>
-        <p class="field-hint">冻结契约中的 PATCH null 表示“不修改”。本页不提供无效的清空动作；如需移除配置，请删除提供商。</p>
+        <p class="field-hint">保留现有 Key，或提交新的 Key；不再使用时可以删除该提供商。</p>
         <div v-if="apiKeyMode === 'replace'" class="field">
           <label for="provider-api-key-replace">新 API Key</label>
           <input
@@ -236,7 +236,7 @@ function cancel(): void {
             :aria-invalid="Boolean(errors.apiKey)"
           />
           <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
-          <p class="field-hint">只保存在当前表单内存；保存成功后立即清空。</p>
+          <p class="field-hint">保存后只显示服务端返回的掩码。</p>
         </div>
       </div>
 
@@ -251,28 +251,31 @@ function cancel(): void {
           :aria-invalid="Boolean(errors.apiKey)"
         />
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
-        <p class="field-hint">不会写入 localStorage/sessionStorage；保存后只显示服务端掩码。</p>
+        <p class="field-hint">保存后只显示服务端返回的掩码。</p>
       </div>
 
-      <div class="ai-form-grid">
-        <div class="field">
-          <label for="provider-priority">优先级（越小越靠前）</label>
-          <input id="provider-priority" v-model.number="priority" type="number" min="0" max="10000" step="1" />
-          <p v-if="errors.priority" class="field-error" role="alert">{{ errors.priority }}</p>
+      <details class="provider-advanced" :open="editing">
+        <summary>高级设置</summary>
+        <div class="ai-form-grid">
+          <div class="field">
+            <label for="provider-priority">备用顺序（数字越小越靠前）</label>
+            <input id="provider-priority" v-model.number="priority" type="number" min="0" max="10000" step="1" />
+            <p v-if="errors.priority" class="field-error" role="alert">{{ errors.priority }}</p>
+          </div>
+          <div class="field">
+            <label for="provider-timeout">请求超时（秒）</label>
+            <input id="provider-timeout" v-model.number="timeoutSeconds" type="number" min="1" max="120" step="1" />
+            <p v-if="errors.timeoutSeconds" class="field-error" role="alert">{{ errors.timeoutSeconds }}</p>
+          </div>
         </div>
-        <div class="field">
-          <label for="provider-timeout">超时（秒）</label>
-          <input id="provider-timeout" v-model.number="timeoutSeconds" type="number" min="1" max="120" step="1" />
-          <p v-if="errors.timeoutSeconds" class="field-error" role="alert">{{ errors.timeoutSeconds }}</p>
-        </div>
-      </div>
 
-      <div class="field">
-        <label for="provider-headers">自定义请求头（JSON）</label>
-        <textarea id="provider-headers" v-model="customHeadersText" rows="5" spellcheck="false"></textarea>
-        <p v-if="errors.customHeaders" class="field-error" role="alert">{{ errors.customHeaders }}</p>
-        <p class="field-hint">最多 10 个；Authorization、Cookie、Host 等安全头不可覆盖。</p>
-      </div>
+        <div class="field">
+          <label for="provider-headers">自定义请求头（JSON）</label>
+          <textarea id="provider-headers" v-model="customHeadersText" rows="4" spellcheck="false"></textarea>
+          <p v-if="errors.customHeaders" class="field-error" role="alert">{{ errors.customHeaders }}</p>
+          <p class="field-hint">最多 10 个；Authorization、Cookie、Host 等安全头不可覆盖。</p>
+        </div>
+      </details>
 
       <div class="checkbox-row">
         <label class="checkbox"><input v-model="enabled" type="checkbox" :disabled="isDefault" /> 启用</label>

@@ -7,24 +7,19 @@ import {
   type RouteRecordRaw,
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
-import AdminUsersView from '../views/AdminUsersView.vue'
-import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
-import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
-import AdminAiUsageView from '../views/AdminAiUsageView.vue'
-import AdminDashboardView from '../views/AdminDashboardView.vue'
+import AccountSecurityView from '../views/AccountSecurityView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import ChallengeView from '../views/ChallengeView.vue'
-import CoachView from '../views/CoachView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LearningSettingsView from '../views/LearningSettingsView.vue'
 import MemoryPracticeView from '../views/MemoryPracticeView.vue'
-import NotificationsView from '../views/NotificationsView.vue'
-import NotificationPreferencesView from '../views/NotificationPreferencesView.vue'
+import PersonalAiConfigView from '../views/PersonalAiConfigView.vue'
 import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeSessionView from '../views/PracticeSessionView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
 import MistakesView from '../views/MistakesView.vue'
+import SettingsHubView from '../views/SettingsHubView.vue'
 import TodayView from '../views/TodayView.vue'
 import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
@@ -58,6 +53,10 @@ const routes: RouteRecordRaw[] = [
         path: 'wordbooks',
         name: 'wordbooks',
         component: WordbooksView,
+      },
+      {
+        path: 'learning',
+        redirect: { name: 'challenges' },
       },
       {
         path: 'memory',
@@ -103,52 +102,33 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'coach',
         name: 'coach',
-        component: CoachView,
-      },
-      {
-        path: 'notifications',
-        name: 'notifications',
-        component: NotificationsView,
-      },
-      {
-        path: 'notifications/preferences',
-        name: 'notification-preferences',
-        component: NotificationPreferencesView,
+        component: TodayView,
+        meta: { coachPanel: true },
       },
       {
         path: 'settings',
-        name: 'settings',
-        component: LearningSettingsView,
-      },
-      {
-        path: 'admin/dashboard',
-        name: 'admin-dashboard',
-        component: AdminDashboardView,
-        meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/users',
-        name: 'admin-users',
-        component: AdminUsersView,
-        meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/ai/providers',
-        name: 'admin-providers',
-        component: AdminAiProvidersView,
-        meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/ai/prompts',
-        name: 'admin-prompts',
-        component: AdminAiPromptsView,
-        meta: { requiresRole: 'admin' },
-      },
-      {
-        path: 'admin/ai/usage',
-        name: 'admin-ai-usage',
-        component: AdminAiUsageView,
-        meta: { requiresRole: 'admin' },
+        component: SettingsHubView,
+        children: [
+          {
+            path: '',
+            redirect: { name: 'settings-learning' },
+          },
+          {
+            path: 'learning',
+            name: 'settings-learning',
+            component: LearningSettingsView,
+          },
+          {
+            path: 'ai',
+            name: 'settings-ai',
+            component: PersonalAiConfigView,
+          },
+          {
+            path: 'security',
+            name: 'settings-security',
+            component: AccountSecurityView,
+          },
+        ],
       },
       {
         path: ':pathMatch(.*)*',
@@ -200,13 +180,6 @@ export function createAppRouter(
 
     if (to.name === 'change-password') {
       return { name: 'overview' }
-    }
-
-    if (to.meta.requiresRole && auth.user?.role !== to.meta.requiresRole) {
-      return {
-        name: 'overview',
-        query: { access: 'denied' },
-      }
     }
 
     return true

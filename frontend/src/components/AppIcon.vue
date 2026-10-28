@@ -9,6 +9,7 @@ withDefaults(
       | 'coach'
       | 'bell'
       | 'settings'
+      | 'admin'
       | 'arrow'
       | 'close'
       | 'star'
@@ -49,6 +50,11 @@ withDefaults(
     <template v-else-if="name === 'settings'">
       <circle cx="12" cy="12" r="3" />
       <path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.5-2.3 1a7 7 0 0 0-1.7-1L14.5 3h-5l-.4 3a7 7 0 0 0-1.7 1L5 6l-2 3.5L5.1 11a7 7 0 0 0 0 2L3 14.5 5 18l2.4-1a7 7 0 0 0 1.7 1l.4 3h5l.4-3a7 7 0 0 0 1.7-1l2.4 1 2-3.5-2.1-1.5a7 7 0 0 0 .1-1Z" />
+    </template>
+    <template v-else-if="name === 'admin'">
+      <circle cx="9" cy="8" r="3" />
+      <circle cx="17" cy="9" r="2.4" />
+      <path d="M3.8 20a5.2 5.2 0 0 1 10.4 0M14.4 20a4.2 4.2 0 0 1 6.2-3.7" />
     </template>
     <template v-else-if="name === 'arrow'">
       <path d="M5 12h14M14 7l5 5-5 5" />

@@ -9,9 +9,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import CrumboMark from '../components/CrumboMark.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
+import StudyStatsPanel from '../components/StudyStatsPanel.vue'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -107,14 +109,10 @@ const activeTaskIndex = computed(() => {
   return index === -1 ? todayTasks.value.length - 1 : index
 })
 
+const shortfallText = computed(() => plan.value?.shortfallReason ? '今天的目标尚未全部完成。' : '')
+
 const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? null)
 const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
-const overallProgress = computed(() => {
-  if (!plan.value) return 0
-  const completed = plan.value.newWords.completed + plan.value.dueReviews.completed
-  const target = plan.value.newWords.target + plan.value.dueReviews.target
-  return percent(completed, target)
-})
 
 const heroNote = computed(() => {
   if (!plan.value) return '正在准备今天的学习计划。'
@@ -166,7 +164,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="today-page member-today-page today-workspace workspace-page">
+  <article class="today-page member-today-page crumb-today workspace-page">
     <ContractGate
       v-if="!frozen"
       :endpoints="['GET /learning/today', 'POST /learning/daily-plan/ensure']"
@@ -174,63 +172,93 @@ onMounted(() => {
 
     <LoadingState v-else-if="loading" label="正在读取今日计划…" />
 
-    <section v-else-if="error" class="panel workspace-card member-error-panel">
-      <ErrorNotice :error="error" retry-label="重新读取今日计划" @retry="load()" />
-      <div v-if="needsActiveWordbook" class="workspace-empty-state">
-        <strong>先选择一本词书</strong>
-        <p>选好词书后，今天的任务会自动出现。</p>
-        <RouterLink class="button workspace-secondary-button" to="/wordbooks">前往词书</RouterLink>
+    <section v-else-if="error" class="crumb-state-panel" :class="needsActiveWordbook ? 'crumb-empty-state' : 'crumb-error-panel'">
+      <div v-if="needsActiveWordbook" class="crumb-empty-note">
+        <CrumboMark size="medium" />
+        <div>
+          <strong>先选一本词书，路线才能开始。</strong>
+          <p>选好词书后，今天的任务会自动出现。</p>
+          <RouterLink class="crumb-inline-link" to="/wordbooks">去词书页</RouterLink>
+        </div>
       </div>
+      <ErrorNotice v-else :error="error" retry-label="重新读取今日计划" @retry="load()" />
     </section>
 
     <template v-else-if="plan">
-      <header class="workspace-page-header">
-        <div>
-          <p class="workspace-kicker">{{ plan.localDate }} · 今日学习</p>
-          <h1>今天先完成这几件事</h1>
-          <p class="workspace-page-lead">{{ heroNote }}</p>
+      <header class="crumb-today-header">
+        <div class="crumb-today-intro">
+          <div class="crumb-mascot-lockup">
+            <CrumboMark size="large" />
+            <div>
+              <p class="crumb-brand-kicker">CRUMBTRAIL · 今日学习路线</p>
+              <h1>跟着 Crumbo，捡完今天的知识碎屑。</h1>
+            </div>
+          </div>
+          <p class="crumb-today-note">{{ heroNote }}</p>
+          <RouterLink
+            v-if="primaryTask"
+            class="button crumb-primary-action crumb-today-mobile-cta"
+            :to="primaryTask.to"
+          >
+            {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
+            <AppIcon name="arrow" />
+          </RouterLink>
         </div>
-        <span class="workspace-status">{{ statusLabel }}</span>
+        <div class="crumb-today-stamp">
+          <span>{{ plan.localDate }}</span>
+          <strong>{{ statusLabel }}</strong>
+        </div>
       </header>
 
-      <div class="today-workbench">
-        <section class="workspace-card today-task-card" aria-labelledby="today-task-title">
-          <header class="workspace-section-header">
+      <div class="crumb-today-layout">
+        <section class="crumb-trail-board">
+          <header class="crumb-trail-board-head">
             <div>
-              <h2 id="today-task-title">今日任务</h2>
-              <p>按自己的节奏完成，进度会自动保存。</p>
+              <span class="crumb-eyebrow">今日任务 · 面包屑路线</span>
+              <h2>今天要捡 {{ todayTasks.length }} 块</h2>
             </div>
-            <span class="workspace-meta">{{ completedTaskCount }} / {{ todayTasks.length }} 完成</span>
+            <strong>{{ completedTaskCount }} / {{ todayTasks.length }} 完成</strong>
           </header>
 
-          <div v-if="!plan.wordbook" class="today-inline-notice">
-            <span>今天还没有主词书。</span>
-            <RouterLink to="/wordbooks">去选择词书</RouterLink>
+          <div
+            class="crumb-route-progress"
+            :style="{ '--crumb-progress': `${todayTasks.length ? (completedTaskCount / todayTasks.length) * 100 : 0}%` }"
+            role="progressbar"
+            :aria-valuenow="completedTaskCount"
+            aria-valuemin="0"
+            :aria-valuemax="Math.max(todayTasks.length, 1)"
+            aria-label="今日面包屑路线进度"
+          >
+            <span v-for="(task, index) in todayTasks" :key="task.key" :class="{ 'is-done': task.done, 'is-current': index === activeTaskIndex && !task.done }">
+              {{ index + 1 }}
+            </span>
           </div>
 
-          <ol class="today-task-list" aria-label="今日任务">
+          <ol class="crumb-trail-list" aria-label="今日任务">
             <li
               v-for="(task, index) in todayTasks"
               :key="task.key"
-              class="today-tile today-task-row"
-              :class="{ 'is-done': task.done, 'is-current': index === activeTaskIndex && !task.done }"
+              class="today-tile crumb-stop"
+              :class="[`crumb-stop--${task.key}`, { 'is-done': task.done, 'is-current': index === activeTaskIndex && !task.done }]"
             >
-              <span class="today-task-icon"><AppIcon :name="task.icon" /></span>
-              <div class="today-task-copy">
-                <div class="today-task-titleline">
+              <div class="crumb-stop-marker" aria-hidden="true">
+                <span>{{ index + 1 }}</span>
+              </div>
+              <div class="crumb-stop-card">
+                <div class="crumb-stop-heading">
                   <div>
-                    <span class="today-task-label">{{ task.label }}</span>
+                    <span class="crumb-stop-label">{{ task.eyebrow }} · {{ task.label }}</span>
                     <h3>{{ task.title }}</h3>
                   </div>
-                  <span class="today-task-state">{{ task.done ? '已完成' : index === activeTaskIndex ? '现在做' : '待开始' }}</span>
+                  <span class="crumb-stop-state">{{ task.done ? '已拾取' : index === activeTaskIndex ? '正在走' : '下一站' }}</span>
                 </div>
-                <div class="today-task-progressline">
+                <div class="crumb-stop-meta">
                   <span class="today-tile__value"><strong>{{ task.completed }}</strong><span>/ {{ task.target }} {{ task.unit }}</span></span>
                   <div
-                    class="workspace-progress today-task-progress"
+                    class="crumb-task-progress"
                     role="progressbar"
                     :aria-valuenow="task.completed"
-                    :aria-valuemin="0"
+                    aria-valuemin="0"
                     :aria-valuemax="Math.max(task.target, 1)"
                     :aria-label="`${task.label}进度 ${task.completed} / ${task.target}`"
                   >
@@ -238,67 +266,54 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
+              <AppIcon :name="task.icon" />
             </li>
           </ol>
 
-          <div class="today-task-footer">
-            <div>
-              <p v-if="plan.extraDueAvailable" class="today-extra-note">还有 {{ plan.extraDueCount }} 个到期词，可加练。</p>
-              <p v-else-if="plan.shortfallReason">{{ plan.shortfallReason }}</p>
-              <p v-else>完成一项，就离今天的目标更近一点。</p>
+          <footer class="crumb-trail-footer">
+            <div class="crumb-guide-note">
+              <CrumboMark size="medium" />
+              <div>
+                <span>CRUMBO 提示</span>
+                <p v-if="plan.extraDueAvailable">还有 {{ plan.extraDueCount }} 块到期复习，可以继续捡。</p>
+                <p v-else-if="shortfallText">{{ shortfallText }}</p>
+                <p v-else>跟着这条路线走，今天就算稳稳落地。</p>
+              </div>
             </div>
             <RouterLink
               v-if="primaryTask"
-              class="button workspace-primary-button today-primary-action"
+              class="button crumb-primary-action today-primary-action"
               :to="primaryTask.to"
             >
-              {{ completedTaskCount === todayTasks.length ? '再练一次' : '继续学习' }} <AppIcon name="arrow" />
+              {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
+              <AppIcon name="arrow" />
             </RouterLink>
-          </div>
+          </footer>
         </section>
 
-        <aside class="today-summary-aside" aria-label="今日学习摘要">
-          <section class="workspace-card today-progress-card">
-            <div class="today-progress-heading">
+        <aside class="crumb-today-side">
+          <section class="crumb-book-note">
+            <span class="crumb-eyebrow">当前词书</span>
+            <div class="crumb-book-note-body">
+              <span class="crumb-mini-cover">{{ plan.wordbook?.name.slice(0, 1) ?? '?' }}</span>
               <div>
-                <span class="workspace-kicker">今日进度</span>
-                <strong>{{ overallProgress }}%</strong>
+                <h2>{{ plan.wordbook?.name ?? '尚未选择' }}</h2>
+                <p>{{ plan.wordbook ? '今天的面包屑都来自这本书。' : '先去词书页选一本。' }}</p>
               </div>
-              <span class="today-progress-ring" :style="{ '--today-progress': `${overallProgress * 3.6}deg` }" aria-hidden="true"></span>
             </div>
-            <div
-              class="workspace-progress"
-              role="progressbar"
-              :aria-valuenow="plan.newWords.completed + plan.dueReviews.completed"
-              :aria-valuemin="0"
-              :aria-valuemax="Math.max(plan.newWords.target + plan.dueReviews.target, 1)"
-              aria-label="今日新词与到期复习总进度"
-            >
-              <span :style="{ width: `${overallProgress}%` }"></span>
-            </div>
-            <dl class="today-metric-list">
-              <div><dt>新词</dt><dd>{{ plan.newWords.completed }} / {{ plan.newWords.target }}</dd></div>
-              <div><dt>复习</dt><dd>{{ plan.dueReviews.completed }} / {{ plan.dueReviews.target }}</dd></div>
-              <div><dt>学习时间</dt><dd>{{ plan.minutes.active }} / {{ plan.minutes.goal }} 分钟</dd></div>
-            </dl>
+            <RouterLink class="crumb-inline-link" to="/wordbooks">{{ plan.wordbook ? '换一本' : '去选择' }}</RouterLink>
           </section>
 
-          <section class="workspace-card today-context-card">
-            <div class="today-context-row">
-              <span class="today-context-label">当前词书</span>
-              <strong>{{ plan.wordbook?.name ?? '尚未选择' }}</strong>
-              <RouterLink to="/wordbooks">{{ plan.wordbook ? '更换' : '选择' }}</RouterLink>
-            </div>
-            <div class="today-context-row">
-              <span class="today-context-label">AI 练习</span>
+          <StudyStatsPanel compact />
+
+          <section class="crumb-ai-note">
+            <span class="crumb-ai-dot" aria-hidden="true">✦</span>
+            <div>
+              <span class="crumb-eyebrow">AI 练习</span>
               <strong>{{ aiUnavailableLabel }}</strong>
-              <RouterLink to="/practice">去看看</RouterLink>
+              <p>想加练时，再开一轮。</p>
             </div>
-            <div class="today-coach-note">
-              <span>学习管家</span>
-              <p>卡住时，可以先问一句。</p>
-              <RouterLink to="/coach">去聊聊</RouterLink>
-            </div>
+            <RouterLink class="crumb-inline-link" to="/practice">去看看</RouterLink>
           </section>
         </aside>
       </div>

@@ -62,10 +62,11 @@ describe('Whisker Crumb theme contract', () => {
     expect(theme).not.toMatch(/url\(['"]?https?:/i)
   })
 
-  it('lets the shell distinguish an administrator without duplicating navigation state', () => {
-    expect(shell).toContain('class="app-shell app-shell--admin"')
-    expect(shell).toContain('<WhiskerCrumbMark size="small" />')
-    expect(shell).toContain('v-if="!auth.isAdmin"')
+  it('keeps one personal application shell without administrator navigation', () => {
+    expect(shell).toContain('<MemberShell')
+    expect(shell).not.toContain(':is-admin="auth.isAdmin"')
+    expect(shell).not.toContain('app-shell--admin')
+    expect(shell).not.toContain('WhiskerCrumbMark')
   })
 
   it('renders an abstract hat, eyes, moustache and bow without a human figure', () => {

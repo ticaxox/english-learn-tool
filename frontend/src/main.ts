@@ -8,6 +8,8 @@ import './style.css'
 import './cookie-theme.css'
 import './member-redesign.css'
 import './workspace-reset.css'
+import './information-architecture.css'
+import './personal-ui.css'
 
 const app = createApp(App)
 const pinia = createPinia()

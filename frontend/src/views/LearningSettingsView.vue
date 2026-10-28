@@ -248,14 +248,6 @@ onMounted(() => {
           <p class="inline-note">至少保留一种训练方式。</p>
         </fieldset>
 
-        <fieldset v-if="profile && (profile.department || profile.learningGroup)">
-          <legend>组织信息</legend>
-          <p class="field-hint">
-            部门：{{ profile.department ?? '未设置' }} · 学习小组：{{ profile.learningGroup ?? '未设置' }}
-          </p>
-          <p class="inline-note">组织归属由管理员维护，本页只读展示。</p>
-        </fieldset>
-
         <div class="button-row">
           <button class="button" type="submit" :disabled="saving">
             {{ saving ? '正在保存…' : '保存设置' }}

@@ -15,6 +15,7 @@ const props = withDefaults(
 
 const coordinate = computed(() => contractCoordinateLabel())
 const frozen = computed(() => isContractFrozen())
+const showDiagnostics = import.meta.env.DEV
 </script>
 
 <template>
@@ -22,26 +23,21 @@ const frozen = computed(() => isContractFrozen())
     <div class="contract-gate__mark" aria-hidden="true">✒</div>
     <div class="contract-gate__body">
       <h2>{{ props.title }}</h2>
-      <p>
-        后端 <code>T-BE-004</code> 尚未发布冻结的 OpenAPI。本页已就绪的路由、校验与交互骨架当前
-        <strong>不会</strong>读取任何数据，也不会用示例卡片、假评分或假计时占位。
-      </p>
-      <p class="contract-gate__coordinate">{{ coordinate }}</p>
-      <div class="contract-gate__endpoints">
-        <span class="contract-gate__label">待校准端点</span>
-        <ul>
-          <li v-for="endpoint in props.endpoints" :key="endpoint">
-            <code>{{ endpoint }}</code>
-          </li>
-        </ul>
-      </div>
-      <p v-if="frozen" class="inline-note">
-        契约坐标已写入，但解析器仍需按 OpenAPI 逐字段实现后才能展示数据。
-      </p>
-      <p v-else class="inline-note">
-        A01 给出唯一 <code>contract_sha</code> 与 <code>openapi_sha256</code> 后，本项目只需修改
-        <code>src/api/contract-adapter.ts</code> 一处即可完成校准。
-      </p>
+      <p>这项功能暂时不可用，请稍后再试。学习记录不会因此丢失。</p>
+      <details v-if="showDiagnostics">
+        <summary>开发诊断</summary>
+        <p class="contract-gate__coordinate">{{ coordinate }}</p>
+        <div class="contract-gate__endpoints">
+          <span class="contract-gate__label">待校准端点</span>
+          <ul>
+            <li v-for="endpoint in props.endpoints" :key="endpoint">
+              <code>{{ endpoint }}</code>
+            </li>
+          </ul>
+        </div>
+        <p v-if="frozen" class="inline-note">契约坐标已写入，解析器仍需逐字段校准。</p>
+        <p v-else class="inline-note">等待契约冻结后校准唯一解析入口。</p>
+      </details>
     </div>
   </section>
 </template>

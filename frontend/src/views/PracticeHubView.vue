@@ -120,7 +120,7 @@ async function loadMistakes(): Promise<void> {
 async function loadWordbooks(): Promise<void> {
   try {
     const page = await listWordbooks({ limit: 100 })
-    wordbooks.value = page.items.filter((book) => book.status === 'ready')
+    wordbooks.value = page.items.filter((book) => book.status === 'ready' && book.visibility === 'private')
     wordbooksError.value = null
   } catch (error) {
     wordbooks.value = []
@@ -194,13 +194,19 @@ onMounted(() => {
             v-for="type in types"
             :key="type"
             class="practice-type-card"
-            :class="{ 'practice-type-card--active': practiceType === type }"
+            :class="[`practice-type-card--${type}`, { 'practice-type-card--active': practiceType === type }]"
             type="button"
+            :data-practice-type="type"
             :aria-pressed="practiceType === type"
             @click="selectType(type)"
           >
-            <strong>{{ PRACTICE_TYPE_LABELS[type] }}</strong>
-            <span>{{ type === 'fill_blank' ? '词义与语境' : type === 'reading' ? '文章理解' : type === 'translation' ? '英译中/中译英' : 'AI 评分作文' }}</span>
+            <span class="practice-type-icon">
+              <AppIcon :name="type === 'fill_blank' ? 'cards' : type === 'reading' ? 'book' : type === 'translation' ? 'arrow' : 'spark'" />
+            </span>
+            <span class="practice-type-copy">
+              <strong>{{ PRACTICE_TYPE_LABELS[type] }}</strong>
+              <span>{{ type === 'fill_blank' ? '词义与语境' : type === 'reading' ? '文章理解' : type === 'translation' ? '英译中/中译英' : 'AI 评分作文' }}</span>
+            </span>
           </button>
         </div>
 
@@ -235,6 +241,14 @@ onMounted(() => {
           </div>
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
+          <div v-if="creating" class="practice-generation-state is-loading" role="status" aria-live="polite">
+            <span class="spinner" aria-hidden="true"></span>
+            <div><strong>正在生成练习</strong><span>正在读取素材并准备题目，请稍候。</span></div>
+          </div>
+          <div v-else-if="createError" class="practice-generation-state is-error" role="status">
+            <strong>这次没有生成成功</strong>
+            <span>可以调整条件后重试，当前设置会保留。</span>
+          </div>
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="practice-create-footer">
             <p>答案与解析只在提交后出现。</p>

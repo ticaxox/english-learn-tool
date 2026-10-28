@@ -338,15 +338,15 @@ onUnmounted(() => {
       <header class="dialog-heading">
         <div>
           <p class="eyebrow">预览 · 映射 · 异步导入</p>
-          <h2 id="wordbook-import-title">导入真实词书</h2>
+          <h2 id="wordbook-import-title">导入词书</h2>
         </div>
         <button class="icon-button" type="button" aria-label="关闭导入窗口" :disabled="taskRunning" @click="close">×</button>
       </header>
 
       <template v-if="!preview">
         <div class="alert alert-info">
-          <strong>文件会先进入服务端预览，不会直接写入词书。</strong>
-          <p>支持 CSV、JSON、TXT；映射必须包含 headword、definition_en 与 definition_zh。错误未清零时不会开放确认导入。</p>
+          <strong>先检查文件和字段映射，确认后才会保存。</strong>
+          <p>支持 CSV、JSON、TXT；至少需要识别单词、英文释义和中文释义。检查通过后才可确认导入。</p>
         </div>
 
         <form class="wordbook-form-grid" @submit.prevent="loadPreview">
@@ -371,7 +371,7 @@ onUnmounted(() => {
           <label class="field wordbook-form-full">
             <span>词书文件</span>
             <input type="file" accept=".csv,.json,.txt,text/csv,application/json,text/plain" :disabled="previewLoading" @change="chooseFile" />
-            <span class="field-hint">前端先做扩展名与 10 MiB 初步检查，最终格式、编码和大小以服务端为准。</span>
+            <span class="field-hint">单文件不超过 10 MiB；导入结果会在确认前再次检查。</span>
           </label>
         </form>
 
@@ -380,7 +380,7 @@ onUnmounted(() => {
 
         <footer class="dialog-actions button-row">
           <button type="button" :disabled="!canPreview" @click="loadPreview">
-            {{ previewLoading ? '服务端预览中…' : '预览并检查映射' }}
+            {{ previewLoading ? '正在检查文件…' : '预览并检查映射' }}
           </button>
           <button class="button-secondary" type="button" :disabled="previewLoading" @click="close">取消</button>
         </footer>

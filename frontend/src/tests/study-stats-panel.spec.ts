@@ -81,7 +81,7 @@ describe('StudyStatsPanel', () => {
     const wrapper = mount(StudyStatsPanel)
     await flush()
 
-    expect(wrapper.text()).toContain('统计服务暂不可用')
+    expect(wrapper.text()).toContain('学习服务暂不可用')
     expect(wrapper.text()).toContain('stats-request')
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('0 / 0')

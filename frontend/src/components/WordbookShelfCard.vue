@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Wordbook } from '../api/wordbooks'
 
 const props = withDefaults(defineProps<{
@@ -11,8 +12,10 @@ const props = withDefaults(defineProps<{
   canDelete: boolean
   activating: boolean
   compact?: boolean
+  sequence?: number
 }>(), {
   compact: false,
+  sequence: 0,
 })
 
 const emit = defineEmits<{
@@ -22,16 +25,26 @@ const emit = defineEmits<{
   delete: []
 }>()
 
-const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
+const coverLetter = computed(() => props.book.name.trim().slice(0, 1).toUpperCase() || 'W')
+const coverTone = computed(() => {
+  if (props.sequence > 0) return ['sage', 'ocean', 'clay', 'slate'][(props.sequence - 1) % 4]
+
+  const total = Array.from(props.book.id).reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  return ['sage', 'ocean', 'clay', 'slate'][total % 4]
+})
 </script>
 
 <template>
   <article
     class="wordbook-card"
-    :class="[`wordbook-card--${book.visibility}`, { 'wordbook-card--compact': compact }]"
+    :class="[
+      `wordbook-card--${book.visibility}`,
+      { 'wordbook-card--compact': compact, 'wordbook-card--active': book.is_active },
+    ]"
   >
     <div
       class="wordbook-cover"
+      :class="`wordbook-cover--${coverTone}`"
       :style="book.visibility === 'private'
         ? 'background-color:#244b64; background-image:radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem)'
         : 'background-color:var(--forest); background-image:radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem)'"
@@ -44,6 +57,12 @@ const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
         <span class="wordbook-status" :class="`wordbook-status--${book.status}`">{{ statusLabel }}</span>
         <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
       </div>
+      <template v-if="compact">
+        <span class="crumb-book-number">#{{ String(sequence).padStart(2, '0') }}</span>
+        <span class="crumb-book-bite crumb-book-bite--one" aria-hidden="true"></span>
+        <span class="crumb-book-bite crumb-book-bite--two" aria-hidden="true"></span>
+        <span class="crumb-book-bite crumb-book-bite--three" aria-hidden="true"></span>
+      </template>
       <strong class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
       <template v-if="!compact">
         <h3>{{ book.name }}</h3>
@@ -57,10 +76,12 @@ const coverLetter = props.book.name.trim().slice(0, 1).toUpperCase() || 'W'
         <h3>{{ book.name }}</h3>
         <span class="wordbook-entry-count">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
       </template>
-      <p class="wordbook-description">{{ book.description || '暂无描述' }}</p>
-      <p class="wordbook-card-meta">
-        {{ statusDescription }}<span>·</span>{{ formattedDate }}
-      </p>
+      <template v-if="!compact">
+        <p class="wordbook-description">{{ book.description || '暂无描述' }}</p>
+        <p class="wordbook-card-meta">
+          {{ statusDescription }}<span>·</span>{{ formattedDate }}
+        </p>
+      </template>
       <div class="wordbook-card-actions">
         <button class="button-secondary button-small" type="button" :aria-label="`查看 ${book.name} 的词条`" @click="emit('detail')">查看词条</button>
         <button

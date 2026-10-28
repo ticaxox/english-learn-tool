@@ -189,7 +189,7 @@ describe('admin AI views', () => {
     expect(providerId).toBe(defaultProvider.id)
     expect(patch.modelId).toBe('model-c')
     expect(patch).not.toHaveProperty('apiKey')
-    expect(wrapper.text()).toContain('PATCH null 表示“不修改”')
+    expect(wrapper.text()).toContain('保留现有 Key')
     expect(wrapper.text()).not.toContain('清空 Key')
   })
 
@@ -215,7 +215,7 @@ describe('admin AI views', () => {
     await wrapper.get('#prompt-template').setValue('Changed prompt template')
     await wrapper.get('form').trigger('submit')
     await flushPromises()
-    expect(wrapper.text()).toContain('模板不能为空')
+    expect(wrapper.text()).toContain('请检查填写内容后重试')
     expect(wrapper.text()).toContain('prompt-request')
     expect(wrapper.text()).not.toContain('已保存')
   })

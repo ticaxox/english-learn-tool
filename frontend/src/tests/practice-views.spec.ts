@@ -68,7 +68,7 @@ const recordPage: PracticeRecordPage = {
   total: 1, offset: 0, limit: 20,
 }
 const wordbookPage: WordbookListPage = {
-  items: [{ id: 'book-1', visibility: 'organization', status: 'ready', name: 'Core Words', version: '1', entry_count: 10, is_active: true, created_at: '2026-10-23T04:00:00Z', updated_at: '2026-10-23T04:00:00Z', description: null, owner_id: null, created_by: null }],
+  items: [{ id: 'book-1', visibility: 'private', status: 'ready', name: 'Core Words', version: '1', entry_count: 10, is_active: true, created_at: '2026-10-23T04:00:00Z', updated_at: '2026-10-23T04:00:00Z', description: null, owner_id: 'member-1', created_by: 'member-1' }],
   total: 1, offset: 0, limit: 100,
 }
 const question: PracticeQuestion = {

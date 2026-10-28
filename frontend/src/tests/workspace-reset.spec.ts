@@ -27,11 +27,12 @@ describe('T-FE-016 member workspace reset', () => {
 
   it('puts real Today tasks and the single primary action before supporting information', () => {
     const today = source('today')
-    expect(today).toContain('today-workbench')
-    expect(today).toContain('today-task-list')
+    expect(today).toContain('crumb-trail-board')
+    expect(today).toContain('crumb-trail-list')
     expect(today).toContain('today-primary-action')
-    expect(today).toContain('today-summary-aside')
+    expect(today).toContain('crumb-today-side')
     expect(today).not.toContain('member-hero')
+    expect(today).not.toContain('today-workbench')
   })
 
   it('organizes the work pages around their actual tasks instead of marketing heroes', () => {
@@ -50,7 +51,7 @@ describe('T-FE-016 member workspace reset', () => {
     expect(css).toContain('--workspace-canvas')
     expect(css).toContain('--workspace-accent')
     expect(css).toContain('.workspace-shell')
-    expect(css).toContain('.today-workbench')
+    expect(css).toContain('.crumb-trail-board')
     expect(css).toContain('@media (max-width: 1024px)')
     expect(css).not.toContain('Georgia')
   })

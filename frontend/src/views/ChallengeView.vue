@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import CrumboMark from '../components/CrumboMark.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ChallengeBossPanel from '../components/ChallengeBossPanel.vue'
 import {
@@ -60,6 +62,7 @@ const mainNodes = computed(() => (plan.value?.nodes ?? [])
   .filter((node) => !node.optional)
   .sort((left, right) => left.orderIndex - right.orderIndex))
 const optionalNodes = computed(() => (plan.value?.nodes ?? []).filter((node) => node.optional))
+const nextNode = computed(() => mainNodes.value.find((node) => node.status !== 'completed') ?? null)
 const todayLocalDate = computed(() => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date()))
 const readOnly = computed(() =>
   Boolean(plan.value && (plan.value.status === 'expired' || plan.value.localDate < todayLocalDate.value)),
@@ -273,10 +276,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="challenge-page challenge-game-stage workspace-page">
+  <article class="challenge-page challenge-game-stage crumb-challenge workspace-page">
     <header class="workspace-page-header challenge-page-header">
       <div>
-        <p class="eyebrow">每日闯关</p>
+        <p class="eyebrow">学习中心 · 每日闯关</p>
         <h1>{{ plan?.title || '今天的学习地图' }}</h1>
         <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>
@@ -293,8 +296,11 @@ onMounted(() => {
       <div class="challenge-generate__mark" aria-hidden="true">✦</div>
       <div>
         <p class="eyebrow">今日路线</p>
-        <h2 id="challenge-generate-title">今天的地图还没有生成</h2>
-        <p>生成一条今天的学习路线。</p>
+        <h2 id="challenge-generate-title">今日地图尚未生成</h2>
+        <p>今天还没有可用的闯关路线，生成后将按顺序解锁。</p>
+        <div class="challenge-preview-route" aria-label="闯关路线结构">
+          <span>复习</span><i>→</i><span>新词</span><i>→</i><span>终点挑战</span>
+        </div>
         <ErrorNotice v-if="generationError" :error="generationError" :show-retry="false" />
         <div class="button-row">
           <button class="button" type="button" :disabled="generating" @click="generateMap">
@@ -318,6 +324,19 @@ onMounted(() => {
         </div>
       </section>
 
+      <section v-if="nextNode" class="challenge-next-step" aria-labelledby="challenge-next-title">
+        <CrumboMark size="medium" />
+        <div class="challenge-next-step__copy">
+          <p class="workspace-kicker">下一步</p>
+          <h2 id="challenge-next-title">{{ nextNode.title }}</h2>
+          <p>{{ nextNode.description }}</p>
+        </div>
+        <span class="challenge-node__status" :class="`challenge-node__status--${nextNode.status}`">{{ CHALLENGE_STATUS_LABELS[nextNode.status] }}</span>
+        <button class="button workspace-primary-button" type="button" :disabled="nodeLoading || readOnly" @click="openNode(nextNode)">
+          {{ nodeActionLabel(nextNode) }}
+        </button>
+      </section>
+
       <div v-if="readOnly" class="alert alert-warning" role="status">
         <strong>跨日地图只读</strong>
         <p>这份地图已过期，只能查看结果。</p>
@@ -335,10 +354,26 @@ onMounted(() => {
       <section class="challenge-map" aria-labelledby="challenge-map-title">
         <div class="challenge-map__heading">
           <div><p class="eyebrow">主线</p><h2 id="challenge-map-title">今日主线</h2></div>
-          <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
+          <div class="challenge-map__tools">
+            <div class="challenge-state-legend" aria-label="节点状态说明">
+              <span class="is-current">当前</span>
+              <span class="is-done">已完成</span>
+              <span class="is-locked">未解锁</span>
+            </div>
+            <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
+          </div>
         </div>
         <div class="challenge-path">
-          <article v-for="(node, index) in mainNodes" :key="node.id" class="challenge-node" :class="[nodeStatusClass(node), { 'challenge-node--boss': node.nodeType === 'BOSS' }]">
+          <svg class="crumb-route-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M15 2 C70 8 88 18 50 31 S12 52 62 64 S82 82 48 98" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round" />
+          </svg>
+          <article
+            v-for="(node, index) in mainNodes"
+            :key="node.id"
+            class="challenge-node"
+            :class="[nodeStatusClass(node), { 'challenge-node--boss': node.nodeType === 'BOSS' }]"
+            :aria-current="nextNode?.id === node.id ? 'step' : undefined"
+          >
             <div class="challenge-node__marker" aria-hidden="true">{{ node.nodeType === 'BOSS' ? '★' : node.orderIndex }}</div>
             <div class="challenge-node__body">
               <div class="challenge-node__heading">
@@ -418,5 +453,33 @@ onMounted(() => {
         <button v-if="historyHasMore" class="button-secondary challenge-history__more" type="button" :disabled="historyLoading" @click="loadHistory(false)">{{ historyLoading ? '正在加载…' : '加载更多历史' }}</button>
       </section>
     </template>
+
+    <section v-if="!loading && !error" class="challenge-self-study" aria-labelledby="challenge-self-study-title">
+      <header>
+        <div>
+          <p class="eyebrow">学习中心</p>
+          <h2 id="challenge-self-study-title">今天想换个方式练？</h2>
+        </div>
+        <span>不进入闯关主线，按自己的节奏练习。</span>
+      </header>
+      <div class="challenge-self-study__grid">
+        <RouterLink class="challenge-self-study__card" to="/memory">
+          <span class="challenge-self-study__mark" aria-hidden="true">Aa</span>
+          <span>
+            <strong>记忆练习</strong>
+            <small>翻卡、选择与拼写，巩固今天遇到的词。</small>
+          </span>
+          <AppIcon name="arrow" />
+        </RouterLink>
+        <RouterLink class="challenge-self-study__card" to="/practice">
+          <span class="challenge-self-study__mark challenge-self-study__mark--ai" aria-hidden="true">✦</span>
+          <span>
+            <strong>AI 练习</strong>
+            <small>按题型或难度生成一组真实练习。</small>
+          </span>
+          <AppIcon name="arrow" />
+        </RouterLink>
+      </div>
+    </section>
   </article>
 </template>

@@ -37,7 +37,7 @@ function formatTime(value: string | null): string {
 }
 
 function roleLabel(message: CoachMessage): string {
-  return message.role === 'user' ? '你' : '学习管家'
+  return message.role === 'user' ? '你' : 'AI 教练'
 }
 
 function actionStatusLabel(receipt: CoachActionReceipt): string {
@@ -163,7 +163,7 @@ onBeforeUnmount(() => {
       <div class="coach-heading-lockup">
         <span class="coach-avatar"><WhiskerCrumbMark size="small" /></span>
         <div>
-          <p class="workspace-kicker">学习管家</p>
+          <p class="workspace-kicker">AI 教练</p>
           <h1>和 Mr. Whisker 聊聊</h1>
           <p class="workspace-page-lead">学习计划、复习顺序，或者一句想改得更自然的英文。</p>
         </div>
@@ -245,7 +245,7 @@ onBeforeUnmount(() => {
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
-          <p class="eyebrow">学习管家</p>
+          <p class="eyebrow">AI 教练</p>
           <h2>从一段长期对话开始</h2>
           <p>选择一段对话，或开始新的对话。</p>
           <div class="coach-suggested-prompts" aria-label="建议提问">
@@ -304,37 +304,52 @@ onBeforeUnmount(() => {
               class="coach-message"
               :class="`coach-message--${message.role}`"
             >
-              <div class="coach-message__meta">
-                <strong>{{ roleLabel(message) }}</strong>
-                <span>{{ formatTime(message.createdAt) }}</span>
-                <span v-if="message.status === 'streaming' || coach.streamingMessageId.value === message.id" class="coach-streaming-chip">正在回复</span>
-                <span v-else-if="message.status === 'failed'" class="coach-failed-chip">发送失败</span>
-              </div>
-              <p class="coach-message__text">{{ coach.messageText(message) || (message.status === 'queued' ? '正在组织回复…' : '') }}</p>
-              <p v-if="message.errorMessage" class="field-error" role="alert">{{ message.errorMessage }}</p>
-              <p v-if="coach.actionNotices[message.id]" class="coach-action-notice">{{ coach.actionNotices[message.id] }}</p>
+              <span class="coach-message-avatar" :class="`coach-message-avatar--${message.role}`" aria-hidden="true">
+                <WhiskerCrumbMark v-if="message.role === 'assistant'" size="small" />
+                <span v-else>你</span>
+              </span>
+              <div class="coach-message-body">
+                <div class="coach-message__meta">
+                  <strong>{{ roleLabel(message) }}</strong>
+                  <span>{{ formatTime(message.createdAt) }}</span>
+                  <span v-if="message.status === 'streaming' || coach.streamingMessageId.value === message.id" class="coach-streaming-chip">正在回复</span>
+                  <span v-else-if="message.status === 'failed'" class="coach-failed-chip">发送失败</span>
+                </div>
+                <div
+                  v-if="(message.status === 'queued' || message.status === 'streaming' || coach.streamingMessageId.value === message.id) && !coach.messageText(message)"
+                  class="coach-thinking"
+                  role="status"
+                  aria-label="AI 教练正在思考"
+                >
+                  <span></span><span></span><span></span>
+                  <em>正在思考</em>
+                </div>
+                <p v-else class="coach-message__text">{{ coach.messageText(message) }}</p>
+                <p v-if="message.errorMessage" class="field-error" role="alert">{{ message.errorMessage }}</p>
+                <p v-if="coach.actionNotices[message.id]" class="coach-action-notice">{{ coach.actionNotices[message.id] }}</p>
 
-              <section v-if="message.actions.length > 0" class="coach-actions" aria-label="已执行的调整">
-                <h3>已执行的调整</h3>
-                <article v-for="receipt in message.actions" :key="receipt.id" class="coach-receipt">
-                  <div class="coach-receipt__heading">
-                    <strong>{{ COACH_ACTION_LABELS[receipt.actionType] }}</strong>
-                    <span class="coach-receipt__status" :class="`coach-receipt__status--${receipt.status}`">{{ actionStatusLabel(receipt) }}</span>
-                  </div>
-                  <p>{{ receipt.summary }}</p>
-                  <p class="field-hint">可撤销至：{{ formatTime(receipt.expiresAt) }}</p>
-                  <p v-if="receipt.conflictMessage" class="field-error" role="alert">{{ receipt.conflictMessage }}</p>
-                  <button
-                    v-if="receipt.status === 'applied'"
-                    class="button-secondary button-small"
-                    type="button"
-                    :disabled="!canUndo(receipt) || coach.undoingReceiptId.value === receipt.id"
-                    @click="undo(receipt)"
-                  >
-                    {{ coach.undoingReceiptId.value === receipt.id ? '正在撤销…' : (canUndo(receipt) ? '撤销这次调整' : '已无法撤销') }}
-                  </button>
-                </article>
-              </section>
+                <section v-if="message.actions.length > 0" class="coach-actions" aria-label="已执行的调整">
+                  <h3>已执行的调整</h3>
+                  <article v-for="receipt in message.actions" :key="receipt.id" class="coach-receipt">
+                    <div class="coach-receipt__heading">
+                      <strong>{{ COACH_ACTION_LABELS[receipt.actionType] }}</strong>
+                      <span class="coach-receipt__status" :class="`coach-receipt__status--${receipt.status}`">{{ actionStatusLabel(receipt) }}</span>
+                    </div>
+                    <p>{{ receipt.summary }}</p>
+                    <p class="field-hint">可撤销至：{{ formatTime(receipt.expiresAt) }}</p>
+                    <p v-if="receipt.conflictMessage" class="field-error" role="alert">{{ receipt.conflictMessage }}</p>
+                    <button
+                      v-if="receipt.status === 'applied'"
+                      class="button-secondary button-small"
+                      type="button"
+                      :disabled="!canUndo(receipt) || coach.undoingReceiptId.value === receipt.id"
+                      @click="undo(receipt)"
+                    >
+                      {{ coach.undoingReceiptId.value === receipt.id ? '正在撤销…' : (canUndo(receipt) ? '撤销这次调整' : '已无法撤销') }}
+                    </button>
+                  </article>
+                </section>
+              </div>
             </article>
 
             <ErrorNotice
@@ -351,7 +366,7 @@ onBeforeUnmount(() => {
           <ErrorNotice v-if="coach.sendError.value" :error="coach.sendError.value" :show-retry="false" />
 
           <form class="coach-composer" @submit.prevent="submitMessage">
-            <label for="coach-message-input">给学习管家发消息</label>
+            <label for="coach-message-input">给 AI 教练发消息</label>
             <textarea
               id="coach-message-input"
               ref="composer"

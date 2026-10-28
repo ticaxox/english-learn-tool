@@ -5,6 +5,17 @@ import { PRACTICE_SUBMISSION_LABELS, PRACTICE_TYPE_LABELS, type PracticeResult }
 const props = defineProps<{ result: PracticeResult }>()
 
 const scoreLabel = computed(() => (props.result.score === null ? '—' : `${props.result.score} 分`))
+const submittedAtLabel = computed(() => {
+  if (!props.result.submittedAt) return '—'
+  const date = new Date(props.result.submittedAt)
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+})
 </script>
 
 <template>
@@ -21,13 +32,12 @@ const scoreLabel = computed(() => (props.result.score === null ? '—' : `${prop
     <section class="practice-result__summary">
       <div><strong>{{ result.correctCount ?? '—' }}</strong><span>答对</span></div>
       <div><strong>{{ result.wrongCount ?? '—' }}</strong><span>错题</span></div>
-      <div><strong>{{ result.submittedAt ?? '—' }}</strong><span>提交时间</span></div>
+      <div><strong>{{ submittedAtLabel }}</strong><span>提交时间</span></div>
     </section>
 
     <p v-if="result.errorCode" class="alert alert-warning">
-      <strong>评分失败</strong>
-      <span>{{ result.errorMessage }}</span>
-      <code>{{ result.errorCode }}</code>
+      <strong>评分没有完成</strong>
+      <span>请稍后重试；本次结果不会显示默认分数。</span>
     </p>
 
     <article v-for="(item, index) in result.questions" :key="item.questionId" class="panel result-question">

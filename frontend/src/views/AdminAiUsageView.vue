@@ -73,7 +73,7 @@ onMounted(() => {
   <article class="ai-admin-page usage-page">
     <header class="ai-admin-hero">
       <div>
-        <p class="eyebrow">管理员 · AI 平台</p>
+        <p class="eyebrow">管理员 · AI 配置</p>
         <h1>AI 用量</h1>
         <p class="lead">只展示聚合任务、额度与提供商结果，不提供用户题目、对话、草稿或私密词书正文。</p>
       </div>

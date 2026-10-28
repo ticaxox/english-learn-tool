@@ -10,7 +10,6 @@ import {
   listWordbooks,
   type Wordbook,
   type WordbookStatus,
-  type WordbookVisibility,
 } from '../api/wordbooks'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -20,15 +19,15 @@ import WordbookExportDialog from '../components/WordbookExportDialog.vue'
 import WordbookImportDialog from '../components/WordbookImportDialog.vue'
 import WordbookShelfCard from '../components/WordbookShelfCard.vue'
 import AppIcon from '../components/AppIcon.vue'
+import CrumboMark from '../components/CrumboMark.vue'
 
 const PAGE_SIZE = 12
+const CATALOG_PAGE_SIZE = 100
 const auth = useAuthStore()
-const books = ref<Wordbook[]>([])
+const catalog = ref<Wordbook[]>([])
 const loading = ref(false)
 const error = ref<unknown>(null)
-const total = ref(0)
 const pageOffset = ref(0)
-const pageLimit = ref(PAGE_SIZE)
 const operationMessage = ref('')
 const activationError = ref<unknown>(null)
 const activatingId = ref<string | null>(null)
@@ -36,7 +35,6 @@ let loadRequestId = 0
 
 const filters = reactive({
   search: '',
-  visibility: '' as WordbookVisibility | '',
 })
 
 const detailId = ref<string | null>(null)
@@ -46,29 +44,29 @@ const deleteTarget = ref<Wordbook | null>(null)
 
 const filteredBooks = computed(() => {
   const query = filters.search.trim().toLocaleLowerCase('zh-CN')
-  return books.value.filter((book) => {
-    const matchesVisibility = !filters.visibility || book.visibility === filters.visibility
+  return catalog.value.filter((book) => {
+    const matchesVisibility = book.visibility === 'private'
     const matchesSearch = !query
       || book.name.toLocaleLowerCase('zh-CN').includes(query)
       || (book.description ?? '').toLocaleLowerCase('zh-CN').includes(query)
     return matchesVisibility && matchesSearch
   })
 })
-const organizationBooks = computed(() => filteredBooks.value.filter((book) => book.visibility === 'organization'))
-const privateBooks = computed(() => filteredBooks.value.filter((book) => book.visibility === 'private'))
-const activeBook = computed(() => books.value.find((book) => book.is_active) ?? null)
-const filterActive = computed(() => Boolean(filters.search.trim() || filters.visibility))
-const empty = computed(() => !loading.value && !error.value && total.value === 0)
-const filteredEmpty = computed(() => !loading.value && !error.value && books.value.length > 0 && filteredBooks.value.length === 0)
+const visibleBooks = computed(() => filteredBooks.value.slice(pageOffset.value, pageOffset.value + PAGE_SIZE))
+const personalBookCount = computed(() => catalog.value.filter((book) => book.visibility === 'private').length)
+const activeBook = computed(() => catalog.value.find((book) => book.visibility === 'private' && book.is_active) ?? null)
+const filterActive = computed(() => Boolean(filters.search.trim()))
+const empty = computed(() => !loading.value && !error.value && personalBookCount.value === 0)
+const filteredEmpty = computed(() => !loading.value && !error.value && personalBookCount.value > 0 && filteredBooks.value.length === 0)
 const hasPrevious = computed(() => pageOffset.value > 0)
-const hasNext = computed(() => pageOffset.value + books.value.length < total.value)
+const hasNext = computed(() => pageOffset.value + visibleBooks.value.length < filteredBooks.value.length)
 const pageSummary = computed(() => {
-  if (total.value === 0) {
+  if (filteredBooks.value.length === 0) {
     return '0 本'
   }
   const start = pageOffset.value + 1
-  const end = Math.min(pageOffset.value + books.value.length, total.value)
-  return `${start}–${end} / 共 ${total.value} 本`
+  const end = Math.min(pageOffset.value + visibleBooks.value.length, filteredBooks.value.length)
+  return `${start}–${end} / 共 ${filteredBooks.value.length} 本`
 })
 
 const statusLabels: Record<WordbookStatus, string> = {
@@ -105,32 +103,36 @@ function formatDate(value: string): string {
 }
 
 function canExport(book: Wordbook): boolean {
-  return canExportWordbook(book, auth.user?.id ?? null, auth.isAdmin)
+  return canExportWordbook(book, auth.user?.id ?? null, false)
 }
 
 function canDelete(book: Wordbook): boolean {
-  return canDeleteWordbook(book, auth.user?.id ?? null, auth.isAdmin)
+  return canDeleteWordbook(book, auth.user?.id ?? null, false)
 }
 
-async function load(offset = pageOffset.value): Promise<void> {
+async function load(): Promise<void> {
   const requestId = ++loadRequestId
   loading.value = true
   error.value = null
   try {
-    const result = await listWordbooks({ offset, limit: PAGE_SIZE })
-    if (requestId !== loadRequestId) {
-      return
+    const items: Wordbook[] = []
+    let offset = 0
+    let total = Number.POSITIVE_INFINITY
+    while (offset < total) {
+      const result = await listWordbooks({ offset, limit: CATALOG_PAGE_SIZE })
+      if (requestId !== loadRequestId) return
+      items.push(...result.items)
+      total = result.total
+      if (result.items.length === 0) break
+      offset += result.items.length
     }
-    books.value = result.items
-    total.value = result.total
-    pageOffset.value = result.offset
-    pageLimit.value = result.limit
+    catalog.value = items
+    pageOffset.value = 0
   } catch (requestError) {
     if (requestId !== loadRequestId) {
       return
     }
-    books.value = []
-    total.value = 0
+    catalog.value = []
     error.value = requestError
   } finally {
     if (requestId === loadRequestId) {
@@ -139,29 +141,22 @@ async function load(offset = pageOffset.value): Promise<void> {
   }
 }
 
-function setVisibility(visibility: WordbookVisibility | ''): void {
-  filters.visibility = visibility
-}
-
-async function nextPage(): Promise<void> {
+function nextPage(): void {
   if (!hasNext.value || loading.value) {
     return
   }
-  await load(pageOffset.value + pageLimit.value)
+  pageOffset.value += PAGE_SIZE
 }
 
-async function previousPage(): Promise<void> {
+function previousPage(): void {
   if (!hasPrevious.value || loading.value) {
     return
   }
-  await load(Math.max(0, pageOffset.value - pageLimit.value))
+  pageOffset.value = Math.max(0, pageOffset.value - PAGE_SIZE)
 }
 
 async function reloadAfterMutation(): Promise<void> {
-  await load(pageOffset.value)
-  if (books.value.length === 0 && pageOffset.value > 0) {
-    await load(Math.max(0, pageOffset.value - pageLimit.value))
-  }
+  await load()
 }
 
 async function activate(book: Wordbook): Promise<void> {
@@ -175,7 +170,7 @@ async function activate(book: Wordbook): Promise<void> {
   try {
     await activateWordbook(book.id)
     operationMessage.value = `已将「${book.name}」设为当前主词书；旧词书和学习数据不会被清除。`
-    await load(pageOffset.value)
+    await load()
   } catch (requestError) {
     activationError.value = requestError
   } finally {
@@ -184,7 +179,7 @@ async function activate(book: Wordbook): Promise<void> {
 }
 
 function markDeleting(wordbookId: string): void {
-  const target = books.value.find((book) => book.id === wordbookId)
+  const target = catalog.value.find((book) => book.id === wordbookId)
   if (target) {
     target.status = 'deleting'
   }
@@ -199,14 +194,13 @@ async function deletionCompleted(): Promise<void> {
 
 async function importCompleted(): Promise<void> {
   operationMessage.value = '词书导入完成。'
-  pageOffset.value = 0
-  await load(0)
+  await load()
 }
 
 function closeDeleteDialog(): void {
   const shouldRefresh = Boolean(
     deleteTarget.value
-    && books.value.find((book) => book.id === deleteTarget.value?.id)?.status === 'deleting',
+    && catalog.value.find((book) => book.id === deleteTarget.value?.id)?.status === 'deleting',
   )
   deleteTarget.value = null
   if (shouldRefresh) {
@@ -215,24 +209,27 @@ function closeDeleteDialog(): void {
 }
 
 onMounted(() => {
-  void load(0)
+  void load()
 })
 </script>
 
 <template>
-  <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page">
-    <header class="workspace-page-header">
-      <div>
-        <p class="workspace-kicker">学习内容</p>
-        <h1>我的词书</h1>
-        <p class="workspace-page-lead">切换主词书，或导入一套自己的词汇。</p>
+  <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page crumb-wordbooks">
+    <header class="crumb-shelf-header">
+      <div class="crumb-shelf-heading">
+        <CrumboMark size="medium" />
+        <div>
+          <p class="crumb-brand-kicker">CRUMBTRAIL LIBRARY</p>
+          <h1>咬一口，多记一个词。</h1>
+          <p>每一本词书，都是 Crumbo 留下的一串面包屑。</p>
+        </div>
       </div>
-      <button class="button workspace-primary-button" type="button" @click="importOpen = true">
+      <button class="button crumb-import-button" type="button" @click="importOpen = true">
         <AppIcon name="plus" /> 导入词书
       </button>
     </header>
 
-    <section class="workspace-card wordbook-active-banner wordbook-active-strip" :class="{ 'wordbook-active-banner--empty': !activeBook }">
+    <section class="workspace-card wordbook-active-banner wordbook-active-strip crumb-current-book" :class="{ 'wordbook-active-banner--empty': !activeBook }">
       <div class="wordbook-active-copy">
         <span class="wordbook-active-mark" aria-hidden="true">{{ activeBook?.name.slice(0, 1) ?? 'W' }}</span>
         <div>
@@ -244,31 +241,15 @@ onMounted(() => {
       <span v-if="activeBook" class="wordbook-status wordbook-status--active">使用中</span>
     </section>
 
-    <section class="workspace-card wordbooks-panel">
+    <section class="workspace-card wordbooks-panel crumb-bookshelf">
       <div class="wordbook-toolbar">
-        <div class="wordbook-tabs" role="group" aria-label="筛选词书">
-          <button
-            type="button"
-            :class="{ 'wordbook-tab--active': filters.visibility === '' }"
-            :aria-pressed="filters.visibility === ''"
-            @click="setVisibility('')"
-          >全部</button>
-          <button
-            type="button"
-            :class="{ 'wordbook-tab--active': filters.visibility === 'organization' }"
-            :aria-pressed="filters.visibility === 'organization'"
-            @click="setVisibility('organization')"
-          >组织词书</button>
-          <button
-            type="button"
-            :class="{ 'wordbook-tab--active': filters.visibility === 'private' }"
-            :aria-pressed="filters.visibility === 'private'"
-            @click="setVisibility('private')"
-          >我的私有</button>
+        <div class="wordbook-toolbar-title">
+          <strong>个人词书</strong>
+          <span>{{ personalBookCount }} 本</span>
         </div>
 
         <label class="wordbook-search">
-          <span class="sr-only">在当前页搜索词书</span>
+          <span class="sr-only">搜索全部个人词书</span>
           <input
             v-model="filters.search"
             type="search"
@@ -277,16 +258,15 @@ onMounted(() => {
           />
         </label>
 
-        <button class="button-secondary button-small" type="button" :disabled="loading && books.length === 0" :aria-busy="loading" @click="load(pageOffset)">
+        <button class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
           {{ loading ? '读取中…' : '刷新' }}
         </button>
       </div>
 
-      <p v-if="filterActive" class="wordbook-filter-note" role="note">筛选仅作用于当前页。</p>
       <p v-if="operationMessage" class="alert alert-success" role="status">{{ operationMessage }}</p>
 
-      <LoadingState v-if="loading && books.length === 0" label="正在加载词书…" />
-      <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取词书" @retry="load(pageOffset)" />
+      <LoadingState v-if="loading && catalog.length === 0" label="正在加载词书…" />
+      <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取词书" @retry="load" />
 
       <div v-else-if="empty" class="workspace-empty-state wordbook-empty">
         <span class="wordbook-empty-mark" aria-hidden="true">Aa</span>
@@ -300,18 +280,18 @@ onMounted(() => {
 
         <div v-if="filteredEmpty" class="workspace-empty-state wordbook-empty">
           <span class="wordbook-empty-mark" aria-hidden="true">Aa</span>
-          <strong>当前页没有匹配项</strong>
-          <p>清除筛选，或翻到下一页继续查找。</p>
+          <strong>没有匹配的词书</strong>
+          <p>换一个关键词，或清除搜索后查看全部个人词书。</p>
         </div>
 
-        <section v-if="organizationBooks.length" class="wordbook-group" aria-labelledby="organization-books-heading">
+        <section v-if="filteredBooks.length" class="wordbook-group" aria-labelledby="private-books-heading">
           <div class="wordbook-group-heading">
-            <h2 id="organization-books-heading">组织词书</h2>
-            <span class="count-pill">{{ organizationBooks.length }} 本</span>
+            <h2 id="private-books-heading">{{ filterActive ? '搜索结果' : '词书书架' }}</h2>
+            <span class="count-pill">{{ filterActive ? `${filteredBooks.length} 个结果` : `${personalBookCount} 本` }}</span>
           </div>
           <div class="wordbook-grid">
             <WordbookShelfCard
-              v-for="book in organizationBooks"
+              v-for="(book, index) in visibleBooks"
               :key="book.id"
               :book="book"
               :status-label="statusLabel(book.status)"
@@ -321,33 +301,8 @@ onMounted(() => {
               :can-export="canExport(book)"
               :can-delete="canDelete(book)"
               :activating="activatingId === book.id"
-              :compact="!auth.isAdmin"
-              @detail="detailId = book.id"
-              @activate="activate(book)"
-              @export="exportTarget = book"
-              @delete="deleteTarget = book"
-            />
-          </div>
-        </section>
-
-        <section v-if="privateBooks.length" class="wordbook-group" aria-labelledby="private-books-heading">
-          <div class="wordbook-group-heading">
-            <h2 id="private-books-heading">我的私有词书</h2>
-            <span class="count-pill">{{ privateBooks.length }} 本</span>
-          </div>
-          <div class="wordbook-grid">
-            <WordbookShelfCard
-              v-for="book in privateBooks"
-              :key="book.id"
-              :book="book"
-              :status-label="statusLabel(book.status)"
-              :status-description="statusDescription(book)"
-              :formatted-date="formatDate(book.updated_at)"
-              :can-activate="canActivateWordbook(book)"
-              :can-export="canExport(book)"
-              :can-delete="canDelete(book)"
-              :activating="activatingId === book.id"
-              :compact="!auth.isAdmin"
+              compact
+              :sequence="pageOffset + index + 1"
               @detail="detailId = book.id"
               @activate="activate(book)"
               @export="exportTarget = book"
@@ -366,7 +321,7 @@ onMounted(() => {
 
     <WordbookImportDialog
       v-if="importOpen"
-      :is-admin="auth.isAdmin"
+      :is-admin="false"
       @close="importOpen = false"
       @completed="importCompleted"
     />
