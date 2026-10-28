@@ -207,7 +207,7 @@ function enumValue<T extends string>(value: unknown, allowed: readonly T[], cont
   return value as T
 }
 
-function parseProvider(value: unknown, index = 0): AiProvider {
+export function parseProvider(value: unknown, index = 0): AiProvider {
   const context = `AI 提供商响应 items[${index}]`
   const body = record(value, context)
   return {
@@ -332,7 +332,7 @@ export function parseAiUsage(payload: unknown): AiUsage {
   }
 }
 
-function serializeProviderCreate(input: ProviderCreateInput): Record<string, unknown> {
+export function serializeProviderCreate(input: ProviderCreateInput): Record<string, unknown> {
   return {
     name: input.name,
     base_url: input.baseUrl,
@@ -346,7 +346,7 @@ function serializeProviderCreate(input: ProviderCreateInput): Record<string, unk
   }
 }
 
-function serializeProviderPatch(input: ProviderPatchInput): Record<string, unknown> {
+export function serializeProviderPatch(input: ProviderPatchInput): Record<string, unknown> {
   const payload: Record<string, unknown> = {}
   if (input.name !== undefined) payload.name = input.name
   if (input.baseUrl !== undefined) payload.base_url = input.baseUrl

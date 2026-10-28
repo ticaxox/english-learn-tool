@@ -16,7 +16,16 @@ function user(role: CurrentUser['role'], mustChangePassword = false): CurrentUse
   }
 }
 
-describe('route guards', () => {
+function authenticatedRouter(role: CurrentUser['role'] = 'member', mustChangePassword = false) {
+  const pinia = createPinia()
+  const auth = useAuthStore(pinia)
+  auth.user = user(role, mustChangePassword)
+  auth.status = 'authenticated'
+  auth.initialized = true
+  return { router: createAppRouter(pinia, createMemoryHistory()), auth }
+}
+
+describe('personal route guards', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     apiClient.clearCredentials()
@@ -26,7 +35,6 @@ describe('route guards', () => {
     const pinia = createPinia()
     const auth = useAuthStore(pinia)
     auth.clearSession()
-
     const router = createAppRouter(pinia, createMemoryHistory())
     await router.push('/overview')
 
@@ -34,140 +42,49 @@ describe('route guards', () => {
     expect(router.currentRoute.value.query.redirect).toBe('/overview')
   })
 
-  it('blocks member access to admin routes', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/admin/users')
-
-    expect(router.currentRoute.value.name).toBe('overview')
-    expect(router.currentRoute.value.query.access).toBe('denied')
+  it('keeps the four personal destinations available to member accounts', async () => {
+    const { router } = authenticatedRouter('member')
+    for (const [path, name] of [
+      ['/overview', 'overview'],
+      ['/challenges', 'challenges'],
+      ['/wordbooks', 'wordbooks'],
+      ['/settings/learning', 'settings-learning'],
+      ['/settings/ai', 'settings-ai'],
+      ['/settings/security', 'settings-security'],
+      ['/coach', 'coach'],
+    ] as const) {
+      await router.push(path)
+      expect(router.currentRoute.value.name).toBe(name)
+    }
   })
 
-  it('blocks member access to the organization dashboard', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/admin/dashboard')
-
-    expect(router.currentRoute.value.name).toBe('overview')
-    expect(router.currentRoute.value.query.access).toBe('denied')
+  it.each(['member', 'admin'] as const)('removes legacy administration and notification routes for %s accounts', async (role) => {
+    const { router } = authenticatedRouter(role)
+    for (const path of [
+      '/admin',
+      '/admin/users',
+      '/admin/dashboard',
+      '/admin/ai/providers',
+      '/notifications',
+      '/notifications/preferences',
+      '/settings/notifications',
+    ]) {
+      await router.push(path)
+      expect(router.currentRoute.value.name).toBe('not-found')
+    }
   })
 
-  it('blocks member access to admin AI usage routes', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/admin/ai/usage')
-
-    expect(router.currentRoute.value.name).toBe('overview')
-    expect(router.currentRoute.value.query.access).toBe('denied')
-  })
-
-  it('allows members to open challenge list and read-only detail routes', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/challenges')
-    expect(router.currentRoute.value.name).toBe('challenges')
-    await router.push('/challenges/challenge-1')
-    expect(router.currentRoute.value.name).toBe('challenge-detail')
-  })
-  it('allows members to open the AI coach workspace', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/coach')
-    expect(router.currentRoute.value.name).toBe('coach')
-  })
-  it('allows members to open the notification center and preferences', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/notifications')
-    expect(router.currentRoute.value.name).toBe('notifications')
-
-    await router.push('/notifications/preferences')
-    expect(router.currentRoute.value.name).toBe('settings-notifications')
-  })
-
-  it('redirects unauthenticated notification access to login with a return path', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.clearSession()
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/notifications/preferences')
-
-    expect(router.currentRoute.value.name).toBe('login')
-    expect(router.currentRoute.value.query.redirect).toBe('/settings/notifications')
-  })
-  it('redirects learning-center and settings entry routes to their default tabs', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
+  it('redirects learning and settings roots to the first personal tab', async () => {
+    const { router } = authenticatedRouter('member')
     await router.push('/learning')
     expect(router.currentRoute.value.name).toBe('challenges')
-
     await router.push('/settings')
     expect(router.currentRoute.value.name).toBe('settings-learning')
-
-    await router.push('/settings/security')
-    expect(router.currentRoute.value.name).toBe('settings-security')
   })
 
-  it('routes organization management defaults to members and AI providers', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('admin')
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
-    await router.push('/admin')
-    expect(router.currentRoute.value.name).toBe('admin-users')
-
-    await router.push('/admin/ai')
-    expect(router.currentRoute.value.name).toBe('admin-providers')
-  })
   it('forces a password change before other authenticated routes', async () => {
-    const pinia = createPinia()
-    const auth = useAuthStore(pinia)
-    auth.user = user('member', true)
-    auth.status = 'authenticated'
-    auth.initialized = true
-
-    const router = createAppRouter(pinia, createMemoryHistory())
+    const { router } = authenticatedRouter('member', true)
     await router.push('/wordbooks')
-
     expect(router.currentRoute.value.name).toBe('change-password')
   })
 })

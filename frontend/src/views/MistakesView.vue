@@ -46,6 +46,18 @@ const priorityError = ref<unknown>(null)
 const page = computed(() => cursorHistory.value.length + 1)
 const canPrev = computed(() => cursorHistory.value.length > 0)
 
+function formatMistakeTime(value: string | null): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+}
+
 async function load(cursor: string | null = currentCursor.value): Promise<void> {
   if (!frozen.value) return
   const isFirstLoad = data.value === null
@@ -149,12 +161,12 @@ onMounted(() => {
             </thead>
             <tbody>
               <tr v-for="entry in data.items" :key="entry.stateId">
-                <th scope="row">{{ entry.headword }}</th>
-                <td>{{ entry.definition ?? '—' }}</td>
-                <td>背词训练 · {{ STATUS_LABELS[entry.status] }}</td>
-                <td>{{ entry.lastMistakeAt ?? '—' }}</td>
-                <td>{{ entry.mistakeCount }}</td>
-                <td>
+                <th scope="row" data-label="单词">{{ entry.headword }}</th>
+                <td data-label="释义">{{ entry.definition ?? '—' }}</td>
+                <td data-label="来源 / 状态">背词训练 · {{ STATUS_LABELS[entry.status] }}</td>
+                <td data-label="最近错误">{{ formatMistakeTime(entry.lastMistakeAt) }}</td>
+                <td data-label="次数">{{ entry.mistakeCount }}</td>
+                <td data-label="重点复习">
                   <button
                     class="link-button"
                     type="button"
@@ -166,7 +178,7 @@ onMounted(() => {
                   </button>
                   <span v-if="prioritising === entry.entryId" class="field-hint">更新中…</span>
                 </td>
-                <td>
+                <td data-label="操作">
                   <button
                     class="button-secondary button-small"
                     type="button"

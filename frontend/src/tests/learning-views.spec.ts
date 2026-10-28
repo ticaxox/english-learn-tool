@@ -126,7 +126,8 @@ describe('learning surfaces with the frozen contract', () => {
     expect(apiMocks.fetchLearningProfile).toHaveBeenCalledTimes(1)
     expect(wrapper.find('form').exists()).toBe(true)
     expect(wrapper.find('#daily-new-words').exists()).toBe(true)
-    expect(wrapper.text()).toContain('学习部')
+    expect(wrapper.text()).not.toContain('组织信息')
+    expect(wrapper.text()).not.toContain('学习部')
     expect(wrapper.text()).toContain('系统默认')
   })
 

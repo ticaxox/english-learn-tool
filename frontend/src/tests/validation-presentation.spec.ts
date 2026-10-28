@@ -41,8 +41,7 @@ describe('422 validation presentation', () => {
   it('ignores a 422 whose details are not the documented issue list', () => {
     const malformed = new ApiError(422, 'VALIDATION_ERROR', 'x', { issues: 'not-an-array' }, 'req-bad')
     expect(fieldIssues(malformed)).toEqual([])
-    // Falls back to the server message rather than an empty explanation.
-    expect(toErrorPresentation(malformed).message).toBe('x')
+    expect(toErrorPresentation(malformed).message).toBe('请检查填写内容后重试。')
   })
 
   it('renders each server issue with its field path and keeps the request id visible', () => {

@@ -120,7 +120,7 @@ async function loadMistakes(): Promise<void> {
 async function loadWordbooks(): Promise<void> {
   try {
     const page = await listWordbooks({ limit: 100 })
-    wordbooks.value = page.items.filter((book) => book.status === 'ready')
+    wordbooks.value = page.items.filter((book) => book.status === 'ready' && book.visibility === 'private')
     wordbooksError.value = null
   } catch (error) {
     wordbooks.value = []

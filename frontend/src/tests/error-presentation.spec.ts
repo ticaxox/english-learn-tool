@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { ApiError, toErrorPresentation } from '../api/errors'
 
 describe('error presentation', () => {
-  it('explains a proxy or gateway outage without implying a fake service', () => {
+  it('explains a service outage in product language', () => {
     const presentation = toErrorPresentation(
       new ApiError(502, 'HTTP_502', 'Bad Gateway', null, 'gateway-request', true),
     )
 
     expect(presentation).toEqual({
       title: '学习服务暂不可用',
-      message: 'Bad Gateway 请确认后端服务已启动且开发代理地址正确，然后重试。',
+      message: '服务正在恢复中，请稍后重试。',
       requestId: 'gateway-request',
       retryable: true,
     })
@@ -32,5 +32,14 @@ describe('error presentation', () => {
       requestId: 'csrf-request',
       retryable: false,
     })
+    expect(forbidden.message).not.toContain('CSRF')
+  })
+
+  it('sends an unavailable AI provider to personal settings', () => {
+    const presentation = toErrorPresentation(
+      new ApiError(503, 'AI_PROVIDER_UNAVAILABLE', 'No enabled AI provider is available.', null, 'ai-request', true),
+    )
+    expect(presentation.message).toContain('设置 → AI 配置')
+    expect(presentation.message).not.toContain('No enabled AI provider')
   })
 })

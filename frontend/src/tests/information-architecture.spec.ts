@@ -22,16 +22,12 @@ function makeRouter() {
       { path: '/memory', name: 'memory', component: StubPage },
       { path: '/practice', name: 'practice', component: StubPage },
       { path: '/coach', name: 'coach', component: StubPage },
-      { path: '/notifications', name: 'notifications', component: StubPage },
-      { path: '/admin/users', name: 'admin-users', component: StubPage },
-      { path: '/admin/dashboard', name: 'admin-dashboard', component: StubPage },
-      { path: '/admin/ai/providers', name: 'admin-providers', component: StubPage },
       {
         path: '/settings',
         component: SettingsHubView,
         children: [
           { path: 'learning', name: 'settings-learning', component: StubPage },
-          { path: 'notifications', name: 'settings-notifications', component: StubPage },
+          { path: 'ai', name: 'settings-ai', component: StubPage },
           { path: 'security', name: 'settings-security', component: StubPage },
         ],
       },
@@ -39,12 +35,12 @@ function makeRouter() {
   })
 }
 
-async function mountShell(isAdmin = false) {
+async function mountShell() {
   const router = makeRouter()
   await router.push('/overview')
   await router.isReady()
   const wrapper = mount(MemberShell, {
-    props: { displayName: 'Harold Chen', username: 'demo_member', isAdmin },
+    props: { displayName: 'Harold Chen', username: 'demo_member' },
     global: { plugins: [router] },
   })
   return { wrapper, router }
@@ -54,106 +50,82 @@ function source(path: string): string {
   return readFileSync(new URL(path, import.meta.url), 'utf8')
 }
 
-describe('T-FE-019 information architecture', () => {
-  it('shows five first-level groups to admins and hides organization management from members', async () => {
-    const member = await mountShell(false)
-    expect(member.wrapper.findAll('.ia-nav-group')).toHaveLength(4)
-    expect(member.wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
-    expect(member.wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
-
-    const admin = await mountShell(true)
-    expect(admin.wrapper.findAll('.ia-nav-group')).toHaveLength(5)
-    expect(admin.wrapper.get('[data-nav-group="organization"] a').attributes('href')).toBe('/admin/users')
+describe('T-FE-020 personal information architecture', () => {
+  it('shows exactly four first-level destinations for every personal account', async () => {
+    const { wrapper } = await mountShell()
+    const labels = wrapper.findAll('.ia-nav-primary').map((link) => link.text().trim())
+    expect(labels).toEqual(['今日学习', '学习中心', '词书', '设置'])
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
+    expect(wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
+    expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
   })
 
-  it('keeps one learning-center entry without nested navigation and removes coach/notifications from primary navigation', async () => {
-    const { wrapper } = await mountShell(false)
+  it('keeps learning center as one entry without nested practice navigation', async () => {
+    const { wrapper } = await mountShell()
     const learning = wrapper.get('[data-nav-group="learning"]')
     expect(learning.findAll('.ia-nav-subitem')).toHaveLength(0)
     expect(learning.text()).toContain('学习中心')
     expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(false)
     expect(wrapper.find('.workspace-nav a[href="/practice"]').exists()).toBe(false)
-    expect(wrapper.get('.workspace-nav').text()).not.toContain('AI 教练')
+    expect(wrapper.find('.workspace-nav a[href="/coach"]').exists()).toBe(false)
     expect(wrapper.get('.workspace-nav').text()).not.toContain('通知')
-    expect(wrapper.get('.ia-notification-button').attributes('href')).toBe('/notifications')
   })
 
-  it('moves profile and signout into the topbar avatar menu', async () => {
-    const { wrapper } = await mountShell(false)
+  it('keeps profile actions and the global AI coach on the shared shell', async () => {
+    const { wrapper, router } = await mountShell()
     await wrapper.get('.ia-profile-trigger').trigger('click')
     const menu = wrapper.get('.ia-profile-menu')
-    expect(menu.text()).toContain('个人资料')
-    expect(menu.text()).toContain('Harold Chen')
-    expect(menu.text()).toContain('@demo_member')
-    expect(menu.find('a[href="/settings"]').exists()).toBe(true)
+    expect(menu.find('a[href="/settings/learning"]').exists()).toBe(true)
     expect(menu.find('a[href="/settings/security"]').exists()).toBe(true)
     expect(menu.text()).toContain('退出登录')
-  })
 
-  it('opens the global coach panel and the /coach deep link without a left navigation item', async () => {
-    const { wrapper, router } = await mountShell(false)
-    expect(wrapper.get('.ia-coach-toggle').attributes('aria-label')).toBe('打开 AI 教练')
     await wrapper.get('.ia-coach-toggle').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('coach')
     expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
-    await flushPromises()
-    await wrapper.get('.ia-coach-panel button[aria-label="关闭 AI 教练"]').trigger('click')
-    await flushPromises()
-    expect(router.currentRoute.value.name).toBe('overview')
-
-    const deepLinkRouter = makeRouter()
-    await deepLinkRouter.push('/coach')
-    await deepLinkRouter.isReady()
-    const deepLink = mount(MemberShell, {
-      props: { displayName: 'Harold Chen', username: 'demo_member', isAdmin: false },
-      global: { plugins: [deepLinkRouter] },
-    })
-    await flushPromises()
-    expect(deepLink.find('.ia-coach-panel').exists()).toBe(true)
   })
 
-  it('defines organization and AI platform internal tabs plus the merged settings tabs', async () => {
-    const adminHtml = source('../views/AdminManagementView.vue')
-    expect(adminHtml).toContain("label: '成员管理'")
-    expect(adminHtml).toContain("label: '组织看板'")
-    expect(adminHtml).toContain("label: 'AI 配置'")
-
-    const aiHtml = source('../views/AdminAiPlatformView.vue')
-    expect(aiHtml).toContain("label: '提供商'")
-    expect(aiHtml).toContain("label: '提示词'")
-    expect(aiHtml).toContain("label: '用量'")
-
-    const router = makeRouter()
-    await router.push('/settings/notifications')
+  it('defines exactly the three personal settings tabs', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{
+        path: '/settings',
+        component: StubPage,
+        children: [
+          { path: 'learning', name: 'settings-learning', component: StubPage },
+          { path: 'ai', name: 'settings-ai', component: StubPage },
+          { path: 'security', name: 'settings-security', component: StubPage },
+        ],
+      }],
+    })
+    await router.push('/settings/ai')
     await router.isReady()
     const settings = mount(SettingsHubView, { global: { plugins: [router] } })
-    const settingsTabs = settings.findAll('.ia-settings-tabs')[0].findAll('.ia-tab')
-    expect(settingsTabs).toHaveLength(3)
-    expect(settingsTabs.find((tab) => tab.classes().includes('ia-tab--active'))?.text()).toContain('通知与免打扰')
+    const tabs = settings.findAll('.ia-settings-tabs .ia-tab')
+    expect(tabs.map((tab) => tab.text().trim())).toEqual(['学习设置', 'AI 配置', '账户与安全'])
+    expect(tabs.map((tab) => tab.attributes('href'))).toEqual([
+      '/settings/learning',
+      '/settings/ai',
+      '/settings/security',
+    ])
+    expect(settings.get('.ia-tab--active').text()).toContain('AI 配置')
   })
 
-  it('keeps training controls horizontal and member actions discoverable at 1024', () => {
-    const settings = source('../views/LearningSettingsView.vue')
-    const adminUsers = source('../views/AdminUsersView.vue')
-    const css = source('../information-architecture.css')
-    expect(settings).toContain('class="field field-inline"')
-    expect(settings).toContain('class="checkbox"')
-    expect(css).toContain('.ia-settings-hub .checkbox input[type="checkbox"]')
-    expect(css).toContain('min-width: 3.5rem')
-    expect(css).toContain('white-space: nowrap')
-    expect(adminUsers).toContain('class="member-actions-menu"')
-    expect(adminUsers).toContain('的更多操作')
-    expect(adminUsers).toContain('重置密码')
-    expect(adminUsers).toContain('删除')
-    expect(css).toContain('.member-actions-cell')
-    expect(css).toContain('position: sticky')
-  })
-  it('exposes the two self-study entries from the challenge page', () => {
+  it('keeps learning-center support cards subordinate to the daily challenge', () => {
     const challenge = source('../views/ChallengeView.vue')
+    const css = source('../personal-ui.css')
     expect(challenge).toContain('challenge-self-study')
     expect(challenge).toContain('to="/memory"')
     expect(challenge).toContain('to="/practice"')
-    expect(source('../information-architecture.css')).toContain('.ia-coach-panel')
+    expect(css).toContain('.personal-workspace .challenge-self-study')
+    expect(css).toContain('.personal-workspace .challenge-generate')
+  })
+
+  it('does not restore legacy organization or notification routes in the production router', () => {
+    const router = source('../router/index.ts')
+    expect(router).not.toContain("path: 'admin'")
+    expect(router).not.toContain("path: 'notifications'")
+    expect(router).toContain("path: 'ai'")
+    expect(router).toContain('PersonalAiConfigView')
   })
 })

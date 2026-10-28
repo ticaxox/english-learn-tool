@@ -45,6 +45,18 @@ const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)))
 const canPrev = computed(() => offset.value > 0)
 const canNext = computed(() => offset.value + limit < total.value)
 
+function formatSubmittedAt(value: string | null): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+}
+
 function newKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
   return `practice-delete-${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -141,7 +153,7 @@ onMounted(() => {
       <div>
         <p class="eyebrow">{{ props.onlyMistakes ? 'AI 练习错题' : '练习记录' }}</p>
         <h1>{{ props.onlyMistakes ? '需要再练的 AI 题' : '练习记录与结果' }}</h1>
-        <p class="lead">只展示当前账号的真实练习记录；提交前内容与用户答案不会出现在这里。</p>
+        <p class="lead">回看已完成练习、成绩和需要再练的题目。</p>
       </div>
       <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
     </header>
@@ -164,7 +176,7 @@ onMounted(() => {
       <label v-if="!props.onlyMistakes" class="checkbox record-mistake-toggle">
         <input v-model="mistakesOnly" type="checkbox" /> 只看错题
       </label>
-      <p class="inline-note">当前契约按提交时间倒序返回，暂未提供时间范围查询参数。</p>
+      <p class="inline-note">记录按最近提交时间排列。</p>
     </section>
 
     <LoadingState v-if="loading" label="正在读取练习记录…" />
@@ -191,16 +203,16 @@ onMounted(() => {
           <thead><tr><th scope="col">选择</th><th scope="col">题型</th><th scope="col">来源</th><th scope="col">结果</th><th scope="col">提交时间</th><th scope="col">操作</th></tr></thead>
           <tbody>
             <tr v-for="record in records" :key="record.id">
-              <td><input type="checkbox" :checked="selected.includes(record.id)" :aria-label="`选择${PRACTICE_TYPE_LABELS[record.practiceType]}记录`" @change="toggleSelected(record.id)" /></td>
-              <td>{{ PRACTICE_TYPE_LABELS[record.practiceType] }}<br /><small>{{ record.totalQuestions }} 题</small></td>
-              <td>{{ PRACTICE_SOURCE_LABELS[record.source] }}</td>
-              <td>
+              <td data-label="选择"><input type="checkbox" :checked="selected.includes(record.id)" :aria-label="`选择${PRACTICE_TYPE_LABELS[record.practiceType]}记录`" @change="toggleSelected(record.id)" /></td>
+              <td data-label="题型">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}<br /><small>{{ record.totalQuestions }} 题</small></td>
+              <td data-label="来源">{{ PRACTICE_SOURCE_LABELS[record.source] }}</td>
+              <td data-label="结果">
                 <span class="status-badge" :class="record.status === 'submitted' ? 'status-badge--success' : 'status-badge--muted'">{{ PRACTICE_STATUS_LABELS[record.status] }}</span>
                 <small v-if="record.score !== null"> · {{ record.score }} 分</small>
                 <small v-if="record.wrongCount !== null"> · {{ record.wrongCount }} 错</small>
               </td>
-              <td>{{ record.submittedAt ?? '—' }}</td>
-              <td><button class="link-button" type="button" @click="openDetail(record)">查看结果</button></td>
+              <td data-label="提交时间">{{ formatSubmittedAt(record.submittedAt) }}</td>
+              <td data-label="操作"><button class="link-button" type="button" @click="openDetail(record)">查看结果</button></td>
             </tr>
           </tbody>
         </table>

@@ -24,18 +24,24 @@ const canRetry = computed(() => props.showRetry ?? presentation.value.retryable)
 </script>
 
 <template>
-  <section class="alert alert-error" role="alert" aria-live="polite">
-    <strong>{{ presentation.title }}</strong>
+  <section class="alert alert-error error-notice" role="alert" aria-live="polite">
+    <div class="error-notice__heading">
+      <span class="error-notice__mark" aria-hidden="true">!</span>
+      <strong>{{ presentation.title }}</strong>
+    </div>
     <p>{{ presentation.message }}</p>
-    <ul v-if="issues.length > 0" class="field-issue-list">
-      <li v-for="issue in issues" :key="`${issue.path}-${issue.message}`">
-        <strong v-if="issue.path"><code>{{ issue.path }}</code></strong>
-        {{ issue.message }}
-      </li>
-    </ul>
-    <p v-if="presentation.requestId" class="request-id">
-      问题编号：<code>{{ presentation.requestId }}</code>
-    </p>
+    <details v-if="issues.length > 0 || presentation.requestId">
+      <summary>查看问题详情</summary>
+      <ul v-if="issues.length > 0" class="field-issue-list">
+        <li v-for="issue in issues" :key="`${issue.path}-${issue.message}`">
+          <strong v-if="issue.path"><code>{{ issue.path }}</code></strong>
+          {{ issue.message }}
+        </li>
+      </ul>
+      <p v-if="presentation.requestId" class="request-id">
+        服务编号：<code>{{ presentation.requestId }}</code>
+      </p>
+    </details>
     <div v-if="canRetry" class="button-row">
       <button class="button-secondary" type="button" @click="emit('retry')">
         {{ props.retryLabel }}

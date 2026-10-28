@@ -8,21 +8,13 @@ import {
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import AccountSecurityView from '../views/AccountSecurityView.vue'
-import AdminAiPlatformView from '../views/AdminAiPlatformView.vue'
-import AdminManagementView from '../views/AdminManagementView.vue'
-import AdminUsersView from '../views/AdminUsersView.vue'
-import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
-import AdminAiPromptsView from '../views/AdminAiPromptsView.vue'
-import AdminAiUsageView from '../views/AdminAiUsageView.vue'
-import AdminDashboardView from '../views/AdminDashboardView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import ChallengeView from '../views/ChallengeView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LearningSettingsView from '../views/LearningSettingsView.vue'
 import MemoryPracticeView from '../views/MemoryPracticeView.vue'
-import NotificationsView from '../views/NotificationsView.vue'
-import NotificationPreferencesView from '../views/NotificationPreferencesView.vue'
+import PersonalAiConfigView from '../views/PersonalAiConfigView.vue'
 import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeSessionView from '../views/PracticeSessionView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
@@ -114,16 +106,6 @@ const routes: RouteRecordRaw[] = [
         meta: { coachPanel: true },
       },
       {
-        path: 'notifications',
-        name: 'notifications',
-        component: NotificationsView,
-      },
-      {
-        path: 'notifications/preferences',
-        name: 'notification-preferences',
-        redirect: { name: 'settings-notifications' },
-      },
-      {
         path: 'settings',
         component: SettingsHubView,
         children: [
@@ -137,60 +119,14 @@ const routes: RouteRecordRaw[] = [
             component: LearningSettingsView,
           },
           {
-            path: 'notifications',
-            name: 'settings-notifications',
-            component: NotificationPreferencesView,
+            path: 'ai',
+            name: 'settings-ai',
+            component: PersonalAiConfigView,
           },
           {
             path: 'security',
             name: 'settings-security',
             component: AccountSecurityView,
-          },
-        ],
-      },
-      {
-        path: 'admin',
-        component: AdminManagementView,
-        meta: { requiresRole: 'admin' },
-        children: [
-          {
-            path: '',
-            redirect: { name: 'admin-users' },
-          },
-          {
-            path: 'users',
-            name: 'admin-users',
-            component: AdminUsersView,
-          },
-          {
-            path: 'dashboard',
-            name: 'admin-dashboard',
-            component: AdminDashboardView,
-          },
-          {
-            path: 'ai',
-            component: AdminAiPlatformView,
-            children: [
-              {
-                path: '',
-                redirect: { name: 'admin-providers' },
-              },
-              {
-                path: 'providers',
-                name: 'admin-providers',
-                component: AdminAiProvidersView,
-              },
-              {
-                path: 'prompts',
-                name: 'admin-prompts',
-                component: AdminAiPromptsView,
-              },
-              {
-                path: 'usage',
-                name: 'admin-ai-usage',
-                component: AdminAiUsageView,
-              },
-            ],
           },
         ],
       },
@@ -244,13 +180,6 @@ export function createAppRouter(
 
     if (to.name === 'change-password') {
       return { name: 'overview' }
-    }
-
-    if (to.meta.requiresRole && auth.user?.role !== to.meta.requiresRole) {
-      return {
-        name: 'overview',
-        query: { access: 'denied' },
-      }
     }
 
     return true

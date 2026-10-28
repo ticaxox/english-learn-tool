@@ -354,7 +354,8 @@ describe('AdminUsersView', () => {
     await flushPromises()
 
     expect(apiMocks.deleteAdminUser).toHaveBeenCalledWith(adminUser.id)
-    expect(wrapper.text()).toContain('The last active administrator cannot be deleted.')
+    expect(wrapper.text()).toContain('当前状态不允许此操作')
+    expect(wrapper.text()).toContain('请刷新后再试')
     expect(wrapper.text()).toContain('req-409')
   })
 })

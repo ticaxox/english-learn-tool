@@ -1,6 +1,6 @@
 # AI 英语学习工具｜前端
 
-这是 v1.1 的 Vue 3 应用，覆盖真实认证、成员管理、词书工作区、T-FE-004 学习工作区、T-FE-005 AI 管理员页面，T-FE-006 的四类 AI 练习、草稿、结果、记录与错题，T-FE-007 的站内通知中心与通知偏好，以及 T-FE-008 的长期 AI 教练、真实 SSE 与动作撤销。所有业务状态、评分、队列、连接检查和用量均以服务端为唯一真相，不使用静态业务假数据。
+这是个人学习版的 Vue 3 应用，覆盖真实认证、个人词书、今日学习、学习中心、记忆训练、四类 AI 练习、AI 教练和个人 AI 提供商配置。业务状态、评分、队列、连接检查与用量均以服务端为唯一真相，不使用静态业务假数据。
 
 ## 环境
 
@@ -78,7 +78,7 @@ API client 优先读取响应头 `X-Request-ID`，并在错误界面展示。对
 - 翻卡、选择、拼写三种训练；服务端判分、事件幂等键、会话刷新恢复与 30 秒心跳/后台暂停。
 - 错词列表、重点复习、已记住/恢复，以及真实空态和失败态。
 - T-BE-004 契约坐标固定为 `contract_sha 25ad69f` / OpenAPI raw `248ff876…f57e7`；字段映射集中在 `src/api/contract-adapter.ts`。
-- AI 管理员页面：Provider 列表/创建/编辑/启停/默认与备用顺序、真实连接检查、模型列表与手填回退、提示词读取/覆盖保存、隐私安全聚合用量。
+- 设置 → AI 配置：当前用户自己的 Provider 列表、创建/编辑/删除、启停、默认与备用顺序、真实连接检查、模型列表与手填回退；API Key 只显示服务端掩码。
 - T-BE-005 管理员契约固定为 `6c72f19` / OpenAPI raw `7a0463b5…` / semantic `8497bc98…`；API Key 只存在于当前表单内存，列表仅显示服务端掩码。
 - AI 练习：填空、阅读、翻译、作文四类创建与 202 生成轮询；服务端草稿/版本冲突、未作答重生成、提交幂等、提交后结果、记录筛选、错题与本人批量删除。
 - T-BE-006 最终契约为 `d6dcdbf`；提交前页面与 API 解析均拒绝答案、解析、参考内容或评分字段。
@@ -90,9 +90,9 @@ API client 优先读取响应头 `X-Request-ID`，并在错误界面展示。对
 
 ## 路由
 
-`/login`、`/change-password`、`/overview`、`/wordbooks`、`/memory`、`/practice`、`/practice/:sessionId`、`/practice/records`、`/practice/mistakes`、`/challenges`、`/challenges/:challengeId`、`/coach`、`/notifications`、`/notifications/preferences`、`/settings`、`/admin/dashboard`、`/admin/users`、`/admin/ai/providers`、`/admin/ai/prompts`、`/admin/ai/usage`。
+`/login`、`/change-password`、`/overview`、`/challenges`、`/challenges/:challengeId`、`/coach`、`/wordbooks`、`/memory`、`/memory/mistakes`、`/practice`、`/practice/:sessionId`、`/practice/records`、`/practice/mistakes`、`/settings/learning`、`/settings/ai`、`/settings/security`。
 
-成员管理、词书、学习、AI 练习、通知与 AI 教练均使用真实接口；每日闯关和看板等未实现页面只显示真实接口响应摘要或真实错误。
+个人词书、学习、AI 练习、AI 教练与个人 AI 提供商均使用真实接口。组织管理、成员、看板、通知与社交入口不属于个人版路由。
 
 ## 验证
 

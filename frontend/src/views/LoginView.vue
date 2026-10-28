@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { apiClient } from '../api/client'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import { useAuthStore } from '../stores/auth'
@@ -81,10 +80,10 @@ async function retryConnection(): Promise<void> {
         <WhiskerCrumbMark size="medium" />
         <span class="auth-card__seal">CURIOUS ENGLISH CLUB</span>
       </div>
-      <p class="eyebrow">组织内部学习平台</p>
+      <p class="eyebrow">个人英语学习空间</p>
       <h1 id="login-title">登录学习空间</h1>
       <p class="lead">
-        使用组织管理员分配的账号登录。首次登录或管理员重置密码后，需要先设置新密码。
+        使用你的账号继续学习。首次登录需要先设置新密码。
       </p>
 
       <div v-if="route.query.reason === 'session-expired'" class="alert alert-warning" role="status">
@@ -142,9 +141,6 @@ async function retryConnection(): Promise<void> {
         </button>
       </form>
 
-      <p class="inline-note">
-        当前 API 前缀：<code>{{ apiClient.getBaseUrl() }}</code>。页面直接请求真实后端；后端未就绪时会展示连接错误，不会切换为模拟登录。
-      </p>
     </section>
   </main>
 </template>

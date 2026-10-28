@@ -8,7 +8,6 @@ import CrumboMark from './CrumboMark.vue'
 const props = defineProps<{
   displayName: string
   username: string
-  isAdmin: boolean
 }>()
 
 const emit = defineEmits<{ signout: [] }>()
@@ -24,15 +23,12 @@ let previousFocus: HTMLElement | null = null
 let coachReturnPath = '/overview'
 
 
-const primaryLinks = computed(() => [
+const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
   { key: 'learning', label: '学习中心', to: '/challenges', icon: 'trail' as const },
   { key: 'wordbooks', label: '词书', to: '/wordbooks', icon: 'book' as const },
-  ...(props.isAdmin
-    ? [{ key: 'organization', label: '组织管理', to: '/admin/users', icon: 'admin' as const }]
-    : []),
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
-])
+] as const
 
 const pageTitles: Record<string, string> = {
   overview: '今日学习',
@@ -46,15 +42,9 @@ const pageTitles: Record<string, string> = {
   challenges: '学习中心',
   'challenge-detail': '学习中心',
   coach: 'AI 教练',
-  notifications: '通知中心',
   'settings-learning': '设置',
-  'settings-notifications': '设置',
+  'settings-ai': '设置',
   'settings-security': '设置',
-  'admin-users': '组织管理',
-  'admin-dashboard': '组织管理',
-  'admin-providers': '组织管理',
-  'admin-prompts': '组织管理',
-  'admin-ai-usage': '组织管理',
 }
 
 const currentPageTitle = computed(() => pageTitles[String(route.name ?? '')] ?? '学习工作台')
@@ -66,13 +56,11 @@ const currentDate = computed(() =>
   }).format(new Date()),
 )
 const userInitials = computed(() => props.displayName.trim().slice(0, 2).toUpperCase() || 'CT')
-const roleLabel = computed(() => (props.isAdmin ? '组织管理员' : '成员'))
 
 function isGroupActive(key: string): boolean {
   if (key === 'learning') {
     return ['/challenges', '/memory', '/practice', '/learning'].some((prefix) => route.path.startsWith(prefix))
   }
-  if (key === 'organization') return route.path.startsWith('/admin')
   if (key === 'settings') return route.path.startsWith('/settings')
   if (key === 'today') return route.path === '/overview'
   if (key === 'wordbooks') return route.path.startsWith('/wordbooks')
@@ -173,7 +161,7 @@ onBeforeUnmount(() => {
 <template>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
 
-  <div class="app-shell app-shell--member workspace-shell ia-workspace" :class="{ 'ia-workspace--admin': isAdmin }">
+  <div class="app-shell app-shell--member workspace-shell ia-workspace personal-workspace">
     <aside class="workspace-sidebar ia-sidebar" aria-label="主导航">
       <RouterLink class="workspace-brand" to="/overview" aria-label="CrumbTrail 今日学习">
         <span class="workspace-brand-mark"><CrumboMark size="small" /></span>
@@ -183,7 +171,7 @@ onBeforeUnmount(() => {
         </span>
       </RouterLink>
 
-      <nav class="workspace-nav ia-nav" aria-label="五组主导航">
+      <nav class="workspace-nav ia-nav" aria-label="主导航">
         <section
           v-for="link in primaryLinks"
           :key="link.key"
@@ -210,14 +198,6 @@ onBeforeUnmount(() => {
           <span class="sr-only">今天也学一点</span>
         </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
-          <RouterLink
-            class="workspace-icon-button member-notices-link ia-notification-button"
-            to="/notifications"
-            aria-label="通知中心"
-            title="通知中心"
-          >
-            <AppIcon name="bell" />
-          </RouterLink>
           <button
             class="workspace-coach-button member-concierge-button ia-coach-toggle"
             type="button"
@@ -247,9 +227,9 @@ onBeforeUnmount(() => {
               <div class="ia-profile-summary">
                 <span class="ia-profile-menu-label">个人资料</span>
                 <strong>{{ displayName }}</strong>
-                <span>@{{ username }} · {{ roleLabel }}</span>
+                <span>@{{ username }}</span>
               </div>
-              <RouterLink role="menuitem" to="/settings" @click="closeProfile">学习与通知设置</RouterLink>
+              <RouterLink role="menuitem" to="/settings/learning" @click="closeProfile">学习设置</RouterLink>
               <RouterLink role="menuitem" to="/settings/security" @click="closeProfile">账户安全</RouterLink>
               <button type="button" role="menuitem" class="ia-profile-signout" @click="emit('signout')">退出登录</button>
             </div>

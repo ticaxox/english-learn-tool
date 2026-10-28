@@ -172,8 +172,7 @@ onMounted(() => {
 
     <LoadingState v-else-if="loading" label="正在读取今日计划…" />
 
-    <section v-else-if="error" class="crumb-state-panel crumb-error-panel">
-      <ErrorNotice :error="error" retry-label="重新读取今日计划" @retry="load()" />
+    <section v-else-if="error" class="crumb-state-panel" :class="needsActiveWordbook ? 'crumb-empty-state' : 'crumb-error-panel'">
       <div v-if="needsActiveWordbook" class="crumb-empty-note">
         <CrumboMark size="medium" />
         <div>
@@ -182,6 +181,7 @@ onMounted(() => {
           <RouterLink class="crumb-inline-link" to="/wordbooks">去词书页</RouterLink>
         </div>
       </div>
+      <ErrorNotice v-else :error="error" retry-label="重新读取今日计划" @retry="load()" />
     </section>
 
     <template v-else-if="plan">
@@ -195,6 +195,14 @@ onMounted(() => {
             </div>
           </div>
           <p class="crumb-today-note">{{ heroNote }}</p>
+          <RouterLink
+            v-if="primaryTask"
+            class="button crumb-primary-action crumb-today-mobile-cta"
+            :to="primaryTask.to"
+          >
+            {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
+            <AppIcon name="arrow" />
+          </RouterLink>
         </div>
         <div class="crumb-today-stamp">
           <span>{{ plan.localDate }}</span>

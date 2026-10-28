@@ -17,9 +17,8 @@ const memberFiles = [
   '../views/PracticeSessionView.vue',
   '../views/ChallengeView.vue',
   '../views/CoachView.vue',
-  '../views/NotificationsView.vue',
-  '../views/NotificationPreferencesView.vue',
   '../views/LearningSettingsView.vue',
+  '../views/PersonalAiConfigView.vue',
 ]
 
 function source(path: string): string {
@@ -81,13 +80,13 @@ describe('member-facing Chinese copy density', () => {
     expect(shell).toContain("label: '今日学习'")
     expect(shell).toContain("label: '学习中心'")
     expect(shell).toContain("label: '词书'")
-    expect(shell).toContain("label: '组织管理'")
+    expect(shell).not.toContain("label: '组织管理'")
     expect(shell).toContain("label: '设置'")
     expect(shell).not.toContain("label: '每日闯关'")
     expect(shell).not.toContain("label: '记忆练习'")
     expect(shell).not.toContain("label: 'AI 练习'")
     expect(shell).toContain('AI 教练')
-    expect(shell).not.toContain("label: '通知'")
+    expect(shell).not.toContain('通知中心')
 
     const today = source('../views/TodayView.vue')
     expect(today).toContain('今日学习')
@@ -96,7 +95,7 @@ describe('member-facing Chinese copy density', () => {
     expect(today).toContain('当前词书')
 
     const wordbooks = source('../views/WordbooksView.vue')
-    expect(wordbooks).toContain('我的词书')
+    expect(wordbooks).toContain('个人词书')
     expect(wordbooks).toContain('当前主词书')
 
     const practice = source('../views/PracticeHubView.vue')
@@ -112,13 +111,13 @@ describe('member-facing Chinese copy density', () => {
     expect(coach).toContain('AI 教练')
     expect(coach).toContain('开始对话')
 
-    const notices = source('../views/NotificationsView.vue')
-    expect(notices).toContain('通知中心')
-    expect(notices).toContain('全部已读')
-
     const settings = source('../views/LearningSettingsView.vue')
     expect(settings).toContain('学习设置')
     expect(settings).toContain('保存设置')
+
+    const aiSettings = source('../views/PersonalAiConfigView.vue')
+    expect(aiSettings).toContain('你的 AI 提供商')
+    expect(aiSettings).toContain('添加 AI 提供商')
   })
 
   it('keeps long explanatory paragraphs out of the member hero copy', () => {
