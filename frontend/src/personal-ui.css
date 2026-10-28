@@ -959,6 +959,7 @@ body {
   border-bottom-width: 1px;
   background: var(--ui-sidebar);
 }
+.personal-workspace .ia-coach-panel-body .coach-page-header { display: none; }
 
 @media (max-width: 1180px) {
   .personal-workspace { grid-template-columns: 212px minmax(0, 1fr); }
@@ -1149,7 +1150,10 @@ body {
     scrollbar-width: none;
   }
   .personal-workspace .ia-tabs::-webkit-scrollbar { display: none; }
-  .personal-workspace .workspace-shell .ia-tab { flex: 1 0 auto; }
+  .personal-workspace.workspace-shell .ia-tab {
+    flex: 1 0 auto;
+    min-height: 44px;
+  }
   .personal-workspace .settings-form fieldset,
   .personal-workspace .ia-account-security { padding: var(--ui-space-4); }
   .personal-workspace .settings-form fieldset:nth-of-type(3) .field-inline {
@@ -1243,6 +1247,23 @@ body {
   .personal-workspace .mistake-table td[data-label="释义"],
   .personal-workspace .mistake-table td[data-label="来源 / 状态"],
   .personal-workspace .mistake-table td[data-label="操作"] { grid-column: 1 / -1; }
+  .personal-workspace.workspace-shell .button-small,
+  .personal-workspace .wordbook-card-actions button,
+  .personal-workspace .practice-records-table .link-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .personal-workspace .workspace-coach-button.member-concierge-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+  .personal-workspace .crumb-inline-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
   .personal-workspace .pager { flex-wrap: wrap; }
   .personal-workspace .ia-coach-panel { width: 100vw; border-left: 0; }
 }

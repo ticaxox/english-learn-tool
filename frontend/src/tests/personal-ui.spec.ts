@@ -57,4 +57,12 @@ describe('T-FE-020 personal UI system', () => {
     expect(css).toContain('td[data-label="结果"]')
     expect(css).toContain('.personal-workspace .mistake-table thead { display: none; }')
   })
+
+  it('keeps mobile actions at least 44px and hides the duplicate coach header', () => {
+    const css = source('../personal-ui.css')
+    expect(css).toContain('.personal-workspace .ia-coach-panel-body .coach-page-header { display: none; }')
+    expect(css).toContain('.personal-workspace.workspace-shell .button-small')
+    expect(css).toContain('.personal-workspace .workspace-coach-button.member-concierge-button')
+    expect(css).toContain('min-height: 44px')
+  })
 })

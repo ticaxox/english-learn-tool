@@ -107,6 +107,15 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       }
     }
 
+    if (error.code === 'AUTH_INVALID_CREDENTIALS') {
+      return {
+        title: '用户名或密码不正确',
+        message: '请检查用户名和密码后重试。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
     if ([502, 503, 504].includes(error.status)) {
       return {
         title: '学习服务暂不可用',

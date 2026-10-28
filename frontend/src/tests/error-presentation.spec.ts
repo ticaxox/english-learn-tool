@@ -42,4 +42,15 @@ describe('error presentation', () => {
     expect(presentation.message).toContain('设置 → AI 配置')
     expect(presentation.message).not.toContain('No enabled AI provider')
   })
+
+  it('describes invalid credentials without presenting a session failure', () => {
+    const presentation = toErrorPresentation(
+      new ApiError(401, 'AUTH_INVALID_CREDENTIALS', 'Invalid credentials.', null, 'login-request'),
+    )
+    expect(presentation).toMatchObject({
+      title: '用户名或密码不正确',
+      message: '请检查用户名和密码后重试。',
+      retryable: false,
+    })
+  })
 })

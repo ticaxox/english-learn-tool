@@ -102,7 +102,6 @@ async function retryConnection(): Promise<void> {
         v-if="error"
         :error="error"
         retry-label="重新检查连接"
-        show-retry
         @retry="retryConnection"
       />
 
