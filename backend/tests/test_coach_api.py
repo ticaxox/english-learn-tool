@@ -42,11 +42,10 @@ async def _create_message(
     return response.json()
 
 
-async def test_coach_message_sse_actions_undo_and_idempotency(client, app, admin_user, member_user):
-    admin_headers = await login(client, admin_user.username)
+async def test_coach_message_sse_actions_undo_and_idempotency(client, app, member_user):
     headers = await login(client, member_user.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         created = await client.post(
             "/api/v1/coach/conversations",
             headers=headers,
@@ -141,11 +140,10 @@ async def test_coach_message_sse_actions_undo_and_idempotency(client, app, admin
         assert repeated.json()["receipt"]["status"] == "undone"
 
 
-async def test_coach_message_failure_is_safe_and_recoverable(client, app, admin_user, member_user):
-    admin_headers = await login(client, admin_user.username)
+async def test_coach_message_failure_is_safe_and_recoverable(client, app, member_user):
     headers = await login(client, member_user.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         created = await client.post("/api/v1/coach/conversations", headers=headers, json={})
         conversation_id = created.json()["id"]
         accepted = await _create_message(client, headers, conversation_id, "coach-fail-1")
@@ -171,15 +169,12 @@ async def test_coach_message_failure_is_safe_and_recoverable(client, app, admin_
         assert "provider down" not in stream.text
 
 
-async def test_coach_action_conflict_and_user_isolation(
-    client, app, admin_user, member_user, user_factory
-):
-    admin_headers = await login(client, admin_user.username)
+async def test_coach_action_conflict_and_user_isolation(client, app, member_user, user_factory):
     headers = await login(client, member_user.username)
     other = await user_factory(role="member")
     other_headers = await login(client, other.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         created = await client.post("/api/v1/coach/conversations", headers=headers, json={})
         conversation_id = created.json()["id"]
         accepted = await _create_message(client, headers, conversation_id, "coach-conflict-1")
@@ -229,13 +224,10 @@ async def test_coach_action_conflict_and_user_isolation(
         assert conflict.json()["code"] == "COACH_ACTION_STATE_CHANGED"
 
 
-async def test_coach_retention_cleanup_removes_old_messages_and_context(
-    client, app, admin_user, member_user
-):
-    admin_headers = await login(client, admin_user.username)
+async def test_coach_retention_cleanup_removes_old_messages_and_context(client, app, member_user):
     headers = await login(client, member_user.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         created = await client.post("/api/v1/coach/conversations", headers=headers, json={})
         conversation_id = created.json()["id"]
         accepted = await _create_message(client, headers, conversation_id, "coach-retention-1")
@@ -258,13 +250,10 @@ async def test_coach_retention_cleanup_removes_old_messages_and_context(
     ).status_code == 404
 
 
-async def test_coach_start_practice_action_creates_scoped_practice(
-    client, app, admin_user, member_user
-):
+async def test_coach_start_practice_action_creates_scoped_practice(client, app, member_user):
     from app.models.practice import PracticeSession
     from app.models.wordbooks import Wordbook, WordbookEntry
 
-    admin_headers = await login(client, admin_user.username)
     headers = await login(client, member_user.username)
     async with app.state.session_factory() as session:
         book = Wordbook(
@@ -288,7 +277,7 @@ async def test_coach_start_practice_action_creates_scoped_practice(
         wordbook_id = str(book.id)
 
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         created = await client.post("/api/v1/coach/conversations", headers=headers, json={})
         conversation_id = created.json()["id"]
         accepted = await _create_message(client, headers, conversation_id, "coach-practice-1")
@@ -337,13 +326,10 @@ async def test_coach_start_practice_action_creates_scoped_practice(
             assert practice.status == "cancelled"
 
 
-async def test_coach_other_whitelisted_actions_are_scoped_and_recorded(
-    client, app, admin_user, member_user
-):
+async def test_coach_other_whitelisted_actions_are_scoped_and_recorded(client, app, member_user):
     from app.models.learning import MistakeFlag
     from app.models.wordbooks import Wordbook, WordbookActivation, WordbookEntry
 
-    admin_headers = await login(client, admin_user.username)
     headers = await login(client, member_user.username)
     async with app.state.session_factory() as session:
         book = Wordbook(
@@ -367,7 +353,7 @@ async def test_coach_other_whitelisted_actions_are_scoped_and_recorded(
         entry_id = str(entry.id)
 
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         created = await client.post("/api/v1/coach/conversations", headers=headers, json={})
         conversation_id = created.json()["id"]
         accepted = await _create_message(client, headers, conversation_id, "coach-actions-1")

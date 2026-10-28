@@ -118,6 +118,13 @@ class ProviderPatchRequest(_StrictModel):
     def trim_url(cls, value: str | None) -> str | None:
         return value.strip().rstrip("/") if value is not None else None
 
+    @field_validator("api_key", mode="before")
+    @classmethod
+    def blank_api_key_keeps_existing(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
     @field_validator("custom_headers")
     @classmethod
     def validate_headers(cls, value: dict[str, str] | None) -> dict[str, str] | None:

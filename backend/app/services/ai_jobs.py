@@ -109,13 +109,17 @@ def _ledger_response(job: AiJob) -> AiJobStatusResponse:
 async def _providers_for_job(
     session: AsyncSession,
     settings: Settings,
+    owner_id: UUID,
     preferred_id: UUID | None,
 ) -> list[ProviderRuntime]:
     providers = list(
         (
             await session.scalars(
                 select(AiProvider)
-                .where(AiProvider.enabled.is_(True))
+                .where(
+                    AiProvider.owner_id == owner_id,
+                    AiProvider.enabled.is_(True),
+                )
                 .order_by(
                     AiProvider.is_default.desc(),
                     AiProvider.priority.asc(),
@@ -317,7 +321,7 @@ async def create_ai_job(
             code="AI_PROMPT_NOT_CONFIGURED",
             message="The AI prompt is not configured.",
         )
-    providers = await _providers_for_job(session, settings, None)
+    providers = await _providers_for_job(session, settings, user.id, None)
     if not providers:
         raise AppError(
             status_code=503,
@@ -522,7 +526,7 @@ async def generate_structured(
     settings: Settings,
     job: AiJob,
 ) -> tuple[dict[str, Any], dict[str, Any], ProviderRuntime, int, int]:
-    providers = await _providers_for_job(session, settings, job.provider_id)
+    providers = await _providers_for_job(session, settings, job.user_id, job.provider_id)
     if not providers:
         raise AiGenerationError(
             code="AI_PROVIDER_UNAVAILABLE",

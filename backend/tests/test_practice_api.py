@@ -195,7 +195,7 @@ async def test_four_practice_types_draft_regenerate_submit_records_and_delete(
     wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
     await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, member_headers, base_url=server.base_url)
 
         fill = await _generate(app, client, member_headers, server, "fill_blank", 3)
         questions = await _questions(app, fill["id"])
@@ -346,14 +346,13 @@ async def test_four_practice_types_draft_regenerate_submit_records_and_delete(
 
 
 async def test_practice_regenerate_replaces_generation_without_history(
-    client, app, admin_user, member_user
+    client, app, member_user
 ) -> None:
-    admin_headers = await login(client, admin_user.username)
     member_headers = await login(client, member_user.username)
     wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
     await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, member_headers, base_url=server.base_url)
         first = await _generate(app, client, member_headers, server, "fill_blank", 3)
         async with app.state.session_factory() as session:
             practice = await session.get(PracticeSession, UUID(first["id"]))
@@ -375,14 +374,13 @@ async def test_practice_regenerate_replaces_generation_without_history(
 
 
 async def test_practice_generation_and_grading_failures_do_not_default_score(
-    client, app, admin_user, member_user
+    client, app, member_user
 ) -> None:
-    admin_headers = await login(client, admin_user.username)
     member_headers = await login(client, member_user.username)
     wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
     await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, member_headers, base_url=server.base_url)
 
         failed_generation = await _create_session(
             client, member_headers, "fill_blank", 3, f"gen-fail-{uuid4().hex}"

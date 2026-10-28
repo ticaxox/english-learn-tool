@@ -10,7 +10,7 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import UploadFile
-from sqlalchemy import and_, func, or_, select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -44,7 +44,6 @@ from app.schemas.wordbooks import (
 )
 from app.services.audit import add_audit_event, commit_failure_audit
 from app.services.auth import utcnow
-from app.services.users import ensure_admin_for_write
 from app.services.wordbook_parser import (
     ParseResult,
     WordbookParseError,
@@ -53,10 +52,6 @@ from app.services.wordbook_parser import (
 from app.services.wordbook_storage import LocalFileStorage
 
 ACTIVATION_LOCK_BASE = 20261023003
-
-
-def _is_active_admin(actor: User) -> bool:
-    return actor.role == "admin" and actor.status == "active"
 
 
 def _hash_token(token: str) -> str:
@@ -165,8 +160,6 @@ async def _load_wordbook(
 
 
 def _can_view(book: Wordbook, actor: User) -> bool:
-    if book.visibility == "organization":
-        return actor.status == "active"
     return book.owner_id == actor.id
 
 
@@ -180,15 +173,7 @@ def _ensure_can_view(book: Wordbook, actor: User) -> None:
 
 
 async def _ensure_can_write(session: AsyncSession, book: Wordbook, actor: User) -> None:
-    if book.visibility == "organization":
-        await ensure_admin_for_write(
-            session,
-            actor,
-            action="wordbook.write",
-            target_type="wordbook",
-            target_id=book.id,
-        )
-    elif book.owner_id != actor.id:
+    if book.owner_id != actor.id:
         raise AppError(
             status_code=404,
             code="WORDBOOK_NOT_FOUND",
@@ -248,11 +233,7 @@ async def list_wordbooks(
 ) -> WordbookListResponse:
     if actor.status != "active":
         raise AppError(status_code=403, code="FORBIDDEN", message="The account is disabled.")
-    visible = or_(
-        and_(Wordbook.visibility == "organization", Wordbook.status != "deleted"),
-        and_(Wordbook.owner_id == actor.id, Wordbook.status != "deleted"),
-    )
-    base = select(Wordbook).where(visible)
+    base = select(Wordbook).where(Wordbook.owner_id == actor.id, Wordbook.status != "deleted")
     total = int(await session.scalar(select(func.count()).select_from(base.subquery())) or 0)
     sort_column = {
         "created_at": Wordbook.created_at,
@@ -421,18 +402,11 @@ async def create_import_preview(
     description: str | None = None,
 ) -> ImportPreviewResponse:
     source_filename = _safe_filename(upload.filename)
-    if visibility not in {"private", "organization"}:
+    if visibility != "private":
         raise AppError(
             status_code=422,
-            code="WORDBOOK_VISIBILITY_INVALID",
-            message="Unknown visibility.",
-        )
-    if visibility == "organization":
-        await ensure_admin_for_write(
-            session,
-            actor,
-            action="wordbook.import.preview",
-            target_type="wordbook",
+            code="WORDBOOK_ORGANIZATION_DISABLED",
+            message="Personal wordbooks must be private.",
         )
     raw = await upload.read(settings.wordbook_max_bytes + 1)
     try:
@@ -726,13 +700,11 @@ async def confirm_wordbook_import(
             code="WORDBOOK_VISIBILITY_MISMATCH",
             message="Visibility must match the preview request.",
         )
-    if preview.requested_visibility == "organization":
-        await ensure_admin_for_write(
-            session,
-            actor,
-            action="wordbook.import",
-            target_type="wordbook_preview",
-            target_id=preview.id,
+    if preview.requested_visibility != "private":
+        raise AppError(
+            status_code=409,
+            code="WORDBOOK_ORGANIZATION_DISABLED",
+            message="Personal wordbooks must be private.",
         )
 
     name = payload.name or preview.requested_name
@@ -745,7 +717,7 @@ async def confirm_wordbook_import(
         status="importing",
         name=name,
         description=_safe_display_text(description, limit=4000),
-        owner_id=actor.id if visibility == "private" else None,
+        owner_id=actor.id,
         created_by=actor.id,
         book_metadata={
             "source_filename": preview.source_filename,
@@ -804,13 +776,9 @@ async def _job_wordbook(session: AsyncSession, job: WordbookJob) -> Wordbook | N
     return await session.scalar(select(Wordbook).where(Wordbook.id == job.wordbook_id))
 
 
-async def _authorize_job(session: AsyncSession, actor: User, job: WordbookJob) -> None:
+def _authorize_job(actor: User, job: WordbookJob) -> None:
     if job.owner_id == actor.id:
         return
-    if _is_active_admin(actor):
-        book = await _job_wordbook(session, job)
-        if book is not None and book.visibility == "organization":
-            return
     raise AppError(
         status_code=404,
         code="WORDBOOK_JOB_NOT_FOUND",
@@ -861,7 +829,7 @@ async def get_wordbook_job(
             code="WORDBOOK_JOB_NOT_FOUND",
             message="The wordbook job was not found.",
         )
-    await _authorize_job(session, actor, job)
+    _authorize_job(actor, job)
     return job_response(job)
 
 
@@ -882,7 +850,7 @@ async def get_export_job(
             code="EXPORT_NOT_FOUND",
             message="The export job was not found.",
         )
-    await _authorize_job(session, actor, job)
+    _authorize_job(actor, job)
     return job_response(job)
 
 
@@ -976,20 +944,6 @@ async def create_export_job(
         )
     book = await _load_wordbook(session, wordbook_id)
     _ensure_can_view(book, actor)
-    if book.visibility == "organization":
-        await ensure_admin_for_write(
-            session,
-            actor,
-            action="wordbook.export",
-            target_type="wordbook",
-            target_id=book.id,
-        )
-    elif book.owner_id != actor.id:
-        raise AppError(
-            status_code=404,
-            code="WORDBOOK_NOT_FOUND",
-            message="The wordbook was not found.",
-        )
     if book.status != "ready":
         raise AppError(
             status_code=409,
@@ -1234,7 +1188,7 @@ async def download_export(
             code="EXPORT_NOT_FOUND",
             message="The export job was not found.",
         )
-    await _authorize_job(session, actor, job)
+    _authorize_job(actor, job)
     if job.kind != "export" or job.status != "succeeded" or not job.storage_key:
         raise AppError(
             status_code=409,

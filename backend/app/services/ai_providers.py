@@ -23,7 +23,6 @@ from app.schemas.ai import (
 from app.services.ai_secrets import ApiKeyCipher, mask_api_key
 from app.services.ai_security import ProviderHttpClient, ProviderRequestError, validate_provider_url
 from app.services.audit import add_audit_event
-from app.services.users import require_admin
 
 
 def _cipher(settings: Settings) -> ApiKeyCipher:
@@ -55,17 +54,25 @@ def _normalize_name(value: str) -> str:
     return " ".join(value.strip().lower().split())
 
 
-async def _has_default(session: AsyncSession, *, exclude_id: UUID | None = None) -> bool:
+async def _has_default(
+    session: AsyncSession, owner_id: UUID, *, exclude_id: UUID | None = None
+) -> bool:
     statement = select(AiProvider.id).where(
-        AiProvider.is_default.is_(True), AiProvider.enabled.is_(True)
+        AiProvider.owner_id == owner_id,
+        AiProvider.is_default.is_(True),
+        AiProvider.enabled.is_(True),
     )
     if exclude_id is not None:
         statement = statement.where(AiProvider.id != exclude_id)
     return await session.scalar(statement) is not None
 
 
-async def _promote_default(session: AsyncSession, *, exclude_id: UUID | None = None) -> None:
-    statement = select(AiProvider).where(AiProvider.enabled.is_(True))
+async def _promote_default(
+    session: AsyncSession, owner_id: UUID, *, exclude_id: UUID | None = None
+) -> None:
+    statement = select(AiProvider).where(
+        AiProvider.owner_id == owner_id, AiProvider.enabled.is_(True)
+    )
     if exclude_id is not None:
         statement = statement.where(AiProvider.id != exclude_id)
     provider = await session.scalar(
@@ -78,8 +85,7 @@ async def _promote_default(session: AsyncSession, *, exclude_id: UUID | None = N
 async def list_providers(
     session: AsyncSession, actor: User, *, include_disabled: bool = True
 ) -> ProviderListResponse:
-    require_admin(actor)
-    statement = select(AiProvider)
+    statement = select(AiProvider).where(AiProvider.owner_id == actor.id)
     if not include_disabled:
         statement = statement.where(AiProvider.enabled.is_(True))
     providers = list(
@@ -92,13 +98,23 @@ async def list_providers(
     return ProviderListResponse(items=[_response(provider) for provider in providers])
 
 
+async def get_provider(session: AsyncSession, actor: User, provider_id: UUID) -> ProviderResponse:
+    provider = await session.scalar(
+        select(AiProvider).where(AiProvider.id == provider_id, AiProvider.owner_id == actor.id)
+    )
+    if provider is None:
+        raise AppError(
+            status_code=404, code="AI_PROVIDER_NOT_FOUND", message="The provider was not found."
+        )
+    return _response(provider)
+
+
 async def create_provider(
     session: AsyncSession,
     actor: User,
     settings: Settings,
     payload: ProviderCreateRequest,
 ) -> ProviderResponse:
-    require_admin(actor)
     try:
         base_url = await validate_provider_url(payload.base_url, settings)
     except ProviderRequestError as exc:
@@ -108,10 +124,13 @@ async def create_provider(
             message=exc.message,
         ) from exc
     if payload.is_default:
-        await session.execute(update(AiProvider).values(is_default=False))
-    elif not await _has_default(session):
+        await session.execute(
+            update(AiProvider).where(AiProvider.owner_id == actor.id).values(is_default=False)
+        )
+    elif not await _has_default(session, actor.id):
         payload = payload.model_copy(update={"is_default": payload.enabled})
     provider = AiProvider(
+        owner_id=actor.id,
         name=payload.name,
         name_normalized=_normalize_name(payload.name),
         base_url=base_url,
@@ -156,9 +175,10 @@ async def update_provider(
     provider_id: UUID,
     payload: ProviderPatchRequest,
 ) -> ProviderResponse:
-    require_admin(actor)
     provider = await session.scalar(
-        select(AiProvider).where(AiProvider.id == provider_id).with_for_update()
+        select(AiProvider)
+        .where(AiProvider.id == provider_id, AiProvider.owner_id == actor.id)
+        .with_for_update()
     )
     if provider is None:
         raise AppError(
@@ -192,7 +212,9 @@ async def update_provider(
         provider.enabled = payload.enabled
     if payload.is_default is True:
         await session.execute(
-            update(AiProvider).where(AiProvider.id != provider.id).values(is_default=False)
+            update(AiProvider)
+            .where(AiProvider.owner_id == actor.id, AiProvider.id != provider.id)
+            .values(is_default=False)
         )
         provider.is_default = True
     elif payload.is_default is False:
@@ -202,12 +224,12 @@ async def update_provider(
     if (
         not provider.is_default
         and provider.enabled
-        and not await _has_default(session, exclude_id=provider.id)
+        and not await _has_default(session, actor.id, exclude_id=provider.id)
     ):
         provider.is_default = True
     await session.flush()
     if was_default and not provider.enabled:
-        await _promote_default(session, exclude_id=provider.id)
+        await _promote_default(session, actor.id, exclude_id=provider.id)
     add_audit_event(
         session,
         action="ai.provider.updated",
@@ -235,9 +257,10 @@ async def update_provider(
 
 
 async def delete_provider(session: AsyncSession, actor: User, provider_id: UUID) -> None:
-    require_admin(actor)
     provider = await session.scalar(
-        select(AiProvider).where(AiProvider.id == provider_id).with_for_update()
+        select(AiProvider)
+        .where(AiProvider.id == provider_id, AiProvider.owner_id == actor.id)
+        .with_for_update()
     )
     if provider is None:
         raise AppError(
@@ -247,7 +270,7 @@ async def delete_provider(session: AsyncSession, actor: User, provider_id: UUID)
     await session.delete(provider)
     await session.flush()
     if was_default:
-        await _promote_default(session, exclude_id=provider_id)
+        await _promote_default(session, actor.id, exclude_id=provider_id)
     add_audit_event(
         session,
         action="ai.provider.deleted",
@@ -266,8 +289,9 @@ async def test_provider(
     settings: Settings,
     provider_id: UUID,
 ) -> ProviderTestResponse:
-    require_admin(actor)
-    provider = await session.scalar(select(AiProvider).where(AiProvider.id == provider_id))
+    provider = await session.scalar(
+        select(AiProvider).where(AiProvider.id == provider_id, AiProvider.owner_id == actor.id)
+    )
     if provider is None:
         raise AppError(
             status_code=404, code="AI_PROVIDER_NOT_FOUND", message="The provider was not found."
@@ -334,8 +358,9 @@ async def list_provider_models(
     settings: Settings,
     provider_id: UUID,
 ) -> ProviderModelsResponse:
-    require_admin(actor)
-    provider = await session.scalar(select(AiProvider).where(AiProvider.id == provider_id))
+    provider = await session.scalar(
+        select(AiProvider).where(AiProvider.id == provider_id, AiProvider.owner_id == actor.id)
+    )
     if provider is None:
         raise AppError(
             status_code=404, code="AI_PROVIDER_NOT_FOUND", message="The provider was not found."

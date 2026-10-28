@@ -34,6 +34,7 @@ from app.services.ai_providers import (
 )
 from app.services.ai_usage import admin_usage
 from app.services.auth import AuthContext
+from app.services.users import require_admin
 
 router = APIRouter(prefix="/admin/ai", tags=["admin ai"])
 
@@ -56,6 +57,7 @@ async def list_providers_endpoint(
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ProviderListResponse:
+    require_admin(context.user)
     return await list_providers(session, context.user)
 
 
@@ -72,6 +74,7 @@ async def create_provider_endpoint(
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ProviderResponse:
+    require_admin(context.user)
     settings: Settings = request.app.state.settings
     return await create_provider(session, context.user, settings, payload)
 
@@ -89,6 +92,7 @@ async def update_provider_endpoint(
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ProviderResponse:
+    require_admin(context.user)
     settings: Settings = request.app.state.settings
     return await update_provider(session, context.user, settings, provider_id, payload)
 
@@ -104,6 +108,7 @@ async def delete_provider_endpoint(
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Response:
+    require_admin(context.user)
     await delete_provider(session, context.user, provider_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -120,6 +125,7 @@ async def test_provider_endpoint(
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ProviderTestResponse:
+    require_admin(context.user)
     settings: Settings = request.app.state.settings
     return await test_provider(session, context.user, settings, provider_id)
 
@@ -136,6 +142,7 @@ async def provider_models_endpoint(
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ProviderModelsResponse:
+    require_admin(context.user)
     settings: Settings = request.app.state.settings
     return await list_provider_models(session, context.user, settings, provider_id)
 

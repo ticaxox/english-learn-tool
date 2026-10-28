@@ -46,17 +46,28 @@ class AiProvider(Base):
             name="last_test_status_valid",
         ),
         CheckConstraint("NOT is_default OR enabled", name="default_must_be_enabled"),
-        UniqueConstraint("name_normalized", name="uq_ai_providers_name_normalized"),
+        UniqueConstraint("owner_id", "name_normalized", name="uq_ai_providers_owner_name"),
         Index(
-            "uq_ai_providers_single_default",
-            "is_default",
+            "uq_ai_providers_owner_default",
+            "owner_id",
             unique=True,
             postgresql_where=text("is_default"),
         ),
-        Index("ix_ai_providers_enabled_priority", "enabled", "priority", "created_at"),
+        Index(
+            "ix_ai_providers_owner_enabled_priority",
+            "owner_id",
+            "enabled",
+            "priority",
+            "created_at",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    owner_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     name_normalized: Mapped[str] = mapped_column(String(100), nullable=False)
     base_url: Mapped[str] = mapped_column(String(500), nullable=False)

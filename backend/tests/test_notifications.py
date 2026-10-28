@@ -286,12 +286,11 @@ async def test_scheduler_creates_due_incomplete_and_streak_events_once(
 
 
 async def test_ai_job_terminal_status_creates_one_notification_per_job(
-    client, app, admin_user, member_user
+    client, app, member_user
 ) -> None:
-    admin_headers = await login(client, admin_user.username)
     member_headers = await login(client, member_user.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, member_headers, base_url=server.base_url)
         success = await client.post(
             "/api/v1/ai/jobs",
             headers={**member_headers, "Idempotency-Key": "notification-ai-success"},
