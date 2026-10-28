@@ -36,20 +36,29 @@ def upgrade() -> None:
     )
     op.execute(
         """
-        UPDATE ai_providers AS provider
-        SET owner_id = fallback.id
-        FROM (
-            SELECT id
-            FROM users
-            WHERE role = 'admin'
-            ORDER BY created_at, id
-            LIMIT 1
-        ) AS fallback
-        WHERE provider.owner_id IS NULL
+        DO $$
+        DECLARE
+            backfilled_count integer;
+            ownerless_count integer;
+        BEGIN
+            SELECT count(*) INTO backfilled_count
+            FROM ai_providers
+            WHERE owner_id IS NOT NULL;
+            SELECT count(*) INTO ownerless_count
+            FROM ai_providers
+            WHERE owner_id IS NULL;
+            RAISE NOTICE 'AI provider ownership migration: % backfilled, % ownerless',
+                backfilled_count, ownerless_count;
+            IF ownerless_count > 0 THEN
+                RAISE EXCEPTION
+                    'AI provider ownership migration blocked: % ownerless providers',
+                    ownerless_count
+                    USING HINT = 'Back up or assign owner_id, then retry; no rows deleted.';
+            END IF;
+        END
+        $$
         """
     )
-    # No safe ownership can be inferred for a provider without a creator or administrator.
-    op.execute("DELETE FROM ai_providers WHERE owner_id IS NULL")
     op.create_foreign_key(
         "fk_ai_providers_owner_id_users",
         "ai_providers",

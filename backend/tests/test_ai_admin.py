@@ -88,6 +88,13 @@ async def test_personal_provider_crud_masks_keys_and_checks_real_http(
         assert key_preserved.status_code == 200, key_preserved.text
         assert key_preserved.json()["api_key_masked"] == "sk-****1234"
 
+        short_key = await client.patch(
+            f"{PROVIDERS_PATH}/{primary['id']}",
+            headers=headers,
+            json={"api_key": "short"},
+        )
+        assert short_key.status_code == 422
+
         tested = await client.post(f"{PROVIDERS_PATH}/{primary['id']}/test", headers=headers)
         assert tested.status_code == 200
         assert tested.json()["success"] is True
@@ -196,11 +203,20 @@ async def test_personal_provider_ownership_is_isolated(
         owner_list = await client.get(PROVIDERS_PATH, headers=owner_headers)
         other_list = await client.get(PROVIDERS_PATH, headers=other_headers)
         admin_list = await client.get(PROVIDERS_PATH, headers=admin_headers)
+        admin_legacy_list = await client.get(ADMIN_PROVIDERS_PATH, headers=admin_headers)
         assert [item["id"] for item in owner_list.json()["items"]] == [owner_provider["id"]]
         assert [item["id"] for item in other_list.json()["items"]] == [other_provider["id"]]
         assert admin_list.json()["items"] == []
+        assert admin_legacy_list.json()["items"] == []
 
         provider_path = f"{PROVIDERS_PATH}/{owner_provider['id']}"
+        admin_legacy_detail = await client.patch(
+            f"{ADMIN_PROVIDERS_PATH}/{owner_provider['id']}",
+            headers=admin_headers,
+            json={"name": "Stolen"},
+        )
+        assert admin_legacy_detail.status_code == 404
+        assert admin_legacy_detail.json()["code"] == "AI_PROVIDER_NOT_FOUND"
         forbidden_requests = [
             await client.get(provider_path, headers=other_headers),
             await client.get(provider_path, headers=admin_headers),
