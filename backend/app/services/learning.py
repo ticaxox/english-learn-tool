@@ -168,6 +168,7 @@ async def _activated_wordbook(session: AsyncSession, user: User) -> Wordbook:
         .join(WordbookActivation, WordbookActivation.wordbook_id == Wordbook.id)
         .where(
             WordbookActivation.user_id == user.id,
+            Wordbook.owner_id == user.id,
             Wordbook.status == "ready",
         )
     )

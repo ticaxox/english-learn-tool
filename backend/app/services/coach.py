@@ -538,8 +538,7 @@ async def _visible_wordbook(
         book is None
         or book.status == "deleted"
         or (require_ready and book.status != "ready")
-        or (book.visibility == "organization" and user.status != "active")
-        or (book.visibility == "private" and book.owner_id != user.id)
+        or book.owner_id != user.id
     ):
         raise AppError(
             status_code=404,

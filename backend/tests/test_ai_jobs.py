@@ -50,7 +50,7 @@ async def test_ai_job_idempotency_quota_concurrency_and_cancel(
     member_headers = await login(client, member_user.username)
     context, entry_ids = practice_context()
     with fake_provider_server() as server:
-        await create_provider(client, headers, base_url=server.base_url)
+        await create_provider(client, member_headers, base_url=server.base_url)
         prompt_update = await client.put(
             f"{PROMPTS_PATH}/practice_generation",
             headers=headers,
@@ -120,12 +120,11 @@ async def test_ai_job_idempotency_quota_concurrency_and_cancel(
         assert usage.json()["concurrency"]["in_use"] == 1
 
 
-async def test_ai_job_repair_and_failure_release_quota(client, app, admin_user, member_user):
-    admin_headers = await login(client, admin_user.username)
+async def test_ai_job_repair_and_failure_release_quota(client, app, member_user):
     member_headers = await login(client, member_user.username)
     context, entry_ids = practice_context()
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url, name="Repair")
+        await create_provider(client, member_headers, base_url=server.base_url, name="Repair")
 
         repair_job = await _create_job(client, member_headers, context, "repair-key")
         assert repair_job.status_code == 202, repair_job.text
@@ -161,14 +160,13 @@ async def test_ai_job_repair_and_failure_release_quota(client, app, admin_user, 
         assert question_usage["remaining"] == 19
 
 
-async def test_ai_job_fails_over_to_backup_provider(client, app, admin_user, member_user):
-    admin_headers = await login(client, admin_user.username)
+async def test_ai_job_fails_over_to_backup_provider(client, app, member_user):
     member_headers = await login(client, member_user.username)
     context, entry_ids = practice_context()
     with fake_provider_server() as primary, fake_provider_server() as backup:
         await create_provider(
             client,
-            admin_headers,
+            member_headers,
             base_url=primary.base_url,
             name="Primary failing",
             is_default=True,
@@ -176,7 +174,7 @@ async def test_ai_job_fails_over_to_backup_provider(client, app, admin_user, mem
         )
         await create_provider(
             client,
-            admin_headers,
+            member_headers,
             base_url=backup.base_url,
             name="Backup working",
             is_default=False,
@@ -196,6 +194,25 @@ async def test_ai_job_fails_over_to_backup_provider(client, app, admin_user, mem
 
 
 @pytest.mark.asyncio
+async def test_ai_job_never_uses_another_users_provider(
+    client, app, member_user, user_factory
+) -> None:
+    owner_headers = await login(client, member_user.username)
+    other_user = await user_factory(role="member")
+    other_headers = await login(client, other_user.username)
+    context, entry_ids = practice_context()
+    with fake_provider_server() as server:
+        await create_provider(client, owner_headers, base_url=server.base_url)
+        blocked = await _create_job(client, other_headers, context, "foreign-provider-key")
+        assert blocked.status_code == 503
+        assert blocked.json()["code"] == "AI_PROVIDER_UNAVAILABLE"
+
+        owner_job = await _create_job(client, owner_headers, context, "owner-provider-key")
+        assert owner_job.status_code == 202
+        server.queue_json(200, practice_output(entry_ids))
+        assert (await _run_job(app, owner_job.json()["job_id"]))["status"] == "succeeded"
+
+
 async def test_provider_url_blocks_metadata_and_private_targets_by_default() -> None:
     from app.core.config import Settings
 
@@ -210,13 +227,12 @@ async def test_provider_url_blocks_metadata_and_private_targets_by_default() -> 
 
 
 async def test_stale_reconciliation_releases_quota_and_concurrency(
-    client, app, admin_user, member_user
+    client, app, member_user
 ) -> None:
-    admin_headers = await login(client, admin_user.username)
     member_headers = await login(client, member_user.username)
     context, _ = practice_context()
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, member_headers, base_url=server.base_url)
         created = await _create_job(client, member_headers, context, "stale-key")
         assert created.status_code == 202, created.text
         job_id = UUID(created.json()["job_id"])
@@ -254,7 +270,7 @@ async def test_ai_job_status_is_private_to_its_owner(
     other_headers = await login(client, other_user.username)
     context, _ = practice_context()
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, owner_headers, base_url=server.base_url)
         created = await _create_job(client, owner_headers, context, "private-key")
         assert created.status_code == 202, created.text
         hidden = await client.get(
@@ -263,3 +279,9 @@ async def test_ai_job_status_is_private_to_its_owner(
         )
         assert hidden.status_code == 404
         assert hidden.json()["code"] == "AI_JOB_NOT_FOUND"
+        admin_hidden = await client.get(
+            f"{JOBS_PATH}/{created.json()['job_id']}",
+            headers=admin_headers,
+        )
+        assert admin_hidden.status_code == 404
+        assert admin_hidden.json()["code"] == "AI_JOB_NOT_FOUND"

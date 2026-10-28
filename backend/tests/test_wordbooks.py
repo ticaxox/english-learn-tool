@@ -25,6 +25,7 @@ from app.services.wordbook_exports import (
 )
 from app.services.wordbook_jobs import process_wordbook_job
 from app.services.wordbook_parser import WordbookParseError, parse_wordbook_bytes
+from tests.learning_support import seed_wordbook
 
 LOGIN_PATH = "/api/v1/auth/login"
 WORDBOOKS_PATH = "/api/v1/wordbooks"
@@ -322,6 +323,64 @@ async def test_cors_preflight_allows_idempotency_key(client: httpx.AsyncClient) 
 
     assert response.status_code == 200
     assert "idempotency-key" in response.headers["access-control-allow-headers"].lower()
+
+
+async def test_personal_wordbook_boundaries_reject_legacy_and_cross_user_access(
+    client, app, admin_user, member_user, user_factory
+) -> None:
+    owner_headers = await _login_headers(client, member_user.username)
+    other_user = await user_factory(role="member")
+    other_headers = await _login_headers(client, other_user.username)
+    admin_headers = await _login_headers(client, admin_user.username)
+
+    owner_book = await seed_wordbook(app, owner_id=member_user.id, entries=2)
+    other_book = await seed_wordbook(app, owner_id=other_user.id, entries=2)
+    legacy_organization = await seed_wordbook(
+        app, owner_id=member_user.id, entries=2, visibility="organization"
+    )
+
+    owner_list = await client.get(WORDBOOKS_PATH, headers=owner_headers)
+    assert [item["id"] for item in owner_list.json()["items"]] == [owner_book]
+    assert other_book not in owner_list.text
+    assert legacy_organization not in owner_list.text
+
+    owner_detail = await client.get(f"{WORDBOOKS_PATH}/{owner_book}", headers=owner_headers)
+    assert owner_detail.status_code == 200
+    assert owner_detail.json()["wordbook"]["visibility"] == "private"
+
+    denied = [
+        await client.get(f"{WORDBOOKS_PATH}/{owner_book}", headers=other_headers),
+        await client.get(f"{WORDBOOKS_PATH}/{owner_book}", headers=admin_headers),
+        await client.post(f"{WORDBOOKS_PATH}/{owner_book}/activate", headers=other_headers),
+        await client.post(f"{WORDBOOKS_PATH}/{owner_book}/activate", headers=admin_headers),
+        await client.get(f"{WORDBOOKS_PATH}/{legacy_organization}", headers=owner_headers),
+        await client.post(
+            f"{WORDBOOKS_PATH}/{owner_book}/export",
+            headers={**other_headers, "Idempotency-Key": "foreign-export-1"},
+            json={"format": "csv"},
+        ),
+        await client.request(
+            "DELETE",
+            f"{WORDBOOKS_PATH}/{owner_book}",
+            headers={**other_headers, "Idempotency-Key": "foreign-delete-1"},
+            json={},
+        ),
+    ]
+    for response in denied:
+        assert response.status_code == 404
+        assert response.json()["code"] == "WORDBOOK_NOT_FOUND"
+
+    organization_import = await client.post(
+        f"{WORDBOOKS_PATH}/import/preview",
+        headers=admin_headers,
+        data={"visibility": "organization", "name": "Legacy shared book"},
+        files={"file": ("words.csv", _csv_payload([_minimal_row()]), "text/csv")},
+    )
+    assert organization_import.status_code == 422
+
+    activated = await client.post(f"{WORDBOOKS_PATH}/{owner_book}/activate", headers=owner_headers)
+    assert activated.status_code == 200
+    assert activated.json()["is_active"] is True
 
 
 @pytest.mark.parametrize("file_format", ["csv", "json", "txt"])

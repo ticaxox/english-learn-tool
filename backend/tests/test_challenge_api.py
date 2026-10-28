@@ -122,12 +122,11 @@ async def _seed_plan(app, user) -> tuple[UUID, list[str], list[str]]:
         )
 
 
-async def test_challenge_generation_sync_boss_and_replay(client, app, admin_user, member_user):
+async def test_challenge_generation_sync_boss_and_replay(client, app, member_user):
     plan_id, entry_ids, _ = await _seed_plan(app, member_user)
-    admin_headers = await login(client, admin_user.username)
     headers = await login(client, member_user.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         server.queue_json(200, challenge_output(entry_ids))
         generated = await client.post("/api/v1/challenges/today/generate", headers=headers)
         assert generated.status_code == 202, generated.text
@@ -220,16 +219,13 @@ async def test_challenge_generation_sync_boss_and_replay(client, app, admin_user
         assert history.json()["items"][0]["status"] == "completed"
 
 
-async def test_challenge_failure_retry_and_user_isolation(
-    client, app, admin_user, member_user, user_factory
-):
+async def test_challenge_failure_retry_and_user_isolation(client, app, member_user, user_factory):
     _, entry_ids, _ = await _seed_plan(app, member_user)
-    admin_headers = await login(client, admin_user.username)
     headers = await login(client, member_user.username)
     other = await user_factory(role="member")
     other_headers = await login(client, other.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         for _ in range(3):
             server.queue_json(500, {"error": "provider down"})
         failed = await client.post("/api/v1/challenges/today/generate", headers=headers)
@@ -254,12 +250,11 @@ async def test_challenge_failure_retry_and_user_isolation(
         ).status_code == 404
 
 
-async def test_challenge_cross_day_is_read_only(client, app, admin_user, member_user):
+async def test_challenge_cross_day_is_read_only(client, app, member_user):
     _, entry_ids, _ = await _seed_plan(app, member_user)
-    admin_headers = await login(client, admin_user.username)
     headers = await login(client, member_user.username)
     with fake_provider_server() as server:
-        await create_provider(client, admin_headers, base_url=server.base_url)
+        await create_provider(client, headers, base_url=server.base_url)
         server.queue_json(200, challenge_output(entry_ids))
         generated = await client.post("/api/v1/challenges/today/generate", headers=headers)
         assert generated.status_code == 202

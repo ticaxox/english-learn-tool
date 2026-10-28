@@ -26,7 +26,7 @@ async def _login(client: httpx.AsyncClient, username: str) -> dict[str, str]:
     return _bearer(response.json()["access_token"])
 
 
-async def _seed_wordbook(app, *, owner_id, visibility="organization", entries=8) -> str:
+async def _seed_wordbook(app, *, owner_id, visibility="private", entries=8) -> str:
     from uuid import uuid4
 
     from app.models.wordbooks import (

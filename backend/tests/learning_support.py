@@ -46,7 +46,7 @@ async def seed_wordbook(
     app,
     *,
     owner_id,
-    visibility: str = "organization",
+    visibility: str = "private",
     entries: int = 8,
     prefix: str = "word",
 ) -> str:

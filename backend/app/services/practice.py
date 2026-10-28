@@ -184,7 +184,7 @@ async def _resolve_wordbook(
         select(Wordbook).where(
             Wordbook.id == wordbook_id,
             Wordbook.status == "ready",
-            (Wordbook.visibility == "organization") | (Wordbook.owner_id == user.id),
+            Wordbook.owner_id == user.id,
         )
     )
     if wordbook is None:
@@ -1249,7 +1249,7 @@ async def create_practice_for_challenge(
             select(Wordbook).where(
                 Wordbook.id == wordbook_id,
                 Wordbook.status == "ready",
-                (Wordbook.visibility == "organization") | (Wordbook.owner_id == user.id),
+                Wordbook.owner_id == user.id,
             )
         )
         resolved_entry_ids = list(

@@ -124,7 +124,11 @@ async def _active_wordbook(session: AsyncSession, user: User) -> Wordbook:
     book = await session.scalar(
         select(Wordbook)
         .join(WordbookActivation, WordbookActivation.wordbook_id == Wordbook.id)
-        .where(WordbookActivation.user_id == user.id, Wordbook.status == "ready")
+        .where(
+            WordbookActivation.user_id == user.id,
+            Wordbook.owner_id == user.id,
+            Wordbook.status == "ready",
+        )
     )
     if book is None:
         raise AppError(

@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-WordbookVisibility = Literal["organization", "private"]
+WordbookVisibility = Literal["private"]
 WordbookStatus = Literal["importing", "ready", "failed", "deleting", "deleted"]
 WordbookJobStatus = Literal["queued", "running", "succeeded", "failed", "cancelled"]
 ExportFormat = Literal["csv", "txt", "pdf"]

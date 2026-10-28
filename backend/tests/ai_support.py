@@ -12,7 +12,8 @@ import httpx
 
 TEST_PASSWORD = "Valid-Test-Pass-123!"
 LOGIN_PATH = "/api/v1/auth/login"
-PROVIDERS_PATH = "/api/v1/admin/ai/providers"
+PROVIDERS_PATH = "/api/v1/me/ai/providers"
+ADMIN_PROVIDERS_PATH = "/api/v1/admin/ai/providers"
 PROMPTS_PATH = "/api/v1/admin/ai/prompts"
 JOBS_PATH = "/api/v1/ai/jobs"
 USAGE_PATH = "/api/v1/ai/usage/me"
