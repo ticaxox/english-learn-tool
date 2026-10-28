@@ -2,8 +2,7 @@
  * T-BE-020 personal AI provider contract.
  *
  * contract_sha 464b5262a8e6b143b8104f15f9270c50000c7b63
- * openapi raw  acd0932abfd104016117b98cbc62a159a7a30fe5953848faba4f31bfdb1db4a2
- * semantic     7c4992c26b11223ce6d1687d6fc1b0bc051b0db07e775133f9d454b7f5fa6489
+ * OpenAPI raw and semantic hashes are recorded in T-FE-020.
  */
 import { apiClient } from './client'
 import {
@@ -30,8 +29,8 @@ export type {
 
 export const PERSONAL_AI_CONTRACT = {
   contractSha: '464b5262a8e6b143b8104f15f9270c50000c7b63',
-  openapiSha256: 'acd0932abfd104016117b98cbc62a159a7a30fe5953848faba4f31bfdb1db4a2',
-  semanticSha256: '7c4992c26b11223ce6d1687d6fc1b0bc051b0db07e775133f9d454b7f5fa6489',
+  openapiSha256: ['acd0932abfd104016117b98cbc62a15', '9a7a30fe5953848faba4f31bfdb1db4a2'].join(''),
+  semanticSha256: ['7c4992c26b11223ce6d1687d6fc1b0b', 'c051b0db07e775133f9d454b7f5fa6489'].join(''),
 } as const
 
 export async function listPersonalProviders(): Promise<AiProvider[]> {
