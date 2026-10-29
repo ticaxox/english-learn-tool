@@ -308,16 +308,41 @@
   font-weight: 800;
 }
 
-.wordbook-dialog {
+/* `.dialog-card` sets a 34rem default; keep these two classes more specific so the
+   wordbook dialogs actually use the desktop width they were designed for. */
+.dialog-card.wordbook-dialog {
   width: min(100%, 48rem);
 }
 
-.wordbook-import-dialog {
-  width: min(100%, 64rem);
+.dialog-card.wordbook-import-dialog {
+  width: min(64rem, calc(100vw - 3rem));
 }
 
-.wordbook-detail-dialog {
-  width: min(100%, 56rem);
+.dialog-card.wordbook-detail-dialog {
+  width: min(56rem, calc(100vw - 3rem));
+}
+
+/* Keep the native file picker inside the dialog's visual system. */
+.wordbook-import-dialog input[type="file"] {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1.5px dashed #a98360;
+  border-radius: 11px 14px 10px 13px;
+  background: var(--paper-white, #fffdf8);
+  color: #4a3a2f;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.wordbook-import-dialog input[type="file"]::file-selector-button {
+  margin-right: 0.6rem;
+  padding: 0.4rem 0.7rem;
+  border: 1.5px solid #a98360;
+  border-radius: 9px;
+  background: var(--cookie-100, #f8efe0);
+  color: #3b2b22;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .dialog-heading {

@@ -201,109 +201,130 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="personal-ai-page" aria-labelledby="personal-ai-title">
-    <div class="personal-ai-toolbar">
-      <div>
-        <h2 id="personal-ai-title">你的 AI 提供商</h2>
-        <p class="field-hint">只显示当前账号自己的配置。默认提供商优先，其他提供商按备用顺序接管。</p>
-      </div>
-      <button class="button" type="button" @click="openCreate">添加 AI 提供商</button>
-    </div>
-
-    <LoadingState v-if="loading && providers.length === 0" label="正在读取 AI 配置…" />
-    <ErrorNotice v-else-if="loadError" :error="loadError" retry-label="重新读取 AI 配置" @retry="load" />
-
-    <div v-else-if="providers.length === 0" class="personal-ai-empty">
-      <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
-      <div>
-        <h3>还没有 AI 提供商</h3>
-        <p>添加一个 OpenAI 兼容服务，AI 教练、练习生成和评分才能开始工作。</p>
-      </div>
-      <button class="button" type="button" @click="openCreate">添加第一个提供商</button>
-    </div>
-
-    <div v-else class="personal-ai-list">
-      <article v-for="provider in sortedProviders" :key="provider.id" class="personal-ai-provider">
+  <section class="personal-ai-page" :class="{ 'personal-ai-page--editing': formOpen }" aria-labelledby="personal-ai-title">
+    <div class="personal-ai-main">
+      <div class="personal-ai-toolbar">
         <div>
-          <div class="personal-ai-provider__meta">
-            <span class="status-badge" :class="provider.enabled ? 'status-badge--success' : 'status-badge--muted'">
-              {{ provider.enabled ? '已启用' : '已停用' }}
-            </span>
-            <span class="count-pill">{{ orderLabel(provider) }}</span>
-            <span class="field-hint">{{ lastTestLabel(provider) }}</span>
-          </div>
-          <h3>{{ provider.name }}</h3>
-          <p class="field-hint">{{ provider.modelId }} · {{ provider.baseUrl }}</p>
-          <p class="masked-value">API Key：<code>{{ provider.apiKeyMasked }}</code></p>
+          <h2 id="personal-ai-title">你的 AI 提供商</h2>
+          <p class="field-hint">只显示当前账号自己的配置。默认提供商优先，其他提供商按备用顺序接管。</p>
         </div>
-        <div class="personal-ai-provider__actions">
-          <button class="button-secondary" type="button" @click="openEdit(provider)">编辑</button>
-          <button class="button-secondary" type="button" :disabled="testStates[provider.id]?.loading" @click="runTest(provider)">
-            {{ testStates[provider.id]?.loading ? '检查中…' : '测试连接' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="modelStates[provider.id]?.loading" @click="loadModels(provider)">
-            {{ modelStates[provider.id]?.loading ? '读取中…' : '获取模型' }}
-          </button>
-          <button v-if="!provider.isDefault" class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="makeDefault(provider)">设为默认</button>
-          <button class="button-secondary" type="button" :disabled="Boolean(actionKey) || provider.isDefault" @click="toggleEnabled(provider)">
-            {{ provider.enabled ? '停用' : '启用' }}
-          </button>
-          <button class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</button>
-        </div>
-
-        <div v-if="testStates[provider.id]?.result" class="operation-result" aria-live="polite">
-          <strong>{{ testStates[provider.id].result!.success ? '连接成功' : '连接未通过' }}</strong>
-          <p v-if="testStates[provider.id].result!.success && testStates[provider.id].result!.latencyMs !== null">
-            响应耗时 {{ testStates[provider.id].result!.latencyMs }} ms。
-          </p>
-          <p v-else>请检查接口地址、模型 ID 和 API Key 后重试。</p>
-        </div>
-        <ErrorNotice v-if="testStates[provider.id]?.error" :error="testStates[provider.id].error" :show-retry="false" />
-
-        <div v-if="modelStates[provider.id]?.result?.success" class="operation-result">
-          <strong>可用模型</strong>
-          <div class="model-chip-list">
-            <button
-              v-for="model in modelStates[provider.id].result!.models"
-              :key="model"
-              class="model-chip"
-              type="button"
-              :class="{ 'model-chip--selected': model === provider.modelId }"
-              :disabled="Boolean(actionKey)"
-              @click="selectModel(provider, model)"
-            >{{ model }}</button>
-          </div>
-        </div>
-        <div v-else-if="modelStates[provider.id]?.result" class="operation-result">
-          <strong>模型列表暂时不可用</strong>
-          <p>可以继续在编辑表单中手动填写模型 ID。</p>
-        </div>
-        <ErrorNotice v-if="modelStates[provider.id]?.error" :error="modelStates[provider.id].error" :show-retry="false" />
-      </article>
-    </div>
-
-    <ErrorNotice v-if="operationError" :error="operationError" :show-retry="false" />
-
-    <section v-if="deleteTarget" class="alert alert-warning" role="alertdialog" aria-labelledby="delete-provider-title">
-      <strong id="delete-provider-title">删除 {{ deleteTarget.name }}？</strong>
-      <p>删除后该提供商配置和密钥会从当前账号移除，其他备用提供商不受影响。</p>
-      <div class="button-row">
-        <button class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="confirmDelete">
-          {{ actionKey?.startsWith('delete:') ? '正在删除…' : '确认删除' }}
-        </button>
-        <button class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = null">取消</button>
+        <button class="button" type="button" @click="openCreate">添加 AI 提供商</button>
       </div>
-    </section>
 
-    <div v-if="formOpen" class="provider-form-shell">
-      <AiProviderForm
-        :provider="editingProvider"
-        :saving="saving"
-        :error="saveError"
-        @create="handleCreate"
-        @update="handleUpdate"
-        @cancel="closeForm"
-      />
+      <LoadingState v-if="loading && providers.length === 0" label="正在读取 AI 配置…" />
+      <ErrorNotice v-else-if="loadError" :error="loadError" retry-label="重新读取 AI 配置" @retry="load" />
+
+      <div v-else-if="providers.length === 0" class="personal-ai-empty">
+        <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
+        <div>
+          <h3>还没有 AI 提供商</h3>
+          <p>添加一个 OpenAI 兼容服务，AI 教练、练习生成和评分才能开始工作。</p>
+        </div>
+        <button v-if="!formOpen" class="button" type="button" @click="openCreate">添加第一个提供商</button>
+      </div>
+
+      <div v-else class="personal-ai-list">
+        <article v-for="provider in sortedProviders" :key="provider.id" class="personal-ai-provider">
+          <div>
+            <div class="personal-ai-provider__meta">
+              <span class="status-badge" :class="provider.enabled ? 'status-badge--success' : 'status-badge--muted'">
+                {{ provider.enabled ? '已启用' : '已停用' }}
+              </span>
+              <span class="count-pill">{{ orderLabel(provider) }}</span>
+              <span class="field-hint">{{ lastTestLabel(provider) }}</span>
+            </div>
+            <h3>{{ provider.name }}</h3>
+            <p class="field-hint">{{ provider.modelId }} · {{ provider.baseUrl }}</p>
+            <p class="masked-value">API Key：<code>{{ provider.apiKeyMasked }}</code></p>
+          </div>
+          <div class="personal-ai-provider__actions">
+            <button class="button-secondary" type="button" @click="openEdit(provider)">编辑</button>
+            <button class="button-secondary" type="button" :disabled="testStates[provider.id]?.loading" @click="runTest(provider)">
+              {{ testStates[provider.id]?.loading ? '检查中…' : '测试连接' }}
+            </button>
+            <button class="button-secondary" type="button" :disabled="modelStates[provider.id]?.loading" @click="loadModels(provider)">
+              {{ modelStates[provider.id]?.loading ? '读取中…' : '获取模型' }}
+            </button>
+            <button v-if="!provider.isDefault" class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="makeDefault(provider)">设为默认</button>
+            <button class="button-secondary" type="button" :disabled="Boolean(actionKey) || provider.isDefault" @click="toggleEnabled(provider)">
+              {{ provider.enabled ? '停用' : '启用' }}
+            </button>
+            <button class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</button>
+          </div>
+
+          <div v-if="testStates[provider.id]?.result" class="operation-result" aria-live="polite">
+            <strong>{{ testStates[provider.id].result!.success ? '连接成功' : '连接未通过' }}</strong>
+            <p v-if="testStates[provider.id].result!.success && testStates[provider.id].result!.latencyMs !== null">
+              响应耗时 {{ testStates[provider.id].result!.latencyMs }} ms。
+            </p>
+            <p v-else>请检查接口地址、模型 ID 和 API Key 后重试。</p>
+          </div>
+          <ErrorNotice v-if="testStates[provider.id]?.error" :error="testStates[provider.id].error" :show-retry="false" />
+
+          <div v-if="modelStates[provider.id]?.result?.success" class="operation-result">
+            <strong>可用模型</strong>
+            <div class="model-chip-list">
+              <button
+                v-for="model in modelStates[provider.id].result!.models"
+                :key="model"
+                class="model-chip"
+                type="button"
+                :class="{ 'model-chip--selected': model === provider.modelId }"
+                :disabled="Boolean(actionKey)"
+                @click="selectModel(provider, model)"
+              >{{ model }}</button>
+            </div>
+          </div>
+          <div v-else-if="modelStates[provider.id]?.result" class="operation-result">
+            <strong>模型列表暂时不可用</strong>
+            <p>可以继续在编辑表单中手动填写模型 ID。</p>
+          </div>
+          <ErrorNotice v-if="modelStates[provider.id]?.error" :error="modelStates[provider.id].error" :show-retry="false" />
+        </article>
+      </div>
+
+      <ErrorNotice v-if="operationError" :error="operationError" :show-retry="false" />
+
+      <section v-if="deleteTarget" class="alert alert-warning" role="alertdialog" aria-labelledby="delete-provider-title">
+        <strong id="delete-provider-title">删除 {{ deleteTarget.name }}？</strong>
+        <p>删除后该提供商配置和密钥会从当前账号移除，其他备用提供商不受影响。</p>
+        <div class="button-row">
+          <button class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="confirmDelete">
+            {{ actionKey?.startsWith('delete:') ? '正在删除…' : '确认删除' }}
+          </button>
+          <button class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = null">取消</button>
+        </div>
+      </section>
+
     </div>
+
+    <aside class="personal-ai-aside" aria-label="AI 提供商配置详情">
+      <div v-if="formOpen" class="provider-form-shell">
+        <AiProviderForm
+          :provider="editingProvider"
+          :saving="saving"
+          :error="saveError"
+          @create="handleCreate"
+          @update="handleUpdate"
+          @cancel="closeForm"
+        />
+      </div>
+
+      <div v-else class="personal-ai-guide">
+        <p class="eyebrow">配置说明</p>
+        <h3>配置后就能用</h3>
+        <ul class="personal-ai-guide__list">
+          <li>AI 教练对话与学习计划调整</li>
+          <li>AI 练习生成、评分与错题解析</li>
+          <li>每日闯关的题目生成</li>
+        </ul>
+        <h3>密钥怎么保存</h3>
+        <p class="field-hint">
+          密钥加密保存，页面只显示掩码；每个账号只能看到自己的提供商，其他账号互不影响。
+        </p>
+        <h3>建议顺序</h3>
+        <p class="field-hint">先保存配置，再用“测试连接”确认可达，最后获取模型列表选择模型 ID。</p>
+      </div>
+    </aside>
   </section>
 </template>

@@ -381,7 +381,7 @@ body {
   font-size: 0.88rem;
   font-weight: 750;
 }
-.personal-workspace input,
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]),
 .personal-workspace textarea,
 .personal-workspace select {
   width: 100%;
@@ -392,6 +392,18 @@ body {
   background: #fff;
   color: var(--ui-ink);
   line-height: 1.4;
+}
+/* Choice radios keep their intrinsic size; the width rule above is for text fields. */
+.personal-workspace .choice-option input[type="radio"],
+.personal-workspace .practice-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
 }
 .personal-workspace textarea { min-height: 116px; resize: vertical; }
 .personal-workspace input:focus,
@@ -863,14 +875,61 @@ body {
 
 /* AI settings skeleton and live personal provider surface. */
 .personal-workspace .personal-ai-page { display: grid; gap: var(--ui-space-4); }
+.personal-workspace .personal-ai-main,
+.personal-workspace .personal-ai-aside {
+  display: grid;
+  min-width: 0;
+  gap: var(--ui-space-4);
+  align-content: start;
+}
+.personal-workspace .personal-ai-guide {
+  display: grid;
+  gap: var(--ui-space-2);
+  align-content: start;
+  padding: var(--ui-space-5);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface-subtle);
+}
+.personal-workspace .personal-ai-guide h3 {
+  margin: var(--ui-space-2) 0 0;
+  font-size: 0.95rem;
+}
+.personal-workspace .personal-ai-guide > .eyebrow { margin: 0; }
+.personal-workspace .personal-ai-guide__list {
+  display: grid;
+  gap: var(--ui-space-1);
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ui-ink);
+  font-size: 0.9rem;
+}
+@media (min-width: 1181px) {
+  /* Desktop: providers on the left, form/guide on the right — never a single narrow column. */
+  .personal-workspace .personal-ai-page {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 9fr);
+    align-items: start;
+    gap: var(--ui-space-6);
+  }
+  .personal-workspace .personal-ai-aside {
+    position: sticky;
+    top: 92px;
+  }
+  .personal-workspace .personal-ai-empty { max-width: none; }
+}
+@media (max-width: 1180px) {
+  .personal-workspace .personal-ai-guide { display: none; }
+}
 .personal-workspace .personal-ai-toolbar {
   display: flex;
-  gap: var(--ui-space-4);
+  flex-wrap: wrap;
+  gap: var(--ui-space-3) var(--ui-space-4);
   align-items: flex-start;
   justify-content: space-between;
   padding-bottom: var(--ui-space-4);
   border-bottom: 1px solid var(--ui-line);
 }
+.personal-workspace .personal-ai-toolbar > .button { flex: 0 0 auto; white-space: nowrap; }
 .personal-workspace .personal-ai-list { display: grid; gap: var(--ui-space-3); }
 .personal-workspace .personal-ai-provider {
   display: grid;
@@ -960,6 +1019,35 @@ body {
   background: var(--ui-sidebar);
 }
 .personal-workspace .ia-coach-panel-body .coach-page-header { display: none; }
+
+/* Desktop: the coach narrows the workspace instead of covering it. */
+@media (min-width: 1181px) {
+  .personal-workspace { --personal-coach-width: 480px; }
+  .personal-workspace .ia-coach-panel {
+    width: var(--personal-coach-width);
+    box-shadow: -10px 0 30px rgb(49 36 29 / 12%);
+  }
+  .personal-workspace.is-coach-open .workspace-main {
+    margin-right: var(--personal-coach-width);
+    transition: margin-right 180ms ease;
+  }
+  .personal-workspace.is-coach-open .ia-coach-backdrop { display: none; }
+  /* A 480px dock cannot host the coach's list + thread side by side; stack them. */
+  .personal-workspace .ia-coach-panel .coach-layout { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .ia-coach-panel .coach-sidebar {
+    max-height: 34vh;
+    overflow-y: auto;
+  }
+  /* The narrower workspace stacks its own two-column pages instead of squeezing them. */
+  .personal-workspace.is-coach-open .crumb-today-layout,
+  .personal-workspace.is-coach-open .practice-workspace-grid,
+  .personal-workspace.is-coach-open .memory-workbench-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (min-width: 861px) and (max-width: 1180px) {
+  .personal-workspace .ia-coach-panel { width: min(560px, calc(100vw - 212px)); }
+}
 
 @media (max-width: 1180px) {
   .personal-workspace { grid-template-columns: 212px minmax(0, 1fr); }

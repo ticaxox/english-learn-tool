@@ -161,7 +161,10 @@ onBeforeUnmount(() => {
 <template>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
 
-  <div class="app-shell app-shell--member workspace-shell ia-workspace personal-workspace">
+  <div
+    class="app-shell app-shell--member workspace-shell ia-workspace personal-workspace"
+    :class="{ 'is-coach-open': coachOpen }"
+  >
     <aside class="workspace-sidebar ia-sidebar" aria-label="主导航">
       <RouterLink class="workspace-brand" to="/overview" aria-label="CrumbTrail 今日学习">
         <span class="workspace-brand-mark"><CrumboMark size="small" /></span>

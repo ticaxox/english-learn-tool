@@ -65,4 +65,33 @@ describe('T-FE-020 personal UI system', () => {
     expect(css).toContain('.personal-workspace .workspace-coach-button.member-concierge-button')
     expect(css).toContain('min-height: 44px')
   })
+
+  it('keeps choice radios at their intrinsic size instead of stretching to the row', () => {
+    const css = source('../personal-ui.css')
+    expect(css).toContain('.personal-workspace input:not([type="checkbox"]):not([type="radio"])')
+    expect(css).toContain('.personal-workspace .choice-option input[type="radio"]')
+    expect(css).toContain('.personal-workspace .practice-option input[type="radio"]')
+  })
+
+  it('gives the AI provider page a desktop master-detail layout', () => {
+    const css = source('../personal-ui.css')
+    expect(css).toContain('.personal-workspace .personal-ai-main')
+    expect(css).toContain('.personal-workspace .personal-ai-aside')
+    expect(css).toContain('grid-template-columns: minmax(0, 7fr) minmax(0, 9fr)')
+    expect(css).toContain('.personal-workspace .personal-ai-empty { max-width: none; }')
+  })
+
+  it('narrows the workspace when the coach is open on desktop', () => {
+    const css = source('../personal-ui.css')
+    expect(css).toContain('--personal-coach-width: 480px')
+    expect(css).toContain('.personal-workspace.is-coach-open .workspace-main')
+    expect(css).toContain('margin-right: var(--personal-coach-width)')
+  })
+
+  it('lets wordbook dialogs use their designed desktop width', () => {
+    const css = source('../wordbooks.css')
+    expect(css).toContain('.dialog-card.wordbook-import-dialog')
+    expect(css).toContain('.dialog-card.wordbook-detail-dialog')
+    expect(css).toContain('calc(100vw - 3rem)')
+  })
 })

@@ -34,6 +34,19 @@ describe('PersonalAiConfigView', () => {
     expect(sessionStorage.length).toBe(0)
   })
 
+  it('keeps the provider list and the form in separate desktop columns', async () => {
+    const wrapper = mount(PersonalAiConfigView)
+    await flushPromises()
+
+    expect(wrapper.find('.personal-ai-main').exists()).toBe(true)
+    expect(wrapper.find('.personal-ai-aside .personal-ai-guide').exists()).toBe(true)
+
+    await wrapper.get('.personal-ai-empty button').trigger('click')
+    const aside = wrapper.get('.personal-ai-aside')
+    expect(aside.find('.provider-form-shell .ai-form-panel').exists()).toBe(true)
+    expect(aside.find('.personal-ai-guide').exists()).toBe(false)
+  })
+
   it('keeps provider data on the server list rather than embedding fixtures', async () => {
     apiMocks.listPersonalProviders.mockResolvedValue([{
       id: 'provider-1',
