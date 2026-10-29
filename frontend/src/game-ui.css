@@ -1,0 +1,1172 @@
+/* CrumbTrail Arcade — game-feel design layer (T-INDEP-001).
+ *
+ * Loaded last on purpose: the personal shell already defines a token set and a
+ * component layer, so this file re-points those tokens and re-skins the
+ * primitives the pages already use. Presentation only — no business state.
+ */
+
+.personal-workspace {
+  /* Palette: warm paper canvas, saturated stage colours, chocolate ink. */
+  --ui-canvas: #fff3dc;
+  --ui-sidebar: #fffaf0;
+  --ui-surface: #fffdf6;
+  --ui-surface-subtle: #fff4e2;
+  --ui-ink: #35240f;
+  --ui-muted: #7d6247;
+  --ui-line: #ecd9bb;
+  --ui-line-strong: #3b2a1a;
+
+  --g-green: #2fb344;
+  --g-green-edge: #1f8a30;
+  --g-green-soft: #ddf7e1;
+  --g-orange: #ff9600;
+  --g-orange-edge: #cf7400;
+  --g-orange-soft: #ffeacd;
+  --g-blue: #1cb0f6;
+  --g-blue-edge: #0d88c4;
+  --g-blue-soft: #dcf2ff;
+  --g-purple: #a75cf0;
+  --g-purple-edge: #7d3cc0;
+  --g-purple-soft: #efe1ff;
+  --g-red: #ff5a5a;
+  --g-red-edge: #d63c3c;
+  --g-red-soft: #ffe4e0;
+  --g-gold: #ffc800;
+  --g-gold-edge: #d9a400;
+  --g-gold-soft: #fff2b8;
+
+  --crumb-forest: #2f8a4c;
+  --crumb-pumpkin: #ff9600;
+  --crumb-gold: #ffc800;
+
+  --ui-radius-sm: 10px;
+  --ui-radius-md: 18px;
+  --ui-radius-lg: 26px;
+  --ui-control: 46px;
+
+  --font-display: "Trebuchet MS", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+
+  background-color: var(--ui-canvas);
+}
+
+/* ------------------------------------------------------------------ shell */
+
+.personal-workspace {
+  background-image: radial-gradient(rgb(190 150 96 / 16%) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.personal-workspace .workspace-sidebar {
+  width: 236px;
+  padding: 18px 14px;
+  border-right: 2px solid var(--ui-line);
+  background: var(--ui-sidebar);
+  box-shadow: 2px 0 0 rgb(59 42 26 / 4%);
+}
+
+.personal-workspace .workspace-brand-mark {
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 16px;
+  background: var(--g-gold);
+  box-shadow: 0 3px 0 var(--g-gold-edge);
+}
+
+.personal-workspace .workspace-brand-copy strong {
+  font-size: 1.02rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.personal-workspace .workspace-nav { gap: 6px; }
+
+.personal-workspace .workspace-nav-link.member-nav-link {
+  min-height: 50px;
+  padding: 11px 14px;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  color: var(--ui-muted);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link svg { width: 22px; height: 22px; }
+
+.personal-workspace .workspace-nav-link.member-nav-link:hover {
+  border-color: var(--ui-line);
+  background: var(--ui-surface);
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link.router-link-active,
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active {
+  border: 2px solid var(--g-green-edge);
+  background: var(--g-green-soft);
+  color: #14431f;
+  box-shadow: 0 3px 0 var(--g-green-edge);
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link.router-link-active svg,
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active svg {
+  color: var(--g-green-edge);
+}
+
+.personal-workspace .workspace-topbar {
+  min-height: 72px;
+  border-bottom: 2px solid var(--ui-line);
+  background: rgb(255 250 240 / 94%);
+  backdrop-filter: blur(6px);
+}
+
+.personal-workspace .workspace-topbar-heading strong {
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+.personal-workspace .workspace-topbar-heading span {
+  color: var(--ui-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.personal-workspace .workspace-content {
+  padding-top: var(--ui-space-6);
+  padding-bottom: var(--ui-space-8);
+}
+
+/* ------------------------------------------------------------- typography */
+
+.personal-workspace h1,
+.personal-workspace .workspace-page-header h1,
+.personal-workspace .challenge-page-header h1,
+.personal-workspace .practice-session-header h1,
+.personal-workspace .settings-hero h1,
+.personal-workspace .memory-hero h1,
+.personal-workspace .practice-hero h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+
+.personal-workspace h2 { font-weight: 900; letter-spacing: -0.02em; }
+.personal-workspace h3 { font-weight: 850; letter-spacing: -0.01em; }
+
+.personal-workspace .workspace-kicker,
+.personal-workspace .crumb-brand-kicker,
+.personal-workspace .eyebrow {
+  color: var(--ui-muted);
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.personal-workspace .button,
+.personal-workspace .workspace-primary-button,
+.personal-workspace .crumb-primary-action,
+.personal-workspace .button-danger {
+  min-height: 46px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--g-green);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 0 var(--g-green-edge);
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+
+.personal-workspace .button-danger {
+  background: var(--g-red);
+  box-shadow: 0 4px 0 var(--g-red-edge);
+}
+
+.personal-workspace .button:hover:not(:disabled),
+.personal-workspace .workspace-primary-button:hover:not(:disabled),
+.personal-workspace .crumb-primary-action:hover:not(:disabled) { filter: brightness(1.04); }
+
+.personal-workspace .button:active:not(:disabled),
+.personal-workspace .workspace-primary-button:active:not(:disabled),
+.personal-workspace .crumb-primary-action:active:not(:disabled),
+.personal-workspace .button-secondary:active:not(:disabled),
+.personal-workspace .workspace-secondary-button:active:not(:disabled),
+.personal-workspace .button-danger:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--g-green-edge);
+}
+
+.personal-workspace .button-danger:active:not(:disabled) { box-shadow: 0 1px 0 var(--g-red-edge); }
+
+.personal-workspace .button-secondary,
+.personal-workspace .workspace-secondary-button,
+.personal-workspace .crumb-import-button.button-secondary {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 2px solid var(--ui-line);
+  border-radius: 14px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-weight: 850;
+  box-shadow: 0 3px 0 var(--ui-line);
+  transition: transform 90ms ease, box-shadow 90ms ease, background 140ms ease;
+}
+
+.personal-workspace .button-secondary:hover:not(:disabled),
+.personal-workspace .workspace-secondary-button:hover:not(:disabled) {
+  background: var(--ui-surface-subtle);
+  border-color: #d9c19c;
+}
+
+.personal-workspace .button-small { min-height: 36px; padding: 0 12px; font-size: 0.83rem; }
+.personal-workspace .button:disabled,
+.personal-workspace .button-secondary:disabled,
+.personal-workspace .button-danger:disabled {
+  box-shadow: none;
+  filter: saturate(0.4);
+  opacity: 0.6;
+  transform: none;
+}
+
+.personal-workspace .icon-button {
+  border: 2px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-weight: 900;
+  box-shadow: 0 3px 0 var(--ui-line);
+}
+
+.personal-workspace .dialog-card .icon-button {
+  border-color: var(--ui-line-strong);
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink);
+}
+
+.personal-workspace .member-concierge-button {
+  border: 2px solid var(--g-purple-edge);
+  border-radius: 14px;
+  background: var(--g-purple-soft);
+  color: #4b1f78;
+  font-weight: 850;
+  box-shadow: 0 3px 0 var(--g-purple-edge);
+}
+
+.personal-workspace .ia-profile-trigger {
+  border: 2px solid var(--g-green-edge);
+  background: var(--g-green-soft);
+  color: #14431f;
+  font-weight: 900;
+  box-shadow: 0 3px 0 var(--g-green-edge);
+}
+
+/* ------------------------------------------------------------------ cards */
+
+.personal-workspace .workspace-card,
+.personal-workspace .panel,
+.personal-workspace .wordbook-card,
+.personal-workspace .practice-type-card,
+.personal-workspace .challenge-self-study__card,
+.personal-workspace .wordbook-active-strip,
+.personal-workspace .memory-context-card {
+  border: 2px solid var(--ui-line) !important;
+  border-radius: var(--ui-radius-md) !important;
+  background: var(--ui-surface);
+  box-shadow: 0 2px 0 rgb(59 42 26 / 5%) !important;
+}
+
+/* ------------------------------------------------------------------ pills */
+
+.personal-workspace .count-pill,
+.personal-workspace .status-badge,
+.personal-workspace .challenge-node__status {
+  border-radius: 999px;
+  font-weight: 850;
+}
+
+.personal-workspace .count-pill {
+  border: 2px solid var(--ui-line);
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink);
+}
+
+/* ------------------------------------------------------------------ forms */
+
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]),
+.personal-workspace textarea,
+.personal-workspace select {
+  border: 2px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  font-weight: 600;
+}
+
+.personal-workspace input:focus,
+.personal-workspace textarea:focus,
+.personal-workspace select:focus {
+  border-color: var(--g-blue-edge);
+  outline: 3px solid rgb(28 176 246 / 22%);
+  outline-offset: 0;
+}
+
+.personal-workspace .ia-tabs,
+.personal-workspace .ia-settings-tabs {
+  gap: 6px;
+  padding: 6px;
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 16px;
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .ia-tab {
+  min-height: 46px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-weight: 850;
+  color: var(--ui-muted);
+}
+
+.personal-workspace .ia-tab--active {
+  border-color: var(--g-orange-edge);
+  background: var(--g-orange);
+  color: #3b2100;
+  box-shadow: 0 3px 0 var(--g-orange-edge);
+}
+
+/* --------------------------------------------------------------- progress */
+
+.personal-workspace .crumb-task-progress,
+.personal-workspace .challenge-progress,
+.personal-workspace .wordbook-import-progress,
+.personal-workspace .progress-track {
+  height: 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #f0e2c9;
+  box-shadow: inset 0 2px 0 rgb(59 42 26 / 8%);
+  overflow: hidden;
+}
+
+.personal-workspace .crumb-task-progress > span,
+.personal-workspace .challenge-progress > span,
+.personal-workspace .wordbook-import-progress > span,
+.personal-workspace .progress-track > span,
+.personal-workspace .progress-track > div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7fe07f 0%, var(--g-green) 55%, #219a36 100%);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 10%);
+}
+
+/* ------------------------------------------------------------------ today */
+
+.personal-workspace .crumb-today-header {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(18px, 2.2vw, 28px) clamp(20px, 3vw, 40px);
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 88% 12%, rgb(255 200 0 / 30%), transparent 22rem),
+    linear-gradient(135deg, #fff6de, #ffe9c2 62%, #ffdfae);
+  box-shadow: 0 6px 0 rgb(59 42 26 / 10%);
+}
+
+.personal-workspace .crumb-today-intro h1 {
+  max-width: 20ch;
+  font-size: clamp(2.4rem, 3.6vw, 3.6rem);
+}
+
+.personal-workspace .crumb-mascot-lockup {
+  align-items: center;
+  gap: 20px;
+}
+
+.personal-workspace .crumb-mascot-lockup .crumbo-mark,
+.personal-workspace .crumb-mascot-lockup svg {
+  width: 76px;
+  height: 76px;
+  filter: drop-shadow(0 4px 0 rgb(59 42 26 / 12%));
+}
+
+.personal-workspace .crumb-mascot-lockup h1 { margin-bottom: 0; }
+
+.personal-workspace .crumb-today-note {
+  width: fit-content;
+  max-width: 46ch;
+  margin-top: var(--ui-space-4);
+  padding: 9px 15px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 14px 14px 14px 4px;
+  background: var(--ui-surface);
+  font-weight: 750;
+  box-shadow: 0 3px 0 rgb(59 42 26 / 10%);
+}
+
+.personal-workspace .crumb-today-stamp {
+  align-self: flex-start;
+  padding: 12px 18px;
+  border: 2px solid var(--g-gold-edge);
+  border-radius: 16px;
+  background: var(--g-gold);
+  color: #3b2500;
+  font-weight: 900;
+  box-shadow: 0 4px 0 var(--g-gold-edge);
+  transform: rotate(2deg);
+}
+
+.personal-workspace .crumb-trail-board {
+  border: 2px solid var(--ui-line-strong) !important;
+  border-radius: 24px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 6px 0 rgb(59 42 26 / 8%) !important;
+}
+
+.personal-workspace .crumb-trail-board-head {
+  border-bottom: 2px dashed var(--ui-line);
+}
+
+.personal-workspace .crumb-stop-card {
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 18px !important;
+  background: var(--ui-surface);
+  box-shadow: 0 3px 0 var(--ui-line) !important;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.personal-workspace .crumb-stop.is-current .crumb-stop-card {
+  border-color: var(--g-orange-edge) !important;
+  background: #fff8ea;
+  box-shadow: 0 4px 0 var(--g-orange-edge) !important;
+}
+
+.personal-workspace .crumb-stop.is-done .crumb-stop-card {
+  border-color: var(--g-green-edge) !important;
+  background: #f2fcf2;
+  box-shadow: 0 4px 0 var(--g-green-edge) !important;
+}
+
+.personal-workspace .crumb-stop-marker {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 3px solid var(--ui-line-strong);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-weight: 900;
+  font-size: 1.15rem;
+  box-shadow: 0 3px 0 rgb(59 42 26 / 18%);
+}
+
+.personal-workspace .crumb-stop.is-current .crumb-stop-marker {
+  border-color: var(--g-orange-edge);
+  background: var(--g-orange);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--g-orange-edge);
+}
+
+.personal-workspace .crumb-stop.is-done .crumb-stop-marker {
+  border-color: var(--g-green-edge);
+  background: var(--g-green);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--g-green-edge);
+}
+
+.personal-workspace .crumb-stop.is-current .crumb-stop-marker::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border: 3px solid rgb(255 150 0 / 45%);
+  border-radius: 50%;
+  animation: crumb-pulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+.personal-workspace .crumb-stop-marker { position: relative; }
+
+.personal-workspace .crumb-trail-footer {
+  border-top: 2px dashed var(--ui-line);
+  background: #f4fbe9;
+}
+
+.personal-workspace .crumb-today-side .workspace-card {
+  border-radius: 20px !important;
+}
+
+.personal-workspace .crumb-book-note {
+  border: 2px solid var(--g-orange-edge) !important;
+  background: linear-gradient(135deg, #ffb03a, var(--g-orange)) !important;
+  color: #3b2100;
+  box-shadow: 0 4px 0 var(--g-orange-edge) !important;
+}
+
+/* ------------------------------------------------------------- challenge */
+
+/* Desktop: the daily map runs in the main column, self-study sits beside it as
+   a side-quest rail instead of a second full-width row under the fold. */
+@media (min-width: 1181px) {
+  .personal-workspace .challenge-page {
+    grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
+    align-items: start;
+  }
+
+  .personal-workspace .challenge-page > .workspace-page-header { grid-column: 1 / -1; }
+
+  .personal-workspace .challenge-page > .challenge-self-study {
+    position: sticky;
+    top: 92px;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+  }
+
+  .personal-workspace .challenge-page > .panel,
+  .personal-workspace .challenge-page > .challenge-map,
+  .personal-workspace .challenge-page > .challenge-summary,
+  .personal-workspace .challenge-page > .challenge-history,
+  .personal-workspace .challenge-page > .challenge-state-panel,
+  .personal-workspace .challenge-page > .workspace-empty-state {
+    grid-column: 1;
+  }
+
+  .personal-workspace .challenge-page .challenge-self-study__grid { grid-template-columns: minmax(0, 1fr); }
+
+  /* The empty map reads as a map canvas rather than a short banner. */
+  .personal-workspace .challenge-page > .challenge-generate {
+    display: grid;
+    min-height: 400px;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: center;
+    background-color: var(--ui-surface);
+    background-image: radial-gradient(rgb(59 42 26 / 8%) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+}
+
+.personal-workspace .challenge-node {
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 18px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 3px 0 var(--ui-line) !important;
+}
+
+.personal-workspace .challenge-node__marker {
+  width: 3.2rem;
+  height: 3.2rem;
+  border: 3px solid var(--ui-line-strong);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  font-size: 1.05rem;
+  transform: none;
+  box-shadow: 0 3px 0 rgb(59 42 26 / 16%);
+}
+
+.personal-workspace .challenge-node--in_progress {
+  border-color: var(--g-orange-edge) !important;
+  background: #fff8ea !important;
+}
+
+.personal-workspace .challenge-node--in_progress .challenge-node__marker {
+  border-color: var(--g-orange-edge);
+  background: var(--g-orange);
+  color: #fff;
+}
+
+.personal-workspace .challenge-node--completed {
+  border-color: var(--g-green-edge) !important;
+  background: #f3fcf3 !important;
+}
+
+.personal-workspace .challenge-node--completed .challenge-node__marker {
+  border-color: var(--g-green-edge);
+  background: var(--g-green);
+  color: #fff;
+}
+
+.personal-workspace .challenge-node--locked { opacity: 0.6; }
+.personal-workspace .challenge-node--boss {
+  border-color: var(--g-purple-edge) !important;
+  background: linear-gradient(135deg, #faf2ff, #f0e0ff) !important;
+}
+.personal-workspace .challenge-node--boss .challenge-node__marker {
+  border-color: var(--g-purple-edge);
+  background: var(--g-purple);
+  color: #fff;
+}
+
+.personal-workspace .challenge-self-study__card {
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 18px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 3px 0 var(--ui-line) !important;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.personal-workspace .challenge-self-study__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 var(--ui-line) !important;
+}
+
+/* --------------------------------------------------------- study surfaces */
+
+.personal-workspace .study-card {
+  border: 2px solid var(--ui-line-strong) !important;
+  border-radius: 24px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 6px 0 rgb(59 42 26 / 9%) !important;
+}
+
+.personal-workspace .study-badge {
+  border: 2px solid var(--g-blue-edge);
+  border-radius: 999px;
+  background: var(--g-blue-soft);
+  color: #074a68;
+  font-weight: 900;
+}
+
+.personal-workspace .study-card__prompt {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.personal-workspace .choice-option,
+.personal-workspace .practice-option {
+  min-height: 58px;
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 16px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 3px 0 var(--ui-line);
+  transition: transform 90ms ease, box-shadow 90ms ease, border-color 120ms ease;
+}
+
+.personal-workspace .choice-option:hover,
+.personal-workspace .practice-option:hover {
+  border-color: #d9c19c !important;
+  background: var(--ui-surface-subtle) !important;
+}
+
+.personal-workspace .choice-option--selected,
+.personal-workspace .practice-option:has(input:checked) {
+  border-color: var(--g-blue-edge) !important;
+  background: var(--g-blue-soft) !important;
+  box-shadow: inset 0 0 0 1px var(--g-blue-edge), 0 3px 0 var(--g-blue-edge);
+}
+
+.personal-workspace .choice-option:active,
+.personal-workspace .practice-option:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ui-line);
+}
+
+.personal-workspace .choice-option__index,
+.personal-workspace .practice-option__mark {
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 10px;
+  background: var(--ui-surface-subtle);
+  font-weight: 900;
+}
+
+/* -------------------------------------------------------------- wordbooks */
+
+.personal-workspace .wordbook-card--compact {
+  border: 2px solid var(--ui-line-strong) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 0 rgb(59 42 26 / 14%) !important;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.personal-workspace .wordbook-card--compact:hover {
+  transform: translateY(-3px) rotate(-0.4deg);
+  box-shadow: 0 7px 0 rgb(59 42 26 / 14%) !important;
+}
+
+.personal-workspace .wordbook-active-strip {
+  border: 2px solid var(--g-orange-edge) !important;
+  background: linear-gradient(135deg, #ffb43f, var(--g-orange)) !important;
+  box-shadow: 0 4px 0 var(--g-orange-edge) !important;
+}
+
+/* --------------------------------------------------------------- settings */
+
+.personal-workspace .settings-form fieldset {
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 18px;
+  background: var(--ui-surface);
+}
+
+.personal-workspace .ia-settings-hub .settings-hero,
+.personal-workspace .ia-hub-header {
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 20px !important;
+  background: var(--ui-surface) !important;
+}
+
+/* The page title repeats once, not twice: drop the duplicate kicker. */
+.personal-workspace .ia-hub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-4) var(--ui-space-5) !important;
+}
+
+.personal-workspace .ia-hub-header .eyebrow { display: none; }
+
+.personal-workspace .ia-hub-header h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 2.2vw, 2.2rem);
+}
+
+.personal-workspace .ia-hub-header p:not(.eyebrow) {
+  margin: var(--ui-space-1) 0 0;
+  color: var(--ui-muted);
+}
+
+/* ---------------------------------------------------------------- dialogs */
+
+.personal-workspace .dialog-card,
+.personal-workspace .dialog-backdrop .dialog-card {
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 24px;
+  box-shadow: 0 10px 0 rgb(59 42 26 / 14%);
+}
+
+/* ------------------------------------------------------------------ coach */
+
+.personal-workspace .ia-coach-panel {
+  border-left: 3px solid var(--ui-line-strong);
+  background: var(--ui-canvas);
+}
+
+.personal-workspace .ia-coach-panel-header {
+  border-bottom: 2px solid var(--ui-line);
+  background: var(--ui-sidebar);
+}
+
+/* ------------------------------------------------------- stage colour coding */
+
+/* Practice types behave like lesson stages: each owns a colour. */
+.personal-workspace .practice-type-card {
+  border: 2px solid var(--ui-line) !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 3px 0 var(--ui-line) !important;
+}
+
+.personal-workspace .practice-type-card--fill_blank { border-color: var(--g-blue-edge) !important; background: var(--g-blue-soft) !important; box-shadow: 0 3px 0 var(--g-blue-edge) !important; }
+.personal-workspace .practice-type-card--reading { border-color: var(--g-green-edge) !important; background: var(--g-green-soft) !important; box-shadow: 0 3px 0 var(--g-green-edge) !important; }
+.personal-workspace .practice-type-card--translation { border-color: var(--g-orange-edge) !important; background: var(--g-orange-soft) !important; box-shadow: 0 3px 0 var(--g-orange-edge) !important; }
+.personal-workspace .practice-type-card--writing { border-color: var(--g-purple-edge) !important; background: var(--g-purple-soft) !important; box-shadow: 0 3px 0 var(--g-purple-edge) !important; }
+
+.personal-workspace .practice-type-card--active {
+  transform: translateY(-2px);
+  border-width: 3px !important;
+  filter: saturate(1.15);
+}
+
+.personal-workspace .practice-type-icon {
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-surface);
+}
+
+/* Self-study entries mirror the two practice stages. */
+.personal-workspace .challenge-self-study__card:nth-child(1) {
+  border-color: var(--g-blue-edge) !important;
+  background: var(--g-blue-soft) !important;
+  box-shadow: 0 3px 0 var(--g-blue-edge) !important;
+}
+
+.personal-workspace .challenge-self-study__card:nth-child(2) {
+  border-color: var(--g-purple-edge) !important;
+  background: var(--g-purple-soft) !important;
+  box-shadow: 0 3px 0 var(--g-purple-edge) !important;
+}
+
+.personal-workspace .challenge-self-study__mark {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 2px solid var(--g-blue-edge);
+  border-radius: 14px;
+  background: #fff;
+  color: #074a68;
+  font-weight: 900;
+}
+
+.personal-workspace .challenge-self-study__mark--ai {
+  border-color: var(--g-purple-edge);
+  color: #4b1f78;
+}
+
+/* The route preview reads as a path, not three chips. */
+.personal-workspace .challenge-preview-route {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  margin: var(--ui-space-4) 0;
+}
+
+.personal-workspace .challenge-preview-route span {
+  display: inline-grid;
+  min-width: 64px;
+  height: 64px;
+  padding: 0 12px;
+  place-items: center;
+  border: 3px solid var(--ui-line-strong);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-weight: 900;
+  font-size: 0.85rem;
+  box-shadow: 0 3px 0 rgb(59 42 26 / 15%);
+}
+
+.personal-workspace .challenge-preview-route span:nth-of-type(1) { background: var(--g-blue-soft); border-color: var(--g-blue-edge); }
+.personal-workspace .challenge-preview-route span:nth-of-type(2) { background: var(--g-orange-soft); border-color: var(--g-orange-edge); }
+.personal-workspace .challenge-preview-route span:nth-of-type(3) { background: var(--g-purple-soft); border-color: var(--g-purple-edge); }
+
+.personal-workspace .challenge-preview-route i {
+  width: 44px;
+  height: 0;
+  border-top: 3px dashed var(--ui-line);
+  font-style: normal;
+  color: transparent;
+}
+
+.personal-workspace .challenge-generate__mark {
+  border: 2px solid var(--g-gold-edge);
+  border-radius: 16px;
+  background: var(--g-gold);
+  color: #3b2500;
+  box-shadow: 0 3px 0 var(--g-gold-edge);
+}
+
+/* ---------------------------------------------------------- today: side rail */
+
+.personal-workspace .crumb-today-side {
+  gap: var(--ui-space-3);
+}
+
+.personal-workspace .crumb-today-side .study-stats,
+.personal-workspace .crumb-today-side .workspace-card {
+  padding: var(--ui-space-4);
+  border-radius: 20px !important;
+}
+
+.personal-workspace .crumb-today-side .member-streak-block {
+  margin-top: var(--ui-space-2);
+}
+
+.personal-workspace .crumb-today-side .study-stats__heading { margin-bottom: var(--ui-space-1); }
+
+.personal-workspace .crumb-today-side .progress-track {
+  height: 14px;
+}
+
+.personal-workspace .crumb-ai-note {
+  border: 2px solid var(--g-purple-edge) !important;
+  background: var(--g-purple-soft) !important;
+  box-shadow: 0 3px 0 var(--g-purple-edge) !important;
+}
+
+.personal-workspace .crumb-ai-note .crumb-eyebrow { color: #5b2a8a; }
+
+.personal-workspace .crumb-book-note,
+.personal-workspace .crumb-book-note * {
+  color: #3b2100 !important;
+}
+
+.personal-workspace .crumb-book-note .crumb-inline-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 850;
+}
+
+/* The coach entry carries the AI stage colour. */
+.personal-workspace .workspace-coach-button.member-concierge-button {
+  border: 2px solid var(--g-purple-edge);
+  background: var(--g-purple-soft);
+  color: #4b1f78;
+  box-shadow: 0 3px 0 var(--g-purple-edge);
+}
+
+/* --------------------------------------------------------------- book cards */
+
+.personal-workspace .wordbook-card--compact .button-secondary,
+.personal-workspace .wordbook-card--compact .button-danger {
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  box-shadow: 0 2px 0 var(--ui-line);
+}
+
+.personal-workspace .wordbook-card--compact .button-danger {
+  border: 2px solid #f0c4bd;
+  background: #fff4f1;
+  color: var(--g-red-edge);
+  box-shadow: 0 2px 0 #f0c4bd;
+}
+
+/* Every shelf card ends in the same 2x2 action pad, so cards line up. */
+.personal-workspace .wordbook-card--compact .wordbook-card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-card-actions > * { min-width: 0; }
+
+/* Practice rail cards carry their own stage colour. */
+.personal-workspace .practice-records-rail {
+  border-color: var(--g-blue-edge) !important;
+  background: var(--g-blue-soft) !important;
+  box-shadow: 0 3px 0 var(--g-blue-edge) !important;
+}
+
+.personal-workspace .practice-mistakes-rail {
+  border-color: var(--g-red-edge) !important;
+  background: var(--g-red-soft) !important;
+  box-shadow: 0 3px 0 var(--g-red-edge) !important;
+}
+
+/* ------------------------------------------------------- streak + energy bars */
+
+.personal-workspace .crumb-task-progress {
+  background-color: #f0e2c9;
+  background-image: repeating-linear-gradient(-45deg, rgb(59 42 26 / 5%) 0 6px, transparent 6px 12px);
+}
+
+.personal-workspace .crumb-task-progress > span {
+  background: linear-gradient(180deg, #8ee88e, var(--g-green) 58%, #1f8a30);
+  border-radius: 999px;
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 12%);
+}
+
+.personal-workspace .progress {
+  height: 16px;
+  background: #f0e2c9;
+  box-shadow: inset 0 2px 0 rgb(59 42 26 / 8%);
+}
+
+.personal-workspace .progress > span {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8ee88e, var(--g-green) 58%, #1f8a30);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 12%);
+}
+
+.personal-workspace .member-stamp-row {
+  gap: 8px;
+}
+
+.personal-workspace .member-stamp-row span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid var(--ui-line);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.personal-workspace .member-stamp-row span.is-filled {
+  border-color: var(--g-green-edge);
+  background: var(--g-green);
+  color: #fff;
+  box-shadow: 0 2px 0 var(--g-green-edge);
+}
+
+.personal-workspace .member-stamp-row span.is-today {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
+
+.personal-workspace .study-stats__value strong {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.personal-workspace .workspace-nav-link:active { transform: translateY(2px); }
+
+/* ------------------------------------------------- memory stage cards + nav */
+
+.personal-workspace .memory-action-card {
+  min-height: 84px;
+  border: 2px solid var(--ui-line) !important;
+  border-radius: 16px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 3px 0 var(--ui-line) !important;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.personal-workspace .memory-action-card:nth-child(1) {
+  border-color: var(--g-blue-edge) !important;
+  background: var(--g-blue-soft) !important;
+  box-shadow: 0 3px 0 var(--g-blue-edge) !important;
+}
+
+.personal-workspace .memory-action-card:nth-child(2) {
+  border-color: var(--g-green-edge) !important;
+  background: var(--g-green-soft) !important;
+  box-shadow: 0 3px 0 var(--g-green-edge) !important;
+}
+
+.personal-workspace .memory-action-card:nth-child(3) {
+  border-color: var(--g-orange-edge) !important;
+  background: var(--g-orange-soft) !important;
+  box-shadow: 0 3px 0 var(--g-orange-edge) !important;
+}
+
+.personal-workspace .memory-action-card:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ui-line) !important; }
+
+.personal-workspace .memory-action-icon {
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-surface);
+}
+
+/* Mobile tab bar: the active stop lifts out of the bar. */
+.personal-workspace .workspace-mobile-nav {
+  border-top: 2px solid var(--ui-line);
+  background: var(--ui-sidebar);
+  box-shadow: 0 -6px 18px rgb(59 42 26 / 6%);
+}
+
+.personal-workspace .workspace-mobile-nav a {
+  border-radius: 12px;
+  padding: 6px 4px;
+  color: var(--ui-muted);
+  font-weight: 800;
+}
+
+.personal-workspace .workspace-mobile-nav a.router-link-active {
+  background: var(--g-green-soft);
+  color: #14431f;
+}
+
+/* -------------------------------------------------------------------- login */
+
+.auth-page {
+  background-color: #fff3dc;
+  background-image: radial-gradient(rgb(190 150 96 / 18%) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.auth-card {
+  border: 2px solid #3b2a1a;
+  border-radius: 26px;
+  background: #fffdf6;
+  box-shadow: 0 8px 0 rgb(59 42 26 / 14%), 0 26px 60px rgb(59 42 26 / 12%);
+}
+
+.auth-card h1 {
+  font-family: "Trebuchet MS", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+
+.auth-card__seal {
+  border: 2px solid #d9a400;
+  background: #ffc800;
+  color: #3b2500;
+  font-weight: 900;
+  box-shadow: 0 3px 0 #d9a400;
+}
+
+.auth-card input:not([type="checkbox"]):not([type="radio"]) {
+  border: 2px solid #ecd9bb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.auth-card input:focus {
+  border-color: #0d88c4;
+  outline: 3px solid rgb(28 176 246 / 22%);
+  outline-offset: 0;
+}
+
+.auth-card .button,
+.auth-card button[type="submit"] {
+  min-height: 50px;
+  border: 0;
+  border-radius: 14px;
+  background: #2fb344;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1rem;
+  box-shadow: 0 4px 0 #1f8a30;
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+
+.auth-card .button:hover:not(:disabled),
+.auth-card button[type="submit"]:hover:not(:disabled) { filter: brightness(1.04); }
+
+.auth-card .button:active:not(:disabled),
+.auth-card button[type="submit"]:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #1f8a30;
+}
+
+/* -------------------------------------------------------------------- focus */
+
+.personal-workspace :focus-visible {
+  outline: 3px solid var(--g-blue);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------- motion */
+
+@keyframes crumb-pulse {
+  0% { transform: scale(0.86); opacity: 0.85; }
+  70% { transform: scale(1.14); opacity: 0; }
+  100% { transform: scale(1.14); opacity: 0; }
+}
+
+@keyframes crumb-pop {
+  0% { transform: translateY(6px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace *,
+  .personal-workspace *::before,
+  .personal-workspace *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ------------------------------------------------------------- responsive */
+
+@media (max-width: 1180px) {
+  .personal-workspace .workspace-sidebar { width: 212px; }
+  .personal-workspace { --ui-page-width: 1240px; }
+}
+
+@media (max-width: 860px) {
+  .personal-workspace .workspace-content { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .personal-workspace .crumb-today-header { border-radius: 22px; }
+  .personal-workspace .crumb-today-stamp { transform: none; }
+}
+
+@media (max-width: 620px) {
+  /* Full-width only where a button is the page's single next action. */
+  .personal-workspace .crumb-trail-footer .button,
+  .personal-workspace .practice-create-footer .button,
+  .personal-workspace .dialog-actions .button,
+  .personal-workspace .dialog-actions .button-secondary { width: 100%; }
+  .personal-workspace .crumb-stop-marker { width: 44px; height: 44px; }
+}
