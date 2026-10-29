@@ -755,8 +755,9 @@
 .personal-workspace .challenge-node { transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; }
 
 .personal-workspace .ia-coach-panel {
-  border-left: 3px solid var(--ui-line-strong);
-  background: var(--ui-canvas);
+  border-left: 0;
+  background: var(--ui-sidebar);
+  box-shadow: -1px 0 0 var(--ui-line), -14px 0 34px rgb(59 42 26 / 10%);
 }
 
 .personal-workspace .ia-coach-panel-header {
