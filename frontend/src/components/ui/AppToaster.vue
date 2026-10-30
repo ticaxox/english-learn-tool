@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { CheckCircle2, Info, X, XCircle } from '@lucide/vue'
+import { CheckCircle2, Info, XCircle } from '@lucide/vue'
 import {
-  ToastClose,
   ToastDescription,
   ToastProvider,
   ToastRoot,
@@ -36,9 +35,6 @@ function iconFor(tone: ToastTone) {
           {{ toast.description }}
         </ToastDescription>
       </div>
-      <ToastClose class="crumb-toast__close" aria-label="关闭提示">
-        <X :size="16" />
-      </ToastClose>
     </ToastRoot>
     <ToastViewport class="crumb-toast-viewport" />
   </ToastProvider>
