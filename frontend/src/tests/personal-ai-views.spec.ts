@@ -42,9 +42,9 @@ describe('PersonalAiConfigView', () => {
     expect(wrapper.find('.personal-ai-aside .personal-ai-guide').exists()).toBe(true)
 
     await wrapper.get('.personal-ai-empty button').trigger('click')
-    const aside = wrapper.get('.personal-ai-aside')
-    expect(aside.find('.provider-form-shell .ai-form-panel').exists()).toBe(true)
-    expect(aside.find('.personal-ai-guide').exists()).toBe(false)
+    // The provider form opens as a floating dialog, not inside the column.
+    expect(wrapper.find('.ai-provider-dialog .ai-form-panel').exists()).toBe(true)
+    expect(wrapper.find('.personal-ai-aside .personal-ai-guide').exists()).toBe(true)
   })
 
   it('keeps provider data on the server list rather than embedding fixtures', async () => {

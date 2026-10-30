@@ -348,8 +348,8 @@ onBeforeUnmount(() => {
                       <span class="coach-receipt__status" :class="`coach-receipt__status--${receipt.status}`">{{ actionStatusLabel(receipt) }}</span>
                     </div>
                     <p>{{ receipt.summary }}</p>
-                    <p class="field-hint">可撤销至：{{ formatTime(receipt.expiresAt) }}</p>
-                    <p v-if="receipt.conflictMessage" class="field-error" role="alert" :title="receipt.conflictMessage">这次调整没有生效，请稍后再试。</p>
+                    <p v-if="canUndo(receipt)" class="field-hint">可撤销至 {{ formatTime(receipt.expiresAt) }}</p>
+                    <p v-if="receipt.conflictMessage" class="field-hint coach-receipt__conflict" :title="receipt.conflictMessage">这次调整没有生效</p>
                     <button
                       v-if="receipt.status === 'applied'"
                       class="button-secondary button-small"

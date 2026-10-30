@@ -100,7 +100,7 @@ describe('member redesign', () => {
     expect(card.find('.wordbook-cover h3').exists()).toBe(false)
     expect(card.text()).toContain('Business English')
     expect(card.text()).toContain('128 词条')
-    expect(card.get('.wordbook-cover .wordbook-cover-stamp').text()).toBe('书架中')
+    expect(card.get('.wordbook-card-badges').text()).toContain('可用')
 
     await card.get('[aria-label="查看 Business English 的词条"]').trigger('click')
     await card.get('[aria-label="将 Business English 设为当前主词书"]').trigger('click')

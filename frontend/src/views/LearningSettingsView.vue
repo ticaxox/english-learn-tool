@@ -13,6 +13,7 @@ import LoadingState from '../components/LoadingState.vue'
 import { useToast } from '../composables/useToast'
 import ContractGate from '../components/ContractGate.vue'
 import { fetchLearningProfile, updateLearningProfile } from '../api/learning'
+import { listWordbooks } from '../api/wordbooks'
 import { isContractFrozen } from '../api/contract-adapter'
 import {
   defaultMemoryConfig,
@@ -26,16 +27,10 @@ import {
   DAILY_MINUTES_MIN,
   DAILY_NEW_WORDS_MAX,
   DAILY_NEW_WORDS_MIN,
-  EXAM_TARGET_LABELS,
-  EXAM_TARGETS,
-  MEMORY_MODULES,
-  MEMORY_MODULE_LABELS,
-  SPELLING_BLANK_LABELS,
   type ExamTarget,
   type LearningProfile,
   type LearningProfileUpdate,
   type MemoryConfig,
-  type SpellingBlankType,
 } from '../types/learning'
 import '../learning.css'
 
@@ -49,8 +44,28 @@ const saveError = ref<unknown>(null)
 const saved = ref(false)
 const toast = useToast()
 const fieldErrors = ref<FieldErrors>({})
+const activeWordbookSize = ref<number | null>(null)
 
-const blankTypes: SpellingBlankType[] = ['full', 'partial', 'first_letter']
+const PRACTICE_TYPE_OPTIONS = [
+  { key: 'fill_blank', label: '填空' },
+  { key: 'reading', label: '阅读' },
+  { key: 'translation', label: '翻译' },
+  { key: 'writing', label: '作文' },
+] as const
+const DRILL_MODE_OPTIONS = [
+  { key: 'choice', label: '选择' },
+  { key: 'spelling', label: '拼写' },
+] as const
+
+const challengePrefs = reactive<{ practiceTypes: string[]; drillModes: string[] }>({
+  practiceTypes: PRACTICE_TYPE_OPTIONS.map((option) => option.key),
+  drillModes: DRILL_MODE_OPTIONS.map((option) => option.key),
+})
+
+const completionDays = computed(() => {
+  if (!activeWordbookSize.value || form.dailyNewWords <= 0) return null
+  return Math.ceil(activeWordbookSize.value / form.dailyNewWords)
+})
 
 const form = reactive<LearningProfileUpdate>({
   examTarget: 'CET4' as ExamTarget,
@@ -71,6 +86,16 @@ function applyProfile(value: LearningProfile): void {
   form.dailyNewWords = value.dailyNewWords
   form.dailyMinutes = value.dailyMinutes
   form.memoryConfig = cloneConfig(value.memoryConfig)
+  const stored = (value.memoryConfig.preferences?.challenge ?? {}) as {
+    practiceTypes?: string[]
+    drillModes?: string[]
+  }
+  const keep = (list: string[] | undefined, options: readonly string[]) => {
+    const filtered = (list ?? []).filter((item) => options.includes(item))
+    return filtered.length ? filtered : [...options]
+  }
+  challengePrefs.practiceTypes = keep(stored.practiceTypes, PRACTICE_TYPE_OPTIONS.map((option) => option.key))
+  challengePrefs.drillModes = keep(stored.drillModes, DRILL_MODE_OPTIONS.map((option) => option.key))
 }
 
 function cloneConfig(config: MemoryConfig): MemoryConfig {
@@ -90,10 +115,21 @@ async function load(): Promise<void> {
   loadError.value = null
   try {
     applyProfile(await fetchLearningProfile())
+    void loadActiveWordbook()
   } catch (error) {
     loadError.value = error
   } finally {
     loading.value = false
+  }
+}
+
+async function loadActiveWordbook(): Promise<void> {
+  try {
+    const page = await listWordbooks({ limit: 50 })
+    const active = page.items.find((item) => item.is_active) ?? page.items.find((item) => item.status === 'ready')
+    activeWordbookSize.value = active ? active.entry_count : null
+  } catch {
+    activeWordbookSize.value = null
   }
 }
 
@@ -104,6 +140,17 @@ async function save(): Promise<void> {
 
   if (hasFieldErrors(fieldErrors.value)) {
     return
+  }
+  if (!challengePrefs.practiceTypes.length || !challengePrefs.drillModes.length) {
+    saveError.value = new Error('关卡生成至少要保留一种题型和一种巩固方式。')
+    return
+  }
+  form.memoryConfig.preferences = {
+    ...form.memoryConfig.preferences,
+    challenge: {
+      practiceTypes: [...challengePrefs.practiceTypes],
+      drillModes: [...challengePrefs.drillModes],
+    },
   }
 
   saving.value = true
@@ -156,35 +203,6 @@ onMounted(() => {
 
       <form class="panel settings-form" novalidate @submit.prevent="save">
         <fieldset>
-          <legend>目标考试</legend>
-          <div class="field">
-            <label for="exam-target">考试类型</label>
-            <select id="exam-target" v-model="form.examTarget" :aria-invalid="Boolean(fieldErrors.examTarget)">
-              <option v-for="target in EXAM_TARGETS" :key="target" :value="target">
-                {{ EXAM_TARGET_LABELS[target] }}
-              </option>
-            </select>
-            <p v-if="fieldErrors.examTarget" class="field-error" role="alert">{{ fieldErrors.examTarget }}</p>
-          </div>
-
-          <div class="field">
-            <label for="exam-date">考试日期（可留空）</label>
-            <input
-              id="exam-date"
-              v-model="form.examDate"
-              type="date"
-              :min="today"
-              :aria-invalid="Boolean(fieldErrors.examDate)"
-              :aria-describedby="fieldErrors.examDate ? 'exam-date-error' : undefined"
-            />
-            <p v-if="fieldErrors.examDate" id="exam-date-error" class="field-error" role="alert">
-              {{ fieldErrors.examDate }}
-            </p>
-            <p v-else class="field-hint">必须晚于今天；留空表示暂不设置。</p>
-          </div>
-        </fieldset>
-
-        <fieldset>
           <legend>每日目标</legend>
           <div class="field">
             <label for="daily-new-words">每日新词量（{{ DAILY_NEW_WORDS_MIN }}–{{ DAILY_NEW_WORDS_MAX }}）</label>
@@ -220,35 +238,35 @@ onMounted(() => {
             </p>
           </div>
 
-          <p class="inline-note">
-            可学新词不足时，今日任务会自动调整。
-          </p>
+          <div class="settings-goal-summary">
+            <p v-if="completionDays !== null" class="inline-note">
+              按每天 {{ form.dailyNewWords }} 个新词计算，当前词书约 {{ completionDays }} 天学完。
+            </p>
+            <p v-else class="inline-note">激活一本词书后，这里会显示预计完成天数。</p>
+          </div>
         </fieldset>
 
         <fieldset>
-          <legend>记忆模块</legend>
-          <p v-if="fieldErrors.memoryConfig" class="field-error" role="alert">{{ fieldErrors.memoryConfig }}</p>
-          <div v-for="module in MEMORY_MODULES" :key="module" class="field field-inline">
-            <label class="checkbox">
-              <input v-model="form.memoryConfig[module].enabled" type="checkbox" />
-              <span>{{ MEMORY_MODULE_LABELS[module] }}</span>
-            </label>
-            <div v-if="module === 'spelling'" class="field field-compact">
-              <label :for="`blank-${module}`">挖空方式</label>
-              <select
-                :id="`blank-${module}`"
-                :value="form.memoryConfig.spelling.blankType ?? ''"
-                :disabled="!form.memoryConfig.spelling.enabled"
-                @change="form.memoryConfig.spelling.blankType = ($event.target as HTMLSelectElement).value ? (($event.target as HTMLSelectElement).value as SpellingBlankType) : null"
-              >
-                <option value="">系统默认</option>
-                <option v-for="blank in blankTypes" :key="blank" :value="blank">
-                  {{ SPELLING_BLANK_LABELS[blank] }}
-                </option>
-              </select>
+          <legend>关卡生成</legend>
+          <p class="field-hint">今日地图只会使用勾选的题型和巩固方式，至少各保留一项。</p>
+          <div class="settings-choice-block">
+            <span class="field-label">练习题型</span>
+            <div class="settings-choice-grid">
+              <label v-for="option in PRACTICE_TYPE_OPTIONS" :key="option.key" class="checkbox">
+                <input v-model="challengePrefs.practiceTypes" type="checkbox" :value="option.key" />
+                <span>{{ option.label }}</span>
+              </label>
             </div>
           </div>
-          <p class="inline-note">至少保留一种训练方式。</p>
+          <div class="settings-choice-block">
+            <span class="field-label">巩固方式</span>
+            <div class="settings-choice-grid">
+              <label v-for="option in DRILL_MODE_OPTIONS" :key="option.key" class="checkbox">
+                <input v-model="challengePrefs.drillModes" type="checkbox" :value="option.key" />
+                <span>{{ option.label }}</span>
+              </label>
+            </div>
+          </div>
         </fieldset>
 
         <div class="button-row">

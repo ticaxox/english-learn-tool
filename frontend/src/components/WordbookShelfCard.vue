@@ -49,32 +49,35 @@ const coverTone = computed(() => {
         ? 'background-color:#244b64; background-image:radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem)'
         : 'background-color:var(--forest); background-image:radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem)'"
     >
-      <span class="wordbook-spine">WHISKER PRESS</span>
-      <div class="wordbook-card-topline">
-        <span class="wordbook-pill" :class="`wordbook-pill--${book.visibility}`">
-          {{ book.visibility === 'organization' ? '组织' : '私有' }}
-        </span>
-        <span class="wordbook-status" :class="`wordbook-status--${book.status}`">{{ statusLabel }}</span>
-        <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
-      </div>
-      <template v-if="compact">
-        <span class="crumb-book-number">#{{ String(sequence).padStart(2, '0') }}</span>
-        <span class="crumb-book-bite crumb-book-bite--one" aria-hidden="true"></span>
-        <span class="crumb-book-bite crumb-book-bite--two" aria-hidden="true"></span>
-        <span class="crumb-book-bite crumb-book-bite--three" aria-hidden="true"></span>
+      <template v-if="!compact">
+        <span class="wordbook-spine">WHISKER PRESS</span>
+        <div class="wordbook-card-topline">
+          <span class="wordbook-pill" :class="`wordbook-pill--${book.visibility}`">
+            {{ book.visibility === 'organization' ? '组织' : '私有' }}
+          </span>
+          <span class="wordbook-status" :class="`wordbook-status--${book.status}`">{{ statusLabel }}</span>
+          <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
+        </div>
       </template>
       <strong class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
       <template v-if="!compact">
         <h3>{{ book.name }}</h3>
         <span class="wordbook-cover-meta">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
+        <span class="wordbook-cover-stamp">{{ book.is_active ? '使用中' : '书架中' }}</span>
       </template>
-      <span class="wordbook-cover-stamp">{{ book.is_active ? '使用中' : '书架中' }}</span>
     </div>
 
     <div class="wordbook-card-body">
       <template v-if="compact">
         <h3>{{ book.name }}</h3>
         <span class="wordbook-entry-count">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
+        <div class="wordbook-card-badges">
+          <span class="wordbook-pill" :class="`wordbook-pill--${book.visibility}`">
+            {{ book.visibility === 'organization' ? '组织' : '私有' }}
+          </span>
+          <span class="wordbook-status" :class="`wordbook-status--${book.status}`">{{ statusLabel }}</span>
+          <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
+        </div>
       </template>
       <template v-if="!compact">
         <p class="wordbook-description">{{ book.description || '暂无描述' }}</p>

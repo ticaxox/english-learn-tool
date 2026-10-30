@@ -351,6 +351,26 @@ onMounted(() => {
         <p v-if="generationError" class="field-error">{{ generationError }}</p>
       </section>
 
+      <section v-if="selectedNode" class="panel challenge-node-detail" aria-live="polite">
+        <div class="challenge-node-detail__heading">
+          <div><p class="eyebrow">{{ CHALLENGE_NODE_LABELS[selectedNode.node.nodeType] }}</p><h2>{{ selectedNode.node.title }}</h2></div>
+          <button class="link-button" type="button" @click="selectedNode = null">关闭</button>
+        </div>
+        <p>{{ selectedNode.node.description }}</p>
+        <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
+        <p v-if="selectedNode.node.status === 'locked'" class="inline-note">完成前一个节点后解锁。</p>
+        <p v-else-if="readOnly" class="inline-note">跨日地图只读，不能开始或重做节点。</p>
+        <p v-else-if="selectedNode.node.nodeType === 'BOSS' && selectedNode.node.status === 'completed'" class="inline-note">终点挑战已完成，可查看结果。</p>
+        <ErrorNotice v-if="nodeError" :error="nodeError" :show-retry="false" />
+        <div class="button-row">
+          <button v-if="selectedNode.allowedActions.includes('start') || selectedNode.allowedActions.includes('resume')" class="button" type="button" :disabled="readOnly || nodeStarting" @click="startNode(selectedNode)">
+            {{ nodeStarting ? '正在启动…' : (selectedNode.allowedActions.includes('resume') ? '继续节点' : '开始节点') }}
+          </button>
+          <button v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
+          <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
+        </div>
+      </section>
+
       <section class="challenge-map" aria-labelledby="challenge-map-title">
         <div class="challenge-map__heading">
           <div><p class="eyebrow">主线</p><h2 id="challenge-map-title">今日主线</h2></div>
@@ -363,32 +383,21 @@ onMounted(() => {
             <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
           </div>
         </div>
-        <div class="challenge-path">
-          <svg class="crumb-route-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M15 2 C70 8 88 18 50 31 S12 52 62 64 S82 82 48 98" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round" />
-          </svg>
-          <article
-            v-for="(node, index) in mainNodes"
+        <div class="crumb-stations" role="list" aria-label="关卡路线">
+          <button
+            v-for="node in mainNodes"
             :key="node.id"
-            class="challenge-node"
-            :class="[nodeStatusClass(node), { 'challenge-node--boss': node.nodeType === 'BOSS' }]"
+            type="button"
+            role="listitem"
+            class="map-station"
+            :class="[nodeStatusClass(node), { 'map-station--boss': node.nodeType === 'BOSS' }]"
+            :aria-label="`第 ${node.orderIndex} 关：${node.title}，${CHALLENGE_STATUS_LABELS[node.status]}`"
             :aria-current="nextNode?.id === node.id ? 'step' : undefined"
+            @click="openNode(node)"
           >
-            <div class="challenge-node__marker" aria-hidden="true">{{ node.nodeType === 'BOSS' ? '★' : node.orderIndex }}</div>
-            <div class="challenge-node__body">
-              <div class="challenge-node__heading">
-                <div><p class="eyebrow">{{ CHALLENGE_NODE_LABELS[node.nodeType] }}</p><h3>{{ node.title }}</h3></div>
-                <span class="challenge-node__status" :class="`challenge-node__status--${node.status}`">{{ CHALLENGE_STATUS_LABELS[node.status] }}</span>
-              </div>
-              <p>{{ node.description }}</p>
-              <p class="field-hint">预计 {{ node.estimatedMinutes }} 分钟 · 顺序 {{ node.orderIndex }}</p>
-              <p v-if="node.errorMessage" class="field-error" role="alert">{{ node.errorMessage }}</p>
-              <div class="button-row">
-                <button class="button-secondary button-small" type="button" :disabled="nodeLoading" @click="openNode(node)">{{ nodeActionLabel(node) }}</button>
-              </div>
-            </div>
-            <span v-if="index < mainNodes.length - 1" class="challenge-node__connector" aria-hidden="true"></span>
-          </article>
+            <span class="map-station__order" aria-hidden="true">{{ node.nodeType === 'BOSS' ? '★' : node.orderIndex }}</span>
+            <span class="map-station__caption">{{ node.title }}</span>
+          </button>
         </div>
 
         <div v-if="optionalNodes.length > 0" class="challenge-optional">
@@ -411,25 +420,6 @@ onMounted(() => {
         </div>
       </section>
 
-      <section v-if="selectedNode" class="panel challenge-node-detail" aria-live="polite">
-        <div class="challenge-node-detail__heading">
-          <div><p class="eyebrow">节点详情</p><h2>{{ selectedNode.node.title }}</h2></div>
-          <button class="link-button" type="button" @click="selectedNode = null">关闭</button>
-        </div>
-        <p>{{ selectedNode.node.description }}</p>
-        <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
-        <p v-if="selectedNode.node.status === 'locked'" class="inline-note">完成前一个节点后解锁。</p>
-        <p v-else-if="readOnly" class="inline-note">跨日地图只读，不能开始或重做节点。</p>
-        <p v-else-if="selectedNode.node.nodeType === 'BOSS' && selectedNode.node.status === 'completed'" class="inline-note">终点挑战已完成，可查看结果。</p>
-        <ErrorNotice v-if="nodeError" :error="nodeError" :show-retry="false" />
-        <div class="button-row">
-          <button v-if="selectedNode.allowedActions.includes('start') || selectedNode.allowedActions.includes('resume')" class="button" type="button" :disabled="readOnly || nodeStarting" @click="startNode(selectedNode)">
-            {{ nodeStarting ? '正在启动…' : (selectedNode.allowedActions.includes('resume') ? '继续节点' : '开始节点') }}
-          </button>
-          <button v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
-          <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
-        </div>
-      </section>
 
       <ErrorNotice v-if="planRefreshError" :error="planRefreshError" :show-retry="false" />
       <ChallengeBossPanel v-if="bossSession" :key="bossSession.sessionId" :challenge-id="plan.id" :node-id="bossSession.nodeId" :session-id="bossSession.sessionId" @completed="onBossCompleted" />

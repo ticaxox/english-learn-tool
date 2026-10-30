@@ -128,7 +128,13 @@ describe('learning surfaces with the frozen contract', () => {
     expect(wrapper.find('#daily-new-words').exists()).toBe(true)
     expect(wrapper.text()).not.toContain('组织信息')
     expect(wrapper.text()).not.toContain('学习部')
-    expect(wrapper.text()).toContain('系统默认')
+    // The settings page now carries the daily goal and the map-generation prefs,
+    // and no longer the exam or memory modules.
+    expect(wrapper.text()).toContain('每日目标')
+    expect(wrapper.text()).toContain('关卡生成')
+    expect(wrapper.text()).not.toContain('目标考试')
+    expect(wrapper.text()).not.toContain('记忆模块')
+    expect(wrapper.findAll('.settings-choice-grid input[type="checkbox"]')).toHaveLength(6)
   })
 
   it('shows all three modules and marks disabled choices from the server config', async () => {

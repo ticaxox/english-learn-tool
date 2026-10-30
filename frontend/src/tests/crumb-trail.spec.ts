@@ -43,12 +43,12 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(today).not.toContain('member-hero')
   })
 
-  it('turns wordbooks into numbered, bitten CrumbTrail covers', () => {
+  it('turns wordbooks into lettered CrumbTrail covers with badges below', () => {
     const wordbooks = source('../views/WordbooksView.vue')
     expect(wordbooks).toContain('crumb-bookshelf')
     expect(wordbooks).toContain('crumb-shelf-header')
     expect(wordbooks).toContain('crumb-current-book')
-    expect(source('../components/WordbookShelfCard.vue')).toContain('crumb-book-number')
+    expect(source('../components/WordbookShelfCard.vue')).toContain('wordbook-card-badges')
   })
 
   it('renders numbered book covers with structural bite marks', async () => {
@@ -67,8 +67,8 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
       },
     })
 
-    expect(wrapper.get('.crumb-book-number').text()).toContain('03')
-    expect(wrapper.findAll('.crumb-book-bite')).toHaveLength(3)
+    expect(wrapper.find('.crumb-book-number').exists()).toBe(false)
+    expect(wrapper.get('.wordbook-card-badges').text()).toContain('可用')
     expect(wrapper.get('.wordbook-cover').classes()).toContain('wordbook-cover--clay')
     expect(wrapper.get('.wordbook-cover-letter').text()).toBe('C')
     await wrapper.setProps({ book: { ...book, name: 'Harbor Reader' } })
@@ -80,8 +80,8 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
   it('uses a curved CrumbTrail route and castle boss structure', () => {
     const challenge = source('../views/ChallengeView.vue')
     expect(challenge).toContain('crumb-challenge')
-    expect(challenge).toContain('crumb-route-svg')
-    expect(challenge).toContain('challenge-node--boss')
+    expect(challenge).toContain('crumb-stations')
+    expect(challenge).toContain('map-station--boss')
     expect(challenge).toContain('CrumboMark')
   })
 

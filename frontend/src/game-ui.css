@@ -1670,3 +1670,287 @@
   font-size: 0.78rem;
   box-shadow: 0 2px 0 var(--ui-line);
 }
+
+/* ------------------------------------------------- challenge: station path */
+
+.crumb-stations {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 18px 0 14px;
+}
+
+.personal-workspace .map-station {
+  position: relative;
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  border: 3px solid var(--ui-line);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  box-shadow: 0 4px 0 var(--ui-line);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.personal-workspace .map-station:nth-child(3n + 1) { transform: translateX(-70px); }
+.personal-workspace .map-station:nth-child(3n) { transform: translateX(70px); }
+
+.personal-workspace .map-station:hover { transform: translateY(-2px); }
+
+.personal-workspace .map-station__order {
+  color: var(--ui-ink);
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.personal-workspace .map-station__caption { display: none; }
+
+.personal-workspace .map-station[aria-current='step'] {
+  border-color: var(--g-orange-edge);
+  background: var(--g-orange-soft);
+  box-shadow: 0 4px 0 var(--g-orange-edge);
+  animation: station-pulse 2s ease-in-out infinite;
+}
+
+@keyframes station-pulse {
+  0%, 100% { outline: 0 solid rgb(255 150 0 / 0%); }
+  50% { outline: 6px solid rgb(255 150 0 / 22%); }
+}
+
+.personal-workspace .map-station.challenge-node--in_progress {
+  border-color: var(--g-orange-edge);
+  background: var(--g-orange);
+  box-shadow: 0 4px 0 var(--g-orange-edge);
+}
+
+.personal-workspace .map-station.challenge-node--in_progress .map-station__order { color: #fff; }
+
+.personal-workspace .map-station.challenge-node--completed {
+  border-color: var(--g-green-edge);
+  background: var(--g-green);
+  box-shadow: 0 4px 0 var(--g-green-edge);
+}
+
+.personal-workspace .map-station.challenge-node--completed .map-station__order { color: #fff; }
+
+.personal-workspace .map-station.challenge-node--locked { opacity: 0.6; }
+
+.personal-workspace .map-station--boss {
+  border-color: var(--g-purple-edge) !important;
+  background: var(--g-purple-soft);
+  box-shadow: 0 4px 0 var(--g-purple-edge) !important;
+}
+
+/* Self-study sits under the map, full width, two cards in a row. */
+@media (min-width: 1181px) {
+  .personal-workspace .challenge-page { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .challenge-page > .challenge-self-study {
+    position: static;
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .personal-workspace .challenge-page .challenge-self-study__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ------------------------------------------------------ coach: compact thread */
+
+@media (min-width: 1181px) {
+  /* The floating window keeps its space: page content narrows instead of hiding
+     under it. */
+  .personal-workspace.is-coach-open .workspace-content {
+    padding-right: calc(var(--ui-space-6) + 456px);
+  }
+}
+
+.personal-workspace .ia-coach-panel .coach-message {
+  max-width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 9px 11px;
+  border-left-width: 0;
+  box-shadow: none;
+}
+
+.personal-workspace .ia-coach-panel .coach-message-avatar { display: none; }
+.personal-workspace .ia-coach-panel .coach-message-body { width: 100%; min-width: 0; }
+.personal-workspace .ia-coach-panel .coach-message__meta { gap: 2px 8px; font-size: 0.72rem; }
+.personal-workspace .ia-coach-panel .coach-message__text { margin: 0; font-size: 0.92rem; line-height: 1.55; }
+
+.personal-workspace .ia-coach-panel .coach-actions { gap: 6px; }
+.personal-workspace .ia-coach-panel .coach-receipt { padding: 8px 10px; gap: 4px; }
+.personal-workspace .ia-coach-panel .coach-receipt p { margin: 0; font-size: 0.85rem; }
+.personal-workspace .ia-coach-panel .coach-receipt__conflict { color: var(--ui-muted); }
+.personal-workspace .ia-coach-panel .coach-messages { gap: 8px; padding: 8px; }
+
+/* -------------------------------------------------- wordbooks: clean covers */
+
+.personal-workspace .wordbook-card--compact {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-cover {
+  position: relative;
+  display: grid;
+  min-height: 118px;
+  place-items: center;
+  border-bottom: 2px solid var(--ui-line-strong);
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-cover-letter {
+  position: static;
+  transform: none;
+  color: rgb(255 255 255 / 92%);
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-card-body {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px 14px;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-card-body h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.3;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-entry-count {
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+}
+
+.personal-workspace .wordbook-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.personal-workspace .wordbook-card-badges .wordbook-pill,
+.personal-workspace .wordbook-card-badges .wordbook-status {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+/* AI provider form is a floating dialog, not an inline column. */
+.personal-workspace .ai-provider-dialog {
+  width: min(720px, calc(100vw - 3rem));
+  max-height: calc(100vh - 3rem);
+}
+
+.personal-workspace .ai-form-grid {
+  align-items: start;
+  gap: var(--ui-space-3) var(--ui-space-4);
+}
+
+.personal-workspace .radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.personal-workspace .radio-option {
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------- practice hub + memory type */
+
+/* Practice hub: one column, recent records as a row of cards underneath. */
+.personal-workspace .practice-hub .practice-workspace-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.personal-workspace .practice-record-list--row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.personal-workspace .practice-record-list--row li a {
+  display: grid;
+  gap: 4px;
+  height: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--ui-line);
+  border-radius: 14px;
+  background: var(--ui-surface);
+  box-shadow: 0 3px 0 var(--ui-line);
+}
+
+.personal-workspace .practice-record-list--row li a:hover {
+  border-color: var(--g-blue-edge);
+  box-shadow: 0 3px 0 var(--g-blue-edge);
+}
+
+/* Readable type sizes for the mode and type cards. */
+.personal-workspace .practice-type-copy strong { font-size: 1rem; }
+.personal-workspace .practice-type-copy span { font-size: 0.82rem; }
+.personal-workspace .practice-record-list strong { font-size: 0.95rem; }
+.personal-workspace .practice-record-list small { font-size: 0.8rem; }
+.personal-workspace .practice-record-type { font-size: 0.78rem; }
+
+.personal-workspace .memory-action-card .module-card__title { font-size: 1rem; }
+.personal-workspace .memory-action-card .module-card__hint { font-size: 0.84rem; }
+.personal-workspace .memory-action-card .memory-action-copy span { font-size: 0.84rem; }
+.personal-workspace .memory-main-card .workspace-section-header h2 { font-size: 1.15rem; }
+
+/* Badges read on the paper body, not on the dark cover. */
+.personal-workspace .wordbook-card-badges .wordbook-pill {
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink) !important;
+}
+
+.personal-workspace .wordbook-card-badges .wordbook-status {
+  background: var(--ui-surface-subtle);
+  color: var(--ui-muted) !important;
+}
+
+.personal-workspace .wordbook-card-badges .wordbook-status--active {
+  border: 1px solid var(--g-gold-edge);
+  background: var(--g-gold);
+  color: #3b2500 !important;
+}
+
+/* "个人词书 · 4 本" stays on one line. */
+.personal-workspace .wordbook-toolbar-title {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.personal-workspace .settings-choice-block {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+}
+
+.personal-workspace .settings-choice-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.personal-workspace .settings-choice-grid .checkbox { font-size: 0.92rem; }
+
+/* The practice hub is one column: header, create panel, then recent records.
+   Flex is used because the inherited grid splits the page into two tracks. */
+.personal-workspace .practice-page.practice-hub {
+  display: flex !important;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+}
+
+.personal-workspace .practice-page.practice-hub > * { width: 100%; }

@@ -5,6 +5,8 @@ import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { createPracticeSession, fetchPracticeUsage, listPracticeMistakes, listPracticeRecords, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
+import { fetchLearningProfile, saveMemoryConfig } from '../api/learning'
+import { useToast } from '../composables/useToast'
 import '../practice.css'
 
 const router = useRouter()
@@ -24,6 +26,33 @@ const mistakesTotal = ref(0)
 const mistakesError = ref<unknown>(null)
 const wordbooks = ref<Wordbook[]>([])
 const wordbooksError = ref<unknown>(null)
+const toast = useToast()
+const spellingBlankMode = ref('')
+
+async function loadSpellingMode(): Promise<void> {
+  try {
+    const profile = await fetchLearningProfile()
+    spellingBlankMode.value = profile.memoryConfig.spelling.blankType ?? ''
+  } catch {
+    spellingBlankMode.value = ''
+  }
+}
+
+async function saveSpellingMode(): Promise<void> {
+  try {
+    const profile = await fetchLearningProfile()
+    await saveMemoryConfig({
+      ...profile.memoryConfig,
+      spelling: {
+        ...profile.memoryConfig.spelling,
+        blankType: (spellingBlankMode.value || null) as typeof profile.memoryConfig.spelling.blankType,
+      },
+    })
+    toast.success('拼写挖空方式已保存')
+  } catch {
+    toast.error('没有保存成功', '稍后再试一次。')
+  }
+}
 const formError = ref<string | null>(null)
 let pendingKey: string | null = null
 let pendingSignature = ''
@@ -34,6 +63,7 @@ const difficulties: PracticeDifficulty[] = ['CET4', 'CET6', 'POSTGRAD', 'IELTS',
 const counts = computed(() => (practiceType.value === 'writing' ? [1] : [3, 5, 10, 15, 20]))
 const needsDifficulty = computed(() => source.value === 'difficulty')
 const needsWordbook = computed(() => source.value !== 'difficulty')
+onMounted(() => { void loadSpellingMode() })
 
 function newKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
@@ -151,30 +181,6 @@ onMounted(() => {
       </div>
     </header>
 
-    <div class="practice-workspace-grid">
-      <aside class="workspace-card practice-records-rail" aria-label="最近练习">
-        <header class="workspace-section-header practice-rail-heading">
-          <div>
-            <h2>最近记录</h2>
-            <p>接着上次继续。</p>
-          </div>
-          <RouterLink to="/practice/records">全部</RouterLink>
-        </header>
-        <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
-        <ul v-else-if="records.length" class="practice-record-list">
-          <li v-for="record in records" :key="record.id">
-            <RouterLink :to="{ name: 'practice-session', params: { sessionId: record.id } }">
-              <span class="practice-record-type">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
-              <strong>{{ record.source ? PRACTICE_SOURCE_LABELS[record.source] : '专项练习' }}</strong>
-              <small>{{ record.totalQuestions }} 题 · {{ record.score === null ? '未评分' : `${record.score} 分` }}</small>
-            </RouterLink>
-          </li>
-        </ul>
-        <div v-else class="practice-rail-empty">
-          <strong>还没有记录</strong>
-          <p>生成第一组练习后，记录会出现在这里。</p>
-        </div>
-      </aside>
 
       <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">
         <header class="workspace-section-header practice-create-heading">
@@ -230,6 +236,16 @@ onMounted(() => {
                 <option v-for="item in counts" :key="item" :value="item">{{ item }} 题</option>
               </select>
             </div>
+            <div class="field">
+              <label for="practice-spelling-mode">拼写挖空方式</label>
+              <select id="practice-spelling-mode" v-model="spellingBlankMode" @change="saveSpellingMode">
+                <option value="">随机（推荐）</option>
+                <option value="full">整词挖空</option>
+                <option value="partial">部分字母</option>
+                <option value="first_letter">只留首字母</option>
+              </select>
+              <p class="field-hint">影响记忆练习中的拼写训练。</p>
+            </div>
             <div v-if="needsWordbook" class="field">
               <label for="practice-wordbook">词书</label>
               <select id="practice-wordbook" v-model="wordbookId">
@@ -259,29 +275,28 @@ onMounted(() => {
         </form>
       </section>
 
-      <aside class="workspace-card practice-mistakes-rail" aria-label="错题概况">
-        <header class="practice-mistakes-heading">
+    <section class="workspace-card practice-records-rail" aria-label="最近练习">
+        <header class="workspace-section-header practice-rail-heading">
           <div>
-            <p class="workspace-kicker">错题概况</p>
-            <strong>{{ mistakesTotal }}</strong>
+            <h2>最近记录</h2>
+            <p>接着上次继续。</p>
           </div>
-          <RouterLink to="/practice/mistakes">查看全部</RouterLink>
+          <RouterLink to="/practice/records">全部</RouterLink>
         </header>
-        <ErrorNotice v-if="mistakesError" :error="mistakesError" :show-retry="false" retry-label="重试" @retry="loadMistakes" />
-        <ul v-else-if="mistakes.length" class="practice-mistake-list">
-          <li v-for="record in mistakes" :key="record.id">
+        <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
+        <ul v-else-if="records.length" class="practice-record-list practice-record-list--row">
+          <li v-for="record in records" :key="record.id">
             <RouterLink :to="{ name: 'practice-session', params: { sessionId: record.id } }">
-              <strong>{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</strong>
-              <span>{{ record.totalQuestions }} 道待复习</span>
+              <span class="practice-record-type">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
+              <strong>{{ record.source ? PRACTICE_SOURCE_LABELS[record.source] : '专项练习' }}</strong>
+              <small>{{ record.totalQuestions }} 题 · {{ record.score === null ? '未评分' : `${record.score} 分` }}</small>
             </RouterLink>
           </li>
         </ul>
         <div v-else class="practice-rail-empty">
-          <strong>暂无错题</strong>
-          <p>完成练习后，需要回看的内容会自动整理在这里。</p>
+          <strong>还没有记录</strong>
+          <p>生成第一组练习后，记录会出现在这里。</p>
         </div>
-        <p class="practice-concurrency">进行中：{{ usage ? `${usage.concurrency.inUse} / ${usage.concurrency.limit}` : '—' }}</p>
-      </aside>
-    </div>
+    </section>
   </article>
 </template>

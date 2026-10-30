@@ -309,18 +309,7 @@ onMounted(() => {
     </div>
 
     <aside class="personal-ai-aside" aria-label="AI 提供商配置详情">
-      <div v-if="formOpen" class="provider-form-shell">
-        <AiProviderForm
-          :provider="editingProvider"
-          :saving="saving"
-          :error="saveError"
-          @create="handleCreate"
-          @update="handleUpdate"
-          @cancel="closeForm"
-        />
-      </div>
-
-      <div v-else class="personal-ai-guide">
+      <div class="personal-ai-guide">
         <p class="eyebrow">配置说明</p>
         <h3>配置后就能用</h3>
         <ul class="personal-ai-guide__list">
@@ -336,5 +325,18 @@ onMounted(() => {
         <p class="field-hint">先保存配置，再用“测试连接”确认可达，最后获取模型列表选择模型 ID。</p>
       </div>
     </aside>
+
+    <div v-if="formOpen" class="dialog-backdrop" @click.self="closeForm">
+      <section class="dialog-card ai-provider-dialog" role="dialog" aria-modal="true" aria-labelledby="provider-form-title">
+        <AiProviderForm
+          :provider="editingProvider"
+          :saving="saving"
+          :error="saveError"
+          @create="handleCreate"
+          @update="handleUpdate"
+          @cancel="closeForm"
+        />
+      </section>
+    </div>
   </section>
 </template>
