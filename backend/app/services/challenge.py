@@ -22,7 +22,7 @@ from app.models.challenge import (
     DailyChallengePlan,
 )
 from app.models.identity import User
-from app.models.learning import DailyPlan, DailyPlanWord, MemorySession
+from app.models.learning import DailyPlan, DailyPlanWord, MemorySession, MemoryConfig
 from app.models.practice import PracticeSession
 from app.schemas.ai_tasks import ChallengePlanContext as AiChallengeContext
 from app.schemas.ai_tasks import ChallengePlanOutput, ChallengePlanRequest
@@ -345,13 +345,26 @@ async def _build_context(
             code="CHALLENGE_DAILY_PLAN_EMPTY",
             message="The daily study plan has no challenge entries.",
         )
+    memory_config = await session.get(MemoryConfig, user.id)
+    preferences = (memory_config.preferences or {}) if memory_config else {}
+    challenge_prefs = preferences.get("challenge", {}) if isinstance(preferences, dict) else {}
+
+    def _kept(value: object, defaults: list[str]) -> list[str]:
+        if not isinstance(value, list):
+            return list(defaults)
+        chosen = [item for item in defaults if item in value]
+        return chosen or list(defaults)
+
     return AiChallengeContext(
         local_date=plan.local_date.isoformat(),
         target_minutes=plan.target_minutes,
         new_entry_ids=new_entry_ids,
         due_entry_ids=due_entry_ids,
-        allowed_practice_types=["fill_blank", "reading", "translation", "writing"],
-        allowed_drill_modes=["choice", "spelling"],
+        allowed_practice_types=_kept(
+            challenge_prefs.get("practiceTypes"),
+            ["fill_blank", "reading", "translation", "writing"],
+        ),
+        allowed_drill_modes=_kept(challenge_prefs.get("drillModes"), ["choice", "spelling"]),
         plan_id=plan.id,
         wordbook_id=plan.wordbook_id,
         target_new_words=len(new_entry_ids),

@@ -292,9 +292,12 @@ async def _card_prompt(
             part_of_speech=part_of_speech,
         )
     if module == "spelling":
-        mode = preferences.get("spelling_mode", "partial")
-        if mode not in {"full", "partial", "first_letter"}:
-            mode = "partial"
+        # Unset or "random" means the cloze type varies from card to card.
+        mode = preferences.get("spelling_mode", "random")
+        if mode not in {"full", "partial", "first_letter", "random"}:
+            mode = "random"
+        if mode == "random":
+            mode = random.choice(["full", "partial", "first_letter"])
         return SessionCardPrompt(
             module="spelling",
             prompt=definition_zh or entry.headword,
