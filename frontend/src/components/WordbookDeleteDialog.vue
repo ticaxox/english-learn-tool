@@ -160,11 +160,10 @@ onUnmounted(() => {
       </header>
 
       <div class="alert alert-warning">
-        <strong>只有服务端删除任务 succeeded 才会显示完成。</strong>
+        <strong>删除会在后台执行，完成后列表会自动更新。</strong>
         <ul>
-          <li>删除请求会返回真实 WordbookJob，页面随后轮询 <code>/wordbooks/jobs/:job_id</code>。</li>
-          <li>组织词书必须输入精确名称；请求体字段为 <code>confirm_name</code>。</li>
-          <li v-if="props.wordbook.is_active">这是当前主词书，清理后需要重新选择或导入主词书。</li>
+          <li>共享词书需要再次输入完整名称；私人词书勾选确认即可。</li>
+          <li v-if="props.wordbook.is_active">这是当前主词书，删除后需要重新选择或导入一本。</li>
           <li>当前词条数：{{ props.wordbook.entry_count.toLocaleString('zh-CN') }}。</li>
         </ul>
       </div>
@@ -172,12 +171,12 @@ onUnmounted(() => {
       <label v-if="exactNameRequired" class="field">
         <span>输入完整词书名以确认</span>
         <input v-model="confirmation" autocomplete="off" :placeholder="props.wordbook.name" :disabled="submitting || completed" />
-        <span class="field-hint">必须与服务端返回的名称完全一致。</span>
+        <span class="field-hint">必须与词书名称完全一致。</span>
       </label>
 
       <label v-else class="wordbook-check">
         <input v-model="privateConfirmed" type="checkbox" :disabled="submitting || completed" />
-        <span>我确认删除这本私有词书；请求中的 confirm_name 为 null。</span>
+        <span>我确认删除这本词书。</span>
       </label>
 
       <ErrorNotice v-if="error" :error="error" :show-retry="false" />
@@ -190,9 +189,9 @@ onUnmounted(() => {
         <div class="progress-track" role="progressbar" :aria-valuenow="job?.progress ?? 0" aria-valuemin="0" aria-valuemax="100">
           <span :style="{ width: `${job?.progress ?? 0}%` }"></span>
         </div>
-        <p v-if="job" class="field-hint">任务 ID：<code>{{ job.job_id }}</code> · 状态：{{ job.status }} · 清理状态：{{ job.cleanup_status }}</p>
-        <p v-if="completed" class="alert alert-success">服务端任务已成功；列表刷新后会移除不再可见的词书。</p>
-        <p v-else class="field-hint">关闭窗口不会取消后台任务，也不会把未完成状态标记为成功。</p>
+        <p v-if="job" class="field-hint">已处理 {{ job.progress }}%</p>
+        <p v-if="completed" class="alert alert-success">删除完成，列表已更新。</p>
+        <p v-else class="field-hint">关闭窗口不会取消删除；重新打开词书页即可看到最新状态。</p>
       </div>
 
       <footer class="dialog-actions button-row">

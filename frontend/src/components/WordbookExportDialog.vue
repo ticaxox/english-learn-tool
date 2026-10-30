@@ -73,7 +73,7 @@ const downloadExpired = computed(() => {
 
 function formatDate(value: string | null): string {
   if (!value) {
-    return '服务端未返回'
+    return '暂无记录'
   }
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN')
@@ -229,8 +229,8 @@ onUnmounted(() => {
       </header>
 
       <div class="alert alert-info">
-        <strong>导出由后台任务生成，下载地址只用于服务端记录。</strong>
-        <p>浏览器下载会重新通过认证 API 获取 Blob，不使用可直接分享的普通链接；下载有效期以服务端返回为准。</p>
+        <strong>导出会在后台生成，完成后即可下载。</strong>
+        <p>下载链接只对当前账号有效；过期后重新导出即可。</p>
       </div>
 
       <fieldset class="wordbook-choice-group" :disabled="submitting">

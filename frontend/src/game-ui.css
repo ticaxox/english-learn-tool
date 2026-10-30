@@ -1361,3 +1361,85 @@
 .personal-workspace .challenge-node__marker svg { width: 18px; height: 18px; }
 .personal-workspace .challenge-self-study__mark svg { width: 22px; height: 22px; }
 .personal-workspace .crumb-ai-dot svg { width: 14px; height: 14px; }
+
+/* --------------------------------------------------- records + account views */
+
+/* A dashed blob behind the practice header is clipped by the viewport edge. */
+.personal-workspace .practice-session-header::after { display: none; }
+
+/* Tables read as rules and alignment, not a header band. */
+.personal-workspace .practice-records-table thead th {
+  border-bottom: 2px solid var(--ui-line);
+  background: transparent;
+  color: var(--ui-muted);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.personal-workspace .practice-records-table td {
+  border-bottom: 1px solid rgb(236 217 187 / 70%);
+}
+
+.personal-workspace .practice-records-table td:nth-child(5) { font-variant-numeric: tabular-nums; }
+
+/* Account security shares the section frame of the other settings tabs. */
+.personal-workspace .ia-account-security .eyebrow { display: none; }
+
+.personal-workspace .ia-security-form .field { align-content: start; }
+
+@media (min-width: 1181px) {
+  .personal-workspace .ia-account-security { width: 100%; }
+}
+
+.personal-workspace .ia-security-form button[type="submit"] {
+  min-height: 46px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--g-green);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 0 var(--g-green-edge);
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+
+.personal-workspace .ia-security-form button[type="submit"]:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--g-green-edge);
+}
+
+/* Mistake table follows the same rule system as the records table. */
+.personal-workspace .mistake-table thead th {
+  border-bottom: 2px solid var(--ui-line);
+  background: transparent;
+  color: var(--ui-muted);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.personal-workspace .mistake-table td {
+  border-bottom: 1px solid rgb(236 217 187 / 70%);
+}
+
+.personal-workspace .mistake-table td:nth-child(5) { font-variant-numeric: tabular-nums; }
+
+/* Dialog footers often use a bare <button> for the primary action. */
+.personal-workspace .dialog-actions > button:not(.button-secondary):not(.button-danger):not(.icon-button) {
+  min-height: 46px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--g-green);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 4px 0 var(--g-green-edge);
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+
+.personal-workspace .dialog-actions > button:not(.button-secondary):not(.button-danger):not(.icon-button):active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--g-green-edge);
+}

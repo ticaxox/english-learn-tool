@@ -414,7 +414,7 @@ onUnmounted(() => {
         <section v-if="preview.errors.length" class="wordbook-subpanel" aria-labelledby="wordbook-errors-title">
           <div class="section-heading">
             <div>
-              <h3 id="wordbook-errors-title">服务端预览错误</h3>
+              <h3 id="wordbook-errors-title">检查发现的错误</h3>
               <p class="field-hint">错误未清零前禁止确认导入。</p>
             </div>
             <span class="count-pill">{{ preview.error_count }} 条</span>
@@ -431,7 +431,7 @@ onUnmounted(() => {
         <section v-if="preview.warnings.length" class="wordbook-subpanel" aria-labelledby="wordbook-warnings-title">
           <div class="section-heading">
             <div>
-              <h3 id="wordbook-warnings-title">服务端预览警告</h3>
+              <h3 id="wordbook-warnings-title">检查发现的警告</h3>
               <p class="field-hint">警告不会阻止导入，但请在确认前检查映射。</p>
             </div>
             <span class="count-pill">{{ preview.warning_count }} 条</span>
@@ -468,7 +468,7 @@ onUnmounted(() => {
         <section v-if="preview.sample_rows.length" class="wordbook-subpanel" aria-labelledby="wordbook-sample-title">
           <div class="section-heading">
             <div>
-              <h3 id="wordbook-sample-title">服务端结构化样例</h3>
+              <h3 id="wordbook-sample-title">导入后的词条样例</h3>
               <p class="field-hint">样例行已经按映射归一化，不是原始列对象。</p>
             </div>
           </div>
@@ -504,9 +504,9 @@ onUnmounted(() => {
           <div class="progress-track" role="progressbar" :aria-valuenow="job?.progress ?? 0" aria-valuemin="0" aria-valuemax="100">
             <span :style="{ width: `${job?.progress ?? 0}%` }"></span>
           </div>
-          <p v-if="job" class="field-hint">任务 ID：<code>{{ job.job_id }}</code> · 状态：{{ job.status }} · 清理：{{ job.cleanup_status }}</p>
-          <p v-if="completed" class="alert alert-success" role="status">服务端任务已成功，词书列表将刷新。</p>
-          <p v-else-if="importTerminalFailure" class="field-hint" role="status">服务端任务未成功；预览已失效，请返回文件重新预览。</p>
+          <p v-if="job" class="field-hint">已处理 {{ job.progress }}%</p>
+          <p v-if="completed" class="alert alert-success" role="status">导入完成，词书列表已刷新。</p>
+          <p v-else-if="importTerminalFailure" class="field-hint" role="status">导入没有完成；请返回文件重新预览后再试。</p>
         </div>
 
         <footer class="dialog-actions button-row">

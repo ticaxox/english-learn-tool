@@ -350,7 +350,7 @@ describe('wordbook dialogs', () => {
 
     expect(wrapper.text()).toContain('导入任务失败')
     expect(wrapper.text()).not.toContain('后台导入中')
-    expect(wrapper.text()).toContain('预览已失效，请返回文件重新预览')
+    expect(wrapper.text()).toContain('请返回文件重新预览')
     expect(buttonByText(wrapper, '请返回文件重新预览').attributes('disabled')).toBeDefined()
   })
 
