@@ -382,3 +382,37 @@ def test_challenge_plan_still_rejects_maps_missing_new_word_coverage() -> None:
             context=context,
             raw_text=json.dumps(output),
         )
+
+
+def test_chat_json_requests_an_explicit_completion_budget(monkeypatch) -> None:
+    """Gateways truncate long structured answers without an explicit budget."""
+    import asyncio
+
+    from app.core.config import Settings
+    from app.services.ai_security import ProviderHttpClient
+
+    settings = Settings(ai_provider_max_tokens=4096)
+    client = ProviderHttpClient(settings)
+    captured: dict = {}
+
+    async def fake_request(**kwargs):
+        captured.update(kwargs)
+        return {"choices": [{"message": {"content": "{}"}}]}
+
+    monkeypatch.setattr(client, "_request", fake_request)
+    raw = asyncio.run(
+        client.chat_json(
+            base_url="https://provider.example/v1",
+            api_key="test-key",
+            custom_headers={},
+            model_id="test-model",
+            timeout_seconds=30,
+            system_prompt="system",
+            user_content="user",
+            schema_name="practice_generation",
+            schema={"type": "object"},
+        )
+    )
+
+    assert raw == "{}"
+    assert captured["json"]["max_tokens"] == 4096

@@ -288,6 +288,7 @@ class ProviderHttpClient:
                 {"role": "user", "content": user_content},
             ],
             "temperature": 0.2,
+            "max_tokens": self.settings.ai_provider_max_tokens,
         }
         request_body["response_format"] = {
             "type": "json_schema",

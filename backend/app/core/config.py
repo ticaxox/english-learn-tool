@@ -76,6 +76,9 @@ class Settings(BaseSettings):
     ai_allow_private_provider_urls: bool = False
     ai_provider_redirect_limit: int = Field(default=2, ge=0, le=5)
     ai_provider_retry_limit: int = Field(default=2, ge=0, le=2)
+    # Structured outputs (5-question practices, daily maps) routinely exceed a
+    # gateway's small default completion budget and arrive truncated.
+    ai_provider_max_tokens: int = Field(default=4096, ge=256, le=16384)
     ai_provider_retry_backoff_seconds: float = Field(default=0.25, ge=0, le=5)
     ai_job_stale_seconds: int = Field(default=900, ge=300, le=86400)
     ai_job_max_context_bytes: int = Field(default=64_000, ge=1024, le=1_000_000)
