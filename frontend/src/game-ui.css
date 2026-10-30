@@ -549,7 +549,10 @@
 }
 
 .personal-workspace .challenge-node {
-  grid-template-columns: 3.4rem minmax(0, 1fr);
+  /* The marker is absolutely positioned on the path, so the card is one column. */
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  justify-self: stretch;
   border: 2px solid var(--ui-line) !important;
   border-radius: 18px !important;
   background: var(--ui-surface) !important;
@@ -557,8 +560,10 @@
 }
 
 .personal-workspace .challenge-node__marker {
-  width: 3.2rem;
-  height: 3.2rem;
+  top: 20px;
+  left: -54px;
+  width: 42px;
+  height: 42px;
   border: 3px solid var(--ui-line-strong);
   border-radius: 50%;
   background: var(--ui-surface);
