@@ -13,6 +13,7 @@ const coach = useCoachWorkspace()
 const draft = ref('')
 const newTitle = ref('')
 const showCreate = ref(false)
+const historyOpen = ref(false)
 const renameId = ref<string | null>(null)
 const renameTitle = ref('')
 const composer = ref<HTMLTextAreaElement | null>(null)
@@ -171,8 +172,19 @@ onBeforeUnmount(() => {
       <span class="coach-privacy-stamp"><AppIcon name="lock" /> 仅你可见</span>
     </header>
 
+    <div class="coach-main-topbar">
+      <button
+        class="button-secondary button-small coach-history-toggle"
+        type="button"
+        :aria-expanded="historyOpen"
+        @click="historyOpen = !historyOpen"
+      >
+        {{ historyOpen ? '收起历史对话' : '历史对话' }}
+      </button>
+    </div>
+
     <div class="coach-layout">
-      <aside class="panel coach-sidebar" aria-label="教练会话列表">
+      <aside v-if="historyOpen" class="panel coach-sidebar" aria-label="教练会话列表">
         <div class="coach-sidebar__heading">
           <div>
             <p class="eyebrow">对话</p>

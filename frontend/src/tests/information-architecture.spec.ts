@@ -81,7 +81,8 @@ describe('T-FE-020 personal information architecture', () => {
 
     await wrapper.get('.ia-coach-toggle').trigger('click')
     await flushPromises()
-    expect(router.currentRoute.value.name).toBe('coach')
+    // The coach is a floating window now: opening it leaves the page alone.
+    expect(router.currentRoute.value.name).toBe('overview')
     expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
   })
 

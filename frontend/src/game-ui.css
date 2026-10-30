@@ -1448,3 +1448,206 @@
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--g-green-edge);
 }
+
+/* --------------------------------------------------- coach: floating window */
+
+@media (min-width: 861px) {
+  .personal-workspace .ia-coach-panel {
+    top: auto;
+    right: 24px;
+    bottom: 24px;
+    left: auto;
+    width: min(432px, calc(100vw - 48px));
+    height: min(664px, calc(100vh - 48px));
+    border: 2px solid var(--ui-line-strong);
+    border-radius: 22px;
+    background: var(--ui-surface);
+    box-shadow: 0 8px 0 rgb(59 42 26 / 12%), 0 30px 70px rgb(59 42 26 / 22%);
+    animation: coach-pop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* A floating window never pushes the page. */
+  .personal-workspace.is-coach-open .workspace-main { margin-right: 0; }
+  .personal-workspace.is-coach-open .ia-coach-backdrop { display: none; }
+  .personal-workspace .ia-coach-panel .coach-layout { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .ia-coach-panel .coach-sidebar {
+    max-height: 40%;
+    overflow-y: auto;
+  }
+}
+
+@keyframes coach-pop {
+  from { transform: translateY(14px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.personal-workspace .coach-main-topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--ui-space-2) var(--ui-space-3) 0;
+}
+
+/* ------------------------------------------------------- practice question UI */
+
+/* Two-by-two options by default; long options take a full row each. */
+.personal-workspace .practice-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.personal-workspace .practice-options--long { grid-template-columns: minmax(0, 1fr); }
+
+@media (max-width: 860px) {
+  .personal-workspace .practice-options { grid-template-columns: minmax(0, 1fr); }
+}
+
+.personal-workspace .practice-option {
+  min-height: 52px;
+  padding: 10px 12px;
+  gap: 10px;
+  align-items: center;
+}
+
+.personal-workspace .practice-option__body {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.personal-workspace .practice-option__text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.personal-workspace .practice-option small {
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+}
+
+.personal-workspace .practice-option__flag {
+  margin-left: auto;
+  color: var(--g-green-edge);
+  font-size: 0.72rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.personal-workspace .practice-option__flag--wrong { color: var(--g-red-edge); }
+
+/* Review state: the picked option and the correct one are both marked. */
+.personal-workspace .practice-option--correct {
+  border-color: var(--g-green-edge) !important;
+  background: var(--g-green-soft) !important;
+  box-shadow: inset 0 0 0 1px var(--g-green-edge);
+}
+
+.personal-workspace .practice-option--wrong {
+  border-color: var(--g-red-edge) !important;
+  background: var(--g-red-soft) !important;
+  box-shadow: inset 0 0 0 1px var(--g-red-edge);
+}
+
+/* Question typography: one readable size, tighter rhythm. */
+.personal-workspace .practice-question-card { gap: 12px; }
+.personal-workspace .practice-question-card h2 { margin: 0; font-size: 1.05rem; }
+.personal-workspace .practice-question-card h3 { margin: 0; font-size: 1rem; }
+
+.personal-workspace .practice-sentence {
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.personal-workspace .practice-article {
+  padding: 4px 0 4px 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.personal-workspace .practice-source-text {
+  padding: 12px 14px;
+  border-left: 0;
+  border-radius: 12px;
+  background: var(--ui-surface-subtle);
+  font-size: 0.95rem;
+}
+
+.personal-workspace .practice-reading-group {
+  display: grid;
+  gap: 12px;
+}
+
+.personal-workspace .practice-article-panel { padding: 16px 20px; }
+.personal-workspace .practice-article-panel .practice-article { margin: 6px 0 0; }
+
+.personal-workspace .practice-translation-note {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.88rem;
+}
+
+/* Result: one total score, then per-question review with an explanation block. */
+.personal-workspace .result-question { display: grid; gap: 10px; }
+
+.personal-workspace .result-explanation {
+  display: grid;
+  gap: 8px;
+  padding: 14px 18px;
+}
+
+.personal-workspace .result-copy { margin: 0; font-size: 0.92rem; line-height: 1.6; }
+
+.personal-workspace .result-explanation__status {
+  margin: 0;
+  color: var(--g-red-edge);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+/* The spelling trainer uses one input per letter; the shared text-field width
+   rule must not stretch them. */
+.personal-workspace .spelling-grid input.spelling-cell {
+  width: 2.4rem;
+  min-width: 2.4rem;
+  height: 2.9rem;
+  min-height: 0;
+  padding: 0;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.personal-workspace .spelling-cell--prefilled {
+  display: grid;
+  width: 2.4rem;
+  height: 2.9rem;
+  place-items: center;
+}
+
+/* A correct pick stays green even though the radio is checked. */
+.personal-workspace .practice-option--correct:has(input:checked),
+.personal-workspace .practice-option--correct {
+  border-color: var(--g-green-edge) !important;
+  background: var(--g-green-soft) !important;
+  box-shadow: inset 0 0 0 1px var(--g-green-edge);
+}
+
+/* The submit bar sits after the last question instead of floating over it. */
+.personal-workspace .member-practice-session-page .member-practice-submit {
+  position: static;
+}
+
+/* A smaller mascot keeps the right rail from shouting. */
+.personal-workspace .member-session-mascot { padding: 12px; }
+.personal-workspace .member-session-mascot .whisker-crumb-mark { width: 4.2rem; }
+.personal-workspace .member-session-mascot p { font-size: 0.85rem; text-align: center; }
+
+/* Keep the history toggle reachable while the thread scrolls. */
+.personal-workspace .ia-coach-panel .coach-main-topbar {
+  padding: 4px 12px 6px;
+  background: var(--ui-surface);
+}

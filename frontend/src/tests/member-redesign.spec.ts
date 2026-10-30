@@ -71,7 +71,8 @@ describe('member redesign', () => {
     await wrapper.get('.ia-coach-toggle').trigger('click')
     await flushPromises()
 
-    expect(router.currentRoute.value.name).toBe('coach')
+    // Floating window: the page underneath does not change.
+    expect(router.currentRoute.value.name).toBe('overview')
     expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
     expect(wrapper.find('.workspace-nav').text()).not.toContain('AI 教练')
     // The shell marks itself so the desktop layout can give the coach real space.

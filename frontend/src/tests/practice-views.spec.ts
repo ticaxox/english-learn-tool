@@ -164,4 +164,27 @@ describe('practice views', () => {
     expect(practiceMocks.listPracticeMistakes).toHaveBeenCalled()
     expect(practiceMocks.listPracticeRecords).not.toHaveBeenCalled()
   })
+
+  it('keeps the answering view English-only and explains in Chinese on review', () => {
+    const answering = mount(PracticeQuestionCard, { props: { question, modelValue: '', index: 0, total: 1 } })
+    expect(answering.text()).toContain('The team remained ____.')
+    expect(answering.text()).not.toContain('有韧性的')
+    expect(answering.text()).not.toContain('源语言')
+
+    const review = mount(PracticeQuestionCard, {
+      props: { question, modelValue: 'o-2', index: 0, total: 1, review: { selected: 'o-2', correct: 'o-1' } },
+    })
+    expect(review.find('.practice-option--wrong').exists()).toBe(true)
+    expect(review.find('.practice-option--correct').exists()).toBe(true)
+    expect(review.text()).toContain('有韧性的')
+    expect(review.text()).toContain('正确')
+  })
+
+  it('shows one total score and re-renders the submitted options in the result', () => {
+    const wrapper = mount(PracticeResultView, { props: { result, questions: [question] } })
+    expect(wrapper.text()).toContain('100 分')
+    expect(wrapper.text()).not.toContain('得分：100')
+    expect(wrapper.findAll('.practice-option')).toHaveLength(2)
+    expect(wrapper.text()).toContain('Context points to resilience.')
+  })
 })

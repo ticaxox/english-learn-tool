@@ -92,6 +92,7 @@ describe('coach view', () => {
 
   it('creates a conversation from the sidebar', async () => {
     const wrapper = await mountView()
+    await wrapper.get('.coach-history-toggle').trigger('click')
     await wrapper.findAll('button').find((button) => button.text() === '新建')!.trigger('click')
     await wrapper.get('.coach-create input').setValue('阅读训练')
     await wrapper.get('form.coach-create').trigger('submit')
@@ -119,6 +120,7 @@ describe('coach view', () => {
   it('requires confirmation and distinguishes clear from delete', async () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const wrapper = await mountView()
+    await wrapper.get('.coach-history-toggle').trigger('click')
     await wrapper.findAll('button').find((button) => button.text() === '清空')!.trigger('click')
     await flushPromises()
     expect(coachMocks.deleteCoachConversation).toHaveBeenCalledWith('conversation-1', true)

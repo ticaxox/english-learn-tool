@@ -36,7 +36,7 @@ const name = ref('')
 const baseUrl = ref('')
 const modelId = ref('')
 const priority = ref(100)
-const timeoutSeconds = ref(60)
+const timeoutSeconds = ref(120)
 const enabled = ref(true)
 const isDefault = ref(false)
 const customHeadersText = ref('{}')
@@ -66,7 +66,7 @@ function reset(): void {
   baseUrl.value = provider?.baseUrl ?? ''
   modelId.value = provider?.modelId ?? ''
   priority.value = provider?.priority ?? 100
-  timeoutSeconds.value = provider?.timeoutSeconds ?? 60
+  timeoutSeconds.value = provider?.timeoutSeconds ?? 120
   enabled.value = provider?.enabled ?? true
   isDefault.value = provider?.isDefault ?? false
   customHeadersText.value = provider ? JSON.stringify(provider.customHeaders, null, 2) : '{}'
@@ -254,6 +254,13 @@ function cancel(): void {
         <p class="field-hint">保存后只显示服务端返回的掩码。</p>
       </div>
 
+      <div class="field">
+        <label for="provider-timeout">生成超时（秒）</label>
+        <input id="provider-timeout" v-model.number="timeoutSeconds" type="number" min="1" max="120" step="1" />
+        <p v-if="errors.timeoutSeconds" class="field-error" role="alert">{{ errors.timeoutSeconds }}</p>
+        <p class="field-hint">单次题目、地图或教练回复的最长等待时间，1–120 秒。网络慢时调大。</p>
+      </div>
+
       <details class="provider-advanced" :open="editing">
         <summary>高级设置</summary>
         <div class="ai-form-grid">
@@ -261,11 +268,6 @@ function cancel(): void {
             <label for="provider-priority">备用顺序（数字越小越靠前）</label>
             <input id="provider-priority" v-model.number="priority" type="number" min="0" max="10000" step="1" />
             <p v-if="errors.priority" class="field-error" role="alert">{{ errors.priority }}</p>
-          </div>
-          <div class="field">
-            <label for="provider-timeout">请求超时（秒）</label>
-            <input id="provider-timeout" v-model.number="timeoutSeconds" type="number" min="1" max="120" step="1" />
-            <p v-if="errors.timeoutSeconds" class="field-error" role="alert">{{ errors.timeoutSeconds }}</p>
           </div>
         </div>
 

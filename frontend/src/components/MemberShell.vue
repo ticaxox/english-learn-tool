@@ -76,16 +76,14 @@ function toggleProfile(): void {
 }
 
 async function openCoach(): Promise<void> {
+  // The coach is a floating window, never a page: opening it leaves the URL be.
   closeProfile()
   previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
-  if (route.name !== 'coach') coachReturnPath = route.fullPath
   coachOpen.value = true
-  if (route.name !== 'coach') await router.push({ name: 'coach' })
 }
 
 function closeCoach(): void {
   coachOpen.value = false
-  if (route.name === 'coach') void router.replace(coachReturnPath)
 }
 
 function focusableElements(): HTMLElement[] {
@@ -141,13 +139,20 @@ watch(coachOpen, async (open) => {
   }
 })
 
-watch(() => route.name, (name) => {
+watch(() => route.fullPath, () => {
   closeProfile()
-  coachOpen.value = name === 'coach'
+  // Old /coach deep links open the window over Today instead of a page.
+  if (route.name === 'coach') {
+    coachOpen.value = true
+    void router.replace(coachReturnPath || '/overview')
+  }
 })
 
 onMounted(() => {
-  coachOpen.value = route.name === 'coach'
+  if (route.name === 'coach') {
+    coachOpen.value = true
+    void router.replace(coachReturnPath || '/overview')
+  }
   document.addEventListener('click', onDocumentClick)
   document.addEventListener('keydown', onKeydown)
 })

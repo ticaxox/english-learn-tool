@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
@@ -8,6 +8,7 @@ import LoadingState from '../components/LoadingState.vue'
 import PracticeQuestionCard from '../components/PracticeQuestionCard.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
 import { usePracticeSession } from '../composables/usePracticeSession'
+import { useToast } from '../composables/useToast'
 import { isApiError } from '../api/errors'
 import {
   PRACTICE_SOURCE_LABELS,
@@ -18,6 +19,8 @@ import {
 import '../practice.css'
 
 const route = useRoute()
+const router = useRouter()
+const toast = useToast()
 const sessionId = String(route.params.sessionId)
 const practice = usePracticeSession(sessionId)
 const answers = ref<Record<string, string>>({})
@@ -137,6 +140,25 @@ async function regenerate(): Promise<void> {
   pendingRegenerateKey = null
 }
 
+const readingGroups = computed(() => {
+  const groups: Array<{ article: string; items: Array<{ question: (typeof questions.value)[number]; index: number }> }> = []
+  let index = 0
+  for (const question of questions.value) {
+    const item = { question, index: index++ }
+    const article = question.article ?? ''
+    const last = groups[groups.length - 1]
+    if (last && last.article === article) last.items.push(item)
+    else groups.push({ article, items: [item] })
+  }
+  return groups
+})
+
+async function cancelGeneration(): Promise<void> {
+  // The server job is not aborted; leaving the session stops waiting for it.
+  toast.push({ title: '已取消等待', description: '生成可能仍在后台完成，可以随时回到练习中心重新开始。', tone: 'info' })
+  await router.push('/practice')
+}
+
 onUnmounted(clearAutosave)
 void practice.load()
 </script>
@@ -166,7 +188,11 @@ void practice.load()
         <h2>正在生成第 {{ session.generationNumber }} 组题目</h2>
         <p>题目正在生成，请稍候。</p>
         <div class="practice-generation-loader" aria-hidden="true"><span></span><span></span><span></span></div>
-        <p class="inline-note">如果生成失败，可以直接重试。</p>
+        <div class="button-row">
+          <button class="button-secondary" type="button" @click="cancelGeneration">取消生成</button>
+          <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
+        </div>
+        <p class="inline-note">取消后不再等待结果；如果生成失败，可以直接重试。</p>
       </section>
 
       <section v-else-if="session.status === 'failed'" class="panel">
@@ -179,7 +205,7 @@ void practice.load()
         </div>
       </section>
 
-      <PracticeResultView v-else-if="result" :result="result" />
+      <PracticeResultView v-else-if="result" :result="result" :questions="questions" />
 
       <section v-else-if="session.status === 'submitted'" class="panel" aria-live="polite">
         <p class="eyebrow">主观题评分中</p>
@@ -213,8 +239,27 @@ void practice.load()
             </section>
             <ErrorNotice v-else-if="practice.draftError.value" :error="practice.draftError.value" :show-retry="false" retry-label="重试" @retry="saveDraft" />
 
+            <template v-if="session.practiceType === 'reading'">
+              <section v-for="(group, groupIndex) in readingGroups" :key="`group-${groupIndex}`" class="practice-reading-group">
+                <section v-if="group.article" class="panel practice-article-panel">
+                  <p class="eyebrow">阅读材料</p>
+                  <p class="practice-article">{{ group.article }}</p>
+                </section>
+                <PracticeQuestionCard
+                  v-for="item in group.items"
+                  :key="item.question.id"
+                  :question="item.question"
+                  :index="item.index"
+                  :total="questions.length"
+                  hide-article
+                  :model-value="answers[item.question.id] ?? ''"
+                  :disabled="practice.busy.value"
+                  @update:model-value="answers[item.question.id] = $event"
+                />
+              </section>
+            </template>
             <PracticeQuestionCard
-              v-for="(question, index) in questions"
+              v-for="(question, index) in (session.practiceType === 'reading' ? [] : questions)"
               :key="question.id"
               :question="question"
               :index="index"
