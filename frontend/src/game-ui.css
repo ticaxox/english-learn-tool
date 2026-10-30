@@ -1954,3 +1954,20 @@
 }
 
 .personal-workspace .practice-page.practice-hub > * { width: 100%; }
+
+/* Settings save button uses the shared 3D primary style. */
+.personal-workspace .settings-form button[type="submit"] {
+  min-height: 46px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--g-green);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 4px 0 var(--g-green-edge);
+}
+
+.personal-workspace .settings-form button[type="submit"]:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--g-green-edge);
+}
