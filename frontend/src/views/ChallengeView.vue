@@ -149,17 +149,17 @@ async function generateMap(): Promise<void> {
       generationStatus.value = '地图生成中…'
       await new Promise((resolve) => window.setTimeout(resolve, 1000))
       const job = await getChallengeJob(accepted.jobId)
-      generationStatus.value = `地图生成中，任务状态：${job.status}`
+      generationStatus.value = '地图生成中…'
       if (job.status === 'succeeded') {
         await loadPlan()
         return
       }
       if (job.status === 'failed' || job.status === 'cancelled') {
-        generationError.value = new Error(job.errorMessage || 'AI 地图生成失败，请重试或使用传统学习模式。')
+        generationError.value = new Error('这次没能生成地图，请稍后再试，或先完成今日任务。')
         return
       }
     }
-    generationError.value = new Error('地图生成等待超时，页面不会生成替代地图。')
+    generationError.value = new Error('地图生成等待超时，请稍后重试。')
   } catch (requestError) {
     generationError.value = requestError
   } finally {
@@ -343,7 +343,7 @@ onMounted(() => {
       </div>
 
       <section v-if="plan.status === 'failed'" class="panel">
-        <ErrorNotice :error="{ code: plan.errorCode, message: plan.errorMessage || '今日地图生成失败。' }" :show-retry="false" />
+        <ErrorNotice :error="{ code: plan.errorCode, message: '今日地图暂时不可用，请稍后重试。' }" :show-retry="false" />
         <div class="button-row">
           <button class="button" type="button" :disabled="generating" @click="generateMap">重试生成</button>
           <RouterLink class="button-secondary" to="/overview">使用传统学习</RouterLink>

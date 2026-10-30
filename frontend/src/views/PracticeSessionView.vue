@@ -23,6 +23,11 @@ const practice = usePracticeSession(sessionId)
 const answers = ref<Record<string, string>>({})
 const formError = ref<string | null>(null)
 const draftSavedAt = ref<string | null>(null)
+const draftSavedLabel = computed(() => {
+  if (!draftSavedAt.value) return null
+  const saved = new Date(draftSavedAt.value)
+  return Number.isNaN(saved.getTime()) ? null : saved.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+})
 const hydratedKey = ref<string | null>(null)
 let autosaveTimer: number | null = null
 let pendingSubmitKey: string | null = null
@@ -191,7 +196,7 @@ void practice.load()
                 <strong>作答进度 {{ answeredCount }} / {{ questions.length }}</strong>
                 <p class="inline-note">
                   <span v-if="practice.draftSaving.value">正在保存草稿…</span>
-                  <span v-else-if="draftSavedAt">草稿已保存：{{ draftSavedAt }}</span>
+                  <span v-else-if="draftSavedAt">草稿已保存：{{ draftSavedLabel }}</span>
                   <span v-else>答案会自动保存。</span>
                 </p>
               </div>
@@ -245,7 +250,7 @@ void practice.load()
             <section class="member-session-note">
               <p class="eyebrow">草稿</p>
               <p v-if="practice.draftSaving.value">正在保存草稿…</p>
-              <p v-else-if="draftSavedAt">草稿已保存：{{ draftSavedAt }}</p>
+              <p v-else-if="draftSavedAt">草稿已保存：{{ draftSavedLabel }}</p>
               <p v-else>答案会自动保存。</p>
               <RouterLink class="member-text-link" to="/coach">问问 AI 教练 <AppIcon name="arrow" /></RouterLink>
             </section>

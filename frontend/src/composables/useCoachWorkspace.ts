@@ -160,12 +160,11 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
       const summary = textData(event, 'summary')
       actionNotices[messageId] = summary
         ? `教练已应用调整：${summary}`
-        : '教练已应用一项调整，正在读取服务端回执。'
+        : '教练已应用一项调整，正在确认结果…'
       return
     }
     if (event.eventType === 'action.rejected') {
-      const code = textData(event, 'code') ?? 'COACH_ACTION_REJECTED'
-      actionNotices[messageId] = `教练动作被服务端拒绝：${code}`
+      actionNotices[messageId] = '这次调整没有生效，请稍后再试。'
       return
     }
     if (event.eventType === 'error') {
@@ -209,7 +208,7 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
     streamController = controller
     streamingMessageId.value = accepted.messageId
     streamError.value = null
-    streamNotice.value = '服务端已接受消息，正在接收真实流式回复。'
+    streamNotice.value = '正在接收教练回复…'
     streamTerminals[accepted.messageId] = 'idle'
     streamSequences[accepted.messageId] = after
     try {
@@ -220,7 +219,7 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
       })
       await refreshMessage(accepted.messageId)
       streamNotice.value = streamTerminals[accepted.messageId] === 'completed'
-        ? '教练回复已完成，最终内容以服务端记录为准。'
+        ? '教练已回复。'
         : '流式回复已结束。'
     } catch (error) {
       if (!controller.signal.aborted) {
@@ -391,7 +390,7 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
       )
       pendingSendKey = null
       pendingSendContent = ''
-      acceptedNotice.value = `服务端已接受消息（${accepted.status}）。`
+      acceptedNotice.value = '消息已发送，正在等待教练回复。'
       await loadMessages(true, false)
       await consumeAccepted(accepted)
       await loadConversations(true)

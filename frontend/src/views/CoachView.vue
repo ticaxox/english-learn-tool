@@ -325,7 +325,7 @@ onBeforeUnmount(() => {
                   <em>正在思考</em>
                 </div>
                 <p v-else class="coach-message__text">{{ coach.messageText(message) }}</p>
-                <p v-if="message.errorMessage" class="field-error" role="alert">{{ message.errorMessage }}</p>
+                <p v-if="message.errorMessage" class="field-error" role="alert" :title="message.errorMessage">这次没有收到教练回复，请重试。</p>
                 <p v-if="coach.actionNotices[message.id]" class="coach-action-notice">{{ coach.actionNotices[message.id] }}</p>
 
                 <section v-if="message.actions.length > 0" class="coach-actions" aria-label="已执行的调整">
@@ -337,7 +337,7 @@ onBeforeUnmount(() => {
                     </div>
                     <p>{{ receipt.summary }}</p>
                     <p class="field-hint">可撤销至：{{ formatTime(receipt.expiresAt) }}</p>
-                    <p v-if="receipt.conflictMessage" class="field-error" role="alert">{{ receipt.conflictMessage }}</p>
+                    <p v-if="receipt.conflictMessage" class="field-error" role="alert" :title="receipt.conflictMessage">这次调整没有生效，请稍后再试。</p>
                     <button
                       v-if="receipt.status === 'applied'"
                       class="button-secondary button-small"
