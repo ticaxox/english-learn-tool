@@ -1651,3 +1651,22 @@
   padding: 4px 12px 6px;
   background: var(--ui-surface);
 }
+
+/* Provider cards live in a 480px column: stack the actions under the details. */
+.personal-workspace .personal-ai-provider {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ui-space-3);
+}
+
+.personal-workspace .personal-ai-provider__actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.personal-workspace .personal-ai-provider__actions .button-secondary,
+.personal-workspace .personal-ai-provider__actions .button-danger {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 0.78rem;
+  box-shadow: 0 2px 0 var(--ui-line);
+}
