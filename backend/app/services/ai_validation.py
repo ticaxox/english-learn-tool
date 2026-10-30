@@ -56,6 +56,53 @@ def _collect_entry_ids(item: Any) -> set[str]:
     return _uuid_set(values)
 
 
+
+_CHALLENGE_PRACTICE_NODES = {"AI_PRACTICE", "BOSS"}
+_CHALLENGE_PRACTICE_COUNTS = {5, 10}
+
+
+def _normalize_challenge_nodes(parsed: dict[str, Any], context: dict[str, Any]) -> None:
+    """Clear node attributes that the node type cannot carry.
+
+    JSON Schema cannot say "this optional field only applies to these node
+    types", so models routinely attach drill_mode to a NEW_WORDS node or
+    practice_type to a WORD_DRILL node. The node type is authoritative: the
+    attribute is advice, not data, so it is dropped instead of failing the map.
+    """
+    nodes = parsed.get("nodes")
+    if not isinstance(nodes, list):
+        return
+    allowed_practice_types = context.get("allowed_practice_types") or []
+    default_practice_type = (
+        allowed_practice_types[0]
+        if allowed_practice_types and allowed_practice_types[0] in {"fill_blank", "reading", "translation", "writing"}
+        else "fill_blank"
+    )
+    for node in nodes:
+        if not isinstance(node, dict):
+            continue
+        node_type = node.get("node_type")
+        if node_type != "WORD_DRILL":
+            node.pop("drill_mode", None)
+        if node_type not in _CHALLENGE_PRACTICE_NODES:
+            node.pop("practice_type", None)
+            node.pop("practice_count", None)
+        if node_type == "OPTIONAL_SIDE":
+            node["optional"] = True
+        else:
+            node.pop("optional", None)
+        if node_type == "AI_PRACTICE":
+            if node.get("practice_type") not in {"fill_blank", "reading", "translation", "writing"}:
+                node["practice_type"] = default_practice_type
+            count = node.get("practice_count")
+            if not isinstance(count, int) or count < 1 or count > 20:
+                node["practice_count"] = 1 if node["practice_type"] == "writing" else 5
+        if node_type == "BOSS":
+            if node.get("practice_type") != "fill_blank":
+                node.pop("practice_type", None)
+            if node.get("practice_count") not in _CHALLENGE_PRACTICE_COUNTS:
+                node.pop("practice_count", None)
+
 def validate_task_output(
     *,
     task_type: str,
@@ -72,6 +119,8 @@ def validate_task_output(
     if task_type == "challenge_plan" and _contains_markup(parsed):
         raise ValueError("AI_HTML_NOT_ALLOWED")
     parsed = sanitize_untrusted_json(parsed)
+    if task_type == "challenge_plan" and isinstance(parsed, dict):
+        _normalize_challenge_nodes(parsed, context)
     model = (
         PracticeGradingBatchOutput
         if task_type == "subjective_grading" and context.get("items")

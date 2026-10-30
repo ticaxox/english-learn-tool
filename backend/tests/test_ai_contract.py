@@ -264,3 +264,121 @@ def test_openapi_publishes_ai_admin_and_job_contracts(app) -> None:
     assert "ProviderCreateRequest" in document["components"]["schemas"]
     assert "PracticeGenerationRequest" in document["components"]["schemas"]
     assert "ChallengePlanRequest" in document["components"]["schemas"]
+
+
+def test_challenge_plan_clears_attributes_the_node_type_cannot_carry() -> None:
+    """Models guess optional fields; the node type decides, not the guess."""
+    new_ids = [str(uuid4()), str(uuid4())]
+    due_ids = [str(uuid4())]
+    context = {
+        "local_date": "2026-10-23",
+        "target_minutes": 30,
+        "new_entry_ids": new_ids,
+        "due_entry_ids": due_ids,
+        "allowed_practice_types": ["fill_blank", "reading"],
+    }
+    output = {
+        "nodes": [
+            {
+                "id": "n0",
+                "node_type": "REVIEW",
+                "title": "Review",
+                "description": "Review due words.",
+                "word_entry_ids": due_ids,
+                "estimated_minutes": 4,
+            },
+            {
+                "id": "n1",
+                "node_type": "NEW_WORDS",
+                "title": "New words",
+                "description": "Learn today's words.",
+                "word_entry_ids": new_ids,
+                "estimated_minutes": 12,
+                # Both belong to other node types.
+                "drill_mode": "choice",
+                "practice_count": 8,
+            },
+            {
+                "id": "n2",
+                "node_type": "WORD_DRILL",
+                "title": "Drill",
+                "description": "Practise the new words.",
+                "word_entry_ids": new_ids,
+                "estimated_minutes": 8,
+                "practice_type": "reading",
+                "practice_count": 5,
+            },
+            {
+                "id": "n3",
+                "node_type": "BOSS",
+                "title": "Boss",
+                "description": "Finish the challenge.",
+                "word_entry_ids": new_ids + due_ids,
+                "estimated_minutes": 6,
+                "practice_type": "reading",
+                "practice_count": 20,
+            },
+        ]
+    }
+
+    result, summary = validate_task_output(
+        task_type="challenge_plan",
+        context=context,
+        raw_text=json.dumps(output),
+    )
+
+    assert summary["node_count"] == 4
+    assert result["nodes"][1]["drill_mode"] is None
+    assert result["nodes"][1]["practice_count"] is None
+    assert result["nodes"][2]["practice_type"] is None
+    assert result["nodes"][2]["drill_mode"] == "choice"
+    assert result["nodes"][3]["practice_type"] == "fill_blank"
+    assert result["nodes"][3]["practice_count"] == 5
+
+
+def test_challenge_plan_still_rejects_maps_missing_new_word_coverage() -> None:
+    new_ids = [str(uuid4()), str(uuid4())]
+    context = {
+        "local_date": "2026-10-23",
+        "target_minutes": 30,
+        "new_entry_ids": new_ids,
+        "due_entry_ids": [],
+        "allowed_practice_types": ["fill_blank"],
+    }
+    output = {
+        "nodes": [
+            {
+                "id": "n1",
+                "node_type": "REVIEW",
+                "title": "Review",
+                "description": "Review.",
+                "word_entry_ids": [],
+                "estimated_minutes": 8,
+                "practice_type": "reading",
+            },
+            {
+                "id": "n2",
+                "node_type": "NEW_WORDS",
+                "title": "New words",
+                "description": "Learn.",
+                "word_entry_ids": [new_ids[0]],
+                "estimated_minutes": 15,
+                "drill_mode": "spelling",
+            },
+            {
+                "id": "n3",
+                "node_type": "BOSS",
+                "title": "Boss",
+                "description": "Finish.",
+                "word_entry_ids": new_ids,
+                "estimated_minutes": 7,
+            },
+        ]
+    }
+
+    with pytest.raises(ValueError, match="AI_NEW_WORD_COVERAGE_INCOMPLETE"):
+        validate_task_output(
+            task_type="challenge_plan",
+            context=context,
+            raw_text=json.dumps(output),
+        )
