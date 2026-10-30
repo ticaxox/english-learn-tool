@@ -218,7 +218,7 @@ onMounted(() => {
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
           <p class="field-hint">只显示当前账号自己的配置。默认提供商优先，其他提供商按备用顺序接管。</p>
         </div>
-        <button class="button" type="button" @click="openCreate">添加 AI 提供商</button>
+        <button v-if="providers.length > 0" class="button" type="button" @click="openCreate">添加 AI 提供商</button>
       </div>
 
       <LoadingState v-if="loading && providers.length === 0" label="正在读取 AI 配置…" />

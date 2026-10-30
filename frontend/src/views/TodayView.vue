@@ -321,7 +321,7 @@ onMounted(() => {
           <StudyStatsPanel compact />
 
           <section class="crumb-ai-note">
-            <span class="crumb-ai-dot" aria-hidden="true">✦</span>
+            <span class="crumb-ai-dot" aria-hidden="true"><AppIcon name="spark" /></span>
             <div>
               <span class="crumb-eyebrow">AI 练习</span>
               <strong>{{ aiUnavailableLabel }}</strong>

@@ -774,10 +774,20 @@
   box-shadow: 0 3px 0 var(--ui-line) !important;
 }
 
-.personal-workspace .practice-type-card--fill_blank { border-color: var(--g-blue-edge) !important; background: var(--g-blue-soft) !important; box-shadow: 0 3px 0 var(--g-blue-edge) !important; }
-.personal-workspace .practice-type-card--reading { border-color: var(--g-green-edge) !important; background: var(--g-green-soft) !important; box-shadow: 0 3px 0 var(--g-green-edge) !important; }
-.personal-workspace .practice-type-card--translation { border-color: var(--g-orange-edge) !important; background: var(--g-orange-soft) !important; box-shadow: 0 3px 0 var(--g-orange-edge) !important; }
-.personal-workspace .practice-type-card--writing { border-color: var(--g-purple-edge) !important; background: var(--g-purple-soft) !important; box-shadow: 0 3px 0 var(--g-purple-edge) !important; }
+.personal-workspace .practice-type-card--fill_blank { border-color: var(--g-blue-edge) !important; box-shadow: 0 3px 0 var(--g-blue-edge) !important; }
+.personal-workspace .practice-type-card--reading { border-color: var(--g-green-edge) !important; box-shadow: 0 3px 0 var(--g-green-edge) !important; }
+.personal-workspace .practice-type-card--translation { border-color: var(--g-orange-edge) !important; box-shadow: 0 3px 0 var(--g-orange-edge) !important; }
+.personal-workspace .practice-type-card--writing { border-color: var(--g-purple-edge) !important; box-shadow: 0 3px 0 var(--g-purple-edge) !important; }
+
+.personal-workspace .practice-type-card--fill_blank .practice-type-icon { color: var(--g-blue-edge); }
+.personal-workspace .practice-type-card--reading .practice-type-icon { color: var(--g-green-edge); }
+.personal-workspace .practice-type-card--translation .practice-type-icon { color: var(--g-orange-edge); }
+.personal-workspace .practice-type-card--writing .practice-type-icon { color: var(--g-purple-edge); }
+
+.personal-workspace .practice-type-card--fill_blank.practice-type-card--active { background: var(--g-blue-soft) !important; }
+.personal-workspace .practice-type-card--reading.practice-type-card--active { background: var(--g-green-soft) !important; }
+.personal-workspace .practice-type-card--translation.practice-type-card--active { background: var(--g-orange-soft) !important; }
+.personal-workspace .practice-type-card--writing.practice-type-card--active { background: var(--g-purple-soft) !important; }
 
 .personal-workspace .practice-type-card--active {
   transform: translateY(-2px);
@@ -786,21 +796,22 @@
 }
 
 .personal-workspace .practice-type-icon {
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 12px;
-  background: var(--ui-surface);
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  background: transparent;
 }
 
 /* Self-study entries mirror the two practice stages. */
 .personal-workspace .challenge-self-study__card:nth-child(1) {
   border-color: var(--g-blue-edge) !important;
-  background: var(--g-blue-soft) !important;
   box-shadow: 0 3px 0 var(--g-blue-edge) !important;
 }
 
 .personal-workspace .challenge-self-study__card:nth-child(2) {
   border-color: var(--g-purple-edge) !important;
-  background: var(--g-purple-soft) !important;
   box-shadow: 0 3px 0 var(--g-purple-edge) !important;
 }
 
@@ -811,14 +822,14 @@
   place-items: center;
   border: 2px solid var(--g-blue-edge);
   border-radius: 14px;
-  background: #fff;
-  color: #074a68;
+  background: var(--ui-surface);
+  color: var(--g-blue-edge);
   font-weight: 900;
 }
 
 .personal-workspace .challenge-self-study__mark--ai {
   border-color: var(--g-purple-edge);
-  color: #4b1f78;
+  color: var(--g-purple-edge);
 }
 
 /* The route preview reads as a path, not three chips. */
@@ -888,9 +899,12 @@
 
 .personal-workspace .crumb-ai-note {
   border: 2px solid var(--g-purple-edge) !important;
-  background: var(--g-purple-soft) !important;
+  background: var(--ui-surface) !important;
   box-shadow: 0 3px 0 var(--g-purple-edge) !important;
 }
+
+.personal-workspace .crumb-ai-note .crumb-ai-dot { color: var(--g-purple-edge); }
+.personal-workspace .crumb-ai-note strong { color: var(--ui-ink); }
 
 .personal-workspace .crumb-ai-note .crumb-eyebrow { color: #5b2a8a; }
 
@@ -941,17 +955,9 @@
 .personal-workspace .wordbook-card--compact .wordbook-card-actions > * { min-width: 0; }
 
 /* Practice rail cards carry their own stage colour. */
-.personal-workspace .practice-records-rail {
-  border-color: var(--g-blue-edge) !important;
-  background: var(--g-blue-soft) !important;
-  box-shadow: 0 3px 0 var(--g-blue-edge) !important;
-}
-
-.personal-workspace .practice-mistakes-rail {
-  border-color: var(--g-red-edge) !important;
-  background: var(--g-red-soft) !important;
-  box-shadow: 0 3px 0 var(--g-red-edge) !important;
-}
+.personal-workspace .practice-records-rail .workspace-section-header h2 { color: var(--ui-ink); }
+.personal-workspace .practice-mistakes-rail .practice-mistakes-count,
+.personal-workspace .practice-mistakes-heading strong { color: var(--g-red-edge); }
 
 /* ------------------------------------------------------- streak + energy bars */
 
@@ -1029,28 +1035,34 @@
 
 .personal-workspace .memory-action-card:nth-child(1) {
   border-color: var(--g-blue-edge) !important;
-  background: var(--g-blue-soft) !important;
   box-shadow: 0 3px 0 var(--g-blue-edge) !important;
 }
 
+.personal-workspace .memory-action-card:nth-child(1) .memory-action-icon { color: var(--g-blue-edge); }
+
 .personal-workspace .memory-action-card:nth-child(2) {
   border-color: var(--g-green-edge) !important;
-  background: var(--g-green-soft) !important;
   box-shadow: 0 3px 0 var(--g-green-edge) !important;
 }
 
+.personal-workspace .memory-action-card:nth-child(2) .memory-action-icon { color: var(--g-green-edge); }
+
 .personal-workspace .memory-action-card:nth-child(3) {
   border-color: var(--g-orange-edge) !important;
-  background: var(--g-orange-soft) !important;
   box-shadow: 0 3px 0 var(--g-orange-edge) !important;
 }
+
+.personal-workspace .memory-action-card:nth-child(3) .memory-action-icon { color: var(--g-orange-edge); }
 
 .personal-workspace .memory-action-card:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ui-line) !important; }
 
 .personal-workspace .memory-action-icon {
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 12px;
-  background: var(--ui-surface);
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  background: transparent;
 }
 
 /* Mobile tab bar: the active stop lifts out of the bar. */
@@ -1262,139 +1274,6 @@
   to { transform: translateX(24px); opacity: 0; }
 }
 
-/* Tooltip ----------------------------------------------------------------- */
-.crumb-tooltip {
-  z-index: 210;
-  padding: 7px 11px;
-  border-radius: 9px;
-  background: var(--ui-ink, #35240f);
-  color: #fff8ea;
-  font-size: 0.78rem;
-  font-weight: 700;
-  box-shadow: 0 3px 0 rgb(0 0 0 / 18%);
-  animation: crumb-tooltip-in 120ms ease-out;
-  user-select: none;
-}
-
-@keyframes crumb-tooltip-in {
-  from { opacity: 0; transform: translateY(-3px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Command palette --------------------------------------------------------- */
-.cmdk-overlay {
-  position: fixed;
-  z-index: 220;
-  inset: 0;
-  background: rgb(59 42 26 / 38%);
-  backdrop-filter: blur(3px);
-  animation: crumb-fade-in 140ms ease-out;
-}
-
-.cmdk-panel {
-  position: fixed;
-  z-index: 221;
-  top: 18vh;
-  left: 50%;
-  display: grid;
-  width: min(600px, calc(100vw - 32px));
-  max-height: 62vh;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  transform: translateX(-50%);
-  border: 2px solid var(--ui-line-strong, #3b2a1a);
-  border-radius: 22px;
-  background: var(--ui-surface, #fffdf6);
-  box-shadow: 0 8px 0 rgb(59 42 26 / 16%), 0 30px 70px rgb(59 42 26 / 24%);
-  overflow: hidden;
-  animation: cmdk-in 170ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes cmdk-in {
-  from { opacity: 0; transform: translate(-50%, -8px) scale(0.98); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
-}
-
-.cmdk-search {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 14px 18px;
-  border-bottom: 2px dashed var(--ui-line, #ecd9bb);
-  color: var(--ui-muted, #7d6247);
-}
-
-.cmdk-input {
-  flex: 1;
-  min-width: 0;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  font-size: 1.02rem;
-  font-weight: 700;
-  color: var(--ui-ink, #35240f);
-}
-
-.cmdk-input:focus { outline: none !important; }
-
-.cmdk-kbd,
-.cmdk-footer kbd {
-  padding: 2px 7px;
-  border: 1px solid var(--ui-line, #ecd9bb);
-  border-radius: 7px;
-  background: var(--ui-surface-subtle, #fff4e2);
-  color: var(--ui-muted, #7d6247);
-  font-family: var(--font-code, monospace);
-  font-size: 0.72rem;
-}
-
-.cmdk-list {
-  margin: 0;
-  padding: 8px;
-  overflow-y: auto;
-  list-style: none;
-}
-
-.cmdk-item {
-  display: grid;
-  width: 100%;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: center;
-  padding: 11px 14px;
-  border: 2px solid transparent;
-  border-radius: 13px;
-  background: transparent;
-  color: var(--ui-ink, #35240f);
-  text-align: left;
-  cursor: pointer;
-}
-
-.cmdk-item--active {
-  border-color: var(--g-green-edge, #1f8a30);
-  background: var(--g-green-soft, #ddf7e1);
-  box-shadow: 0 3px 0 var(--g-green-edge, #1f8a30);
-}
-
-.cmdk-item__label { font-weight: 800; }
-.cmdk-item__hint { color: var(--ui-muted, #7d6247); font-size: 0.8rem; }
-.cmdk-empty { padding: 18px; color: var(--ui-muted, #7d6247); text-align: center; }
-
-.cmdk-footer {
-  display: flex;
-  gap: 16px;
-  padding: 10px 18px;
-  border-top: 2px dashed var(--ui-line, #ecd9bb);
-  color: var(--ui-muted, #7d6247);
-  font-size: 0.75rem;
-}
-
-.cmdk-footer span { display: inline-flex; gap: 5px; align-items: center; }
-
-@keyframes crumb-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 /* Goal ring --------------------------------------------------------------- */
 .crumb-hero-status {
   display: flex;
@@ -1473,9 +1352,7 @@
   display: block;
   height: 14px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #f3e7d2 25%, #fbf3e3 37%, #f3e7d2 63%);
-  background-size: 400% 100%;
-  animation: crumb-shimmer 1.3s ease infinite;
+  background: #efe3cf;
 }
 
 .crumb-skeleton__bar--lg { height: 22px; width: 58%; }
@@ -1491,7 +1368,9 @@
   font-weight: 700;
 }
 
-@keyframes crumb-shimmer {
-  from { background-position: 100% 0; }
-  to { background-position: 0 0; }
-}
+
+/* Spark marks keep the app's own icon set at the size each slot needs. */
+.personal-workspace .challenge-generate__mark svg { width: 30px; height: 30px; }
+.personal-workspace .challenge-node__marker svg { width: 18px; height: 18px; }
+.personal-workspace .challenge-self-study__mark svg { width: 22px; height: 22px; }
+.personal-workspace .crumb-ai-dot svg { width: 14px; height: 14px; }

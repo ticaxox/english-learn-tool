@@ -293,7 +293,7 @@ onMounted(() => {
     <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取地图" @retry="loadPlan" />
 
     <section v-else-if="notGenerated" class="panel challenge-generate" aria-labelledby="challenge-generate-title">
-      <div class="challenge-generate__mark" aria-hidden="true">✦</div>
+      <div class="challenge-generate__mark" aria-hidden="true"><AppIcon name="spark" /></div>
       <div>
         <p class="eyebrow">今日路线</p>
         <h2 id="challenge-generate-title">今日地图尚未生成</h2>
@@ -397,7 +397,7 @@ onMounted(() => {
             <span class="field-hint">不影响主线顺序</span>
           </div>
           <article v-for="node in optionalNodes" :key="node.id" class="challenge-node challenge-node--optional" :class="nodeStatusClass(node)">
-            <div class="challenge-node__marker" aria-hidden="true">✦</div>
+            <div class="challenge-node__marker" aria-hidden="true"><AppIcon name="spark" /></div>
             <div class="challenge-node__body">
               <div class="challenge-node__heading">
                 <div><p class="eyebrow">可选支线</p><h3>{{ node.title }}</h3></div>
@@ -472,7 +472,7 @@ onMounted(() => {
           <AppIcon name="arrow" />
         </RouterLink>
         <RouterLink class="challenge-self-study__card" to="/practice">
-          <span class="challenge-self-study__mark challenge-self-study__mark--ai" aria-hidden="true">✦</span>
+          <span class="challenge-self-study__mark challenge-self-study__mark--ai" aria-hidden="true"><AppIcon name="spark" /></span>
           <span>
             <strong>AI 练习</strong>
             <small>按题型或难度生成一组真实练习。</small>

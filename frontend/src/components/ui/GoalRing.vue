@@ -44,6 +44,7 @@ const dash = computed(() => `${circumference.value * ratio.value} ${circumferenc
         :stroke-width="stroke"
         stroke-linecap="round"
         :stroke-dasharray="dash"
+        :style="{ opacity: ratio > 0 ? 1 : 0 }"
         :transform="`rotate(-90 ${size / 2} ${size / 2})`"
       />
     </svg>
