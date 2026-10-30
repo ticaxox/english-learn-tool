@@ -9,6 +9,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import GoalRing from '../components/ui/GoalRing.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -103,6 +104,8 @@ const todayTasks = computed(() => {
     done: task.target > 0 && task.completed >= task.target,
   }))
 })
+
+const newWordsTask = computed(() => todayTasks.value.find((task) => task.key === 'new-words') ?? null)
 
 const activeTaskIndex = computed(() => {
   const index = todayTasks.value.findIndex((task) => !task.done)
@@ -204,9 +207,20 @@ onMounted(() => {
             <AppIcon name="arrow" />
           </RouterLink>
         </div>
-        <div class="crumb-today-stamp">
-          <span>{{ plan.localDate }}</span>
-          <strong>{{ statusLabel }}</strong>
+        <div class="crumb-hero-status">
+          <GoalRing
+            v-if="newWordsTask"
+            :value="newWordsTask.completed"
+            :max="newWordsTask.target"
+            :size="124"
+            :stroke="12"
+            caption="新词"
+            class="crumb-hero-ring"
+          />
+          <div class="crumb-today-stamp">
+            <span>{{ plan.localDate }}</span>
+            <strong>{{ statusLabel }}</strong>
+          </div>
         </div>
       </header>
 

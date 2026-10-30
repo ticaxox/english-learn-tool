@@ -22,6 +22,10 @@ async function signOut(): Promise<void> {
     :username="auth.user?.username ?? ''"
     @signout="signOut"
   >
-    <RouterView />
+    <RouterView v-slot="{ Component, route }">
+      <Transition name="crumb-page" mode="out-in">
+        <component :is="Component" :key="route.path" />
+      </Transition>
+    </RouterView>
   </MemberShell>
 </template>

@@ -18,6 +18,7 @@ import {
   type ProviderTestResult,
 } from '../api/personal-ai'
 import '../ai-admin.css'
+import { useToast } from '../composables/useToast'
 
 interface OperationState<T> {
   loading: boolean
@@ -26,6 +27,7 @@ interface OperationState<T> {
 }
 
 const providers = ref<AiProvider[]>([])
+const toast = useToast()
 const loading = ref(false)
 const loadError = ref<unknown>(null)
 const formOpen = ref(false)
@@ -108,6 +110,7 @@ async function handleCreate(input: ProviderCreateInput): Promise<void> {
     await createPersonalProvider(input)
     closeForm()
     await load()
+    toast.success('AI 提供商已添加', '先测试连接，再确认模型可用。')
   } catch (error) {
     saveError.value = error
   } finally {
@@ -122,6 +125,7 @@ async function handleUpdate(providerId: string, input: ProviderPatchInput): Prom
     await updatePersonalProvider(providerId, input)
     closeForm()
     await load()
+    toast.success('AI 提供商已更新')
   } catch (error) {
     saveError.value = error
   } finally {
@@ -155,8 +159,14 @@ function toggleEnabled(provider: AiProvider): void {
 async function runTest(provider: AiProvider): Promise<void> {
   setTestState(provider.id, { loading: true, result: null, error: null })
   try {
-    setTestState(provider.id, { result: await testPersonalProvider(provider.id) })
+    const result = await testPersonalProvider(provider.id)
+    setTestState(provider.id, { result })
     await load()
+    if (result.success) {
+      toast.success('连接成功', result.latencyMs === null ? undefined : `响应耗时 ${result.latencyMs} ms。`)
+    } else {
+      toast.error('连接未通过', '检查接口地址、模型 ID 和 API Key 后重试。')
+    }
   } catch (error) {
     setTestState(provider.id, { error })
   } finally {

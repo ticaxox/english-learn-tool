@@ -10,6 +10,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
+import { useToast } from '../composables/useToast'
 import ContractGate from '../components/ContractGate.vue'
 import { fetchLearningProfile, updateLearningProfile } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
@@ -46,6 +47,7 @@ const saving = ref(false)
 const loadError = ref<unknown>(null)
 const saveError = ref<unknown>(null)
 const saved = ref(false)
+const toast = useToast()
 const fieldErrors = ref<FieldErrors>({})
 
 const blankTypes: SpellingBlankType[] = ['full', 'partial', 'first_letter']
@@ -109,6 +111,7 @@ async function save(): Promise<void> {
     const updated = await updateLearningProfile({ ...form, memoryConfig: cloneConfig(form.memoryConfig) })
     applyProfile(updated)
     saved.value = true
+    toast.success('学习设置已保存', '之后的学习目标会按新设置执行。')
   } catch (error) {
     saveError.value = error
   } finally {

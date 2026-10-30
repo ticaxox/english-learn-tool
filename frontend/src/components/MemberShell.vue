@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { Search } from '@lucide/vue'
 import AppIcon from './AppIcon.vue'
 import CoachView from '../views/CoachView.vue'
 import CrumboMark from './CrumboMark.vue'
+import AppTooltip from './ui/AppTooltip.vue'
+import CommandPalette from './ui/CommandPalette.vue'
 
 const props = defineProps<{
   displayName: string
@@ -18,6 +21,7 @@ const coachOpen = ref(false)
 const profileArea = ref<HTMLElement | null>(null)
 const profileTrigger = ref<HTMLButtonElement | null>(null)
 const coachPanel = ref<HTMLElement | null>(null)
+const palette = ref<InstanceType<typeof CommandPalette> | null>(null)
 const coachCloseButton = ref<HTMLButtonElement | null>(null)
 let previousFocus: HTMLElement | null = null
 let coachReturnPath = '/overview'
@@ -201,17 +205,30 @@ onBeforeUnmount(() => {
           <span class="sr-only">今天也学一点</span>
         </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
-          <button
-            class="workspace-coach-button member-concierge-button ia-coach-toggle"
-            type="button"
-            aria-label="打开 AI 教练"
-            :aria-expanded="coachOpen"
-            aria-controls="global-coach-panel"
-            @click="openCoach"
-          >
-            <AppIcon name="coach" />
-            <span>AI 教练</span>
-          </button>
+          <AppTooltip text="快速跳转 ⌘K">
+            <button
+              class="workspace-icon-button ia-search-button"
+              type="button"
+              aria-label="快速跳转（⌘K）"
+              @click="palette?.show()"
+            >
+              <Search :size="18" aria-hidden="true" />
+            </button>
+          </AppTooltip>
+
+          <AppTooltip text="打开 AI 教练">
+            <button
+              class="workspace-coach-button member-concierge-button ia-coach-toggle"
+              type="button"
+              aria-label="打开 AI 教练"
+              :aria-expanded="coachOpen"
+              aria-controls="global-coach-panel"
+              @click="openCoach"
+            >
+              <AppIcon name="coach" />
+              <span>AI 教练</span>
+            </button>
+          </AppTooltip>
 
           <div ref="profileArea" class="ia-profile-area">
             <button
@@ -251,6 +268,8 @@ onBeforeUnmount(() => {
         <span>{{ link.label }}</span>
       </RouterLink>
     </nav>
+
+    <CommandPalette ref="palette" @coach="openCoach" @signout="emit('signout')" />
 
     <div v-if="coachOpen" class="ia-coach-backdrop" @click="closeCoach"></div>
     <aside

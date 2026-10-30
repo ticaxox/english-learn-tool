@@ -10,10 +10,15 @@ withDefaults(
 </script>
 
 <template>
-  <div class="alert" role="status" aria-live="polite">
-    <div class="button-row">
-      <span class="spinner" aria-hidden="true"></span>
-      <span>{{ label }}</span>
+  <div class="crumb-skeleton" role="status" aria-live="polite">
+    <div class="crumb-skeleton__lines" aria-hidden="true">
+      <span class="crumb-skeleton__bar crumb-skeleton__bar--lg"></span>
+      <span class="crumb-skeleton__bar"></span>
+      <span class="crumb-skeleton__bar crumb-skeleton__bar--sm"></span>
     </div>
+    <p class="crumb-skeleton__label">
+      <span class="spinner" aria-hidden="true"></span>
+      {{ label }}
+    </p>
   </div>
 </template>
