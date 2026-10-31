@@ -19,6 +19,7 @@ import {
   type PagedMistakes,
   type WordStateStatus,
 } from '../types/learning'
+import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../learning.css'
 
 const PAGE_SIZE = 50
@@ -120,7 +121,7 @@ onMounted(() => {
 
 <template>
   <article class="mistakes-page">
-    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+    <PracticeTopBar mode="practice" active="" />
 
     <header class="page-header">
       <div>

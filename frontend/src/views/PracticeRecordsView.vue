@@ -16,6 +16,7 @@ import {
   type PracticeSource,
   type PracticeType,
 } from '../api/practice'
+import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../practice.css'
 
 const props = withDefaults(defineProps<{ onlyMistakes?: boolean }>(), { onlyMistakes: false })
@@ -149,7 +150,7 @@ onMounted(() => {
 
 <template>
   <article class="practice-page practice-records-page">
-    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+    <PracticeTopBar mode="practice" active="" />
 
     <header class="practice-session-header">
       <div>

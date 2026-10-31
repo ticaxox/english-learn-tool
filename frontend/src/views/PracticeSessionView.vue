@@ -15,6 +15,7 @@ import {
   PRACTICE_TYPE_LABELS,
   type PracticeAnswerInput,
 } from '../api/practice'
+import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../practice.css'
 
 const route = useRoute()
@@ -159,7 +160,7 @@ void practice.load()
 
 <template>
   <article class="practice-page practice-session-page member-practice-session-page">
-    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+    <PracticeTopBar mode="practice" :active="session?.practiceType ?? null" />
 
     <header class="practice-session-header practice-stage-header">
       <div>
@@ -168,10 +169,6 @@ void practice.load()
         <p v-if="session" class="lead">
           {{ PRACTICE_SOURCE_LABELS[session.source] }} · {{ session.questionCount }} 题 · {{ PRACTICE_STATUS_LABELS[session.status] }}
         </p>
-      </div>
-      <div v-if="session?.status === 'ready'" class="practice-stage-progress" aria-live="polite">
-        <strong>{{ answeredCount }}<span>/ {{ questions.length }}</span></strong>
-        <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
       </div>
     </header>
 
@@ -254,25 +251,25 @@ void practice.load()
               @update:model-value="answers[question.id] = $event"
             />
 
+          </div>
+
+          <aside class="member-practice-session-aside" aria-label="作答操作">
             <section class="panel practice-submit-panel member-practice-submit">
               <div class="practice-submit-progress">
                 <div class="practice-submit-progress__top">
                   <span>已答 {{ answeredCount }} / {{ questions.length }}</span>
-                  <span class="field-hint">{{ allAnswered ? '全部题目已作答，可以提交。' : `还有 ${questions.length - answeredCount} 题未作答。` }}</span>
                 </div>
                 <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
+                <p class="field-hint">{{ allAnswered ? '全部题目已作答，可以提交。' : `还有 ${questions.length - answeredCount} 题未作答。` }}</p>
               </div>
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />
-              <div class="button-row">
-                <button class="button member-primary-button" type="button" :disabled="practice.busy.value || !allAnswered" @click="submit">
-                  {{ practice.busy.value ? '正在提交…' : '提交全部答案' }} <AppIcon name="arrow" />
-                </button>
-                <button class="button-secondary" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</button>
-              </div>
+              <button class="button member-primary-button practice-submit-button" type="button" :disabled="practice.busy.value || !allAnswered" @click="submit">
+                {{ practice.busy.value ? '正在提交…' : '提交全部答案' }} <AppIcon name="arrow" />
+              </button>
+              <button class="button-secondary practice-regenerate-button" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</button>
             </section>
-          </div>
-
+          </aside>
         </div>
       </template>
     </template>

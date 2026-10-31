@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import PracticeChooser from '../components/PracticeChooser.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -479,24 +480,7 @@ onMounted(() => {
         </div>
         <span>不进入闯关主线，按自己的节奏练习。</span>
       </header>
-      <div class="challenge-self-study__grid">
-        <RouterLink class="challenge-self-study__card" to="/memory">
-          <span class="challenge-self-study__mark" aria-hidden="true">Aa</span>
-          <span>
-            <strong>记忆练习</strong>
-            <small>翻卡、选择与拼写，巩固今天遇到的词。</small>
-          </span>
-          <AppIcon name="arrow" />
-        </RouterLink>
-        <RouterLink class="challenge-self-study__card" to="/practice">
-          <span class="challenge-self-study__mark challenge-self-study__mark--ai" aria-hidden="true"><AppIcon name="spark" /></span>
-          <span>
-            <strong>AI 练习</strong>
-            <small>按题型或难度生成一组真实练习。</small>
-          </span>
-          <AppIcon name="arrow" />
-        </RouterLink>
-      </div>
+      <PracticeChooser />
     </section>
 
       <section id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">

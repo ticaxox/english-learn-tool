@@ -1,16 +1,22 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { createPracticeSession, fetchPracticeUsage, listPracticeMistakes, listPracticeRecords, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import { fetchLearningProfile, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
+import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../practice.css'
 
 const router = useRouter()
-const practiceType = ref<PracticeType>('fill_blank')
+const route = useRoute()
+const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
+function queryType(value: unknown): PracticeType | null {
+  return typeof value === 'string' && practiceTypes.includes(value as PracticeType) ? value as PracticeType : null
+}
+const practiceType = ref<PracticeType>(queryType(route.query.type) ?? 'fill_blank')
 const source = ref<PracticeSource>('today_new')
 const count = ref(5)
 const difficulty = ref<PracticeDifficulty>('CET6')
@@ -64,6 +70,11 @@ const counts = computed(() => (practiceType.value === 'writing' ? [1] : [3, 5, 1
 const needsDifficulty = computed(() => source.value === 'difficulty')
 const needsWordbook = computed(() => source.value !== 'difficulty')
 onMounted(() => { void loadSpellingMode() })
+
+watch(() => route.query.type, (value) => {
+  const next = queryType(value)
+  if (next && next !== practiceType.value) selectType(next)
+})
 
 function newKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
@@ -169,7 +180,7 @@ onMounted(() => {
 
 <template>
   <article class="practice-page practice-hub member-practice-page practice-workspace workspace-page">
-    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+    <PracticeTopBar mode="practice" :active="practiceType" />
 
     <header class="workspace-page-header">
       <div>

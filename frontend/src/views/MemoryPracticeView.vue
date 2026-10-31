@@ -6,7 +6,7 @@
  * only renders what the server returned and forwards learner actions with
  * idempotency keys. Heartbeats run while a session is open.
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -27,6 +27,7 @@ import {
   type MemoryModule,
   type TodayPlan,
 } from '../types/learning'
+import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../learning.css'
 
 const route = useRoute()
@@ -161,15 +162,20 @@ onMounted(async () => {
   if (challengeSessionId.value && challengeModule.value) {
     await begin(challengeModule.value, challengeSessionId.value)
   } else if (challengeModule.value && !session.hasSession.value) {
-    // 学习中心的启动面板传 module 时直接进入答题，不再多一次选择。
     await begin(challengeModule.value)
   }
+})
+
+// The practice top bar switches modes by changing the query.
+watch(challengeModule, async (module, previous) => {
+  if (!module || module === previous) return
+  await begin(module)
 })
 </script>
 
 <template>
   <article class="memory-page memory-workbench workspace-page">
-    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+    <PracticeTopBar mode="memory" :active="selectedModule ?? challengeModule ?? null" />
 
     <header v-if="!session.hasSession.value && !session.finished.value" class="workspace-page-header">
       <div>

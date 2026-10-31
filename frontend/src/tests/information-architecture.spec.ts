@@ -116,8 +116,9 @@ describe('T-FE-020 personal information architecture', () => {
     const challenge = source('../views/ChallengeView.vue')
     const css = source('../personal-ui.css')
     expect(challenge).toContain('challenge-self-study')
-    expect(challenge).toContain('to="/memory"')
-    expect(challenge).toContain('to="/practice"')
+    // The two entries are tabs of one chooser; choosing one shows its panel.
+    expect(challenge).toContain('PracticeChooser')
+    expect(css).toContain('.personal-workspace .challenge-self-study')
     expect(css).toContain('.personal-workspace .challenge-self-study')
     expect(css).toContain('.personal-workspace .challenge-generate')
   })
