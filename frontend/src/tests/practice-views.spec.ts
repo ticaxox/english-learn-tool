@@ -99,7 +99,7 @@ describe('practice views', () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice')
     await wrapper.get('form').trigger('submit')
     await flushPromises()
-    expect(wrapper.text()).toContain('请求过于频繁')
+    expect(wrapper.text()).toContain('今天的 AI 次数已用完')
     expect(wrapper.text()).toContain('quota-request')
   })
 

@@ -5,6 +5,7 @@ import type {
   AiProvider,
   ProviderCreateInput,
   ProviderPatchInput,
+  ProviderTestResult,
 } from '../api/ai-admin'
 
 interface ValidatedProviderFields {
@@ -28,6 +29,10 @@ const props = defineProps<{
   modelOptions?: string[]
   modelLoading?: boolean
   modelError?: unknown
+  /** Owner-only reveal of the stored key (personal dialog). */
+  revealKey?: (providerId: string) => Promise<string>
+  testLoading?: boolean
+  testResult?: ProviderTestResult | null
 }>()
 
 const emit = defineEmits<{
@@ -35,6 +40,7 @@ const emit = defineEmits<{
   (event: 'update', providerId: string, input: ProviderPatchInput): void
   (event: 'cancel'): void
   (event: 'fetch-models'): void
+  (event: 'test'): void
 }>()
 
 const name = ref('')
@@ -47,13 +53,18 @@ const isDefault = ref(false)
 const customHeadersText = ref('{}')
 const apiKey = ref('')
 const keyVisible = ref(false)
+const revealedKey = ref('')
+const keyLoading = ref(false)
 const modelsOpen = ref(false)
 const errors = reactive<Record<string, string>>({})
 
 const editing = computed(() => Boolean(props.provider))
 const title = computed(() => (editing.value ? `编辑 ${props.provider?.name}` : '新增 AI 提供商'))
 const maskedKey = computed(() => (editing.value ? props.provider?.apiKeyMasked ?? '' : ''))
-const keyChanged = computed(() => editing.value && apiKey.value !== '' && apiKey.value !== maskedKey.value)
+const keyChanged = computed(() => editing.value
+  && apiKey.value !== ''
+  && apiKey.value !== maskedKey.value
+  && apiKey.value !== revealedKey.value)
 
 const forbiddenHeaders = new Set([
   'authorization',
@@ -80,6 +91,8 @@ function reset(): void {
   customHeadersText.value = provider ? JSON.stringify(provider.customHeaders, null, 2) : '{}'
   apiKey.value = provider?.apiKeyMasked ?? ''
   keyVisible.value = false
+  revealedKey.value = ''
+  keyLoading.value = false
   modelsOpen.value = false
   Object.keys(errors).forEach((key) => delete errors[key])
 }
@@ -192,6 +205,33 @@ function submit(): void {
   emit('update', props.provider.id, patch)
 }
 
+async function toggleKey(): Promise<void> {
+  if (keyVisible.value) {
+    keyVisible.value = false
+    // Put the mask back: the full key is not kept on screen.
+    if (revealedKey.value) {
+      apiKey.value = maskedKey.value
+      revealedKey.value = ''
+    }
+    return
+  }
+  if (editing.value && props.revealKey && apiKey.value === maskedKey.value && !keyLoading.value) {
+    keyLoading.value = true
+    try {
+      const full = await props.revealKey(props.provider!.id)
+      revealedKey.value = full
+      apiKey.value = full
+    } catch {
+      errors.apiKey = '暂时读不到完整 Key，请重新填写一个。'
+      keyLoading.value = false
+      return
+    } finally {
+      keyLoading.value = false
+    }
+  }
+  keyVisible.value = true
+}
+
 function selectMaskedKey(event: FocusEvent): void {
   const input = event.target as HTMLInputElement
   if (input.value === maskedKey.value) input.select()
@@ -238,7 +278,7 @@ function cancel(): void {
             @click="enabled = !enabled"
           >
             <span class="ai-toggle__dot" :class="{ 'is-on': enabled }" aria-hidden="true"></span>
-            {{ enabled ? '已启用' : '已停用' }}
+            {{ enabled ? '停用' : '启用' }}
           </button>
           <button class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '保存' }}</button>
           <button class="button-secondary" type="button" :disabled="saving" @click="cancel">取消</button>
@@ -304,11 +344,20 @@ function cancel(): void {
             class="button-secondary ai-secret-toggle"
             type="button"
             :aria-pressed="keyVisible"
-            :aria-label="keyVisible ? '隐藏 API Key' : '显示 API Key'"
-            @click="keyVisible = !keyVisible"
-          >{{ keyVisible ? '隐藏' : '显示' }}</button>
+            :aria-label="keyVisible ? '隐藏 API Key' : '显示完整 API Key'"
+            :disabled="keyLoading"
+            @click="toggleKey"
+          >{{ keyLoading ? '读取中…' : (keyVisible ? '隐藏' : '显示') }}</button>
         </div>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
+        <div v-if="editing" class="ai-test-row">
+          <button class="button-secondary" type="button" :disabled="testLoading" @click="emit('test')">
+            {{ testLoading ? '连接中…' : '测试连接' }}
+          </button>
+          <span v-if="testResult" class="field-hint">
+            {{ testResult.success ? `连接正常 · ${testResult.latencyMs ?? '—'} ms` : '连接失败，请检查地址、模型和 Key。' }}
+          </span>
+        </div>
       </div>
 
       <div class="ai-form-grid">

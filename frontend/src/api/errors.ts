@@ -107,6 +107,15 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       }
     }
 
+    if (error.code === 'AI_QUOTA_EXHAUSTED') {
+      return {
+        title: '今天的 AI 次数已用完',
+        message: '按当前额度今天不能再生成新的题目或地图，明天会恢复；也可以到“设置 → AI 配置”切换成其他提供商。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
     if (error.code === 'AUTH_INVALID_CREDENTIALS') {
       return {
         title: '用户名或密码不正确',

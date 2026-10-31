@@ -45,6 +45,14 @@ function focusActive(): void {
 }
 
 const composingAt = ref<Record<number, boolean>>({})
+/**
+ * On a mouse/keyboard device the cells are read-only and keys are handled by
+ * `keydown`: a read-only field never opens the Chinese IME candidate window.
+ * Touch keyboards type through `input`, so they keep the editable fields.
+ */
+const touchTyping = typeof window !== 'undefined'
+  && typeof window.matchMedia === 'function'
+  && window.matchMedia('(pointer: coarse)').matches
 
 /** Keep only Latin letters: an IME candidate never becomes the answer. */
 function latinOnly(value: string): string {
@@ -90,7 +98,14 @@ function syncDomValues(): void {
   })
 }
 
-function handleKeydown(event: KeyboardEvent): void {
+function handleKeydown(event: KeyboardEvent, index: number): void {
+  if (/^[a-zA-Z]$/.test(event.key) && !touchTyping) {
+    event.preventDefault()
+    grid.typeCharacterAt(index, event.key)
+    syncDomValues()
+    focusActive()
+    return
+  }
   if (event.key === 'Backspace') {
     event.preventDefault()
     grid.backspace()
@@ -158,11 +173,12 @@ function submit(): void {
           maxlength="1"
           :aria-label="`第 ${blank.index + 1} 个字母`"
           :value="grid.values.value[blank.index] ?? ''"
+          :readonly="!touchTyping"
           :disabled="props.disabled"
           @input="handleInput(blank.index, $event)"
           @compositionstart="handleCompositionStart(blank.index)"
           @compositionend="handleCompositionEnd(blank.index, $event)"
-          @keydown="handleKeydown"
+          @keydown="handleKeydown($event, blank.index)"
           @focus="handleFocus(blank.index)"
         />
       </template>

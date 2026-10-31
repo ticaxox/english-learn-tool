@@ -282,7 +282,7 @@ describe('challenge view', () => {
     challengeMocks.getTodayChallenge.mockRejectedValueOnce(new ApiError(429, 'AI_QUOTA_EXHAUSTED', 'Quota exhausted.', null, 'challenge-429', true))
     await wrapper.findAll('button').find((button) => button.text() === '刷新地图')!.trigger('click')
     await flushPromises()
-    expect(wrapper.text()).toContain('请求过于频繁')
+    expect(wrapper.text()).toContain('今天的 AI 次数已用完')
     expect(wrapper.text()).toContain('challenge-429')
   })
 })

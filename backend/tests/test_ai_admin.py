@@ -80,6 +80,10 @@ async def test_personal_provider_crud_masks_keys_and_checks_real_http(
         assert detail.status_code == 200
         assert detail.json()["api_key_masked"] == "sk-****1234"
 
+        revealed = await client.get(f"{PROVIDERS_PATH}/{primary['id']}/api-key", headers=headers)
+        assert revealed.status_code == 200, revealed.text
+        assert revealed.json()["api_key"] == "sk-test-secret-1234"
+
         key_preserved = await client.patch(
             f"{PROVIDERS_PATH}/{primary['id']}",
             headers=headers,
@@ -198,6 +202,12 @@ async def test_personal_provider_ownership_is_isolated(
             name="Primary",
             is_default=False,
         )
+        foreign_key = await client.get(
+            f"{PROVIDERS_PATH}/{owner_provider['id']}/api-key", headers=other_headers
+        )
+        assert foreign_key.status_code == 404
+        assert foreign_key.json()["code"] == "AI_PROVIDER_NOT_FOUND"
+
         assert other_provider["is_default"] is True
 
         owner_list = await client.get(PROVIDERS_PATH, headers=owner_headers)

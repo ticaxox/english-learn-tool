@@ -283,6 +283,33 @@ async def delete_provider(session: AsyncSession, actor: User, provider_id: UUID)
     await session.commit()
 
 
+async def reveal_provider_key(
+    session: AsyncSession,
+    actor: User,
+    settings: Settings,
+    provider_id: UUID,
+) -> str:
+    """Return the decrypted key to its owner; every reveal is audited."""
+
+    provider = await session.scalar(
+        select(AiProvider).where(AiProvider.id == provider_id, AiProvider.owner_id == actor.id)
+    )
+    if provider is None:
+        raise AppError(
+            status_code=404, code="AI_PROVIDER_NOT_FOUND", message="The provider was not found."
+        )
+    add_audit_event(
+        session,
+        action="ai.provider.key_revealed",
+        target_type="ai_provider",
+        outcome="success",
+        actor=actor,
+        target_id=provider.id,
+    )
+    await session.commit()
+    return _cipher(settings).decrypt(provider.api_key_ciphertext)
+
+
 async def test_provider(
     session: AsyncSession,
     actor: User,

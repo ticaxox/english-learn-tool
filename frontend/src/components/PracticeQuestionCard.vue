@@ -90,7 +90,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     <fieldset
       v-if="isChoice"
       class="practice-options"
-      :class="{ 'practice-options--long': longOptions }"
+      :class="{ 'practice-options--long': longOptions, 'practice-options--four': question.questionType === 'fill_blank' && !longOptions }"
       :disabled="disabled || inReview"
     >
       <legend class="visually-hidden">选择一个答案</legend>

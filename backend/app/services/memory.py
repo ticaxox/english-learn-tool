@@ -255,9 +255,15 @@ def _cloze(headword: str, mode: str) -> str:
     if mode == "partial":
         visible = max(1, len(headword) // 3)
         return headword[:visible] + "_" * (len(headword) - visible)
-    if mode == "middle" and len(headword) > 3:
-        # First and last letters stay visible, the middle is blanked.
-        return headword[0] + "_" * (len(headword) - 2) + headword[-1]
+    if mode == "middle":
+        # First and last letters stay visible; a random share of the middle is
+        # blanked so the same word does not always lose exactly every middle letter.
+        if len(headword) <= 2:
+            return headword
+        positions = list(range(1, len(headword) - 1))
+        blank_count = random.randint(max(1, len(positions) // 2), len(positions))
+        blanks = set(random.sample(positions, blank_count))
+        return "".join("_" if index in blanks else character for index, character in enumerate(headword))
     return "_" * len(headword)
 
 

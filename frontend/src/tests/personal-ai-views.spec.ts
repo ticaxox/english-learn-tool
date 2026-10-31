@@ -70,7 +70,9 @@ describe('PersonalAiConfigView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Primary')
-    expect(wrapper.text()).toContain('sk-••••1234')
+    expect(wrapper.text()).toContain('model-a')
+    // The list no longer prints the masked key; it lives in the edit dialog.
+    expect(wrapper.text()).not.toContain('sk-••••1234')
     expect(wrapper.text()).not.toContain('sk-test-secret')
   })
 })

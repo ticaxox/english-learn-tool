@@ -77,3 +77,16 @@ export async function fetchPersonalProviderModels(providerId: string): Promise<P
     { retryCount: 0 },
   ))
 }
+
+/** Owner-only reveal of the stored key; the server audits each call. */
+export async function revealPersonalProviderKey(providerId: string): Promise<string> {
+  const payload = await apiClient.get<{ api_key?: unknown }>(
+    `/me/ai/providers/${encodeURIComponent(providerId)}/api-key`,
+    { retryCount: 0 },
+  )
+  const value = payload?.api_key
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error('The provider key was not returned.')
+  }
+  return value
+}

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -9,22 +9,16 @@ import {
   deletePersonalProvider,
   fetchPersonalProviderModels,
   listPersonalProviders,
+  revealPersonalProviderKey,
   testPersonalProvider,
   updatePersonalProvider,
   type AiProvider,
   type ProviderCreateInput,
-  type ProviderModelsResult,
   type ProviderPatchInput,
   type ProviderTestResult,
 } from '../api/personal-ai'
 import '../ai-admin.css'
 import { useToast } from '../composables/useToast'
-
-interface OperationState<T> {
-  loading: boolean
-  result: T | null
-  error: unknown
-}
 
 const providers = ref<AiProvider[]>([])
 const toast = useToast()
@@ -37,44 +31,16 @@ const saveError = ref<unknown>(null)
 const operationError = ref<unknown>(null)
 const actionKey = ref<string | null>(null)
 const deleteTarget = ref<AiProvider | null>(null)
-const modelTarget = ref<AiProvider | null>(null)
 const formModels = ref<string[]>([])
 const formModelsLoading = ref(false)
 const formModelError = ref<unknown>(null)
-const testStates = reactive<Record<string, OperationState<ProviderTestResult>>>({})
-const modelStates = reactive<Record<string, OperationState<ProviderModelsResult>>>({})
+const formTestLoading = ref(false)
+const formTestResult = ref<ProviderTestResult | null>(null)
 
 const sortedProviders = computed(() => [...providers.value].sort((left, right) => {
-  if (left.isDefault !== right.isDefault) return left.isDefault ? -1 : 1
   if (left.priority !== right.priority) return left.priority - right.priority
   return left.name.localeCompare(right.name, 'zh-CN')
 }))
-
-const defaultProvider = computed(() => providers.value.find((provider) => provider.isDefault) ?? null)
-
-function operation<T>(store: Record<string, OperationState<T>>, id: string): OperationState<T> {
-  return store[id] ?? { loading: false, result: null, error: null }
-}
-
-function setTestState(id: string, patch: Partial<OperationState<ProviderTestResult>>): void {
-  testStates[id] = { ...operation(testStates, id), ...patch }
-}
-
-function setModelState(id: string, patch: Partial<OperationState<ProviderModelsResult>>): void {
-  modelStates[id] = { ...operation(modelStates, id), ...patch }
-}
-
-function orderLabel(provider: AiProvider): string {
-  if (provider.isDefault) return '默认'
-  const index = sortedProviders.value.findIndex((item) => item.id === provider.id)
-  return index >= 0 ? `备用 ${index + (defaultProvider.value ? 0 : 1)}` : '备用'
-}
-
-function lastTestLabel(provider: AiProvider): string {
-  if (provider.lastTestStatus === 'succeeded') return '最近连接正常'
-  if (provider.lastTestStatus === 'failed') return '最近连接失败'
-  return '尚未检查连接'
-}
 
 async function load(): Promise<void> {
   loading.value = true
@@ -89,23 +55,25 @@ async function load(): Promise<void> {
   }
 }
 
-function resetFormModels(): void {
+function resetFormSideState(): void {
   formModels.value = []
   formModelsLoading.value = false
   formModelError.value = null
+  formTestLoading.value = false
+  formTestResult.value = null
 }
 
 function openCreate(): void {
   editingProvider.value = null
   saveError.value = null
-  resetFormModels()
+  resetFormSideState()
   formOpen.value = true
 }
 
 function openEdit(provider: AiProvider): void {
   editingProvider.value = provider
   saveError.value = null
-  resetFormModels()
+  resetFormSideState()
   formOpen.value = true
 }
 
@@ -125,10 +93,32 @@ async function loadFormModels(): Promise<void> {
   }
 }
 
+async function testFormProvider(): Promise<void> {
+  const provider = editingProvider.value
+  if (!provider || formTestLoading.value) return
+  formTestLoading.value = true
+  formTestResult.value = null
+  try {
+    const result = await testPersonalProvider(provider.id)
+    formTestResult.value = result
+    if (result.success) {
+      toast.success('连接成功', result.latencyMs === null ? undefined : `响应耗时 ${result.latencyMs} ms。`)
+    } else {
+      toast.error('连接未通过', '检查接口地址、模型 ID 和 API Key 后重试。')
+    }
+    await load()
+  } catch (error) {
+    saveError.value = error
+  } finally {
+    formTestLoading.value = false
+  }
+}
+
 function closeForm(): void {
   formOpen.value = false
   editingProvider.value = null
   saveError.value = null
+  resetFormSideState()
 }
 
 async function handleCreate(input: ProviderCreateInput): Promise<void> {
@@ -138,7 +128,7 @@ async function handleCreate(input: ProviderCreateInput): Promise<void> {
     await createPersonalProvider(input)
     closeForm()
     await load()
-    toast.success('AI 提供商已添加', '先测试连接，再确认模型可用。')
+    toast.success('AI 提供商已添加', '可以再打开编辑，测试连接或获取模型列表。')
   } catch (error) {
     saveError.value = error
   } finally {
@@ -175,57 +165,8 @@ async function patchProvider(providerId: string, input: ProviderPatchInput, key:
   }
 }
 
-function makeDefault(provider: AiProvider): void {
-  void patchProvider(provider.id, { isDefault: true, enabled: true }, `default:${provider.id}`)
-}
-
 function toggleEnabled(provider: AiProvider): void {
-  if (provider.isDefault && provider.enabled) return
   void patchProvider(provider.id, { enabled: !provider.enabled }, `enabled:${provider.id}`)
-}
-
-async function runTest(provider: AiProvider): Promise<void> {
-  setTestState(provider.id, { loading: true, result: null, error: null })
-  try {
-    const result = await testPersonalProvider(provider.id)
-    setTestState(provider.id, { result })
-    await load()
-    if (result.success) {
-      toast.success('连接成功', result.latencyMs === null ? undefined : `响应耗时 ${result.latencyMs} ms。`)
-    } else {
-      toast.error('连接未通过', '检查接口地址、模型 ID 和 API Key 后重试。')
-    }
-  } catch (error) {
-    setTestState(provider.id, { error })
-  } finally {
-    setTestState(provider.id, { loading: false })
-  }
-}
-
-function openModels(provider: AiProvider): void {
-  modelTarget.value = provider
-  void loadModels(provider)
-}
-
-async function loadModels(provider: AiProvider): Promise<void> {
-  setModelState(provider.id, { loading: true, result: null, error: null })
-  try {
-    setModelState(provider.id, { result: await fetchPersonalProviderModels(provider.id) })
-  } catch (error) {
-    setModelState(provider.id, { error })
-  } finally {
-    setModelState(provider.id, { loading: false })
-  }
-}
-
-function closeModels(): void {
-  modelTarget.value = null
-}
-
-async function selectModel(provider: AiProvider, modelId: string): Promise<void> {
-  await patchProvider(provider.id, { modelId }, `model:${provider.id}`)
-  modelTarget.value = null
-  toast.success('模型已切换', modelId)
 }
 
 async function confirmDelete(): Promise<void> {
@@ -255,7 +196,7 @@ onMounted(() => {
       <div class="personal-ai-toolbar">
         <div>
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
-          <p class="field-hint">只显示当前账号自己的配置。默认提供商优先，其他提供商按备用顺序接管。</p>
+          <p class="field-hint">只显示当前账号自己的配置。数字越小越先用，失败时按顺序换下一个。</p>
         </div>
         <button v-if="providers.length > 0" class="button" type="button" @click="openCreate">添加 AI 提供商</button>
       </div>
@@ -274,39 +215,24 @@ onMounted(() => {
 
       <div v-else class="personal-ai-list">
         <article v-for="provider in sortedProviders" :key="provider.id" class="personal-ai-provider">
-          <div>
-            <div class="personal-ai-provider__meta">
-              <span class="status-badge" :class="provider.enabled ? 'status-badge--success' : 'status-badge--muted'">
-                {{ provider.enabled ? '已启用' : '已停用' }}
-              </span>
-              <span class="count-pill">{{ orderLabel(provider) }}</span>
-              <span class="field-hint">{{ lastTestLabel(provider) }}</span>
-            </div>
+          <div class="personal-ai-provider__main">
+            <span
+              class="ai-status-dot"
+              :class="{ 'is-on': provider.enabled }"
+              :title="provider.enabled ? '已启用' : '已停用'"
+              aria-hidden="true"
+            ></span>
             <h3>{{ provider.name }}</h3>
-            <p class="field-hint">{{ provider.modelId }} · {{ provider.baseUrl }}</p>
-            <p class="masked-value">API Key：<code>{{ provider.apiKeyMasked }}</code></p>
+            <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
+            <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
           </div>
           <div class="personal-ai-provider__actions">
             <button class="button-secondary" type="button" @click="openEdit(provider)">编辑</button>
-            <button class="button-secondary" type="button" :disabled="testStates[provider.id]?.loading" @click="runTest(provider)">
-              {{ testStates[provider.id]?.loading ? '检查中…' : '测试连接' }}
-            </button>
-            <button class="button-secondary" type="button" @click="openModels(provider)">获取模型</button>
-            <button v-if="!provider.isDefault" class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="makeDefault(provider)">设为默认</button>
-            <button class="button-secondary" type="button" :disabled="Boolean(actionKey) || provider.isDefault" @click="toggleEnabled(provider)">
+            <button class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
               {{ provider.enabled ? '停用' : '启用' }}
             </button>
             <button class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</button>
           </div>
-
-          <div v-if="testStates[provider.id]?.result" class="operation-result" aria-live="polite">
-            <strong>{{ testStates[provider.id].result!.success ? '连接成功' : '连接未通过' }}</strong>
-            <p v-if="testStates[provider.id].result!.success && testStates[provider.id].result!.latencyMs !== null">
-              响应耗时 {{ testStates[provider.id].result!.latencyMs }} ms。
-            </p>
-            <p v-else>请检查接口地址、模型 ID 和 API Key 后重试。</p>
-          </div>
-          <ErrorNotice v-if="testStates[provider.id]?.error" :error="testStates[provider.id].error" :show-retry="false" />
         </article>
       </div>
 
@@ -322,24 +248,29 @@ onMounted(() => {
           <button class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = null">取消</button>
         </div>
       </section>
-
     </div>
 
-    <aside class="personal-ai-aside" aria-label="AI 提供商配置详情">
+    <aside class="personal-ai-aside" aria-label="AI 提供商配置说明">
       <div class="personal-ai-guide">
-        <p class="eyebrow">配置说明</p>
-        <h3>配置后就能用</h3>
-        <ul class="personal-ai-guide__list">
-          <li>AI 教练对话与学习计划调整</li>
-          <li>AI 练习生成、评分与错题解析</li>
-          <li>每日闯关的题目生成</li>
-        </ul>
-        <h3>密钥怎么保存</h3>
-        <p class="field-hint">
-          密钥加密保存，页面只显示掩码；每个账号只能看到自己的提供商，其他账号互不影响。
-        </p>
-        <h3>建议顺序</h3>
-        <p class="field-hint">先保存配置，再用“测试连接”确认可达，最后获取模型列表选择模型 ID。</p>
+        <div>
+          <p class="eyebrow">配置说明</p>
+          <h3>配置后就能用</h3>
+          <ul class="personal-ai-guide__list">
+            <li>AI 教练对话与学习计划调整</li>
+            <li>AI 练习生成、评分与错题解析</li>
+            <li>每日闯关的题目生成</li>
+          </ul>
+        </div>
+        <div>
+          <h3>密钥怎么保存</h3>
+          <p class="field-hint">
+            密钥加密保存，列表只显示掩码；在编辑弹窗里可以点“显示”查看完整 Key。
+          </p>
+        </div>
+        <div>
+          <h3>建议顺序</h3>
+          <p class="field-hint">先保存配置，再在弹窗里测试连接，最后获取模型列表选择模型 ID。</p>
+        </div>
       </div>
     </aside>
 
@@ -354,52 +285,15 @@ onMounted(() => {
           :model-options="formModels"
           :model-loading="formModelsLoading"
           :model-error="formModelError"
+          :reveal-key="editingProvider ? revealPersonalProviderKey : undefined"
+          :test-loading="formTestLoading"
+          :test-result="formTestResult"
           @create="handleCreate"
           @update="handleUpdate"
           @cancel="closeForm"
           @fetch-models="loadFormModels"
+          @test="testFormProvider"
         />
-      </section>
-    </div>
-
-    <div v-if="modelTarget" class="dialog-backdrop" @click.self="closeModels">
-      <section class="dialog-card ai-model-dialog" role="dialog" aria-modal="true" aria-labelledby="provider-models-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">模型列表</p>
-            <h2 id="provider-models-title">{{ modelTarget.name }}</h2>
-          </div>
-          <button class="button-secondary button-small" type="button" @click="closeModels">关闭</button>
-        </div>
-
-        <p v-if="modelStates[modelTarget.id]?.loading" class="field-hint">正在向该提供商读取模型列表…</p>
-        <div v-else-if="modelStates[modelTarget.id]?.result?.success" class="model-chip-list">
-          <button
-            v-for="model in modelStates[modelTarget.id].result!.models"
-            :key="model"
-            class="model-chip"
-            type="button"
-            :class="{ 'model-chip--selected': model === modelTarget.modelId }"
-            :disabled="Boolean(actionKey)"
-            @click="selectModel(modelTarget, model)"
-          >{{ model }}</button>
-        </div>
-        <div v-else-if="modelStates[modelTarget.id]?.result" class="ai-model-dialog__empty">
-          <strong>模型列表暂时不可用</strong>
-          <p class="field-hint">该接口没有返回模型列表，可以关闭后在编辑表单里手填模型 ID。</p>
-        </div>
-        <ErrorNotice
-          v-else-if="modelStates[modelTarget.id]?.error"
-          :error="modelStates[modelTarget.id].error"
-          retry-label="重新读取"
-          @retry="loadModels(modelTarget)"
-        />
-
-        <div class="button-row">
-          <button class="button-secondary" type="button" :disabled="modelStates[modelTarget.id]?.loading" @click="loadModels(modelTarget)">
-            {{ modelStates[modelTarget.id]?.loading ? '读取中…' : '重新读取' }}
-          </button>
-        </div>
       </section>
     </div>
   </section>

@@ -135,7 +135,7 @@ describe('challenge BOSS panel', () => {
     await wrapper.findAll('button').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
     await flushPromises()
 
-    expect(wrapper.text()).toContain('请求过于频繁')
+    expect(wrapper.text()).toContain('今天的 AI 次数已用完')
     expect(wrapper.text()).toContain('boss-429')
     expect((wrapper.findAll('.question-answer')[0].element as HTMLInputElement).value).toBe('answer-1')
   })

@@ -162,7 +162,7 @@ describe('coach view', () => {
     await wrapper.get('.coach-composer').trigger('submit')
     await flushPromises()
 
-    expect(wrapper.text()).toContain('请求过于频繁')
+    expect(wrapper.text()).toContain('今天的 AI 次数已用完')
     expect(wrapper.text()).toContain('coach-quota-429')
     expect((textarea.element as HTMLTextAreaElement).value).toBe('再问一个问题')
   })

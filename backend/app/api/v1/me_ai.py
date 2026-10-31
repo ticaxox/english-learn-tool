@@ -11,6 +11,7 @@ from app.core.config import Settings
 from app.db.session import get_db_session
 from app.schemas.ai import (
     ProviderCreateRequest,
+    ProviderKeyResponse,
     ProviderListResponse,
     ProviderModelsResponse,
     ProviderPatchRequest,
@@ -24,6 +25,7 @@ from app.services.ai_providers import (
     get_provider,
     list_provider_models,
     list_providers,
+    reveal_provider_key,
     test_provider,
     update_provider,
 )
@@ -64,6 +66,23 @@ async def get_my_provider_endpoint(
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ProviderResponse:
     return await get_provider(session, context.user, provider_id)
+
+
+@router.get(
+    "/providers/{provider_id}/api-key",
+    response_model=ProviderKeyResponse,
+    responses=_RESPONSES,
+    summary="Reveal the decrypted key of one provider owned by the current user",
+)
+async def reveal_my_provider_key_endpoint(
+    provider_id: UUID,
+    request: Request,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> ProviderKeyResponse:
+    settings: Settings = request.app.state.settings
+    api_key = await reveal_provider_key(session, context.user, settings, provider_id)
+    return ProviderKeyResponse(api_key=api_key)
 
 
 @router.post(
