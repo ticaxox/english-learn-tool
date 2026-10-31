@@ -463,3 +463,9 @@
 
 /* The stage header carries the mode name; the kicker above it repeats it. */
 .personal-workspace .memory-stage-header .eyebrow { display: none; }
+
+/* One focus colour for the whole product. */
+.personal-workspace :focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
