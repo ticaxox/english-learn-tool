@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import PracticeLauncher from '../components/PracticeLauncher.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -56,6 +57,7 @@ const historyOffset = ref(0)
 const historyHasMore = ref(false)
 const historyLoading = ref(false)
 const historyError = ref<unknown>(null)
+const launcherKind = ref<'memory' | 'practice' | null>(null)
 
 const routeChallengeId = computed(() => typeof route.params.challengeId === 'string' ? route.params.challengeId : null)
 const mainNodes = computed(() => (plan.value?.nodes ?? [])
@@ -480,22 +482,22 @@ onMounted(() => {
         <span>不进入闯关主线，按自己的节奏练习。</span>
       </header>
       <div class="challenge-self-study__grid">
-        <RouterLink class="challenge-self-study__card" to="/memory">
+        <button class="challenge-self-study__card" type="button" @click="launcherKind = 'memory'">
           <span class="challenge-self-study__mark" aria-hidden="true">Aa</span>
           <span>
             <strong>记忆练习</strong>
             <small>翻卡、选择与拼写，巩固今天遇到的词。</small>
           </span>
           <AppIcon name="arrow" />
-        </RouterLink>
-        <RouterLink class="challenge-self-study__card" to="/practice">
+        </button>
+        <button class="challenge-self-study__card" type="button" @click="launcherKind = 'practice'">
           <span class="challenge-self-study__mark challenge-self-study__mark--ai" aria-hidden="true"><AppIcon name="spark" /></span>
           <span>
             <strong>AI 练习</strong>
             <small>按题型或难度生成一组真实练习。</small>
           </span>
           <AppIcon name="arrow" />
-        </RouterLink>
+        </button>
       </div>
     </section>
 
@@ -518,5 +520,10 @@ onMounted(() => {
         <button v-if="historyHasMore" class="button-secondary challenge-history__more" type="button" :disabled="historyLoading" @click="loadHistory(false)">{{ historyLoading ? '正在加载…' : '加载更多历史' }}</button>
       </section>
 
+    <PracticeLauncher
+      :open="launcherKind !== null"
+      :kind="launcherKind ?? 'memory'"
+      @close="launcherKind = null"
+    />
   </article>
 </template>

@@ -160,19 +160,29 @@ onMounted(async () => {
   await Promise.all([loadConfig(), loadTodayPlan()])
   if (challengeSessionId.value && challengeModule.value) {
     await begin(challengeModule.value, challengeSessionId.value)
+  } else if (challengeModule.value && !session.hasSession.value) {
+    // 学习中心的启动面板传 module 时直接进入答题，不再多一次选择。
+    await begin(challengeModule.value)
   }
 })
 </script>
 
 <template>
   <article class="memory-page memory-workbench workspace-page">
-    <header class="workspace-page-header">
+    <header v-if="!session.hasSession.value && !session.finished.value" class="workspace-page-header">
       <div>
         <p class="workspace-kicker">记忆训练</p>
         <h1>选一种方式开始复习</h1>
         <p class="workspace-page-lead">翻卡、选择或拼写，都从今天的真实队列开始。</p>
       </div>
-      <div v-if="session.hasSession.value" class="memory-session-actions">
+    </header>
+
+    <header v-else class="memory-stage-header">
+      <div>
+        <p class="eyebrow">记忆练习</p>
+        <h1>{{ selectedModule ? MEMORY_MODULE_LABELS[selectedModule] : '记忆练习' }}</h1>
+      </div>
+      <div class="memory-session-actions">
         <span class="workspace-status" :class="`memory-timer--${heartbeat.state.value}`">
           {{ heartbeat.state.value === 'active' ? '计时中' : '已暂停' }}
         </span>

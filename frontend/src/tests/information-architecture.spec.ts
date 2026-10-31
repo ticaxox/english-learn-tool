@@ -116,8 +116,10 @@ describe('T-FE-020 personal information architecture', () => {
     const challenge = source('../views/ChallengeView.vue')
     const css = source('../personal-ui.css')
     expect(challenge).toContain('challenge-self-study')
-    expect(challenge).toContain('to="/memory"')
-    expect(challenge).toContain('to="/practice"')
+    // Practice entries open the in-frame launcher instead of navigating away.
+    expect(challenge).toContain("launcherKind = 'memory'")
+    expect(challenge).toContain("launcherKind = 'practice'")
+    expect(challenge).toContain('PracticeLauncher')
     expect(css).toContain('.personal-workspace .challenge-self-study')
     expect(css).toContain('.personal-workspace .challenge-generate')
   })

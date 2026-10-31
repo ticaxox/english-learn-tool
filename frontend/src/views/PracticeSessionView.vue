@@ -3,7 +3,6 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import LoadingState from '../components/LoadingState.vue'
 import PracticeQuestionCard from '../components/PracticeQuestionCard.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
@@ -160,13 +159,17 @@ void practice.load()
 
 <template>
   <article class="practice-page practice-session-page member-practice-session-page">
-    <header class="practice-session-header">
+    <header class="practice-session-header practice-stage-header">
       <div>
-        <p class="eyebrow">AI 练习会话</p>
+        <p class="eyebrow">AI 练习</p>
         <h1>{{ session ? `${PRACTICE_TYPE_LABELS[session.practiceType]}练习` : '练习会话' }}</h1>
         <p v-if="session" class="lead">
           {{ PRACTICE_SOURCE_LABELS[session.source] }} · {{ session.questionCount }} 题 · {{ PRACTICE_STATUS_LABELS[session.status] }}
         </p>
+      </div>
+      <div v-if="session?.status === 'ready'" class="practice-stage-progress" aria-live="polite">
+        <strong>{{ answeredCount }}<span>/ {{ questions.length }}</span></strong>
+        <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
       </div>
     </header>
 
@@ -268,12 +271,6 @@ void practice.load()
             </section>
           </div>
 
-          <aside class="member-practice-session-aside">
-            <section class="member-session-mascot">
-              <WhiskerCrumbMark size="hero" />
-              <p>“先读意思，再找线索。相信句子本身。”</p>
-            </section>
-          </aside>
         </div>
       </template>
     </template>

@@ -2914,3 +2914,192 @@
   line-height: 1.2;
   text-align: center;
 }
+
+/* ------------------------------------------- practice launcher (stays in-frame) */
+
+.personal-workspace .challenge-self-study__card {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.personal-workspace .practice-launcher {
+  display: grid;
+  gap: 14px;
+  width: min(560px, calc(100vw - 2rem));
+}
+
+.personal-workspace .practice-launcher__header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.personal-workspace .practice-launcher__header h2 { margin: 2px 0 4px; font-size: 1.25rem; }
+.personal-workspace .practice-launcher__header .field-hint { margin: 0; }
+
+.personal-workspace .practice-launcher__body { display: grid; gap: 10px; }
+
+.personal-workspace .launcher-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--ui-line);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.personal-workspace .launcher-option:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--ui-line);
+}
+
+.personal-workspace .launcher-option.is-disabled { opacity: 0.55; cursor: not-allowed; }
+
+.personal-workspace .launcher-option__mark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-paper, #fffaf0);
+  color: var(--ui-ink);
+}
+
+.personal-workspace .launcher-option__copy { display: grid; flex: 1 1 auto; gap: 2px; }
+.personal-workspace .launcher-option__copy strong { font-size: 1rem; }
+.personal-workspace .launcher-option__copy small { color: var(--ui-muted); font-size: 0.82rem; }
+.personal-workspace .launcher-option__state { flex: 0 0 auto; color: var(--ui-muted); font-size: 0.8rem; font-weight: 800; }
+
+.personal-workspace .launcher-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.personal-workspace .launcher-type {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 2px solid var(--ui-line);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.personal-workspace .launcher-type strong { font-size: 0.98rem; }
+.personal-workspace .launcher-type small { color: var(--ui-muted); font-size: 0.8rem; }
+
+.personal-workspace .launcher-type.is-selected {
+  border-color: var(--g-blue-edge);
+  background: var(--g-blue-soft);
+}
+
+.personal-workspace .launcher-count {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 800;
+}
+
+.personal-workspace .launcher-count select { width: auto; min-width: 120px; }
+
+.personal-workspace .launcher-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ------------------------------------------------------- practice stage layout */
+
+.personal-workspace .practice-stage-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.personal-workspace .practice-stage-header h1 { margin: 2px 0 4px; }
+
+.personal-workspace .practice-stage-progress {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+  justify-items: end;
+}
+
+.personal-workspace .practice-stage-progress strong {
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.personal-workspace .practice-stage-progress strong span {
+  color: var(--ui-muted);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.personal-workspace .practice-stage-progress .progress { width: 180px; height: 8px; }
+
+/* One column, one reading width: the session is a stage, not a dashboard. */
+.personal-workspace .member-practice-session-page .member-practice-session-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.personal-workspace .member-practice-session-page .member-practice-workbench {
+  width: min(100%, 960px);
+  margin: 0 auto;
+}
+
+.personal-workspace .member-practice-session-page .practice-generation-panel,
+.personal-workspace .member-practice-session-page > .panel {
+  width: min(100%, 720px);
+  margin-inline: auto;
+}
+
+.personal-workspace .memory-stage-header {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 4px 2px 14px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.personal-workspace .memory-stage-header h1 {
+  margin: 2px 0 0;
+  font-size: 1.5rem;
+}
+
+.personal-workspace .memory-page .memory-main-card {
+  width: min(100%, 820px);
+  margin-inline: auto;
+}
+
+/* The trainer card already lives inside the memory card: no second frame. */
+.personal-workspace .memory-page .memory-main-card .study-card {
+  min-height: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.personal-workspace .practice-stage-progress strong span { margin-left: 4px; }
