@@ -26,11 +26,6 @@ const practice = usePracticeSession(sessionId)
 const answers = ref<Record<string, string>>({})
 const formError = ref<string | null>(null)
 const draftSavedAt = ref<string | null>(null)
-const draftSavedLabel = computed(() => {
-  if (!draftSavedAt.value) return null
-  const saved = new Date(draftSavedAt.value)
-  return Number.isNaN(saved.getTime()) ? null : saved.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-})
 const hydratedKey = ref<string | null>(null)
 let autosaveTimer: number | null = null
 let pendingSubmitKey: string | null = null
@@ -173,7 +168,6 @@ void practice.load()
           {{ PRACTICE_SOURCE_LABELS[session.source] }} · {{ session.questionCount }} 题 · {{ PRACTICE_STATUS_LABELS[session.status] }}
         </p>
       </div>
-      <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
     </header>
 
     <LoadingState v-if="practice.loading.value" label="正在读取练习会话…" />
@@ -217,20 +211,6 @@ void practice.load()
       <template v-else-if="session.status === 'ready'">
         <div class="member-practice-session-layout">
           <div class="member-practice-workbench">
-            <section class="practice-session-toolbar panel">
-              <div>
-                <strong>作答进度 {{ answeredCount }} / {{ questions.length }}</strong>
-                <p class="inline-note">
-                  <span v-if="practice.draftSaving.value">正在保存草稿…</span>
-                  <span v-else-if="draftSavedAt">草稿已保存：{{ draftSavedLabel }}</span>
-                  <span v-else>答案会自动保存。</span>
-                </p>
-              </div>
-              <div class="button-row">
-                <button class="button-secondary button-small" type="button" :disabled="practice.draftSaving.value || draftConflict" @click="saveDraft">保存草稿</button>
-                <button class="button-secondary button-small" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</button>
-              </div>
-            </section>
 
             <section v-if="draftConflict" class="alert alert-warning" role="alert">
               <strong>草稿版本冲突</strong>
@@ -276,7 +256,7 @@ void practice.load()
                 <button class="button member-primary-button" type="button" :disabled="practice.busy.value || !allAnswered" @click="submit">
                   {{ practice.busy.value ? '正在提交…' : '提交全部答案' }} <AppIcon name="arrow" />
                 </button>
-                <span class="inline-note">提交后查看答案和解析。</span>
+                <button class="button-secondary" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</button>
               </div>
             </section>
           </div>
@@ -291,13 +271,6 @@ void practice.load()
               <strong>{{ answeredCount }} <span>/ {{ questions.length }}</span></strong>
               <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
               <p>{{ allAnswered ? '全部题目已作答，可以提交。' : `还有 ${questions.length - answeredCount} 题未作答。` }}</p>
-            </section>
-            <section class="member-session-note">
-              <p class="eyebrow">草稿</p>
-              <p v-if="practice.draftSaving.value">正在保存草稿…</p>
-              <p v-else-if="draftSavedAt">草稿已保存：{{ draftSavedLabel }}</p>
-              <p v-else>答案会自动保存。</p>
-              <RouterLink class="member-text-link" to="/coach">问问 AI 教练 <AppIcon name="arrow" /></RouterLink>
             </section>
           </aside>
         </div>

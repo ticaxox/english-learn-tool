@@ -44,9 +44,34 @@ function focusActive(): void {
   inputs.value[grid.activeIndex.value]?.focus()
 }
 
+const composingAt = ref<Record<number, boolean>>({})
+
+/** Keep only Latin letters: an IME candidate never becomes the answer. */
+function latinOnly(value: string): string {
+  return value.replace(/[^a-zA-Z]/g, '')
+}
+
+function handleCompositionStart(index: number): void {
+  composingAt.value[index] = true
+}
+
+function handleCompositionEnd(index: number, event: CompositionEvent): void {
+  composingAt.value[index] = false
+  const letters = latinOnly(event.data ?? '')
+  if (letters) {
+    grid.typeCharacterAt(index, letters.slice(0, 1))
+    syncDomValues()
+    focusActive()
+  }
+}
+
 function handleInput(index: number, event: Event): void {
+  if (composingAt.value[index] || (event as InputEvent).isComposing) {
+    return
+  }
   const target = event.target as HTMLInputElement
-  grid.typeCharacterAt(index, target.value)
+  const letters = latinOnly(target.value)
+  grid.typeCharacterAt(index, letters.slice(0, 1))
   // Sync immediately: the grid already holds the authoritative characters, and
   // deferring to nextTick lets a fast keystroke read a stale cell.
   syncDomValues()
@@ -129,11 +154,14 @@ function submit(): void {
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
+          lang="en"
           maxlength="1"
           :aria-label="`第 ${blank.index + 1} 个字母`"
           :value="grid.values.value[blank.index] ?? ''"
           :disabled="props.disabled"
           @input="handleInput(blank.index, $event)"
+          @compositionstart="handleCompositionStart(blank.index)"
+          @compositionend="handleCompositionEnd(blank.index, $event)"
           @keydown="handleKeydown"
           @focus="handleFocus(blank.index)"
         />

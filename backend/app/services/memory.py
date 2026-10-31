@@ -244,12 +244,20 @@ def _item_response(item: MemorySessionItem) -> SessionItemResponse:
     )
 
 
+CLOZE_MODES = ("full", "partial", "first_letter", "middle")
+
+
 def _cloze(headword: str, mode: str) -> str:
+    if not headword:
+        return ""
     if mode == "first_letter":
         return headword[0] + "_" * (len(headword) - 1)
     if mode == "partial":
         visible = max(1, len(headword) // 3)
         return headword[:visible] + "_" * (len(headword) - visible)
+    if mode == "middle" and len(headword) > 3:
+        # First and last letters stay visible, the middle is blanked.
+        return headword[0] + "_" * (len(headword) - 2) + headword[-1]
     return "_" * len(headword)
 
 
@@ -294,10 +302,10 @@ async def _card_prompt(
     if module == "spelling":
         # Unset or "random" means the cloze type varies from card to card.
         mode = preferences.get("spelling_mode", "random")
-        if mode not in {"full", "partial", "first_letter", "random"}:
+        if mode not in {*CLOZE_MODES, "random"}:
             mode = "random"
         if mode == "random":
-            mode = random.choice(["full", "partial", "first_letter"])
+            mode = random.choice(list(CLOZE_MODES))
         return SessionCardPrompt(
             module="spelling",
             prompt=definition_zh or entry.headword,

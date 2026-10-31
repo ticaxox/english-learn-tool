@@ -7,8 +7,6 @@ import type {
   ProviderPatchInput,
 } from '../api/ai-admin'
 
-type ApiKeyMode = 'preserve' | 'replace'
-
 interface ValidatedProviderFields {
   name: string
   baseUrl: string
@@ -41,10 +39,11 @@ const enabled = ref(true)
 const isDefault = ref(false)
 const customHeadersText = ref('{}')
 const apiKey = ref('')
-const apiKeyMode = ref<ApiKeyMode>('preserve')
 const errors = reactive<Record<string, string>>({})
 
 const editing = computed(() => Boolean(props.provider))
+const maskedKey = computed(() => (editing.value ? props.provider?.apiKeyMasked ?? '' : ''))
+const keyChanged = computed(() => editing.value && apiKey.value !== '' && apiKey.value !== maskedKey.value)
 const title = computed(() => (editing.value ? `编辑 ${props.provider?.name}` : '新增 AI 提供商'))
 
 const forbiddenHeaders = new Set([
@@ -70,8 +69,7 @@ function reset(): void {
   enabled.value = provider?.enabled ?? true
   isDefault.value = provider?.isDefault ?? false
   customHeadersText.value = provider ? JSON.stringify(provider.customHeaders, null, 2) : '{}'
-  apiKey.value = ''
-  apiKeyMode.value = provider ? 'preserve' : 'replace'
+  apiKey.value = provider?.apiKeyMasked ?? ''
   Object.keys(errors).forEach((key) => delete errors[key])
 }
 
@@ -149,7 +147,7 @@ function validate(): ValidatedProviderFields | null {
     errors.timeoutSeconds = '超时必须是 1–120 秒的整数。'
   }
   if (isDefault.value && !enabled.value) errors.enabled = '默认提供商必须保持启用。'
-  if (!editing.value || apiKeyMode.value === 'replace') {
+  if (!editing.value || keyChanged.value) {
     if (apiKey.value.length < 8) errors.apiKey = 'API Key 至少需要 8 个字符。'
   }
 
@@ -175,8 +173,14 @@ function submit(): void {
     return
   }
   const patch: ProviderPatchInput = { ...fields }
-  if (apiKeyMode.value === 'replace') patch.apiKey = apiKey.value
+  // An untouched field still shows the masked key; only send the key when it changed.
+  if (keyChanged.value) patch.apiKey = apiKey.value
   emit('update', props.provider.id, patch)
+}
+
+function selectMaskedKey(event: FocusEvent): void {
+  const input = event.target as HTMLInputElement
+  if (input.value === maskedKey.value) input.select()
 }
 
 function cancel(): void {
@@ -207,7 +211,6 @@ function cancel(): void {
           <label for="provider-model">模型 ID</label>
           <input id="provider-model" v-model="modelId" type="text" maxlength="200" :aria-invalid="Boolean(errors.modelId)" />
           <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
-          <p class="field-hint">可先手填；保存后可调用真实模型列表接口再选择。</p>
         </div>
       </div>
 
@@ -217,67 +220,43 @@ function cancel(): void {
         <p v-if="errors.baseUrl" class="field-error" role="alert">{{ errors.baseUrl }}</p>
       </div>
 
-      <div v-if="editing" class="field">
-        <span class="field-label">API Key</span>
-        <p class="masked-value">当前：<code>{{ props.provider?.apiKeyMasked }}</code></p>
-        <div class="radio-row">
-          <label class="radio-option"><input v-model="apiKeyMode" type="radio" value="preserve" /> 保留已有 Key</label>
-          <label class="radio-option"><input v-model="apiKeyMode" type="radio" value="replace" /> 提交新 Key</label>
-        </div>
-        <p class="field-hint">保留现有 Key，或提交新的 Key；不再使用时可以删除该提供商。</p>
-        <div v-if="apiKeyMode === 'replace'" class="field">
-          <label for="provider-api-key-replace">新 API Key</label>
-          <input
-            id="provider-api-key-replace"
-            v-model="apiKey"
-            type="password"
-            autocomplete="new-password"
-            maxlength="4096"
-            :aria-invalid="Boolean(errors.apiKey)"
-          />
-          <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
-          <p class="field-hint">保存后只显示服务端返回的掩码。</p>
-        </div>
-      </div>
-
-      <div v-else class="field">
+      <div class="field">
         <label for="provider-api-key">API Key</label>
         <input
           id="provider-api-key"
           v-model="apiKey"
-          type="password"
-          autocomplete="new-password"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
           maxlength="4096"
           :aria-invalid="Boolean(errors.apiKey)"
+          @focus="selectMaskedKey"
         />
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
-        <p class="field-hint">保存后只显示服务端返回的掩码。</p>
       </div>
 
-      <div class="field">
-        <label for="provider-timeout">生成超时（秒）</label>
-        <input id="provider-timeout" v-model.number="timeoutSeconds" type="number" min="1" max="120" step="1" />
-        <p v-if="errors.timeoutSeconds" class="field-error" role="alert">{{ errors.timeoutSeconds }}</p>
-        <p class="field-hint">单次题目、地图或教练回复的最长等待时间，1–120 秒。网络慢时调大。</p>
-      </div>
-
-      <details class="provider-advanced" :open="editing">
-        <summary>高级设置</summary>
-        <div class="ai-form-grid">
-          <div class="field">
-            <label for="provider-priority">备用顺序（数字越小越靠前）</label>
-            <input id="provider-priority" v-model.number="priority" type="number" min="0" max="10000" step="1" />
-            <p v-if="errors.priority" class="field-error" role="alert">{{ errors.priority }}</p>
-          </div>
+      <div class="ai-form-grid">
+        <div class="field">
+          <label for="provider-timeout">生成超时（秒）</label>
+          <input id="provider-timeout" v-model.number="timeoutSeconds" type="number" min="1" max="120" step="1" />
+          <p v-if="errors.timeoutSeconds" class="field-error" role="alert">{{ errors.timeoutSeconds }}</p>
+          <p class="field-hint">1–120 秒。单次题目、地图或教练回复的最长等待时间。</p>
         </div>
 
         <div class="field">
-          <label for="provider-headers">自定义请求头（JSON）</label>
-          <textarea id="provider-headers" v-model="customHeadersText" rows="4" spellcheck="false"></textarea>
-          <p v-if="errors.customHeaders" class="field-error" role="alert">{{ errors.customHeaders }}</p>
-          <p class="field-hint">最多 10 个；Authorization、Cookie、Host 等安全头不可覆盖。</p>
+          <label for="provider-priority">备用顺序</label>
+          <input id="provider-priority" v-model.number="priority" type="number" min="0" max="10000" step="1" />
+          <p v-if="errors.priority" class="field-error" role="alert">{{ errors.priority }}</p>
+          <p class="field-hint">数字越小越靠前，默认提供商始终最先使用。</p>
         </div>
-      </details>
+      </div>
+
+      <div class="field">
+        <label for="provider-headers">自定义请求头（JSON）</label>
+        <textarea id="provider-headers" v-model="customHeadersText" rows="3" spellcheck="false"></textarea>
+        <p v-if="errors.customHeaders" class="field-error" role="alert">{{ errors.customHeaders }}</p>
+        <p class="field-hint">最多 10 个；Authorization、Cookie、Host 等安全头不可覆盖。</p>
+      </div>
 
       <div class="checkbox-row">
         <label class="checkbox"><input v-model="enabled" type="checkbox" :disabled="isDefault" /> 启用</label>

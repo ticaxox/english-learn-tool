@@ -243,8 +243,8 @@ onMounted(() => {
                 <option value="full">整词挖空</option>
                 <option value="partial">部分字母</option>
                 <option value="first_letter">只留首字母</option>
+                <option value="middle">中间挖空</option>
               </select>
-              <p class="field-hint">影响记忆练习中的拼写训练。</p>
             </div>
             <div v-if="needsWordbook" class="field">
               <label for="practice-wordbook">词书</label>

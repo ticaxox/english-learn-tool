@@ -319,7 +319,7 @@ const AI_STATES: readonly AiPracticeState[] = [
   'available',
   'unknown',
 ]
-const BLANK_TYPES: readonly SpellingBlankType[] = ['full', 'partial', 'first_letter']
+const BLANK_TYPES: readonly SpellingBlankType[] = ['full', 'partial', 'first_letter', 'middle']
 const SESSION_STATUSES = ['active', 'completed', 'abandoned'] as const
 const EVENT_ACTIONS = ['again', 'good', 'mastered', 'shown'] as const
 const WORD_STATE_STATUSES: readonly WordStateStatus[] = [
@@ -420,6 +420,9 @@ export function serializeMemoryConfig(config: MemoryConfig): unknown {
   const preferences: Record<string, unknown> = { ...config.preferences }
   if (config.spelling.blankType !== null) {
     preferences[CONTRACT.memoryConfig.spellingMode] = config.spelling.blankType
+  } else {
+    // Picking "random" again must clear the previous explicit mode.
+    delete preferences[CONTRACT.memoryConfig.spellingMode]
   }
   return {
     [CONTRACT.memoryConfig.flashcardEnabled]: config.flashcard.enabled,

@@ -1452,26 +1452,29 @@
 /* --------------------------------------------------- coach: floating window */
 
 @media (min-width: 861px) {
+  /* The coach is a sidebar flush with the right edge, full height. It overlays
+     the page without resizing it. */
   .personal-workspace .ia-coach-panel {
-    top: auto;
-    right: 24px;
-    bottom: 24px;
+    top: 0;
+    right: 0;
+    bottom: 0;
     left: auto;
-    width: min(432px, calc(100vw - 48px));
-    height: min(664px, calc(100vh - 48px));
-    border: 2px solid var(--ui-line-strong);
-    border-radius: 22px;
+    width: min(420px, calc(100vw - 212px));
+    height: 100vh;
+    border: 0;
+    border-left: 2px solid var(--ui-line-strong);
+    border-radius: 0;
     background: var(--ui-surface);
-    box-shadow: 0 8px 0 rgb(59 42 26 / 12%), 0 30px 70px rgb(59 42 26 / 22%);
-    animation: coach-pop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: -12px 0 32px rgb(59 42 26 / 14%);
+    animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* A floating window never pushes the page. */
-  .personal-workspace.is-coach-open .workspace-main { margin-right: 0; }
+  /* Overlay: the page keeps its layout. */
+  .personal-workspace.is-coach-open .workspace-main { margin-right: 0; padding-right: 0; }
   .personal-workspace.is-coach-open .ia-coach-backdrop { display: none; }
   .personal-workspace .ia-coach-panel .coach-layout { grid-template-columns: minmax(0, 1fr); }
   .personal-workspace .ia-coach-panel .coach-sidebar {
-    max-height: 40%;
+    max-height: 42%;
     overflow-y: auto;
   }
 }
@@ -1674,19 +1677,44 @@
 /* ------------------------------------------------- challenge: station path */
 
 .crumb-stations {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 30px;
   align-items: center;
-  padding: 18px 0 14px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 22px 0 18px;
 }
+
+/* The dashed route behind the stations. */
+.crumb-stations::before {
+  position: absolute;
+  top: 32px;
+  bottom: 32px;
+  left: 50%;
+  border-left: 3px dashed var(--ui-line-strong);
+  content: "";
+  transform: translateX(-1px);
+}
+
+/* Map board: warm paper with a soft sun glow behind the route. */
+.personal-workspace .challenge-map {
+  background-image:
+    radial-gradient(circle at 50% 0%, rgb(255 204 128 / 26%), transparent 58%),
+    radial-gradient(var(--ui-line) 1px, transparent 1px);
+  background-size: 100% 100%, 18px 18px;
+}
+
+.personal-workspace .map-station { z-index: 1; }
 
 .personal-workspace .map-station {
   position: relative;
   display: grid;
-  width: 76px;
-  height: 76px;
+  width: 84px;
+  height: 84px;
   place-items: center;
+  padding: 0;
   border: 3px solid var(--ui-line);
   border-radius: 50%;
   background: var(--ui-surface);
@@ -1695,18 +1723,61 @@
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
-.personal-workspace .map-station:nth-child(3n + 1) { transform: translateX(-70px); }
-.personal-workspace .map-station:nth-child(3n) { transform: translateX(70px); }
+.personal-workspace .map-station:nth-child(3n + 1) { --station-offset: -110px; }
+.personal-workspace .map-station:nth-child(3n + 2) { --station-offset: 0px; }
+.personal-workspace .map-station:nth-child(3n) { --station-offset: 110px; }
 
-.personal-workspace .map-station:hover { transform: translateY(-2px); }
+.personal-workspace .map-station { transform: translateX(var(--station-offset, 0px)); }
+
+.personal-workspace .map-station:hover {
+  transform: translateX(var(--station-offset, 0px)) translateY(-2px);
+}
 
 .personal-workspace .map-station__order {
   color: var(--ui-ink);
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   font-weight: 900;
+  line-height: 1;
 }
 
-.personal-workspace .map-station__caption { display: none; }
+.personal-workspace .map-station__caption {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  width: 130px;
+  color: var(--ui-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.personal-workspace .map-station[aria-current='step'] .map-station__caption,
+.personal-workspace .map-station.challenge-node--in_progress .map-station__caption {
+  color: var(--g-orange-edge);
+}
+
+/* Connectors tie each station to the central route. */
+.personal-workspace .map-station::after {
+  position: absolute;
+  top: 50%;
+  width: 68px;
+  border-top: 3px dashed var(--ui-line-strong);
+  content: "";
+}
+
+.personal-workspace .map-station:nth-child(3n + 1)::after { left: 100%; }
+.personal-workspace .map-station:nth-child(3n)::after { right: 100%; }
+.personal-workspace .map-station:nth-child(3n + 2)::after { display: none; }
+
+.personal-workspace .map-station.challenge-node--completed::after { border-top-color: var(--g-green-edge); }
+.personal-workspace .map-station[aria-current='step']::after,
+.personal-workspace .map-station.challenge-node--in_progress::after { border-top-color: var(--g-orange-edge); }
 
 .personal-workspace .map-station[aria-current='step'] {
   border-color: var(--g-orange-edge);
@@ -1721,16 +1792,16 @@
 }
 
 .personal-workspace .map-station.challenge-node--in_progress {
-  border-color: var(--g-orange-edge);
-  background: var(--g-orange);
+  border-color: var(--g-orange-edge) !important;
+  background: var(--g-orange) !important;
   box-shadow: 0 4px 0 var(--g-orange-edge);
 }
 
 .personal-workspace .map-station.challenge-node--in_progress .map-station__order { color: #fff; }
 
 .personal-workspace .map-station.challenge-node--completed {
-  border-color: var(--g-green-edge);
-  background: var(--g-green);
+  border-color: var(--g-green-edge) !important;
+  background: var(--g-green) !important;
   box-shadow: 0 4px 0 var(--g-green-edge);
 }
 
@@ -1758,14 +1829,6 @@
 }
 
 /* ------------------------------------------------------ coach: compact thread */
-
-@media (min-width: 1181px) {
-  /* The floating window keeps its space: page content narrows instead of hiding
-     under it. */
-  .personal-workspace.is-coach-open .workspace-content {
-    padding-right: calc(var(--ui-space-6) + 456px);
-  }
-}
 
 .personal-workspace .ia-coach-panel .coach-message {
   max-width: 100%;
@@ -1847,6 +1910,42 @@
 .personal-workspace .ai-provider-dialog {
   width: min(720px, calc(100vw - 3rem));
   max-height: calc(100vh - 3rem);
+}
+
+/* The dialog card is already the frame; the inner panel must not draw a second one. */
+.personal-workspace .ai-provider-dialog > .panel {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .ai-provider-dialog .ai-form {
+  gap: 2px;
+}
+
+.personal-workspace .ai-provider-dialog #provider-api-key,
+.personal-workspace .ai-provider-dialog #provider-headers {
+  font-family: "Cascadia Code", Consolas, monospace;
+  font-size: 0.9rem;
+}
+
+.personal-workspace .ai-model-dialog {
+  display: grid;
+  gap: 12px;
+  width: min(560px, calc(100vw - 3rem));
+}
+
+.personal-workspace .ai-model-dialog .model-chip-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 2px 6px 10px 0;
+}
+
+.personal-workspace .ai-model-dialog__empty {
+  display: grid;
+  gap: 4px;
 }
 
 .personal-workspace .ai-form-grid {
@@ -1971,3 +2070,329 @@
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--g-green-edge);
 }
+
+/* Coach sidebar: shorter header, tighter composer, scrollbar at the edge. */
+.personal-workspace .ia-coach-panel .ia-coach-panel-header {
+  min-height: 52px;
+  padding: 6px 12px;
+}
+
+.personal-workspace .ia-coach-panel .ia-coach-panel-header h2 {
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.personal-workspace .ia-coach-panel .ia-coach-panel-header p { display: none; }
+
+.personal-workspace .ia-coach-panel .coach-main { padding: 0 10px 10px; }
+
+.personal-workspace .ia-coach-panel .coach-composer {
+  gap: 6px;
+  margin-top: 6px;
+  padding: 8px 10px;
+}
+
+.personal-workspace .ia-coach-panel .coach-composer label { display: none; }
+
+.personal-workspace .ia-coach-panel .coach-composer textarea {
+  min-height: 64px;
+  padding: 8px 10px;
+}
+
+.personal-workspace .ia-coach-panel .coach-messages {
+  padding: 6px 8px 6px 10px;
+}
+
+/* Sidebar chrome: one compact line per section, scroll area flush to the edge. */
+@media (min-width: 861px) {
+  .personal-workspace .ia-coach-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .personal-workspace .ia-coach-panel .ia-coach-panel-header {
+    flex: 0 0 auto;
+    min-height: 46px;
+    height: 46px;
+    align-items: center;
+    padding: 0 8px 0 14px;
+    overflow: visible;
+  }
+
+  .personal-workspace .ia-coach-panel .ia-coach-panel-header .workspace-icon-button {
+    width: 32px;
+    height: 32px;
+    min-height: 0;
+  }
+
+  .personal-workspace .ia-coach-panel .ia-coach-panel-header > div {
+    min-width: 0;
+    max-width: calc(100% - 158px);
+  }
+
+  .personal-workspace .ia-coach-panel-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-page {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-messages {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  /* The history toggle rides in the panel header instead of taking a row. */
+  .personal-workspace .ia-coach-panel .coach-main-topbar {
+    position: absolute;
+    top: 9px;
+    right: 60px;
+    z-index: 3;
+    height: auto;
+    padding: 0;
+    margin: 0;
+  }
+
+  .personal-workspace .ia-coach-panel .ia-coach-panel-header h2 {
+    font-size: 1rem;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  .personal-workspace .ia-coach-panel .ia-coach-panel-header .workspace-icon-button {
+    flex: 0 0 auto;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main-topbar {
+    height: auto;
+    align-items: center;
+    padding: 2px 10px 2px 12px;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main-topbar .button-secondary {
+    min-height: 0;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main {
+    padding: 0 0 8px;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main-header {
+    min-height: 0;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 10px 8px 12px;
+    border-bottom: 1px solid var(--ui-line);
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main-header > div:first-child {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    min-width: 0;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main-header .eyebrow { display: none; }
+
+  .personal-workspace .ia-coach-panel .coach-main-header h2 {
+    margin: 0;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main-header .field-hint {
+    margin: 0;
+    font-size: 0.74rem;
+    white-space: nowrap;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-main-header .button-row { gap: 4px; flex: 0 0 auto; }
+
+  .personal-workspace .ia-coach-panel .coach-main-header .button-secondary {
+    min-height: 0;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 0.76rem;
+    line-height: 1;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-composer {
+    padding: 8px 10px 8px 12px;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-composer textarea {
+    height: 54px;
+    min-height: 54px;
+    font-size: 0.9rem;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-composer__footer {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-composer__footer .button {
+    min-height: 0;
+    height: 32px;
+    padding: 0 14px;
+  }
+}
+
+/* Node details open as a floating dialog over the map. */
+.personal-workspace .challenge-node-dialog {
+  width: min(560px, calc(100vw - 3rem));
+  display: grid;
+  gap: 12px;
+}
+
+/* Question header: number and badge at a calmer size, no helper sentence. */
+.personal-workspace .practice-question-step {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.personal-workspace .practice-question-number {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--g-gold);
+  color: #3b2500;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.personal-workspace .practice-question-card .status-badge { font-size: 0.78rem; }
+
+/* Choice rows draw the letter chip only; the native radio stays for a11y. */
+.personal-workspace .practice-option__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.personal-workspace .practice-option:has(.practice-option__input:focus-visible) {
+  outline: 3px solid var(--g-blue);
+  outline-offset: 2px;
+}
+
+.personal-workspace .practice-option { position: relative; }
+
+.personal-workspace .practice-option--picked:not(.practice-option--correct):not(.practice-option--wrong) {
+  border-color: var(--g-blue-edge) !important;
+  background: var(--g-blue-soft) !important;
+}
+
+.personal-workspace .practice-generation-panel { gap: 14px; }
+.personal-workspace .practice-generation-panel .inline-note { margin: 0; }
+
+/* Hub form: the two selects in a row keep the same height. */
+.personal-workspace .practice-form-grid { align-items: start; }
+.personal-workspace .practice-form-grid .field { align-content: start; }
+
+/* ------------------------------------------------- wordbook detail: compact rows */
+
+.personal-workspace .wordbook-entry-list { gap: 6px; }
+
+/* One entry reads as three lines: headword, meaning, one example. */
+.personal-workspace .wordbook-entry-list > li {
+  grid-template-columns: minmax(6.5rem, 0.32fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.personal-workspace .wordbook-entry-word {
+  display: grid;
+  gap: 1px;
+  align-content: start;
+}
+
+.personal-workspace .wordbook-entry-word strong { font-size: 1.02rem; line-height: 1.3; }
+.personal-workspace .wordbook-entry-word span { font-size: 0.76rem; }
+.personal-workspace .wordbook-entry-normalized { display: none; }
+
+.personal-workspace .wordbook-entry-definitions { display: grid; gap: 3px; }
+
+.personal-workspace .wordbook-definition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 0;
+  padding: 0;
+  border-left: 0;
+  background: transparent;
+}
+
+.personal-workspace .wordbook-definition .part-of-speech {
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ui-muted);
+  font-size: 0.72rem;
+}
+
+.personal-workspace .wordbook-definition-en,
+.personal-workspace .wordbook-definition-zh,
+.personal-workspace .wordbook-examples li p:first-child {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.personal-workspace .wordbook-definition-en { flex: 0 1 auto; max-width: 78%; }
+.personal-workspace .wordbook-definition-zh { flex: 0 1 auto; color: var(--ui-muted); }
+
+.personal-workspace .wordbook-examples {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.personal-workspace .wordbook-examples li { display: block; }
+.personal-workspace .wordbook-examples li p:first-child { font-size: 0.8rem; color: var(--ui-muted); }
+.personal-workspace .wordbook-examples .muted { display: none; }

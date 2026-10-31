@@ -41,12 +41,13 @@ export const MEMORY_MODULE_LABELS: Record<MemoryModule, string> = {
 }
 
 /** Spelling blanking strategy described by the product contract. */
-export type SpellingBlankType = 'full' | 'partial' | 'first_letter'
+export type SpellingBlankType = 'full' | 'partial' | 'first_letter' | 'middle'
 
 export const SPELLING_BLANK_LABELS: Record<SpellingBlankType, string> = {
   full: '全挖空',
   partial: '部分挖空',
   first_letter: '保留首字母',
+  middle: '中间挖空',
 }
 
 export interface MemoryModulePreference {

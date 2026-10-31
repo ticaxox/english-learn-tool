@@ -351,9 +351,11 @@ onMounted(() => {
         <p v-if="generationError" class="field-error">{{ generationError }}</p>
       </section>
 
-      <section v-if="selectedNode" class="panel challenge-node-detail" aria-live="polite">
+
+      <div v-if="selectedNode" class="dialog-backdrop" @click.self="selectedNode = null">
+        <section class="dialog-card challenge-node-dialog" role="dialog" aria-modal="true" aria-labelledby="challenge-node-dialog-title">
         <div class="challenge-node-detail__heading">
-          <div><p class="eyebrow">{{ CHALLENGE_NODE_LABELS[selectedNode.node.nodeType] }}</p><h2>{{ selectedNode.node.title }}</h2></div>
+          <div><p class="eyebrow">{{ CHALLENGE_NODE_LABELS[selectedNode.node.nodeType] }}</p><h2 id="challenge-node-dialog-title">{{ selectedNode.node.title }}</h2></div>
           <button class="link-button" type="button" @click="selectedNode = null">关闭</button>
         </div>
         <p>{{ selectedNode.node.description }}</p>
@@ -369,7 +371,8 @@ onMounted(() => {
           <button v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
           <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         </div>
-      </section>
+        </section>
+      </div>
 
       <section class="challenge-map" aria-labelledby="challenge-map-title">
         <div class="challenge-map__heading">
@@ -424,24 +427,6 @@ onMounted(() => {
       <ErrorNotice v-if="planRefreshError" :error="planRefreshError" :show-retry="false" />
       <ChallengeBossPanel v-if="bossSession" :key="bossSession.sessionId" :challenge-id="plan.id" :node-id="bossSession.nodeId" :session-id="bossSession.sessionId" @completed="onBossCompleted" />
 
-      <section id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">
-        <div class="challenge-map__heading">
-          <div><p class="eyebrow">历史</p><h2 id="challenge-history-title">闯关历史</h2></div>
-          <span class="field-hint">历史地图只读</span>
-        </div>
-        <LoadingState v-if="historyLoading && historyItems.length === 0" label="正在加载历史…" />
-        <ErrorNotice v-else-if="historyError" :error="historyError" retry-label="重新读取历史" @retry="loadHistory(true)" />
-        <div v-else-if="historyItems.length === 0" class="challenge-history__empty"><p>还没有闯关记录。</p></div>
-        <ul v-else class="challenge-history__list">
-          <li v-for="item in historyItems" :key="item.id">
-            <RouterLink class="challenge-history__item" :to="`/challenges/${item.id}`">
-              <span><strong>{{ item.localDate }} · {{ item.title || '每日闯关' }}</strong><small>{{ item.summary || '没有摘要' }}</small></span>
-              <span class="challenge-history__meta"><span>{{ PLAN_STATUS_LABELS[item.status] }}</span><small>主线 {{ item.mainCompleted }} / {{ item.mainTotal }}</small></span>
-            </RouterLink>
-          </li>
-        </ul>
-        <button v-if="historyHasMore" class="button-secondary challenge-history__more" type="button" :disabled="historyLoading" @click="loadHistory(false)">{{ historyLoading ? '正在加载…' : '加载更多历史' }}</button>
-      </section>
     </template>
 
     <section v-if="!loading && !error" class="challenge-self-study" aria-labelledby="challenge-self-study-title">
@@ -471,5 +456,25 @@ onMounted(() => {
         </RouterLink>
       </div>
     </section>
+
+      <section id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">
+        <div class="challenge-map__heading">
+          <div><p class="eyebrow">历史</p><h2 id="challenge-history-title">闯关历史</h2></div>
+          <span class="field-hint">历史地图只读</span>
+        </div>
+        <LoadingState v-if="historyLoading && historyItems.length === 0" label="正在加载历史…" />
+        <ErrorNotice v-else-if="historyError" :error="historyError" retry-label="重新读取历史" @retry="loadHistory(true)" />
+        <div v-else-if="historyItems.length === 0" class="challenge-history__empty"><p>还没有闯关记录。</p></div>
+        <ul v-else class="challenge-history__list">
+          <li v-for="item in historyItems" :key="item.id">
+            <RouterLink class="challenge-history__item" :to="`/challenges/${item.id}`">
+              <span><strong>{{ item.localDate }} · {{ item.title || '每日闯关' }}</strong><small>{{ item.summary || '没有摘要' }}</small></span>
+              <span class="challenge-history__meta"><span>{{ PLAN_STATUS_LABELS[item.status] }}</span><small>主线 {{ item.mainCompleted }} / {{ item.mainTotal }}</small></span>
+            </RouterLink>
+          </li>
+        </ul>
+        <button v-if="historyHasMore" class="button-secondary challenge-history__more" type="button" :disabled="historyLoading" @click="loadHistory(false)">{{ historyLoading ? '正在加载…' : '加载更多历史' }}</button>
+      </section>
+
   </article>
 </template>

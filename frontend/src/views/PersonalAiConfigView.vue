@@ -37,6 +37,7 @@ const saveError = ref<unknown>(null)
 const operationError = ref<unknown>(null)
 const actionKey = ref<string | null>(null)
 const deleteTarget = ref<AiProvider | null>(null)
+const modelTarget = ref<AiProvider | null>(null)
 const testStates = reactive<Record<string, OperationState<ProviderTestResult>>>({})
 const modelStates = reactive<Record<string, OperationState<ProviderModelsResult>>>({})
 
@@ -174,6 +175,11 @@ async function runTest(provider: AiProvider): Promise<void> {
   }
 }
 
+function openModels(provider: AiProvider): void {
+  modelTarget.value = provider
+  void loadModels(provider)
+}
+
 async function loadModels(provider: AiProvider): Promise<void> {
   setModelState(provider.id, { loading: true, result: null, error: null })
   try {
@@ -185,8 +191,14 @@ async function loadModels(provider: AiProvider): Promise<void> {
   }
 }
 
-function selectModel(provider: AiProvider, modelId: string): void {
-  void patchProvider(provider.id, { modelId }, `model:${provider.id}`)
+function closeModels(): void {
+  modelTarget.value = null
+}
+
+async function selectModel(provider: AiProvider, modelId: string): Promise<void> {
+  await patchProvider(provider.id, { modelId }, `model:${provider.id}`)
+  modelTarget.value = null
+  toast.success('模型已切换', modelId)
 }
 
 async function confirmDelete(): Promise<void> {
@@ -252,9 +264,7 @@ onMounted(() => {
             <button class="button-secondary" type="button" :disabled="testStates[provider.id]?.loading" @click="runTest(provider)">
               {{ testStates[provider.id]?.loading ? '检查中…' : '测试连接' }}
             </button>
-            <button class="button-secondary" type="button" :disabled="modelStates[provider.id]?.loading" @click="loadModels(provider)">
-              {{ modelStates[provider.id]?.loading ? '读取中…' : '获取模型' }}
-            </button>
+            <button class="button-secondary" type="button" @click="openModels(provider)">获取模型</button>
             <button v-if="!provider.isDefault" class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="makeDefault(provider)">设为默认</button>
             <button class="button-secondary" type="button" :disabled="Boolean(actionKey) || provider.isDefault" @click="toggleEnabled(provider)">
               {{ provider.enabled ? '停用' : '启用' }}
@@ -270,26 +280,6 @@ onMounted(() => {
             <p v-else>请检查接口地址、模型 ID 和 API Key 后重试。</p>
           </div>
           <ErrorNotice v-if="testStates[provider.id]?.error" :error="testStates[provider.id].error" :show-retry="false" />
-
-          <div v-if="modelStates[provider.id]?.result?.success" class="operation-result">
-            <strong>可用模型</strong>
-            <div class="model-chip-list">
-              <button
-                v-for="model in modelStates[provider.id].result!.models"
-                :key="model"
-                class="model-chip"
-                type="button"
-                :class="{ 'model-chip--selected': model === provider.modelId }"
-                :disabled="Boolean(actionKey)"
-                @click="selectModel(provider, model)"
-              >{{ model }}</button>
-            </div>
-          </div>
-          <div v-else-if="modelStates[provider.id]?.result" class="operation-result">
-            <strong>模型列表暂时不可用</strong>
-            <p>可以继续在编辑表单中手动填写模型 ID。</p>
-          </div>
-          <ErrorNotice v-if="modelStates[provider.id]?.error" :error="modelStates[provider.id].error" :show-retry="false" />
         </article>
       </div>
 
@@ -336,6 +326,47 @@ onMounted(() => {
           @update="handleUpdate"
           @cancel="closeForm"
         />
+      </section>
+    </div>
+
+    <div v-if="modelTarget" class="dialog-backdrop" @click.self="closeModels">
+      <section class="dialog-card ai-model-dialog" role="dialog" aria-modal="true" aria-labelledby="provider-models-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">模型列表</p>
+            <h2 id="provider-models-title">{{ modelTarget.name }}</h2>
+          </div>
+          <button class="button-secondary button-small" type="button" @click="closeModels">关闭</button>
+        </div>
+
+        <p v-if="modelStates[modelTarget.id]?.loading" class="field-hint">正在向该提供商读取模型列表…</p>
+        <div v-else-if="modelStates[modelTarget.id]?.result?.success" class="model-chip-list">
+          <button
+            v-for="model in modelStates[modelTarget.id].result!.models"
+            :key="model"
+            class="model-chip"
+            type="button"
+            :class="{ 'model-chip--selected': model === modelTarget.modelId }"
+            :disabled="Boolean(actionKey)"
+            @click="selectModel(modelTarget, model)"
+          >{{ model }}</button>
+        </div>
+        <div v-else-if="modelStates[modelTarget.id]?.result" class="ai-model-dialog__empty">
+          <strong>模型列表暂时不可用</strong>
+          <p class="field-hint">该接口没有返回模型列表，可以关闭后在编辑表单里手填模型 ID。</p>
+        </div>
+        <ErrorNotice
+          v-else-if="modelStates[modelTarget.id]?.error"
+          :error="modelStates[modelTarget.id].error"
+          retry-label="重新读取"
+          @retry="loadModels(modelTarget)"
+        />
+
+        <div class="button-row">
+          <button class="button-secondary" type="button" :disabled="modelStates[modelTarget.id]?.loading" @click="loadModels(modelTarget)">
+            {{ modelStates[modelTarget.id]?.loading ? '读取中…' : '重新读取' }}
+          </button>
+        </div>
       </section>
     </div>
   </section>

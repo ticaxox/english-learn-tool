@@ -189,8 +189,8 @@ describe('admin AI views', () => {
     expect(providerId).toBe(defaultProvider.id)
     expect(patch.modelId).toBe('model-c')
     expect(patch).not.toHaveProperty('apiKey')
-    expect(wrapper.text()).toContain('保留现有 Key')
-    expect(wrapper.text()).not.toContain('清空 Key')
+    // The key field keeps showing the masked key and is not sent back unchanged.
+    expect((wrapper.get('#provider-api-key').element as HTMLInputElement).value).toBe(defaultProvider.apiKeyMasked)
   })
 
   it('requires a new key only when creating or explicitly replacing it', async () => {

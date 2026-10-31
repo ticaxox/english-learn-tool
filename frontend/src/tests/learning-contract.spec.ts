@@ -160,6 +160,13 @@ describe('profile and memory config', () => {
       preferences: { spelling_mode: 'full', choice_prompt: 'definition' },
     })
   })
+
+  it('clears the stored spelling mode when random is chosen again', () => {
+    const config = parseMemoryConfig({ ...configPayload, preferences: { ...configPayload.preferences, spelling_mode: 'middle' } })
+    config.spelling.blankType = null
+    const payload = serializeMemoryConfig(config) as Record<string, unknown>
+    expect((payload.preferences as Record<string, unknown>)).not.toHaveProperty('spelling_mode')
+  })
 })
 
 describe('today, heartbeat and mistakes', () => {
@@ -289,7 +296,7 @@ describe('contract helpers', () => {
   it('publishes the exact enums used by the frozen contract', () => {
     expect(contractHelpers.EXAM_TARGETS).toEqual(['CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL'])
     expect(contractHelpers.MEMORY_MODULES).toEqual(['flashcard', 'choice', 'spelling'])
-    expect(contractHelpers.BLANK_TYPES).toEqual(['full', 'partial', 'first_letter'])
+    expect(contractHelpers.BLANK_TYPES).toEqual(['full', 'partial', 'first_letter', 'middle'])
   })
 })
 

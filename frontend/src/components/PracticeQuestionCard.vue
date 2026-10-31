@@ -49,7 +49,6 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         <span class="practice-question-number">{{ String(index + 1).padStart(2, '0') }}</span>
         <div>
           <span class="status-badge">{{ questionLabel }}</span>
-          <p v-if="!inReview">提交后查看答案和解析。</p>
         </div>
       </div>
       <span class="practice-question-type">{{ typeLabel }}</span>
@@ -96,6 +95,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         :class="optionClass(option)"
       >
         <input
+          class="practice-option__input"
           type="radio"
           :name="`answer-${question.id}`"
           :value="option.id"
