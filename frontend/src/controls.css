@@ -1,0 +1,465 @@
+/*
+ * Control kit pass: one visual language for every control the app draws.
+ * Loaded last so it can refine the game layer without rewrites.
+ */
+
+/* ------------------------------------------------------- browser surfaces */
+
+.personal-workspace ::selection {
+  background: rgb(255 196 87 / 55%);
+  color: #2b1b08;
+}
+
+.personal-workspace {
+  caret-color: var(--g-orange-edge);
+}
+
+.personal-workspace * {
+  scrollbar-color: #d9c19c transparent;
+  scrollbar-width: thin;
+}
+
+.personal-workspace ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.personal-workspace ::-webkit-scrollbar-track { background: transparent; }
+
+.personal-workspace ::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #d9c19c padding-box;
+}
+
+.personal-workspace ::-webkit-scrollbar-thumb:hover { background: #c3a476 padding-box; }
+
+/* ------------------------------------------------------------- checkboxes */
+
+.personal-workspace input[type="checkbox"],
+.personal-workspace input[type="radio"] {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  place-content: center;
+  appearance: none;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 7px;
+  background: var(--ui-surface);
+  box-shadow: inset 0 -2px 0 rgb(59 42 26 / 8%);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.personal-workspace input[type="radio"] { border-radius: 50%; }
+
+.personal-workspace input[type="checkbox"]::after {
+  width: 14px;
+  height: 14px;
+  background: center / 14px 14px no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5 6.2 12 13 4.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  content: "";
+  transform: scale(0);
+  transition: transform 140ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+.personal-workspace input[type="radio"]::after {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  content: "";
+  transform: scale(0);
+  transition: transform 140ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+.personal-workspace input[type="checkbox"]:checked,
+.personal-workspace input[type="radio"]:checked {
+  border-color: var(--g-green-edge);
+  background: var(--g-green);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 14%);
+}
+
+.personal-workspace input[type="checkbox"]:checked::after,
+.personal-workspace input[type="radio"]:checked::after { transform: scale(1); }
+
+.personal-workspace input[type="checkbox"]:hover:not(:disabled),
+.personal-workspace input[type="radio"]:hover:not(:disabled) { border-color: var(--g-green-edge); }
+
+.personal-workspace input[type="checkbox"]:focus-visible,
+.personal-workspace input[type="radio"]:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 40%);
+  outline-offset: 2px;
+}
+
+.personal-workspace input[type="checkbox"]:disabled,
+.personal-workspace input[type="radio"]:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.personal-workspace .checkbox,
+.personal-workspace .radio-option {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------- inputs + selects */
+
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]),
+.personal-workspace textarea,
+.personal-workspace select {
+  border: 1.5px solid var(--ui-line-strong);
+  border-radius: 12px;
+  background-color: var(--ui-surface);
+  box-shadow: inset 0 2px 0 rgb(59 42 26 / 5%);
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):hover,
+.personal-workspace textarea:hover,
+.personal-workspace select:hover { border-color: #c9ab80; }
+
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):focus,
+.personal-workspace textarea:focus,
+.personal-workspace select:focus {
+  border-color: var(--g-orange-edge);
+  outline: 3px solid rgb(255 150 0 / 25%);
+  outline-offset: 0;
+  box-shadow: inset 0 2px 0 rgb(59 42 26 / 4%);
+}
+
+.personal-workspace input::placeholder,
+.personal-workspace textarea::placeholder { color: #9b8467; }
+
+.personal-workspace select {
+  padding-right: 44px;
+  appearance: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2335240f' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 14px 14px;
+  cursor: pointer;
+}
+
+.personal-workspace select:hover {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a82e2e' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.personal-workspace .button,
+.personal-workspace .button-secondary,
+.personal-workspace .button-danger,
+.personal-workspace .workspace-primary-button,
+.personal-workspace .workspace-secondary-button,
+.personal-workspace .member-primary-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.personal-workspace .button:hover:not(:disabled),
+.personal-workspace .workspace-primary-button:hover:not(:disabled),
+.personal-workspace .member-primary-button:hover:not(:disabled),
+.personal-workspace .button-danger:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 var(--g-green-edge);
+}
+
+.personal-workspace .button-danger:hover:not(:disabled) { box-shadow: 0 5px 0 var(--g-red-edge); }
+
+.personal-workspace .button-secondary:hover:not(:disabled),
+.personal-workspace .workspace-secondary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #d9c19c;
+}
+
+.personal-workspace .button:focus-visible,
+.personal-workspace .button-secondary:focus-visible,
+.personal-workspace .button-danger:focus-visible,
+.personal-workspace .workspace-primary-button:focus-visible,
+.personal-workspace .workspace-secondary-button:focus-visible,
+.personal-workspace .member-primary-button:focus-visible,
+.personal-workspace .practice-topbar__tab:focus-visible,
+.personal-workspace .practice-chooser__tab:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
+
+.personal-workspace .button:disabled,
+.personal-workspace .button-secondary:disabled,
+.personal-workspace .button-danger:disabled {
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------ SVG plate buttons */
+
+.personal-workspace .svg-plate-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 0 26px;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.personal-workspace .svg-plate-button--block { display: flex; width: 100%; }
+
+.personal-workspace .svg-plate-button__plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.personal-workspace .svg-plate-button__face {
+  fill: var(--g-green);
+  stroke: var(--g-green-edge);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.personal-workspace .svg-plate-button__edge {
+  fill: var(--g-green-edge);
+  stroke: none;
+}
+
+.personal-workspace .svg-plate-button__label {
+  position: relative;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.personal-workspace .svg-plate-button--secondary .svg-plate-button__face {
+  fill: var(--ui-surface);
+  stroke: var(--ui-line-strong);
+}
+
+.personal-workspace .svg-plate-button--secondary .svg-plate-button__edge { fill: #d9c19c; }
+
+.personal-workspace .svg-plate-button--secondary { color: var(--ui-ink); }
+
+.personal-workspace .svg-plate-button:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.35);
+  opacity: 0.6;
+}
+
+.personal-workspace .svg-plate-button:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 4px;
+  border-radius: 18px;
+}
+
+/* ------------------------------------------------------------ segmented tabs */
+
+.personal-workspace .ia-tabs,
+.personal-workspace .ia-settings-tabs {
+  border-radius: 18px;
+  background: #fff7e8;
+}
+
+.personal-workspace .ia-tab {
+  border-radius: 12px;
+  color: #7d6247;
+}
+
+.personal-workspace .ia-tab:hover { background: rgb(255 255 255 / 65%); color: var(--ui-ink); }
+
+.personal-workspace .ia-tab--active {
+  border-color: var(--ui-line);
+  background: #fffdf8;
+  color: var(--ui-ink);
+  box-shadow: inset 0 -3px 0 var(--g-orange-edge), 0 2px 0 rgb(59 42 26 / 6%);
+}
+
+/* ---------------------------------------------------------- settings cards */
+
+.personal-workspace .settings-form fieldset {
+  padding: 20px 18px 18px;
+  border-radius: 18px;
+  box-shadow: 0 2px 0 rgb(59 42 26 / 5%);
+}
+
+.personal-workspace .settings-form legend {
+  float: none;
+  margin: 0 0 12px;
+  padding: 2px 10px;
+  border: 1.5px solid var(--ui-line);
+  border-radius: 999px;
+  background: #fff7e8;
+  color: var(--ui-ink);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.personal-workspace .settings-choice-grid {
+  gap: 8px 18px;
+}
+
+/* --------------------------------------------------------------- tables */
+
+.personal-workspace table input[type="checkbox"] { width: 20px; height: 20px; }
+
+.personal-workspace .link-button {
+  color: var(--g-blue-edge);
+  font-weight: 800;
+  text-underline-offset: 3px;
+}
+
+.personal-workspace .link-button:hover { color: var(--ui-ink); }
+
+/* --------------------------------------------------------- practice chrome */
+
+.personal-workspace .practice-topbar__back {
+  gap: 5px;
+  border-width: 2px;
+  box-shadow: 0 2px 0 var(--ui-line);
+}
+
+.personal-workspace .practice-topbar__back:hover { transform: translateY(-1px); }
+
+.personal-workspace .practice-topbar__tab.is-active {
+  box-shadow: inset 0 -3px 0 var(--g-orange-edge);
+}
+
+/* Redundant kickers above page titles (the page title already says it). */
+.personal-workspace .practice-page .practice-session-header .eyebrow,
+.personal-workspace .practice-page .workspace-page-header .eyebrow,
+.personal-workspace .memory-page .workspace-page-header .workspace-kicker {
+  display: none;
+}
+
+/* Kickers above page and section titles repeat the heading: drop them here. */
+.personal-workspace .practice-page .workspace-page-header .workspace-kicker,
+.personal-workspace .practice-page .practice-session-header .eyebrow,
+.personal-workspace .practice-page .workspace-section-header .workspace-kicker,
+.personal-workspace .memory-page > .workspace-page-header .workspace-kicker {
+  display: none;
+}
+
+/* Notes are cards, not callouts with a side tab. */
+.personal-workspace .inline-note {
+  border: 1.5px solid var(--ui-line-strong);
+  border-radius: 12px;
+  background: #fff7e8;
+  color: #5b4630;
+}
+
+/* Table select boxes stay square regardless of row height. */
+.personal-workspace table input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  vertical-align: middle;
+}
+
+/* Letter chips stay neutral; only review states tint them. */
+.personal-workspace .practice-option__mark {
+  color: var(--ui-ink);
+  background: #fffdf8;
+}
+
+.personal-workspace .practice-option--correct .practice-option__mark {
+  border-color: var(--g-green-edge);
+  background: #fff;
+  color: var(--g-green-edge);
+}
+
+.personal-workspace .practice-option--wrong .practice-option__mark {
+  border-color: var(--g-red-edge);
+  background: #fff;
+  color: var(--g-red-edge);
+}
+
+/* ------------------------------------------------------------ SVG stamp */
+
+.personal-workspace .svg-stamp {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 118px;
+  height: 34px;
+  padding: 0 22px;
+  transform: rotate(-2deg);
+  color: #3b2500;
+}
+
+.personal-workspace .svg-stamp__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.personal-workspace .svg-stamp__face {
+  fill: #ffd75e;
+  stroke: #3b2500;
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+}
+
+.personal-workspace .svg-stamp__dash {
+  fill: none;
+  stroke: rgb(59 37 0 / 35%);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.personal-workspace .svg-stamp__hole {
+  fill: #fffaf0;
+  stroke: #3b2500;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.personal-workspace .svg-stamp__label {
+  position: relative;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+
+/* Table row actions read as small buttons, not raw links. */
+.personal-workspace .practice-records-table .link-button {
+  padding: 5px 12px;
+  border: 1.5px solid var(--ui-line);
+  border-radius: 999px;
+  background: #fffdf8;
+  color: var(--ui-ink);
+  font-weight: 800;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.personal-workspace .practice-records-table .link-button:hover {
+  border-color: var(--g-green-edge);
+  background: var(--g-green-soft);
+  color: #14431f;
+}
+
+.personal-workspace a:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
+
+/* The stage header carries the mode name; the kicker above it repeats it. */
+.personal-workspace .memory-stage-header .eyebrow { display: none; }

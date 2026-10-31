@@ -2898,14 +2898,8 @@
 }
 
 /* Button labels never wrap into a half-empty second line. */
-.personal-workspace .button,
-.personal-workspace .button-secondary,
-.personal-workspace .button-danger,
-.personal-workspace .button-small,
-.personal-workspace .workspace-primary-button,
-.personal-workspace .workspace-secondary-button,
-.personal-workspace .member-primary-button,
-.personal-workspace .dialog-actions > button {
+.personal-workspace :where(.button, .button-secondary, .button-danger, .button-small,
+  .workspace-primary-button, .workspace-secondary-button, .member-primary-button) {
   display: inline-flex;
   align-items: center;
   justify-content: center;

@@ -5,6 +5,7 @@
  */
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import AppIcon from './AppIcon.vue'
 import { useAuthStore } from '../stores/auth'
 import { MEMORY_MODULE_LABELS, MEMORY_MODULES, type MemoryModule } from '../types/learning'
 import { PRACTICE_TYPE_LABELS, type PracticeType } from '../api/practice'
@@ -47,7 +48,7 @@ function openSettings(): void {
 
 <template>
   <header class="practice-topbar">
-    <RouterLink class="practice-topbar__back" to="/challenges">← 学习中心</RouterLink>
+    <RouterLink class="practice-topbar__back" to="/challenges"><AppIcon name="arrow-left" /> 学习中心</RouterLink>
 
     <nav class="practice-topbar__tabs" aria-label="题型导航">
       <button

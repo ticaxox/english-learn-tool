@@ -158,7 +158,6 @@ onMounted(() => {
         <h1>{{ props.onlyMistakes ? '需要再练的 AI 题' : '练习记录与结果' }}</h1>
         <p class="lead">回看已完成练习、成绩和需要再练的题目。</p>
       </div>
-      <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
     </header>
 
     <section class="panel practice-filter-bar">

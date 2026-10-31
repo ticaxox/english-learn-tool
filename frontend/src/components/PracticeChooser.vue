@@ -158,9 +158,9 @@ async function startPractice(): Promise<void> {
           </select>
         </label>
         <ErrorNotice v-if="startError" :error="startError" :show-retry="false" />
-        <button class="button" type="button" :disabled="starting" @click="startPractice">
+        <SvgPlateButton :disabled="starting" @click="startPractice">
           {{ starting ? '正在生成…' : '生成并开始' }} <AppIcon name="arrow" />
-        </button>
+        </SvgPlateButton>
       </div>
     </div>
   </section>

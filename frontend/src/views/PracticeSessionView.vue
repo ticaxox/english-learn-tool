@@ -2,6 +2,7 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import PracticeQuestionCard from '../components/PracticeQuestionCard.vue'
@@ -264,9 +265,9 @@ void practice.load()
               </div>
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />
-              <button class="button member-primary-button practice-submit-button" type="button" :disabled="practice.busy.value || !allAnswered" @click="submit">
+              <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value || !allAnswered" @click="submit">
                 {{ practice.busy.value ? '正在提交…' : '提交全部答案' }} <AppIcon name="arrow" />
-              </button>
+              </SvgPlateButton>
               <button class="button-secondary practice-regenerate-button" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</button>
             </section>
           </aside>

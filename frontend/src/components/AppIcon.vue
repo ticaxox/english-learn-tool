@@ -11,6 +11,7 @@ withDefaults(
       | 'settings'
       | 'admin'
       | 'arrow'
+      | 'arrow-left'
       | 'close'
       | 'star'
       | 'spark'
@@ -58,6 +59,9 @@ withDefaults(
     </template>
     <template v-else-if="name === 'arrow'">
       <path d="M5 12h14M14 7l5 5-5 5" />
+    </template>
+    <template v-else-if="name === 'arrow-left'">
+      <path d="M19 12H5M10 7l-5 5 5 5" />
     </template>
     <template v-else-if="name === 'close'">
       <path d="m5 5 14 14M19 5 5 19" />

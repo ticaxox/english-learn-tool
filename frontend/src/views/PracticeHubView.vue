@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { createPracticeSession, fetchPracticeUsage, listPracticeMistakes, listPracticeRecords, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
@@ -281,9 +282,9 @@ onMounted(() => {
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="practice-create-footer">
             <p>答案与解析只在提交后出现。</p>
-            <button class="button workspace-primary-button practice-generate-action" type="submit" :disabled="creating">
+            <SvgPlateButton class="practice-generate-action" type="submit" :disabled="creating">
               {{ creating ? '正在生成…' : '生成练习' }} <AppIcon name="arrow" />
-            </button>
+            </SvgPlateButton>
           </div>
         </form>
       </section>

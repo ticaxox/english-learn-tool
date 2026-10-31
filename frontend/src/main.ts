@@ -11,6 +11,7 @@ import './workspace-reset.css'
 import './information-architecture.css'
 import './personal-ui.css'
 import './game-ui.css'
+import './controls.css'
 
 const app = createApp(App)
 const pinia = createPinia()
