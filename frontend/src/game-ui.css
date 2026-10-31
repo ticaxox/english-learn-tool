@@ -2915,113 +2915,6 @@
   text-align: center;
 }
 
-/* ------------------------------------------- practice launcher (stays in-frame) */
-
-.personal-workspace .challenge-self-study__card {
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.personal-workspace .practice-launcher {
-  display: grid;
-  gap: 14px;
-  width: min(560px, calc(100vw - 2rem));
-}
-
-.personal-workspace .practice-launcher__header {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.personal-workspace .practice-launcher__header h2 { margin: 2px 0 4px; font-size: 1.25rem; }
-.personal-workspace .practice-launcher__header .field-hint { margin: 0; }
-
-.personal-workspace .practice-launcher__body { display: grid; gap: 10px; }
-
-.personal-workspace .launcher-option {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  padding: 12px 14px;
-  border: 2px solid var(--ui-line);
-  border-radius: var(--ui-radius-md);
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  text-align: left;
-  cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
-}
-
-.personal-workspace .launcher-option:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 0 var(--ui-line);
-}
-
-.personal-workspace .launcher-option.is-disabled { opacity: 0.55; cursor: not-allowed; }
-
-.personal-workspace .launcher-option__mark {
-  display: grid;
-  flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 12px;
-  background: var(--ui-paper, #fffaf0);
-  color: var(--ui-ink);
-}
-
-.personal-workspace .launcher-option__copy { display: grid; flex: 1 1 auto; gap: 2px; }
-.personal-workspace .launcher-option__copy strong { font-size: 1rem; }
-.personal-workspace .launcher-option__copy small { color: var(--ui-muted); font-size: 0.82rem; }
-.personal-workspace .launcher-option__state { flex: 0 0 auto; color: var(--ui-muted); font-size: 0.8rem; font-weight: 800; }
-
-.personal-workspace .launcher-type-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.personal-workspace .launcher-type {
-  display: grid;
-  gap: 2px;
-  padding: 10px 14px;
-  border: 2px solid var(--ui-line);
-  border-radius: var(--ui-radius-md);
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  text-align: left;
-  cursor: pointer;
-}
-
-.personal-workspace .launcher-type strong { font-size: 0.98rem; }
-.personal-workspace .launcher-type small { color: var(--ui-muted); font-size: 0.8rem; }
-
-.personal-workspace .launcher-type.is-selected {
-  border-color: var(--g-blue-edge);
-  background: var(--g-blue-soft);
-}
-
-.personal-workspace .launcher-count {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  font-weight: 800;
-}
-
-.personal-workspace .launcher-count select { width: auto; min-width: 120px; }
-
-.personal-workspace .launcher-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
 /* ------------------------------------------------------- practice stage layout */
 
 .personal-workspace .practice-stage-header {
@@ -3103,3 +2996,47 @@
 }
 
 .personal-workspace .practice-stage-progress strong span { margin-left: 4px; }
+
+/* ---------------------------------------------- practice screens: own chrome */
+
+.personal-workspace.is-immersive { display: block; min-height: 100vh; }
+
+.personal-workspace.is-immersive .workspace-sidebar,
+.personal-workspace.is-immersive .workspace-topbar,
+.personal-workspace.is-immersive .workspace-mobile-nav {
+  display: none !important;
+}
+
+.personal-workspace.is-immersive .workspace-main {
+  display: block;
+  min-height: 100vh;
+  margin: 0 !important;
+}
+
+.personal-workspace.is-immersive .workspace-content {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 20px 28px 56px;
+}
+
+.personal-workspace .immersive-back {
+  display: inline-flex;
+  width: fit-content;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 6px 14px;
+  border: 1.5px solid var(--ui-line-strong);
+  border-radius: 999px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.personal-workspace .immersive-back:hover { background: #fffaf0; }
+
+@media (max-width: 860px) {
+  .personal-workspace.is-immersive .workspace-content { padding: 14px 14px 40px; }
+}

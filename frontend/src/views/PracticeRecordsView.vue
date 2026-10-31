@@ -149,6 +149,8 @@ onMounted(() => {
 
 <template>
   <article class="practice-page practice-records-page">
+    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+
     <header class="practice-session-header">
       <div>
         <p class="eyebrow">{{ props.onlyMistakes ? 'AI 练习错题' : '练习记录' }}</p>

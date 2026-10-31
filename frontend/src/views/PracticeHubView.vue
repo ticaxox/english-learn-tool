@@ -169,6 +169,8 @@ onMounted(() => {
 
 <template>
   <article class="practice-page practice-hub member-practice-page practice-workspace workspace-page">
+    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+
     <header class="workspace-page-header">
       <div>
         <p class="workspace-kicker">AI 练习</p>

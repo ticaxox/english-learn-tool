@@ -48,6 +48,8 @@ const pageTitles: Record<string, string> = {
 }
 
 const currentPageTitle = computed(() => pageTitles[String(route.name ?? '')] ?? '学习工作台')
+// Practice and memory are their own screens: no app sidebar or top bar there.
+const immersive = computed(() => Boolean(route.meta.immersive))
 const currentDate = computed(() =>
   new Intl.DateTimeFormat('zh-CN', {
     month: 'long',
@@ -168,9 +170,9 @@ onBeforeUnmount(() => {
 
   <div
     class="app-shell app-shell--member workspace-shell ia-workspace personal-workspace"
-    :class="{ 'is-coach-open': coachOpen }"
+    :class="{ 'is-coach-open': coachOpen, 'is-immersive': immersive }"
   >
-    <aside class="workspace-sidebar ia-sidebar" aria-label="主导航">
+    <aside v-if="!immersive" class="workspace-sidebar ia-sidebar" aria-label="主导航">
       <RouterLink class="workspace-brand" to="/overview" aria-label="CrumbTrail 今日学习">
         <span class="workspace-brand-mark"><CrumboMark size="small" /></span>
         <span class="workspace-brand-copy">
@@ -199,7 +201,7 @@ onBeforeUnmount(() => {
     </aside>
 
     <div class="workspace-main">
-      <header class="workspace-topbar member-topbar ia-topbar">
+      <header v-if="!immersive" class="workspace-topbar member-topbar ia-topbar">
         <div class="workspace-topbar-heading">
           <strong>{{ currentPageTitle }}</strong>
           <span>{{ currentDate }}</span>
@@ -250,7 +252,7 @@ onBeforeUnmount(() => {
       </main>
     </div>
 
-    <nav class="workspace-mobile-nav member-mobile-nav ia-mobile-nav" aria-label="移动端主导航">
+    <nav v-if="!immersive" class="workspace-mobile-nav member-mobile-nav ia-mobile-nav" aria-label="移动端主导航">
       <RouterLink v-for="link in primaryLinks" :key="link.key" :to="link.to">
         <AppIcon :name="link.icon" />
         <span>{{ link.label }}</span>

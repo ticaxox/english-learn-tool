@@ -62,32 +62,38 @@ const routes: RouteRecordRaw[] = [
         path: 'memory',
         name: 'memory',
         component: MemoryPracticeView,
+        meta: { immersive: true },
       },
       {
         path: 'memory/mistakes',
         name: 'memory-mistakes',
         component: MistakesView,
+        meta: { immersive: true },
       },
       {
         path: 'practice',
         name: 'practice',
         component: PracticeHubView,
+        meta: { immersive: true },
       },
       {
         path: 'practice/records',
         name: 'practice-records',
         component: PracticeRecordsView,
+        meta: { immersive: true },
       },
       {
         path: 'practice/mistakes',
         name: 'practice-mistakes',
         component: PracticeRecordsView,
         props: { onlyMistakes: true },
+        meta: { immersive: true },
       },
       {
         path: 'practice/:sessionId',
         name: 'practice-session',
         component: PracticeSessionView,
+        meta: { immersive: true },
       },
       {
         path: 'challenges',

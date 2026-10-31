@@ -159,6 +159,8 @@ void practice.load()
 
 <template>
   <article class="practice-page practice-session-page member-practice-session-page">
+    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+
     <header class="practice-session-header practice-stage-header">
       <div>
         <p class="eyebrow">AI 练习</p>

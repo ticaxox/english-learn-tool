@@ -120,6 +120,8 @@ onMounted(() => {
 
 <template>
   <article class="mistakes-page">
+    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+
     <header class="page-header">
       <div>
         <p class="eyebrow">错词本</p>

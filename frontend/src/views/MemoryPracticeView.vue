@@ -169,6 +169,8 @@ onMounted(async () => {
 
 <template>
   <article class="memory-page memory-workbench workspace-page">
+    <RouterLink class="immersive-back" to="/challenges">← 学习中心</RouterLink>
+
     <header v-if="!session.hasSession.value && !session.finished.value" class="workspace-page-header">
       <div>
         <p class="workspace-kicker">记忆训练</p>
