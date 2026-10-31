@@ -65,10 +65,7 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
         <h3>你的答案：{{ item.userAnswer || '未填写' }}</h3>
       </section>
 
-      <section class="panel result-explanation">
-        <p v-if="item.isMistake" class="result-explanation__status">已加入错题本</p>
-        <p v-else-if="item.gradedCorrect === false" class="result-explanation__status">未通过</p>
-
+      <section class="result-explanation">
         <p v-if="!isChoiceType(item.questionType) && item.userAnswer" class="result-copy">
           <strong>你的答案：</strong>{{ item.userAnswer }}
         </p>

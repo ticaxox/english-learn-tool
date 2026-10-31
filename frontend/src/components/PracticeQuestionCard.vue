@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PRACTICE_TYPE_LABELS, type PracticeOption, type PracticeQuestion } from '../api/practice'
+import type { PracticeOption, PracticeQuestion } from '../api/practice'
 
 const props = defineProps<{
   question: PracticeQuestion
@@ -21,7 +21,6 @@ const emit = defineEmits<{
 const questionLabel = computed(() => `第 ${props.index + 1} 题，共 ${props.total} 题`)
 const isChoice = computed(() => ['fill_blank', 'reading'].includes(props.question.questionType))
 const inReview = computed(() => props.review !== null && props.review !== undefined)
-const typeLabel = computed(() => PRACTICE_TYPE_LABELS[props.question.questionType] ?? '')
 const longOptions = computed(() => props.question.options.some((option) => (option.text ?? '').length > 26))
 const correctId = computed(() => props.review?.correct ?? null)
 const selectedId = computed(() => props.review?.selected ?? props.modelValue)
@@ -32,12 +31,20 @@ function update(value: string): void {
   emit('update:modelValue', value)
 }
 
+/** The submitted answer may arrive as an option id or as its text. */
+function matches(value: string | null, option: PracticeOption): boolean {
+  if (!value) return false
+  return value === option.id || value === option.text
+}
+
 function optionClass(option: PracticeOption): Record<string, boolean> {
   if (!inReview.value) return {}
+  const picked = matches(selectedId.value, option)
+  const correct = matches(correctId.value, option)
   return {
-    'practice-option--picked': option.id === selectedId.value,
-    'practice-option--correct': option.id === correctId.value,
-    'practice-option--wrong': option.id === selectedId.value && option.id !== correctId.value,
+    'practice-option--picked': picked,
+    'practice-option--correct': correct,
+    'practice-option--wrong': picked && !correct,
   }
 }
 </script>
@@ -51,7 +58,6 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
           <span class="status-badge">{{ questionLabel }}</span>
         </div>
       </div>
-      <span class="practice-question-type">{{ typeLabel }}</span>
     </header>
 
     <div v-if="question.questionType === 'reading'" class="practice-reading">
@@ -108,13 +114,6 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
           <span class="practice-option__text">{{ option.text }}</span>
           <small v-if="inReview && option.textZh">{{ option.textZh }}</small>
         </span>
-        <span v-if="inReview && option.id === correctId" class="practice-option__flag">
-          {{ option.id === selectedId ? '正确 · 你的选择' : '正确' }}
-        </span>
-        <span
-          v-else-if="inReview && option.id === selectedId"
-          class="practice-option__flag practice-option__flag--wrong"
-        >你的选择</span>
       </label>
     </fieldset>
 

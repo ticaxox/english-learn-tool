@@ -1020,29 +1020,13 @@ body {
 }
 .personal-workspace .ia-coach-panel-body .coach-page-header { display: none; }
 
-/* Desktop: the coach narrows the workspace instead of covering it. */
-@media (min-width: 1181px) {
-  .personal-workspace { --personal-coach-width: 480px; }
-  .personal-workspace .ia-coach-panel {
-    width: var(--personal-coach-width);
-    box-shadow: -10px 0 30px rgb(49 36 29 / 12%);
-  }
-  .personal-workspace.is-coach-open .workspace-main {
-    margin-right: var(--personal-coach-width);
-    transition: margin-right 180ms ease;
-  }
+/* The coach dock itself is defined in game-ui.css; pages keep their own columns. */
+@media (min-width: 861px) {
   .personal-workspace.is-coach-open .ia-coach-backdrop { display: none; }
-  /* A 480px dock cannot host the coach's list + thread side by side; stack them. */
   .personal-workspace .ia-coach-panel .coach-layout { grid-template-columns: minmax(0, 1fr); }
   .personal-workspace .ia-coach-panel .coach-sidebar {
     max-height: 34vh;
     overflow-y: auto;
-  }
-  /* The narrower workspace stacks its own two-column pages instead of squeezing them. */
-  .personal-workspace.is-coach-open .crumb-today-layout,
-  .personal-workspace.is-coach-open .practice-workspace-grid,
-  .personal-workspace.is-coach-open .memory-workbench-grid {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (min-width: 861px) and (max-width: 1180px) {

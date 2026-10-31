@@ -56,10 +56,9 @@ function canUndo(receipt: CoachActionReceipt): boolean {
   return receipt.status === 'applied' && !isExpired(receipt)
 }
 
-function usageText(): string {
-  const usage = coach.latestUsage.value
-  if (!usage) return ''
-  return '本次可用：' + usage.units + ' / ' + usage.limit
+function appliedActions(message: CoachMessage): CoachActionReceipt[] {
+  // Only actions that actually changed something are worth showing.
+  return message.actions.filter((receipt) => receipt.status !== 'conflict')
 }
 
 async function focusComposer(): Promise<void> {
@@ -119,12 +118,12 @@ async function deleteConversation(conversationId: string, title: string): Promis
 async function submitMessage(): Promise<void> {
   const content = draft.value.trim()
   if (!content || coach.sending.value || coach.streamingMessageId.value) return
+  // Clear the box as soon as it is sent; the reply may take a while.
+  draft.value = ''
+  await scrollToBottom()
   const sent = await coach.sendMessage(content)
-  if (sent) {
-    draft.value = ''
-    await focusComposer()
-    await scrollToBottom()
-  }
+  if (!sent) draft.value = content
+  await focusComposer()
 }
 
 function onComposerKeydown(event: KeyboardEvent): void {
@@ -285,8 +284,6 @@ onBeforeUnmount(() => {
             <button class="button-secondary button-small" type="button" @click="renameId = null">取消</button>
           </form>
 
-          <p v-if="coach.acceptedNotice.value" class="alert alert-success" role="status">{{ coach.acceptedNotice.value }}</p>
-          <p v-if="coach.streamNotice.value" class="inline-note" role="status">{{ coach.streamNotice.value }}</p>
 
           <ErrorNotice
             v-if="coach.messagesError.value"
@@ -323,9 +320,7 @@ onBeforeUnmount(() => {
               <div class="coach-message-body">
                 <div class="coach-message__meta">
                   <strong>{{ roleLabel(message) }}</strong>
-                  <span>{{ formatTime(message.createdAt) }}</span>
-                  <span v-if="message.status === 'streaming' || coach.streamingMessageId.value === message.id" class="coach-streaming-chip">正在回复</span>
-                  <span v-else-if="message.status === 'failed'" class="coach-failed-chip">发送失败</span>
+                  <span v-if="message.status === 'failed'" class="coach-failed-chip">发送失败</span>
                 </div>
                 <div
                   v-if="(message.status === 'queued' || message.status === 'streaming' || coach.streamingMessageId.value === message.id) && !coach.messageText(message)"
@@ -334,22 +329,20 @@ onBeforeUnmount(() => {
                   aria-label="AI 教练正在思考"
                 >
                   <span></span><span></span><span></span>
-                  <em>正在思考</em>
                 </div>
                 <p v-else class="coach-message__text">{{ coach.messageText(message) }}</p>
                 <p v-if="message.errorMessage" class="field-error" role="alert" :title="message.errorMessage">这次没有收到教练回复，请重试。</p>
                 <p v-if="coach.actionNotices[message.id]" class="coach-action-notice">{{ coach.actionNotices[message.id] }}</p>
 
-                <section v-if="message.actions.length > 0" class="coach-actions" aria-label="已执行的调整">
+                <section v-if="appliedActions(message).length > 0" class="coach-actions" aria-label="已执行的调整">
                   <h3>已执行的调整</h3>
-                  <article v-for="receipt in message.actions" :key="receipt.id" class="coach-receipt">
+                  <article v-for="receipt in appliedActions(message)" :key="receipt.id" class="coach-receipt">
                     <div class="coach-receipt__heading">
                       <strong>{{ COACH_ACTION_LABELS[receipt.actionType] }}</strong>
                       <span class="coach-receipt__status" :class="`coach-receipt__status--${receipt.status}`">{{ actionStatusLabel(receipt) }}</span>
                     </div>
                     <p>{{ receipt.summary }}</p>
                     <p v-if="canUndo(receipt)" class="field-hint">可撤销至 {{ formatTime(receipt.expiresAt) }}</p>
-                    <p v-if="receipt.conflictMessage" class="field-hint coach-receipt__conflict" :title="receipt.conflictMessage">这次调整没有生效</p>
                     <button
                       v-if="receipt.status === 'applied'"
                       class="button-secondary button-small"
@@ -373,7 +366,6 @@ onBeforeUnmount(() => {
             />
           </div>
 
-          <p v-if="usageText()" class="coach-usage">{{ usageText() }}</p>
           <ErrorNotice v-if="coach.undoError.value" :error="coach.undoError.value" :show-retry="false" />
           <ErrorNotice v-if="coach.sendError.value" :error="coach.sendError.value" :show-retry="false" />
 

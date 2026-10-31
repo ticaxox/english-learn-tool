@@ -81,11 +81,12 @@ describe('T-FE-020 personal UI system', () => {
     expect(css).toContain('.personal-workspace .personal-ai-empty { max-width: none; }')
   })
 
-  it('narrows the workspace when the coach is open on desktop', () => {
-    const css = source('../personal-ui.css')
-    expect(css).toContain('--personal-coach-width: 480px')
+  it('docks the coach beside the workspace without collapsing page columns', () => {
+    const css = source('../game-ui.css')
     expect(css).toContain('.personal-workspace.is-coach-open .workspace-main')
-    expect(css).toContain('margin-right: var(--personal-coach-width)')
+    expect(css).toContain('margin-right: 400px')
+    const personal = source('../personal-ui.css')
+    expect(personal).not.toContain('.personal-workspace.is-coach-open .crumb-today-layout')
   })
 
   it('lets wordbook dialogs use their designed desktop width', () => {

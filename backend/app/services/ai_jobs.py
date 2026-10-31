@@ -121,8 +121,9 @@ async def _providers_for_job(
                     AiProvider.enabled.is_(True),
                 )
                 .order_by(
-                    AiProvider.is_default.desc(),
+                    # Priority decides the order; "default" only breaks ties.
                     AiProvider.priority.asc(),
+                    AiProvider.is_default.desc(),
                     AiProvider.created_at.asc(),
                 )
             )

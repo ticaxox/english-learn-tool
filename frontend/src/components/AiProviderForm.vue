@@ -14,7 +14,6 @@ interface ValidatedProviderFields {
   priority: number
   timeoutSeconds: number
   enabled: boolean
-  isDefault: boolean
   customHeaders: Record<string, string>
 }
 
@@ -22,12 +21,20 @@ const props = defineProps<{
   provider?: AiProvider | null
   saving?: boolean
   error?: unknown
+  /** The personal settings dialog: no title, actions in the header row. */
+  compact?: boolean
+  /** Lets the parent fetch the model list for a saved provider. */
+  canFetchModels?: boolean
+  modelOptions?: string[]
+  modelLoading?: boolean
+  modelError?: unknown
 }>()
 
 const emit = defineEmits<{
   (event: 'create', input: ProviderCreateInput): void
   (event: 'update', providerId: string, input: ProviderPatchInput): void
   (event: 'cancel'): void
+  (event: 'fetch-models'): void
 }>()
 
 const name = ref('')
@@ -39,12 +46,14 @@ const enabled = ref(true)
 const isDefault = ref(false)
 const customHeadersText = ref('{}')
 const apiKey = ref('')
+const keyVisible = ref(false)
+const modelsOpen = ref(false)
 const errors = reactive<Record<string, string>>({})
 
 const editing = computed(() => Boolean(props.provider))
+const title = computed(() => (editing.value ? `编辑 ${props.provider?.name}` : '新增 AI 提供商'))
 const maskedKey = computed(() => (editing.value ? props.provider?.apiKeyMasked ?? '' : ''))
 const keyChanged = computed(() => editing.value && apiKey.value !== '' && apiKey.value !== maskedKey.value)
-const title = computed(() => (editing.value ? `编辑 ${props.provider?.name}` : '新增 AI 提供商'))
 
 const forbiddenHeaders = new Set([
   'authorization',
@@ -70,6 +79,8 @@ function reset(): void {
   isDefault.value = provider?.isDefault ?? false
   customHeadersText.value = provider ? JSON.stringify(provider.customHeaders, null, 2) : '{}'
   apiKey.value = provider?.apiKeyMasked ?? ''
+  keyVisible.value = false
+  modelsOpen.value = false
   Object.keys(errors).forEach((key) => delete errors[key])
 }
 
@@ -77,6 +88,10 @@ watch(() => props.provider, reset, { immediate: true })
 
 watch(isDefault, (value) => {
   if (value) enabled.value = true
+})
+
+watch(() => props.modelOptions, (options) => {
+  if (options && options.length > 0) modelsOpen.value = true
 })
 
 function clearErrors(): void {
@@ -146,7 +161,6 @@ function validate(): ValidatedProviderFields | null {
   if (!Number.isInteger(timeoutSeconds.value) || timeoutSeconds.value < 1 || timeoutSeconds.value > 120) {
     errors.timeoutSeconds = '超时必须是 1–120 秒的整数。'
   }
-  if (isDefault.value && !enabled.value) errors.enabled = '默认提供商必须保持启用。'
   if (!editing.value || keyChanged.value) {
     if (apiKey.value.length < 8) errors.apiKey = 'API Key 至少需要 8 个字符。'
   }
@@ -160,7 +174,6 @@ function validate(): ValidatedProviderFields | null {
     priority: priority.value,
     timeoutSeconds: timeoutSeconds.value,
     enabled: enabled.value,
-    isDefault: isDefault.value,
     customHeaders: headers,
   }
 }
@@ -169,10 +182,11 @@ function submit(): void {
   const fields = validate()
   if (!fields) return
   if (!props.provider) {
-    emit('create', { ...fields, apiKey: apiKey.value })
+    emit('create', { ...fields, isDefault: false, apiKey: apiKey.value })
     return
   }
   const patch: ProviderPatchInput = { ...fields }
+  if (!props.compact) patch.isDefault = isDefault.value
   // An untouched field still shows the masked key; only send the key when it changed.
   if (keyChanged.value) patch.apiKey = apiKey.value
   emit('update', props.provider.id, patch)
@@ -183,6 +197,16 @@ function selectMaskedKey(event: FocusEvent): void {
   if (input.value === maskedKey.value) input.select()
 }
 
+function toggleModels(): void {
+  modelsOpen.value = !modelsOpen.value
+  if (modelsOpen.value) emit('fetch-models')
+}
+
+function chooseModel(model: string): void {
+  modelId.value = model
+  modelsOpen.value = false
+}
+
 function cancel(): void {
   apiKey.value = ''
   emit('cancel')
@@ -190,8 +214,8 @@ function cancel(): void {
 </script>
 
 <template>
-  <section class="panel ai-form-panel" aria-labelledby="provider-form-title">
-    <div class="section-heading">
+  <section class="panel ai-form-panel" :class="{ 'ai-form-panel--compact': compact }" :aria-label="compact ? 'AI 提供商配置' : undefined" :aria-labelledby="compact ? undefined : 'provider-form-title'">
+    <div v-if="!compact" class="section-heading">
       <div>
         <p class="eyebrow">AI 提供商</p>
         <h2 id="provider-form-title">{{ title }}</h2>
@@ -200,17 +224,60 @@ function cancel(): void {
     </div>
 
     <form class="ai-form" novalidate @submit.prevent="submit">
-      <div class="ai-form-grid">
+      <div class="ai-form-top">
         <div class="field">
           <label for="provider-name">名称</label>
           <input id="provider-name" v-model="name" type="text" maxlength="100" :aria-invalid="Boolean(errors.name)" />
           <p v-if="errors.name" class="field-error" role="alert">{{ errors.name }}</p>
         </div>
+        <div class="ai-form-actions">
+          <button
+            class="button-secondary ai-toggle"
+            type="button"
+            :aria-pressed="enabled"
+            @click="enabled = !enabled"
+          >
+            <span class="ai-toggle__dot" :class="{ 'is-on': enabled }" aria-hidden="true"></span>
+            {{ enabled ? '已启用' : '已停用' }}
+          </button>
+          <button class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '保存' }}</button>
+          <button class="button-secondary" type="button" :disabled="saving" @click="cancel">取消</button>
+        </div>
+      </div>
 
-        <div class="field">
-          <label for="provider-model">模型 ID</label>
+      <div class="field ai-model-field">
+        <label for="provider-model">模型 ID</label>
+        <div class="ai-model-row">
           <input id="provider-model" v-model="modelId" type="text" maxlength="200" :aria-invalid="Boolean(errors.modelId)" />
-          <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
+          <button
+            v-if="canFetchModels"
+            class="button-secondary ai-model-fetch"
+            type="button"
+            :aria-expanded="modelsOpen"
+            @click="toggleModels"
+          >
+            {{ modelLoading ? '读取中…' : '获取模型' }}
+            <span class="ai-model-fetch__arrow" :class="{ 'is-open': modelsOpen }" aria-hidden="true">▾</span>
+          </button>
+        </div>
+        <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
+
+        <div v-if="canFetchModels && modelsOpen" class="ai-model-menu" role="listbox" aria-label="可用模型">
+          <p v-if="modelLoading" class="field-hint">正在读取模型列表…</p>
+          <template v-else-if="modelOptions && modelOptions.length">
+            <button
+              v-for="model in modelOptions"
+              :key="model"
+              class="ai-model-option"
+              :class="{ 'is-selected': model === modelId }"
+              type="button"
+              role="option"
+              :aria-selected="model === modelId"
+              @click="chooseModel(model)"
+            >{{ model }}</button>
+          </template>
+          <p v-else class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
+          <ErrorNotice v-if="modelError" :error="modelError" :show-retry="false" />
         </div>
       </div>
 
@@ -222,16 +289,25 @@ function cancel(): void {
 
       <div class="field">
         <label for="provider-api-key">API Key</label>
-        <input
-          id="provider-api-key"
-          v-model="apiKey"
-          type="text"
-          autocomplete="off"
-          spellcheck="false"
-          maxlength="4096"
-          :aria-invalid="Boolean(errors.apiKey)"
-          @focus="selectMaskedKey"
-        />
+        <div class="ai-secret-row">
+          <input
+            id="provider-api-key"
+            v-model="apiKey"
+            :type="keyVisible ? 'text' : 'password'"
+            autocomplete="off"
+            spellcheck="false"
+            maxlength="4096"
+            :aria-invalid="Boolean(errors.apiKey)"
+            @focus="selectMaskedKey"
+          />
+          <button
+            class="button-secondary ai-secret-toggle"
+            type="button"
+            :aria-pressed="keyVisible"
+            :aria-label="keyVisible ? '隐藏 API Key' : '显示 API Key'"
+            @click="keyVisible = !keyVisible"
+          >{{ keyVisible ? '隐藏' : '显示' }}</button>
+        </div>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
       </div>
 
@@ -247,7 +323,7 @@ function cancel(): void {
           <label for="provider-priority">备用顺序</label>
           <input id="provider-priority" v-model.number="priority" type="number" min="0" max="10000" step="1" />
           <p v-if="errors.priority" class="field-error" role="alert">{{ errors.priority }}</p>
-          <p class="field-hint">数字越小越靠前，默认提供商始终最先使用。</p>
+          <p class="field-hint">数字越小越靠前；失败时按顺序换下一个。</p>
         </div>
       </div>
 
@@ -258,15 +334,14 @@ function cancel(): void {
         <p class="field-hint">最多 10 个；Authorization、Cookie、Host 等安全头不可覆盖。</p>
       </div>
 
-      <div class="checkbox-row">
-        <label class="checkbox"><input v-model="enabled" type="checkbox" :disabled="isDefault" /> 启用</label>
-        <label class="checkbox"><input v-model="isDefault" type="checkbox" /> 设为默认提供商</label>
-      </div>
-      <p v-if="errors.enabled" class="field-error" role="alert">{{ errors.enabled }}</p>
+      <label v-if="!compact" class="checkbox">
+        <input v-model="isDefault" type="checkbox" />
+        设为默认提供商
+      </label>
 
       <ErrorNotice v-if="error" :error="error" :show-retry="false" retry-label="重试" @retry="() => {}" />
 
-      <div class="button-row">
+      <div v-if="!compact" class="button-row">
         <button class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '保存提供商' }}</button>
         <button class="button-secondary" type="button" :disabled="saving" @click="cancel">取消</button>
       </div>

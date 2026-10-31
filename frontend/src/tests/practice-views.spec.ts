@@ -177,7 +177,8 @@ describe('practice views', () => {
     expect(review.find('.practice-option--wrong').exists()).toBe(true)
     expect(review.find('.practice-option--correct').exists()).toBe(true)
     expect(review.text()).toContain('有韧性的')
-    expect(review.text()).toContain('正确')
+    expect(review.text()).not.toContain('正确')
+    expect(review.text()).not.toContain('你的选择')
   })
 
   it('shows one total score and re-renders the submitted options in the result', () => {

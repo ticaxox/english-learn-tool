@@ -72,6 +72,33 @@ const progressPercent = computed(() => {
   return Math.min(100, Math.round((plan.value.mainCompleted / plan.value.mainTotal) * 100))
 })
 
+/** The route runs left to right, stations stepping above and below the line. */
+const STATION_SHIFTS = [0, -28, 0, 28]
+const mapTrackHeight = 190
+
+function stationShift(index: number): number {
+  return STATION_SHIFTS[index % STATION_SHIFTS.length]
+}
+
+const routePath = computed(() => {
+  const nodes = mainNodes.value
+  if (nodes.length < 2) return ''
+  const step = 100 / nodes.length
+  const point = (index: number): [number, number] => [
+    step * (index + 0.5),
+    50 + (stationShift(index) / mapTrackHeight) * 100,
+  ]
+  const [startX, startY] = point(0)
+  let path = `M ${startX.toFixed(2)} ${startY.toFixed(2)}`
+  for (let index = 1; index < nodes.length; index += 1) {
+    const [previousX, previousY] = point(index - 1)
+    const [x, y] = point(index)
+    const mid = (previousX + x) / 2
+    path += ` C ${mid.toFixed(2)} ${previousY.toFixed(2)}, ${mid.toFixed(2)} ${y.toFixed(2)}, ${x.toFixed(2)} ${y.toFixed(2)}`
+  }
+  return path
+})
+
 function isNotGenerated(errorValue: unknown): boolean {
   return isApiError(errorValue)
     && (errorValue.code === 'CHALLENGE_NOT_GENERATED' || errorValue.status === 404)
@@ -386,14 +413,29 @@ onMounted(() => {
             <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
           </div>
         </div>
-        <div class="crumb-stations" role="list" aria-label="关卡路线">
+        <div
+          class="crumb-stations"
+          role="list"
+          aria-label="关卡路线"
+          :style="{ gridTemplateColumns: `repeat(${Math.max(mainNodes.length, 1)}, minmax(0, 1fr))` }"
+        >
+          <svg
+            v-if="mainNodes.length > 1"
+            class="crumb-route"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path :d="routePath" />
+          </svg>
           <button
-            v-for="node in mainNodes"
+            v-for="(node, stationIndex) in mainNodes"
             :key="node.id"
             type="button"
             role="listitem"
             class="map-station"
             :class="[nodeStatusClass(node), { 'map-station--boss': node.nodeType === 'BOSS' }]"
+            :style="{ '--station-shift': `${stationShift(stationIndex)}px` }"
             :aria-label="`第 ${node.orderIndex} 关：${node.title}，${CHALLENGE_STATUS_LABELS[node.status]}`"
             :aria-current="nextNode?.id === node.id ? 'step' : undefined"
             @click="openNode(node)"

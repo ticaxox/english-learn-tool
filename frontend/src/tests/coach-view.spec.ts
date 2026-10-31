@@ -114,7 +114,7 @@ describe('coach view', () => {
       'conversation-1', '帮我安排今天的复习。', expect.any(String), { page_route: '/coach' },
     )
     expect(wrapper.text()).toContain('先完成到期复习，再做 12 个新词。')
-    expect(wrapper.text()).toContain('本次可用：1 / 50')
+    expect(wrapper.text()).not.toContain('本次可用')
   })
 
   it('requires confirmation and distinguishes clear from delete', async () => {

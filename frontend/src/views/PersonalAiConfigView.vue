@@ -38,6 +38,9 @@ const operationError = ref<unknown>(null)
 const actionKey = ref<string | null>(null)
 const deleteTarget = ref<AiProvider | null>(null)
 const modelTarget = ref<AiProvider | null>(null)
+const formModels = ref<string[]>([])
+const formModelsLoading = ref(false)
+const formModelError = ref<unknown>(null)
 const testStates = reactive<Record<string, OperationState<ProviderTestResult>>>({})
 const modelStates = reactive<Record<string, OperationState<ProviderModelsResult>>>({})
 
@@ -86,16 +89,40 @@ async function load(): Promise<void> {
   }
 }
 
+function resetFormModels(): void {
+  formModels.value = []
+  formModelsLoading.value = false
+  formModelError.value = null
+}
+
 function openCreate(): void {
   editingProvider.value = null
   saveError.value = null
+  resetFormModels()
   formOpen.value = true
 }
 
 function openEdit(provider: AiProvider): void {
   editingProvider.value = provider
   saveError.value = null
+  resetFormModels()
   formOpen.value = true
+}
+
+async function loadFormModels(): Promise<void> {
+  const provider = editingProvider.value
+  if (!provider || formModelsLoading.value) return
+  formModelsLoading.value = true
+  formModelError.value = null
+  try {
+    const result = await fetchPersonalProviderModels(provider.id)
+    formModels.value = result.success ? result.models : []
+  } catch (error) {
+    formModels.value = []
+    formModelError.value = error
+  } finally {
+    formModelsLoading.value = false
+  }
 }
 
 function closeForm(): void {
@@ -317,14 +344,20 @@ onMounted(() => {
     </aside>
 
     <div v-if="formOpen" class="dialog-backdrop" @click.self="closeForm">
-      <section class="dialog-card ai-provider-dialog" role="dialog" aria-modal="true" aria-labelledby="provider-form-title">
+      <section class="dialog-card ai-provider-dialog" role="dialog" aria-modal="true" aria-label="AI 提供商配置">
         <AiProviderForm
+          compact
           :provider="editingProvider"
           :saving="saving"
           :error="saveError"
+          :can-fetch-models="Boolean(editingProvider)"
+          :model-options="formModels"
+          :model-loading="formModelsLoading"
+          :model-error="formModelError"
           @create="handleCreate"
           @update="handleUpdate"
           @cancel="closeForm"
+          @fetch-models="loadFormModels"
         />
       </section>
     </div>

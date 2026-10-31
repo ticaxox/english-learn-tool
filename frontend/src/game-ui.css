@@ -1469,14 +1469,32 @@
     animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Overlay: the page keeps its layout. */
-  .personal-workspace.is-coach-open .workspace-main { margin-right: 0; padding-right: 0; }
+  /* The page keeps its own columns; it only gives up the docked width. */
   .personal-workspace.is-coach-open .ia-coach-backdrop { display: none; }
   .personal-workspace .ia-coach-panel .coach-layout { grid-template-columns: minmax(0, 1fr); }
   .personal-workspace .ia-coach-panel .coach-sidebar {
     max-height: 42%;
     overflow-y: auto;
   }
+}
+
+/* Wide screens dock the coach: the page narrows instead of being covered. */
+@media (min-width: 1181px) {
+  .personal-workspace .ia-coach-panel { width: 400px; }
+
+  .personal-workspace.is-coach-open .workspace-main {
+    margin-right: 400px;
+    transition: margin-right 180ms ease;
+  }
+
+  .personal-workspace.is-coach-open .workspace-content {
+    padding-right: clamp(12px, 2vw, 24px);
+  }
+}
+
+@media (min-width: 861px) and (max-width: 1180px) {
+  .personal-workspace .ia-coach-panel { width: min(420px, calc(100vw - 212px)); }
+  .personal-workspace.is-coach-open .workspace-main { margin-right: 0; }
 }
 
 @keyframes coach-pop {
@@ -2244,8 +2262,23 @@
   }
 
   .personal-workspace .ia-coach-panel .coach-composer {
-    padding: 8px 10px 8px 12px;
+    margin: 0;
+    padding: 10px 12px 12px;
+    border: 0;
+    border-top: 2px solid var(--ui-line);
+    border-radius: 0;
+    background: var(--ui-surface);
   }
+
+  .personal-workspace .ia-coach-panel .coach-main { padding-bottom: 0; }
+
+  .personal-workspace .ia-coach-panel .coach-message__meta strong {
+    color: var(--ui-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .personal-workspace .ia-coach-panel .coach-thinking { padding: 4px 2px; }
 
   .personal-workspace .ia-coach-panel .coach-composer textarea {
     height: 54px;
@@ -2396,3 +2429,372 @@
 .personal-workspace .wordbook-examples li { display: block; }
 .personal-workspace .wordbook-examples li p:first-child { font-size: 0.8rem; color: var(--ui-muted); }
 .personal-workspace .wordbook-examples .muted { display: none; }
+
+/* ------------------------------------------------ practice: submit + review */
+
+/* Progress moved out of the right rail and into the submit bar. */
+.personal-workspace .practice-submit-progress {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.personal-workspace .practice-submit-progress__top {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.personal-workspace .practice-submit-progress .progress { height: 8px; }
+
+/* Review keeps the answering column width instead of spanning the page. */
+.personal-workspace .practice-result {
+  max-width: 720px;
+  margin-right: auto;
+}
+
+/* One card per question: the question and its explanation share a frame. */
+.personal-workspace .result-question {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 2px solid var(--ui-line);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  box-shadow: 0 6px 14px rgb(59 42 26 / 6%);
+}
+
+.personal-workspace .result-question .practice-question-card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .result-question .practice-options {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.personal-workspace .result-question .practice-question-card__header { padding-bottom: 6px; }
+
+.personal-workspace .result-explanation {
+  padding: 12px 18px 14px;
+  border: 0;
+  border-top: 1px dashed var(--ui-line-strong);
+  border-radius: 0;
+  background: rgb(255 250 240 / 70%);
+  box-shadow: none;
+}
+
+.personal-workspace .result-explanation .result-copy { font-size: 0.9rem; }
+
+/* ------------------------------------------------- challenge: horizontal route */
+
+.personal-workspace .challenge-map .crumb-stations {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 190px;
+  margin: 0;
+  padding: 0 14px;
+}
+
+.personal-workspace .challenge-map .crumb-stations::before { display: none; }
+
+.personal-workspace .crumb-route {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.personal-workspace .crumb-route path {
+  fill: none;
+  stroke: var(--ui-line-strong);
+  stroke-width: 3;
+  stroke-dasharray: 8 8;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.personal-workspace .map-station {
+  justify-self: center;
+  width: 66px;
+  height: 66px;
+  transform: translateY(var(--station-shift, 0px));
+}
+
+.personal-workspace .map-station:hover {
+  transform: translateY(calc(var(--station-shift, 0px) - 2px));
+}
+
+.personal-workspace .map-station::after { display: none; }
+
+.personal-workspace .map-station__order { font-size: 1.15rem; }
+
+.personal-workspace .map-station__caption {
+  top: calc(100% + 3px);
+  width: 104px;
+  font-size: 0.62rem;
+}
+
+.personal-workspace .challenge-map { padding: 14px 16px 10px; }
+.personal-workspace .challenge-map .challenge-map__heading { margin-bottom: 4px; }
+
+@media (max-width: 720px) {
+  .personal-workspace .challenge-map .crumb-stations { overflow-x: auto; }
+}
+
+/* --------------------------------------------- AI provider dialog: compact form */
+
+.personal-workspace .ai-form-panel--compact .ai-form { gap: 10px; }
+
+.personal-workspace .ai-form-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.personal-workspace .ai-form-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.personal-workspace .ai-form-actions .button,
+.personal-workspace .ai-form-actions .button-secondary {
+  min-height: 40px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.personal-workspace .ai-toggle {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.personal-workspace .ai-toggle__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ui-muted);
+}
+
+.personal-workspace .ai-toggle__dot.is-on { background: var(--g-green); }
+
+.personal-workspace .ai-model-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.personal-workspace .ai-model-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.personal-workspace .ai-model-fetch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.personal-workspace .ai-model-fetch__arrow { transition: transform 120ms ease; }
+.personal-workspace .ai-model-fetch__arrow.is-open { transform: rotate(180deg); }
+
+.personal-workspace .ai-model-menu {
+  max-height: 216px;
+  margin-top: 6px;
+  padding: 4px;
+  overflow-y: auto;
+  border: 2px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-surface);
+}
+
+.personal-workspace .ai-model-option {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-ink);
+  font: 600 0.84rem/1.4 "Cascadia Code", Consolas, monospace;
+  text-align: left;
+  cursor: pointer;
+}
+
+.personal-workspace .ai-model-option:hover { background: #fdf3e1; }
+.personal-workspace .ai-model-option.is-selected { background: var(--g-green-soft); color: var(--g-green-edge); }
+
+.personal-workspace .ai-secret-row {
+  display: flex;
+  gap: 8px;
+}
+
+.personal-workspace .ai-secret-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.personal-workspace .ai-secret-toggle { flex: 0 0 auto; }
+
+@media (max-width: 620px) {
+  .personal-workspace .ai-form-top { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .ai-form-actions { flex-wrap: wrap; }
+}
+
+/* Review colours must beat the generic checked-option blue. */
+.personal-workspace .practice-option.practice-option--wrong,
+.personal-workspace .practice-option.practice-option--wrong:has(input:checked) {
+  border-color: var(--g-red-edge) !important;
+  background: var(--g-red-soft) !important;
+  box-shadow: inset 0 0 0 1px var(--g-red-edge), 0 3px 0 var(--g-red-edge) !important;
+}
+
+.personal-workspace .practice-option.practice-option--correct,
+.personal-workspace .practice-option.practice-option--correct:has(input:checked) {
+  border-color: var(--g-green-edge) !important;
+  background: var(--g-green-soft) !important;
+  box-shadow: inset 0 0 0 1px var(--g-green-edge), 0 3px 0 var(--g-green-edge) !important;
+}
+
+/* A shorter board keeps the two practice entry cards on the first screen. */
+.personal-workspace .challenge-map .crumb-stations { min-height: 166px; padding: 0 14px; }
+
+.personal-workspace .map-station {
+  width: 60px;
+  height: 60px;
+}
+
+.personal-workspace .map-station__order { font-size: 1.05rem; }
+.personal-workspace .map-station__caption { top: calc(100% + 2px); font-size: 0.6rem; }
+
+.personal-workspace .challenge-map { padding: 12px 16px 8px; }
+.personal-workspace .challenge-map .challenge-map__heading { margin-bottom: 2px; }
+.personal-workspace .challenge-map .challenge-map__heading h2 { font-size: 1.05rem; margin: 0; }
+
+/* Model menu rows keep readable text on hover/focus. */
+.personal-workspace .ai-model-option,
+.personal-workspace .ai-model-option:hover,
+.personal-workspace .ai-model-option:focus-visible {
+  color: var(--ui-ink);
+}
+
+.personal-workspace .ai-model-option:hover,
+.personal-workspace .ai-model-option:focus-visible {
+  background: #fdf3e1;
+  box-shadow: none;
+  transform: none;
+}
+
+.personal-workspace .ai-model-option.is-selected,
+.personal-workspace .ai-model-option.is-selected:hover {
+  color: var(--g-green-edge);
+  background: var(--g-green-soft);
+}
+
+/* The dialog scrolls instead of being clipped by the viewport. */
+.personal-workspace .ai-provider-dialog { overflow-y: auto; }
+
+.personal-workspace .ai-secret-row input {
+  width: 100%;
+  max-width: none;
+}
+
+/* ------------------------------------------------ coach thread: quieter rows */
+
+.personal-workspace .ia-coach-panel .coach-message {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 9px 0;
+}
+
+.personal-workspace .ia-coach-panel .coach-message + .coach-message {
+  border-top: 1px dashed var(--ui-line);
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user { justify-items: end; }
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
+  max-width: 88%;
+  justify-items: end;
+  text-align: right;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
+  padding: 8px 12px;
+  border-radius: 12px 12px 4px;
+  background: var(--g-blue-soft);
+  text-align: left;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--assistant .coach-message__text {
+  color: var(--ui-ink);
+}
+
+/* User bubbles shrink to their text instead of one character per line. */
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+  max-width: none;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
+  display: inline-block;
+  width: auto;
+  max-width: 84%;
+  white-space: pre-wrap;
+}
+
+/* Give the conversation title room: the privacy hint is not needed in the panel. */
+.personal-workspace .ia-coach-panel .coach-main-header .field-hint { display: none; }
+
+.personal-workspace .ia-coach-panel .coach-main-header h2 { max-width: 52%; }
+
+/* The thread header is just the conversation name; rename/clear live in the list. */
+.personal-workspace .ia-coach-panel .coach-main-header .button-row { display: none; }
+.personal-workspace .ia-coach-panel .coach-main-header h2 { max-width: none; }
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
+  width: max-content;
+  max-width: 84%;
+}
+
+.personal-workspace .ai-model-menu { padding-bottom: 8px; }
+
+/* Short user messages stay on one line: size the bubble against the thread. */
+.personal-workspace .ia-coach-panel .coach-message--user { justify-items: stretch; }
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
+  width: fit-content !important;
+  max-width: 84% !important;
+}
+
+/* Between 861 and 1180 the dock would squeeze the page, so it reads as a drawer. */
+@media (min-width: 861px) and (max-width: 1180px) {
+  .personal-workspace.is-coach-open .ia-coach-backdrop { display: block; }
+}

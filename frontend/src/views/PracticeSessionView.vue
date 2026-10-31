@@ -250,6 +250,13 @@ void practice.load()
             />
 
             <section class="panel practice-submit-panel member-practice-submit">
+              <div class="practice-submit-progress">
+                <div class="practice-submit-progress__top">
+                  <span>已答 {{ answeredCount }} / {{ questions.length }}</span>
+                  <span class="field-hint">{{ allAnswered ? '全部题目已作答，可以提交。' : `还有 ${questions.length - answeredCount} 题未作答。` }}</span>
+                </div>
+                <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
+              </div>
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />
               <div class="button-row">
@@ -265,12 +272,6 @@ void practice.load()
             <section class="member-session-mascot">
               <WhiskerCrumbMark size="hero" />
               <p>“先读意思，再找线索。相信句子本身。”</p>
-            </section>
-            <section class="member-session-progress-card">
-              <p class="eyebrow">作答进度</p>
-              <strong>{{ answeredCount }} <span>/ {{ questions.length }}</span></strong>
-              <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
-              <p>{{ allAnswered ? '全部题目已作答，可以提交。' : `还有 ${questions.length - answeredCount} 题未作答。` }}</p>
             </section>
           </aside>
         </div>
