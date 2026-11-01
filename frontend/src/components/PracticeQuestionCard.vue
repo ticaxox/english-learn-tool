@@ -23,6 +23,14 @@ const questionLabel = computed(() => `第 ${props.index + 1} 题，共 ${props.t
 const isChoice = computed(() => ['fill_blank', 'reading'].includes(props.question.questionType))
 const inReview = computed(() => props.review !== null && props.review !== undefined)
 const longOptions = computed(() => props.question.options.some((option) => (option.text ?? '').length > 26))
+const glossary = computed(() => props.question.options
+  .map((option, index) => ({
+    letter: String.fromCharCode(65 + index),
+    text: option.text,
+    textZh: option.textZh,
+  }))
+  .filter((entry) => entry.textZh))
+
 const wordOptions = computed(() => props.question.options.length > 0
   && props.question.options.every((option) => {
     const text = (option.text ?? '').trim()
@@ -118,10 +126,17 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         <OptionBadge :letter="String.fromCharCode(65 + optionIndex)" />
         <span class="practice-option__body">
           <span class="practice-option__text">{{ option.text }}</span>
-          <small v-if="inReview && option.textZh">{{ option.textZh }}</small>
         </span>
       </label>
     </fieldset>
+
+    <ul v-if="inReview && glossary.length" class="practice-option-glossary" aria-label="选项中文释义">
+      <li v-for="entry in glossary" :key="entry.letter">
+        <span class="practice-option-glossary__letter">{{ entry.letter }}</span>
+        <span class="practice-option-glossary__en">{{ entry.text }}</span>
+        <span class="practice-option-glossary__zh">{{ entry.textZh }}</span>
+      </li>
+    </ul>
 
     <div v-else-if="!inReview" class="field">
       <label :for="answerId">你的答案</label>

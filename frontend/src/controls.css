@@ -858,3 +858,68 @@
 
 .personal-workspace .choice-list--words .choice-option { max-width: 280px; }
 .personal-workspace .choice-list--words .choice-option__label { font-size: 1rem; }
+
+/* A quiet ring for the letter: no tag, no separate plate. */
+.personal-workspace .option-badge {
+  position: static;
+  align-self: center;
+  justify-self: center;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  border: 1.5px solid var(--badge-edge, var(--ui-line-strong));
+  border-radius: 50%;
+  background: var(--badge-fill, #fffdf8);
+  place-items: center;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.personal-workspace .option-badge__letter {
+  color: var(--badge-ink, var(--ui-ink));
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.personal-workspace .practice-option:hover .option-badge,
+.personal-workspace .choice-option:hover .option-badge {
+  border-color: var(--g-orange-edge);
+}
+
+/* Review: option translations live below the options, not inside them. */
+.personal-workspace .practice-option-glossary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin: 12px 0 0;
+  padding: 10px 2px 0;
+  border-top: 1px dashed var(--ui-line-strong);
+  list-style: none;
+}
+
+.personal-workspace .practice-option-glossary li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+  font-size: 0.84rem;
+}
+
+.personal-workspace .practice-option-glossary__letter {
+  flex: 0 0 auto;
+  width: 16px;
+  color: var(--ui-muted);
+  font-weight: 900;
+}
+
+.personal-workspace .practice-option-glossary__en {
+  color: var(--ui-ink);
+  font-weight: 750;
+}
+
+.personal-workspace .practice-option-glossary__zh { color: var(--ui-muted); }
+
+
+@media (max-width: 720px) {
+  .personal-workspace .practice-option-glossary { grid-template-columns: minmax(0, 1fr); }
+}
