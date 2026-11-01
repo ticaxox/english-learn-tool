@@ -998,3 +998,47 @@
 @media (max-width: 720px) {
   .personal-workspace .practice-options--phrases { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Sentences keep the full row and read from the left. */
+.personal-workspace .practice-options--sentences .practice-option {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.personal-workspace .practice-options--sentences .practice-option__body {
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* Words sit in four even columns with real space between the tiles. */
+.personal-workspace .practice-options--words {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.personal-workspace .practice-options--words .practice-option {
+  width: 100%;
+  max-width: 200px;
+  justify-self: center;
+}
+
+/* Phrases: 2×2 with compact tiles, not full-width strips. */
+.personal-workspace .practice-options--phrases {
+  gap: 16px 20px;
+}
+
+.personal-workspace .practice-options--phrases .practice-option {
+  width: 100%;
+  max-width: 380px;
+  justify-self: center;
+}
+
+@media (max-width: 1180px) {
+  .personal-workspace .practice-options--words { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .practice-options--phrases { grid-template-columns: minmax(0, 1fr); }
+}
