@@ -22,7 +22,10 @@ const emit = defineEmits<{
 const questionLabel = computed(() => `第 ${props.index + 1} 题，共 ${props.total} 题`)
 const isChoice = computed(() => ['fill_blank', 'reading'].includes(props.question.questionType))
 const inReview = computed(() => props.review !== null && props.review !== undefined)
-const longOptions = computed(() => props.question.options.some((option) => (option.text ?? '').length > 26))
+const optionWordCount = (option: PracticeOption): number => (option.text ?? '').trim().split(/\s+/).filter(Boolean).length
+const sentenceOptions = computed(() => props.question.options.some((option) => (
+  optionWordCount(option) >= 4 || (option.text ?? '').length > 32
+)))
 const glossary = computed(() => props.question.options
   .map((option, index) => ({
     letter: String.fromCharCode(65 + index),
@@ -36,6 +39,7 @@ const wordOptions = computed(() => props.question.options.length > 0
     const text = (option.text ?? '').trim()
     return text.length > 0 && text.length <= 18 && !text.includes(' ')
   }))
+const phraseOptions = computed(() => !wordOptions.value && !sentenceOptions.value)
 const correctId = computed(() => props.review?.correct ?? null)
 const selectedId = computed(() => props.review?.selected ?? props.modelValue)
 const promptId = computed(() => `practice-question-${props.question.id}`)
@@ -104,7 +108,11 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     <fieldset
       v-if="isChoice"
       class="practice-options"
-      :class="{ 'practice-options--long': longOptions, 'practice-options--words': wordOptions && !longOptions, 'practice-options--four': question.questionType === 'fill_blank' && !longOptions && !wordOptions }"
+      :class="{
+        'practice-options--words': wordOptions,
+        'practice-options--phrases': phraseOptions,
+        'practice-options--sentences': sentenceOptions,
+      }"
       :disabled="disabled || inReview"
     >
       <legend class="visually-hidden">选择一个答案</legend>

@@ -969,3 +969,32 @@
 
 .personal-workspace .practice-options--words .practice-option { max-width: 185px; }
 .personal-workspace .choice-list--words .choice-option { max-width: 240px; }
+
+/* One spacing rhythm: words, phrases (2×2) and sentences (one per row). */
+.personal-workspace .practice-options { gap: 12px; }
+
+.personal-workspace .practice-options--words { gap: 12px; }
+
+.personal-workspace .practice-options--phrases {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.personal-workspace .practice-options--sentences {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.personal-workspace .practice-options--sentences .practice-option {
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.personal-workspace .choice-list--words { gap: 12px; }
+
+@media (max-width: 720px) {
+  .personal-workspace .practice-options--phrases { grid-template-columns: minmax(0, 1fr); }
+}
