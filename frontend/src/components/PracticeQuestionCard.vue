@@ -22,17 +22,13 @@ const emit = defineEmits<{
 const questionLabel = computed(() => `第 ${props.index + 1} 题，共 ${props.total} 题`)
 const isChoice = computed(() => ['fill_blank', 'reading'].includes(props.question.questionType))
 const inReview = computed(() => props.review !== null && props.review !== undefined)
-const optionWordCount = (option: PracticeOption): number => (option.text ?? '').trim().split(/\s+/).filter(Boolean).length
-const sentenceOptions = computed(() => props.question.options.some((option) => {
-  const text = (option.text ?? '').trim()
-  return optionWordCount(option) >= 6 || text.length > 40 || /[.!?]$/.test(text)
-}))
-const wordOptions = computed(() => props.question.options.length > 0
-  && props.question.options.every((option) => {
-    const text = (option.text ?? '').trim()
-    return text.length > 0 && text.length <= 18 && !text.includes(' ')
-  }))
-const phraseOptions = computed(() => !wordOptions.value && !sentenceOptions.value)
+const optionLayout = computed<'four' | 'two' | 'one'>(() => {
+  const longest = props.question.options.reduce((max, option) => Math.max(max, (option.text ?? '').trim().length), 0)
+  if (longest <= 16) return 'four'
+  if (longest <= 32) return 'two'
+  return 'one'
+})
+
 const correctId = computed(() => props.review?.correct ?? null)
 const selectedId = computed(() => props.review?.selected ?? props.modelValue)
 const promptId = computed(() => `practice-question-${props.question.id}`)
@@ -101,20 +97,16 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     <fieldset
       v-if="isChoice"
       class="practice-options"
-      :class="{
-        'practice-options--words': wordOptions,
-        'practice-options--phrases': phraseOptions,
-        'practice-options--sentences': sentenceOptions,
-      }"
+      :class="`practice-options--${optionLayout}`"
       :disabled="disabled || inReview"
     >
       <legend class="visually-hidden">选择一个答案</legend>
-      <label
+      <div
         v-for="(option, optionIndex) in question.options"
         :key="option.id"
-        class="practice-option"
-        :class="optionClass(option)"
+        class="practice-option-unit"
       >
+        <label class="practice-option" :class="optionClass(option)">
         <input
           class="practice-option__input"
           type="radio"
@@ -127,9 +119,10 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         <OptionBadge :letter="String.fromCharCode(65 + optionIndex)" />
         <span class="practice-option__body">
           <span class="practice-option__text">{{ option.text }}</span>
-          <small v-if="inReview && option.textZh">{{ option.textZh }}</small>
         </span>
-      </label>
+        </label>
+        <small v-if="inReview && option.textZh" class="practice-option-translation">{{ option.textZh }}</small>
+      </div>
     </fieldset>
 
     <div v-else-if="!inReview" class="field">

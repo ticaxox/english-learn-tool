@@ -1090,3 +1090,76 @@
 
 /* Phrases: shorter tiles while the row stays flush at both edges. */
 .personal-workspace .practice-options--phrases .practice-option { max-width: 320px; }
+
+/* Character-count layouts: 4, 2 or 1 option per row. */
+.personal-workspace .practice-option-unit {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.personal-workspace .practice-option-unit .practice-option { width: 100%; }
+
+.personal-workspace .practice-options--four {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.personal-workspace .practice-options--four .practice-option-unit {
+  flex: 1 1 180px;
+  max-width: 210px;
+}
+
+.personal-workspace .practice-options--two {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px 20px;
+}
+
+.personal-workspace .practice-options--two .practice-option-unit {
+  flex: 1 1 300px;
+  max-width: 320px;
+}
+
+.personal-workspace .practice-options--one {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.personal-workspace .practice-options--one .practice-option__body {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.personal-workspace .practice-option-translation {
+  padding: 0 4px;
+  color: var(--ui-muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.personal-workspace .practice-options--one .practice-option-translation {
+  padding-left: 46px;
+  text-align: left;
+}
+
+@media (max-width: 1180px) {
+  .personal-workspace .practice-options--four .practice-option-unit {
+    flex: 1 1 45%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .practice-options--two .practice-option-unit,
+  .personal-workspace .practice-options--four .practice-option-unit {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}
