@@ -360,22 +360,6 @@ function cancel(): void {
         </div>
       </div>
 
-      <div class="ai-form-grid">
-        <div class="field">
-          <label for="provider-timeout">生成超时（秒）</label>
-          <input id="provider-timeout" v-model.number="timeoutSeconds" type="number" min="1" max="120" step="1" />
-          <p v-if="errors.timeoutSeconds" class="field-error" role="alert">{{ errors.timeoutSeconds }}</p>
-          <p class="field-hint">1–120 秒。单次题目、地图或教练回复的最长等待时间。</p>
-        </div>
-
-        <div class="field">
-          <label for="provider-priority">备用顺序</label>
-          <input id="provider-priority" v-model.number="priority" type="number" min="0" max="10000" step="1" />
-          <p v-if="errors.priority" class="field-error" role="alert">{{ errors.priority }}</p>
-          <p class="field-hint">数字越小越靠前；失败时按顺序换下一个。</p>
-        </div>
-      </div>
-
       <div class="field">
         <label for="provider-headers">自定义请求头（JSON）</label>
         <textarea id="provider-headers" v-model="customHeadersText" rows="3" spellcheck="false"></textarea>

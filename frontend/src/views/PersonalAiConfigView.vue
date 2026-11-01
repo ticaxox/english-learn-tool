@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -36,6 +36,8 @@ const formModelsLoading = ref(false)
 const formModelError = ref<unknown>(null)
 const formTestLoading = ref(false)
 const formTestResult = ref<ProviderTestResult | null>(null)
+const globalTimeout = ref(120)
+const globalSaving = ref(false)
 
 const sortedProviders = computed(() => [...providers.value].sort((left, right) => {
   if (left.priority !== right.priority) return left.priority - right.priority
@@ -169,6 +171,37 @@ function toggleEnabled(provider: AiProvider): void {
   void patchProvider(provider.id, { enabled: !provider.enabled }, `enabled:${provider.id}`)
 }
 
+watch(providers, (list) => {
+  if (list.length > 0) globalTimeout.value = list[0].timeoutSeconds
+}, { immediate: true })
+
+async function saveGlobalTimeout(): Promise<void> {
+  if (globalSaving.value || providers.value.length === 0) return
+  const value = Number(globalTimeout.value)
+  if (!Number.isInteger(value) || value < 1 || value > 120) {
+    toast.error('超时必须是 1–120 秒')
+    return
+  }
+  globalSaving.value = true
+  try {
+    for (const provider of providers.value) {
+      await updatePersonalProvider(provider.id, { timeoutSeconds: value })
+    }
+    await load()
+    toast.success('已应用到所有提供商', `生成超时 ${value} 秒`)
+  } catch (error) {
+    operationError.value = error
+  } finally {
+    globalSaving.value = false
+  }
+}
+
+function updatePriority(provider: AiProvider, event: Event): void {
+  const value = Number((event.target as HTMLInputElement).value)
+  if (!Number.isInteger(value) || value < 0 || value > 10000 || value === provider.priority) return
+  void patchProvider(provider.id, { priority: value }, `priority:${provider.id}`)
+}
+
 async function confirmDelete(): Promise<void> {
   const provider = deleteTarget.value
   if (!provider) return
@@ -226,6 +259,18 @@ onMounted(() => {
             <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
             <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
           </div>
+          <label class="personal-ai-provider__priority">
+            <span>优先级</span>
+            <input
+              type="number"
+              min="0"
+              max="10000"
+              step="1"
+              :value="provider.priority"
+              :disabled="Boolean(actionKey)"
+              @change="updatePriority(provider, $event)"
+            />
+          </label>
           <div class="personal-ai-provider__actions">
             <button class="button-secondary" type="button" @click="openEdit(provider)">编辑</button>
             <button class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
@@ -235,6 +280,22 @@ onMounted(() => {
           </div>
         </article>
       </div>
+
+      <section class="panel ai-global-config" aria-labelledby="ai-global-config-title">
+        <div>
+          <h3 id="ai-global-config-title">其他 API 配置</h3>
+          <p class="field-hint">对所有提供商生效，不绑定某一个。</p>
+        </div>
+        <div class="ai-global-config__row">
+          <div class="field">
+            <label for="global-timeout">生成超时（秒，1–120）</label>
+            <input id="global-timeout" v-model.number="globalTimeout" type="number" min="1" max="120" step="1" />
+          </div>
+          <button class="button" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
+            {{ globalSaving ? '正在应用…' : '应用到所有提供商' }}
+          </button>
+        </div>
+      </section>
 
       <ErrorNotice v-if="operationError" :error="operationError" :show-retry="false" />
 

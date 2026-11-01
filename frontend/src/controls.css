@@ -469,3 +469,244 @@
   outline: 3px solid rgb(255 150 0 / 45%);
   outline-offset: 2px;
 }
+
+/* Settings is one card: sections are flat, separated by hairlines. */
+.personal-workspace .settings-form { padding: 22px; }
+
+.personal-workspace .settings-form fieldset {
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: 16px;
+}
+
+.personal-workspace .settings-form fieldset + fieldset {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--ui-line-strong);
+}
+
+.personal-workspace .settings-form legend {
+  grid-column: 1 / -1;
+  margin: 0 0 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.personal-workspace .settings-form fieldset > .field-hint,
+.personal-workspace .settings-form fieldset > .inline-note,
+.personal-workspace .settings-form .settings-choice-block,
+.personal-workspace .settings-form .settings-goal-summary {
+  grid-column: 1 / -1;
+}
+
+.personal-workspace .settings-choice-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+
+/* Provider list: priority sits on the row; app-wide API config below. */
+.personal-workspace .personal-ai-provider__priority {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+  align-items: center;
+  color: var(--ui-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.personal-workspace .personal-ai-provider__priority input {
+  width: 84px;
+  min-height: 34px;
+  padding: 4px 10px;
+  font-size: 0.86rem;
+}
+
+.personal-workspace .ai-global-config {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.personal-workspace .ai-global-config h3 { margin: 0 0 4px; }
+.personal-workspace .ai-global-config .field-hint { margin: 0; }
+
+.personal-workspace .ai-global-config__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.personal-workspace .ai-global-config__row .field { flex: 0 1 280px; }
+
+/* Practice tabs carry the type's icon and colour. */
+.personal-workspace .practice-topbar__tab {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  border-width: 1.5px;
+}
+
+.personal-workspace .practice-topbar__tab svg { width: 1.05rem; height: 1.05rem; }
+
+.personal-workspace .practice-topbar__tab--fill_blank,
+.personal-workspace .practice-topbar__tab--flashcard { --tab-color: #0d88c4; --tab-soft: #dff2ff; --tab-edge: #0d88c4; }
+.personal-workspace .practice-topbar__tab--reading,
+.personal-workspace .practice-topbar__tab--choice { --tab-color: #1f8a30; --tab-soft: #ddf7e1; --tab-edge: #1f8a30; }
+.personal-workspace .practice-topbar__tab--translation,
+.personal-workspace .practice-topbar__tab--spelling { --tab-color: #cf7400; --tab-soft: #ffeacd; --tab-edge: #cf7400; }
+.personal-workspace .practice-topbar__tab--writing { --tab-color: #7d3cc0; --tab-soft: #efe1ff; --tab-edge: #7d3cc0; }
+
+.personal-workspace .practice-topbar__tab:hover { background: var(--tab-soft, #fffaf0); color: var(--tab-color, var(--ui-ink)); }
+
+.personal-workspace .practice-topbar__tab.is-active {
+  border-color: var(--tab-edge, var(--ui-line-strong));
+  background: var(--tab-soft, var(--ui-surface));
+  color: var(--tab-color, var(--ui-ink));
+  box-shadow: inset 0 -3px 0 var(--tab-edge, var(--g-orange-edge));
+}
+
+/* The bar reaches both edges; its content stays aligned with the page. */
+.personal-workspace .practice-topbar {
+  width: 100vw;
+  margin: 0 calc(50% - 50vw) 20px;
+  padding-inline: max(24px, calc((100vw - 1320px) / 2 + 28px));
+}
+
+/* Chooser aligns with the section title; rows carry their own config. */
+.personal-workspace .practice-chooser__tabs { padding-left: 0; }
+.personal-workspace .challenge-self-study > header { padding-inline: 0; }
+.personal-workspace .challenge-self-study { padding-inline: 0; }
+
+.personal-workspace .practice-chooser__row { position: relative; }
+
+.personal-workspace .practice-chooser__config { display: inline-flex; flex: 0 0 auto; }
+.personal-workspace .practice-chooser__config select { width: auto; min-width: 128px; min-height: 34px; padding: 4px 34px 4px 10px; font-size: 0.82rem; }
+
+/* Timer control + live clock in memory practice. */
+.personal-workspace .memory-picker-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.personal-workspace .memory-timer-control {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--ui-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.personal-workspace .memory-timer-control select {
+  width: auto;
+  min-height: 36px;
+  padding: 4px 34px 4px 10px;
+  font-size: 0.82rem;
+}
+
+/* Memory choice: two by two, bold labels, selection shown by the tile. */
+.personal-workspace .choice-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.personal-workspace .choice-option { position: relative; }
+
+.personal-workspace .choice-option input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.personal-workspace .choice-option__label {
+  font-size: 0.96rem;
+  font-weight: 850;
+}
+
+.personal-workspace .choice-option__index {
+  border-width: 1.5px;
+  border-radius: 9px;
+}
+
+.personal-workspace .choice-option:has(input:focus-visible) {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .choice-list { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Session clock and timer fields. */
+.personal-workspace .practice-stage-clock {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1.5px solid var(--ui-line-strong);
+  border-radius: 999px;
+  background: var(--ui-surface);
+  font-size: 0.85rem;
+  font-weight: 850;
+}
+
+.personal-workspace .practice-stage-clock svg { width: 1rem; height: 1rem; }
+.personal-workspace .practice-stage-clock.is-expired { border-color: var(--g-red-edge); color: var(--g-red-edge); }
+
+.personal-workspace .practice-create-footer__meta {
+  display: grid;
+  gap: 8px;
+}
+
+.personal-workspace .practice-timer-control {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--ui-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.personal-workspace .practice-timer-control select {
+  width: auto;
+  min-height: 36px;
+  padding: 4px 34px 4px 10px;
+  font-size: 0.82rem;
+}
+
+.personal-workspace .practice-chooser__toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.personal-workspace .practice-chooser__footer .practice-timer-control { margin-right: auto; }
+
+.personal-workspace .settings-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px 22px;
+  width: 100%;
+}
+
+.personal-workspace .personal-ai-provider__priority span { white-space: nowrap; }

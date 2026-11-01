@@ -364,7 +364,7 @@ async def _build_context(
             challenge_prefs.get("practiceTypes"),
             ["fill_blank", "reading", "translation", "writing"],
         ),
-        allowed_drill_modes=_kept(challenge_prefs.get("drillModes"), ["choice", "spelling"]),
+        allowed_drill_modes=_kept(challenge_prefs.get("drillModes"), ["choice", "spelling", "flashcard"]),
         plan_id=plan.id,
         wordbook_id=plan.wordbook_id,
         target_new_words=len(new_entry_ids),
@@ -566,7 +566,12 @@ async def _mark_node_failed(
 
 def _module_for_node(node: ChallengeNode) -> str:
     if node.node_type == "WORD_DRILL":
-        return "spelling" if node.practice_spec.get("drill_mode") == "spelling" else "choice"
+        mode = node.practice_spec.get("drill_mode")
+        if mode == "spelling":
+            return "spelling"
+        if mode == "flashcard":
+            return "flashcard"
+        return "choice"
     if node.node_type == "NEW_WORDS":
         return "flashcard"
     return "choice"

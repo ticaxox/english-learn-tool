@@ -8,6 +8,7 @@ import { createPracticeSession, fetchPracticeUsage, listPracticeMistakes, listPr
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import { fetchLearningProfile, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
+
 import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../practice.css'
 
@@ -19,7 +20,7 @@ function queryType(value: unknown): PracticeType | null {
 }
 const practiceType = ref<PracticeType>(queryType(route.query.type) ?? 'fill_blank')
 const source = ref<PracticeSource>('today_new')
-const count = ref(5)
+const count = ref(practiceType.value === 'writing' ? 1 : 5)
 const difficulty = ref<PracticeDifficulty>('CET6')
 const wordbookId = ref('')
 const creating = ref(false)
@@ -35,6 +36,11 @@ const wordbooks = ref<Wordbook[]>([])
 const wordbooksError = ref<unknown>(null)
 const toast = useToast()
 const spellingBlankMode = ref('')
+const timerLimit = ref<number>(0)
+
+function onTimerLimitChange(event: Event): void {
+  timerLimit.value = Number((event.target as HTMLSelectElement).value) || 0
+}
 
 async function loadSpellingMode(): Promise<void> {
   try {
@@ -64,7 +70,6 @@ const formError = ref<string | null>(null)
 let pendingKey: string | null = null
 let pendingSignature = ''
 
-const types: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
 const sources: PracticeSource[] = ['today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty']
 const difficulties: PracticeDifficulty[] = ['CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL']
 const counts = computed(() => (practiceType.value === 'writing' ? [1] : [3, 5, 10, 15, 20]))
@@ -118,7 +123,11 @@ async function create(): Promise<void> {
     const session = await createPracticeSession(input, pendingKey)
     pendingKey = null
     pendingSignature = ''
-    await router.push({ name: 'practice-session', params: { sessionId: session.id } })
+    await router.push({
+      name: 'practice-session',
+      params: { sessionId: session.id },
+      query: timerLimit.value > 0 ? { timer: String(timerLimit.value) } : {},
+    })
   } catch (error) {
     createError.value = error
   } finally {
@@ -209,27 +218,6 @@ onMounted(() => {
         </header>
         <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
 
-        <div class="practice-type-grid practice-type-switcher" role="group" aria-label="练习类型">
-          <button
-            v-for="type in types"
-            :key="type"
-            class="practice-type-card"
-            :class="[`practice-type-card--${type}`, { 'practice-type-card--active': practiceType === type }]"
-            type="button"
-            :data-practice-type="type"
-            :aria-pressed="practiceType === type"
-            @click="selectType(type)"
-          >
-            <span class="practice-type-icon">
-              <AppIcon :name="type === 'fill_blank' ? 'cards' : type === 'reading' ? 'book' : type === 'translation' ? 'arrow' : 'spark'" />
-            </span>
-            <span class="practice-type-copy">
-              <strong>{{ PRACTICE_TYPE_LABELS[type] }}</strong>
-              <span>{{ type === 'fill_blank' ? '词义与语境' : type === 'reading' ? '文章理解' : type === 'translation' ? '英译中/中译英' : 'AI 评分作文' }}</span>
-            </span>
-          </button>
-        </div>
-
         <form class="practice-form" novalidate @submit.prevent="create">
           <div class="practice-form-grid">
             <div class="field">
@@ -281,7 +269,20 @@ onMounted(() => {
           </div>
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="practice-create-footer">
-            <p>答案与解析只在提交后出现。</p>
+            <div class="practice-create-footer__meta">
+              <label class="practice-timer-control">
+                <span>计时</span>
+                <select id="practice-timer" :value="timerLimit" @change="onTimerLimitChange">
+                  <option :value="0">不限（正计时）</option>
+                  <option :value="5">5 分钟</option>
+                  <option :value="10">10 分钟</option>
+                  <option :value="15">15 分钟</option>
+                  <option :value="20">20 分钟</option>
+                  <option :value="30">30 分钟</option>
+                </select>
+              </label>
+              <p>答案与解析只在提交后出现。</p>
+            </div>
             <SvgPlateButton class="practice-generate-action" type="submit" :disabled="creating">
               {{ creating ? '正在生成…' : '生成练习' }} <AppIcon name="arrow" />
             </SvgPlateButton>

@@ -4,6 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import LoadingState from '../components/LoadingState.vue'
 import PracticeQuestionCard from '../components/PracticeQuestionCard.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
@@ -21,6 +22,8 @@ import '../practice.css'
 
 const route = useRoute()
 const router = useRouter()
+const sessionTimer = useSessionTimer()
+const timerLimit = timerLimitFromQuery(route.query.timer)
 const toast = useToast()
 const sessionId = String(route.params.sessionId)
 const practice = usePracticeSession(sessionId)
@@ -35,6 +38,14 @@ let pendingRegenerateKey: string | null = null
 let hydrating = false
 
 const session = practice.session
+
+watch(() => session.value?.status, (status) => {
+  if (status === 'ready') {
+    if (!sessionTimer.running.value) sessionTimer.start(timerLimit)
+  } else if (status === 'submitted' || status === 'failed') {
+    sessionTimer.stop()
+  }
+}, { immediate: true })
 const result = practice.result
 const questions = computed(() => session.value?.questions ?? [])
 const answeredCount = computed(() => questions.value.filter((question) => (answers.value[question.id] ?? '').trim()).length)
@@ -170,6 +181,10 @@ void practice.load()
         <p v-if="session" class="lead">
           {{ PRACTICE_SOURCE_LABELS[session.source] }} · {{ session.questionCount }} 题 · {{ PRACTICE_STATUS_LABELS[session.status] }}
         </p>
+      </div>
+      <div v-if="sessionTimer.running.value" class="practice-stage-clock" :class="{ 'is-expired': sessionTimer.expired.value }">
+        <AppIcon name="today" />
+        <span>{{ timerLimit ? '倒计时' : '正计时' }} {{ sessionTimer.label.value }}</span>
       </div>
     </header>
 

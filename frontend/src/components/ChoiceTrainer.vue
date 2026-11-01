@@ -78,7 +78,7 @@ function submit(): void {
       本页不会按这份数据判分，请刷新或联系管理员；提交按钮保持不可用。
     </p>
 
-    <fieldset v-else class="choice-list" :disabled="props.disabled" aria-describedby="choice-hint">
+    <fieldset v-else class="choice-list" :disabled="props.disabled">
       <legend class="visually-hidden">选择一个答案</legend>
       <label
         v-for="(option, index) in props.question.options"
@@ -101,6 +101,5 @@ function submit(): void {
     <div class="button-row">
       <button class="button" type="button" :disabled="!canSubmit" @click="submit">提交答案</button>
     </div>
-    <p id="choice-hint" class="inline-note">提交后查看结果。</p>
   </section>
 </template>

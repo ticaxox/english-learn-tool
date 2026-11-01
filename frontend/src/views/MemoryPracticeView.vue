@@ -20,6 +20,7 @@ import { isContractFrozen } from '../api/contract-adapter'
 import { isApiError } from '../api/errors'
 import { useMemorySession } from '../composables/useMemorySession'
 import { useStudyHeartbeat } from '../composables/useStudyHeartbeat'
+import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import {
   MEMORY_MODULES,
   MEMORY_MODULE_LABELS,
@@ -48,6 +49,16 @@ const loadingConfig = ref(false)
 const selectedModule = ref<MemoryModule | null>(null)
 
 const session = useMemorySession()
+const timer = useSessionTimer()
+const timerLimit = ref<number>(timerLimitFromQuery(route.query.timer) ?? 0)
+
+function startClock(): void {
+  timer.start(timerLimit.value > 0 ? timerLimit.value : null)
+}
+
+function onTimerLimitChange(event: Event): void {
+  timerLimit.value = Number((event.target as HTMLSelectElement).value) || 0
+}
 
 const heartbeat = useStudyHeartbeat({
   enabled: () => session.hasSession.value && !session.finished.value,
@@ -104,6 +115,7 @@ async function begin(module: MemoryModule, existingSessionId?: string): Promise<
   try {
     await session.open(module, existingSessionId)
     heartbeat.start()
+    startClock()
   } catch {
     // Error already captured by the session composable for display.
   }
@@ -116,6 +128,7 @@ async function resume(): Promise<void> {
   try {
     await session.open(selectedModule.value)
     heartbeat.start()
+    if (!timer.running.value) startClock()
   } catch {
     // handled by the composable
   }
@@ -148,11 +161,13 @@ async function endSession(): Promise<void> {
   }
   await session.endSession()
   heartbeat.stop()
+  timer.stop()
 }
 
 function restart(): void {
   session.reset()
   heartbeat.stop()
+  timer.reset()
   selectedModule.value = null
   void loadConfig()
 }
@@ -192,7 +207,7 @@ watch(challengeModule, async (module, previous) => {
       </div>
       <div class="memory-session-actions">
         <span class="workspace-status" :class="`memory-timer--${heartbeat.state.value}`">
-          {{ heartbeat.state.value === 'active' ? '计时中' : '已暂停' }}
+          {{ timer.running.value ? `${timerLimit > 0 ? '倒计时' : '正计时'} ${timer.label.value}` : '已暂停' }}
         </span>
         <button class="button-secondary button-small" type="button" @click="endSession">结束本次</button>
       </div>
@@ -231,7 +246,20 @@ watch(challengeModule, async (module, previous) => {
               <h2>今天练什么</h2>
               <p>选一个入口，直接进入当前队列。</p>
             </div>
-            <span class="workspace-meta">{{ activeModules.length }} 种可用</span>
+            <div class="memory-picker-tools">
+              <label class="memory-timer-control">
+                <span>计时</span>
+                <select :value="timerLimit" @change="onTimerLimitChange">
+                  <option :value="0">不限（正计时）</option>
+                  <option :value="5">5 分钟</option>
+                  <option :value="10">10 分钟</option>
+                  <option :value="15">15 分钟</option>
+                  <option :value="20">20 分钟</option>
+                  <option :value="30">30 分钟</option>
+                </select>
+              </label>
+              <span class="workspace-meta">{{ activeModules.length }} 种可用</span>
+            </div>
           </header>
 
           <div v-if="activeModules.length === 0" class="workspace-inline-banner memory-no-modules">

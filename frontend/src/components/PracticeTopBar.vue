@@ -26,11 +26,24 @@ try {
 const displayName = computed(() => auth?.displayName || '学')
 const initials = computed(() => displayName.value.trim().slice(0, 2).toUpperCase())
 
-const tabs = computed<Array<{ id: string; label: string }>>(() => (
+type TabIcon = 'cards' | 'book' | 'star' | 'arrow' | 'spark'
+const memoryIcons: Record<MemoryModule, TabIcon> = {
+  flashcard: 'book',
+  choice: 'cards',
+  spelling: 'star',
+}
+const practiceIcons: Record<PracticeType, TabIcon> = {
+  fill_blank: 'book',
+  reading: 'cards',
+  translation: 'arrow',
+  writing: 'spark',
+}
+
+const tabs = computed<Array<{ id: string; label: string; icon: TabIcon }>>(() => (
   props.mode === 'memory'
-    ? MEMORY_MODULES.map((module: MemoryModule) => ({ id: module, label: MEMORY_MODULE_LABELS[module] }))
+    ? MEMORY_MODULES.map((module: MemoryModule) => ({ id: module, label: MEMORY_MODULE_LABELS[module], icon: memoryIcons[module] }))
     : (['fill_blank', 'reading', 'translation', 'writing'] as PracticeType[])
-      .map((type) => ({ id: type, label: PRACTICE_TYPE_LABELS[type] }))
+      .map((type) => ({ id: type, label: PRACTICE_TYPE_LABELS[type], icon: practiceIcons[type] }))
 ))
 
 function open(id: string): void {
@@ -55,11 +68,11 @@ function openSettings(): void {
         v-for="tab in tabs"
         :key="tab.id"
         class="practice-topbar__tab"
-        :class="{ 'is-active': tab.id === active }"
+        :class="[`practice-topbar__tab--${tab.id}`, { 'is-active': tab.id === active }]"
         type="button"
         :aria-current="tab.id === active ? 'page' : undefined"
         @click="open(tab.id)"
-      >{{ tab.label }}</button>
+      ><AppIcon :name="tab.icon" /><span>{{ tab.label }}</span></button>
     </nav>
 
     <button

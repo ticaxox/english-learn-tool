@@ -111,9 +111,8 @@ describe('practice views', () => {
   })
 
   it('offers all four practice types and creates a writing session with one question', async () => {
-    const { wrapper, router } = await mountRoute(PracticeHubView, '/practice')
-    expect(wrapper.findAll('.practice-type-card')).toHaveLength(4)
-    await wrapper.findAll('.practice-type-card').find((card) => card.text().includes('作文'))!.trigger('click')
+    const { wrapper, router } = await mountRoute(PracticeHubView, '/practice?type=writing')
+    expect(wrapper.findAll('.practice-topbar__tab')).toHaveLength(4)
     expect((wrapper.get('#practice-count').element as HTMLSelectElement).value).toBe('1')
     await wrapper.get('form').trigger('submit')
     await flushPromises()

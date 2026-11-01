@@ -85,8 +85,8 @@ class ChallengePlanContext(StrictModel):
     new_entry_ids: list[UUID] = Field(default_factory=list, max_length=200)
     due_entry_ids: list[UUID] = Field(default_factory=list, max_length=500)
     allowed_practice_types: list[PracticeType] = Field(default_factory=list)
-    allowed_drill_modes: list[Literal["choice", "spelling"]] = Field(
-        default_factory=lambda: ["choice", "spelling"]
+    allowed_drill_modes: list[Literal["choice", "spelling", "flashcard"]] = Field(
+        default_factory=lambda: ["choice", "spelling", "flashcard"]
     )
     plan_id: UUID | None = None
     wordbook_id: UUID | None = None
@@ -324,7 +324,7 @@ class ChallengeNodeOutput(StrictModel):
     optional: bool = False
     practice_type: PracticeType | None = None
     practice_count: int | None = Field(default=None, ge=1, le=20)
-    drill_mode: Literal["choice", "spelling"] | None = None
+    drill_mode: Literal["choice", "spelling", "flashcard"] | None = None
     order: int | None = Field(default=None, ge=1, le=100)
 
     @field_validator("title", "description")

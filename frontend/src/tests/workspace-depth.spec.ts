@@ -61,10 +61,11 @@ describe('T-FE-017 workspace depth', () => {
   })
 
   it('gives the four AI practice types distinct icons and generation feedback', () => {
+    const topbar = source('../components/PracticeTopBar.vue')
+    expect(topbar).toContain('practiceIcons')
+    expect(topbar).toContain('practice-topbar__tab--')
     const practice = source('../views/PracticeHubView.vue')
-    expect(practice).toContain('practice-type-icon')
     expect(practice).toContain('practice-generation-state')
-    expect(practice).toContain('data-practice-type')
   })
 
   it('keeps Coach hierarchy and streaming state visible', () => {
