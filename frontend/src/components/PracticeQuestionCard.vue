@@ -23,9 +23,10 @@ const questionLabel = computed(() => `第 ${props.index + 1} 题，共 ${props.t
 const isChoice = computed(() => ['fill_blank', 'reading'].includes(props.question.questionType))
 const inReview = computed(() => props.review !== null && props.review !== undefined)
 const optionWordCount = (option: PracticeOption): number => (option.text ?? '').trim().split(/\s+/).filter(Boolean).length
-const sentenceOptions = computed(() => props.question.options.some((option) => (
-  optionWordCount(option) >= 4 || (option.text ?? '').length > 32
-)))
+const sentenceOptions = computed(() => props.question.options.some((option) => {
+  const text = (option.text ?? '').trim()
+  return optionWordCount(option) >= 6 || text.length > 40 || /[.!?]$/.test(text)
+}))
 const glossary = computed(() => props.question.options
   .map((option, index) => ({
     letter: String.fromCharCode(65 + index),
@@ -138,14 +139,6 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
       </label>
     </fieldset>
 
-    <ul v-if="inReview && glossary.length" class="practice-option-glossary" aria-label="选项中文释义">
-      <li v-for="entry in glossary" :key="entry.letter">
-        <span class="practice-option-glossary__letter">{{ entry.letter }}</span>
-        <span class="practice-option-glossary__en">{{ entry.text }}</span>
-        <span class="practice-option-glossary__zh">{{ entry.textZh }}</span>
-      </li>
-    </ul>
-
     <div v-else-if="!inReview" class="field">
       <label :for="answerId">你的答案</label>
       <textarea
@@ -159,5 +152,14 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
       ></textarea>
       <p class="field-hint">当前字数：{{ modelValue.length }} / 20000</p>
     </div>
+
+    <ul v-if="inReview && glossary.length" class="practice-option-glossary" aria-label="选项中文释义">
+      <li v-for="entry in glossary" :key="entry.letter">
+        <span class="practice-option-glossary__letter">{{ entry.letter }}</span>
+        <span class="practice-option-glossary__en">{{ entry.text }}</span>
+        <span class="practice-option-glossary__zh">{{ entry.textZh }}</span>
+      </li>
+    </ul>
+
   </section>
 </template>

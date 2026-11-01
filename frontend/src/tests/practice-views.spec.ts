@@ -123,6 +123,8 @@ describe('practice views', () => {
   it('renders a choice question without any answer or explanation fields', () => {
     const wrapper = mount(PracticeQuestionCard, { props: { question, modelValue: '', index: 0, total: 1 } })
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(2)
+    // Choice questions never fall through to the free-text answer box.
+    expect(wrapper.find('textarea').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('解析：')
     expect(wrapper.text()).not.toContain('正确答案')
     expect(wrapper.html()).not.toContain('correct_option')
