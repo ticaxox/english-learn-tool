@@ -44,6 +44,7 @@ const notGenerated = ref(false)
 const generating = ref(false)
 const generationError = ref<unknown>(null)
 const generationStatus = ref('')
+const cancelGenerationWait = ref(false)
 
 const selectedNode = ref<ChallengeNodeDetail | null>(null)
 const nodeLoading = ref(false)
@@ -162,9 +163,15 @@ async function refreshPlanSilently(): Promise<void> {
   }
 }
 
+function stopWaitingForMap(): void {
+  cancelGenerationWait.value = true
+  generationStatus.value = '已停止等待；地图仍可能在后台生成，稍后点“刷新地图”查看。'
+}
+
 async function generateMap(): Promise<void> {
   if (generating.value) return
   generating.value = true
+  cancelGenerationWait.value = false
   generationError.value = null
   generationStatus.value = '正在生成今日地图…'
   try {
@@ -176,7 +183,9 @@ async function generateMap(): Promise<void> {
     for (let attempt = 0; attempt < 120; attempt += 1) {
       generationStatus.value = '地图生成中…'
       await new Promise((resolve) => window.setTimeout(resolve, 1000))
+      if (cancelGenerationWait.value) return
       const job = await getChallengeJob(accepted.jobId)
+      if (cancelGenerationWait.value) return
       generationStatus.value = '地图生成中…'
       if (job.status === 'succeeded') {
         await loadPlan()
@@ -336,7 +345,10 @@ onMounted(() => {
           </button>
           <RouterLink class="button-secondary" to="/overview">先学习今日任务</RouterLink>
         </div>
-        <p v-if="generating" class="field-hint" role="status">{{ generationStatus }} 通常需要 1–2 分钟，可以先去做记忆练习。</p>
+        <div v-if="generating" class="challenge-generate__waiting">
+          <p class="field-hint" role="status">{{ generationStatus }} 通常需要 1–2 分钟，可以先去做记忆练习。</p>
+          <button class="button-secondary button-small" type="button" @click="stopWaitingForMap">先不等了</button>
+        </div>
       </div>
     </section>
 

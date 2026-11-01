@@ -65,3 +65,10 @@
 @media (max-width:780px){.challenge-hero,.challenge-summary,.challenge-node__heading,.challenge-map__heading,.challenge-node-detail__heading,.challenge-boss__heading{align-items:stretch;flex-direction:column}.challenge-hero__actions{justify-content:flex-start}.challenge-progress{flex-basis:auto;width:100%}.challenge-history__item{align-items:flex-start;flex-direction:column}.challenge-history__meta{justify-items:start}}
 @media (max-width:520px){.challenge-page{gap:.85rem}.challenge-hero{padding:1rem;border-radius:20px 10px 20px 10px}.challenge-path{padding-left:0}.challenge-path::before{left:1.35rem}.challenge-node{grid-template-columns:2.3rem minmax(0,1fr);padding:.8rem}.challenge-node__marker{width:2.3rem;height:2.3rem}.challenge-node__connector{left:1.4rem}.challenge-generate{flex-direction:column}}
 @media (prefers-reduced-motion:reduce){.challenge-progress span{transition:none}}
+
+.challenge-generate__waiting {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
