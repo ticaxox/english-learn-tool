@@ -192,12 +192,15 @@ async function generateMap(): Promise<void> {
         return
       }
       if (job.status === 'failed' || job.status === 'cancelled') {
+        generationStatus.value = ''
         generationError.value = new Error('这次没能生成地图，请稍后再试，或先完成今日任务。')
         return
       }
     }
+    generationStatus.value = ''
     generationError.value = new Error('地图生成等待超时，请稍后重试。')
   } catch (requestError) {
+    generationStatus.value = ''
     generationError.value = requestError
   } finally {
     generating.value = false
@@ -349,6 +352,7 @@ onMounted(() => {
           <p class="field-hint" role="status">{{ generationStatus }} 通常需要 1–2 分钟，可以先去做记忆练习。</p>
           <button class="button-secondary button-small" type="button" @click="stopWaitingForMap">先不等了</button>
         </div>
+        <p v-else-if="generationStatus" class="field-hint" role="status">{{ generationStatus }}</p>
       </div>
     </section>
 

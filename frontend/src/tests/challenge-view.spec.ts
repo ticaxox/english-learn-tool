@@ -157,6 +157,36 @@ describe('challenge view', () => {
     expect(wrapper.text()).toContain('复习回廊')
   })
 
+  it('lets the learner stop waiting for a slow map job', async () => {
+    challengeMocks.getTodayChallenge.mockRejectedValueOnce(
+      new ApiError(404, 'CHALLENGE_NOT_GENERATED', 'Not generated.', null, 'not-generated', false),
+    )
+    challengeMocks.generateTodayChallenge.mockResolvedValueOnce({
+      challengeId: makePlan().id,
+      status: 'generating',
+      jobId: 'job-1',
+      statusUrl: null,
+      replayed: false,
+    })
+    challengeMocks.getChallengeJob.mockResolvedValue({
+      jobId: 'job-1',
+      challengeId: makePlan().id,
+      status: 'running',
+      errorCode: null,
+      errorMessage: null,
+      retryable: false,
+    })
+    const { wrapper } = await mountView()
+    await wrapper.get('.challenge-generate .button').trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('先不等了')
+    await wrapper.get('.challenge-generate__waiting button').trigger('click')
+    await new Promise((resolve) => setTimeout(resolve, 1100))
+    await flushPromises()
+    expect(wrapper.text()).toContain('已停止等待')
+    expect(challengeMocks.getChallengeJob).not.toHaveBeenCalled()
+  })
+
   it('starts a memory node and preserves the server session in the route', async () => {
     const { wrapper, router } = await mountView()
     await wrapper.findAll('.map-station')[0].trigger('click')
