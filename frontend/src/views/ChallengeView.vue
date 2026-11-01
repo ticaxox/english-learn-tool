@@ -448,7 +448,7 @@ onMounted(() => {
 
         <div v-if="optionalNodes.length > 0" class="challenge-optional">
           <div class="challenge-map__heading">
-            <div><p class="eyebrow">可选支线</p><h2>可选支线</h2></div>
+            <div><p class="eyebrow">可选支线</p><h2>支线任务</h2></div>
             <span class="field-hint">不影响主线顺序</span>
           </div>
           <article v-for="node in optionalNodes" :key="node.id" class="challenge-node challenge-node--optional" :class="nodeStatusClass(node)">

@@ -1366,3 +1366,11 @@ body {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* The goal estimate is a sentence, not a disabled input. */
+.personal-workspace .settings-goal-summary .inline-note {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-muted);
+}

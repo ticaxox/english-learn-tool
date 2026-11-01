@@ -594,7 +594,9 @@
   color: #fff;
 }
 
-.personal-workspace .challenge-node--locked { opacity: 0.8; }
+.personal-workspace .challenge-node--locked { opacity: 1; }
+.personal-workspace .challenge-node--locked .map-station__order { color: #7d6a58; }
+.personal-workspace .challenge-node--locked .map-station__caption { color: #6f5b49; }
 .personal-workspace .challenge-node--boss {
   border-color: var(--g-purple-edge) !important;
   background: linear-gradient(135deg, #faf2ff, #f0e0ff) !important;
@@ -1835,7 +1837,9 @@
 
 .personal-workspace .map-station.challenge-node--completed .map-station__order { color: #fff; }
 
-.personal-workspace .map-station.challenge-node--locked { opacity: 0.6; }
+.personal-workspace .map-station.challenge-node--locked { opacity: 1; }
+.personal-workspace .map-station.challenge-node--locked .map-station__order { color: #7d6a58; }
+.personal-workspace .map-station.challenge-node--locked .map-station__caption { color: #6f5b49; }
 
 .personal-workspace .map-station--boss {
   border-color: var(--g-purple-edge) !important;
@@ -3317,4 +3321,28 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.personal-workspace .challenge-optional .challenge-node .button,
+.personal-workspace .challenge-optional .challenge-node button {
+  width: fit-content;
+  justify-self: start;
+}
+
+/* Optional branch: description on the left, one compact action on the right. */
+.personal-workspace .challenge-node--optional .challenge-node__body {
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 24px;
+  align-items: center;
+}
+
+.personal-workspace .challenge-node--optional .challenge-node__body > *:not(button) {
+  grid-column: 1;
+}
+
+.personal-workspace .challenge-node--optional .challenge-node__body > button {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  justify-self: end;
 }
