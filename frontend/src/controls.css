@@ -1042,3 +1042,36 @@
 @media (max-width: 720px) {
   .personal-workspace .practice-options--phrases { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Every question's option block spans the card: first tile flush left,
+   last tile flush right, with the gap absorbing the difference. */
+.personal-workspace .practice-options--words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.personal-workspace .practice-options--words .practice-option {
+  flex: 1 1 180px;
+  max-width: 210px;
+  justify-self: auto;
+}
+
+.personal-workspace .practice-options--phrases {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.personal-workspace .practice-options--phrases .practice-option {
+  flex: 1 1 300px;
+  max-width: 420px;
+  justify-self: auto;
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .practice-options--phrases .practice-option,
+  .personal-workspace .practice-options--words .practice-option { max-width: none; }
+}
