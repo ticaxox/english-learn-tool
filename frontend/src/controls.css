@@ -923,3 +923,49 @@
 @media (max-width: 720px) {
   .personal-workspace .practice-option-glossary { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* One weight for every option label; size and width carry the hierarchy. */
+.personal-workspace .practice-option__text {
+  font-size: 0.97rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.personal-workspace .practice-option,
+.personal-workspace .choice-option {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+
+/* Sentence-length options get a readable measure instead of full-bleed rows. */
+.personal-workspace .practice-options--long .practice-option {
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+/* Word tiles: shorter and larger, still centred. */
+.personal-workspace .practice-options--words .practice-option {
+  max-width: 190px;
+}
+
+.personal-workspace .practice-options--words .practice-option__text {
+  font-size: 1.06rem;
+}
+
+.personal-workspace .choice-list--words .choice-option { max-width: 260px; }
+
+.personal-workspace .choice-option__label {
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+/* Trim the gutters so shorter tiles still hold the word without wrapping. */
+.personal-workspace .practice-option,
+.personal-workspace .choice-option {
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+}
+
+.personal-workspace .option-badge { width: 26px; height: 26px; }
+
+.personal-workspace .practice-options--words .practice-option { max-width: 185px; }
+.personal-workspace .choice-list--words .choice-option { max-width: 240px; }
