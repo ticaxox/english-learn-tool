@@ -27,14 +27,6 @@ const sentenceOptions = computed(() => props.question.options.some((option) => {
   const text = (option.text ?? '').trim()
   return optionWordCount(option) >= 6 || text.length > 40 || /[.!?]$/.test(text)
 }))
-const glossary = computed(() => props.question.options
-  .map((option, index) => ({
-    letter: String.fromCharCode(65 + index),
-    text: option.text,
-    textZh: option.textZh,
-  }))
-  .filter((entry) => entry.textZh))
-
 const wordOptions = computed(() => props.question.options.length > 0
   && props.question.options.every((option) => {
     const text = (option.text ?? '').trim()
@@ -135,6 +127,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         <OptionBadge :letter="String.fromCharCode(65 + optionIndex)" />
         <span class="practice-option__body">
           <span class="practice-option__text">{{ option.text }}</span>
+          <small v-if="inReview && option.textZh">{{ option.textZh }}</small>
         </span>
       </label>
     </fieldset>
@@ -153,13 +146,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
       <p class="field-hint">当前字数：{{ modelValue.length }} / 20000</p>
     </div>
 
-    <ul v-if="inReview && glossary.length" class="practice-option-glossary" aria-label="选项中文释义">
-      <li v-for="entry in glossary" :key="entry.letter">
-        <span class="practice-option-glossary__letter">{{ entry.letter }}</span>
-        <span class="practice-option-glossary__en">{{ entry.text }}</span>
-        <span class="practice-option-glossary__zh">{{ entry.textZh }}</span>
-      </li>
-    </ul>
+
 
   </section>
 </template>

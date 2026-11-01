@@ -1075,3 +1075,18 @@
   .personal-workspace .practice-options--phrases .practice-option,
   .personal-workspace .practice-options--words .practice-option { max-width: none; }
 }
+
+/* Reviews: each option carries its own translation underneath. */
+.personal-workspace .practice-option__body small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.personal-workspace .practice-options--sentences .practice-option__body { align-items: flex-start; }
+
+/* Phrases: shorter tiles while the row stays flush at both edges. */
+.personal-workspace .practice-options--phrases .practice-option { max-width: 320px; }
