@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import { ValidationError } from '../api/errors'
 import { validateStrongPassword } from '../lib/validation'
 import { PasswordChangedLoginRequiredError, useAuthStore } from '../stores/auth'
 
@@ -19,23 +20,23 @@ async function submit(): Promise<void> {
   saved.value = false
 
   if (!oldPassword.value) {
-    error.value = new Error('请输入当前密码。')
+    error.value = new ValidationError('请输入当前密码。')
     return
   }
 
   const passwordError = validateStrongPassword(newPassword.value)
   if (passwordError) {
-    error.value = new Error(passwordError)
+    error.value = new ValidationError(passwordError)
     return
   }
 
   if (newPassword.value !== confirmPassword.value) {
-    error.value = new Error('两次输入的新密码不一致。')
+    error.value = new ValidationError('两次输入的新密码不一致。')
     return
   }
 
   if (oldPassword.value === newPassword.value) {
-    error.value = new Error('新密码不能与当前密码相同。')
+    error.value = new ValidationError('新密码不能与当前密码相同。')
     return
   }
 

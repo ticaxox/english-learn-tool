@@ -159,6 +159,7 @@ async function patchProvider(providerId: string, input: ProviderPatchInput, key:
   try {
     await updatePersonalProvider(providerId, input)
     await load()
+    toast.push({ title: 'AI 配置已更新', tone: 'success' })
   } catch (error) {
     operationError.value = error
   } finally {

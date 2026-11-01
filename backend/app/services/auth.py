@@ -380,6 +380,27 @@ async def refresh_session(
                     csrf_token=new_csrf,
                     refresh_token=new_refresh,
                 )
+        if record.revoked_reason == "rotated":
+            # A stale tab (or a replayed old token) must not take down every
+            # other tab in the family. Deny this request only.
+            add_audit_event(
+                session,
+                actor=user,
+                action="auth.refresh.stale",
+                target_type="session",
+                target_id=record.id,
+                target_username=user.username_normalized,
+                outcome="failure",
+                reason_code="AUTH_REFRESH_STALE",
+                context={"family_id": str(record.family_id)},
+            )
+            await session.commit()
+            raise AppError(
+                status_code=401,
+                code="AUTH_REFRESH_STALE",
+                message="This refresh token has been rotated. Sign in again on this tab.",
+            )
+
         await session.execute(
             update(RefreshToken)
             .where(

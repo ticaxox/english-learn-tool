@@ -77,6 +77,13 @@ const statusLabels: Record<WordbookStatus, string> = {
   deleted: '已删除',
 }
 
+function coverMark(name: string | undefined): string {
+  if (!name) return 'W'
+  const lastToken = name.trim().split(/\s+/).at(-1) ?? ''
+  if (/^\d{2,}$/.test(lastToken)) return lastToken.slice(-2)
+  return name.trim().slice(0, 1).toUpperCase() || 'W'
+}
+
 function statusLabel(status: WordbookStatus): string {
   return statusLabels[status]
 }
@@ -231,7 +238,7 @@ onMounted(() => {
 
     <section class="workspace-card wordbook-active-banner wordbook-active-strip crumb-current-book" :class="{ 'wordbook-active-banner--empty': !activeBook }">
       <div class="wordbook-active-copy">
-        <span class="wordbook-active-mark" aria-hidden="true">{{ activeBook?.name.slice(0, 1) ?? 'W' }}</span>
+        <span class="wordbook-active-mark" aria-hidden="true">{{ coverMark(activeBook?.name) }}</span>
         <div>
           <p class="workspace-kicker">当前主词书</p>
           <strong>{{ activeBook?.name ?? '还没有激活词书' }}</strong>

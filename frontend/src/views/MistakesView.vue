@@ -8,6 +8,7 @@
  * server's recomputed next appearance.
  */
 import { computed, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
@@ -128,7 +129,7 @@ onMounted(() => {
         <p class="eyebrow">错词本</p>
         <h1>需要再练的词</h1>
         <p class="lead">
-          只列出背词训练中真实答错（Again）的词。未来 AI 练习的错题属于另一个数据源，不会混入这里。
+          只记录背词训练中答错的词。AI 练习错题请到<RouterLink to="/practice/mistakes">练习错题本</RouterLink>查看。
         </p>
       </div>
     </header>

@@ -162,7 +162,9 @@ async def test_login_rate_limit_uses_real_redis_and_returns_retry_after(
     assert correct_while_throttled.status_code == 429
 
 
-async def test_refresh_rotation_and_replay_revokes_entire_family(app, admin_user) -> None:
+async def test_refresh_rotation_denies_a_stale_tab_without_revoking_the_family(
+    app, admin_user
+) -> None:
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
         login_response = await login(client, admin_user.username)
@@ -221,20 +223,20 @@ async def test_refresh_rotation_and_replay_revokes_entire_family(app, admin_user
             },
         )
         assert replay.status_code == 401
-        assert replay.json()["code"] == "AUTH_TOKEN_REUSED"
+        assert replay.json()["code"] == "AUTH_REFRESH_STALE"
 
-        revoked_access = await client.get(
+        surviving_access = await client.get(
             ME_PATH,
             headers=bearer(grace_session["access_token"]),
         )
-        assert revoked_access.status_code == 401
+        assert surviving_access.status_code == 200
 
         async with app.state.session_factory() as db:
             events = list(
                 (
                     await db.scalars(
                         select(AuditLog)
-                        .where(AuditLog.action == "auth.refresh.reuse")
+                        .where(AuditLog.action == "auth.refresh.stale")
                         .order_by(AuditLog.created_at.desc())
                         .limit(1)
                     )
@@ -242,7 +244,7 @@ async def test_refresh_rotation_and_replay_revokes_entire_family(app, admin_user
             )
         assert len(events) == 1
         assert events[0].outcome == "failure"
-        assert events[0].reason_code == "AUTH_TOKEN_REUSED"
+        assert events[0].reason_code == "AUTH_REFRESH_STALE"
 
 
 async def test_refresh_and_logout_enforce_origin_and_double_submit_csrf(client, admin_user) -> None:

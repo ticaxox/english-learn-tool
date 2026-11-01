@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { ApiError, toErrorPresentation } from '../api/errors'
+import { ApiError, ValidationError, toErrorPresentation } from '../api/errors'
 
 describe('error presentation', () => {
+  it('keeps client-side form checks out of the unexpected-error bucket', () => {
+    const presentation = toErrorPresentation(new ValidationError('两次输入的新密码不一致。'))
+    expect(presentation).toEqual({
+      title: '请检查填写内容',
+      message: '两次输入的新密码不一致。',
+      requestId: null,
+      retryable: false,
+    })
+  })
+
   it('explains a service outage in product language', () => {
     const presentation = toErrorPresentation(
       new ApiError(502, 'HTTP_502', 'Bad Gateway', null, 'gateway-request', true),

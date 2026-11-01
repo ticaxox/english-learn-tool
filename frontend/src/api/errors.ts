@@ -24,6 +24,14 @@ export class ApiError extends Error {
   }
 }
 
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ValidationError'
+    Object.setPrototypeOf(this, ValidationError.prototype)
+  }
+}
+
 export class ContractError extends Error {
   readonly code = 'API_CONTRACT_MISMATCH'
 
@@ -88,6 +96,15 @@ export function isContractError(error: unknown): error is ContractError {
 }
 
 export function toErrorPresentation(error: unknown): ErrorPresentation {
+  if (error instanceof ValidationError) {
+    return {
+      title: '请检查填写内容',
+      message: error.message,
+      requestId: null,
+      retryable: false,
+    }
+  }
+
   if (isApiError(error)) {
     if (error.code === 'NETWORK_ERROR') {
       return {

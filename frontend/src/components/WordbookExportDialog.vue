@@ -180,7 +180,7 @@ async function download(): Promise<void> {
   try {
     const blob = await downloadWordbookExport(current.job_id)
     if (blob.size === 0) {
-      throw new WordbookTaskError('EXPORT_DOWNLOAD_EMPTY', '下载接口返回了空文件，不会将空文件标记为成功。')
+      throw new WordbookTaskError('EXPORT_DOWNLOAD_EMPTY', '导出文件为空，请重新导出。')
     }
     const objectUrl = window.URL.createObjectURL(blob)
     const anchor = document.createElement('a')
