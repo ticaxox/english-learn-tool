@@ -6,6 +6,7 @@
  */
 import { computed, nextTick, ref, watch } from 'vue'
 import type { ChoiceQuestion } from '../types/learning'
+import OptionBadge from './OptionBadge.vue'
 
 const props = defineProps<{
   question: ChoiceQuestion
@@ -99,7 +100,7 @@ function submit(): void {
           :checked="selected === option.optionId"
           @change="choose(option.optionId)"
         />
-        <span class="choice-option__index" aria-hidden="true">{{ String.fromCharCode(65 + index) }}</span>
+        <OptionBadge :letter="String.fromCharCode(65 + index)" />
         <span class="choice-option__label">{{ option.label }}</span>
       </label>
     </fieldset>

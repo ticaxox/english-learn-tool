@@ -749,3 +749,112 @@
 }
 
 .personal-workspace .choice-list--words .choice-option__label { text-align: center; }
+
+/* ----------------------------------------------------------------- option badge */
+
+/* Any native radio inside a tile is purely semantic: never paint it. */
+.personal-workspace .practice-option__input,
+.personal-workspace .choice-option input[type="radio"] {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Letter band pinned left, content centred between two equal gutters. */
+.personal-workspace .practice-option,
+.personal-workspace .choice-option {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 54px;
+  align-items: center;
+  padding: 0;
+  overflow: hidden;
+}
+
+.personal-workspace .practice-option__body {
+  grid-column: 2;
+  align-items: center;
+  min-height: 0;
+  text-align: center;
+}
+
+.personal-workspace .choice-option__label {
+  grid-column: 2;
+  text-align: center;
+}
+
+.personal-workspace .option-badge {
+  position: relative;
+  display: grid;
+  grid-column: 1;
+  align-self: stretch;
+  min-height: 52px;
+  place-items: center;
+}
+
+.personal-workspace .option-badge__plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.personal-workspace .option-badge__shape {
+  fill: var(--badge-fill, #fff7e8);
+  stroke: var(--badge-edge, var(--ui-line-strong));
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.personal-workspace .option-badge__letter {
+  position: relative;
+  z-index: 1;
+  color: var(--badge-ink, var(--ui-ink));
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.personal-workspace .practice-option--correct,
+.personal-workspace .practice-option--correct:has(input:checked) {
+  --badge-fill: #ddf7e1;
+  --badge-edge: var(--g-green-edge);
+  --badge-ink: var(--g-green-edge);
+}
+
+.personal-workspace .practice-option--wrong,
+.personal-workspace .practice-option--wrong:has(input:checked) {
+  --badge-fill: #ffe4e0;
+  --badge-edge: var(--g-red-edge);
+  --badge-ink: var(--g-red-edge);
+}
+
+.personal-workspace .practice-option--picked:not(.practice-option--correct):not(.practice-option--wrong),
+.personal-workspace .choice-option--selected {
+  --badge-fill: #dff2ff;
+  --badge-edge: #0d88c4;
+  --badge-ink: #0d88c4;
+}
+
+/* Word tiles: tighter width, larger type, roomier gaps. */
+.personal-workspace .practice-options--words { gap: 18px 20px; }
+
+.personal-workspace .practice-options--words .practice-option {
+  flex: 1 1 150px;
+  max-width: 200px;
+  min-height: 56px;
+}
+
+.personal-workspace .practice-options--words .practice-option__text {
+  font-size: 1.03rem;
+  font-weight: 850;
+}
+
+.personal-workspace .practice-options--words .practice-option small { font-size: 0.8rem; }
+
+.personal-workspace .choice-list--words .choice-option { max-width: 280px; }
+.personal-workspace .choice-list--words .choice-option__label { font-size: 1rem; }

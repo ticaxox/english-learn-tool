@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PracticeOption, PracticeQuestion } from '../api/practice'
+import OptionBadge from './OptionBadge.vue'
 
 const props = defineProps<{
   question: PracticeQuestion
@@ -114,7 +115,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
           :disabled="disabled || inReview"
           @change="update(option.id)"
         />
-        <span class="practice-option__mark" aria-hidden="true">{{ String.fromCharCode(65 + optionIndex) }}</span>
+        <OptionBadge :letter="String.fromCharCode(65 + optionIndex)" />
         <span class="practice-option__body">
           <span class="practice-option__text">{{ option.text }}</span>
           <small v-if="inReview && option.textZh">{{ option.textZh }}</small>
