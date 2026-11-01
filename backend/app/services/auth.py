@@ -333,6 +333,53 @@ async def refresh_session(
         )
 
     if record.revoked_at is not None:
+        grace = timedelta(seconds=settings.refresh_reuse_grace_seconds)
+        rotated_recently = (
+            settings.refresh_reuse_grace_seconds > 0
+            and record.revoked_reason == "rotated"
+            and utcnow() - record.revoked_at <= grace
+        )
+        if rotated_recently:
+            active = await session.scalar(
+                select(RefreshToken)
+                .where(
+                    RefreshToken.family_id == record.family_id,
+                    RefreshToken.revoked_at.is_(None),
+                    RefreshToken.expires_at > utcnow(),
+                )
+                .order_by(RefreshToken.created_at.desc())
+                .with_for_update()
+            )
+            if active is not None and user.status == "active":
+                new_record, new_refresh, new_csrf = _create_refresh_record(
+                    user_id=user.id,
+                    family_id=record.family_id,
+                    settings=settings,
+                    request=request,
+                )
+                session.add(new_record)
+                await session.flush()
+                active.revoked_at = utcnow()
+                active.revoked_reason = "rotated"
+                active.replaced_by_id = new_record.id
+                await session.commit()
+                logger.info(
+                    "security.refresh_race_recovered",
+                    extra={
+                        "event": "auth.refresh.race_recovered",
+                        "user_id": str(user.id),
+                        "target_id": str(record.id),
+                        "outcome": "success",
+                    },
+                )
+                access_token, expires_in = _issue_access(user, new_record, settings)
+                return IssuedSession(
+                    user=user,
+                    access_token=access_token,
+                    expires_in=expires_in,
+                    csrf_token=new_csrf,
+                    refresh_token=new_refresh,
+                )
         await session.execute(
             update(RefreshToken)
             .where(

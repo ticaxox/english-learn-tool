@@ -203,6 +203,8 @@ export function usePracticeSession(sessionId: string, options: PracticeSessionOp
     error.value = null
     try {
       const response = await api.submit(sessionId, answers, key)
+      // The header reads session.status; keep it in step with the result view.
+      if (session.value) session.value = { ...session.value, status: 'submitted' }
       if (response.result) {
         result.value = response.result
       } else if (response.status === 'scoring') {

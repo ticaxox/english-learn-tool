@@ -162,7 +162,7 @@ onUnmounted(() => {
       <div class="alert alert-warning">
         <strong>删除会在后台执行，完成后列表会自动更新。</strong>
         <ul>
-          <li>共享词书需要再次输入完整名称；私人词书勾选确认即可。</li>
+          <li>私人词书删除后不可恢复；学习进度和相关记录会一并清理。</li>
           <li v-if="props.wordbook.is_active">这是当前主词书，删除后需要重新选择或导入一本。</li>
           <li>当前词条数：{{ props.wordbook.entry_count.toLocaleString('zh-CN') }}。</li>
         </ul>

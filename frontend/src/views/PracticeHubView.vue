@@ -212,8 +212,8 @@ onMounted(() => {
             <h2 id="practice-create-title">今天想练什么</h2>
           </div>
           <div class="practice-quota-inline" aria-label="今日练习额度">
-            <span>生成 <strong>{{ quotaRemaining('question_generation') ?? '—' }}</strong></span>
-            <span>评分 <strong>{{ quotaRemaining('subjective_grading') ?? '—' }}</strong></span>
+            <span title="今日还可用 AI 生成题目的次数">生成余量 <strong>{{ quotaRemaining('question_generation') ?? '—' }}</strong></span>
+            <span title="今日还可提交主观题评分的次数">评分余量 <strong>{{ quotaRemaining('subjective_grading') ?? '—' }}</strong></span>
           </div>
         </header>
         <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />

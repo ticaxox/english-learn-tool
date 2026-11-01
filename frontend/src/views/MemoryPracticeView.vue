@@ -154,14 +154,24 @@ async function master(questionId: string): Promise<void> {
   heartbeat.markInteraction()
 }
 
-async function endSession(): Promise<void> {
-  const confirmed = window.confirm('结束本次会话后，未完成的目标不会被算作完成。确定结束吗？')
-  if (!confirmed) {
-    return
+const endConfirmOpen = ref(false)
+const ending = ref(false)
+
+function endSession(): void {
+  endConfirmOpen.value = true
+}
+
+async function confirmEndSession(): Promise<void> {
+  if (ending.value) return
+  ending.value = true
+  try {
+    await session.endSession()
+    heartbeat.stop()
+    timer.stop()
+    endConfirmOpen.value = false
+  } finally {
+    ending.value = false
   }
-  await session.endSession()
-  heartbeat.stop()
-  timer.stop()
 }
 
 function restart(): void {
@@ -372,6 +382,24 @@ watch(challengeModule, async (module, previous) => {
         </dl>
         <RouterLink class="memory-settings-link" to="/settings">调整训练与目标 <AppIcon name="settings" /></RouterLink>
       </aside>
+    </div>
+
+    <div v-if="endConfirmOpen" class="dialog-backdrop" @click.self="endConfirmOpen = false">
+      <section class="dialog-card memory-end-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-end-title">
+        <header class="dialog-heading">
+          <div>
+            <p class="eyebrow">本次训练</p>
+            <h2 id="memory-end-title">结束本次训练？</h2>
+          </div>
+        </header>
+        <p class="field-hint">未完成的目标不会被算作完成，已记住的词会保留。</p>
+        <div class="button-row">
+          <button class="button-danger" type="button" :disabled="ending" @click="confirmEndSession">
+            {{ ending ? '正在结束…' : '结束本次' }}
+          </button>
+          <button class="button-secondary" type="button" :disabled="ending" @click="endConfirmOpen = false">继续学习</button>
+        </div>
+      </section>
     </div>
   </article>
 </template>

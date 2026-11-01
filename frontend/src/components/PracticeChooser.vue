@@ -6,6 +6,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import ErrorNotice from './ErrorNotice.vue'
+import SvgPlateButton from './SvgPlateButton.vue'
 import { fetchLearningProfile, fetchMemoryConfig, saveMemoryConfig } from '../api/learning'
 
 import {

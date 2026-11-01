@@ -38,6 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
   const lastError = ref<unknown>(null)
 
   let restoreInFlight: Promise<void> | null = null
+  let refreshInFlight: Promise<void> | null = null
 
   const isAuthenticated = computed(() => user.value !== null)
   const isAdmin = computed(() => user.value?.role === 'admin')
@@ -84,12 +85,29 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function refreshAccessToken(): Promise<void> {
-    const payload = await apiClient.post<unknown>(
-      '/auth/refresh',
-      undefined,
-      { skipAuthRefresh: true, retryCount: 0 },
-    )
-    applyTokenResponse(payload)
+    // Startup restore and a 401-triggered refresh can overlap; one rotation only.
+    if (!refreshInFlight) {
+      refreshInFlight = (async () => {
+        const rotate = async (): Promise<void> => {
+          const payload = await apiClient.post<unknown>(
+            '/auth/refresh',
+            undefined,
+            { skipAuthRefresh: true, retryCount: 0 },
+          )
+          applyTokenResponse(payload)
+        }
+        // Tabs share one refresh cookie; serialise rotation across them so a
+        // stale in-flight request cannot trip refresh-token reuse detection.
+        if (typeof navigator !== 'undefined' && 'locks' in navigator) {
+          await navigator.locks.request('crumbtrail.auth.refresh', rotate)
+        } else {
+          await rotate()
+        }
+      })().finally(() => {
+        refreshInFlight = null
+      })
+    }
+    await refreshInFlight
   }
 
   async function restoreSession(): Promise<void> {

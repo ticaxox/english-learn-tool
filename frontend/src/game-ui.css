@@ -539,7 +539,7 @@
   /* The empty map reads as a map canvas rather than a short banner. */
   .personal-workspace .challenge-page > .challenge-generate {
     display: grid;
-    min-height: 400px;
+    min-height: 320px;
     grid-template-columns: auto minmax(0, 1fr);
     align-content: center;
     background-color: var(--ui-surface);
@@ -594,7 +594,7 @@
   color: #fff;
 }
 
-.personal-workspace .challenge-node--locked { opacity: 0.6; }
+.personal-workspace .challenge-node--locked { opacity: 0.8; }
 .personal-workspace .challenge-node--boss {
   border-color: var(--g-purple-edge) !important;
   background: linear-gradient(135deg, #faf2ff, #f0e0ff) !important;
@@ -638,6 +638,16 @@
 .personal-workspace .study-card__prompt {
   font-weight: 900;
   letter-spacing: -0.02em;
+}
+
+.personal-workspace .memory-page .study-card__word,
+.personal-workspace .memory-page .study-card__prompt {
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  line-height: 1.05;
+}
+
+.personal-workspace .memory-page .memory-main-card {
+  align-content: center;
 }
 
 .personal-workspace .choice-option,
@@ -2986,14 +2996,14 @@
   border: 0 !important;
   border-radius: 0;
   background: transparent;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 .personal-workspace .practice-stage-progress strong span { margin-left: 4px; }
 
 /* ---------------------------------------------- practice screens: own chrome */
 
-.personal-workspace.is-immersive { display: block; min-height: 100vh; }
+.personal-workspace.is-immersive { display: block; min-height: 100vh; overflow-x: clip; }
 
 .personal-workspace.is-immersive .workspace-sidebar,
 .personal-workspace.is-immersive .workspace-topbar,
@@ -3283,4 +3293,28 @@
     padding: 8px 14px;
   }
   .personal-workspace .practice-topbar__tabs { order: 3; justify-content: flex-start; width: 100%; }
+}
+
+/* One bubble rule: the article, row and text all shrink to the message. */
+.personal-workspace .ia-coach-panel .coach-message--user {
+  width: fit-content;
+  max-width: 88%;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
+  width: auto !important;
+  max-width: none !important;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
+  width: max-content !important;
+  max-width: 100% !important;
+  white-space: pre-wrap;
+}
+
+.personal-workspace .personal-ai-provider__url {
+  max-width: 46ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

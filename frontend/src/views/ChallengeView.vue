@@ -336,7 +336,7 @@ onMounted(() => {
           </button>
           <RouterLink class="button-secondary" to="/overview">先学习今日任务</RouterLink>
         </div>
-        <p v-if="generating" class="inline-note" role="status">{{ generationStatus }}</p>
+        <p v-if="generating" class="field-hint" role="status">{{ generationStatus }} 通常需要 1–2 分钟，可以先去做记忆练习。</p>
       </div>
     </section>
 
@@ -384,7 +384,7 @@ onMounted(() => {
         <section class="dialog-card challenge-node-dialog" role="dialog" aria-modal="true" aria-labelledby="challenge-node-dialog-title">
         <div class="challenge-node-detail__heading">
           <div><p class="eyebrow">{{ CHALLENGE_NODE_LABELS[selectedNode.node.nodeType] }}</p><h2 id="challenge-node-dialog-title">{{ selectedNode.node.title }}</h2></div>
-          <button class="link-button" type="button" @click="selectedNode = null">关闭</button>
+          <button class="icon-button" type="button" aria-label="关闭" @click="selectedNode = null">×</button>
         </div>
         <p>{{ selectedNode.node.description }}</p>
         <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
@@ -397,7 +397,7 @@ onMounted(() => {
             {{ nodeStarting ? '正在启动…' : (selectedNode.allowedActions.includes('resume') ? '继续节点' : '开始节点') }}
           </button>
           <button v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
-          <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
+          <button class="button-secondary" type="button" @click="selectedNode = null">取消</button>
         </div>
         </section>
       </div>

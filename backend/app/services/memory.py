@@ -263,7 +263,9 @@ def _cloze(headword: str, mode: str) -> str:
         positions = list(range(1, len(headword) - 1))
         blank_count = random.randint(max(1, len(positions) // 2), len(positions))
         blanks = set(random.sample(positions, blank_count))
-        return "".join("_" if index in blanks else character for index, character in enumerate(headword))
+        return "".join(
+            "_" if index in blanks else character for index, character in enumerate(headword)
+        )
     return "_" * len(headword)
 
 

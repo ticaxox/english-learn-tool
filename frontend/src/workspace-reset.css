@@ -1562,3 +1562,12 @@
   .crumb-today h1 { overflow-wrap: anywhere; }
   .crumb-route-progress { margin-right: 16px; margin-left: 16px; }
 }
+/* The preview summary sits on paper, not on a dark book cover. */
+.workspace-shell .wordbook-preview-meta .wordbook-pill {
+  padding: 2px 8px;
+  border: 1px solid #c8dece;
+  border-radius: 999px;
+  background: #edf8f0;
+  color: #1e6040;
+  font-size: 11px;
+}

@@ -730,6 +730,11 @@ body {
 }
 .personal-workspace .ia-security-form .field:first-child,
 .personal-workspace .ia-security-form .button-row { grid-column: 1 / -1; }
+.personal-workspace .ia-account-security .button-row {
+  justify-content: flex-end;
+  padding-top: var(--ui-space-4);
+  border-top: 1px solid var(--ui-line);
+}
 
 /* Practice hub: one working area and one supporting rail. */
 .personal-workspace .practice-workspace-grid {
@@ -784,6 +789,9 @@ body {
 .personal-workspace .practice-filter-bar > .inline-note {
   grid-column: 1 / -1;
   margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 .personal-workspace .practice-records-actions {
   justify-content: space-between;

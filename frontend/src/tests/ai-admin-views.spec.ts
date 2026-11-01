@@ -189,8 +189,10 @@ describe('admin AI views', () => {
     expect(providerId).toBe(defaultProvider.id)
     expect(patch.modelId).toBe('model-c')
     expect(patch).not.toHaveProperty('apiKey')
-    // The key field keeps showing the masked key and is not sent back unchanged.
-    expect((wrapper.get('#provider-api-key').element as HTMLInputElement).value).toBe(defaultProvider.apiKeyMasked)
+    // The stored key is never sent to the browser; only its mask is shown as a hint.
+    const keyInput = wrapper.get('#provider-api-key').element as HTMLInputElement
+    expect(keyInput.value).toBe('')
+    expect(keyInput.placeholder).toContain(defaultProvider.apiKeyMasked)
   })
 
   it('requires a new key only when creating or explicitly replacing it', async () => {

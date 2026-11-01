@@ -56,7 +56,6 @@ def _collect_entry_ids(item: Any) -> set[str]:
     return _uuid_set(values)
 
 
-
 _CHALLENGE_PRACTICE_NODES = {"AI_PRACTICE", "BOSS"}
 _CHALLENGE_PRACTICE_COUNTS = {5, 10}
 
@@ -75,7 +74,8 @@ def _normalize_challenge_nodes(parsed: dict[str, Any], context: dict[str, Any]) 
     allowed_practice_types = context.get("allowed_practice_types") or []
     default_practice_type = (
         allowed_practice_types[0]
-        if allowed_practice_types and allowed_practice_types[0] in {"fill_blank", "reading", "translation", "writing"}
+        if allowed_practice_types
+        and allowed_practice_types[0] in {"fill_blank", "reading", "translation", "writing"}
         else "fill_blank"
     )
     for node in nodes:
@@ -102,6 +102,7 @@ def _normalize_challenge_nodes(parsed: dict[str, Any], context: dict[str, Any]) 
                 node.pop("practice_type", None)
             if node.get("practice_count") not in _CHALLENGE_PRACTICE_COUNTS:
                 node.pop("practice_count", None)
+
 
 def validate_task_output(
     *,

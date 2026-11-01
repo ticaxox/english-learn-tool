@@ -29,8 +29,6 @@ const props = defineProps<{
   modelOptions?: string[]
   modelLoading?: boolean
   modelError?: unknown
-  /** Owner-only reveal of the stored key (personal dialog). */
-  revealKey?: (providerId: string) => Promise<string>
   testLoading?: boolean
   testResult?: ProviderTestResult | null
 }>()
@@ -52,19 +50,13 @@ const enabled = ref(true)
 const isDefault = ref(false)
 const customHeadersText = ref('{}')
 const apiKey = ref('')
-const keyVisible = ref(false)
-const revealedKey = ref('')
-const keyLoading = ref(false)
 const modelsOpen = ref(false)
 const errors = reactive<Record<string, string>>({})
 
 const editing = computed(() => Boolean(props.provider))
 const title = computed(() => (editing.value ? `编辑 ${props.provider?.name}` : '新增 AI 提供商'))
 const maskedKey = computed(() => (editing.value ? props.provider?.apiKeyMasked ?? '' : ''))
-const keyChanged = computed(() => editing.value
-  && apiKey.value !== ''
-  && apiKey.value !== maskedKey.value
-  && apiKey.value !== revealedKey.value)
+const keyChanged = computed(() => editing.value && apiKey.value !== '')
 
 const forbiddenHeaders = new Set([
   'authorization',
@@ -89,10 +81,7 @@ function reset(): void {
   enabled.value = provider?.enabled ?? true
   isDefault.value = provider?.isDefault ?? false
   customHeadersText.value = provider ? JSON.stringify(provider.customHeaders, null, 2) : '{}'
-  apiKey.value = provider?.apiKeyMasked ?? ''
-  keyVisible.value = false
-  revealedKey.value = ''
-  keyLoading.value = false
+  apiKey.value = ''
   modelsOpen.value = false
   Object.keys(errors).forEach((key) => delete errors[key])
 }
@@ -175,7 +164,7 @@ function validate(): ValidatedProviderFields | null {
     errors.timeoutSeconds = '超时必须是 1–120 秒的整数。'
   }
   if (!editing.value || keyChanged.value) {
-    if (apiKey.value.length < 8) errors.apiKey = 'API Key 至少需要 8 个字符。'
+    if (apiKey.value.trim().length < 8) errors.apiKey = 'API Key 至少需要 8 个字符。'
   }
 
   const headers = parseHeaders()
@@ -200,41 +189,9 @@ function submit(): void {
   }
   const patch: ProviderPatchInput = { ...fields }
   if (!props.compact) patch.isDefault = isDefault.value
-  // An untouched field still shows the masked key; only send the key when it changed.
-  if (keyChanged.value) patch.apiKey = apiKey.value
+  // The stored key is never sent to the browser; only a newly typed key is saved.
+  if (keyChanged.value) patch.apiKey = apiKey.value.trim()
   emit('update', props.provider.id, patch)
-}
-
-async function toggleKey(): Promise<void> {
-  if (keyVisible.value) {
-    keyVisible.value = false
-    // Put the mask back: the full key is not kept on screen.
-    if (revealedKey.value) {
-      apiKey.value = maskedKey.value
-      revealedKey.value = ''
-    }
-    return
-  }
-  if (editing.value && props.revealKey && apiKey.value === maskedKey.value && !keyLoading.value) {
-    keyLoading.value = true
-    try {
-      const full = await props.revealKey(props.provider!.id)
-      revealedKey.value = full
-      apiKey.value = full
-    } catch {
-      errors.apiKey = '暂时读不到完整 Key，请重新填写一个。'
-      keyLoading.value = false
-      return
-    } finally {
-      keyLoading.value = false
-    }
-  }
-  keyVisible.value = true
-}
-
-function selectMaskedKey(event: FocusEvent): void {
-  const input = event.target as HTMLInputElement
-  if (input.value === maskedKey.value) input.select()
 }
 
 function toggleModels(): void {
@@ -329,26 +286,17 @@ function cancel(): void {
 
       <div class="field">
         <label for="provider-api-key">API Key</label>
-        <div class="ai-secret-row">
-          <input
-            id="provider-api-key"
-            v-model="apiKey"
-            :type="keyVisible ? 'text' : 'password'"
-            autocomplete="off"
-            spellcheck="false"
-            maxlength="4096"
-            :aria-invalid="Boolean(errors.apiKey)"
-            @focus="selectMaskedKey"
-          />
-          <button
-            class="button-secondary ai-secret-toggle"
-            type="button"
-            :aria-pressed="keyVisible"
-            :aria-label="keyVisible ? '隐藏 API Key' : '显示完整 API Key'"
-            :disabled="keyLoading"
-            @click="toggleKey"
-          >{{ keyLoading ? '读取中…' : (keyVisible ? '隐藏' : '显示') }}</button>
-        </div>
+        <input
+          id="provider-api-key"
+          v-model="apiKey"
+          type="password"
+          autocomplete="new-password"
+          spellcheck="false"
+          maxlength="4096"
+          :placeholder="editing ? (maskedKey ? `留空保持当前 Key（${maskedKey}）` : '留空保持当前 Key') : '至少 8 个字符'"
+          :aria-invalid="Boolean(errors.apiKey)"
+        />
+        <p v-if="editing && !errors.apiKey" class="field-hint">已保存的 Key 不会回显；需要更换时直接输入新 Key。</p>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
         <div v-if="editing" class="ai-test-row">
           <button class="button-secondary" type="button" :disabled="testLoading" @click="emit('test')">

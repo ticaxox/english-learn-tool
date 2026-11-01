@@ -449,7 +449,7 @@ onUnmounted(() => {
           <div class="section-heading">
             <div>
               <h3 id="wordbook-mapping-title">字段映射</h3>
-              <p class="field-hint">确认前会先 PATCH remap，再使用响应中的新 preview_hash 创建导入任务。</p>
+              <p class="field-hint">确认前会按当前字段映射整理内容；确认后开始导入。</p>
             </div>
           </div>
           <div class="wordbook-form-grid wordbook-mapping-grid">
@@ -469,7 +469,7 @@ onUnmounted(() => {
           <div class="section-heading">
             <div>
               <h3 id="wordbook-sample-title">导入后的词条样例</h3>
-              <p class="field-hint">样例行已经按映射归一化，不是原始列对象。</p>
+              <p class="field-hint">样例行已按当前映射转换，不是原始文件行。</p>
             </div>
           </div>
           <div class="wordbook-sample-list">

@@ -299,6 +299,7 @@
 
 .coach-message--user {
   justify-self: end;
+  width: max-content;
   border-color: #c5ddcf;
   border-bottom-right-radius: 4px;
   background: #eaf5ee;
@@ -513,3 +514,13 @@
     scroll-behavior: auto;
   }
 }
+
+.coach-message__error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.coach-message__error .field-error { margin: 0; }

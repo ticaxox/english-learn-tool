@@ -52,14 +52,11 @@ function statusLabel(status: WordbookStatus): string {
 
 function formatDate(value: string): string {
   const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN')
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-function ownerLabel(ownerId: string | null, visibility: 'organization' | 'private'): string {
-  if (visibility === 'organization') {
-    return '组织共享'
-  }
-  return ownerId ? `${ownerId.slice(0, 8)}…` : '服务端未返回所有者'
+function ownerLabel(_ownerId: string | null, visibility: 'organization' | 'private'): string {
+  return visibility === 'organization' ? '组织共享' : '仅自己可见'
 }
 
 async function load(offset = detail.value?.offset ?? 0): Promise<void> {
@@ -155,7 +152,7 @@ onMounted(() => {
             <dd>{{ detail.wordbook.version }}</dd>
           </div>
           <div>
-            <dt>所有者</dt>
+            <dt>可见范围</dt>
             <dd>{{ ownerLabel(detail.wordbook.owner_id, detail.wordbook.visibility) }}</dd>
           </div>
           <div>
@@ -167,7 +164,7 @@ onMounted(() => {
         <div class="section-heading wordbook-entry-heading">
           <div>
             <h3>词条</h3>
-            <p class="field-hint">词条与嵌套释义由真实详情接口返回；本任务不提供逐词编辑。</p>
+            <p class="field-hint">词条内容来自词书文件；暂不支持逐词编辑。</p>
           </div>
           <span class="count-pill">本页 {{ detail.entries.length }} 条</span>
         </div>

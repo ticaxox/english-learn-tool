@@ -108,6 +108,7 @@ describe('coach workspace orchestration', () => {
     expect(workspace.messages.value.find((message) => message.id === 'assistant-1')?.actions[0].status).toBe('applied')
     expect(workspace.latestUsage.value).toMatchObject({ units: 1, limit: 50 })
     expect(workspace.actionNotices['assistant-1']).toContain('把每日新词从 20 调整为 12')
+    expect(workspace.actionNotices['assistant-1']).not.toContain('没有生效')
   })
 
   it('reuses the same idempotency key when retrying an unaccepted send', async () => {

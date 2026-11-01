@@ -164,7 +164,8 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
       return
     }
     if (event.eventType === 'action.rejected') {
-      actionNotices[messageId] = '这次调整没有生效，请稍后再试。'
+      // The model can propose optional actions the server rejects. That is not a
+      // failed user request, so keep the reply clean and leave the audit to the server.
       return
     }
     if (event.eventType === 'error') {

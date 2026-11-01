@@ -22,7 +22,7 @@ from app.models.challenge import (
     DailyChallengePlan,
 )
 from app.models.identity import User
-from app.models.learning import DailyPlan, DailyPlanWord, MemorySession, MemoryConfig
+from app.models.learning import DailyPlan, DailyPlanWord, MemoryConfig, MemorySession
 from app.models.practice import PracticeSession
 from app.schemas.ai_tasks import ChallengePlanContext as AiChallengeContext
 from app.schemas.ai_tasks import ChallengePlanOutput, ChallengePlanRequest
@@ -364,7 +364,9 @@ async def _build_context(
             challenge_prefs.get("practiceTypes"),
             ["fill_blank", "reading", "translation", "writing"],
         ),
-        allowed_drill_modes=_kept(challenge_prefs.get("drillModes"), ["choice", "spelling", "flashcard"]),
+        allowed_drill_modes=_kept(
+            challenge_prefs.get("drillModes"), ["choice", "spelling", "flashcard"]
+        ),
         plan_id=plan.id,
         wordbook_id=plan.wordbook_id,
         target_new_words=len(new_entry_ids),

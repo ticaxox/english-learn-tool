@@ -331,7 +331,10 @@ onBeforeUnmount(() => {
                   <span></span><span></span><span></span>
                 </div>
                 <p v-else class="coach-message__text">{{ coach.messageText(message) }}</p>
-                <p v-if="message.errorMessage" class="field-error" role="alert" :title="message.errorMessage">这次没有收到教练回复，请重试。</p>
+                <div v-if="message.errorMessage" class="coach-message__error">
+                  <p class="field-error" role="alert" :title="message.errorMessage">这次没有收到教练回复。</p>
+                  <button class="button-secondary button-small" type="button" @click="retryStream(message)">重新连接</button>
+                </div>
                 <p v-if="coach.actionNotices[message.id]" class="coach-action-notice">{{ coach.actionNotices[message.id] }}</p>
 
                 <section v-if="appliedActions(message).length > 0" class="coach-actions" aria-label="已执行的调整">
@@ -358,7 +361,7 @@ onBeforeUnmount(() => {
             </article>
 
             <ErrorNotice
-              v-if="coach.streamError.value"
+              v-if="coach.streamError.value && !coach.messages.value.some((item) => item.errorMessage)"
               :error="coach.streamError.value"
               :show-retry="streamErrorRetryable"
               retry-label="重新连接"

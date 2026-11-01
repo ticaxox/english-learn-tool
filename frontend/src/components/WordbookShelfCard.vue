@@ -25,7 +25,13 @@ const emit = defineEmits<{
   delete: []
 }>()
 
-const coverLetter = computed(() => props.book.name.trim().slice(0, 1).toUpperCase() || 'W')
+const coverLetter = computed(() => {
+  const name = props.book.name.trim()
+  const lastToken = name.split(/\s+/).at(-1) ?? ''
+  // Demo shelves often share a long prefix; the trailing number distinguishes them.
+  if (/^\d{2,}$/.test(lastToken)) return lastToken.slice(-2)
+  return name.slice(0, 1).toUpperCase() || 'W'
+})
 const coverTone = computed(() => {
   if (props.sequence > 0) return ['sage', 'ocean', 'clay', 'slate'][(props.sequence - 1) % 4]
 
@@ -95,6 +101,7 @@ const coverTone = computed(() => {
           :disabled="activating"
           @click="emit('activate')"
         >{{ activating ? '激活中…' : '设为主词书' }}</button>
+        <button v-else class="button-secondary button-small" type="button" disabled>已在使用</button>
         <button
           v-if="canExport"
           class="button-secondary button-small"

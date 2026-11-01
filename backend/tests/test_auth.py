@@ -199,6 +199,19 @@ async def test_refresh_rotation_and_replay_revokes_entire_family(app, admin_user
         assert old_record.revoked_reason == "rotated"
         assert old_record.replaced_by_id is not None
 
+        grace_replay = await client.post(
+            REFRESH_PATH,
+            headers={
+                "Origin": ORIGIN,
+                "X-CSRF-Token": old_csrf,
+                "Cookie": f"refresh_token={old_refresh}; csrf_token={old_csrf}",
+            },
+        )
+        assert grace_replay.status_code == 200
+        grace_session = grace_replay.json()
+        assert grace_session["access_token"] != new_session["access_token"]
+
+        app.state.settings.refresh_reuse_grace_seconds = 0
         replay = await client.post(
             REFRESH_PATH,
             headers={
@@ -212,7 +225,7 @@ async def test_refresh_rotation_and_replay_revokes_entire_family(app, admin_user
 
         revoked_access = await client.get(
             ME_PATH,
-            headers=bearer(new_session["access_token"]),
+            headers=bearer(grace_session["access_token"]),
         )
         assert revoked_access.status_code == 401
 

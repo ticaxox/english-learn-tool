@@ -180,12 +180,6 @@ class ProviderModelsResponse(BaseModel):
     error_message: str | None = None
 
 
-class ProviderKeyResponse(BaseModel):
-    """The decrypted key, returned only to the owner on explicit request."""
-
-    api_key: str
-
-
 class PromptSummary(BaseModel):
     key: AiPromptKey
     name: str

@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     secret_encryption_key: SecretStr = Field(min_length=32)
     access_token_minutes: int = Field(default=15, gt=0)
     refresh_token_days: int = Field(default=30, gt=0)
+    # Accept a just-rotated token for this many seconds so concurrent tabs and
+    # reloads do not revoke the whole session family.
+    refresh_reuse_grace_seconds: int = Field(default=15, ge=0, le=120)
 
     cors_origins: str
     log_level: str = "INFO"

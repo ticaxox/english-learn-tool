@@ -9,7 +9,6 @@ import {
   deletePersonalProvider,
   fetchPersonalProviderModels,
   listPersonalProviders,
-  revealPersonalProviderKey,
   testPersonalProvider,
   updatePersonalProvider,
   type AiProvider,
@@ -325,7 +324,7 @@ onMounted(() => {
         <div>
           <h3>密钥怎么保存</h3>
           <p class="field-hint">
-            密钥加密保存，列表只显示掩码；在编辑弹窗里可以点“显示”查看完整 Key。
+            密钥加密保存，列表只显示掩码；已保存的 Key 不会回显，需要更换时在编辑弹窗里输入新 Key。
           </p>
         </div>
         <div>
@@ -346,7 +345,6 @@ onMounted(() => {
           :model-options="formModels"
           :model-loading="formModelsLoading"
           :model-error="formModelError"
-          :reveal-key="editingProvider ? revealPersonalProviderKey : undefined"
           :test-loading="formTestLoading"
           :test-result="formTestResult"
           @create="handleCreate"

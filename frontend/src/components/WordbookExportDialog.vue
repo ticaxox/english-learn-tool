@@ -76,7 +76,7 @@ function formatDate(value: string | null): string {
     return '暂无记录'
   }
   const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN')
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function sleep(milliseconds: number): Promise<void> {
@@ -272,14 +272,14 @@ onUnmounted(() => {
         <div class="progress-track" role="progressbar" :aria-valuenow="job?.progress ?? 0" aria-valuemin="0" aria-valuemax="100">
           <span :style="{ width: `${job?.progress ?? 0}%` }"></span>
         </div>
-        <p v-if="job" class="field-hint">任务 ID：<code>{{ job.job_id }}</code> · 状态：{{ job.status }} · 清理：{{ job.cleanup_status }}</p>
+        <p v-if="job" class="field-hint">导出文件已生成，可以下载。</p>
         <p v-if="job?.download_expires_at" class="field-hint">下载有效期至：{{ formatDate(job.download_expires_at) }}</p>
 
         <div v-if="completed" class="wordbook-download-actions">
           <button type="button" :disabled="downloading || downloadExpired" @click="download">
             {{ downloading ? '正在安全下载…' : downloadExpired ? '下载已过期' : `下载 ${form.format.toUpperCase()}` }}
           </button>
-          <span class="field-hint">通过 GET /exports/{job_id}/download 带认证获取文件。</span>
+          <span class="field-hint">下载链接仅对当前账号有效。</span>
         </div>
       </div>
 

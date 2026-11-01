@@ -40,8 +40,10 @@
 .personal-workspace input[type="radio"] {
   display: inline-grid;
   flex: 0 0 auto;
+  align-self: start;
   width: 22px;
   height: 22px;
+  min-height: 22px;
   margin: 0;
   padding: 0;
   place-content: center;
@@ -738,12 +740,12 @@
 
 .personal-workspace .choice-list--words {
   gap: 16px 20px;
-  justify-items: center;
+  justify-items: stretch;
 }
 
 .personal-workspace .choice-list--words .choice-option {
   width: 100%;
-  max-width: 300px;
+  max-width: none;
   justify-content: center;
   text-align: center;
 }
@@ -856,7 +858,7 @@
 
 .personal-workspace .practice-options--words .practice-option small { font-size: 0.8rem; }
 
-.personal-workspace .choice-list--words .choice-option { max-width: 280px; }
+.personal-workspace .choice-list--words .choice-option { max-width: none; }
 .personal-workspace .choice-list--words .choice-option__label { font-size: 1rem; }
 
 /* A quiet ring for the letter: no tag, no separate plate. */
@@ -952,7 +954,7 @@
   font-size: 1.06rem;
 }
 
-.personal-workspace .choice-list--words .choice-option { max-width: 260px; }
+.personal-workspace .choice-list--words .choice-option { max-width: none; }
 
 .personal-workspace .choice-option__label {
   font-size: 1.02rem;
@@ -968,7 +970,7 @@
 .personal-workspace .option-badge { width: 26px; height: 26px; }
 
 .personal-workspace .practice-options--words .practice-option { max-width: 185px; }
-.personal-workspace .choice-list--words .choice-option { max-width: 240px; }
+.personal-workspace .choice-list--words .choice-option { max-width: none; }
 
 /* One spacing rhythm: words, phrases (2×2) and sentences (one per row). */
 .personal-workspace .practice-options { gap: 12px; }
@@ -1162,4 +1164,30 @@
     flex: 1 1 100%;
     max-width: none;
   }
+}
+
+/* Native file pickers should read as part of the control kit. */
+.personal-workspace input[type="file"] {
+  padding: 6px;
+  font-size: 0.86rem;
+}
+
+.personal-workspace input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 8px 14px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 10px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Compact stats keep the streak caption as plain text, not another card. */
+.personal-workspace .study-stats--compact .inline-note {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--workspace-muted);
 }
