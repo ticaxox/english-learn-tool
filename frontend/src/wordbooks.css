@@ -642,10 +642,21 @@
 }
 
 .wordbook-error-list li {
-  padding: 0.55rem 0.65rem;
-  border-left: 3px solid #d7938e;
+  position: relative;
+  padding: 0.55rem 0.65rem 0.55rem 1.6rem;
   background: #fff7f6;
   font-size: 0.85rem;
+}
+
+.wordbook-error-list li::before {
+  position: absolute;
+  top: 0.95rem;
+  left: 0.65rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d7938e;
+  content: "";
 }
 
 .wordbook-error-list p {
@@ -792,11 +803,22 @@
 }
 
 .wordbook-warning-list li {
-  padding: 0.55rem 0.65rem;
-  border-left: 3px solid #d1a84d;
+  position: relative;
+  padding: 0.55rem 0.65rem 0.55rem 1.6rem;
   background: #fffbef;
   color: #685528;
   font-size: 0.85rem;
+}
+
+.wordbook-warning-list li::before {
+  position: absolute;
+  top: 0.95rem;
+  left: 0.65rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d1a84d;
+  content: "";
 }
 
 .wordbook-warning-list p {
