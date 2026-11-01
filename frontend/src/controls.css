@@ -710,3 +710,42 @@
 }
 
 .personal-workspace .personal-ai-provider__priority span { white-space: nowrap; }
+
+/* Word options: compact tiles, centred text, more breathing room. */
+.personal-workspace .practice-options--words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 18px;
+  justify-content: center;
+}
+
+.personal-workspace .practice-options--words .practice-option {
+  flex: 1 1 160px;
+  max-width: 210px;
+  min-height: 56px;
+  justify-content: center;
+  text-align: center;
+}
+
+.personal-workspace .practice-options--words .practice-option__body {
+  flex: 0 1 auto;
+  align-items: center;
+  min-height: 0;
+  text-align: center;
+}
+
+.personal-workspace .practice-options--words .practice-option__text { font-weight: 800; }
+
+.personal-workspace .choice-list--words {
+  gap: 16px 20px;
+  justify-items: center;
+}
+
+.personal-workspace .choice-list--words .choice-option {
+  width: 100%;
+  max-width: 300px;
+  justify-content: center;
+  text-align: center;
+}
+
+.personal-workspace .choice-list--words .choice-option__label { text-align: center; }

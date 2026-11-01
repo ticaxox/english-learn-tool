@@ -16,6 +16,12 @@ const emit = defineEmits<{
   (event: 'answer', optionId: string): void
 }>()
 
+const wordOptions = computed(() => props.question.options.length > 0
+  && props.question.options.every((option) => {
+    const text = (option.label ?? '').trim()
+    return text.length > 0 && text.length <= 18 && !text.includes(' ')
+  }))
+
 const selected = ref<string | null>(null)
 const promptHeading = ref<HTMLElement | null>(null)
 
@@ -78,7 +84,7 @@ function submit(): void {
       本页不会按这份数据判分，请刷新或联系管理员；提交按钮保持不可用。
     </p>
 
-    <fieldset v-else class="choice-list" :disabled="props.disabled">
+    <fieldset v-else class="choice-list" :class="{ 'choice-list--words': wordOptions }" :disabled="props.disabled">
       <legend class="visually-hidden">选择一个答案</legend>
       <label
         v-for="(option, index) in props.question.options"
