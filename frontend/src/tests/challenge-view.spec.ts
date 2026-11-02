@@ -146,6 +146,16 @@ describe('challenge view', () => {
     expect(wrapper.get('.challenge-progress').attributes('aria-valuenow')).toBe('0')
   })
 
+  it('does not repeat the date when a history title already starts with it', async () => {
+    challengeMocks.getChallengeHistory.mockResolvedValue({
+      items: [{ id: makePlan().id, localDate: currentLocalDate, status: 'ready', title: `${currentLocalDate} 到期单词巩固闯关`, summary: '', targetMinutes: 30, mainCompleted: 0, mainTotal: 3, challengeCompletedAt: null }],
+      nextCursor: null,
+      hasMore: false,
+    })
+    const { wrapper } = await mountView()
+    expect(wrapper.get('.challenge-history__item strong').text()).toBe(`${currentLocalDate} · 到期单词巩固闯关`)
+  })
+
   it('generates a missing map through the 202 flow', async () => {
     challengeMocks.getTodayChallenge
       .mockRejectedValueOnce(new ApiError(404, 'CHALLENGE_NOT_GENERATED', 'Not generated.', null, 'not-generated', false))

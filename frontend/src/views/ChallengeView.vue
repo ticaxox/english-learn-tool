@@ -101,6 +101,12 @@ const routePath = computed(() => {
   return path
 })
 
+function historyTitle(item: { localDate: string; title?: string | null }): string {
+  const title = item.title?.trim() || '每日闯关'
+  if (!title.startsWith(item.localDate)) return title
+  return title.slice(item.localDate.length).replace(/^[\s·:：-]+/, '') || '每日闯关'
+}
+
 function isNotGenerated(errorValue: unknown): boolean {
   return isApiError(errorValue)
     && (errorValue.code === 'CHALLENGE_NOT_GENERATED' || errorValue.status === 404)
@@ -510,7 +516,7 @@ onMounted(() => {
         <div role="list" v-else class="challenge-history__list">
           <div role="listitem" v-for="item in historyItems" :key="item.id">
             <RouterLink class="challenge-history__item" :to="`/challenges/${item.id}`">
-              <span><strong>{{ item.localDate }} · {{ item.title || '每日闯关' }}</strong><small>{{ item.summary || '没有摘要' }}</small></span>
+              <span><strong>{{ item.localDate }} · {{ historyTitle(item) }}</strong><small>{{ item.summary || '没有摘要' }}</small></span>
               <span class="challenge-history__meta"><span>{{ PLAN_STATUS_LABELS[item.status] }}</span><small>主线 {{ item.mainCompleted }} / {{ item.mainTotal }}</small></span>
             </RouterLink>
           </div>
