@@ -3102,7 +3102,7 @@
 .personal-workspace .practice-chooser__tabs {
   display: flex;
   gap: 4px;
-  padding-left: 4px;
+  padding-left: 0;
   border-bottom: 2px solid var(--ui-line);
 }
 
@@ -3123,10 +3123,11 @@
   border-color: var(--ui-line);
   background: var(--ui-surface);
   color: var(--ui-ink);
+  box-shadow: inset 0 -3px 0 var(--g-orange-edge);
 }
 
 .personal-workspace .practice-chooser__panel {
-  padding: 14px;
+  padding: 14px 0 0;
   border: 2px solid var(--ui-line);
   border-top: 0;
   border-radius: 0 0 var(--ui-radius-md) var(--ui-radius-md);
@@ -3149,7 +3150,10 @@
   cursor: pointer;
 }
 
-.personal-workspace .practice-chooser__row:hover:not(:disabled) { background: #fffaf0; }
+.personal-workspace .practice-chooser__row:hover:not(:disabled) {
+  border-color: var(--ui-line-strong);
+  background: var(--ui-surface-subtle);
+}
 .personal-workspace .practice-chooser__row:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .personal-workspace .practice-chooser__mark {
