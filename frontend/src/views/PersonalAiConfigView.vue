@@ -291,7 +291,7 @@ onMounted(() => {
             <label for="global-timeout">生成超时（秒，1–120）</label>
             <input id="global-timeout" v-model.number="globalTimeout" type="number" min="1" max="120" step="1" />
           </div>
-          <button class="button" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
+          <button class="button-secondary" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
             {{ globalSaving ? '正在应用…' : '应用到所有提供商' }}
           </button>
         </div>
