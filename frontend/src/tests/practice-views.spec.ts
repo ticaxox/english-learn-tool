@@ -155,7 +155,7 @@ describe('practice views', () => {
     await flushPromises()
     expect(practiceMocks.listPracticeRecords).toHaveBeenLastCalledWith(expect.objectContaining({ practiceType: 'fill_blank', offset: 0 }))
     await wrapper.get('tbody input[type="checkbox"]').setValue(true)
-    await wrapper.findAll('button').find((button) => button.text().includes('删除选中'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('删除选中'))!.trigger('click')
     await flushPromises()
     expect(practiceMocks.deletePracticeRecords).toHaveBeenCalledWith(['record-1'], expect.any(String))
   })

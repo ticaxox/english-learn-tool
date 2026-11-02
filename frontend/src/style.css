@@ -41,7 +41,7 @@ body {
     #f5f7f4;
 }
 
-button,
+[role="button"],
 input,
 textarea,
 select {
@@ -208,7 +208,7 @@ pre {
   align-items: center;
 }
 
-button,
+[role="button"],
 .button {
   display: inline-flex;
   min-height: 2.65rem;
@@ -225,26 +225,26 @@ button,
   cursor: pointer;
 }
 
-button:hover,
+[role="button"]:hover,
 .button:hover {
   background: var(--brand-strong);
   color: #fff;
 }
 
-button:disabled {
+[role="button"]:disabled {
   cursor: not-allowed;
   opacity: 0.62;
 }
 
 .button-secondary,
-button.button-secondary {
+[role="button"].button-secondary {
   border-color: var(--border);
   background: var(--surface);
   color: var(--ink);
 }
 
 .button-secondary:hover,
-button.button-secondary:hover {
+[role="button"].button-secondary:hover {
   background: var(--surface-muted);
   color: var(--ink);
 }
@@ -551,14 +551,14 @@ button.button-secondary:hover {
   font-size: 0.84rem;
 }
 
-button.button-danger,
+[role="button"].button-danger,
 .button-danger {
   border-color: #8f2727;
   background: #9b2c2c;
   color: #fff;
 }
 
-button.button-danger:hover,
+[role="button"].button-danger:hover,
 .button-danger:hover {
   background: #761f1f;
   color: #fff;
@@ -773,7 +773,7 @@ button.button-danger:hover,
 
 .metric-list,
 .row-errors,
-.alert ul {
+.alert [role="list"] {
   margin: 0;
   padding-left: 1.1rem;
 }
@@ -955,7 +955,7 @@ button.button-danger:hover,
   list-style: none;
 }
 
-.secret-list li {
+.secret-list [role="listitem"] {
   display: grid;
   gap: 0.7rem;
   padding: 0.85rem;
@@ -964,7 +964,7 @@ button.button-danger:hover,
   background: #fff8e7;
 }
 
-.secret-list li > div:first-child {
+.secret-list [role="listitem"] > div:first-child {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem 0.7rem;

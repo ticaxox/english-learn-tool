@@ -106,7 +106,7 @@ function submit(): void {
     </fieldset>
 
     <div class="button-row">
-      <button class="button" type="button" :disabled="!canSubmit" @click="submit">提交答案</button>
+      <DivButton class="button" type="button" :disabled="!canSubmit" @click="submit">提交答案</DivButton>
     </div>
   </section>
 </template>

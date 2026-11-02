@@ -125,12 +125,12 @@ async function signOut(): Promise<void> {
         </div>
 
         <div class="button-row">
-          <button type="submit" :disabled="submitting">
+          <DivButton type="submit" :disabled="submitting">
             {{ submitting ? '正在更新真实账号…' : '保存新密码' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="submitting" @click="signOut">
+          </DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="submitting" @click="signOut">
             退出登录
-          </button>
+          </DivButton>
         </div>
       </form>
     </section>

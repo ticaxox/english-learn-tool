@@ -146,7 +146,7 @@ describe('learning surfaces with the frozen contract', () => {
       expect.stringContaining('选择'),
       expect.stringContaining('拼写'),
     ])
-    const disabled = wrapper.findAll('.module-card[disabled]')
+    const disabled = wrapper.findAll('.module-card[aria-disabled="true"]')
     expect(disabled).toHaveLength(1)
     expect(disabled[0].text()).toContain('选择')
     expect(disabled[0].text()).toContain('未启用')

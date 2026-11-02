@@ -225,7 +225,7 @@ onUnmounted(() => {
           <p class="eyebrow">异步导出 · 授权下载</p>
           <h2 id="wordbook-export-title">导出「{{ props.wordbook.name }}」</h2>
         </div>
-        <button class="icon-button" type="button" aria-label="关闭导出窗口" :disabled="submitting" @click="close">×</button>
+        <DivButton class="icon-button" type="button" aria-label="关闭导出窗口" :disabled="submitting" @click="close">×</DivButton>
       </header>
 
       <div class="alert alert-info">
@@ -276,20 +276,20 @@ onUnmounted(() => {
         <p v-if="job?.download_expires_at" class="field-hint">下载有效期至：{{ formatDate(job.download_expires_at) }}</p>
 
         <div v-if="completed" class="wordbook-download-actions">
-          <button type="button" :disabled="downloading || downloadExpired" @click="download">
+          <DivButton type="button" :disabled="downloading || downloadExpired" @click="download">
             {{ downloading ? '正在安全下载…' : downloadExpired ? '下载已过期' : `下载 ${form.format.toUpperCase()}` }}
-          </button>
+          </DivButton>
           <span class="field-hint">下载链接仅对当前账号有效。</span>
         </div>
       </div>
 
       <footer class="dialog-actions button-row">
-        <button v-if="!completed" type="button" :disabled="!canSubmit" @click="submit">
+        <DivButton v-if="!completed" type="button" :disabled="!canSubmit" @click="submit">
           {{ submitting ? '导出任务处理中…' : job ? '重新创建导出任务' : '开始导出' }}
-        </button>
-        <button class="button-secondary" type="button" :disabled="submitting || downloading" @click="close">
+        </DivButton>
+        <DivButton class="button-secondary" type="button" :disabled="submitting || downloading" @click="close">
           {{ completed ? '完成' : '取消' }}
-        </button>
+        </DivButton>
       </footer>
     </section>
   </div>

@@ -151,7 +151,7 @@ onMounted(() => {
     <div v-else-if="questions.length === 0" class="alert alert-warning">
       <strong>服务端尚未返回 BOSS 题目</strong>
       <p>页面不会生成替代题；请稍后刷新。</p>
-      <button class="button-secondary" type="button" @click="load">重新读取</button>
+      <DivButton class="button-secondary" type="button" @click="load">重新读取</DivButton>
     </div>
     <template v-else>
       <div class="challenge-boss__questions">
@@ -174,9 +174,9 @@ onMounted(() => {
           题目统计：{{ JSON.stringify(bossResult.result.question_stats) }}
         </p>
       </div>
-      <button class="button challenge-boss__submit" type="button" :disabled="!allAnswered || submitting" @click="submit">
+      <DivButton class="button challenge-boss__submit" type="button" :disabled="!allAnswered || submitting" @click="submit">
         {{ submitting ? '正在提交…' : '提交终点挑战' }}
-      </button>
+      </DivButton>
     </template>
   </section>
 </template>

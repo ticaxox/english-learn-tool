@@ -114,7 +114,7 @@ describe('notification views', () => {
       .mockResolvedValueOnce({ items: [], nextCursor: null, hasMore: false })
     const { wrapper } = await mountRoute(NotificationsView, '/notifications')
 
-    await wrapper.findAll('button').find((button) => button.text().includes('加载更多通知'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('加载更多通知'))!.trigger('click')
     await flushPromises()
     expect(notificationMocks.listNotifications).toHaveBeenLastCalledWith({
       limit: 20,
@@ -130,18 +130,18 @@ describe('notification views', () => {
 
   it('updates one notification only after the server confirms it is read', async () => {
     const { wrapper } = await mountRoute(NotificationsView, '/notifications')
-    const button = wrapper.findAll('button').find((candidate) => candidate.text() === '标记已读')!
+    const button = wrapper.findAll('[role="button"]').find((candidate) => candidate.text() === '标记已读')!
     await button.trigger('click')
     await flushPromises()
 
     expect(notificationMocks.markNotificationRead).toHaveBeenCalledWith(unreadNotification.id)
     expect(wrapper.text()).toContain('已标记为已读')
-    expect(wrapper.findAll('button').some((candidate) => candidate.text() === '标记已读')).toBe(false)
+    expect(wrapper.findAll('[role="button"]').some((candidate) => candidate.text() === '标记已读')).toBe(false)
   })
 
   it('marks all read through the server and reloads the inbox', async () => {
     const { wrapper } = await mountRoute(NotificationsView, '/notifications')
-    await wrapper.findAll('button').find((button) => button.text().includes('全部已读'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('全部已读'))!.trigger('click')
     await flushPromises()
 
     expect(notificationMocks.markAllNotificationsRead).toHaveBeenCalledOnce()
@@ -173,7 +173,7 @@ describe('notification views', () => {
       new ApiError(403, 'FORBIDDEN', 'Notification action denied.', null, 'notification-403', false),
     )
     const { wrapper } = await mountRoute(NotificationsView, '/notifications')
-    await wrapper.findAll('button').find((button) => button.text().includes('全部已读'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('全部已读'))!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('权限不足或操作被拒绝')
     expect(wrapper.text()).toContain('notification-403')

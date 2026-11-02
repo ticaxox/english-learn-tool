@@ -53,7 +53,7 @@
 .ia-profile-summary strong { color: var(--crumb-cocoa); font-size: 13px; }
 .ia-profile-summary span { overflow: hidden; color: #7a5a49; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .workspace-shell .ia-profile-menu a,
-.workspace-shell .ia-profile-menu button {
+.workspace-shell .ia-profile-menu [role="button"] {
   display: flex;
   min-height: 34px;
   align-items: center;
@@ -69,7 +69,7 @@
   text-decoration: none;
 }
 .workspace-shell .ia-profile-menu a:hover,
-.workspace-shell .ia-profile-menu button:hover { background: var(--crumb-parchment); color: var(--crumb-forest); }
+.workspace-shell .ia-profile-menu [role="button"]:hover { background: var(--crumb-parchment); color: var(--crumb-forest); }
 .workspace-shell .ia-profile-menu .ia-profile-signout { color: #8a3f2d; }
 
 .ia-coach-backdrop {
@@ -351,7 +351,7 @@
   border-radius: 7px 10px 6px 9px;
   background: var(--cookie-50);
 }
-.workspace-shell .member-actions-menu__panel button {
+.workspace-shell .member-actions-menu__panel [role="button"] {
   min-height: 30px;
   justify-content: center;
   white-space: nowrap;

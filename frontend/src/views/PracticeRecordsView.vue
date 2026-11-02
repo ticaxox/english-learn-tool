@@ -195,9 +195,9 @@ onMounted(() => {
       <section class="panel practice-records-table-wrap">
         <div class="button-row practice-records-actions">
           <strong>共 {{ total }} 条 · 第 {{ page }} / {{ pages }} 页</strong>
-          <button class="button-danger button-small" type="button" :disabled="selected.length === 0 || deleting" @click="removeSelected">
+          <DivButton class="button-danger button-small" type="button" :disabled="selected.length === 0 || deleting" @click="removeSelected">
             {{ deleting ? '删除中…' : `删除选中（${selected.length}）` }}
-          </button>
+          </DivButton>
         </div>
         <ErrorNotice v-if="deleteError" :error="deleteError" :show-retry="false" retry-label="重试" @retry="removeSelected" />
         <table class="practice-records-table">
@@ -214,14 +214,14 @@ onMounted(() => {
                 <small v-if="record.wrongCount !== null"> · {{ record.wrongCount }} 错</small>
               </td>
               <td data-label="提交时间">{{ formatSubmittedAt(record.submittedAt) }}</td>
-              <td data-label="操作"><button class="link-button" type="button" @click="openDetail(record)">查看结果</button></td>
+              <td data-label="操作"><DivButton class="link-button" type="button" @click="openDetail(record)">查看结果</DivButton></td>
             </tr>
           </tbody>
         </table>
         <nav class="pager" aria-label="练习记录分页">
-          <button class="button-secondary button-small" type="button" :disabled="!canPrev || loading" @click="changePage(offset - limit)">上一页</button>
+          <DivButton class="button-secondary button-small" type="button" :disabled="!canPrev || loading" @click="changePage(offset - limit)">上一页</DivButton>
           <span>第 {{ page }} / {{ pages }} 页</span>
-          <button class="button-secondary button-small" type="button" :disabled="!canNext || loading" @click="changePage(offset + limit)">下一页</button>
+          <DivButton class="button-secondary button-small" type="button" :disabled="!canNext || loading" @click="changePage(offset + limit)">下一页</DivButton>
         </nav>
       </section>
 

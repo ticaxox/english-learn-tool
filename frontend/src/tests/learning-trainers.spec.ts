@@ -73,7 +73,7 @@ describe('FlashcardTrainer', () => {
 
   it('reveals the back only after the flip button is pressed', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('button.study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card__flip').trigger('click')
 
     expect(wrapper.text()).toContain('很可能')
     expect(wrapper.emitted('reveal')).toHaveLength(1)
@@ -81,15 +81,15 @@ describe('FlashcardTrainer', () => {
 
   it('offers no rating buttons before the flip, so a rating cannot be guessed', () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    const labels = wrapper.findAll('button').map((button) => button.text())
+    const labels = wrapper.findAll('[role="button"]').map((button) => button.text())
     expect(labels).toEqual(['翻到背面'])
   })
 
   it('emits both documented ratings after the flip', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('button.study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card__flip').trigger('click')
 
-    const buttons = wrapper.findAll('button')
+    const buttons = wrapper.findAll('[role="button"]')
     const again = buttons.find((button) => button.text() === '无印象')
     const good = buttons.find((button) => button.text() === '有印象')
 
@@ -101,15 +101,15 @@ describe('FlashcardTrainer', () => {
 
   it('emits master for the "already known" path', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('button.study-card__flip').trigger('click')
-    const master = wrapper.findAll('button').find((button) => button.text() === '已记住')
+    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    const master = wrapper.findAll('[role="button"]').find((button) => button.text() === '已记住')
     await master!.trigger('click')
     expect(wrapper.emitted('master')).toHaveLength(1)
   })
 
   it('re-hides the back when the question changes', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('button.study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card__flip').trigger('click')
     expect(wrapper.text()).toContain('很可能')
 
     await wrapper.setProps({ question: flashcard({ questionId: 'q-9', front: 'seldom', back: '很少' }) })
@@ -119,7 +119,7 @@ describe('FlashcardTrainer', () => {
 
   it('moves focus to the next card so keyboard users are not stranded', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() }, attachTo: document.body })
-    await wrapper.get('button.study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card__flip').trigger('click')
     // Flipping unmounts the button, so focus must move to the revealed answer.
     expect(document.activeElement).toBe(wrapper.get('.study-card__back').element)
 
@@ -134,9 +134,9 @@ describe('FlashcardTrainer', () => {
 
   it('blocks rating while disabled', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard(), disabled: true } })
-    await wrapper.get('button.study-card__flip').trigger('click')
-    const good = wrapper.findAll('button').find((button) => button.text() === '有印象')
-    expect(good!.attributes('disabled')).toBeDefined()
+    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    const good = wrapper.findAll('[role="button"]').find((button) => button.text() === '有印象')
+    expect(good!.attributes('aria-disabled')).toBeDefined()
     await good!.trigger('click')
     expect(wrapper.emitted('rate')).toBeUndefined()
   })
@@ -173,7 +173,7 @@ describe('ChoiceTrainer', () => {
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
     expect(wrapper.text()).toContain('选项暂时不可用')
-    expect(wrapper.findAll('button').find((button) => button.text() === '提交答案')!.attributes('disabled')).toBeDefined()
+    expect(wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')!.attributes('aria-disabled')).toBeDefined()
   })
 
   it('rejects an option list that disagrees with option_count', () => {
@@ -209,7 +209,7 @@ describe('ChoiceTrainer', () => {
     const inputs = wrapper.findAll('input[type="radio"]')
     expect(inputs).toHaveLength(2)
     await inputs[0].setValue()
-    await wrapper.findAll('button').find((button) => button.text() === '提交答案')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')!.trigger('click')
     expect(wrapper.emitted('answer')).toEqual([['有弹性的']])
   })
 
@@ -235,14 +235,14 @@ describe('ChoiceTrainer', () => {
     const wrapper = mount(ChoiceTrainer, { props: { question: choice() } })
     const inputs = wrapper.findAll('input[type="radio"]')
     await inputs[2].setValue()
-    await wrapper.findAll('button').find((button) => button.text() === '提交答案')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')!.trigger('click')
     expect(wrapper.emitted('answer')).toEqual([['o-3']])
   })
 
   it('does not emit before a choice is made', async () => {
     const wrapper = mount(ChoiceTrainer, { props: { question: choice() } })
-    const submit = wrapper.findAll('button').find((button) => button.text() === '提交答案')
-    expect(submit!.attributes('disabled')).toBeDefined()
+    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')
+    expect(submit!.attributes('aria-disabled')).toBeDefined()
     await submit!.trigger('click')
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
@@ -276,15 +276,15 @@ describe('ChoiceTrainer', () => {
     expect(wrapper.findAll('input[type="radio"]')[0].attributes('checked')).toBeDefined()
 
     await wrapper.setProps({ question: choice({ questionId: 'q-8', prompt: '另一题' }) })
-    const submit = wrapper.findAll('button').find((button) => button.text() === '提交答案')
-    expect(submit!.attributes('disabled')).toBeDefined()
+    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')
+    expect(submit!.attributes('aria-disabled')).toBeDefined()
   })
 
   it('prevents a second submission while disabled', async () => {
     const wrapper = mount(ChoiceTrainer, { props: { question: choice(), disabled: true } })
     await wrapper.findAll('input[type="radio"]')[1].setValue()
-    const submit = wrapper.findAll('button').find((button) => button.text() === '提交答案')
-    expect(submit!.attributes('disabled')).toBeDefined()
+    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')
+    expect(submit!.attributes('aria-disabled')).toBeDefined()
     await submit!.trigger('click')
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
@@ -323,19 +323,19 @@ describe('SpellingTrainer', () => {
 
   it('keeps submission blocked until every editable cell is filled', async () => {
     const wrapper = mount(SpellingTrainer, { props: { question: spelling() } })
-    const submit = () => wrapper.findAll('button').find((button) => button.text() === '提交拼写')
+    const submit = () => wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')
 
-    expect(submit()!.attributes('disabled')).toBeDefined()
+    expect(submit()!.attributes('aria-disabled')).toBeDefined()
 
     const inputs = wrapper.findAll('input')
     await inputs[0].setValue('p')
     await inputs[0].trigger('input')
     // One of two editable cells filled: still incomplete.
-    expect(submit()!.attributes('disabled')).toBeDefined()
+    expect(submit()!.attributes('aria-disabled')).toBeDefined()
 
     await inputs[1].setValue('t')
     await inputs[1].trigger('input')
-    expect(submit()!.attributes('disabled')).toBeUndefined()
+    expect(submit()!.attributes('aria-disabled')).toBeUndefined()
   })
 
   it('moves the active cell forward as each letter is typed', async () => {
@@ -358,8 +358,8 @@ describe('SpellingTrainer', () => {
       await inputs[index].setValue(letter)
       await inputs[index].trigger('input')
     }
-    const submit = wrapper.findAll('button').find((button) => button.text() === '提交拼写')
-    expect(submit!.attributes('disabled')).toBeUndefined()
+    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')
+    expect(submit!.attributes('aria-disabled')).toBeUndefined()
   })
 
   it('submits the concatenated answer including the prefilled letter', async () => {
@@ -370,7 +370,7 @@ describe('SpellingTrainer', () => {
     await inputs[1].setValue('t')
     await inputs[1].trigger('input')
 
-    await wrapper.findAll('button').find((button) => button.text() === '提交拼写')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')!.trigger('click')
     expect(wrapper.emitted('answer')).toEqual([['opt']])
   })
 
@@ -413,7 +413,7 @@ describe('SpellingTrainer', () => {
     await inputs[2].setValue('c')
     await inputs[2].trigger('input')
 
-    const submit = wrapper.findAll('button').find((button) => button.text() === '提交拼写')
+    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')
     await submit!.trigger('click')
     expect(wrapper.emitted('answer')).toBeUndefined()
   })

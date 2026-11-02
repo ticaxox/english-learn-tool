@@ -1,6 +1,7 @@
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
+import DivButton from './components/DivButton.vue'
 import { apiClient } from './api/client'
 import { createAppRouter } from './router'
 import { useAuthStore } from './stores/auth'
@@ -16,6 +17,7 @@ import './controls.css'
 const app = createApp(App)
 const pinia = createPinia()
 
+app.component('DivButton', DivButton)
 app.use(pinia)
 
 const auth = useAuthStore(pinia)

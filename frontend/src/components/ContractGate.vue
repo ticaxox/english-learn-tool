@@ -29,11 +29,11 @@ const showDiagnostics = import.meta.env.DEV
         <p class="contract-gate__coordinate">{{ coordinate }}</p>
         <div class="contract-gate__endpoints">
           <span class="contract-gate__label">待校准端点</span>
-          <ul>
-            <li v-for="endpoint in props.endpoints" :key="endpoint">
+          <div role="list">
+            <div role="listitem" v-for="endpoint in props.endpoints" :key="endpoint">
               <code>{{ endpoint }}</code>
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
         <p v-if="frozen" class="inline-note">契约坐标已写入，解析器仍需逐字段校准。</p>
         <p v-else class="inline-note">等待契约冻结后校准唯一解析入口。</p>

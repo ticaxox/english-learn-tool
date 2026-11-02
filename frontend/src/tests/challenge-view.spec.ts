@@ -30,9 +30,10 @@ vi.mock('../components/ChallengeBossPanel.vue', () => ({
       const completed = ref(false)
       return () => h('div', { 'data-test': 'boss-panel' }, [
         h('span', completed.value ? 'BOSS completed' : 'BOSS ready'),
-        h('button', {
+        h('div', {
           class: 'emit-boss-completed',
-          type: 'button',
+          role: 'button',
+          tabindex: 0,
           onClick: () => {
             completed.value = true
             emit('completed', {
@@ -180,7 +181,7 @@ describe('challenge view', () => {
     await wrapper.get('.challenge-generate .button').trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('先不等了')
-    await wrapper.get('.challenge-generate__waiting button').trigger('click')
+    await wrapper.get('.challenge-generate__waiting [role="button"]').trigger('click')
     await new Promise((resolve) => setTimeout(resolve, 1100))
     await flushPromises()
     expect(wrapper.text()).toContain('已停止等待')
@@ -192,7 +193,7 @@ describe('challenge view', () => {
     await wrapper.findAll('.map-station')[0].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('开始节点')
-    await wrapper.findAll('.challenge-node-dialog button').find((button) => button.text() === '开始节点')!.trigger('click')
+    await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '开始节点')!.trigger('click')
     await flushPromises()
     expect(challengeMocks.startChallengeNode).toHaveBeenCalledWith(makePlan().id, mainNodes[0].id)
     expect(router.currentRoute.value.name).toBe('memory')
@@ -205,7 +206,7 @@ describe('challenge view', () => {
     await wrapper.findAll('.map-station')[1].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('完成前一个节点后解锁')
-    expect(wrapper.findAll('.challenge-node-dialog button').some((button) => button.text() === '开始节点')).toBe(false)
+    expect(wrapper.findAll('.challenge-node-dialog [role="button"]').some((button) => button.text() === '开始节点')).toBe(false)
   })
 
   it('opens the BOSS panel only after a real BOSS start', async () => {
@@ -214,8 +215,9 @@ describe('challenge view', () => {
     const { wrapper } = await mountView()
     await wrapper.findAll('.map-station')[2].trigger('click')
     await flushPromises()
-    await wrapper.findAll('.challenge-node-dialog button').find((button) => button.text() === '开始节点')!.trigger('click')
+    await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '开始节点')!.trigger('click')
     await flushPromises()
+    expect(challengeMocks.startChallengeNode).toHaveBeenCalled()
     expect(wrapper.find('[data-test="boss-panel"]').exists()).toBe(true)
   })
 
@@ -244,7 +246,7 @@ describe('challenge view', () => {
     const { wrapper } = await mountView()
     await wrapper.findAll('.map-station')[2].trigger('click')
     await flushPromises()
-    await wrapper.findAll('.challenge-node-dialog button').find((button) => button.text() === '继续节点')!.trigger('click')
+    await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '继续节点')!.trigger('click')
     await flushPromises()
     expect(wrapper.find('[data-test="boss-panel"]').exists()).toBe(true)
     await wrapper.get('.emit-boss-completed').trigger('click')
@@ -284,7 +286,7 @@ describe('challenge view', () => {
     await wrapper.findAll('.map-station')[2].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('终点挑战已完成，可查看结果')
-    await wrapper.findAll('.challenge-node-dialog button').find((button) => button.text() === '查看节点结果')!.trigger('click')
+    await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '查看节点结果')!.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.fullPath).toBe('/practice/boss-session-1')
     expect(challengeMocks.startChallengeNode).not.toHaveBeenCalled()
@@ -296,21 +298,21 @@ describe('challenge view', () => {
     await wrapper.findAll('.map-station')[0].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('跨日地图只读，不能开始或重做节点')
-    const start = wrapper.findAll('.challenge-node-dialog button').find((button) => button.text() === '开始节点')
-    expect(start?.attributes('disabled')).toBeDefined()
+    const start = wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '开始节点')
+    expect(start?.attributes('aria-disabled')).toBeDefined()
   })
 
   it('refreshes server-owned completion state and surfaces quota errors', async () => {
     const completed = makePlan({ mainCompleted: 1, nodes: [{ ...mainNodes[0], status: 'completed' }, mainNodes[1], mainNodes[2], optionalNode] })
     challengeMocks.getTodayChallenge.mockResolvedValueOnce(makePlan()).mockResolvedValueOnce(completed)
     const { wrapper } = await mountView()
-    await wrapper.findAll('button').find((button) => button.text() === '刷新地图')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '刷新地图')!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('已完成')
     expect(wrapper.text()).toContain('主线 1 / 3')
 
     challengeMocks.getTodayChallenge.mockRejectedValueOnce(new ApiError(429, 'AI_QUOTA_EXHAUSTED', 'Quota exhausted.', null, 'challenge-429', true))
-    await wrapper.findAll('button').find((button) => button.text() === '刷新地图')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '刷新地图')!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('今天的 AI 次数已用完')
     expect(wrapper.text()).toContain('challenge-429')

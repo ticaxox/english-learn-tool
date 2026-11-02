@@ -87,7 +87,7 @@ describe('StudyStatsPanel', () => {
     expect(wrapper.text()).not.toContain('0 / 0')
 
     apiMocks.fetchLearningStats.mockResolvedValueOnce(stats())
-    const retry = wrapper.findAll('button').find((button) => button.text().includes('重新读取统计'))
+    const retry = wrapper.findAll('[role="button"]').find((button) => button.text().includes('重新读取统计'))
     await retry!.trigger('click')
     await flush()
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(true)

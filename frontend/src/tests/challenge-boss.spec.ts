@@ -84,12 +84,12 @@ describe('challenge BOSS panel', () => {
   it('requires all server questions before submitting the real BOSS endpoint', async () => {
     const wrapper = mount(ChallengeBossPanel, { props: { challengeId: 'challenge-1', nodeId: 'boss-1', sessionId: 'boss-session-1' } })
     await flushPromises()
-    const submit = wrapper.findAll('button').find((button) => button.text().includes('提交终点挑战'))!
-    expect(submit.attributes('disabled')).toBeDefined()
+    const submit = wrapper.findAll('[role="button"]').find((button) => button.text().includes('提交终点挑战'))!
+    expect(submit.attributes('aria-disabled')).toBeDefined()
     const inputs = wrapper.findAll('.question-answer')
     expect(inputs).toHaveLength(5)
     for (let index = 0; index < inputs.length; index += 1) await inputs[index].setValue(`answer-${index + 1}`)
-    expect(submit.attributes('disabled')).toBeUndefined()
+    expect(submit.attributes('aria-disabled')).toBeUndefined()
     await submit.trigger('click')
     await flushPromises()
 
@@ -116,7 +116,7 @@ describe('challenge BOSS panel', () => {
     await flushPromises()
     const inputs = wrapper.findAll('.question-answer')
     for (let index = 0; index < inputs.length; index += 1) await inputs[index].setValue(`answer-${index + 1}`)
-    await wrapper.findAll('button').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('终点挑战已完成')
     expect(wrapper.text()).toContain('服务端已确认本次终点挑战完成')
@@ -132,7 +132,7 @@ describe('challenge BOSS panel', () => {
     await flushPromises()
     const inputs = wrapper.findAll('.question-answer')
     for (let index = 0; index < inputs.length; index += 1) await inputs[index].setValue(`answer-${index + 1}`)
-    await wrapper.findAll('button').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
     await flushPromises()
 
     expect(wrapper.text()).toContain('今天的 AI 次数已用完')
@@ -148,7 +148,7 @@ describe('challenge BOSS panel', () => {
     await flushPromises()
     const inputs = wrapper.findAll('.question-answer')
     for (let index = 0; index < inputs.length; index += 1) await inputs[index].setValue(`answer-${index + 1}`)
-    await wrapper.findAll('button').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('提交终点挑战'))!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('正在评分')
     expect(wrapper.emitted('completed')).toBeUndefined()

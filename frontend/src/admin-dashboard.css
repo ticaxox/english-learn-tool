@@ -248,7 +248,7 @@
   list-style: none;
 }
 
-.dashboard-risk__list li {
+.dashboard-risk__list [role="listitem"] {
   display: flex;
   gap: 1rem;
   align-items: center;

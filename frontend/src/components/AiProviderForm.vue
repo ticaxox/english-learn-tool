@@ -217,7 +217,7 @@ function cancel(): void {
         <p class="eyebrow">AI 提供商</p>
         <h2 id="provider-form-title">{{ title }}</h2>
       </div>
-      <button class="button-secondary button-small" type="button" @click="cancel">关闭</button>
+      <DivButton class="button-secondary button-small" type="button" @click="cancel">关闭</DivButton>
     </div>
 
     <form class="ai-form" novalidate @submit.prevent="submit">
@@ -228,7 +228,7 @@ function cancel(): void {
           <p v-if="errors.name" class="field-error" role="alert">{{ errors.name }}</p>
         </div>
         <div class="ai-form-actions">
-          <button
+          <DivButton
             class="button-secondary ai-toggle"
             type="button"
             :aria-pressed="enabled"
@@ -236,9 +236,9 @@ function cancel(): void {
           >
             <span class="ai-toggle__dot" :class="{ 'is-on': enabled }" aria-hidden="true"></span>
             {{ enabled ? '停用' : '启用' }}
-          </button>
-          <button class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '保存' }}</button>
-          <button class="button-secondary" type="button" :disabled="saving" @click="cancel">取消</button>
+          </DivButton>
+          <DivButton class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '保存' }}</DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="saving" @click="cancel">取消</DivButton>
         </div>
       </div>
 
@@ -246,7 +246,7 @@ function cancel(): void {
         <label for="provider-model">模型 ID</label>
         <div class="ai-model-row">
           <input id="provider-model" v-model="modelId" type="text" maxlength="200" :aria-invalid="Boolean(errors.modelId)" />
-          <button
+          <DivButton
             v-if="canFetchModels"
             class="button-secondary ai-model-fetch"
             type="button"
@@ -255,14 +255,14 @@ function cancel(): void {
           >
             {{ modelLoading ? '读取中…' : '获取模型' }}
             <span class="ai-model-fetch__arrow" :class="{ 'is-open': modelsOpen }" aria-hidden="true">▾</span>
-          </button>
+          </DivButton>
         </div>
         <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
 
         <div v-if="canFetchModels && modelsOpen" class="ai-model-menu" role="listbox" aria-label="可用模型">
           <p v-if="modelLoading" class="field-hint">正在读取模型列表…</p>
           <template v-else-if="modelOptions && modelOptions.length">
-            <button
+            <DivButton
               v-for="model in modelOptions"
               :key="model"
               class="ai-model-option"
@@ -271,7 +271,7 @@ function cancel(): void {
               role="option"
               :aria-selected="model === modelId"
               @click="chooseModel(model)"
-            >{{ model }}</button>
+            >{{ model }}</DivButton>
           </template>
           <p v-else class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
           <ErrorNotice v-if="modelError" :error="modelError" :show-retry="false" />
@@ -299,9 +299,9 @@ function cancel(): void {
         <p v-if="editing && !errors.apiKey" class="field-hint">已保存的 Key 不会回显；需要更换时直接输入新 Key。</p>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
         <div v-if="editing" class="ai-test-row">
-          <button class="button-secondary" type="button" :disabled="testLoading" @click="emit('test')">
+          <DivButton class="button-secondary" type="button" :disabled="testLoading" @click="emit('test')">
             {{ testLoading ? '连接中…' : '测试连接' }}
-          </button>
+          </DivButton>
           <span v-if="testResult" class="field-hint">
             {{ testResult.success ? `连接正常 · ${testResult.latencyMs ?? '—'} ms` : '连接失败，请检查地址、模型和 Key。' }}
           </span>
@@ -323,8 +323,8 @@ function cancel(): void {
       <ErrorNotice v-if="error" :error="error" :show-retry="false" retry-label="重试" @retry="() => {}" />
 
       <div v-if="!compact" class="button-row">
-        <button class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '保存提供商' }}</button>
-        <button class="button-secondary" type="button" :disabled="saving" @click="cancel">取消</button>
+        <DivButton class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '保存提供商' }}</DivButton>
+        <DivButton class="button-secondary" type="button" :disabled="saving" @click="cancel">取消</DivButton>
       </div>
     </form>
   </section>

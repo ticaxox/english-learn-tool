@@ -47,9 +47,9 @@ defineExpose({ load })
   >
     <div class="study-stats__heading">
       <h2 id="study-stats-title">{{ props.compact ? '连续学习' : '今日统计' }}</h2>
-      <button v-if="!props.compact" class="button-secondary button-small" type="button" :disabled="loading" @click="load">
+      <DivButton v-if="!props.compact" class="button-secondary button-small" type="button" :disabled="loading" @click="load">
         {{ loading ? '读取中…' : '刷新统计' }}
-      </button>
+      </DivButton>
     </div>
 
     <p v-if="!stats && !error && !loading" class="inline-note">尚未记录学习时间。</p>

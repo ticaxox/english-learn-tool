@@ -233,7 +233,7 @@ onMounted(() => {
       </div>
       <div class="dashboard-hero__actions">
         <span class="dashboard-source">GET /api/v1/admin/dashboard</span>
-        <button class="button-secondary" type="button" :disabled="loading" @click="load">刷新看板</button>
+        <DivButton class="button-secondary" type="button" :disabled="loading" @click="load">刷新看板</DivButton>
       </div>
     </header>
 
@@ -262,7 +262,7 @@ onMounted(() => {
           <option :value="50">50</option>
         </select>
       </div>
-      <button class="button" type="submit" :disabled="loading">{{ loading ? '读取中…' : '应用筛选' }}</button>
+      <DivButton class="button" type="submit" :disabled="loading">{{ loading ? '读取中…' : '应用筛选' }}</DivButton>
     </form>
     <p v-if="filterError" class="field-error" role="alert">{{ filterError }}</p>
 
@@ -360,11 +360,11 @@ onMounted(() => {
             <div class="dashboard-section__heading">
               <div><p class="eyebrow">Risk hints</p><h2 id="dashboard-risk-title">风险提示</h2></div>
             </div>
-            <ul class="dashboard-risk__list">
-              <li><span>3 天未活跃成员</span><strong>{{ formatInteger(dashboard.riskHints.inactiveMembers3d) }}</strong></li>
-              <li><span>高错题成员</span><strong>{{ formatInteger(dashboard.riskHints.highMistakeMembers) }}</strong></li>
-              <li><span>AI 失败率提醒</span><strong>{{ dashboard.riskHints.aiFailureAlert === null ? '—' : (dashboard.riskHints.aiFailureAlert ? '需要关注' : '正常') }}</strong></li>
-            </ul>
+            <div role="list" class="dashboard-risk__list">
+              <div role="listitem"><span>3 天未活跃成员</span><strong>{{ formatInteger(dashboard.riskHints.inactiveMembers3d) }}</strong></div>
+              <div role="listitem"><span>高错题成员</span><strong>{{ formatInteger(dashboard.riskHints.highMistakeMembers) }}</strong></div>
+              <div role="listitem"><span>AI 失败率提醒</span><strong>{{ dashboard.riskHints.aiFailureAlert === null ? '—' : (dashboard.riskHints.aiFailureAlert ? '需要关注' : '正常') }}</strong></div>
+            </div>
             <p class="field-hint">风险提示是聚合口径，不包含成员姓名、正文或可反推个人的明细。</p>
           </section>
         </div>
@@ -439,9 +439,9 @@ onMounted(() => {
             </table>
           </div>
           <div class="dashboard-pagination">
-            <button class="button-secondary button-small" type="button" :disabled="loading || dashboard.groupPage <= 1" @click="changePage(-1)">上一页</button>
+            <DivButton class="button-secondary button-small" type="button" :disabled="loading || dashboard.groupPage <= 1" @click="changePage(-1)">上一页</DivButton>
             <span>第 {{ dashboard.groupPage }} 页</span>
-            <button class="button-secondary button-small" type="button" :disabled="loading || !dashboard.groupHasMore" @click="changePage(1)">下一页</button>
+            <DivButton class="button-secondary button-small" type="button" :disabled="loading || !dashboard.groupHasMore" @click="changePage(1)">下一页</DivButton>
           </div>
         </section>
       </template>

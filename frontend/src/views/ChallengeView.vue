@@ -325,7 +325,7 @@ onMounted(() => {
       </div>
       <div class="workspace-header-actions challenge-page-actions">
         <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
-        <button class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</button>
+        <DivButton class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</DivButton>
       </div>
     </header>
 
@@ -343,14 +343,14 @@ onMounted(() => {
         </div>
         <ErrorNotice v-if="generationError" :error="generationError" :show-retry="false" />
         <div class="button-row">
-          <button class="button" type="button" :disabled="generating" @click="generateMap">
+          <DivButton class="button" type="button" :disabled="generating" @click="generateMap">
             {{ generating ? '正在生成…' : '生成今日地图' }}
-          </button>
+          </DivButton>
           <RouterLink class="button-secondary" to="/overview">先学习今日任务</RouterLink>
         </div>
         <div v-if="generating" class="challenge-generate__waiting">
           <p class="field-hint" role="status">{{ generationStatus }} 通常需要 1–2 分钟，可以先去做记忆练习。</p>
-          <button class="button-secondary button-small" type="button" @click="stopWaitingForMap">先不等了</button>
+          <DivButton class="button-secondary button-small" type="button" @click="stopWaitingForMap">先不等了</DivButton>
         </div>
         <p v-else-if="generationStatus" class="field-hint" role="status">{{ generationStatus }}</p>
       </div>
@@ -376,9 +376,9 @@ onMounted(() => {
           <p>{{ nextNode.description }}</p>
         </div>
         <span class="challenge-node__status" :class="`challenge-node__status--${nextNode.status}`">{{ CHALLENGE_STATUS_LABELS[nextNode.status] }}</span>
-        <button class="button workspace-primary-button" type="button" :disabled="nodeLoading || readOnly" @click="openNode(nextNode)">
+        <DivButton class="button workspace-primary-button" type="button" :disabled="nodeLoading || readOnly" @click="openNode(nextNode)">
           {{ nodeActionLabel(nextNode) }}
-        </button>
+        </DivButton>
       </section>
 
       <div v-if="readOnly" class="alert alert-warning" role="status">
@@ -389,7 +389,7 @@ onMounted(() => {
       <section v-if="plan.status === 'failed'" class="panel">
         <ErrorNotice :error="{ code: plan.errorCode, message: '今日地图暂时不可用，请稍后重试。' }" :show-retry="false" />
         <div class="button-row">
-          <button class="button" type="button" :disabled="generating" @click="generateMap">重试生成</button>
+          <DivButton class="button" type="button" :disabled="generating" @click="generateMap">重试生成</DivButton>
           <RouterLink class="button-secondary" to="/overview">使用传统学习</RouterLink>
         </div>
         <p v-if="generationError" class="field-error">{{ generationError }}</p>
@@ -400,7 +400,7 @@ onMounted(() => {
         <section class="dialog-card challenge-node-dialog" role="dialog" aria-modal="true" aria-labelledby="challenge-node-dialog-title">
         <div class="challenge-node-detail__heading">
           <div><p class="eyebrow">{{ CHALLENGE_NODE_LABELS[selectedNode.node.nodeType] }}</p><h2 id="challenge-node-dialog-title">{{ selectedNode.node.title }}</h2></div>
-          <button class="icon-button" type="button" aria-label="关闭" @click="selectedNode = null">×</button>
+          <DivButton class="icon-button" type="button" aria-label="关闭" @click="selectedNode = null">×</DivButton>
         </div>
         <p>{{ selectedNode.node.description }}</p>
         <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
@@ -409,11 +409,11 @@ onMounted(() => {
         <p v-else-if="selectedNode.node.nodeType === 'BOSS' && selectedNode.node.status === 'completed'" class="inline-note">终点挑战已完成，可查看结果。</p>
         <ErrorNotice v-if="nodeError" :error="nodeError" :show-retry="false" />
         <div class="button-row">
-          <button v-if="selectedNode.allowedActions.includes('start') || selectedNode.allowedActions.includes('resume')" class="button" type="button" :disabled="readOnly || nodeStarting" @click="startNode(selectedNode)">
+          <DivButton v-if="selectedNode.allowedActions.includes('start') || selectedNode.allowedActions.includes('resume')" class="button" type="button" :disabled="readOnly || nodeStarting" @click="startNode(selectedNode)">
             {{ nodeStarting ? '正在启动…' : (selectedNode.allowedActions.includes('resume') ? '继续节点' : '开始节点') }}
-          </button>
-          <button v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</button>
-          <button class="button-secondary" type="button" @click="selectedNode = null">取消</button>
+          </DivButton>
+          <DivButton v-if="selectedNode.allowedActions.includes('view_result')" class="button-secondary" type="button" @click="viewResult(selectedNode)">查看节点结果</DivButton>
+          <DivButton class="button-secondary" type="button" @click="selectedNode = null">取消</DivButton>
         </div>
         </section>
       </div>
@@ -445,7 +445,7 @@ onMounted(() => {
           >
             <path :d="routePath" />
           </svg>
-          <button
+          <DivButton
             v-for="(node, stationIndex) in mainNodes"
             :key="node.id"
             type="button"
@@ -459,7 +459,7 @@ onMounted(() => {
           >
             <span class="map-station__order" aria-hidden="true">{{ node.nodeType === 'BOSS' ? '★' : node.orderIndex }}</span>
             <span class="map-station__caption">{{ node.title }}</span>
-          </button>
+          </DivButton>
         </div>
 
         <div v-if="optionalNodes.length > 0" class="challenge-optional">
@@ -476,7 +476,7 @@ onMounted(() => {
               </div>
               <p>{{ node.description }}</p>
               <p class="field-hint">预计 {{ node.estimatedMinutes }} 分钟</p>
-              <button class="button-secondary button-small" type="button" :disabled="nodeLoading" @click="openNode(node)">{{ nodeActionLabel(node) }}</button>
+              <DivButton class="button-secondary button-small" type="button" :disabled="nodeLoading" @click="openNode(node)">{{ nodeActionLabel(node) }}</DivButton>
             </div>
           </article>
         </div>
@@ -507,15 +507,15 @@ onMounted(() => {
         <LoadingState v-if="historyLoading && historyItems.length === 0" label="正在加载历史…" />
         <ErrorNotice v-else-if="historyError" :error="historyError" retry-label="重新读取历史" @retry="loadHistory(true)" />
         <div v-else-if="historyItems.length === 0" class="challenge-history__empty"><p>还没有闯关记录。</p></div>
-        <ul v-else class="challenge-history__list">
-          <li v-for="item in historyItems" :key="item.id">
+        <div role="list" v-else class="challenge-history__list">
+          <div role="listitem" v-for="item in historyItems" :key="item.id">
             <RouterLink class="challenge-history__item" :to="`/challenges/${item.id}`">
               <span><strong>{{ item.localDate }} · {{ item.title || '每日闯关' }}</strong><small>{{ item.summary || '没有摘要' }}</small></span>
               <span class="challenge-history__meta"><span>{{ PLAN_STATUS_LABELS[item.status] }}</span><small>主线 {{ item.mainCompleted }} / {{ item.mainTotal }}</small></span>
             </RouterLink>
-          </li>
-        </ul>
-        <button v-if="historyHasMore" class="button-secondary challenge-history__more" type="button" :disabled="historyLoading" @click="loadHistory(false)">{{ historyLoading ? '正在加载…' : '加载更多历史' }}</button>
+          </div>
+        </div>
+        <DivButton v-if="historyHasMore" class="button-secondary challenge-history__more" type="button" :disabled="historyLoading" @click="loadHistory(false)">{{ historyLoading ? '正在加载…' : '加载更多历史' }}</DivButton>
       </section>
 
   </article>

@@ -201,7 +201,7 @@ void practice.load()
         <p>题目正在生成，请稍候。</p>
         <div class="practice-generation-loader" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="button-row">
-          <button class="button-secondary" type="button" @click="cancelGeneration">取消生成</button>
+          <DivButton class="button-secondary" type="button" @click="cancelGeneration">取消生成</DivButton>
           <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
         </div>
         <p class="inline-note">取消后不再等待结果；如果生成失败，可以直接重试。</p>
@@ -212,7 +212,7 @@ void practice.load()
         <h2>题目生成失败</h2>
         <p>请稍后重试，或重新创建练习。</p>
         <div class="button-row">
-          <button class="button" type="button" :disabled="practice.busy.value" @click="regenerate">重新生成</button>
+          <DivButton class="button" type="button" :disabled="practice.busy.value" @click="regenerate">重新生成</DivButton>
           <RouterLink class="button-secondary" to="/practice">新建练习</RouterLink>
         </div>
       </section>
@@ -233,7 +233,7 @@ void practice.load()
             <section v-if="draftConflict" class="alert alert-warning" role="alert">
               <strong>草稿版本冲突</strong>
               <p>答案已在其他页面更新，请重新加载后再编辑。</p>
-              <button class="button-secondary button-small" type="button" @click="retryDraftAfterConflict">读取最新草稿</button>
+              <DivButton class="button-secondary button-small" type="button" @click="retryDraftAfterConflict">读取最新草稿</DivButton>
             </section>
             <ErrorNotice v-else-if="practice.draftError.value" :error="practice.draftError.value" :show-retry="false" retry-label="重试" @retry="saveDraft" />
 
@@ -283,7 +283,7 @@ void practice.load()
               <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value || !allAnswered" @click="submit">
                 {{ practice.busy.value ? '正在提交…' : '提交全部答案' }} <AppIcon name="arrow" />
               </SvgPlateButton>
-              <button class="button-secondary practice-regenerate-button" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</button>
+              <DivButton class="button-secondary practice-regenerate-button" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</DivButton>
             </section>
           </aside>
         </div>

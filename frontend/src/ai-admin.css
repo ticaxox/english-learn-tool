@@ -121,14 +121,14 @@
 }
 
 .button-danger,
-button.button-danger {
+[role="button"].button-danger {
   border-color: #d9aaa7;
   background: #fff5f4;
   color: var(--danger);
 }
 
 .button-danger:hover,
-button.button-danger:hover {
+[role="button"].button-danger:hover {
   background: #ffe7e4;
   color: #7e1f1f;
 }
@@ -406,7 +406,7 @@ button.button-danger:hover {
   }
 
   .provider-actions .button,
-  .provider-actions button {
+  .provider-actions [role="button"] {
     flex: 1 1 8rem;
   }
 

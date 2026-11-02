@@ -195,12 +195,12 @@ onMounted(() => {
         <span>只看未读</span>
       </label>
       <div class="button-row">
-        <button class="button-secondary button-small" type="button" :disabled="loading" @click="loadFirstPage">
+        <DivButton class="button-secondary button-small" type="button" :disabled="loading" @click="loadFirstPage">
           刷新
-        </button>
-        <button class="button button-small" type="button" :disabled="!canMarkAll" @click="markAllRead">
+        </DivButton>
+        <DivButton class="button button-small" type="button" :disabled="!canMarkAll" @click="markAllRead">
           {{ markingAll ? '正在处理…' : '全部已读' }}
-        </button>
+        </DivButton>
       </div>
     </section>
 
@@ -262,7 +262,7 @@ onMounted(() => {
             <RouterLink class="notification-business-link" :to="businessLink(item)">
               {{ businessLinkLabel(item) }}
             </RouterLink>
-            <button
+            <DivButton
               v-if="!item.readAt"
               class="button-secondary button-small"
               type="button"
@@ -270,14 +270,14 @@ onMounted(() => {
               @click="markOneRead(item)"
             >
               {{ markingId === item.id ? '正在确认…' : '标记已读' }}
-            </button>
+            </DivButton>
           </div>
         </div>
       </article>
 
       <div class="notification-list__footer">
         <p class="inline-note">这里只显示站内通知。</p>
-        <button
+        <DivButton
           v-if="hasMore"
           class="button-secondary"
           type="button"
@@ -285,7 +285,7 @@ onMounted(() => {
           @click="loadMore"
         >
           {{ loadingMore ? '正在读取下一页…' : '加载更多通知' }}
-        </button>
+        </DivButton>
         <span v-else class="inline-note">已到通知列表末尾</span>
       </div>
     </section>

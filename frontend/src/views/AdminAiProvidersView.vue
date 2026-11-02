@@ -228,7 +228,7 @@ onMounted(() => {
         <h1>AI 提供商</h1>
         <p class="lead">配置 OpenAI 兼容提供商，查看服务端掩码、真实连接检查、模型列表与默认/备用顺序。</p>
       </div>
-      <button class="button" type="button" @click="openCreate">新增提供商</button>
+      <DivButton class="button" type="button" @click="openCreate">新增提供商</DivButton>
     </header>
 
     <section class="ai-summary-strip" aria-label="提供商摘要">
@@ -258,7 +258,7 @@ onMounted(() => {
     <section v-else-if="providers.length === 0" class="panel empty-state">
       <h2>尚未配置 AI 提供商</h2>
       <p>新增后由服务端加密保存 Key，前端只显示掩码。连接测试和模型列表会发起真实网络请求。</p>
-      <button class="button" type="button" @click="openCreate">新增第一个提供商</button>
+      <DivButton class="button" type="button" @click="openCreate">新增第一个提供商</DivButton>
     </section>
 
     <section v-else class="provider-list" aria-label="AI 提供商列表">
@@ -288,24 +288,24 @@ onMounted(() => {
         </p>
 
         <div class="button-row provider-actions">
-          <button class="button-secondary button-small" type="button" @click="openEdit(provider)">编辑</button>
-          <button class="button-secondary button-small" type="button" :disabled="testStates[provider.id]?.loading" @click="runTest(provider)">
+          <DivButton class="button-secondary button-small" type="button" @click="openEdit(provider)">编辑</DivButton>
+          <DivButton class="button-secondary button-small" type="button" :disabled="testStates[provider.id]?.loading" @click="runTest(provider)">
             {{ testStates[provider.id]?.loading ? '检查中…' : '连接检查' }}
-          </button>
-          <button class="button-secondary button-small" type="button" :disabled="modelStates[provider.id]?.loading" @click="loadModels(provider)">
+          </DivButton>
+          <DivButton class="button-secondary button-small" type="button" :disabled="modelStates[provider.id]?.loading" @click="loadModels(provider)">
             {{ modelStates[provider.id]?.loading ? '读取中…' : '获取模型' }}
-          </button>
-          <button
+          </DivButton>
+          <DivButton
             v-if="!provider.isDefault"
             class="button-secondary button-small"
             type="button"
             :disabled="Boolean(actionKey)"
             @click="makeDefault(provider)"
-          >设为默认</button>
-          <button class="button-secondary button-small" type="button" :disabled="Boolean(actionKey) || provider.isDefault" @click="toggleEnabled(provider)">
+          >设为默认</DivButton>
+          <DivButton class="button-secondary button-small" type="button" :disabled="Boolean(actionKey) || provider.isDefault" @click="toggleEnabled(provider)">
             {{ provider.enabled ? '停用' : '启用' }}
-          </button>
-          <button class="button-danger button-small" type="button" :disabled="Boolean(actionKey)" @click="removeProvider(provider)">删除</button>
+          </DivButton>
+          <DivButton class="button-danger button-small" type="button" :disabled="Boolean(actionKey)" @click="removeProvider(provider)">删除</DivButton>
         </div>
 
         <section v-if="testStates[provider.id]?.result || testStates[provider.id]?.error" class="operation-result" aria-live="polite">
@@ -326,7 +326,7 @@ onMounted(() => {
           <template v-if="modelStates[provider.id]?.result?.success">
             <strong>服务端返回 {{ modelStates[provider.id].result!.models.length }} 个模型</strong>
             <div class="model-chip-list">
-              <button
+              <DivButton
                 v-for="model in modelStates[provider.id].result!.models"
                 :key="model"
                 class="model-chip"
@@ -334,7 +334,7 @@ onMounted(() => {
                 :class="{ 'model-chip--selected': model === provider.modelId }"
                 :disabled="Boolean(actionKey)"
                 @click="selectModel(provider, model)"
-              >{{ model }}</button>
+              >{{ model }}</DivButton>
             </div>
           </template>
           <template v-else-if="modelStates[provider.id]?.result">

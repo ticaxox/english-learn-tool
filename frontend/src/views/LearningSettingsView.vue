@@ -271,9 +271,9 @@ onMounted(() => {
         </fieldset>
 
         <div class="button-row">
-          <button class="button" type="submit" :disabled="saving">
+          <DivButton class="button" type="submit" :disabled="saving">
             {{ saving ? '正在保存…' : '保存设置' }}
-          </button>
+          </DivButton>
         </div>
 
         <div v-if="saved" class="alert alert-success" role="status">

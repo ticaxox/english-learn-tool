@@ -34,7 +34,7 @@ const emit = defineEmits<{ (event: 'retry'): void }>()
       <div>
         <h2>{{ title }}</h2>
         <p>{{ message || '通知读取失败。' }}</p>
-        <button class="button-secondary" type="button" @click="emit('retry')">重新读取</button>
+        <DivButton class="button-secondary" type="button" @click="emit('retry')">重新读取</DivButton>
       </div>
     </template>
   </section>

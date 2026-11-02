@@ -127,7 +127,7 @@ describe('AdminUsersView', () => {
     const wrapper = mount(AdminUsersView)
     await flushPromises()
 
-    await wrapper.get('.admin-users__hero button').trigger('click')
+    await wrapper.get('.admin-users__hero [role="button"]').trigger('click')
     await wrapper.get('#create-username').setValue('member_two')
     await wrapper.get('#create-display-name').setValue('成员二号')
     await wrapper.get('#create-learning-group').setValue('学习二组')
@@ -148,10 +148,10 @@ describe('AdminUsersView', () => {
     expect(localStorage.length).toBe(0)
     expect(sessionStorage.length).toBe(0)
 
-    await wrapper.get('.dialog-card--password > button').trigger('click')
+    await wrapper.get('.dialog-card--password > [role="button"]').trigger('click')
     expect(wrapper.text()).not.toContain('Show-Once-Pass-123!')
 
-    await wrapper.get('.create-panel .section-heading button').trigger('click')
+    await wrapper.get('.create-panel .section-heading [role="button"]').trigger('click')
     expect(wrapper.find('.create-panel').exists()).toBe(false)
     expect(wrapper.text()).toContain('账号 成员一号（@member_one）已创建')
   })
@@ -222,9 +222,9 @@ describe('AdminUsersView', () => {
     })
 
     await fileInput.trigger('change')
-    await wrapper.get('.import-picker > button').trigger('click')
+    await wrapper.get('.import-picker > [role="button"]').trigger('click')
     await flushPromises()
-    await wrapper.get('.import-preview .button-row > button').trigger('click')
+    await wrapper.get('.import-preview .button-row > [role="button"]').trigger('click')
     await flushPromises()
 
     expect(apiMocks.confirmAdminUserImport).toHaveBeenCalledWith('preview-1', 'a'.repeat(64))
@@ -300,9 +300,9 @@ describe('AdminUsersView', () => {
     })
 
     await fileInput.trigger('change')
-    await wrapper.get('.import-picker > button').trigger('click')
+    await wrapper.get('.import-picker > [role="button"]').trigger('click')
     await flushPromises()
-    await wrapper.get('.import-preview .button-row > button').trigger('click')
+    await wrapper.get('.import-preview .button-row > [role="button"]').trigger('click')
     await flushPromises()
 
     expect(wrapper.text()).toContain('CSV 批次已导入')
@@ -322,7 +322,7 @@ describe('AdminUsersView', () => {
     const wrapper = mount(AdminUsersView)
     await flushPromises()
 
-    const detailButtons = wrapper.findAll('.member-actions-menu__panel button').filter((button) => button.text() === '详情')
+    const detailButtons = wrapper.findAll('.member-actions-menu__panel [role="button"]').filter((button) => button.text() === '详情')
     await detailButtons[1].trigger('click')
     await flushPromises()
 
@@ -341,14 +341,14 @@ describe('AdminUsersView', () => {
     const wrapper = mount(AdminUsersView)
     await flushPromises()
 
-    const deleteButtons = wrapper.findAll('.member-actions-menu__panel button').filter((button) => button.text() === '删除')
+    const deleteButtons = wrapper.findAll('.member-actions-menu__panel [role="button"]').filter((button) => button.text() === '删除')
     await deleteButtons[0].trigger('click')
 
-    const confirmButton = wrapper.get('.dialog-actions button')
-    expect(confirmButton.attributes('disabled')).toBeDefined()
+    const confirmButton = wrapper.get('.dialog-actions [role="button"]')
+    expect(confirmButton.attributes('aria-disabled')).toBeDefined()
 
     await wrapper.get('#delete-confirmation').setValue(adminUser.username)
-    expect(confirmButton.attributes('disabled')).toBeUndefined()
+    expect(confirmButton.attributes('aria-disabled')).toBeUndefined()
 
     await confirmButton.trigger('click')
     await flushPromises()

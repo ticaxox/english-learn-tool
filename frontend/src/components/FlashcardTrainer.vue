@@ -70,14 +70,14 @@ function rate(rating: FlashcardRating): void {
       leave the learner staring at a card whose answer they already know. Only
       the rating actions are gated by `disabled`.
     -->
-    <button
+    <DivButton
       v-if="!revealed"
       class="button study-card__flip"
       type="button"
       @click="flip"
     >
       翻到背面
-    </button>
+    </DivButton>
 
     <div v-else ref="backRegion" class="study-card__back" aria-live="polite" tabindex="-1">
       <p v-if="props.question.partOfSpeech" class="study-card__phonetic">{{ props.question.partOfSpeech }}</p>
@@ -85,20 +85,20 @@ function rate(rating: FlashcardRating): void {
       <p v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</p>
       <p v-if="props.question.example" class="study-card__example">{{ props.question.example }}</p>
       <div class="button-row">
-        <button class="button-secondary" type="button" :disabled="!canRate" @click="rate('again')">
+        <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('again')">
           无印象
-        </button>
-        <button class="button" type="button" :disabled="!canRate" @click="rate('good')">
+        </DivButton>
+        <DivButton class="button" type="button" :disabled="!canRate" @click="rate('good')">
           有印象
-        </button>
-        <button
+        </DivButton>
+        <DivButton
           class="button-secondary button-small"
           type="button"
           :disabled="props.disabled"
           @click="emit('master')"
         >
           已记住
-        </button>
+        </DivButton>
       </div>
       <p class="inline-note">选择后会自动安排下次复习。</p>
     </div>

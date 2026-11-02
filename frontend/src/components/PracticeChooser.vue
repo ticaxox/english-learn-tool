@@ -140,22 +140,22 @@ async function startPractice(): Promise<void> {
 <template>
   <section class="practice-chooser" aria-label="选择练习方式">
     <div class="practice-chooser__tabs" role="tablist" aria-label="练习类型">
-      <button
+      <DivButton
         class="practice-chooser__tab"
         :class="{ 'is-active': active === 'memory' }"
         type="button"
         role="tab"
         :aria-selected="active === 'memory'"
         @click="active = 'memory'"
-      >记忆练习</button>
-      <button
+      >记忆练习</DivButton>
+      <DivButton
         class="practice-chooser__tab"
         :class="{ 'is-active': active === 'practice' }"
         type="button"
         role="tab"
         :aria-selected="active === 'practice'"
         @click="active = 'practice'"
-      >AI 练习</button>
+      >AI 练习</DivButton>
     </div>
 
     <div v-if="active === 'memory'" class="practice-chooser__panel" role="tabpanel" aria-label="记忆练习">
@@ -174,7 +174,7 @@ async function startPractice(): Promise<void> {
       </div>
       <ErrorNotice v-if="configError" :error="configError" retry-label="重新读取" @retry="loadConfig" />
       <div class="practice-chooser__rows">
-        <button
+        <DivButton
           v-for="module in MEMORY_MODULES"
           :key="module"
           class="practice-chooser__row"
@@ -205,13 +205,13 @@ async function startPractice(): Promise<void> {
           </span>
           <span v-else-if="memoryConfig !== null && !memoryModes.includes(module)" class="practice-chooser__state">未启用</span>
           <AppIcon name="arrow" />
-        </button>
+        </DivButton>
       </div>
     </div>
 
     <div v-else class="practice-chooser__panel" role="tabpanel" aria-label="AI 练习">
       <div class="practice-chooser__types">
-        <button
+        <DivButton
           v-for="type in (['fill_blank', 'reading', 'translation', 'writing'] as PracticeType[])"
           :key="type"
           class="practice-chooser__type"
@@ -221,7 +221,7 @@ async function startPractice(): Promise<void> {
         >
           <strong>{{ PRACTICE_TYPE_LABELS[type] }}</strong>
           <small>{{ typeDescriptions[type] }}</small>
-        </button>
+        </DivButton>
       </div>
 
       <div class="practice-chooser__footer">

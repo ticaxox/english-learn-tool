@@ -130,7 +130,7 @@ onMounted(() => {
         <h1>AI 提示词</h1>
         <p class="lead">按功能键读取并覆盖提示词。保存只影响后续 AI 任务，不会展示用户答案、密钥或教练正文。</p>
       </div>
-      <button class="button-secondary" type="button" :disabled="loadingList" @click="loadList">刷新列表</button>
+      <DivButton class="button-secondary" type="button" :disabled="loadingList" @click="loadList">刷新列表</DivButton>
     </header>
 
     <LoadingState v-if="loadingList" label="正在读取提示词列表…" />
@@ -147,7 +147,7 @@ onMounted(() => {
     <div v-else class="prompt-layout">
       <aside class="panel prompt-list" aria-label="提示词清单">
         <h2>功能键</h2>
-        <button
+        <DivButton
           v-for="item in prompts"
           :key="item.key"
           class="prompt-list__item"
@@ -158,7 +158,7 @@ onMounted(() => {
           <strong>{{ item.name }}</strong>
           <span>{{ PROMPT_LABELS[item.key] }} · <code>{{ item.key }}</code></span>
           <small>更新于 {{ item.updatedAt }}</small>
-        </button>
+        </DivButton>
       </aside>
 
       <section class="panel prompt-editor">
@@ -201,7 +201,7 @@ onMounted(() => {
             <div v-if="lastRequestId" class="inline-note">Request ID：<code>{{ lastRequestId }}</code></div>
 
             <div class="button-row">
-              <button class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '覆盖保存' }}</button>
+              <DivButton class="button" type="submit" :disabled="saving">{{ saving ? '正在保存…' : '覆盖保存' }}</DivButton>
               <span v-if="saved" class="status-badge status-badge--success" role="status">已保存</span>
             </div>
           </form>

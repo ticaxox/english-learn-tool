@@ -231,9 +231,9 @@ onMounted(() => {
           <p>每一本词书，都是 Crumbo 留下的一串面包屑。</p>
         </div>
       </div>
-      <button class="button crumb-import-button" type="button" @click="importOpen = true">
+      <DivButton class="button crumb-import-button" type="button" @click="importOpen = true">
         <AppIcon name="plus" /> 导入词书
-      </button>
+      </DivButton>
     </header>
 
     <section class="workspace-card wordbook-active-banner wordbook-active-strip crumb-current-book" :class="{ 'wordbook-active-banner--empty': !activeBook }">
@@ -265,9 +265,9 @@ onMounted(() => {
           />
         </label>
 
-        <button class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
+        <DivButton class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
           {{ loading ? '读取中…' : '刷新' }}
-        </button>
+        </DivButton>
       </div>
 
       <p v-if="operationMessage" class="alert alert-success" role="status">{{ operationMessage }}</p>
@@ -279,7 +279,7 @@ onMounted(() => {
         <span class="wordbook-empty-mark" aria-hidden="true">Aa</span>
         <strong>还没有词书</strong>
         <p>导入一套词书，今天的任务才能开始。</p>
-        <button class="button workspace-primary-button" type="button" @click="importOpen = true">导入一本词书</button>
+        <DivButton class="button workspace-primary-button" type="button" @click="importOpen = true">导入一本词书</DivButton>
       </div>
 
       <template v-else>
@@ -319,9 +319,9 @@ onMounted(() => {
         </section>
 
         <div class="pagination" aria-label="词书分页">
-          <button class="button-secondary button-small" type="button" :disabled="!hasPrevious || loading" @click="previousPage">上一页</button>
+          <DivButton class="button-secondary button-small" type="button" :disabled="!hasPrevious || loading" @click="previousPage">上一页</DivButton>
           <span>{{ pageSummary }}</span>
-          <button class="button-secondary button-small" type="button" :disabled="!hasNext || loading" @click="nextPage">下一页</button>
+          <DivButton class="button-secondary button-small" type="button" :disabled="!hasNext || loading" @click="nextPage">下一页</DivButton>
         </div>
       </template>
     </section>

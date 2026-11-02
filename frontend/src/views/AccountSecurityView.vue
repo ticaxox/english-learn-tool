@@ -115,7 +115,7 @@ async function submit(): Promise<void> {
         />
       </div>
       <div class="button-row">
-        <button type="submit" :disabled="submitting">{{ submitting ? '正在更新…' : '保存新密码' }}</button>
+        <DivButton type="submit" :disabled="submitting">{{ submitting ? '正在更新…' : '保存新密码' }}</DivButton>
       </div>
     </form>
   </section>

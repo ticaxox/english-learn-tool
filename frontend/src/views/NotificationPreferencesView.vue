@@ -223,9 +223,9 @@ onMounted(() => {
           <p v-else-if="savedMessage" class="alert alert-success" role="status">{{ savedMessage }}</p>
           <p v-else class="field-hint">设置会用于之后的提醒。</p>
         </div>
-        <button class="button" type="submit" :disabled="saving || !dirty">
+        <DivButton class="button" type="submit" :disabled="saving || !dirty">
           {{ saving ? '正在保存…' : '保存偏好' }}
-        </button>
+        </DivButton>
       </div>
 
       <ErrorNotice

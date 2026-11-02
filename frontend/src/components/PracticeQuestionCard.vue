@@ -82,16 +82,16 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
 
     <div v-else-if="question.questionType === 'translation'" class="practice-translation">
       <p v-if="question.sourceText" class="practice-source-text">{{ question.sourceText }}</p>
-      <ul v-if="question.requirements.length" class="practice-requirements">
-        <li v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</li>
-      </ul>
+      <div role="list" v-if="question.requirements.length" class="practice-requirements">
+        <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
+      </div>
     </div>
 
     <div v-else class="practice-writing">
       <p v-if="question.prompt" class="practice-source-text">{{ question.prompt }}</p>
-      <ul v-if="question.requirements.length" class="practice-requirements">
-        <li v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</li>
-      </ul>
+      <div role="list" v-if="question.requirements.length" class="practice-requirements">
+        <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
+      </div>
     </div>
 
     <fieldset

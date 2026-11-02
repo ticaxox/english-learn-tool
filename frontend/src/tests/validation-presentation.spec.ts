@@ -61,7 +61,7 @@ describe('422 validation presentation', () => {
     expect(text).toContain('req-422')
     expect(wrapper.find('.field-issue-list').exists()).toBe(true)
     // The server's own wording stays actionable: no client-side retry is offered.
-    expect(wrapper.find('button').exists()).toBe(false)
+    expect(wrapper.find('[role="button"]').exists()).toBe(false)
   })
 
   it('offers no retry for a validation rejection even when retry is requested', () => {
@@ -69,6 +69,6 @@ describe('422 validation presentation', () => {
       props: { error: validationError([{ path: 'a', message: 'bad' }]), retryLabel: '重试' },
       listeners: { retry: vi.fn() },
     })
-    expect(wrapper.find('button').exists()).toBe(false)
+    expect(wrapper.find('[role="button"]').exists()).toBe(false)
   })
 })

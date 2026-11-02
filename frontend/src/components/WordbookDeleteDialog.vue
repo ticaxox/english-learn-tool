@@ -156,16 +156,16 @@ onUnmounted(() => {
           <p class="eyebrow">危险操作 · 后台清理</p>
           <h2 id="wordbook-delete-title">删除「{{ props.wordbook.name }}」</h2>
         </div>
-        <button class="icon-button" type="button" aria-label="关闭删除窗口" :disabled="submitting" @click="close">×</button>
+        <DivButton class="icon-button" type="button" aria-label="关闭删除窗口" :disabled="submitting" @click="close">×</DivButton>
       </header>
 
       <div class="alert alert-warning">
         <strong>删除会在后台执行，完成后列表会自动更新。</strong>
-        <ul>
-          <li>私人词书删除后不可恢复；学习进度和相关记录会一并清理。</li>
-          <li v-if="props.wordbook.is_active">这是当前主词书，删除后需要重新选择或导入一本。</li>
-          <li>当前词条数：{{ props.wordbook.entry_count.toLocaleString('zh-CN') }}。</li>
-        </ul>
+        <div role="list">
+          <div role="listitem">私人词书删除后不可恢复；学习进度和相关记录会一并清理。</div>
+          <div role="listitem" v-if="props.wordbook.is_active">这是当前主词书，删除后需要重新选择或导入一本。</div>
+          <div role="listitem">当前词条数：{{ props.wordbook.entry_count.toLocaleString('zh-CN') }}。</div>
+        </div>
       </div>
 
       <label v-if="exactNameRequired" class="field">
@@ -195,10 +195,10 @@ onUnmounted(() => {
       </div>
 
       <footer class="dialog-actions button-row">
-        <button v-if="!completed" class="button-danger" type="button" :disabled="!canSubmit" @click="confirmDelete">
+        <DivButton v-if="!completed" class="button-danger" type="button" :disabled="!canSubmit" @click="confirmDelete">
           {{ submitting ? '正在删除并轮询…' : '确认启动删除' }}
-        </button>
-        <button class="button-secondary" type="button" :disabled="submitting" @click="close">{{ completed ? '完成' : '取消' }}</button>
+        </DivButton>
+        <DivButton class="button-secondary" type="button" :disabled="submitting" @click="close">{{ completed ? '完成' : '取消' }}</DivButton>
       </footer>
     </section>
   </div>

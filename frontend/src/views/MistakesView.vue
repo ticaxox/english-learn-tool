@@ -171,7 +171,7 @@ onMounted(() => {
                 <td data-label="最近错误">{{ formatMistakeTime(entry.lastMistakeAt) }}</td>
                 <td data-label="次数">{{ entry.mistakeCount }}</td>
                 <td data-label="重点复习">
-                  <button
+                  <DivButton
                     class="link-button"
                     type="button"
                     :disabled="prioritising === entry.entryId"
@@ -179,18 +179,18 @@ onMounted(() => {
                     @click="togglePriority(entry)"
                   >
                     {{ entry.priorityReview ? '已标记重点' : '标为重点' }}
-                  </button>
+                  </DivButton>
                   <span v-if="prioritising === entry.entryId" class="field-hint">更新中…</span>
                 </td>
                 <td data-label="操作">
-                  <button
+                  <DivButton
                     class="button-secondary button-small"
                     type="button"
                     :disabled="restoring === entry.stateId"
                     @click="restore(entry)"
                   >
                     {{ restoring === entry.stateId ? '恢复中…' : '恢复复习' }}
-                  </button>
+                  </DivButton>
                 </td>
               </tr>
             </tbody>
@@ -198,13 +198,13 @@ onMounted(() => {
         </section>
 
         <nav class="pager" aria-label="错词分页">
-          <button class="button-secondary button-small" type="button" :disabled="!canPrev || loading" @click="previousPage">
+          <DivButton class="button-secondary button-small" type="button" :disabled="!canPrev || loading" @click="previousPage">
             上一页
-          </button>
+          </DivButton>
           <span>第 {{ page }} 页 · 本页 {{ data.items.length }} 条</span>
-          <button class="button-secondary button-small" type="button" :disabled="!data.hasMore || loading" @click="nextPage">
+          <DivButton class="button-secondary button-small" type="button" :disabled="!data.hasMore || loading" @click="nextPage">
             下一页
-          </button>
+          </DivButton>
         </nav>
       </template>
 

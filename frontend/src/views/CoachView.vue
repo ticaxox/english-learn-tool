@@ -172,14 +172,14 @@ onBeforeUnmount(() => {
     </header>
 
     <div class="coach-main-topbar">
-      <button
+      <DivButton
         class="button-secondary button-small coach-history-toggle"
         type="button"
         :aria-expanded="historyOpen"
         @click="historyOpen = !historyOpen"
       >
         {{ historyOpen ? '收起历史对话' : '历史对话' }}
-      </button>
+      </DivButton>
     </div>
 
     <div class="coach-layout">
@@ -189,9 +189,9 @@ onBeforeUnmount(() => {
             <p class="eyebrow">对话</p>
             <h2>长期对话</h2>
           </div>
-          <button class="button-secondary button-small" type="button" @click="showCreate = !showCreate">
+          <DivButton class="button-secondary button-small" type="button" @click="showCreate = !showCreate">
             新建
-          </button>
+          </DivButton>
         </div>
 
         <form v-if="showCreate" class="coach-create" @submit.prevent="createConversation">
@@ -200,8 +200,8 @@ onBeforeUnmount(() => {
             <input v-model="newTitle" maxlength="200" placeholder="例如：本周学习计划" />
           </label>
           <div class="button-row">
-            <button class="button button-small" type="submit">创建对话</button>
-            <button class="button-secondary button-small" type="button" @click="showCreate = false">取消</button>
+            <DivButton class="button button-small" type="submit">创建对话</DivButton>
+            <DivButton class="button-secondary button-small" type="button" @click="showCreate = false">取消</DivButton>
           </div>
         </form>
 
@@ -218,9 +218,9 @@ onBeforeUnmount(() => {
           <p class="field-hint">有需要时，随时回来继续。</p>
         </div>
 
-        <ul v-else class="coach-conversation-list">
-          <li v-for="conversation in coach.conversations.value" :key="conversation.id">
-            <button
+        <div role="list" v-else class="coach-conversation-list">
+          <div role="listitem" v-for="conversation in coach.conversations.value" :key="conversation.id">
+            <DivButton
               class="coach-conversation"
               :class="{ 'coach-conversation--active': conversation.id === coach.selectedConversationId.value }"
               type="button"
@@ -228,21 +228,21 @@ onBeforeUnmount(() => {
             >
               <span class="coach-conversation__title">{{ conversation.title }}</span>
               <span class="coach-conversation__meta">{{ conversation.messageCount }} 条消息 · {{ formatTime(conversation.lastMessageAt) }}</span>
-            </button>
+            </DivButton>
             <div class="coach-conversation__actions">
-              <button class="link-button" type="button" @click="beginRename(conversation.id, conversation.title)">改名</button>
-              <button class="link-button" type="button" @click="selectConversation(conversation.id).then(clearConversation)">清空</button>
-              <button class="link-button link-button--danger" type="button" @click="deleteConversation(conversation.id, conversation.title)">删除</button>
+              <DivButton class="link-button" type="button" @click="beginRename(conversation.id, conversation.title)">改名</DivButton>
+              <DivButton class="link-button" type="button" @click="selectConversation(conversation.id).then(clearConversation)">清空</DivButton>
+              <DivButton class="link-button link-button--danger" type="button" @click="deleteConversation(conversation.id, conversation.title)">删除</DivButton>
             </div>
             <form v-if="renameId === conversation.id" class="coach-rename" @submit.prevent="saveRename">
               <input v-model="renameTitle" maxlength="200" aria-label="新对话标题" />
-              <button class="button button-small" type="submit">保存</button>
-              <button class="button-secondary button-small" type="button" @click="renameId = null">取消</button>
+              <DivButton class="button button-small" type="submit">保存</DivButton>
+              <DivButton class="button-secondary button-small" type="button" @click="renameId = null">取消</DivButton>
             </form>
-          </li>
-        </ul>
+          </div>
+        </div>
 
-        <button
+        <DivButton
           v-if="coach.conversationsHasMore.value"
           class="button-secondary button-small coach-load-more"
           type="button"
@@ -250,7 +250,7 @@ onBeforeUnmount(() => {
           @click="coach.loadMoreConversations()"
         >
           加载更多会话
-        </button>
+        </DivButton>
       </aside>
 
       <section class="panel coach-main" aria-label="教练对话">
@@ -260,9 +260,9 @@ onBeforeUnmount(() => {
           <h2>从一段长期对话开始</h2>
           <p>选择一段对话，或开始新的对话。</p>
           <div class="coach-suggested-prompts" aria-label="建议提问">
-            <button v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</button>
+            <DivButton v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</DivButton>
           </div>
-          <button class="button member-primary-button" type="button" @click="showCreate = true">开始对话 <AppIcon name="arrow" /></button>
+          <DivButton class="button member-primary-button" type="button" @click="showCreate = true">开始对话 <AppIcon name="arrow" /></DivButton>
         </div>
 
         <template v-else>
@@ -273,15 +273,15 @@ onBeforeUnmount(() => {
               <p class="field-hint">{{ coach.selectedConversation.value.messageCount }} 条消息 · 只对当前账号可见</p>
             </div>
             <div class="button-row">
-              <button class="button-secondary button-small" type="button" @click="beginRename(coach.selectedConversation.value.id, coach.selectedConversation.value.title)">改名</button>
-              <button class="button-secondary button-small" type="button" @click="clearConversation">清空</button>
+              <DivButton class="button-secondary button-small" type="button" @click="beginRename(coach.selectedConversation.value.id, coach.selectedConversation.value.title)">改名</DivButton>
+              <DivButton class="button-secondary button-small" type="button" @click="clearConversation">清空</DivButton>
             </div>
           </header>
 
           <form v-if="renameId === coach.selectedConversation.value.id" class="coach-rename coach-rename--main" @submit.prevent="saveRename">
             <input v-model="renameTitle" maxlength="200" aria-label="新对话标题" />
-            <button class="button button-small" type="submit">保存</button>
-            <button class="button-secondary button-small" type="button" @click="renameId = null">取消</button>
+            <DivButton class="button button-small" type="submit">保存</DivButton>
+            <DivButton class="button-secondary button-small" type="button" @click="renameId = null">取消</DivButton>
           </form>
 
 
@@ -294,7 +294,7 @@ onBeforeUnmount(() => {
 
           <div ref="messageArea" class="coach-messages" aria-live="polite">
             <LoadingState v-if="coach.messagesLoading.value && coach.messages.value.length === 0" label="正在加载消息…" />
-            <button
+            <DivButton
               v-if="coach.messagesHasMore.value"
               class="button-secondary button-small coach-load-older"
               type="button"
@@ -302,7 +302,7 @@ onBeforeUnmount(() => {
               @click="coach.loadMoreMessages()"
             >
               加载更早消息
-            </button>
+            </DivButton>
             <div v-if="coach.messages.value.length === 0 && !coach.messagesLoading.value" class="coach-messages-empty">
               <p>这段对话还没有消息，先说一句吧。</p>
             </div>
@@ -333,7 +333,7 @@ onBeforeUnmount(() => {
                 <p v-else class="coach-message__text">{{ coach.messageText(message) }}</p>
                 <div v-if="message.errorMessage" class="coach-message__error">
                   <p class="field-error" role="alert" :title="message.errorMessage">这次没有收到教练回复。</p>
-                  <button class="button-secondary button-small" type="button" @click="retryStream(message)">重新连接</button>
+                  <DivButton class="button-secondary button-small" type="button" @click="retryStream(message)">重新连接</DivButton>
                 </div>
                 <p v-if="coach.actionNotices[message.id]" class="coach-action-notice">{{ coach.actionNotices[message.id] }}</p>
 
@@ -346,7 +346,7 @@ onBeforeUnmount(() => {
                     </div>
                     <p>{{ receipt.summary }}</p>
                     <p v-if="canUndo(receipt)" class="field-hint">可撤销至 {{ formatTime(receipt.expiresAt) }}</p>
-                    <button
+                    <DivButton
                       v-if="receipt.status === 'applied'"
                       class="button-secondary button-small"
                       type="button"
@@ -354,7 +354,7 @@ onBeforeUnmount(() => {
                       @click="undo(receipt)"
                     >
                       {{ coach.undoingReceiptId.value === receipt.id ? '正在撤销…' : (canUndo(receipt) ? '撤销这次调整' : '已无法撤销') }}
-                    </button>
+                    </DivButton>
                   </article>
                 </section>
               </div>
@@ -386,9 +386,9 @@ onBeforeUnmount(() => {
             />
             <div class="coach-composer__footer">
               <span class="field-hint">{{ draft.length }} / 8000</span>
-              <button class="button member-primary-button" type="submit" :disabled="!draft.trim() || coach.sending.value || Boolean(coach.streamingMessageId.value)">
+              <DivButton class="button member-primary-button" type="submit" :disabled="!draft.trim() || coach.sending.value || Boolean(coach.streamingMessageId.value)">
                 {{ coach.sending.value || coach.streamingMessageId.value ? '正在接收回复…' : '发送消息' }} <AppIcon name="send" />
-              </button>
+              </DivButton>
             </div>
           </form>
         </template>

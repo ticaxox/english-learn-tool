@@ -127,7 +127,7 @@ describe('admin AI views', () => {
     const wrapper = mount(AdminAiProvidersView)
     await flushPromises()
     const backupCard = wrapper.findAll('.provider-card')[1]
-    await backupCard.findAll('button').find((button) => button.text() === '设为默认')!.trigger('click')
+    await backupCard.findAll('[role="button"]').find((button) => button.text() === '设为默认')!.trigger('click')
     await flushPromises()
     expect(apiMocks.updateProvider).toHaveBeenCalledWith('provider-backup', { isDefault: true })
   })
@@ -137,7 +137,7 @@ describe('admin AI views', () => {
     const wrapper = mount(AdminAiProvidersView)
     await flushPromises()
     const firstCard = wrapper.findAll('.provider-card')[0]
-    await firstCard.findAll('button').find((button) => button.text() === '删除')!.trigger('click')
+    await firstCard.findAll('[role="button"]').find((button) => button.text() === '删除')!.trigger('click')
     await flushPromises()
     expect(apiMocks.deleteProvider).toHaveBeenCalledWith(defaultProvider.id)
   })
@@ -155,7 +155,7 @@ describe('admin AI views', () => {
     const wrapper = mount(AdminAiProvidersView)
     await flushPromises()
     const firstCard = wrapper.findAll('.provider-card')[0]
-    const testButton = firstCard.findAll('button').find((button) => button.text() === '连接检查')
+    const testButton = firstCard.findAll('[role="button"]').find((button) => button.text() === '连接检查')
     await testButton!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('真实连接检查失败')
@@ -173,7 +173,7 @@ describe('admin AI views', () => {
     const wrapper = mount(AdminAiProvidersView)
     await flushPromises()
     const firstCard = wrapper.findAll('.provider-card')[0]
-    await firstCard.findAll('button').find((button) => button.text() === '获取模型')!.trigger('click')
+    await firstCard.findAll('[role="button"]').find((button) => button.text() === '获取模型')!.trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('AI_MODEL_LIST_UNSUPPORTED')
     expect(wrapper.text()).toContain('可打开编辑表单手填模型 ID')

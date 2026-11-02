@@ -121,7 +121,7 @@ onMounted(() => {
           <p class="eyebrow">只读词书详情</p>
           <h2 id="wordbook-detail-title">{{ detail?.wordbook.name ?? '词书详情' }}</h2>
         </div>
-        <button class="icon-button" type="button" aria-label="关闭词书详情" @click="close">×</button>
+        <DivButton class="icon-button" type="button" aria-label="关闭词书详情" @click="close">×</DivButton>
       </header>
 
       <LoadingState v-if="loading && !detail" label="正在读取词书与词条…" />
@@ -174,8 +174,8 @@ onMounted(() => {
           <p>如果词书仍在导入，请稍后刷新；失败原因以服务端任务状态为准。</p>
         </div>
 
-        <ol v-else class="wordbook-entry-list" :aria-busy="loading">
-          <li v-for="entry in detail.entries" :key="entry.id">
+        <div role="list" v-else class="wordbook-entry-list" :aria-busy="loading">
+          <div role="listitem" v-for="entry in detail.entries" :key="entry.id">
             <div class="wordbook-entry-word">
               <strong>{{ entry.headword }}</strong>
               <span v-if="entry.phonetic">{{ entry.phonetic }}</span>
@@ -192,21 +192,21 @@ onMounted(() => {
                 <span v-if="definition.part_of_speech" class="part-of-speech">{{ definition.part_of_speech }}</span>
                 <p v-if="definition.definition_en" class="wordbook-definition-en">{{ definition.definition_en }}</p>
                 <p v-if="definition.definition_zh" class="wordbook-definition-zh">{{ definition.definition_zh }}</p>
-                <ul v-if="definition.examples.length" class="wordbook-examples">
-                  <li v-for="(example, exampleIndex) in definition.examples" :key="`${entry.id}-${definitionIndex}-example-${exampleIndex}`">
+                <div role="list" v-if="definition.examples.length" class="wordbook-examples">
+                  <div role="listitem" v-for="(example, exampleIndex) in definition.examples" :key="`${entry.id}-${definitionIndex}-example-${exampleIndex}`">
                     <p>{{ example.example_en }}</p>
                     <p v-if="example.example_zh" class="muted">{{ example.example_zh }}</p>
-                  </li>
-                </ul>
+                  </div>
+                </div>
               </article>
             </div>
-          </li>
-        </ol>
+          </div>
+        </div>
 
         <div class="pagination" aria-label="词条分页">
-          <button class="button-secondary button-small" type="button" :disabled="!hasPrevious || loading" @click="previousPage">上一页</button>
+          <DivButton class="button-secondary button-small" type="button" :disabled="!hasPrevious || loading" @click="previousPage">上一页</DivButton>
           <span>{{ pageSummary }}</span>
-          <button class="button-secondary button-small" type="button" :disabled="!hasNext || loading" @click="nextPage">{{ loading ? '读取中…' : '下一页' }}</button>
+          <DivButton class="button-secondary button-small" type="button" :disabled="!hasNext || loading" @click="nextPage">{{ loading ? '读取中…' : '下一页' }}</DivButton>
         </div>
       </template>
     </section>

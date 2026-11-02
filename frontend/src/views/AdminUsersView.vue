@@ -593,9 +593,9 @@ onMounted(() => loadUsers(null))
         <h1>成员管理</h1>
         <p>只展示账号、角色、状态和允许的聚合指标；不提供答题正文、草稿、教练对话或私有词书正文入口。</p>
       </div>
-      <button type="button" @click="toggleCreatePanel">
+      <DivButton type="button" @click="toggleCreatePanel">
         {{ createOpen ? '收起创建表单' : '添加成员' }}
-      </button>
+      </DivButton>
     </header>
 
     <div class="alert alert-warning privacy-note" role="note">
@@ -613,7 +613,7 @@ onMounted(() => loadUsers(null))
           <p class="eyebrow">单个创建</p>
           <h2 id="create-title">添加一名成员</h2>
         </div>
-        <button class="button-secondary button-small" type="button" @click="toggleCreatePanel">关闭</button>
+        <DivButton class="button-secondary button-small" type="button" @click="toggleCreatePanel">关闭</DivButton>
       </div>
 
       <ErrorNotice v-if="createError" :error="createError" />
@@ -707,12 +707,12 @@ onMounted(() => loadUsers(null))
           <p class="field-hint">12–128 位，至少包含大写字母、小写字母、数字和特殊字符中的三类。</p>
         </div>
         <div class="member-form__full button-row">
-          <button type="submit" :disabled="createSubmitting">
+          <DivButton type="submit" :disabled="createSubmitting">
             {{ createSubmitting ? '正在创建真实成员…' : '创建成员' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="createSubmitting" @click="resetCreateForm">
+          </DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="createSubmitting" @click="resetCreateForm">
             清空
-          </button>
+          </DivButton>
         </div>
       </form>
     </section>
@@ -756,15 +756,15 @@ onMounted(() => loadUsers(null))
           </select>
         </div>
         <div class="button-row filter-bar__actions">
-          <button type="submit" :disabled="loading">筛选</button>
-          <button
+          <DivButton type="submit" :disabled="loading">筛选</DivButton>
+          <DivButton
             class="button-secondary"
             type="button"
             :disabled="loading || !filtered"
             @click="clearFilters"
           >
             清除
-          </button>
+          </DivButton>
         </div>
       </form>
 
@@ -817,13 +817,13 @@ onMounted(() => loadUsers(null))
                 <details class="member-actions-menu">
                   <summary :aria-label="`${user.display_name} 的更多操作`">更多</summary>
                   <div class="member-actions-menu__panel">
-                    <button class="button-secondary button-small" type="button" @click="openMemberDetail($event, user)">详情</button>
-                    <button class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'toggle-status')">
+                    <DivButton class="button-secondary button-small" type="button" @click="openMemberDetail($event, user)">详情</DivButton>
+                    <DivButton class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'toggle-status')">
                       {{ isActive(user) ? '停用' : '启用' }}
-                    </button>
-                    <button class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'change-role')">角色</button>
-                    <button class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'reset-password')">重置密码</button>
-                    <button class="button-danger button-small" type="button" @click="openMemberAction($event, user, 'delete')">删除</button>
+                    </DivButton>
+                    <DivButton class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'change-role')">角色</DivButton>
+                    <DivButton class="button-secondary button-small" type="button" @click="openMemberAction($event, user, 'reset-password')">重置密码</DivButton>
+                    <DivButton class="button-danger button-small" type="button" @click="openMemberAction($event, user, 'delete')">删除</DivButton>
                   </div>
                 </details>
               </td>
@@ -833,11 +833,11 @@ onMounted(() => loadUsers(null))
       </div>
 
       <nav v-if="!loading && !listError && (cursorHistory.length > 0 || hasMore)" class="pagination" aria-label="成员列表分页">
-        <button class="button-secondary" type="button" :disabled="cursorHistory.length === 0" @click="goPrevious">
+        <DivButton class="button-secondary" type="button" :disabled="cursorHistory.length === 0" @click="goPrevious">
           上一页
-        </button>
+        </DivButton>
         <span>每页最多 {{ PAGE_SIZE }} 项</span>
-        <button class="button-secondary" type="button" :disabled="!hasMore" @click="goNext">下一页</button>
+        <DivButton class="button-secondary" type="button" :disabled="!hasMore" @click="goNext">下一页</DivButton>
       </nav>
     </section>
 
@@ -866,9 +866,9 @@ onMounted(() => loadUsers(null))
           />
         </label>
         <span v-if="selectedFile" class="file-chip">{{ selectedFile.name }}</span>
-        <button type="button" :disabled="!selectedFile || previewLoading" @click="requestPreview">
+        <DivButton type="button" :disabled="!selectedFile || previewLoading" @click="requestPreview">
           {{ previewLoading ? '正在预览…' : '上传并预览' }}
-        </button>
+        </DivButton>
       </div>
 
       <ErrorNotice v-if="fileError" :error="fileError" />
@@ -907,9 +907,9 @@ onMounted(() => loadUsers(null))
                   <span v-if="row.status === 'valid'" class="status-badge status-badge--active">可导入</span>
                   <span v-else-if="row.status === 'conflict'" class="status-badge">用户名冲突</span>
                   <span v-else class="status-badge">格式错误</span>
-                  <ul v-if="row.errors.length" class="row-errors">
-                    <li v-for="error in row.errors" :key="error">{{ error }}</li>
-                  </ul>
+                  <div role="list" v-if="row.errors.length" class="row-errors">
+                    <div role="listitem" v-for="error in row.errors" :key="error">{{ error }}</div>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -917,13 +917,13 @@ onMounted(() => loadUsers(null))
         </div>
 
         <div class="button-row">
-          <button
+          <DivButton
             type="button"
             :disabled="importConfirming || preview.total_rows === 0 || previewInvalidRows > 0"
             @click="confirmImport"
           >
             {{ importConfirming ? '正在确认导入…' : `确认导入 ${preview.total_rows} 行` }}
-          </button>
+          </DivButton>
           <span v-if="previewInvalidRows > 0" class="muted">存在错误或冲突时，后端会整批拒绝。</span>
         </div>
       </div>
@@ -939,9 +939,9 @@ onMounted(() => loadUsers(null))
         <strong>{{ importResult.status === 'imported' ? 'CSV 批次已导入' : 'CSV 批次导入失败' }}</strong>
         <p>创建成员：{{ importResult.created_count }} 名。</p>
         <p>批次编号：<code>{{ importResult.import_id }}</code></p>
-        <button class="button-secondary button-small" type="button" :disabled="importStatusLoading" @click="refreshImportStatus">
+        <DivButton class="button-secondary button-small" type="button" :disabled="importStatusLoading" @click="refreshImportStatus">
           {{ importStatusLoading ? '正在读取真实状态…' : '重新读取批次状态' }}
-        </button>
+        </DivButton>
         <p v-if="importStatus">
           服务端状态：<strong>{{ importStatusLabel(importStatus.status) }}</strong>
         </p>
@@ -999,9 +999,9 @@ onMounted(() => loadUsers(null))
         </template>
 
         <div class="button-row dialog-actions">
-          <button class="button-secondary" type="button" :disabled="detailLoading" @click="closeDetail">
+          <DivButton class="button-secondary" type="button" :disabled="detailLoading" @click="closeDetail">
             关闭详情
-          </button>
+          </DivButton>
         </div>
       </section>
     </div>
@@ -1038,17 +1038,17 @@ onMounted(() => loadUsers(null))
         <ErrorNotice v-if="actionError" :error="actionError" />
 
         <div class="button-row dialog-actions">
-          <button
+          <DivButton
             :class="{ 'button-danger': actionKind === 'delete' }"
             type="button"
             :disabled="actionSubmitting || !canConfirmAction"
             @click="confirmAction"
           >
             {{ actionSubmitting ? '正在请求服务端…' : '确认' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="actionSubmitting" @click="closeAction">
+          </DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="actionSubmitting" @click="closeAction">
             取消
-          </button>
+          </DivButton>
         </div>
         <p v-if="apiErrorCode(actionError)" class="request-id">
           错误码：<code>{{ apiErrorCode(actionError) }}</code>
@@ -1062,22 +1062,22 @@ onMounted(() => loadUsers(null))
         <h2 id="password-dialog-title">一次性临时密码</h2>
         <p>关闭后页面不会从 localStorage、sessionStorage 或本地业务缓存恢复这些密码。请通过安全渠道立即交付给对应成员。</p>
 
-        <ul class="secret-list">
-          <li v-for="secret in temporarySecrets" :key="`${secret.username}-${secret.password}`">
+        <div role="list" class="secret-list">
+          <div role="listitem" v-for="secret in temporarySecrets" :key="`${secret.username}-${secret.password}`">
             <div>
               <strong>@{{ secret.username }}</strong>
               <span>{{ secret.context }}</span>
             </div>
             <div class="secret-value">
               <code>{{ secret.password }}</code>
-              <button class="button-secondary button-small" type="button" @click="copyPassword(secret)">
+              <DivButton class="button-secondary button-small" type="button" @click="copyPassword(secret)">
                 {{ copiedUsername === secret.username ? '已复制' : '复制' }}
-              </button>
+              </DivButton>
             </div>
-          </li>
-        </ul>
+          </div>
+        </div>
 
-        <button type="button" @click="closeTemporaryDialog">我已安全保存，关闭</button>
+        <DivButton type="button" @click="closeTemporaryDialog">我已安全保存，关闭</DivButton>
       </section>
     </div>
   </article>

@@ -299,15 +299,15 @@ onMounted(() => {
           <RouterLink to="/practice/records">全部</RouterLink>
         </header>
         <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
-        <ul v-else-if="records.length" class="practice-record-list practice-record-list--row">
-          <li v-for="record in records" :key="record.id">
+        <div role="list" v-else-if="records.length" class="practice-record-list practice-record-list--row">
+          <div role="listitem" v-for="record in records" :key="record.id">
             <RouterLink :to="{ name: 'practice-session', params: { sessionId: record.id } }">
               <span class="practice-record-type">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
               <strong>{{ record.source ? PRACTICE_SOURCE_LABELS[record.source] : '专项练习' }}</strong>
               <small>{{ record.totalQuestions }} 题 · {{ record.score === null ? '未评分' : `${record.score} 分` }}</small>
             </RouterLink>
-          </li>
-        </ul>
+          </div>
+        </div>
         <div v-else class="practice-rail-empty">
           <strong>还没有记录</strong>
           <p>生成第一组练习后，记录会出现在这里。</p>

@@ -1143,7 +1143,7 @@
 }
 
 .auth-card .button,
-.auth-card button[type="submit"] {
+.auth-card [role="button"][type="submit"] {
   min-height: 50px;
   border: 0;
   border-radius: 14px;
@@ -1156,10 +1156,10 @@
 }
 
 .auth-card .button:hover:not(:disabled),
-.auth-card button[type="submit"]:hover:not(:disabled) { filter: brightness(1.04); }
+.auth-card [role="button"][type="submit"]:hover:not(:disabled) { filter: brightness(1.04); }
 
 .auth-card .button:active:not(:disabled),
-.auth-card button[type="submit"]:active:not(:disabled) {
+.auth-card [role="button"][type="submit"]:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: 0 1px 0 #1f8a30;
 }
@@ -1409,7 +1409,7 @@
   .personal-workspace .ia-account-security { width: 100%; }
 }
 
-.personal-workspace .ia-security-form button[type="submit"] {
+.personal-workspace .ia-security-form [role="button"][type="submit"] {
   min-height: 46px;
   padding: 0 20px;
   border: 0;
@@ -1422,7 +1422,7 @@
   transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
 }
 
-.personal-workspace .ia-security-form button[type="submit"]:active:not(:disabled) {
+.personal-workspace .ia-security-form [role="button"][type="submit"]:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--g-green-edge);
 }
@@ -1444,7 +1444,7 @@
 .personal-workspace .mistake-table td:nth-child(5) { font-variant-numeric: tabular-nums; }
 
 /* Dialog footers often use a bare <button> for the primary action. */
-.personal-workspace .dialog-actions > button:not(.button-secondary):not(.button-danger):not(.icon-button) {
+.personal-workspace .dialog-actions > [role="button"]:not(.button-secondary):not(.button-danger):not(.icon-button) {
   min-height: 46px;
   padding: 0 20px;
   border: 0;
@@ -1456,7 +1456,7 @@
   transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
 }
 
-.personal-workspace .dialog-actions > button:not(.button-secondary):not(.button-danger):not(.icon-button):active:not(:disabled) {
+.personal-workspace .dialog-actions > [role="button"]:not(.button-secondary):not(.button-danger):not(.icon-button):active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--g-green-edge);
 }
@@ -2008,7 +2008,7 @@
   gap: 10px;
 }
 
-.personal-workspace .practice-record-list--row li a {
+.personal-workspace .practice-record-list--row [role="listitem"] a {
   display: grid;
   gap: 4px;
   height: 100%;
@@ -2019,7 +2019,7 @@
   box-shadow: 0 3px 0 var(--ui-line);
 }
 
-.personal-workspace .practice-record-list--row li a:hover {
+.personal-workspace .practice-record-list--row [role="listitem"] a:hover {
   border-color: var(--g-blue-edge);
   box-shadow: 0 3px 0 var(--g-blue-edge);
 }
@@ -2087,7 +2087,7 @@
 .personal-workspace .practice-page.practice-hub > * { width: 100%; }
 
 /* Settings save button uses the shared 3D primary style. */
-.personal-workspace .settings-form button[type="submit"] {
+.personal-workspace .settings-form [role="button"][type="submit"] {
   min-height: 46px;
   padding: 0 20px;
   border: 0;
@@ -2098,7 +2098,7 @@
   box-shadow: 0 4px 0 var(--g-green-edge);
 }
 
-.personal-workspace .settings-form button[type="submit"]:active:not(:disabled) {
+.personal-workspace .settings-form [role="button"][type="submit"]:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--g-green-edge);
 }
@@ -2373,7 +2373,7 @@
 .personal-workspace .wordbook-entry-list { gap: 6px; }
 
 /* One entry reads as three lines: headword, meaning, one example. */
-.personal-workspace .wordbook-entry-list > li {
+.personal-workspace .wordbook-entry-list > [role="listitem"] {
   grid-template-columns: minmax(6.5rem, 0.32fr) minmax(0, 1fr);
   align-items: start;
   gap: 12px;
@@ -2417,7 +2417,7 @@
 
 .personal-workspace .wordbook-definition-en,
 .personal-workspace .wordbook-definition-zh,
-.personal-workspace .wordbook-examples li p:first-child {
+.personal-workspace .wordbook-examples [role="listitem"] p:first-child {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
@@ -2440,8 +2440,8 @@
   background: transparent;
 }
 
-.personal-workspace .wordbook-examples li { display: block; }
-.personal-workspace .wordbook-examples li p:first-child { font-size: 0.8rem; color: var(--ui-muted); }
+.personal-workspace .wordbook-examples [role="listitem"] { display: block; }
+.personal-workspace .wordbook-examples [role="listitem"] p:first-child { font-size: 0.8rem; color: var(--ui-muted); }
 .personal-workspace .wordbook-examples .muted { display: none; }
 
 /* ------------------------------------------------ practice: submit + review */
@@ -3324,7 +3324,7 @@
 }
 
 .personal-workspace .challenge-optional .challenge-node .button,
-.personal-workspace .challenge-optional .challenge-node button {
+.personal-workspace .challenge-optional .challenge-node [role="button"] {
   width: fit-content;
   justify-self: start;
 }
@@ -3340,7 +3340,7 @@
   grid-column: 1;
 }
 
-.personal-workspace .challenge-node--optional .challenge-node__body > button {
+.personal-workspace .challenge-node--optional .challenge-node__body > [role="button"] {
   grid-column: 2;
   grid-row: 1 / span 3;
   align-self: center;

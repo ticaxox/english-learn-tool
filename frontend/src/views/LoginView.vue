@@ -135,9 +135,9 @@ async function retryConnection(): Promise<void> {
           />
         </div>
 
-        <button type="submit" :disabled="submitting">
+        <DivButton type="submit" :disabled="submitting">
           {{ submitting ? '正在验证真实账号…' : '登录' }}
-        </button>
+        </DivButton>
       </form>
 
     </section>

@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
           <span class="sr-only">今天也学一点</span>
         </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
-          <button
+          <DivButton
             class="workspace-coach-button member-concierge-button ia-coach-toggle"
             type="button"
             aria-label="打开 AI 教练"
@@ -218,10 +218,10 @@ onBeforeUnmount(() => {
           >
             <AppIcon name="coach" />
             <span>AI 教练</span>
-          </button>
+          </DivButton>
 
           <div ref="profileArea" class="ia-profile-area">
-            <button
+            <DivButton
               ref="profileTrigger"
               class="workspace-avatar-button ia-profile-trigger"
               type="button"
@@ -232,7 +232,7 @@ onBeforeUnmount(() => {
               @click="toggleProfile"
             >
               {{ userInitials }}
-            </button>
+            </DivButton>
             <div v-if="profileOpen" id="member-profile-menu" class="ia-profile-menu" role="menu">
               <div class="ia-profile-summary">
                 <span class="ia-profile-menu-label">个人资料</span>
@@ -241,7 +241,7 @@ onBeforeUnmount(() => {
               </div>
               <RouterLink role="menuitem" to="/settings/learning" @click="closeProfile">学习设置</RouterLink>
               <RouterLink role="menuitem" to="/settings/security" @click="closeProfile">账户安全</RouterLink>
-              <button type="button" role="menuitem" class="ia-profile-signout" @click="emit('signout')">退出登录</button>
+              <DivButton type="button" role="menuitem" class="ia-profile-signout" @click="emit('signout')">退出登录</DivButton>
             </div>
           </div>
         </div>
@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
           <p>AI 教练</p>
           <h2 id="global-coach-title">随时问一句</h2>
         </div>
-        <button
+        <DivButton
           ref="coachCloseButton"
           class="workspace-icon-button"
           type="button"
@@ -283,7 +283,7 @@ onBeforeUnmount(() => {
           @click="closeCoach"
         >
           <AppIcon name="close" />
-        </button>
+        </DivButton>
       </header>
       <div class="ia-coach-panel-body">
         <CoachView />

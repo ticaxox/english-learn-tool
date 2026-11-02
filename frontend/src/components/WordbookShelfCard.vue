@@ -92,30 +92,30 @@ const coverTone = computed(() => {
         </p>
       </template>
       <div class="wordbook-card-actions">
-        <button class="button-secondary button-small" type="button" :aria-label="`查看 ${book.name} 的词条`" @click="emit('detail')">查看词条</button>
-        <button
+        <DivButton class="button-secondary button-small" type="button" :aria-label="`查看 ${book.name} 的词条`" @click="emit('detail')">查看词条</DivButton>
+        <DivButton
           v-if="canActivate"
           type="button"
           class="button-small"
           :aria-label="`将 ${book.name} 设为当前主词书`"
           :disabled="activating"
           @click="emit('activate')"
-        >{{ activating ? '激活中…' : '设为主词书' }}</button>
-        <button v-else class="button-secondary button-small" type="button" disabled>已在使用</button>
-        <button
+        >{{ activating ? '激活中…' : '设为主词书' }}</DivButton>
+        <DivButton v-else class="button-secondary button-small" type="button" disabled>已在使用</DivButton>
+        <DivButton
           v-if="canExport"
           class="button-secondary button-small"
           type="button"
           :aria-label="`导出 ${book.name}`"
           @click="emit('export')"
-        >导出</button>
-        <button
+        >导出</DivButton>
+        <DivButton
           v-if="canDelete"
           class="button-danger button-small"
           type="button"
           :aria-label="`删除 ${book.name}`"
           @click="emit('delete')"
-        >删除</button>
+        >删除</DivButton>
       </div>
     </div>
   </article>

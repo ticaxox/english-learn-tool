@@ -93,7 +93,7 @@ describe('coach view', () => {
   it('creates a conversation from the sidebar', async () => {
     const wrapper = await mountView()
     await wrapper.get('.coach-history-toggle').trigger('click')
-    await wrapper.findAll('button').find((button) => button.text() === '新建')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '新建')!.trigger('click')
     await wrapper.get('.coach-create input').setValue('阅读训练')
     await wrapper.get('form.coach-create').trigger('submit')
     await flushPromises()
@@ -121,11 +121,11 @@ describe('coach view', () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const wrapper = await mountView()
     await wrapper.get('.coach-history-toggle').trigger('click')
-    await wrapper.findAll('button').find((button) => button.text() === '清空')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '清空')!.trigger('click')
     await flushPromises()
     expect(coachMocks.deleteCoachConversation).toHaveBeenCalledWith('conversation-1', true)
 
-    await wrapper.findAll('button').find((button) => button.text() === '删除')!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text() === '删除')!.trigger('click')
     await flushPromises()
     expect(coachMocks.deleteCoachConversation).toHaveBeenCalledWith('conversation-1', false)
     expect(confirm).toHaveBeenCalledTimes(2)
@@ -133,7 +133,7 @@ describe('coach view', () => {
 
   it('undoes an action only after the server confirms', async () => {
     const wrapper = await mountView()
-    await wrapper.get('.coach-receipt button').trigger('click')
+    await wrapper.get('.coach-receipt [role="button"]').trigger('click')
     await flushPromises()
     expect(coachMocks.undoCoachAction).toHaveBeenCalledWith('receipt-1')
     expect(wrapper.get('.coach-receipt').text()).toContain('已撤销')
@@ -146,8 +146,8 @@ describe('coach view', () => {
       hasMore: false,
     })
     const wrapper = await mountView()
-    const button = wrapper.get('.coach-receipt button')
-    expect(button.attributes('disabled')).toBeDefined()
+    const button = wrapper.get('.coach-receipt [role="button"]')
+    expect(button.attributes('aria-disabled')).toBeDefined()
     expect(button.text()).toBe('已无法撤销')
     expect(wrapper.get('.coach-receipt').text()).toContain('已无法撤销')
   })

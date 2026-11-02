@@ -899,7 +899,7 @@
   list-style: none;
 }
 
-.personal-workspace .practice-option-glossary li {
+.personal-workspace .practice-option-glossary [role="listitem"] {
   display: flex;
   gap: 8px;
   align-items: baseline;
@@ -1190,4 +1190,14 @@
   border: 0;
   background: transparent;
   color: var(--workspace-muted);
+}
+
+.div-button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.div-button[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

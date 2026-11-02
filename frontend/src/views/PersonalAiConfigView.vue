@@ -231,7 +231,7 @@ onMounted(() => {
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
           <p class="field-hint">只显示当前账号自己的配置。数字越小越先用，失败时按顺序换下一个。</p>
         </div>
-        <button v-if="providers.length > 0" class="button" type="button" @click="openCreate">添加 AI 提供商</button>
+        <DivButton v-if="providers.length > 0" class="button" type="button" @click="openCreate">添加 AI 提供商</DivButton>
       </div>
 
       <LoadingState v-if="loading && providers.length === 0" label="正在读取 AI 配置…" />
@@ -243,7 +243,7 @@ onMounted(() => {
           <h3>还没有 AI 提供商</h3>
           <p>添加一个 OpenAI 兼容服务，AI 教练、练习生成和评分才能开始工作。</p>
         </div>
-        <button v-if="!formOpen" class="button" type="button" @click="openCreate">添加第一个提供商</button>
+        <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate">添加第一个提供商</DivButton>
       </div>
 
       <div v-else class="personal-ai-list">
@@ -272,11 +272,11 @@ onMounted(() => {
             />
           </label>
           <div class="personal-ai-provider__actions">
-            <button class="button-secondary" type="button" @click="openEdit(provider)">编辑</button>
-            <button class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
+            <DivButton class="button-secondary" type="button" @click="openEdit(provider)">编辑</DivButton>
+            <DivButton class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
               {{ provider.enabled ? '停用' : '启用' }}
-            </button>
-            <button class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</button>
+            </DivButton>
+            <DivButton class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</DivButton>
           </div>
         </article>
       </div>
@@ -291,9 +291,9 @@ onMounted(() => {
             <label for="global-timeout">生成超时（秒，1–120）</label>
             <input id="global-timeout" v-model.number="globalTimeout" type="number" min="1" max="120" step="1" />
           </div>
-          <button class="button-secondary" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
+          <DivButton class="button-secondary" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
             {{ globalSaving ? '正在应用…' : '应用到所有提供商' }}
-          </button>
+          </DivButton>
         </div>
       </section>
 
@@ -303,10 +303,10 @@ onMounted(() => {
         <strong id="delete-provider-title">删除 {{ deleteTarget.name }}？</strong>
         <p>删除后该提供商配置和密钥会从当前账号移除，其他备用提供商不受影响。</p>
         <div class="button-row">
-          <button class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="confirmDelete">
+          <DivButton class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="confirmDelete">
             {{ actionKey?.startsWith('delete:') ? '正在删除…' : '确认删除' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = null">取消</button>
+          </DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = null">取消</DivButton>
         </div>
       </section>
     </div>
@@ -316,11 +316,11 @@ onMounted(() => {
         <div>
           <p class="eyebrow">配置说明</p>
           <h3>配置后就能用</h3>
-          <ul class="personal-ai-guide__list">
-            <li>AI 教练对话与学习计划调整</li>
-            <li>AI 练习生成、评分与错题解析</li>
-            <li>每日闯关的题目生成</li>
-          </ul>
+          <div role="list" class="personal-ai-guide__list">
+            <div role="listitem">AI 教练对话与学习计划调整</div>
+            <div role="listitem">AI 练习生成、评分与错题解析</div>
+            <div role="listitem">每日闯关的题目生成</div>
+          </div>
         </div>
         <div>
           <h3>密钥怎么保存</h3>

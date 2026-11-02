@@ -219,7 +219,7 @@ watch(challengeModule, async (module, previous) => {
         <span class="workspace-status" :class="`memory-timer--${heartbeat.state.value}`">
           {{ timer.running.value ? `${timerLimit > 0 ? '倒计时' : '正计时'} ${timer.label.value}` : '已暂停' }}
         </span>
-        <button class="button-secondary button-small" type="button" @click="endSession">结束本次</button>
+        <DivButton class="button-secondary button-small" type="button" @click="endSession">结束本次</DivButton>
       </div>
     </header>
 
@@ -277,7 +277,7 @@ watch(challengeModule, async (module, previous) => {
             <RouterLink to="/settings">去设置开启</RouterLink>
           </div>
           <div class="module-grid memory-action-grid">
-            <button
+            <DivButton
               v-for="module in MEMORY_MODULES"
               :key="module"
               class="module-card memory-action-card"
@@ -301,7 +301,7 @@ watch(challengeModule, async (module, previous) => {
                 <small>{{ activeModules.includes(module) ? '可开始' : '到设置开启' }}</small>
               </span>
               <AppIcon :name="activeModules.includes(module) ? 'arrow' : 'lock'" />
-            </button>
+            </DivButton>
           </div>
         </template>
 
@@ -354,14 +354,14 @@ watch(challengeModule, async (module, previous) => {
           <h2>这次复习完成了</h2>
           <p>可以回到今日进度，或继续查看错词。</p>
           <div class="button-row">
-            <button class="button workspace-primary-button" type="button" @click="restart">再练一轮</button>
+            <DivButton class="button workspace-primary-button" type="button" @click="restart">再练一轮</DivButton>
             <RouterLink class="button workspace-secondary-button" to="/overview">查看今日进度</RouterLink>
             <RouterLink class="button workspace-secondary-button" to="/memory/mistakes">查看错词</RouterLink>
           </div>
         </section>
 
         <section v-if="showModulePicker && selectedModule && session.lastError.value" class="memory-resume-row">
-          <button class="button workspace-secondary-button" type="button" @click="resume">继续上一次会话</button>
+          <DivButton class="button workspace-secondary-button" type="button" @click="resume">继续上一次会话</DivButton>
         </section>
 
         <p v-if="heartbeat.lastError.value" class="workspace-inline-note">
@@ -394,10 +394,10 @@ watch(challengeModule, async (module, previous) => {
         </header>
         <p class="field-hint">未完成的目标不会被算作完成，已记住的词会保留。</p>
         <div class="button-row">
-          <button class="button-danger" type="button" :disabled="ending" @click="confirmEndSession">
+          <DivButton class="button-danger" type="button" :disabled="ending" @click="confirmEndSession">
             {{ ending ? '正在结束…' : '结束本次' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="ending" @click="endConfirmOpen = false">继续学习</button>
+          </DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="ending" @click="endConfirmOpen = false">继续学习</DivButton>
         </div>
       </section>
     </div>

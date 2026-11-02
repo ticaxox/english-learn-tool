@@ -143,7 +143,7 @@
   list-style: none;
 }
 
-.coach-conversation-list li {
+.coach-conversation-list [role="listitem"] {
   display: grid;
   gap: 0.3rem;
   padding: 0.55rem;

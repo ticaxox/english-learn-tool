@@ -88,7 +88,7 @@ onMounted(() => {
         <label for="usage-to">结束日期</label>
         <input id="usage-to" v-model="dateTo" type="date" />
       </div>
-      <button class="button" type="submit" :disabled="loading">{{ loading ? '读取中…' : '应用范围' }}</button>
+      <DivButton class="button" type="submit" :disabled="loading">{{ loading ? '读取中…' : '应用范围' }}</DivButton>
     </form>
     <p v-if="filterError" class="field-error" role="alert">{{ filterError }}</p>
 

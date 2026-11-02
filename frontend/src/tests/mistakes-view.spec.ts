@@ -135,7 +135,7 @@ describe('MistakesView', () => {
       .mockResolvedValueOnce(page({ nextCursor: 'cursor-2', hasMore: true }))
       .mockResolvedValueOnce(page({ items: [] }))
     const wrapper = await mountView()
-    const next = wrapper.findAll('.pager button').find((button) => button.text() === '下一页')
+    const next = wrapper.findAll('.pager [role="button"]').find((button) => button.text() === '下一页')
     await next!.trigger('click')
     await flush()
     expect(apiMocks.fetchMistakes).toHaveBeenLastCalledWith({ cursor: 'cursor-2', limit: 50 })

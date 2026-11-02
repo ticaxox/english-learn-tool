@@ -32,20 +32,20 @@ const canRetry = computed(() => props.showRetry ?? presentation.value.retryable)
     <p>{{ presentation.message }}</p>
     <details v-if="issues.length > 0 || presentation.requestId">
       <summary>查看问题详情</summary>
-      <ul v-if="issues.length > 0" class="field-issue-list">
-        <li v-for="issue in issues" :key="`${issue.path}-${issue.message}`">
+      <div role="list" v-if="issues.length > 0" class="field-issue-list">
+        <div role="listitem" v-for="issue in issues" :key="`${issue.path}-${issue.message}`">
           <strong v-if="issue.path"><code>{{ issue.path }}</code></strong>
           {{ issue.message }}
-        </li>
-      </ul>
+        </div>
+      </div>
       <p v-if="presentation.requestId" class="request-id">
         服务编号：<code>{{ presentation.requestId }}</code>
       </p>
     </details>
     <div v-if="canRetry" class="button-row">
-      <button class="button-secondary" type="button" @click="emit('retry')">
+      <DivButton class="button-secondary" type="button" @click="emit('retry')">
         {{ props.retryLabel }}
-      </button>
+      </DivButton>
     </div>
   </section>
 </template>

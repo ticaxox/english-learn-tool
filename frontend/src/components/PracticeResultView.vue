@@ -79,17 +79,17 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
           <strong>解析：</strong>{{ item.explanation }}
         </p>
 
-        <ul v-if="item.dimensions.length" class="dimension-list">
-          <li v-for="dimension in item.dimensions" :key="dimension.name">
+        <div role="list" v-if="item.dimensions.length" class="dimension-list">
+          <div role="listitem" v-for="dimension in item.dimensions" :key="dimension.name">
             {{ dimension.name }}：{{ dimension.score }} / {{ dimension.maxScore }}
-          </li>
-        </ul>
-        <ul v-if="item.errors.length" class="result-list result-list--error">
-          <li v-for="error in item.errors" :key="error">{{ error }}</li>
-        </ul>
-        <ul v-if="item.suggestions.length" class="result-list">
-          <li v-for="suggestion in item.suggestions" :key="suggestion">{{ suggestion }}</li>
-        </ul>
+          </div>
+        </div>
+        <div role="list" v-if="item.errors.length" class="result-list result-list--error">
+          <div role="listitem" v-for="error in item.errors" :key="error">{{ error }}</div>
+        </div>
+        <div role="list" v-if="item.suggestions.length" class="result-list">
+          <div role="listitem" v-for="suggestion in item.suggestions" :key="suggestion">{{ suggestion }}</div>
+        </div>
       </section>
     </article>
   </section>

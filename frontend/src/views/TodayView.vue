@@ -248,8 +248,8 @@ onMounted(() => {
             </span>
           </div>
 
-          <ol class="crumb-trail-list" aria-label="今日任务">
-            <li
+          <div role="list" class="crumb-trail-list" aria-label="今日任务">
+            <div role="listitem"
               v-for="(task, index) in todayTasks"
               :key="task.key"
               class="today-tile crumb-stop"
@@ -281,8 +281,8 @@ onMounted(() => {
                 </div>
               </div>
               <AppIcon :name="task.icon" />
-            </li>
-          </ol>
+            </div>
+          </div>
 
           <footer class="crumb-trail-footer">
             <div class="crumb-guide-note">

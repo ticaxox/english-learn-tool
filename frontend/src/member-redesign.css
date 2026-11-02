@@ -1695,13 +1695,13 @@
   border-bottom: 1px dashed var(--line);
 }
 
-.coach-conversation-list li {
+.coach-conversation-list [role="listitem"] {
   border: 1px solid transparent;
   border-radius: 9px 13px 8px 12px;
   background: transparent;
 }
 
-.coach-conversation-list li:has(.coach-conversation--active) {
+.coach-conversation-list [role="listitem"]:has(.coach-conversation--active) {
   border-color: var(--forest);
   background: var(--lime-soft);
   box-shadow: 2px 2px 0 var(--forest);
@@ -1763,7 +1763,7 @@
   margin: 0.7rem 0 1rem;
 }
 
-.coach-suggested-prompts button {
+.coach-suggested-prompts [role="button"] {
   padding: 0.38rem 0.55rem;
   border: 1px dashed var(--line-strong);
   border-radius: 999px;
@@ -1772,7 +1772,7 @@
   font-size: 0.64rem;
 }
 
-.coach-suggested-prompts button:hover {
+.coach-suggested-prompts [role="button"]:hover {
   border-style: solid;
   border-color: var(--forest);
   background: var(--mint-soft);

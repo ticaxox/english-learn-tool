@@ -64,7 +64,7 @@ function mountView(role: CurrentUser['role'] = 'member') {
 }
 
 function buttonByText(wrapper: VueWrapper, text: string) {
-  const button = wrapper.findAll('button').find((candidate) => candidate.text().includes(text))
+  const button = wrapper.findAll('[role="button"]').find((candidate) => candidate.text().includes(text))
   if (!button) throw new Error(`Button not found: ${text}`)
   return button
 }
@@ -110,7 +110,7 @@ describe('WordbooksView personal shelf', () => {
     const wrapper = mountView('admin')
     await flushPromises()
     const activateButton = cardByText(wrapper, 'My Reading Notes')
-      .findAll('button')
+      .findAll('[role="button"]')
       .find((candidate) => candidate.text().includes('设为主词书'))
     if (!activateButton) throw new Error('Activate button not found')
 
@@ -133,7 +133,7 @@ describe('WordbooksView personal shelf', () => {
 
     const wrapper = mountView()
     await flushPromises()
-    expect(buttonByText(wrapper, '下一页').attributes('disabled')).toBeUndefined()
+    expect(buttonByText(wrapper, '下一页').attributes('aria-disabled')).toBeUndefined()
 
     const callsBefore = apiMocks.listWordbooks.mock.calls.length
     await buttonByText(wrapper, '下一页').trigger('click')
@@ -177,7 +177,7 @@ describe('WordbooksView personal shelf', () => {
 
     expect(wrapper.text()).toContain('还没有词书')
     expect(wrapper.text()).toContain('导入一本词书')
-    await wrapper.get('.wordbook-empty button').trigger('click')
+    await wrapper.get('.wordbook-empty [role="button"]').trigger('click')
     expect(wrapper.find('.wordbook-import-dialog').exists()).toBe(true)
   })
 

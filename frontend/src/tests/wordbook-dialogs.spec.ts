@@ -142,7 +142,7 @@ function untrack(wrapper: VueWrapper): void {
 }
 
 function buttonByText(wrapper: VueWrapper, text: string) {
-  const button = wrapper.findAll('button').find((candidate) => candidate.text().includes(text))
+  const button = wrapper.findAll('[role="button"]').find((candidate) => candidate.text().includes(text))
   if (!button) {
     throw new Error(`Button not found: ${text}`)
   }
@@ -272,7 +272,7 @@ describe('wordbook dialogs', () => {
     await openImportPreview(wrapper)
 
     expect(wrapper.text()).toContain('释义不能为空')
-    expect(buttonByText(wrapper, '确认导入').attributes('disabled')).toBeDefined()
+    expect(buttonByText(wrapper, '确认导入').attributes('aria-disabled')).toBeDefined()
   })
 
   it('blocks confirmation when the in-memory preview is expired', async () => {
@@ -281,7 +281,7 @@ describe('wordbook dialogs', () => {
     await openImportPreview(wrapper)
 
     expect(wrapper.text()).toContain('预览令牌已过期')
-    expect(buttonByText(wrapper, '确认导入').attributes('disabled')).toBeDefined()
+    expect(buttonByText(wrapper, '确认导入').attributes('aria-disabled')).toBeDefined()
   })
 
   it('does not confirm when remapping introduces preview errors', async () => {
@@ -351,7 +351,7 @@ describe('wordbook dialogs', () => {
     expect(wrapper.text()).toContain('导入任务失败')
     expect(wrapper.text()).not.toContain('后台导入中')
     expect(wrapper.text()).toContain('请返回文件重新预览')
-    expect(buttonByText(wrapper, '请返回文件重新预览').attributes('disabled')).toBeDefined()
+    expect(buttonByText(wrapper, '请返回文件重新预览').attributes('aria-disabled')).toBeDefined()
   })
 
   it('creates an export, polls /exports and downloads through the authenticated Blob API', async () => {
@@ -388,7 +388,7 @@ describe('wordbook dialogs', () => {
     const numberInputs = wrapper.findAll('input[type="number"]')
     await numberInputs[0]?.setValue('101')
     expect(wrapper.text()).toContain('1 到 100')
-    expect(buttonByText(wrapper, '开始导出').attributes('disabled')).toBeDefined()
+    expect(buttonByText(wrapper, '开始导出').attributes('aria-disabled')).toBeDefined()
 
     await numberInputs[0]?.setValue('80')
     await numberInputs[1]?.setValue('4')
@@ -456,9 +456,9 @@ describe('wordbook dialogs', () => {
     const wrapper = track(mount(WordbookDeleteDialog, { props: { wordbook: book } }))
 
     const confirmButton = buttonByText(wrapper, '确认启动删除')
-    expect(confirmButton.attributes('disabled')).toBeDefined()
+    expect(confirmButton.attributes('aria-disabled')).toBeDefined()
     await wrapper.get('input[autocomplete="off"]').setValue('Business English')
-    expect(confirmButton.attributes('disabled')).toBeUndefined()
+    expect(confirmButton.attributes('aria-disabled')).toBeUndefined()
 
     await confirmButton.trigger('click')
     await flushPromises()
@@ -517,7 +517,9 @@ describe('wordbook dialogs', () => {
   })
 
   it('traps tab focus, closes on Escape and restores focus to the opener', async () => {
-    const trigger = document.createElement('button')
+    const trigger = document.createElement('div')
+    trigger.setAttribute('role', 'button')
+    trigger.tabIndex = 0
     trigger.textContent = '打开导出窗口'
     document.body.append(trigger)
     trigger.focus()
@@ -533,7 +535,7 @@ describe('wordbook dialogs', () => {
     expect(document.activeElement).toBe(dialog)
     expect(document.body.style.overflow).toBe('hidden')
 
-    const focusable = Array.from(dialog.querySelectorAll<HTMLElement>('button:not([disabled])'))
+    const focusable = Array.from(dialog.querySelectorAll<HTMLElement>('[role="button"]:not([aria-disabled="true"])'))
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
     if (!first || !last) {

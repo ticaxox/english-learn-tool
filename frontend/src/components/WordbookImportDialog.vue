@@ -340,7 +340,7 @@ onUnmounted(() => {
           <p class="eyebrow">预览 · 映射 · 异步导入</p>
           <h2 id="wordbook-import-title">导入词书</h2>
         </div>
-        <button class="icon-button" type="button" aria-label="关闭导入窗口" :disabled="taskRunning" @click="close">×</button>
+        <DivButton class="icon-button" type="button" aria-label="关闭导入窗口" :disabled="taskRunning" @click="close">×</DivButton>
       </header>
 
       <template v-if="!preview">
@@ -379,10 +379,10 @@ onUnmounted(() => {
         <ErrorNotice v-if="previewError" :error="previewError" :show-retry="false" />
 
         <footer class="dialog-actions button-row">
-          <button type="button" :disabled="!canPreview" @click="loadPreview">
+          <DivButton type="button" :disabled="!canPreview" @click="loadPreview">
             {{ previewLoading ? '正在检查文件…' : '预览并检查映射' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="previewLoading" @click="close">取消</button>
+          </DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="previewLoading" @click="close">取消</DivButton>
         </footer>
       </template>
 
@@ -401,7 +401,7 @@ onUnmounted(() => {
         <div v-if="previewExpired" class="alert alert-warning" role="alert">
           <strong>预览令牌已过期</strong>
           <p>必须重新上传并预览，不能继续使用旧令牌确认导入。</p>
-          <button class="button-secondary" type="button" @click="resetPreview">返回文件</button>
+          <DivButton class="button-secondary" type="button" @click="resetPreview">返回文件</DivButton>
         </div>
 
         <div class="wordbook-preview-summary">
@@ -419,13 +419,13 @@ onUnmounted(() => {
             </div>
             <span class="count-pill">{{ preview.error_count }} 条</span>
           </div>
-          <ul class="wordbook-error-list">
-            <li v-for="(item, index) in preview.errors" :key="`${item.line_number}-${item.code}-${index}`">
+          <div role="list" class="wordbook-error-list">
+            <div role="listitem" v-for="(item, index) in preview.errors" :key="`${item.line_number}-${item.code}-${index}`">
               <strong>{{ item.line_number ? `第 ${item.line_number} 行` : '文件级错误' }}</strong>
               <span v-if="item.code">· {{ item.code }}</span>
               <p>{{ item.message }}</p>
-            </li>
-          </ul>
+            </div>
+          </div>
         </section>
 
         <section v-if="preview.warnings.length" class="wordbook-subpanel" aria-labelledby="wordbook-warnings-title">
@@ -436,13 +436,13 @@ onUnmounted(() => {
             </div>
             <span class="count-pill">{{ preview.warning_count }} 条</span>
           </div>
-          <ul class="wordbook-warning-list">
-            <li v-for="(item, index) in preview.warnings" :key="`${item.line_number}-${item.code}-warning-${index}`">
+          <div role="list" class="wordbook-warning-list">
+            <div role="listitem" v-for="(item, index) in preview.warnings" :key="`${item.line_number}-${item.code}-warning-${index}`">
               <strong>{{ item.line_number ? `第 ${item.line_number} 行` : '文件级警告' }}</strong>
               <span v-if="item.code">· {{ item.code }}</span>
               <p>{{ item.message }}</p>
-            </li>
-          </ul>
+            </div>
+          </div>
         </section>
 
         <section class="wordbook-subpanel" aria-labelledby="wordbook-mapping-title">
@@ -510,11 +510,11 @@ onUnmounted(() => {
         </div>
 
         <footer class="dialog-actions button-row">
-          <button type="button" :disabled="!canConfirm || completed || importTerminalFailure" @click="confirmImport">
+          <DivButton type="button" :disabled="!canConfirm || completed || importTerminalFailure" @click="confirmImport">
             {{ importTerminalFailure ? '请返回文件重新预览' : confirming ? (remapping ? '正在 remap…' : '正在确认并轮询…') : '确认导入' }}
-          </button>
-          <button class="button-secondary" type="button" :disabled="taskRunning || completed" @click="resetPreview">返回文件</button>
-          <button class="button-secondary" type="button" :disabled="taskRunning" @click="close">{{ completed ? '完成' : '取消' }}</button>
+          </DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="taskRunning || completed" @click="resetPreview">返回文件</DivButton>
+          <DivButton class="button-secondary" type="button" :disabled="taskRunning" @click="close">{{ completed ? '完成' : '取消' }}</DivButton>
         </footer>
 
         <p v-if="previewRestartSuggested" class="field-hint">预览凭证已失效或不匹配，请返回文件重新上传预览。</p>

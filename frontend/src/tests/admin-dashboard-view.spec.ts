@@ -132,7 +132,7 @@ describe('admin dashboard view', () => {
     }))
 
     dashboardMocks.fetchAdminDashboard.mockResolvedValueOnce(makeDashboard({ groupPage: 2, groupHasMore: false }))
-    const next = wrapper.findAll('.dashboard-pagination button').find((button) => button.text() === '下一页')!
+    const next = wrapper.findAll('.dashboard-pagination [role="button"]').find((button) => button.text() === '下一页')!
     await next.trigger('click')
     await flushPromises()
     expect(dashboardMocks.fetchAdminDashboard).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }))

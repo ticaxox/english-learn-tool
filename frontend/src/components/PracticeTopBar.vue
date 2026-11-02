@@ -64,7 +64,7 @@ function openSettings(): void {
     <RouterLink class="practice-topbar__back" to="/challenges"><AppIcon name="arrow-left" /> 学习中心</RouterLink>
 
     <nav class="practice-topbar__tabs" aria-label="题型导航">
-      <button
+      <DivButton
         v-for="tab in tabs"
         :key="tab.id"
         class="practice-topbar__tab"
@@ -72,14 +72,14 @@ function openSettings(): void {
         type="button"
         :aria-current="tab.id === active ? 'page' : undefined"
         @click="open(tab.id)"
-      ><AppIcon :name="tab.icon" /><span>{{ tab.label }}</span></button>
+      ><AppIcon :name="tab.icon" /><span>{{ tab.label }}</span></DivButton>
     </nav>
 
-    <button
+    <DivButton
       class="practice-topbar__avatar"
       type="button"
       :aria-label="`${displayName} 的账户设置`"
       @click="openSettings"
-    >{{ initials }}</button>
+    >{{ initials }}</DivButton>
   </header>
 </template>
