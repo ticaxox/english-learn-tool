@@ -1780,7 +1780,7 @@
   overflow: hidden;
   width: 130px;
   color: var(--ui-muted);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 800;
   line-height: 1.2;
   text-align: center;
@@ -2084,7 +2084,7 @@
   gap: var(--ui-space-4);
 }
 
-.personal-workspace .practice-page.practice-hub > * { width: 100%; }
+.personal-workspace .practice-page.practice-hub > *:not(.practice-topbar) { width: 100%; }
 
 /* Settings save button uses the shared 3D primary style. */
 .personal-workspace .settings-form [role="button"][type="submit"] {
@@ -2697,7 +2697,7 @@
 }
 
 .personal-workspace .map-station__order { font-size: 1.05rem; }
-.personal-workspace .map-station__caption { top: calc(100% + 2px); font-size: 0.6rem; }
+.personal-workspace .map-station__caption { top: calc(100% + 2px); font-size: 0.72rem; }
 
 .personal-workspace .challenge-map { padding: 12px 16px 8px; }
 .personal-workspace .challenge-map .challenge-map__heading { margin-bottom: 2px; }
@@ -3349,4 +3349,36 @@
   grid-row: 1 / span 3;
   align-self: center;
   justify-self: end;
+}
+
+/* Legacy workspace-reset set status text to 8–9px; keep functional labels readable. */
+.personal-workspace .challenge-state-legend { font-size: 11px; }
+.personal-workspace .challenge-game-stage .challenge-node__status { font-size: 11px; }
+.personal-workspace .crumb-stop-label { font-size: 11px; }
+.personal-workspace .crumb-stop-state { font-size: 10.5px; }
+.personal-workspace .memory-action-status small { font-size: 10.5px; }
+.personal-workspace .wordbook-status { font-size: 10px; }
+
+/* A squeezed section header must wrap the timer, not split the word 计时. */
+.personal-workspace .memory-main-card .workspace-section-header { flex-wrap: wrap; }
+.personal-workspace .memory-timer-control { white-space: nowrap; }
+
+/* The optional-branch status is a badge, not a full-width bar. */
+.personal-workspace .challenge-node--optional .challenge-node__status {
+  align-self: flex-start;
+  width: fit-content;
+}
+
+/* Trail markers belong to the vertical roster, not inside the optional card. */
+.personal-workspace .challenge-optional .challenge-node__marker { display: none; }
+
+/* All four practice types fit a 390px screen without horizontal scrolling. */
+@media (max-width: 430px) {
+  .personal-workspace .practice-topbar__tabs { gap: 2px; }
+  .personal-workspace .practice-topbar__tab { padding: 7px 9px; font-size: 0.82rem; }
+}
+
+/* Station captions get their own column so neighbouring labels stop colliding. */
+@media (max-width: 620px) {
+  .personal-workspace .map-station__caption { width: 74px; font-size: 0.7rem; }
 }

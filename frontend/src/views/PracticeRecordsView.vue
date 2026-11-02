@@ -156,7 +156,7 @@ onMounted(() => {
       <div>
         <p class="eyebrow">{{ props.onlyMistakes ? 'AI 练习错题' : '练习记录' }}</p>
         <h1>{{ props.onlyMistakes ? '需要再练的 AI 题' : '练习记录与结果' }}</h1>
-        <p class="lead">回看已完成练习、成绩和需要再练的题目。</p>
+        <p class="lead">{{ props.onlyMistakes ? '这里只列出还有错题的练习，点开即可回看解析。' : '回看已完成练习、成绩和需要再练的题目。' }}</p>
       </div>
     </header>
 
