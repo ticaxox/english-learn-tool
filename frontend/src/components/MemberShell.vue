@@ -25,14 +25,13 @@ let coachReturnPath = '/overview'
 
 const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
-  { key: 'learning', label: '学习中心', to: '/challenges', icon: 'trail' as const },
-  { key: 'wordbooks', label: '词书', to: '/wordbooks', icon: 'book' as const },
+  { key: 'learning', label: '学习中心', to: '/study', icon: 'trail' as const },
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
 ] as const
 
 const pageTitles: Record<string, string> = {
   overview: '今日学习',
-  wordbooks: '我的词书',
+  'study-center': '学习中心',
   memory: '记忆练习',
   'memory-mistakes': '记忆错词',
   practice: 'AI 练习',
@@ -61,12 +60,37 @@ const userInitials = computed(() => props.displayName.trim().slice(0, 2).toUpper
 
 function isGroupActive(key: string): boolean {
   if (key === 'learning') {
-    return ['/challenges', '/memory', '/practice', '/learning'].some((prefix) => route.path.startsWith(prefix))
+    return ['/study', '/memory', '/practice', '/learning'].some((prefix) => route.path.startsWith(prefix))
   }
   if (key === 'settings') return route.path.startsWith('/settings')
-  if (key === 'today') return route.path === '/overview'
-  if (key === 'wordbooks') return route.path.startsWith('/wordbooks')
+  if (key === 'today') return route.path === '/overview' || route.path.startsWith('/challenges')
   return false
+}
+
+/** Secondary navigation lives in the top bar: one set of tabs per section. */
+const sectionTabs = computed(() => {
+  const path = route.path
+  if (['overview', 'challenges', 'challenge-detail', 'coach'].includes(String(route.name ?? ''))) {
+    return [
+      { label: '今日学习', to: '/overview', active: path === '/overview' },
+      { label: '学习地图', to: '/challenges', active: path.startsWith('/challenges') },
+    ]
+  }
+  if (path.startsWith('/settings')) {
+    return [
+      { label: '学习设置', to: '/settings/learning', active: path.startsWith('/settings/learning') },
+      { label: 'AI 配置', to: '/settings/ai', active: path.startsWith('/settings/ai') },
+      { label: '账户与安全', to: '/settings/security', active: path.startsWith('/settings/security') },
+      { label: '词书', to: '/settings/wordbooks', active: path.startsWith('/settings/wordbooks') },
+    ]
+  }
+  return []
+})
+
+const sidebarCollapsed = ref(false)
+
+function toggleSidebar(): void {
+  sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
 function closeProfile(): void {
@@ -170,7 +194,7 @@ onBeforeUnmount(() => {
 
   <div
     class="app-shell app-shell--member workspace-shell ia-workspace personal-workspace"
-    :class="{ 'is-coach-open': coachOpen, 'is-immersive': immersive }"
+    :class="{ 'is-coach-open': coachOpen, 'is-immersive': immersive, 'is-sidebar-collapsed': sidebarCollapsed }"
   >
     <aside v-if="!immersive" class="workspace-sidebar ia-sidebar" aria-label="主导航">
       <RouterLink class="workspace-brand" to="/overview" aria-label="CrumbTrail 今日学习">
@@ -191,6 +215,7 @@ onBeforeUnmount(() => {
           <RouterLink
             :to="link.to"
             class="workspace-nav-link member-nav-link ia-nav-primary"
+            :aria-label="link.label"
             :class="{ 'ia-nav-primary--section-active': isGroupActive(link.key) }"
           >
             <AppIcon :name="link.icon" />
@@ -198,14 +223,39 @@ onBeforeUnmount(() => {
           </RouterLink>
         </section>
       </nav>
+
+      <div class="workspace-sidebar-footer">
+        <DivButton
+          class="sidebar-collapse"
+          type="button"
+          :aria-label="sidebarCollapsed ? '展开导航栏' : '折叠导航栏'"
+          :aria-expanded="!sidebarCollapsed"
+          @click="toggleSidebar"
+        >
+          <AppIcon name="arrow-left" />
+          <span>折叠导航</span>
+        </DivButton>
+      </div>
     </aside>
 
     <div class="workspace-main">
       <header v-if="!immersive" class="workspace-topbar member-topbar ia-topbar">
-        <div class="workspace-topbar-heading">
+        <span class="sr-only">今天也学一点</span>
+        <nav v-if="sectionTabs.length" class="workspace-topbar-tabs" aria-label="二级导航">
+          <RouterLink
+            v-for="tab in sectionTabs"
+            :key="tab.to"
+            :to="tab.to"
+            class="workspace-topbar-tab"
+            :class="{ 'is-active': tab.active }"
+            :aria-current="tab.active ? 'page' : undefined"
+          >
+            {{ tab.label }}
+          </RouterLink>
+        </nav>
+        <div v-else class="workspace-topbar-heading">
           <strong>{{ currentPageTitle }}</strong>
           <span>{{ currentDate }}</span>
-          <span class="sr-only">今天也学一点</span>
         </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
           <DivButton

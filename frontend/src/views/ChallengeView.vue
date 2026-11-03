@@ -327,12 +327,12 @@ onMounted(() => {
   <article class="challenge-page challenge-game-stage crumb-challenge workspace-page">
     <header class="workspace-page-header challenge-page-header">
       <div>
-        <p class="eyebrow">学习中心 · 每日闯关</p>
+        <p class="eyebrow">今日学习 · 学习地图</p>
         <h1>{{ plan?.title || '今天的学习地图' }}</h1>
         <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>
       <div class="workspace-header-actions challenge-page-actions">
-        <RouterLink class="button" to="/practice">学习中心</RouterLink>
+        <RouterLink class="button" to="/study">学习中心</RouterLink>
         <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         <DivButton class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</DivButton>
       </div>

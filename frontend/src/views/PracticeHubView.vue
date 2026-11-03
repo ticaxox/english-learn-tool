@@ -194,9 +194,9 @@ onMounted(() => {
 
     <header class="workspace-page-header">
       <div>
-        <p class="workspace-kicker">练习入口</p>
-        <h1>学习中心</h1>
-        <p class="workspace-page-lead">做一组有针对性的 AI 练习：从今天的学习内容出题，计时和挖空在这里设置。</p>
+        <p class="workspace-kicker">AI 练习</p>
+        <h1>做一组有针对性的练习</h1>
+        <p class="workspace-page-lead">从今天的学习内容出题，计时和拼写挖空也在这里设置。</p>
       </div>
       <div class="workspace-header-actions">
         <RouterLink class="button workspace-secondary-button" to="/practice/records">练习记录</RouterLink>

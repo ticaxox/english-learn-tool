@@ -42,15 +42,17 @@ describe('personal route guards', () => {
     expect(router.currentRoute.value.query.redirect).toBe('/overview')
   })
 
-  it('keeps the four personal destinations available to member accounts', async () => {
+  it('keeps the personal destinations available to member accounts', async () => {
     const { router } = authenticatedRouter('member')
     for (const [path, name] of [
       ['/overview', 'overview'],
       ['/challenges', 'challenges'],
-      ['/wordbooks', 'wordbooks'],
+      ['/study', 'study-center'],
+      ['/wordbooks', 'settings-wordbooks'],
       ['/settings/learning', 'settings-learning'],
       ['/settings/ai', 'settings-ai'],
       ['/settings/security', 'settings-security'],
+      ['/settings/wordbooks', 'settings-wordbooks'],
       ['/coach', 'coach'],
     ] as const) {
       await router.push(path)

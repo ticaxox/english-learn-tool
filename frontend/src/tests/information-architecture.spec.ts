@@ -17,8 +17,9 @@ function makeRouter() {
     history: createMemoryHistory(),
     routes: [
       { path: '/overview', name: 'overview', component: StubPage },
-      { path: '/wordbooks', name: 'wordbooks', component: StubPage },
+      { path: '/wordbooks', redirect: '/settings/wordbooks' },
       { path: '/challenges', name: 'challenges', component: StubPage },
+      { path: '/study', name: 'study-center', component: StubPage },
       { path: '/memory', name: 'memory', component: StubPage },
       { path: '/practice', name: 'practice', component: StubPage },
       { path: '/coach', name: 'coach', component: StubPage },
@@ -29,6 +30,7 @@ function makeRouter() {
           { path: 'learning', name: 'settings-learning', component: StubPage },
           { path: 'ai', name: 'settings-ai', component: StubPage },
           { path: 'security', name: 'settings-security', component: StubPage },
+          { path: 'wordbooks', name: 'settings-wordbooks', component: StubPage },
         ],
       },
     ],
@@ -51,11 +53,11 @@ function source(path: string): string {
 }
 
 describe('T-FE-020 personal information architecture', () => {
-  it('shows exactly four first-level destinations for every personal account', async () => {
+  it('shows exactly three first-level destinations for every personal account', async () => {
     const { wrapper } = await mountShell()
     const labels = wrapper.findAll('.ia-nav-primary').map((link) => link.text().trim())
-    expect(labels).toEqual(['今日学习', '学习中心', '词书', '设置'])
-    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
+    expect(labels).toEqual(['今日学习', '学习中心', '设置'])
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(3)
     expect(wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
   })
@@ -86,38 +88,31 @@ describe('T-FE-020 personal information architecture', () => {
     expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
   })
 
-  it('defines exactly the three personal settings tabs', async () => {
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [{
-        path: '/settings',
-        component: StubPage,
-        children: [
-          { path: 'learning', name: 'settings-learning', component: StubPage },
-          { path: 'ai', name: 'settings-ai', component: StubPage },
-          { path: 'security', name: 'settings-security', component: StubPage },
-        ],
-      }],
-    })
+  it('puts the four settings tabs in the shared top bar', async () => {
+    const router = makeRouter()
     await router.push('/settings/ai')
     await router.isReady()
-    const settings = mount(SettingsHubView, { global: { plugins: [router] } })
-    const tabs = settings.findAll('.ia-settings-tabs .ia-tab')
-    expect(tabs.map((tab) => tab.text().trim())).toEqual(['学习设置', 'AI 配置', '账户与安全'])
+    const wrapper = mount(MemberShell, {
+      props: { displayName: 'Harold Chen', username: 'demo_member' },
+      global: { plugins: [router] },
+    })
+    const tabs = wrapper.findAll('.workspace-topbar-tab')
+    expect(tabs.map((tab) => tab.text().trim())).toEqual(['学习设置', 'AI 配置', '账户与安全', '词书'])
     expect(tabs.map((tab) => tab.attributes('href'))).toEqual([
       '/settings/learning',
       '/settings/ai',
       '/settings/security',
+      '/settings/wordbooks',
     ])
-    expect(settings.get('.ia-tab--active').text()).toContain('AI 配置')
+    expect(wrapper.get('.workspace-topbar-tab.is-active').text()).toContain('AI 配置')
   })
 
-  it('links the daily challenge to the practice page and keeps the chooser off the map', () => {
+  it('links the daily challenge to the study centre and keeps the chooser off the map', () => {
     const challenge = source('../views/ChallengeView.vue')
-    const practice = source('../views/PracticeHubView.vue')
-    expect(challenge).toContain('to="/practice"')
+    const study = source('../views/StudyCenterView.vue')
+    expect(challenge).toContain('to="/study"')
     expect(challenge).not.toContain('<PracticeChooser')
-    expect(practice).toContain('<h1>学习中心</h1>')
+    expect(study).toContain('PracticeChooser')
   })
 
   it('does not restore legacy organization or notification routes in the production router', () => {

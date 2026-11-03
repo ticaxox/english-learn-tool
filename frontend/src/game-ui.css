@@ -3424,6 +3424,75 @@
   border-left: 1px solid var(--ui-line);
 }
 
+/* Secondary navigation lives in the top bar. */
+.personal-workspace .workspace-topbar-tabs {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.personal-workspace .workspace-topbar-tab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: var(--ui-muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.personal-workspace .workspace-topbar-tab:hover { background: #fffaf0; color: var(--ui-ink); }
+
+.personal-workspace .workspace-topbar-tab.is-active {
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  box-shadow: inset 0 -3px 0 var(--g-orange-edge);
+}
+
+/* Sidebar collapse control at the bottom of the primary navigation. */
+.personal-workspace .workspace-sidebar-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.personal-workspace .sidebar-collapse {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.personal-workspace .sidebar-collapse:hover {
+  border-color: var(--ui-line-strong);
+  color: var(--ui-ink);
+}
+
+.personal-workspace .sidebar-collapse svg { width: 16px; height: 16px; }
+
+.personal-workspace.is-sidebar-collapsed { grid-template-columns: 84px minmax(0, 1fr); }
+.personal-workspace.is-sidebar-collapsed .workspace-sidebar { width: 84px; padding-inline: 10px; }
+.personal-workspace.is-sidebar-collapsed .workspace-brand { justify-content: center; padding-inline: 0; }
+.personal-workspace.is-sidebar-collapsed .workspace-brand-copy,
+.personal-workspace.is-sidebar-collapsed .member-nav-link span,
+.personal-workspace.is-sidebar-collapsed .sidebar-collapse span { display: none; }
+.personal-workspace.is-sidebar-collapsed .member-nav-link { justify-content: center; padding-inline: 0; }
+.personal-workspace.is-sidebar-collapsed .sidebar-collapse svg { transform: rotate(180deg); }
+
+@media (max-width: 860px) {
+  .personal-workspace .workspace-topbar { flex-wrap: wrap; }
+  .personal-workspace .workspace-topbar-tabs { order: 3; width: 100%; }
+}
+
 @media (max-width: 720px) {
   .personal-workspace .settings-form .settings-choice-row .settings-choice-block {
     width: 100%;
