@@ -16,7 +16,6 @@ import LearningSettingsView from '../views/LearningSettingsView.vue'
 import MemoryPracticeView from '../views/MemoryPracticeView.vue'
 import PersonalAiConfigView from '../views/PersonalAiConfigView.vue'
 import PracticeHubView from '../views/PracticeHubView.vue'
-import PracticeSessionView from '../views/PracticeSessionView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
 import MistakesView from '../views/MistakesView.vue'
 import SettingsHubView from '../views/SettingsHubView.vue'
@@ -89,8 +88,14 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'practice/:sessionId',
         name: 'practice-session',
-        component: PracticeSessionView,
-        meta: { immersive: true },
+        // Answering happens inside the practice page, never on a page of its own.
+        redirect: (to) => ({
+          name: 'practice',
+          query: {
+            session: String(to.params.sessionId),
+            ...(typeof to.query.timer === 'string' ? { timer: to.query.timer } : {}),
+          },
+        }),
       },
       {
         path: 'challenges',

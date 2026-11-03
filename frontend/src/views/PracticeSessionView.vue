@@ -20,12 +20,14 @@ import {
 import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../practice.css'
 
+const props = withDefaults(defineProps<{ sessionId?: string; embedded?: boolean }>(), { embedded: false })
+
 const route = useRoute()
 const router = useRouter()
 const sessionTimer = useSessionTimer()
 const timerLimit = timerLimitFromQuery(route.query.timer)
 const toast = useToast()
-const sessionId = String(route.params.sessionId)
+const sessionId = props.sessionId ?? String(route.params.sessionId)
 const practice = usePracticeSession(sessionId)
 const answers = ref<Record<string, string>>({})
 const formError = ref<string | null>(null)
@@ -171,8 +173,8 @@ void practice.load()
 </script>
 
 <template>
-  <article class="practice-page practice-session-page member-practice-session-page">
-    <PracticeTopBar mode="practice" :active="session?.practiceType ?? null" />
+  <article class="practice-page practice-session-page member-practice-session-page" :class="{ 'is-embedded': embedded }">
+    <PracticeTopBar v-if="!embedded" mode="practice" :active="session?.practiceType ?? null" />
 
     <header class="practice-session-header practice-stage-header">
       <div>

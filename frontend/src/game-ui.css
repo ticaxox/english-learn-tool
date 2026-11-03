@@ -3424,6 +3424,12 @@
   border-left: 1px solid var(--ui-line);
 }
 
+/* Answering happens on the practice page itself, not on a page of its own. */
+.personal-workspace .practice-session-page.is-embedded {
+  padding: 0;
+  gap: var(--ui-space-4);
+}
+
 /* The map shares the Today page instead of owning a separate page. */
 .personal-workspace .challenge-page.is-embedded { padding: 0; }
 .personal-workspace .challenge-page.is-embedded .challenge-embedded-header {

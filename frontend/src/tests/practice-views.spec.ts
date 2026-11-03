@@ -116,7 +116,8 @@ describe('practice views', () => {
     await wrapper.get('form').trigger('submit')
     await flushPromises()
     expect(practiceMocks.createPracticeSession).toHaveBeenCalledWith(expect.objectContaining({ practiceType: 'writing', count: 1 }), expect.any(String))
-    expect(router.currentRoute.value.name).toBe('practice-session')
+    expect(router.currentRoute.value.name).toBe('practice')
+    expect(router.currentRoute.value.query.session).toBeTruthy()
   })
 
   it('renders a choice question without any answer or explanation fields', () => {

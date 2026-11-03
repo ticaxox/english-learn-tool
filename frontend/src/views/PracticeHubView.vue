@@ -8,11 +8,13 @@ import { createPracticeSession, fetchPracticeUsage, listPracticeMistakes, listPr
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import { fetchLearningProfile, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
+import PracticeSessionView from './PracticeSessionView.vue'
 
 import '../practice.css'
 
 const router = useRouter()
 const route = useRoute()
+const activeSessionId = computed(() => (typeof route.query.session === 'string' && route.query.session ? route.query.session : null))
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
 function queryType(value: unknown): PracticeType | null {
   return typeof value === 'string' && practiceTypes.includes(value as PracticeType) ? value as PracticeType : null
@@ -123,9 +125,11 @@ async function create(): Promise<void> {
     pendingKey = null
     pendingSignature = ''
     await router.push({
-      name: 'practice-session',
-      params: { sessionId: session.id },
-      query: timerLimit.value > 0 ? { timer: String(timerLimit.value) } : {},
+      name: 'practice',
+      query: {
+        session: session.id,
+        ...(timerLimit.value > 0 ? { timer: String(timerLimit.value) } : {}),
+      },
     })
   } catch (error) {
     createError.value = error
@@ -189,6 +193,9 @@ onMounted(() => {
 
 <template>
   <article class="practice-page practice-hub member-practice-page practice-workspace workspace-page">
+    <PracticeSessionView v-if="activeSessionId" embedded :session-id="activeSessionId" />
+
+    <template v-else>
     <header class="workspace-page-header">
       <div>
         <p class="workspace-kicker">AI 练习</p>
@@ -298,7 +305,7 @@ onMounted(() => {
         <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
         <div role="list" v-else-if="records.length" class="practice-record-list practice-record-list--row">
           <div role="listitem" v-for="record in records" :key="record.id">
-            <RouterLink :to="{ name: 'practice-session', params: { sessionId: record.id } }">
+            <RouterLink :to="{ name: 'practice', query: { session: record.id } }">
               <span class="practice-record-type">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
               <strong>{{ record.source ? PRACTICE_SOURCE_LABELS[record.source] : '专项练习' }}</strong>
               <small>{{ record.totalQuestions }} 题 · {{ record.score === null ? '未评分' : `${record.score} 分` }}</small>
@@ -310,5 +317,6 @@ onMounted(() => {
           <p>生成第一组练习后，记录会出现在这里。</p>
         </div>
     </section>
+    </template>
   </article>
 </template>
