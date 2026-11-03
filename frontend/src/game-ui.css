@@ -3576,3 +3576,235 @@
     border-left: 0;
   }
 }
+
+/* --------------------------------------------------------- coach: chat panel */
+/* One flat sheet: a quiet header, a scrolling thread, a docked composer.
+   Nothing inside the panel is a card inside another card. */
+
+.personal-workspace .ia-coach-panel {
+  background: var(--ui-surface);
+}
+
+.personal-workspace .ia-coach-panel .ia-coach-panel-header {
+  min-height: 58px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+}
+
+.personal-workspace .ia-coach-panel .ia-coach-panel-header p {
+  color: var(--ui-muted);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.personal-workspace .ia-coach-panel .ia-coach-panel-header h2 {
+  color: var(--ui-ink);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+/* The history toggle is a toolbar row, never floating over the thread. */
+.personal-workspace .ia-coach-panel .coach-main-topbar {
+  position: static;
+  padding: 10px 16px 0;
+  margin: 0;
+  background: transparent;
+}
+
+.personal-workspace .ia-coach-panel .coach-main-topbar .button-secondary {
+  min-height: 30px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+/* Thread */
+.personal-workspace .ia-coach-panel .coach-layout { display: flex; flex-direction: column; gap: 0; }
+
+.personal-workspace .ia-coach-panel .coach-main {
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .ia-coach-panel .coach-main-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.personal-workspace .ia-coach-panel .coach-main-header h2 { margin: 0; font-size: 0.98rem; }
+
+.personal-workspace .ia-coach-panel .coach-messages {
+  gap: 18px;
+  padding: 16px;
+  background: transparent;
+}
+
+.personal-workspace .ia-coach-panel .coach-message {
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--assistant { justify-self: stretch; }
+
+.personal-workspace .ia-coach-panel .coach-message--user {
+  justify-self: end;
+  max-width: 84%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--g-gold-soft);
+}
+
+.personal-workspace .ia-coach-panel .coach-message__meta {
+  margin-bottom: 3px;
+  color: var(--ui-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message__meta { justify-content: flex-end; }
+
+.personal-workspace .ia-coach-panel .coach-message__meta strong { color: var(--ui-muted); font-weight: 800; }
+
+.personal-workspace .ia-coach-panel .coach-message__text {
+  font-size: 0.94rem;
+  line-height: 1.68;
+}
+
+.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  line-height: 1.55;
+}
+
+/* Failure reads as a line of text, not another boxed card. */
+.personal-workspace .ia-coach-panel .coach-message__error {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0 0;
+}
+
+.personal-workspace .ia-coach-panel .coach-message__error .field-error { margin: 0; }
+
+.personal-workspace .ia-coach-panel .coach-message__error .button-secondary {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+/* Applied adjustments: a quiet indented list. */
+.personal-workspace .ia-coach-panel .coach-actions {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--ui-line);
+}
+
+.personal-workspace .ia-coach-panel .coach-actions h3 {
+  margin: 0 0 4px;
+  color: var(--ui-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.personal-workspace .ia-coach-panel .coach-receipt {
+  padding: 6px 0 6px 10px;
+  border: 0;
+  border-left: 3px solid var(--g-green-edge);
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Composer: docked strip, no inner box. */
+.personal-workspace .ia-coach-panel .coach-composer {
+  gap: 4px;
+  margin: 0;
+  padding: 10px 14px 12px;
+  border: 0;
+  border-top: 1px solid var(--ui-line);
+  border-radius: 0;
+  background: var(--ui-surface);
+}
+
+.personal-workspace .ia-coach-panel .coach-composer label { display: none; }
+
+.personal-workspace .ia-coach-panel .coach-composer textarea {
+  min-height: 56px;
+  max-height: 132px;
+  padding: 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  resize: none;
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.personal-workspace .ia-coach-panel .coach-composer textarea:focus { outline: none; }
+
+.personal-workspace .ia-coach-panel .coach-composer__footer { align-items: center; }
+
+.personal-workspace .ia-coach-panel .coach-composer__footer .member-primary-button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+}
+
+/* History: flat rows under the header, a hairline away from the thread. */
+.personal-workspace .ia-coach-panel .coach-sidebar {
+  padding: 12px 16px;
+  border: 0 !important;
+  border-bottom: 1px solid var(--ui-line) !important;
+  border-radius: 0 !important;
+  background: var(--ui-surface-subtle) !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .ia-coach-panel .coach-conversation {
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.personal-workspace .ia-coach-panel .coach-conversation--active { background: var(--g-gold-soft); }
+
+.personal-workspace .ia-coach-panel .coach-conversation__actions .link-button {
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+}
+
+/* No dashed separators between chat messages; the spacing does that work. */
+.personal-workspace .ia-coach-panel .coach-message + .coach-message {
+  border-top: 0 !important;
+}
+
+/* The panel already names the coach and the thread: no second conversation bar. */
+.personal-workspace .ia-coach-panel .coach-main-header {
+  display: none !important;
+}
+
+.personal-workspace .ia-coach-panel .coach-sidebar__heading { align-items: center; }
+.personal-workspace .ia-coach-panel .coach-sidebar__heading h2 { margin: 0; font-size: 0.95rem; }
+.personal-workspace .ia-coach-panel .coach-sidebar__heading .eyebrow { display: none; }
+.personal-workspace .ia-coach-panel .coach-conversation__title { font-size: 0.88rem; font-weight: 750; }
+.personal-workspace .ia-coach-panel .coach-conversation__meta { font-size: 0.72rem; }
+
+/* A hairline under the history row so the thread clips against an edge, not text. */
+.personal-workspace .ia-coach-panel .coach-main-topbar {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ui-line);
+}
