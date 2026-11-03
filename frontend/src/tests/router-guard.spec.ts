@@ -47,7 +47,6 @@ describe('personal route guards', () => {
     for (const [path, name] of [
       ['/overview', 'overview'],
       ['/challenges', 'challenges'],
-      ['/study', 'study-center'],
       ['/wordbooks', 'settings-wordbooks'],
       ['/settings/learning', 'settings-learning'],
       ['/settings/ai', 'settings-ai'],

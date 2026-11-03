@@ -15,6 +15,7 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
 import StudyStatsPanel from '../components/StudyStatsPanel.vue'
+import ChallengeView from './ChallengeView.vue'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -331,6 +332,8 @@ onMounted(() => {
           </section>
         </aside>
       </div>
+
+      <ChallengeView embedded />
     </template>
   </article>
 </template>

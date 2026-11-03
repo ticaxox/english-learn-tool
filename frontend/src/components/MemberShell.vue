@@ -25,21 +25,21 @@ let coachReturnPath = '/overview'
 
 const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
-  { key: 'learning', label: '学习中心', to: '/study', icon: 'trail' as const },
+  { key: 'practice', label: 'AI 练习', to: '/practice', icon: 'book' as const },
+  { key: 'memory', label: '记忆练习', to: '/memory', icon: 'cards' as const },
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
 ] as const
 
 const pageTitles: Record<string, string> = {
   overview: '今日学习',
-  'study-center': '学习中心',
   memory: '记忆练习',
   'memory-mistakes': '记忆错词',
   practice: 'AI 练习',
   'practice-records': '练习记录',
   'practice-mistakes': '练习错题',
   'practice-session': 'AI 练习',
-  challenges: '学习中心',
-  'challenge-detail': '学习中心',
+  challenges: '学习地图',
+  'challenge-detail': '学习地图',
   coach: 'AI 教练',
   'settings-learning': '设置',
   'settings-ai': '设置',
@@ -59,9 +59,8 @@ const currentDate = computed(() =>
 const userInitials = computed(() => props.displayName.trim().slice(0, 2).toUpperCase() || 'CT')
 
 function isGroupActive(key: string): boolean {
-  if (key === 'learning') {
-    return ['/study', '/memory', '/practice', '/learning'].some((prefix) => route.path.startsWith(prefix))
-  }
+  if (key === 'practice') return route.path.startsWith('/practice')
+  if (key === 'memory') return route.path.startsWith('/memory')
   if (key === 'settings') return route.path.startsWith('/settings')
   if (key === 'today') return route.path === '/overview' || route.path.startsWith('/challenges')
   return false
@@ -70,12 +69,6 @@ function isGroupActive(key: string): boolean {
 /** Secondary navigation lives in the top bar: one set of tabs per section. */
 const sectionTabs = computed(() => {
   const path = route.path
-  if (['overview', 'challenges', 'challenge-detail', 'coach'].includes(String(route.name ?? ''))) {
-    return [
-      { label: '今日学习', to: '/overview', active: path === '/overview' },
-      { label: '学习地图', to: '/challenges', active: path.startsWith('/challenges') },
-    ]
-  }
   if (path.startsWith('/settings')) {
     return [
       { label: '学习设置', to: '/settings/learning', active: path.startsWith('/settings/learning') },

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+
+// Embedded on the Today page: the map shares the page instead of owning it.
+const props = defineProps<{ embedded?: boolean }>()
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -319,20 +322,19 @@ watch(routeChallengeId, () => {
 
 onMounted(() => {
   void loadPlan()
-  void loadHistory(true)
+  if (!props.embedded) void loadHistory(true)
 })
 </script>
 
 <template>
-  <article class="challenge-page challenge-game-stage crumb-challenge workspace-page">
-    <header class="workspace-page-header challenge-page-header">
+  <article class="challenge-page challenge-game-stage crumb-challenge workspace-page" :class="{ 'is-embedded': embedded }">
+    <header v-if="!embedded" class="workspace-page-header challenge-page-header">
       <div>
         <p class="eyebrow">今日学习 · 学习地图</p>
         <h1>{{ plan?.title || '今天的学习地图' }}</h1>
         <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>
       <div class="workspace-header-actions challenge-page-actions">
-        <RouterLink class="button" to="/study">学习中心</RouterLink>
         <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         <DivButton class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</DivButton>
       </div>
@@ -366,6 +368,14 @@ onMounted(() => {
     </section>
 
     <template v-else-if="plan">
+      <header v-if="embedded" class="challenge-embedded-header">
+        <div>
+          <p class="eyebrow">今日学习 · 学习地图</p>
+          <h2>{{ plan.title || '今天的学习地图' }}</h2>
+        </div>
+        <RouterLink class="button-secondary button-small" to="/challenges">闯关历史</RouterLink>
+      </header>
+
       <section class="panel challenge-summary" aria-label="今日闯关摘要">
         <div class="challenge-summary__copy">
           <p class="eyebrow">{{ plan.localDate }} · {{ PLAN_STATUS_LABELS[plan.status] }}</p>
@@ -497,7 +507,7 @@ onMounted(() => {
 
     </template>
 
-      <section id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">
+      <section v-if="!embedded" id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">
         <div class="challenge-map__heading">
           <div><p class="eyebrow">历史</p><h2 id="challenge-history-title">闯关历史</h2></div>
           <span class="field-hint">历史地图只读</span>

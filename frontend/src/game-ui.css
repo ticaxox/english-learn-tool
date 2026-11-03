@@ -3424,6 +3424,21 @@
   border-left: 1px solid var(--ui-line);
 }
 
+/* The map shares the Today page instead of owning a separate page. */
+.personal-workspace .challenge-page.is-embedded { padding: 0; }
+.personal-workspace .challenge-page.is-embedded .challenge-embedded-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.personal-workspace .challenge-page.is-embedded .challenge-embedded-header h2 {
+  margin: 2px 0 0;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+}
+.personal-workspace .challenge-page.is-embedded .challenge-summary { margin-top: 12px; }
+
 /* Secondary navigation lives in the top bar. */
 .personal-workspace .workspace-topbar-tabs {
   display: flex;

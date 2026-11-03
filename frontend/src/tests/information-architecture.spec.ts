@@ -19,7 +19,6 @@ function makeRouter() {
       { path: '/overview', name: 'overview', component: StubPage },
       { path: '/wordbooks', redirect: '/settings/wordbooks' },
       { path: '/challenges', name: 'challenges', component: StubPage },
-      { path: '/study', name: 'study-center', component: StubPage },
       { path: '/memory', name: 'memory', component: StubPage },
       { path: '/practice', name: 'practice', component: StubPage },
       { path: '/coach', name: 'coach', component: StubPage },
@@ -53,22 +52,21 @@ function source(path: string): string {
 }
 
 describe('T-FE-020 personal information architecture', () => {
-  it('shows exactly three first-level destinations for every personal account', async () => {
+  it('shows exactly four first-level destinations for every personal account', async () => {
     const { wrapper } = await mountShell()
     const labels = wrapper.findAll('.ia-nav-primary').map((link) => link.text().trim())
-    expect(labels).toEqual(['今日学习', '学习中心', '设置'])
-    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(3)
+    expect(labels).toEqual(['今日学习', 'AI 练习', '记忆练习', '设置'])
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
     expect(wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
   })
 
-  it('keeps learning center as one entry without nested practice navigation', async () => {
+  it('keeps practice and memory as flat first-level entries', async () => {
     const { wrapper } = await mountShell()
-    const learning = wrapper.get('[data-nav-group="learning"]')
-    expect(learning.findAll('.ia-nav-subitem')).toHaveLength(0)
-    expect(learning.text()).toContain('学习中心')
-    expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(false)
-    expect(wrapper.find('.workspace-nav a[href="/practice"]').exists()).toBe(false)
+    expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(0)
+    expect(wrapper.find('.workspace-nav a[href="/practice"]').exists()).toBe(true)
+    expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(true)
+    expect(wrapper.find('.workspace-nav a[href="/challenges"]').exists()).toBe(false)
     expect(wrapper.find('.workspace-nav a[href="/coach"]').exists()).toBe(false)
     expect(wrapper.get('.workspace-nav').text()).not.toContain('通知')
   })
@@ -107,12 +105,12 @@ describe('T-FE-020 personal information architecture', () => {
     expect(wrapper.get('.workspace-topbar-tab.is-active').text()).toContain('AI 配置')
   })
 
-  it('links the daily challenge to the study centre and keeps the chooser off the map', () => {
+  it('keeps the learning map on the Today page instead of a separate destination', () => {
     const challenge = source('../views/ChallengeView.vue')
-    const study = source('../views/StudyCenterView.vue')
-    expect(challenge).toContain('to="/study"')
+    const today = source('../views/TodayView.vue')
+    expect(today).toContain('<ChallengeView embedded />')
+    expect(challenge).toContain('defineProps<{ embedded?: boolean }>()')
     expect(challenge).not.toContain('<PracticeChooser')
-    expect(study).toContain('PracticeChooser')
   })
 
   it('does not restore legacy organization or notification routes in the production router', () => {
