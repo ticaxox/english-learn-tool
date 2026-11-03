@@ -25,8 +25,7 @@ let coachReturnPath = '/overview'
 
 const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
-  { key: 'practice', label: 'AI 练习', to: '/practice', icon: 'book' as const },
-  { key: 'memory', label: '记忆练习', to: '/memory', icon: 'cards' as const },
+  { key: 'learning', label: '学习中心', to: '/practice', icon: 'trail' as const },
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
 ] as const
 
@@ -59,16 +58,21 @@ const currentDate = computed(() =>
 const userInitials = computed(() => props.displayName.trim().slice(0, 2).toUpperCase() || 'CT')
 
 function isGroupActive(key: string): boolean {
-  if (key === 'practice') return route.path.startsWith('/practice')
-  if (key === 'memory') return route.path.startsWith('/memory')
+  if (key === 'learning') return ['/practice', '/memory', '/challenges'].some((prefix) => route.path.startsWith(prefix))
   if (key === 'settings') return route.path.startsWith('/settings')
-  if (key === 'today') return route.path === '/overview' || route.path.startsWith('/challenges')
+  if (key === 'today') return route.path === '/overview'
   return false
 }
 
 /** Secondary navigation lives in the top bar: one set of tabs per section. */
 const sectionTabs = computed(() => {
   const path = route.path
+  if (path.startsWith('/practice') || path.startsWith('/memory')) {
+    return [
+      { label: 'AI 练习', to: '/practice', active: path.startsWith('/practice') },
+      { label: '记忆练习', to: '/memory', active: path.startsWith('/memory') },
+    ]
+  }
   if (path.startsWith('/settings')) {
     return [
       { label: '学习设置', to: '/settings/learning', active: path.startsWith('/settings/learning') },

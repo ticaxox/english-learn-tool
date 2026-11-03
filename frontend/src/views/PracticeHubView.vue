@@ -190,7 +190,7 @@ onMounted(() => {
 
 <template>
   <article class="practice-page practice-hub member-practice-page practice-workspace workspace-page">
-    <PracticeTopBar mode="practice" :active="practiceType" />
+    <PracticeTopBar mode="practice" :active="practiceType" compact />
 
     <header class="workspace-page-header">
       <div>

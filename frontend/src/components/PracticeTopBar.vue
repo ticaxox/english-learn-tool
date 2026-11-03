@@ -13,6 +13,8 @@ import { PRACTICE_TYPE_LABELS, type PracticeType } from '../api/practice'
 const props = defineProps<{
   mode: 'memory' | 'practice'
   active?: string | null
+  // Hubs sit inside the app shell: the shell owns back/avatar, the bar keeps only tabs.
+  compact?: boolean
 }>()
 
 const router = useRouter()
@@ -60,8 +62,8 @@ function openSettings(): void {
 </script>
 
 <template>
-  <header class="practice-topbar">
-    <RouterLink class="practice-topbar__back" to="/overview"><AppIcon name="arrow-left" /> 今日学习</RouterLink>
+  <header class="practice-topbar" :class="{ 'is-compact': compact }">
+    <RouterLink v-if="!compact" class="practice-topbar__back" to="/practice"><AppIcon name="arrow-left" /> AI 练习</RouterLink>
 
     <nav class="practice-topbar__tabs" aria-label="题型导航">
       <DivButton
@@ -76,6 +78,7 @@ function openSettings(): void {
     </nav>
 
     <DivButton
+      v-if="!compact"
       class="practice-topbar__avatar"
       type="button"
       :aria-label="`${displayName} 的账户设置`"

@@ -61,7 +61,6 @@ const routes: RouteRecordRaw[] = [
         path: 'memory',
         name: 'memory',
         component: MemoryPracticeView,
-        meta: { immersive: true },
       },
       {
         path: 'memory/mistakes',
@@ -73,7 +72,6 @@ const routes: RouteRecordRaw[] = [
         path: 'practice',
         name: 'practice',
         component: PracticeHubView,
-        meta: { immersive: true },
       },
       {
         path: 'practice/records',

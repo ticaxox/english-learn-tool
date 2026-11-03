@@ -200,7 +200,7 @@ watch(challengeModule, async (module, previous) => {
 
 <template>
   <article class="memory-page memory-workbench workspace-page">
-    <PracticeTopBar mode="memory" :active="selectedModule ?? challengeModule ?? null" />
+    <PracticeTopBar mode="memory" :active="selectedModule ?? challengeModule ?? null" compact />
 
     <header v-if="!session.hasSession.value && !session.finished.value" class="workspace-page-header">
       <div>

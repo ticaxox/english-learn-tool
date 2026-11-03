@@ -81,9 +81,9 @@ describe('member-facing Chinese copy density', () => {
   it('uses concise Chinese labels for the primary member surfaces', () => {
     const shell = source('../components/MemberShell.vue')
     expect(shell).toContain("label: '今日学习'")
+    expect(shell).toContain("label: '学习中心'")
     expect(shell).toContain("label: 'AI 练习'")
     expect(shell).toContain("label: '记忆练习'")
-    expect(shell).not.toContain("label: '学习中心'")
     expect(shell).not.toContain("label: '组织管理'")
     expect(shell).toContain("label: '设置'")
     expect(shell).not.toContain("label: '每日闯关'")
