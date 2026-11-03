@@ -12,6 +12,19 @@ describe('error presentation', () => {
     })
   })
 
+  it('explains an unusable AI result without leaking internals', () => {
+    const presentation = toErrorPresentation(
+      new ApiError(500, 'AI_OUTPUT_INVALID', 'AI output did not match schema', null, 'ai-job-request', true),
+    )
+
+    expect(presentation).toMatchObject({
+      title: 'AI 这次没有给出可用的结果',
+      requestId: 'ai-job-request',
+      retryable: true,
+    })
+    expect(presentation.message).not.toContain('schema')
+  })
+
   it('explains a service outage in product language', () => {
     const presentation = toErrorPresentation(
       new ApiError(502, 'HTTP_502', 'Bad Gateway', null, 'gateway-request', true),

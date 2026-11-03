@@ -224,48 +224,46 @@ onMounted(() => {
 
           <div class="field">
             <label for="daily-minutes">每日学习时长（{{ DAILY_MINUTES_MIN }}–{{ DAILY_MINUTES_MAX }} 分钟）</label>
-            <input
-              id="daily-minutes"
-              v-model.number="form.dailyMinutes"
-              type="number"
-              :min="DAILY_MINUTES_MIN"
-              :max="DAILY_MINUTES_MAX"
-              step="1"
-              :aria-invalid="Boolean(fieldErrors.dailyMinutes)"
-              :aria-describedby="fieldErrors.dailyMinutes ? 'daily-minutes-error' : undefined"
-            />
+            <div class="field-inline-note">
+              <input
+                id="daily-minutes"
+                v-model.number="form.dailyMinutes"
+                type="number"
+                :min="DAILY_MINUTES_MIN"
+                :max="DAILY_MINUTES_MAX"
+                step="1"
+                :aria-invalid="Boolean(fieldErrors.dailyMinutes)"
+                :aria-describedby="fieldErrors.dailyMinutes ? 'daily-minutes-error' : undefined"
+              />
+              <p v-if="completionDays !== null" class="field-hint">预计 {{ completionDays }} 天学完</p>
+            </div>
             <p v-if="fieldErrors.dailyMinutes" id="daily-minutes-error" class="field-error" role="alert">
               {{ fieldErrors.dailyMinutes }}
             </p>
-          </div>
-
-          <div class="settings-goal-summary">
-            <p v-if="completionDays !== null" class="inline-note">
-              按每天 {{ form.dailyNewWords }} 个新词计算，当前词书约 {{ completionDays }} 天学完。
-            </p>
-            <p v-else class="inline-note">激活一本词书后，这里会显示预计完成天数。</p>
           </div>
         </fieldset>
 
         <fieldset>
           <legend>关卡生成</legend>
           <p class="field-hint">今日地图只会使用勾选的题型和学习方式，至少各保留一项。</p>
-          <div class="settings-choice-block">
-            <span class="field-label">学习方式</span>
-            <div class="settings-choice-grid">
-              <label v-for="option in DRILL_MODE_OPTIONS" :key="option.key" class="checkbox">
-                <input v-model="challengePrefs.drillModes" type="checkbox" :value="option.key" />
-                <span>{{ option.label }}</span>
-              </label>
+          <div class="settings-choice-row">
+            <div class="settings-choice-block">
+              <span class="field-label">学习方式</span>
+              <div class="settings-choice-grid">
+                <label v-for="option in DRILL_MODE_OPTIONS" :key="option.key" class="checkbox">
+                  <input v-model="challengePrefs.drillModes" type="checkbox" :value="option.key" />
+                  <span>{{ option.label }}</span>
+                </label>
+              </div>
             </div>
-          </div>
-          <div class="settings-choice-block">
-            <span class="field-label">练习题型</span>
-            <div class="settings-choice-grid">
-              <label v-for="option in PRACTICE_TYPE_OPTIONS" :key="option.key" class="checkbox">
-                <input v-model="challengePrefs.practiceTypes" type="checkbox" :value="option.key" />
-                <span>{{ option.label }}</span>
-              </label>
+            <div class="settings-choice-block">
+              <span class="field-label">练习题型</span>
+              <div class="settings-choice-grid">
+                <label v-for="option in PRACTICE_TYPE_OPTIONS" :key="option.key" class="checkbox">
+                  <input v-model="challengePrefs.practiceTypes" type="checkbox" :value="option.key" />
+                  <span>{{ option.label }}</span>
+                </label>
+              </div>
             </div>
           </div>
         </fieldset>

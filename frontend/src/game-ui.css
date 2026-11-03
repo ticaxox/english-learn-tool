@@ -2832,7 +2832,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 28px;
   padding: 12px 16px;
 }
 
@@ -3381,4 +3381,60 @@
 /* Station captions get their own column so neighbouring labels stop colliding. */
 @media (max-width: 620px) {
   .personal-workspace .map-station__caption { width: 74px; font-size: 0.7rem; }
+}
+
+/* Goals: the estimate sits beside the minutes input instead of on its own row. */
+.personal-workspace .settings-form .field-inline-note {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.personal-workspace .settings-form .field-inline-note input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.personal-workspace .settings-form .field-inline-note .field-hint {
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Challenge preferences: both checkbox groups share one row, split by a rule. */
+.personal-workspace .settings-form .settings-choice-row {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 12px 40px;
+  align-items: flex-start;
+}
+
+.personal-workspace .settings-form .settings-choice-row .settings-choice-block {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.personal-workspace .settings-form .settings-choice-row .settings-choice-grid {
+  width: max-content;
+}
+
+.personal-workspace .settings-form .settings-choice-row .settings-choice-block + .settings-choice-block {
+  padding-left: 40px;
+  border-left: 1px solid var(--ui-line);
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .settings-form .settings-choice-row .settings-choice-block {
+    width: 100%;
+  }
+
+  .personal-workspace .settings-form .settings-choice-row .settings-choice-grid {
+    width: 100%;
+  }
+
+  .personal-workspace .settings-form .settings-choice-row .settings-choice-block + .settings-choice-block {
+    padding-left: 0;
+    border-left: 0;
+  }
 }

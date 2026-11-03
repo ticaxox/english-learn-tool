@@ -188,7 +188,7 @@ async function saveGlobalTimeout(): Promise<void> {
       await updatePersonalProvider(provider.id, { timeoutSeconds: value })
     }
     await load()
-    toast.success('已应用到所有提供商', `生成超时 ${value} 秒`)
+    toast.success('已保存', `生成超时 ${value} 秒`)
   } catch (error) {
     operationError.value = error
   } finally {
@@ -284,7 +284,7 @@ onMounted(() => {
       <section class="panel ai-global-config" aria-labelledby="ai-global-config-title">
         <div>
           <h3 id="ai-global-config-title">其他 API 配置</h3>
-          <p class="field-hint">对所有提供商生效，不绑定某一个。</p>
+          <p class="field-hint">这些配置对整个系统生效。</p>
         </div>
         <div class="ai-global-config__row">
           <div class="field">
@@ -292,7 +292,7 @@ onMounted(() => {
             <input id="global-timeout" v-model.number="globalTimeout" type="number" min="1" max="120" step="1" />
           </div>
           <DivButton class="button-secondary" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
-            {{ globalSaving ? '正在应用…' : '应用到所有提供商' }}
+            {{ globalSaving ? '正在保存…' : '保存' }}
           </DivButton>
         </div>
       </section>

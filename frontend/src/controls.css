@@ -525,10 +525,10 @@
   font-weight: 800;
 }
 
-.personal-workspace .personal-ai-provider__priority input {
-  width: 84px;
-  min-height: 34px;
-  padding: 4px 10px;
+.personal-workspace .personal-ai-provider__priority input[type="number"] {
+  width: 64px;
+  min-height: 30px;
+  padding: 3px 8px;
   font-size: 0.86rem;
 }
 
@@ -546,6 +546,7 @@
   flex-wrap: wrap;
   gap: 14px;
   align-items: flex-end;
+  justify-content: space-between;
 }
 
 .personal-workspace .ai-global-config__row .field { flex: 0 1 280px; }
@@ -586,8 +587,6 @@
 
 /* Chooser aligns with the section title; rows carry their own config. */
 .personal-workspace .practice-chooser__tabs { padding-left: 0; }
-.personal-workspace .challenge-self-study > header { padding-inline: 0; }
-.personal-workspace .challenge-self-study { padding-inline: 0; }
 
 .personal-workspace .practice-chooser__row { position: relative; }
 
@@ -703,13 +702,6 @@
 }
 
 .personal-workspace .practice-chooser__footer .practice-timer-control { margin-right: auto; }
-
-.personal-workspace .settings-choice-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px 22px;
-  width: 100%;
-}
 
 .personal-workspace .personal-ai-provider__priority span { white-space: nowrap; }
 

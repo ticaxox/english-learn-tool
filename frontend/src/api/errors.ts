@@ -133,6 +133,15 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       }
     }
 
+    if (error.code === 'AI_OUTPUT_INVALID') {
+      return {
+        title: 'AI 这次没有给出可用的结果',
+        message: '可以重新生成一次；如果反复出现，到“设置 → AI 配置”换一个模型或提供商。',
+        requestId: error.requestId,
+        retryable: true,
+      }
+    }
+
     if (error.code === 'AUTH_INVALID_CREDENTIALS') {
       return {
         title: '用户名或密码不正确',

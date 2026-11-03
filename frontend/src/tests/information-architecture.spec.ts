@@ -112,15 +112,14 @@ describe('T-FE-020 personal information architecture', () => {
     expect(settings.get('.ia-tab--active').text()).toContain('AI 配置')
   })
 
-  it('keeps learning-center support cards subordinate to the daily challenge', () => {
+  it('keeps the practice chooser on the learning-center page, linked from the daily challenge', () => {
     const challenge = source('../views/ChallengeView.vue')
-    const css = source('../personal-ui.css')
-    expect(challenge).toContain('challenge-self-study')
-    // The two entries are tabs of one chooser; choosing one shows its panel.
-    expect(challenge).toContain('PracticeChooser')
-    expect(css).toContain('.personal-workspace .challenge-self-study')
-    expect(css).toContain('.personal-workspace .challenge-self-study')
-    expect(css).toContain('.personal-workspace .challenge-generate')
+    const study = source('../views/StudyCenterView.vue')
+    const router = source('../router/index.ts')
+    expect(challenge).toContain('to="/study"')
+    expect(challenge).not.toContain('<PracticeChooser')
+    expect(study).toContain('PracticeChooser')
+    expect(router).toContain("path: 'study'")
   })
 
   it('does not restore legacy organization or notification routes in the production router', () => {

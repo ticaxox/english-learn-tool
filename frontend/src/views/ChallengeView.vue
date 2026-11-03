@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
-import PracticeChooser from '../components/PracticeChooser.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -23,7 +22,7 @@ import {
   type ChallengeNodeDetail,
   type ChallengePlan,
 } from '../api/challenge'
-import { isApiError } from '../api/errors'
+import { ApiError, isApiError } from '../api/errors'
 import '../challenge.css'
 
 const route = useRoute()
@@ -65,6 +64,9 @@ const mainNodes = computed(() => (plan.value?.nodes ?? [])
   .sort((left, right) => left.orderIndex - right.orderIndex))
 const optionalNodes = computed(() => (plan.value?.nodes ?? []).filter((node) => node.optional))
 const nextNode = computed(() => mainNodes.value.find((node) => node.status !== 'completed') ?? null)
+const planFailureError = computed(() => (plan.value?.status === 'failed'
+  ? new ApiError(500, plan.value.errorCode ?? 'AI_JOB_FAILED', '今日地图生成失败，请稍后重试。', null, null, true)
+  : null))
 const todayLocalDate = computed(() => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date()))
 const readOnly = computed(() =>
   Boolean(plan.value && (plan.value.status === 'expired' || plan.value.localDate < todayLocalDate.value)),
@@ -330,6 +332,7 @@ onMounted(() => {
         <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>
       <div class="workspace-header-actions challenge-page-actions">
+        <RouterLink class="button" to="/study">学习中心</RouterLink>
         <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         <DivButton class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</DivButton>
       </div>
@@ -393,7 +396,7 @@ onMounted(() => {
       </div>
 
       <section v-if="plan.status === 'failed'" class="panel">
-        <ErrorNotice :error="{ code: plan.errorCode, message: '今日地图暂时不可用，请稍后重试。' }" :show-retry="false" />
+        <ErrorNotice v-if="planFailureError" :error="planFailureError" :show-retry="false" />
         <div class="button-row">
           <DivButton class="button" type="button" :disabled="generating" @click="generateMap">重试生成</DivButton>
           <RouterLink class="button-secondary" to="/overview">使用传统学习</RouterLink>
@@ -424,7 +427,7 @@ onMounted(() => {
         </section>
       </div>
 
-      <section class="challenge-map" aria-labelledby="challenge-map-title">
+      <section v-if="mainNodes.length > 0" class="challenge-map" aria-labelledby="challenge-map-title">
         <div class="challenge-map__heading">
           <div><p class="eyebrow">主线</p><h2 id="challenge-map-title">今日主线</h2></div>
           <div class="challenge-map__tools">
@@ -493,17 +496,6 @@ onMounted(() => {
       <ChallengeBossPanel v-if="bossSession" :key="bossSession.sessionId" :challenge-id="plan.id" :node-id="bossSession.nodeId" :session-id="bossSession.sessionId" @completed="onBossCompleted" />
 
     </template>
-
-    <section v-if="!loading && !error" class="challenge-self-study" aria-labelledby="challenge-self-study-title">
-      <header>
-        <div>
-          <p class="eyebrow">学习中心</p>
-          <h2 id="challenge-self-study-title">今天想换个方式练？</h2>
-        </div>
-        <span>不进入闯关主线，按自己的节奏练习。</span>
-      </header>
-      <PracticeChooser />
-    </section>
 
       <section id="challenge-history" class="panel challenge-history" aria-labelledby="challenge-history-title">
         <div class="challenge-map__heading">
