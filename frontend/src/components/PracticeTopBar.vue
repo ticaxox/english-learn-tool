@@ -61,7 +61,7 @@ function openSettings(): void {
 
 <template>
   <header class="practice-topbar">
-    <RouterLink class="practice-topbar__back" to="/challenges"><AppIcon name="arrow-left" /> 学习中心</RouterLink>
+    <RouterLink class="practice-topbar__back" to="/challenges"><AppIcon name="arrow-left" /> 闯关地图</RouterLink>
 
     <nav class="practice-topbar__tabs" aria-label="题型导航">
       <DivButton

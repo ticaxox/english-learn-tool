@@ -20,7 +20,6 @@ import PracticeSessionView from '../views/PracticeSessionView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
 import MistakesView from '../views/MistakesView.vue'
 import SettingsHubView from '../views/SettingsHubView.vue'
-import StudyCenterView from '../views/StudyCenterView.vue'
 import TodayView from '../views/TodayView.vue'
 import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
@@ -58,11 +57,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'learning',
         redirect: { name: 'challenges' },
-      },
-      {
-        path: 'study',
-        name: 'study-center',
-        component: StudyCenterView,
       },
       {
         path: 'memory',

@@ -332,7 +332,7 @@ onMounted(() => {
         <p class="lead">按顺序完成，最后挑战终点。</p>
       </div>
       <div class="workspace-header-actions challenge-page-actions">
-        <RouterLink class="button" to="/study">学习中心</RouterLink>
+        <RouterLink class="button" to="/practice">学习中心</RouterLink>
         <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
         <DivButton class="button-secondary" type="button" :disabled="loading || generating" @click="loadPlan">刷新地图</DivButton>
       </div>

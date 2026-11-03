@@ -112,14 +112,12 @@ describe('T-FE-020 personal information architecture', () => {
     expect(settings.get('.ia-tab--active').text()).toContain('AI 配置')
   })
 
-  it('keeps the practice chooser on the learning-center page, linked from the daily challenge', () => {
+  it('links the daily challenge to the practice page and keeps the chooser off the map', () => {
     const challenge = source('../views/ChallengeView.vue')
-    const study = source('../views/StudyCenterView.vue')
-    const router = source('../router/index.ts')
-    expect(challenge).toContain('to="/study"')
+    const practice = source('../views/PracticeHubView.vue')
+    expect(challenge).toContain('to="/practice"')
     expect(challenge).not.toContain('<PracticeChooser')
-    expect(study).toContain('PracticeChooser')
-    expect(router).toContain("path: 'study'")
+    expect(practice).toContain('<h1>学习中心</h1>')
   })
 
   it('does not restore legacy organization or notification routes in the production router', () => {

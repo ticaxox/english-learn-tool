@@ -41,7 +41,6 @@ const pageTitles: Record<string, string> = {
   'practice-session': 'AI 练习',
   challenges: '学习中心',
   'challenge-detail': '学习中心',
-  'study-center': '学习中心',
   coach: 'AI 教练',
   'settings-learning': '设置',
   'settings-ai': '设置',
