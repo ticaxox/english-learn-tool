@@ -9,7 +9,6 @@ import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import { fetchLearningProfile, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
 
-import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../practice.css'
 
 const router = useRouter()
@@ -190,8 +189,6 @@ onMounted(() => {
 
 <template>
   <article class="practice-page practice-hub member-practice-page practice-workspace workspace-page">
-    <PracticeTopBar mode="practice" :active="practiceType" compact />
-
     <header class="workspace-page-header">
       <div>
         <p class="workspace-kicker">AI 练习</p>

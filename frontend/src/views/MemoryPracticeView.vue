@@ -28,7 +28,6 @@ import {
   type MemoryModule,
   type TodayPlan,
 } from '../types/learning'
-import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../learning.css'
 
 const route = useRoute()
@@ -200,8 +199,6 @@ watch(challengeModule, async (module, previous) => {
 
 <template>
   <article class="memory-page memory-workbench workspace-page">
-    <PracticeTopBar mode="memory" :active="selectedModule ?? challengeModule ?? null" compact />
-
     <header v-if="!session.hasSession.value && !session.finished.value" class="workspace-page-header">
       <div>
         <p class="workspace-kicker">记忆训练</p>

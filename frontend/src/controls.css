@@ -585,13 +585,6 @@
   padding-inline: max(24px, calc((100vw - 1320px) / 2 + 28px));
 }
 
-/* Inside the app shell the bar stops bleeding past the content column. */
-.personal-workspace .practice-topbar.is-compact {
-  width: 100%;
-  margin: 0 0 20px;
-  padding-inline: 0;
-}
-
 /* Chooser aligns with the section title; rows carry their own config. */
 .personal-workspace .practice-chooser__tabs { padding-left: 0; }
 

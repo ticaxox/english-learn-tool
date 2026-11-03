@@ -76,9 +76,17 @@ describe('T-FE-020 personal information architecture', () => {
       props: { displayName: 'Harold Chen', username: 'demo_member' },
       global: { plugins: [router] },
     })
+    const modes = practiceShell.findAll('.workspace-mode')
+    expect(modes.map((mode) => mode.text().trim())).toEqual(['记忆练习', 'AI 练习'])
+    expect(practiceShell.get('.workspace-mode.is-active').text()).toContain('AI 练习')
     const tabs = practiceShell.findAll('.workspace-topbar-tab')
-    expect(tabs.map((tab) => tab.text().trim())).toEqual(['AI 练习', '记忆练习'])
-    expect(practiceShell.get('.workspace-topbar-tab.is-active').text()).toContain('AI 练习')
+    expect(tabs.map((tab) => tab.text().trim())).toEqual(['填空', '阅读', '翻译', '作文'])
+
+    await router.push('/memory')
+    await flushPromises()
+    expect(practiceShell.get('.workspace-mode.is-active').text()).toContain('记忆练习')
+    expect(practiceShell.findAll('.workspace-topbar-tab').map((tab) => tab.text().trim()))
+      .toEqual(['翻卡', '选择', '拼写'])
   })
 
   it('keeps profile actions and the global AI coach on the shared shell', async () => {
