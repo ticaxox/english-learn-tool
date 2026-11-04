@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
+import AppIcon from './AppIcon.vue'
 import ErrorNotice from './ErrorNotice.vue'
 import type {
   AiProvider,
@@ -50,6 +51,7 @@ const enabled = ref(true)
 const isDefault = ref(false)
 const customHeadersText = ref('{}')
 const apiKey = ref('')
+const showKey = ref(false)
 const modelsOpen = ref(false)
 const errors = reactive<Record<string, string>>({})
 
@@ -82,6 +84,7 @@ function reset(): void {
   isDefault.value = provider?.isDefault ?? false
   customHeadersText.value = provider ? JSON.stringify(provider.customHeaders, null, 2) : '{}'
   apiKey.value = ''
+  showKey.value = false
   modelsOpen.value = false
   Object.keys(errors).forEach((key) => delete errors[key])
 }
@@ -90,10 +93,6 @@ watch(() => props.provider, reset, { immediate: true })
 
 watch(isDefault, (value) => {
   if (value) enabled.value = true
-})
-
-watch(() => props.modelOptions, (options) => {
-  if (options && options.length > 0) modelsOpen.value = true
 })
 
 function clearErrors(): void {
@@ -196,7 +195,6 @@ function submit(): void {
 
 function toggleModels(): void {
   modelsOpen.value = !modelsOpen.value
-  if (modelsOpen.value) emit('fetch-models')
 }
 
 function chooseModel(model: string): void {
@@ -245,19 +243,32 @@ function cancel(): void {
       <div class="field ai-model-field">
         <label for="provider-model">模型 ID</label>
         <div class="ai-model-row">
-          <input id="provider-model" v-model="modelId" type="text" maxlength="200" :aria-invalid="Boolean(errors.modelId)" />
+          <div class="ai-model-input">
+            <input id="provider-model" v-model="modelId" type="text" maxlength="200" :aria-invalid="Boolean(errors.modelId)" />
+            <DivButton
+              v-if="modelOptions && modelOptions.length"
+              class="ai-model-caret"
+              type="button"
+              aria-label="从已获取的模型中选择"
+              :aria-expanded="modelsOpen"
+              @click="toggleModels"
+            >
+              <span class="ai-model-fetch__arrow" :class="{ 'is-open': modelsOpen }" aria-hidden="true">▾</span>
+            </DivButton>
+          </div>
           <DivButton
             v-if="canFetchModels"
             class="button-secondary ai-model-fetch"
             type="button"
-            :aria-expanded="modelsOpen"
-            @click="toggleModels"
+            :disabled="modelLoading"
+            @click="emit('fetch-models')"
           >
             {{ modelLoading ? '读取中…' : '获取模型' }}
-            <span class="ai-model-fetch__arrow" :class="{ 'is-open': modelsOpen }" aria-hidden="true">▾</span>
           </DivButton>
         </div>
         <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
+        <p v-else-if="modelOptions && modelOptions.length === 0" class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
+        <ErrorNotice v-if="modelError" :error="modelError" :show-retry="false" />
 
         <div v-if="canFetchModels && modelsOpen" class="ai-model-menu" role="listbox" aria-label="可用模型">
           <p v-if="modelLoading" class="field-hint">正在读取模型列表…</p>
@@ -274,7 +285,6 @@ function cancel(): void {
             >{{ model }}</DivButton>
           </template>
           <p v-else class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
-          <ErrorNotice v-if="modelError" :error="modelError" :show-retry="false" />
         </div>
       </div>
 
@@ -286,16 +296,27 @@ function cancel(): void {
 
       <div class="field">
         <label for="provider-api-key">API Key</label>
-        <input
-          id="provider-api-key"
-          v-model="apiKey"
-          type="password"
-          autocomplete="new-password"
-          spellcheck="false"
-          maxlength="4096"
-          :placeholder="editing ? (maskedKey ? `留空保持当前 Key（${maskedKey}）` : '留空保持当前 Key') : '至少 8 个字符'"
-          :aria-invalid="Boolean(errors.apiKey)"
-        />
+        <div class="ai-secret-row">
+          <input
+            id="provider-api-key"
+            v-model="apiKey"
+            :type="showKey ? 'text' : 'password'"
+            autocomplete="new-password"
+            spellcheck="false"
+            maxlength="4096"
+            :placeholder="editing ? (maskedKey || '留空保持当前 Key') : '至少 8 个字符'"
+            :aria-invalid="Boolean(errors.apiKey)"
+          />
+          <DivButton
+            class="ai-secret-toggle"
+            type="button"
+            :aria-label="showKey ? '隐藏 Key' : '显示 Key'"
+            :aria-pressed="showKey"
+            @click="showKey = !showKey"
+          >
+            <AppIcon name="eye" />
+          </DivButton>
+        </div>
         <p v-if="editing && !errors.apiKey" class="field-hint">已保存的 Key 不会回显；需要更换时直接输入新 Key。</p>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
         <div v-if="editing" class="ai-test-row">

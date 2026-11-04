@@ -3808,3 +3808,63 @@
   padding-bottom: 10px;
   border-bottom: 1px solid var(--ui-line);
 }
+
+/* Secondary menus sit centred in the top bar on wide screens. */
+.personal-workspace .workspace-topbar-actions { margin-left: auto; }
+
+@media (min-width: 1100px) {
+  .personal-workspace .workspace-topbar { position: relative; }
+  .personal-workspace .workspace-topbar-tabs,
+  .personal-workspace .workspace-topbar-learning {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* Provider form: the model picker lives in the field; the key has an eye toggle. */
+.personal-workspace .ai-model-input {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.personal-workspace .ai-model-input input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.personal-workspace .ai-model-caret {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+  transform: translateY(-50%);
+}
+
+.personal-workspace .ai-model-caret:hover {
+  border-color: var(--ui-line-strong);
+  color: var(--ui-ink);
+}
+
+.personal-workspace .ai-secret-toggle {
+  display: grid;
+  flex: 0 0 auto;
+  width: 42px;
+  place-items: center;
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+}
+
+.personal-workspace .ai-secret-toggle svg { width: 18px; height: 18px; }
+.personal-workspace .ai-secret-toggle:hover { border-color: var(--ui-line-strong); color: var(--ui-ink); }
+.personal-workspace .ai-secret-toggle[aria-pressed="true"] { background: var(--g-gold-soft); color: var(--ui-ink); }
