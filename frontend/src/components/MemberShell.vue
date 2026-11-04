@@ -4,8 +4,6 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import CoachView from '../views/CoachView.vue'
 import CrumboMark from './CrumboMark.vue'
-import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryModule } from '../types/learning'
-import { PRACTICE_TYPE_LABELS, type PracticeType } from '../api/practice'
 
 const props = defineProps<{
   displayName: string
@@ -27,7 +25,8 @@ let coachReturnPath = '/overview'
 
 const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
-  { key: 'learning', label: '学习中心', to: '/practice', icon: 'trail' as const },
+  { key: 'memory', label: '记忆练习', to: '/memory', icon: 'cards' as const },
+  { key: 'practice', label: 'AI 练习', to: '/practice', icon: 'book' as const },
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
 ] as const
 
@@ -60,9 +59,10 @@ const currentDate = computed(() =>
 const userInitials = computed(() => props.displayName.trim().slice(0, 2).toUpperCase() || 'CT')
 
 function isGroupActive(key: string): boolean {
-  if (key === 'learning') return ['/practice', '/memory', '/challenges'].some((prefix) => route.path.startsWith(prefix))
+  if (key === 'practice') return route.path.startsWith('/practice')
+  if (key === 'memory') return route.path.startsWith('/memory')
   if (key === 'settings') return route.path.startsWith('/settings')
-  if (key === 'today') return route.path === '/overview'
+  if (key === 'today') return route.path === '/overview' || route.path.startsWith('/challenges')
   return false
 }
 
@@ -79,28 +79,6 @@ const sectionTabs = computed(() => {
   }
   return []
 })
-
-const inLearningCentre = computed(() => route.path.startsWith('/practice') || route.path.startsWith('/memory'))
-const learningMode = computed<'memory' | 'practice'>(() => (route.path.startsWith('/memory') ? 'memory' : 'practice'))
-const PRACTICE_TYPES: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
-const activePracticeType = computed<PracticeType>(() => {
-  const value = route.query.type
-  return typeof value === 'string' && PRACTICE_TYPES.includes(value as PracticeType)
-    ? value as PracticeType
-    : 'fill_blank'
-})
-const activeMemoryModule = computed(() => (typeof route.query.module === 'string' ? route.query.module : null))
-const learningTabs = computed(() => (learningMode.value === 'memory'
-  ? MEMORY_MODULES.map((module: MemoryModule) => ({
-    label: MEMORY_MODULE_LABELS[module],
-    to: { path: '/memory', query: { module } },
-    active: activeMemoryModule.value === module,
-  }))
-  : PRACTICE_TYPES.map((type) => ({
-    label: PRACTICE_TYPE_LABELS[type],
-    to: { path: '/practice', query: { type } },
-    active: activePracticeType.value === type,
-  }))))
 
 const sidebarCollapsed = ref(false)
 
@@ -256,39 +234,7 @@ onBeforeUnmount(() => {
     <div class="workspace-main">
       <header v-if="!immersive" class="workspace-topbar member-topbar ia-topbar">
         <span class="sr-only">今天也学一点</span>
-        <div v-if="inLearningCentre" class="workspace-topbar-learning">
-          <div class="workspace-mode-switch" role="tablist" aria-label="学习中心">
-            <RouterLink
-              to="/memory"
-              class="workspace-mode"
-              :class="{ 'is-active': learningMode === 'memory' }"
-              :aria-current="learningMode === 'memory' ? 'page' : undefined"
-            >
-              记忆练习
-            </RouterLink>
-            <RouterLink
-              to="/practice"
-              class="workspace-mode"
-              :class="{ 'is-active': learningMode === 'practice' }"
-              :aria-current="learningMode === 'practice' ? 'page' : undefined"
-            >
-              AI 练习
-            </RouterLink>
-          </div>
-
-          <nav class="workspace-topbar-tabs" aria-label="练习类型">
-            <RouterLink
-              v-for="tab in learningTabs"
-              :key="tab.label"
-              :to="tab.to"
-              class="workspace-topbar-tab"
-              :class="{ 'is-active': tab.active }"
-            >
-              {{ tab.label }}
-            </RouterLink>
-          </nav>
-        </div>
-        <nav v-else-if="sectionTabs.length" class="workspace-topbar-tabs" aria-label="二级导航">
+        <nav v-if="sectionTabs.length" class="workspace-topbar-tabs" aria-label="二级导航">
           <RouterLink
             v-for="tab in sectionTabs"
             :key="tab.to"

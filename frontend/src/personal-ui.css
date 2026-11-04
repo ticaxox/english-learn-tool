@@ -858,7 +858,7 @@ body {
 .personal-workspace .wordbook-toolbar .button-secondary { justify-self: end; }
 .personal-workspace .wordbook-tabs { display: none; }
 .personal-workspace .wordbook-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--ui-space-4);
 }
 .personal-workspace .crumb-wordbooks .wordbook-card--compact { min-height: 244px; }
@@ -1045,7 +1045,7 @@ body {
   .personal-workspace { grid-template-columns: 212px minmax(0, 1fr); }
   .personal-workspace .workspace-sidebar { width: 212px; }
   .personal-workspace .crumb-today-layout { grid-template-columns: minmax(0, 1fr) 250px; }
-  .personal-workspace .wordbook-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .personal-workspace .wordbook-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (min-width: 861px) and (max-width: 1180px) {
@@ -1069,7 +1069,7 @@ body {
     bottom: max(8px, env(safe-area-inset-bottom));
     left: 8px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--ui-space-1);
     padding: 6px;
     border: 1px solid var(--ui-line-strong);

@@ -52,21 +52,21 @@ function source(path: string): string {
 }
 
 describe('T-FE-020 personal information architecture', () => {
-  it('shows exactly three first-level destinations for every personal account', async () => {
+  it('shows exactly four first-level destinations for every personal account', async () => {
     const { wrapper } = await mountShell()
     const labels = wrapper.findAll('.ia-nav-primary').map((link) => link.text().trim())
-    expect(labels).toEqual(['今日学习', '学习中心', '设置'])
-    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(3)
+    expect(labels).toEqual(['今日学习', '记忆练习', 'AI 练习', '设置'])
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
     expect(wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
   })
 
-  it('keeps practice and memory inside the learning centre section', async () => {
+  it('keeps practice and memory as their own first-level destinations', async () => {
     const { wrapper } = await mountShell()
     expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(0)
-    expect(wrapper.get('[data-nav-group="learning"]').text()).toContain('学习中心')
-    expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(false)
-    expect(wrapper.find('.workspace-nav a[href="/challenges"]').exists()).toBe(false)
+    expect(wrapper.find('.workspace-nav a[href="/practice"]').exists()).toBe(true)
+    expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(true)
+    expect(wrapper.get('.workspace-nav').text()).not.toContain('学习中心')
     expect(wrapper.get('.workspace-nav').text()).not.toContain('通知')
 
     const router = makeRouter()
@@ -76,17 +76,9 @@ describe('T-FE-020 personal information architecture', () => {
       props: { displayName: 'Harold Chen', username: 'demo_member' },
       global: { plugins: [router] },
     })
-    const modes = practiceShell.findAll('.workspace-mode')
-    expect(modes.map((mode) => mode.text().trim())).toEqual(['记忆练习', 'AI 练习'])
-    expect(practiceShell.get('.workspace-mode.is-active').text()).toContain('AI 练习')
-    const tabs = practiceShell.findAll('.workspace-topbar-tab')
-    expect(tabs.map((tab) => tab.text().trim())).toEqual(['填空', '阅读', '翻译', '作文'])
-
-    await router.push('/memory')
-    await flushPromises()
-    expect(practiceShell.get('.workspace-mode.is-active').text()).toContain('记忆练习')
-    expect(practiceShell.findAll('.workspace-topbar-tab').map((tab) => tab.text().trim()))
-      .toEqual(['翻卡', '选择', '拼写'])
+    expect(practiceShell.findAll('.workspace-topbar-tab')).toHaveLength(0)
+    expect(practiceShell.findAll('.workspace-mode')).toHaveLength(0)
+    expect(practiceShell.get('.workspace-topbar-heading').text()).toContain('AI 练习')
   })
 
   it('keeps profile actions and the global AI coach on the shared shell', async () => {

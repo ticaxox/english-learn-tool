@@ -120,6 +120,15 @@ describe('practice views', () => {
     expect(router.currentRoute.value.query.session).toBeTruthy()
   })
 
+  it('resolves the random type to a concrete one before creating', async () => {
+    const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=random')
+    expect((wrapper.get('#practice-type').element as HTMLSelectElement).value).toBe('random')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!
+    expect(['fill_blank', 'reading', 'translation', 'writing']).toContain(input.practiceType)
+  })
+
   it('renders a choice question without any answer or explanation fields', () => {
     const wrapper = mount(PracticeQuestionCard, { props: { question, modelValue: '', index: 0, total: 1 } })
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(2)
