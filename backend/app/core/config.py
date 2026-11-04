@@ -86,6 +86,7 @@ class Settings(BaseSettings):
     ai_provider_max_tokens: int = Field(default=8192, ge=256, le=16384)
     ai_provider_retry_backoff_seconds: float = Field(default=0.25, ge=0, le=5)
     ai_job_stale_seconds: int = Field(default=900, ge=300, le=86400)
+    ai_generation_budget_seconds: int = Field(default=540, ge=120, le=1800)
     ai_job_max_context_bytes: int = Field(default=64_000, ge=1024, le=1_000_000)
     ai_concurrency_limit: int = Field(default=2, ge=1, le=2)
     ai_prompt_max_chars: int = Field(default=100_000, ge=1000, le=200_000)

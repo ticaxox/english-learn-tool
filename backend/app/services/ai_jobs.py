@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -487,6 +488,7 @@ async def _call_with_provider(
     schema_name: str,
     schema: dict[str, Any],
     repair_text: str | None = None,
+    deadline: float | None = None,
 ) -> str:
     cipher = ApiKeyCipher(settings.secret_encryption_key.get_secret_value())
     api_key = cipher.decrypt(provider.api_key_ciphertext)
@@ -501,13 +503,22 @@ async def _call_with_provider(
     )
     last_error: ProviderRequestError | None = None
     for attempt in range(settings.ai_provider_retry_limit + 1):
+        call_timeout = provider.timeout_seconds
+        if deadline is not None:
+            call_timeout = min(call_timeout, int(deadline - time.monotonic()))
+            if call_timeout <= 2:
+                raise ProviderRequestError(
+                    code="AI_PROVIDER_TIMEOUT",
+                    message="The AI provider timed out.",
+                    retryable=True,
+                )
         try:
             return await client.chat_json(
                 base_url=provider.base_url,
                 api_key=api_key,
                 custom_headers=provider.custom_headers,
                 model_id=provider.model_id,
-                timeout_seconds=provider.timeout_seconds,
+                timeout_seconds=call_timeout,
                 system_prompt=system_prompt,
                 user_content=user_content,
                 schema_name=schema_name,
@@ -539,11 +550,27 @@ async def generate_structured(
     attempts = 0
     repairs = 0
     last_error: AiGenerationError | None = None
+    deadline = time.monotonic() + settings.ai_generation_budget_seconds
+
+    def remaining() -> int:
+        return int(deadline - time.monotonic())
+
     for logical_attempt in range(1, 4):
         attempts = logical_attempt
         raw_text: str | None = None
         chosen: ProviderRuntime | None = None
         for provider in providers:
+            budget = remaining()
+            if budget <= 5:
+                raise AiGenerationError(
+                    code="AI_GENERATION_TIMEOUT",
+                    message="The AI task ran out of time before the provider answered.",
+                    retryable=True,
+                    attempts=attempts,
+                    repair_count=repairs,
+                    provider_name=provider.name,
+                    model_id=provider.model_id,
+                )
             try:
                 raw_text = await _call_with_provider(
                     client,
@@ -553,6 +580,7 @@ async def generate_structured(
                     context=job.input_context,
                     schema_name=job.task_type,
                     schema=schema,
+                    deadline=deadline,
                 )
                 chosen = provider
                 break
@@ -600,6 +628,7 @@ async def generate_structured(
                     schema_name=job.task_type,
                     schema=schema,
                     repair_text=repair_prompt(raw_text, str(exc)),
+                    deadline=deadline,
                 )
                 result, summary = validate_task_output(
                     task_type=job.task_type,

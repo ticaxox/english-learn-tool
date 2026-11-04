@@ -40,7 +40,7 @@ class AiProvider(Base):
         CheckConstraint("btrim(name) <> ''", name="name_not_blank"),
         CheckConstraint("btrim(name_normalized) <> ''", name="name_normalized_not_blank"),
         CheckConstraint("priority >= 0", name="priority_nonnegative"),
-        CheckConstraint("timeout_seconds >= 1 AND timeout_seconds <= 120", name="timeout_range"),
+        CheckConstraint("timeout_seconds >= 1 AND timeout_seconds <= 300", name="timeout_range"),
         CheckConstraint(
             "last_test_status IN ('untested', 'succeeded', 'failed')",
             name="last_test_status_valid",

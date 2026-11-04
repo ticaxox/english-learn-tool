@@ -3916,6 +3916,15 @@
 
 .personal-workspace .memory-workbench-grid.is-session .memory-context-card { display: none; }
 
+/* The session title sits above both columns as one quiet line. */
+.personal-workspace .memory-session-kicker {
+  margin: 30px 0 16px;
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
 /* The right rail carries the session headline, clock and the end action. */
 .personal-workspace .memory-session-rail {
   position: sticky;
@@ -4125,7 +4134,7 @@
 /* Study card keeps its own surface and inner spacing on the memory page. */
 .personal-workspace .memory-page .memory-main-card .study-card {
   width: 100%;
-  min-height: 240px;
+  min-height: 200px;
   padding: 30px 36px;
   border: 2px solid var(--ui-line-strong) !important;
   border-radius: 24px !important;
@@ -4288,4 +4297,11 @@
     min-width: 0;
     padding: 14px 8px;
   }
+}
+
+/* The completion card is a standalone surface, not a section under a rule. */
+.personal-workspace .memory-workbench-grid.is-session .workspace-complete-state {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }

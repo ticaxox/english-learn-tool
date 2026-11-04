@@ -60,6 +60,11 @@ class MemoryConfigResponse(MemoryModuleConfig):
     updated_at: datetime
 
 
+class MemoryProgressResetResponse(BaseModel):
+    sessions_reset: int
+    words_reset: int
+
+
 class PlanWordResponse(BaseModel):
     entry_id: UUID
     headword: str

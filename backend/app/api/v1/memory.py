@@ -13,6 +13,7 @@ from app.schemas.common import ErrorResponse
 from app.schemas.learning import (
     MemoryConfigResponse,
     MemoryModuleConfig,
+    MemoryProgressResetResponse,
     MistakeListResponse,
     MistakePriorityRequest,
     MistakeResponse,
@@ -30,6 +31,7 @@ from app.services.memory import (
     get_session,
     list_mistakes,
     master_word,
+    reset_today_progress,
     restore_word,
     set_config,
     set_mistake_priority,
@@ -72,6 +74,21 @@ async def put_config_endpoint(
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> MemoryConfigResponse:
     return await set_config(session, context.user, payload)
+
+
+@router.post(
+    "/progress/reset",
+    response_model=MemoryProgressResetResponse,
+    responses=_AUTH_RESPONSES,
+    summary="Reset today's memory progress and put today's words back in the queue",
+)
+async def reset_progress_endpoint(
+    request: Request,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> MemoryProgressResetResponse:
+    settings: Settings = request.app.state.settings
+    return await reset_today_progress(session, context.user, settings)
 
 
 @router.post(

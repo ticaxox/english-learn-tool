@@ -159,8 +159,8 @@ function validate(): ValidatedProviderFields | null {
   if (!Number.isInteger(priority.value) || priority.value < 0 || priority.value > 10000) {
     errors.priority = '优先级必须是 0–10000 的整数。'
   }
-  if (!Number.isInteger(timeoutSeconds.value) || timeoutSeconds.value < 1 || timeoutSeconds.value > 120) {
-    errors.timeoutSeconds = '超时必须是 1–120 秒的整数。'
+  if (!Number.isInteger(timeoutSeconds.value) || timeoutSeconds.value < 1 || timeoutSeconds.value > 300) {
+    errors.timeoutSeconds = '超时必须是 1–300 秒的整数。'
   }
   if (!editing.value || keyChanged.value) {
     if (apiKey.value.trim().length < 8) errors.apiKey = 'API Key 至少需要 8 个字符。'

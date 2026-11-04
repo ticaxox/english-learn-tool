@@ -150,8 +150,11 @@ class ProviderHttpClient:
         ) as client:
             while True:
                 try:
-                    response = await client.request(method, current, headers=headers, json=json)
-                except httpx.TimeoutException as exc:
+                    # A hard wall-clock deadline: httpx phase timeouts alone let a
+                    # slow-drip response hold the worker far beyond the budget.
+                    async with asyncio.timeout(timeout_seconds):
+                        response = await client.request(method, current, headers=headers, json=json)
+                except (TimeoutError, httpx.TimeoutException) as exc:
                     raise ProviderRequestError(
                         code="AI_PROVIDER_TIMEOUT",
                         message="The AI provider timed out.",

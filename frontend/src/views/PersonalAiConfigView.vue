@@ -181,8 +181,8 @@ watch(providers, (list) => {
 async function saveGlobalTimeout(): Promise<void> {
   if (globalSaving.value || providers.value.length === 0) return
   const value = Number(globalTimeout.value)
-  if (!Number.isInteger(value) || value < 1 || value > 120) {
-    toast.error('超时必须是 1–120 秒')
+  if (!Number.isInteger(value) || value < 1 || value > 300) {
+    toast.error('超时必须是 1–300 秒')
     return
   }
   globalSaving.value = true
@@ -291,8 +291,8 @@ onMounted(() => {
         </div>
         <div class="ai-global-config__row">
           <div class="field">
-            <label for="global-timeout">生成超时（秒，1–120）</label>
-            <input id="global-timeout" v-model.number="globalTimeout" type="number" min="1" max="120" step="1" />
+            <label for="global-timeout">生成超时（秒，1–300）</label>
+            <input id="global-timeout" v-model.number="globalTimeout" type="number" min="1" max="300" step="1" />
           </div>
           <DivButton class="button-secondary" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
             {{ globalSaving ? '正在保存…' : '保存' }}

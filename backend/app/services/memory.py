@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,6 +35,7 @@ from app.models.wordbooks import (
 from app.schemas.learning import (
     MemoryConfigResponse,
     MemoryModuleConfig,
+    MemoryProgressResetResponse,
     MistakeListResponse,
     MistakePriorityRequest,
     MistakeResponse,
@@ -120,6 +121,50 @@ async def set_config(
     await session.commit()
     await session.refresh(config)
     return _config_response(config)
+
+
+async def reset_today_progress(
+    session: AsyncSession, user: User, settings: Settings
+) -> MemoryProgressResetResponse:
+    """Put today's reviewed words back in the queue for another run.
+
+    Used by the "reset today's progress" action: today's memory sessions and
+    their events are removed, and the words they covered become due now. The
+    wordbook, the words themselves and older history stay untouched.
+    """
+    today = local_date_for(settings, user)
+    sessions = list(
+        (
+            await session.scalars(
+                select(MemorySession).where(
+                    MemorySession.user_id == user.id, MemorySession.local_date == today
+                )
+            )
+        ).all()
+    )
+    if not sessions:
+        return MemoryProgressResetResponse(sessions_reset=0, words_reset=0)
+    session_ids = [item.id for item in sessions]
+    state_ids = list(
+        (
+            await session.scalars(
+                select(MemorySessionItem.word_state_id)
+                .where(MemorySessionItem.session_id.in_(session_ids))
+                .distinct()
+            )
+        ).all()
+    )
+    await session.execute(delete(MemoryEvent).where(MemoryEvent.session_id.in_(session_ids)))
+    await session.execute(
+        delete(MemorySessionItem).where(MemorySessionItem.session_id.in_(session_ids))
+    )
+    await session.execute(delete(MemorySession).where(MemorySession.id.in_(session_ids)))
+    if state_ids:
+        await session.execute(
+            update(UserWordState).where(UserWordState.id.in_(state_ids)).values(due_at=utcnow())
+        )
+    await session.commit()
+    return MemoryProgressResetResponse(sessions_reset=len(session_ids), words_reset=len(state_ids))
 
 
 async def _active_wordbook(session: AsyncSession, user: User) -> Wordbook:

@@ -3950,6 +3950,24 @@
         "title": "MemoryModuleConfig",
         "type": "object"
       },
+      "MemoryProgressResetResponse": {
+        "properties": {
+          "sessions_reset": {
+            "title": "Sessions Reset",
+            "type": "integer"
+          },
+          "words_reset": {
+            "title": "Words Reset",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sessions_reset",
+          "words_reset"
+        ],
+        "title": "MemoryProgressResetResponse",
+        "type": "object"
+      },
       "MistakeListResponse": {
         "properties": {
           "has_more": {
@@ -5973,7 +5991,7 @@
           },
           "timeout_seconds": {
             "default": 60,
-            "maximum": 120.0,
+            "maximum": 300.0,
             "minimum": 1.0,
             "title": "Timeout Seconds",
             "type": "integer"
@@ -6153,7 +6171,7 @@
           "timeout_seconds": {
             "anyOf": [
               {
-                "maximum": 120.0,
+                "maximum": 300.0,
                 "minimum": 1.0,
                 "type": "integer"
               },
@@ -6211,7 +6229,7 @@
           },
           "timeout_seconds": {
             "default": 60,
-            "maximum": 120.0,
+            "maximum": 300.0,
             "minimum": 1.0,
             "title": "Timeout Seconds",
             "type": "integer"
@@ -15002,6 +15020,53 @@
           }
         ],
         "summary": "Toggle the review marker without altering recorded events",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/progress/reset": {
+      "post": {
+        "operationId": "reset_progress_endpoint_api_v1_memory_progress_reset_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryProgressResetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The account may not perform this action."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reset today's memory progress and put today's words back in the queue",
         "tags": [
           "system",
           "memory"

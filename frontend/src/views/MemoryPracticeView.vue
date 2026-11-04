@@ -15,11 +15,12 @@ import ContractGate from '../components/ContractGate.vue'
 import FlashcardTrainer from '../components/FlashcardTrainer.vue'
 import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
-import { fetchMemoryConfig, fetchTodayPlan } from '../api/learning'
+import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
 import { isApiError } from '../api/errors'
 import { useMemorySession } from '../composables/useMemorySession'
 import { useStudyHeartbeat } from '../composables/useStudyHeartbeat'
+import { useToast } from '../composables/useToast'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import {
   MEMORY_MODULES,
@@ -49,6 +50,8 @@ const selectedModule = ref<MemoryModule | null>(null)
 
 const session = useMemorySession()
 const timer = useSessionTimer()
+const toast = useToast()
+const resetting = ref(false)
 const timerLimit = ref<number>(timerLimitFromQuery(route.query.timer) ?? 0)
 
 function startClock(): void {
@@ -211,6 +214,25 @@ async function confirmEndSession(): Promise<void> {
   }
 }
 
+async function resetTodayProgress(): Promise<void> {
+  if (resetting.value) return
+  const confirmed = window.confirm(
+    '重置今天的记忆进度？今天已完成的记录会被清空，今天的单词会重新回到队列。',
+  )
+  if (!confirmed) return
+  resetting.value = true
+  try {
+    const result = await resetMemoryProgress()
+    restart()
+    await loadTodayPlan()
+    toast.success('已重置今天的进度', `${result.wordsReset} 个单词已回到队列。`)
+  } catch {
+    toast.error('重置失败', '请稍后重试。')
+  } finally {
+    resetting.value = false
+  }
+}
+
 function restart(): void {
   wrongCard.value = null
   session.reset()
@@ -271,8 +293,16 @@ watch(challengeModule, async (module, previous) => {
       <ErrorNotice :error="configError" retry-label="重新读取配置" @retry="loadConfig" />
     </section>
 
-    <div v-else class="memory-workbench-grid" :class="{ 'is-session': Boolean(session.question.value) || session.finished.value }">
-      <section class="workspace-card memory-main-card">
+    <template v-else>
+      <p
+        v-if="session.hasSession.value || session.finished.value"
+        class="memory-session-kicker"
+      >
+        记忆练习
+      </p>
+
+      <div class="memory-workbench-grid" :class="{ 'is-session': Boolean(session.question.value) || session.finished.value }">
+        <section class="workspace-card memory-main-card">
         <template v-if="showModulePicker">
           <header class="workspace-section-header">
             <div>
@@ -381,6 +411,14 @@ watch(challengeModule, async (module, previous) => {
           <p>可以回到今日进度，或继续查看错词。</p>
           <div class="button-row">
             <DivButton class="button workspace-primary-button" type="button" @click="restart">再练一轮</DivButton>
+            <DivButton
+              class="button-secondary"
+              type="button"
+              :disabled="resetting"
+              @click="resetTodayProgress"
+            >
+              {{ resetting ? '正在重置…' : '重置今日进度' }}
+            </DivButton>
             <RouterLink class="button workspace-secondary-button" to="/overview">查看今日进度</RouterLink>
             <RouterLink class="button workspace-secondary-button" to="/memory/mistakes">查看错词</RouterLink>
           </div>
@@ -397,7 +435,6 @@ watch(challengeModule, async (module, previous) => {
 
       <aside v-if="session.hasSession.value || session.finished.value" class="workspace-card memory-session-rail" aria-label="本次训练">
         <div class="memory-rail-head">
-          <p class="workspace-kicker">记忆练习</p>
           <h1 class="memory-rail-title">{{ selectedModule ? MEMORY_MODULE_LABELS[selectedModule] : '记忆练习' }}</h1>
           <p v-if="session.question.value" class="memory-rail-remaining">
             本轮剩余 <strong>{{ session.question.value.remaining }}</strong> 张
@@ -436,7 +473,8 @@ watch(challengeModule, async (module, previous) => {
         </dl>
         <RouterLink class="memory-settings-link" to="/settings">调整训练与目标 <AppIcon name="settings" /></RouterLink>
       </aside>
-    </div>
+      </div>
+    </template>
 
     <div v-if="endConfirmOpen" class="dialog-backdrop" @click.self="endConfirmOpen = false">
       <section class="dialog-card memory-end-dialog" role="dialog" aria-modal="true" aria-labelledby="memory-end-title">

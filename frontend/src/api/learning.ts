@@ -205,6 +205,24 @@ export async function completeMemorySession(
   })
 }
 
+export interface MemoryProgressReset {
+  sessionsReset: number
+  wordsReset: number
+}
+
+/** Clear today's memory sessions and make their words due again. */
+export async function resetMemoryProgress(options: FetchOptions = {}): Promise<MemoryProgressReset> {
+  const payload = await apiClient.post('/memory/progress/reset', {}, {
+    signal: options.signal,
+    retryCount: 0,
+  })
+  const body = (payload ?? {}) as Record<string, unknown>
+  return {
+    sessionsReset: typeof body.sessions_reset === 'number' ? body.sessions_reset : 0,
+    wordsReset: typeof body.words_reset === 'number' ? body.words_reset : 0,
+  }
+}
+
 export async function masterWord(stateId: string, options: FetchOptions = {}): Promise<MasteryOutcome> {
   const payload = await apiClient.patch(
     `/memory/words/${encodeURIComponent(stateId)}/master`,

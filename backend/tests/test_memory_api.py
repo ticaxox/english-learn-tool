@@ -933,3 +933,49 @@ async def _force_due(app, user_id, wordbook_id, entry_id, plan_word_id) -> None:
             existing.due_at = utcnow() - timedelta(hours=1)
             existing.review_count = 3
         await session.commit()
+
+
+async def test_reset_today_progress_clears_sessions_and_requeues_words(
+    app, client, member_user
+) -> None:
+    headers = await login(client, member_user.username)
+    wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=6)
+    await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
+    await client.get(TODAY_PATH, headers=headers)
+
+    entry_id, plan_word_id = await _first_plan_word(app, member_user.id, wordbook_id)
+    await _force_due(app, member_user.id, wordbook_id, entry_id, plan_word_id)
+
+    created = await client.post(SESSIONS_PATH, headers=headers, json={"module": "flashcard"})
+    assert created.status_code == 201, created.text
+    body = created.json()
+    item = body["next_item"]
+    await _submit(client, headers, body["session_id"], item["item_id"], "good", key="reset-good")
+
+    reset = await client.post("/api/v1/memory/progress/reset", headers=headers, json={})
+    assert reset.status_code == 200, reset.text
+    data = reset.json()
+    assert data["sessions_reset"] >= 1
+    assert data["words_reset"] >= 1
+
+    async with app.state.session_factory() as session:
+        remaining = await session.scalar(
+            select(func.count(MemorySession.id)).where(MemorySession.user_id == member_user.id)
+        )
+        assert remaining == 0
+        state = await session.scalar(
+            select(UserWordState).where(
+                UserWordState.user_id == member_user.id,
+                UserWordState.entry_id == entry_id,
+            )
+        )
+        assert state is not None
+        assert state.due_at <= utcnow()
+
+    again = await client.post(SESSIONS_PATH, headers=headers, json={"module": "flashcard"})
+    assert again.status_code == 201, again.text
+    assert again.json()["next_item"]["entry_id"] == str(entry_id)
+
+    empty = await client.post("/api/v1/memory/progress/reset", headers=headers, json={})
+    assert empty.status_code == 200
+    assert empty.json()["words_reset"] >= 1

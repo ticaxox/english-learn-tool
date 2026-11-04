@@ -38,7 +38,7 @@ class ProviderCreateRequest(_StrictModel):
     model_id: str = Field(min_length=1, max_length=200)
     priority: int = Field(default=100, ge=0, le=10_000)
     is_default: bool = False
-    timeout_seconds: int = Field(default=60, ge=1, le=120)
+    timeout_seconds: int = Field(default=60, ge=1, le=300)
     enabled: bool = True
     custom_headers: dict[str, str] = Field(default_factory=dict)
 
@@ -99,7 +99,7 @@ class ProviderPatchRequest(_StrictModel):
     model_id: str | None = Field(default=None, min_length=1, max_length=200)
     priority: int | None = Field(default=None, ge=0, le=10_000)
     is_default: bool | None = None
-    timeout_seconds: int | None = Field(default=None, ge=1, le=120)
+    timeout_seconds: int | None = Field(default=None, ge=1, le=300)
     enabled: bool | None = None
     custom_headers: dict[str, str] | None = None
 
@@ -152,7 +152,7 @@ class ProviderProbeRequest(_StrictModel):
     base_url: str = Field(min_length=8, max_length=500)
     api_key: str | None = Field(default=None, min_length=8, max_length=4_096, repr=False)
     provider_id: UUID | None = None
-    timeout_seconds: int = Field(default=60, ge=1, le=120)
+    timeout_seconds: int = Field(default=60, ge=1, le=300)
     custom_headers: dict[str, str] = Field(default_factory=dict)
 
     @field_validator("base_url")
