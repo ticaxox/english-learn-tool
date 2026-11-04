@@ -4048,3 +4048,64 @@
 }
 
 .personal-workspace .memory-main-card .choice-list { gap: 18px 32px; }
+
+
+/* Study card keeps its own surface and inner spacing on the memory page. */
+.personal-workspace .memory-page .memory-main-card .study-card {
+  width: 100%;
+  padding: 30px 36px;
+  border: 2px solid var(--ui-line-strong) !important;
+  border-radius: 24px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 6px 0 rgb(59 42 26 / 9%) !important;
+}
+
+.memory-main-card .study-card__meaning {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: center;
+  margin: 0;
+}
+
+.memory-main-card .study-card__meaning .study-card__definition { font-size: 1.35rem; }
+
+.memory-main-card .study-card__face > .study-card__example {
+  grid-column: 1 / -1;
+  margin: 12px auto 0;
+}
+
+.memory-main-card .study-card__rating { margin-top: 28px; }
+
+/* Ending dialog: keep the actions away from the copy. */
+.personal-workspace .memory-end-dialog .button-row { margin-top: 14px; }
+
+/* Model picker floats over the form instead of stretching the dialog. */
+.personal-workspace .ai-model-field { position: relative; }
+.personal-workspace .ai-model-menu {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  right: 0;
+  left: 0;
+  max-height: 216px;
+  margin-top: 4px;
+  box-shadow: 0 10px 24px rgb(59 42 26 / 16%);
+}
+
+.personal-workspace .ai-model-caret {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+  padding: 0;
+}
+
+.personal-workspace .ai-model-caret:hover { background: transparent; }
+
+/* The result page uses the full content column. */
+.personal-workspace .member-practice-session-page .practice-result {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
