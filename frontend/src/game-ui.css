@@ -3814,8 +3814,9 @@
 
 @media (min-width: 1100px) {
   .personal-workspace .workspace-topbar { position: relative; }
-  .personal-workspace .workspace-topbar-tabs,
-  .personal-workspace .workspace-topbar-learning {
+  /* Direct children only: the learning group holds its own tabs. */
+  .personal-workspace .workspace-topbar > .workspace-topbar-tabs,
+  .personal-workspace .workspace-topbar > .workspace-topbar-learning {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
