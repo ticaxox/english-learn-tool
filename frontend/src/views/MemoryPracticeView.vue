@@ -246,19 +246,6 @@ watch(challengeModule, async (module, previous) => {
       </div>
     </header>
 
-    <header v-else class="memory-stage-header">
-      <div>
-        <p class="eyebrow">记忆练习</p>
-        <h1>{{ selectedModule ? MEMORY_MODULE_LABELS[selectedModule] : '记忆练习' }}</h1>
-      </div>
-      <div class="memory-session-actions">
-        <span class="workspace-status" :class="`memory-timer--${heartbeat.state.value}`">
-          {{ timer.running.value ? `${timerLimit > 0 ? '倒计时' : '正计时'} ${timer.label.value}` : '已暂停' }}
-        </span>
-        <DivButton class="button-secondary button-small" type="button" @click="endSession">结束本次</DivButton>
-      </div>
-    </header>
-
     <div v-if="challengeId" class="workspace-inline-banner challenge-memory-banner">
       <span>本次训练来自每日闯关节点。</span>
       <RouterLink :to="`/challenges/${challengeId}`">返回今日闯关</RouterLink>
@@ -408,7 +395,35 @@ watch(challengeModule, async (module, previous) => {
         </p>
       </section>
 
-      <aside class="workspace-card memory-context-card" aria-label="当前学习信息">
+      <aside v-if="session.hasSession.value || session.finished.value" class="workspace-card memory-session-rail" aria-label="本次训练">
+        <div class="memory-rail-head">
+          <p class="workspace-kicker">记忆练习</p>
+          <h1 class="memory-rail-title">{{ selectedModule ? MEMORY_MODULE_LABELS[selectedModule] : '记忆练习' }}</h1>
+          <p v-if="session.question.value" class="memory-rail-remaining">
+            本轮剩余 <strong>{{ session.question.value.remaining }}</strong> 张
+          </p>
+          <p v-else class="memory-rail-remaining">本轮已完成</p>
+        </div>
+
+        <div class="memory-rail-block">
+          <span class="memory-rail-label">本次用时</span>
+          <span class="workspace-status memory-rail-clock" :class="`memory-timer--${heartbeat.state.value}`">
+            {{ timer.running.value ? `${timerLimit > 0 ? '倒计时' : '正计时'} ${timer.label.value}` : '已暂停' }}
+          </span>
+        </div>
+
+        <DivButton
+          v-if="!session.finished.value"
+          class="button-secondary memory-rail-end"
+          type="button"
+          @click="endSession"
+        >
+          结束本次
+        </DivButton>
+        <p v-else class="memory-rail-state">本轮训练已结束，成绩会记入今日进度。</p>
+      </aside>
+
+      <aside v-else class="workspace-card memory-context-card" aria-label="当前学习信息">
         <div>
           <p class="workspace-kicker">当前词书</p>
           <strong>{{ planLoading ? '正在读取…' : todayPlan?.wordbook?.name ?? (planError ? '暂未读取' : '尚未选择') }}</strong>

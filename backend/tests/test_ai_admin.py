@@ -109,6 +109,57 @@ async def test_personal_provider_crud_masks_keys_and_checks_real_http(
         assert models.json()["success"] is True
         assert models.json()["models"] == ["fake-model", "fake-model-2"]
 
+        # The create dialog can probe before saving, using the typed key only.
+        drafted = await client.post(
+            f"{PROVIDERS_PATH}/probe",
+            headers=headers,
+            json={
+                "base_url": server.base_url,
+                "api_key": "sk-draft-secret-5555",
+                "timeout_seconds": 10,
+                "custom_headers": {},
+            },
+        )
+        assert drafted.status_code == 200, drafted.text
+        assert drafted.json()["success"] is True
+        assert drafted.json()["models"] == ["fake-model", "fake-model-2"]
+        assert "sk-draft-secret-5555" not in drafted.text
+
+        drafted_models = await client.post(
+            f"{PROVIDERS_PATH}/probe/models",
+            headers=headers,
+            json={
+                "base_url": server.base_url,
+                "api_key": "sk-draft-secret-5555",
+                "timeout_seconds": 10,
+                "custom_headers": {},
+            },
+        )
+        assert drafted_models.status_code == 200, drafted_models.text
+        assert drafted_models.json()["models"] == ["fake-model", "fake-model-2"]
+
+        missing_key = await client.post(
+            f"{PROVIDERS_PATH}/probe",
+            headers=headers,
+            json={"base_url": server.base_url, "timeout_seconds": 10, "custom_headers": {}},
+        )
+        assert missing_key.status_code == 422
+        assert missing_key.json()["code"] == "AI_PROVIDER_API_KEY_REQUIRED"
+
+        # An existing provider can be probed with its stored key and a new URL.
+        stored_probe = await client.post(
+            f"{PROVIDERS_PATH}/probe",
+            headers=headers,
+            json={
+                "base_url": server.base_url,
+                "provider_id": primary["id"],
+                "timeout_seconds": 10,
+                "custom_headers": {},
+            },
+        )
+        assert stored_probe.status_code == 200, stored_probe.text
+        assert stored_probe.json()["success"] is True
+
         backup = await create_provider(
             client,
             headers,

@@ -55,6 +55,15 @@ export interface ProviderCreateInput {
   customHeaders: Record<string, string>
 }
 
+/** Checks a configuration before it is saved; `apiKey` is omitted when the stored key applies. */
+export interface ProviderProbeInput {
+  baseUrl: string
+  apiKey?: string | null
+  providerId?: string | null
+  timeoutSeconds: number
+  customHeaders: Record<string, string>
+}
+
 export interface ProviderPatchInput {
   name?: string
   baseUrl?: string

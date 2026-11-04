@@ -43,6 +43,7 @@ from app.schemas.learning import (
     StatsSourceBreakdown,
     TodayResponse,
 )
+from app.services.ai_memory import sync_profile_memories
 from app.services.auth import utcnow
 
 PLAN_RULES_VERSION = "daily-plan-1.0.0"
@@ -157,6 +158,7 @@ async def update_profile(
     elif profile.target_exam is not None:
         profile.onboarding_completed = True
     profile.timezone = DEFAULT_TIMEZONE
+    await sync_profile_memories(session, user)
     await session.commit()
     await session.refresh(profile)
     return _profile_response(profile)

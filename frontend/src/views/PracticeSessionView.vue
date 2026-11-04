@@ -184,10 +184,6 @@ void practice.load()
           {{ PRACTICE_SOURCE_LABELS[session.source] }} · {{ session.questionCount }} 题 · {{ PRACTICE_STATUS_LABELS[session.status] }}
         </p>
       </div>
-      <div v-if="sessionTimer.running.value" class="practice-stage-clock" :class="{ 'is-expired': sessionTimer.expired.value }">
-        <AppIcon name="today" />
-        <span>{{ timerLimit ? '倒计时' : '正计时' }} {{ sessionTimer.label.value }}</span>
-      </div>
     </header>
 
     <LoadingState v-if="practice.loading.value" label="正在读取练习会话…" />
@@ -271,6 +267,13 @@ void practice.load()
           </div>
 
           <aside class="member-practice-session-aside" aria-label="作答操作">
+            <section v-if="sessionTimer.running.value" class="panel practice-rail-clock" aria-label="本次计时">
+              <span class="practice-rail-clock__label">本次用时</span>
+              <span class="practice-stage-clock" :class="{ 'is-expired': sessionTimer.expired.value }">
+                <AppIcon name="today" />
+                <span>{{ timerLimit ? '倒计时' : '正计时' }} {{ sessionTimer.label.value }}</span>
+              </span>
+            </section>
             <section class="panel practice-submit-panel member-practice-submit">
               <div class="practice-submit-progress">
                 <div class="practice-submit-progress__top">

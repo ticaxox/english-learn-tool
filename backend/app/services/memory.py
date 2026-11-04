@@ -47,6 +47,7 @@ from app.schemas.learning import (
     WordStateResponse,
 )
 from app.services import fsrs_scheduler
+from app.services.ai_memory import sync_profile_memories
 from app.services.auth import utcnow
 from app.services.learning import LEARNING_CALCULATION_VERSION, local_date_for
 
@@ -115,6 +116,7 @@ async def set_config(
     config.choice_enabled = payload.choice_enabled
     config.spelling_enabled = payload.spelling_enabled
     config.preferences = payload.preferences
+    await sync_profile_memories(session, user)
     await session.commit()
     await session.refresh(config)
     return _config_response(config)

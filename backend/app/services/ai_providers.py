@@ -17,6 +17,7 @@ from app.schemas.ai import (
     ProviderListResponse,
     ProviderModelsResponse,
     ProviderPatchRequest,
+    ProviderProbeRequest,
     ProviderResponse,
     ProviderTestResponse,
 )
@@ -371,6 +372,84 @@ async def list_provider_models(
             api_key=_cipher(settings).decrypt(provider.api_key_ciphertext),
             custom_headers=provider.custom_headers,
             timeout_seconds=provider.timeout_seconds,
+        )
+    except ProviderRequestError as exc:
+        return ProviderModelsResponse(success=False, error_code=exc.code, error_message=exc.message)
+    return ProviderModelsResponse(success=True, models=models)
+
+
+async def _probe_api_key(
+    session: AsyncSession, actor: User, settings: Settings, payload: ProviderProbeRequest
+) -> str:
+    """Use the key from the form, or the stored key of an owned provider."""
+    if payload.api_key:
+        return payload.api_key
+    if payload.provider_id is None:
+        raise AppError(
+            status_code=422,
+            code="AI_PROVIDER_API_KEY_REQUIRED",
+            message="An API key is required to test this provider.",
+        )
+    provider = await session.scalar(
+        select(AiProvider).where(
+            AiProvider.id == payload.provider_id, AiProvider.owner_id == actor.id
+        )
+    )
+    if provider is None:
+        raise AppError(
+            status_code=404, code="AI_PROVIDER_NOT_FOUND", message="The provider was not found."
+        )
+    return _cipher(settings).decrypt(provider.api_key_ciphertext)
+
+
+async def probe_provider(
+    session: AsyncSession,
+    actor: User,
+    settings: Settings,
+    payload: ProviderProbeRequest,
+) -> ProviderTestResponse:
+    """Check a configuration that has not been saved yet (the create dialog)."""
+    api_key = await _probe_api_key(session, actor, settings, payload)
+    started = time.perf_counter()
+    try:
+        models = await ProviderHttpClient(settings).list_models(
+            base_url=payload.base_url,
+            api_key=api_key,
+            custom_headers=payload.custom_headers,
+            timeout_seconds=payload.timeout_seconds,
+        )
+    except ProviderRequestError as exc:
+        latency = int((time.perf_counter() - started) * 1000)
+        return ProviderTestResponse(
+            success=False,
+            status="failed",
+            latency_ms=latency,
+            error_code=exc.code,
+            error_message=exc.message,
+        )
+    latency = int((time.perf_counter() - started) * 1000)
+    return ProviderTestResponse(
+        success=True,
+        status="succeeded",
+        latency_ms=latency,
+        models=models,
+    )
+
+
+async def probe_provider_models(
+    session: AsyncSession,
+    actor: User,
+    settings: Settings,
+    payload: ProviderProbeRequest,
+) -> ProviderModelsResponse:
+    """List models for an unsaved configuration so the create dialog can pick one."""
+    api_key = await _probe_api_key(session, actor, settings, payload)
+    try:
+        models = await ProviderHttpClient(settings).list_models(
+            base_url=payload.base_url,
+            api_key=api_key,
+            custom_headers=payload.custom_headers,
+            timeout_seconds=payload.timeout_seconds,
         )
     except ProviderRequestError as exc:
         return ProviderModelsResponse(success=False, error_code=exc.code, error_message=exc.message)

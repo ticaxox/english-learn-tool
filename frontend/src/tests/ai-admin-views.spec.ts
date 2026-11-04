@@ -234,3 +234,48 @@ describe('admin AI views', () => {
     expect(tables).not.toContain('私密词书正文')
   })
 })
+
+describe('AiProviderForm draft probe', () => {
+  it('tests an unsaved provider with the typed key and normalized URL', async () => {
+    const wrapper = mount(AiProviderForm, { props: { compact: true, canFetchModels: true } })
+    await wrapper.get('#provider-base-url').setValue('https://draft.example/v1/')
+    await wrapper.get('#provider-api-key').setValue('sk-draft-secret-1234')
+    const testButton = wrapper.findAll('[role="button"]').find((button) => button.text() === '测试连接')
+    expect(testButton).toBeTruthy()
+    await testButton!.trigger('click')
+
+    const [payload] = wrapper.emitted('test')?.[0] ?? []
+    expect(payload).toMatchObject({
+      baseUrl: 'https://draft.example/v1',
+      apiKey: 'sk-draft-secret-1234',
+      providerId: null,
+      timeoutSeconds: 120,
+      customHeaders: {},
+    })
+  })
+
+  it('refuses to probe before a key is typed in the create dialog', async () => {
+    const wrapper = mount(AiProviderForm, { props: { compact: true, canFetchModels: true } })
+    await wrapper.get('#provider-base-url').setValue('https://draft.example/v1')
+    const fetchButton = wrapper.findAll('[role="button"]').find((button) => button.text() === '获取模型')
+    await fetchButton!.trigger('click')
+
+    expect(wrapper.emitted('fetch-models')).toBeUndefined()
+    expect(wrapper.text()).toContain('先填写 API Key 才能测试连接。')
+  })
+
+  it('reuses a stored key in edit mode by sending only the provider id', async () => {
+    const wrapper = mount(AiProviderForm, {
+      props: { compact: true, canFetchModels: true, provider: defaultProvider },
+    })
+    const fetchButton = wrapper.findAll('[role="button"]').find((button) => button.text() === '获取模型')
+    await fetchButton!.trigger('click')
+
+    const [payload] = wrapper.emitted('fetch-models')?.[0] ?? []
+    expect(payload).toMatchObject({
+      baseUrl: 'https://default.example/v1',
+      apiKey: null,
+      providerId: defaultProvider.id,
+    })
+  })
+})

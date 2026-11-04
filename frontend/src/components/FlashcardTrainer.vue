@@ -56,11 +56,6 @@ function rate(rating: FlashcardRating): void {
 </script>
 
 <template>
-  <p class="study-meta-line">
-    <span class="study-badge">翻卡</span>
-    <span>剩余 {{ props.question.remaining }} 张</span>
-  </p>
-
   <section
     class="study-card"
     :class="{ 'is-revealed': revealed }"

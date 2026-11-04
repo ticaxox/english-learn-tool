@@ -1,4 +1,5 @@
 from app.models.ai import AiJob, AiJobEvent, AiPrompt, AiProvider, AiUsageLedger
+from app.models.ai_memory import AiMemory
 from app.models.challenge import (
     ChallengeBossResult,
     ChallengeNode,
@@ -49,6 +50,7 @@ from app.models.wordbooks import (
 __all__ = [
     "AiJob",
     "AiJobEvent",
+    "AiMemory",
     "AiPrompt",
     "AiProvider",
     "AiUsageLedger",

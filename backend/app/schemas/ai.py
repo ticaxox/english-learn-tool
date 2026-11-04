@@ -141,6 +141,38 @@ class ProviderPatchRequest(_StrictModel):
         return self
 
 
+class ProviderProbeRequest(_StrictModel):
+    """Check a provider configuration that has not been saved yet.
+
+    The editor can test a brand-new provider before creating it. When the key is
+    already stored, the client sends only ``provider_id`` so the secret never
+    leaves the server again.
+    """
+
+    base_url: str = Field(min_length=8, max_length=500)
+    api_key: str | None = Field(default=None, min_length=8, max_length=4_096, repr=False)
+    provider_id: UUID | None = None
+    timeout_seconds: int = Field(default=60, ge=1, le=120)
+    custom_headers: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("base_url")
+    @classmethod
+    def trim_url(cls, value: str) -> str:
+        return value.strip().rstrip("/")
+
+    @field_validator("api_key", mode="before")
+    @classmethod
+    def blank_api_key_uses_stored(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
+    @field_validator("custom_headers")
+    @classmethod
+    def validate_headers(cls, value: dict[str, str]) -> dict[str, str]:
+        return ProviderCreateRequest.validate_headers(value)
+
+
 class ProviderResponse(BaseModel):
     id: UUID
     name: str

@@ -5,6 +5,7 @@ import type {
   AiProvider,
   ProviderCreateInput,
   ProviderPatchInput,
+  ProviderProbeInput,
   ProviderTestResult,
 } from '../api/ai-admin'
 
@@ -37,8 +38,8 @@ const emit = defineEmits<{
   (event: 'create', input: ProviderCreateInput): void
   (event: 'update', providerId: string, input: ProviderPatchInput): void
   (event: 'cancel'): void
-  (event: 'fetch-models'): void
-  (event: 'test'): void
+  (event: 'fetch-models', input: ProviderProbeInput): void
+  (event: 'test', input: ProviderProbeInput): void
 }>()
 
 const name = ref('')
@@ -192,6 +193,53 @@ function submit(): void {
   emit('update', props.provider.id, patch)
 }
 
+/** Build the payload for probing the form before it is saved. */
+function probeInput(): ProviderProbeInput | null {
+  clearErrors()
+  const normalizedUrl = baseUrl.value.trim().replace(/\/+$/, '')
+  if (!normalizedUrl) {
+    errors.baseUrl = '请先填写 Base URL。'
+    return null
+  }
+  try {
+    const url = new URL(normalizedUrl)
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      errors.baseUrl = 'Base URL 必须使用 http 或 https。'
+      return null
+    }
+  } catch {
+    errors.baseUrl = 'Base URL 不是有效地址。'
+    return null
+  }
+  const headers = parseHeaders()
+  if (headers === null) return null
+  const key = apiKey.value.trim()
+  if (!editing.value && key.length < 8) {
+    errors.apiKey = '先填写 API Key 才能测试连接。'
+    return null
+  }
+  return {
+    baseUrl: normalizedUrl,
+    apiKey: key || null,
+    providerId: props.provider?.id ?? null,
+    timeoutSeconds: timeoutSeconds.value,
+    customHeaders: headers,
+  }
+}
+
+function requestModels(): void {
+  const input = probeInput()
+  if (!input) return
+  modelsFetched.value = true
+  emit('fetch-models', input)
+}
+
+function requestTest(): void {
+  const input = probeInput()
+  if (!input) return
+  emit('test', input)
+}
+
 function toggleModels(): void {
   modelsOpen.value = !modelsOpen.value
 }
@@ -260,21 +308,21 @@ function cancel(): void {
             class="button-secondary ai-model-fetch"
             type="button"
             :disabled="modelLoading"
-            @click="modelsFetched = true; emit('fetch-models')"
+            @click="requestModels"
           >
             {{ modelLoading ? '读取中…' : '获取模型' }}
           </DivButton>
           <DivButton
-            v-if="editing"
+            v-if="canFetchModels"
             class="button-secondary"
             type="button"
             :disabled="testLoading"
-            @click="emit('test')"
+            @click="requestTest"
           >
             {{ testLoading ? '连接中…' : '测试连接' }}
           </DivButton>
         </div>
-        <p v-if="editing && testResult" class="field-hint">
+        <p v-if="testResult" class="field-hint">
           {{ testResult.success ? `连接正常 · ${testResult.latencyMs ?? '—'} ms` : '连接失败，请检查地址、模型和 Key。' }}
         </p>
         <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>

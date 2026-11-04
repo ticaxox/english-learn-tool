@@ -14,16 +14,34 @@ from app.schemas.ai import (
     ProviderListResponse,
     ProviderModelsResponse,
     ProviderPatchRequest,
+    ProviderProbeRequest,
     ProviderResponse,
     ProviderTestResponse,
 )
+from app.schemas.ai_memory import (
+    AiMemoryClearResponse,
+    AiMemoryCreateRequest,
+    AiMemoryKind,
+    AiMemoryListResponse,
+    AiMemoryResponse,
+    AiMemoryUpdateRequest,
+)
 from app.schemas.common import ErrorResponse
+from app.services.ai_memory import (
+    clear_auto_memories,
+    create_memory,
+    delete_memory,
+    list_memories,
+    update_memory,
+)
 from app.services.ai_providers import (
     create_provider,
     delete_provider,
     get_provider,
     list_provider_models,
     list_providers,
+    probe_provider,
+    probe_provider_models,
     test_provider,
     update_provider,
 )
@@ -81,6 +99,38 @@ async def create_my_provider_endpoint(
 ) -> ProviderResponse:
     settings: Settings = request.app.state.settings
     return await create_provider(session, context.user, settings, payload)
+
+
+@router.post(
+    "/providers/probe",
+    response_model=ProviderTestResponse,
+    responses=_RESPONSES,
+    summary="Check a provider configuration before it is saved",
+)
+async def probe_my_provider_endpoint(
+    request: Request,
+    payload: ProviderProbeRequest,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> ProviderTestResponse:
+    settings: Settings = request.app.state.settings
+    return await probe_provider(session, context.user, settings, payload)
+
+
+@router.post(
+    "/providers/probe/models",
+    response_model=ProviderModelsResponse,
+    responses=_RESPONSES,
+    summary="List models for a provider configuration before it is saved",
+)
+async def probe_my_provider_models_endpoint(
+    request: Request,
+    payload: ProviderProbeRequest,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> ProviderModelsResponse:
+    settings: Settings = request.app.state.settings
+    return await probe_provider_models(session, context.user, settings, payload)
 
 
 @router.patch(
@@ -145,3 +195,75 @@ async def my_provider_models_endpoint(
 ) -> ProviderModelsResponse:
     settings: Settings = request.app.state.settings
     return await list_provider_models(session, context.user, settings, provider_id)
+
+
+@router.get(
+    "/memories",
+    response_model=AiMemoryListResponse,
+    responses=_RESPONSES,
+    summary="List the AI memories the coach may use for the current user",
+)
+async def list_my_memories_endpoint(
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    kind: AiMemoryKind | None = None,
+) -> AiMemoryListResponse:
+    return await list_memories(session, context.user, kind=kind)
+
+
+@router.post(
+    "/memories",
+    response_model=AiMemoryResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses=_RESPONSES,
+    summary="Add a memory the coach must keep for the current user",
+)
+async def create_my_memory_endpoint(
+    payload: AiMemoryCreateRequest,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> AiMemoryResponse:
+    return await create_memory(session, context.user, payload)
+
+
+@router.post(
+    "/memories/clear-auto",
+    response_model=AiMemoryClearResponse,
+    responses=_RESPONSES,
+    summary="Delete every automatically recorded memory of the current user",
+)
+async def clear_my_auto_memories_endpoint(
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> AiMemoryClearResponse:
+    return await clear_auto_memories(session, context.user)
+
+
+@router.patch(
+    "/memories/{memory_id}",
+    response_model=AiMemoryResponse,
+    responses=_RESPONSES,
+    summary="Edit one memory owned by the current user",
+)
+async def update_my_memory_endpoint(
+    memory_id: UUID,
+    payload: AiMemoryUpdateRequest,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> AiMemoryResponse:
+    return await update_memory(session, context.user, memory_id, payload)
+
+
+@router.delete(
+    "/memories/{memory_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=_RESPONSES,
+    summary="Delete one memory owned by the current user",
+)
+async def delete_my_memory_endpoint(
+    memory_id: UUID,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> Response:
+    await delete_memory(session, context.user, memory_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

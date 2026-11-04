@@ -63,11 +63,6 @@ function choose(optionId: string): void {
 
 <template>
   <section class="study-card" aria-labelledby="choice-prompt">
-    <p class="study-card__meta">
-      <span class="study-badge">选择</span>
-      <span>剩余 {{ props.question.remaining }} 张</span>
-    </p>
-
     <h2 id="choice-prompt" ref="promptHeading" class="study-card__prompt" tabindex="-1">{{ props.question.prompt }}</h2>
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
 

@@ -38,6 +38,8 @@ watch(
     if (done && !props.disabled) submit()
   },
 )
+
+/** Inside the card: spelling needs to say which letters the server gave away. */
 const blankLabel = computed(() =>
   props.question.blankType ? SPELLING_BLANK_LABELS[props.question.blankType] : '按提示拼写',
 )
@@ -152,16 +154,11 @@ function submit(): void {
 </script>
 
 <template>
-  <p class="study-meta-line">
-    <span class="study-badge">拼写</span>
-    <span>{{ blankLabel }}</span>
-    <span>剩余 {{ props.question.remaining }} 张</span>
-  </p>
-
   <section class="study-card" aria-labelledby="spelling-definition">
 
     <h2 id="spelling-definition" class="study-card__prompt" tabindex="-1">{{ props.question.definition }}</h2>
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
+    <p class="study-card__hint">{{ blankLabel }}</p>
 
     <div class="spelling-grid" role="group" aria-label="按字母顺序填写单词">
       <template v-for="blank in props.question.blanks" :key="blank.index">

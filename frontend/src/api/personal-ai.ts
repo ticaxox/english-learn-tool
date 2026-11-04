@@ -16,6 +16,7 @@ import {
   type ProviderCreateInput,
   type ProviderModelsResult,
   type ProviderPatchInput,
+  type ProviderProbeInput,
   type ProviderTestResult,
 } from './ai-admin'
 
@@ -24,6 +25,7 @@ export type {
   ProviderCreateInput,
   ProviderModelsResult,
   ProviderPatchInput,
+  ProviderProbeInput,
   ProviderTestResult,
 } from './ai-admin'
 
@@ -74,6 +76,34 @@ export async function fetchPersonalProviderModels(providerId: string): Promise<P
   return parseProviderModels(await apiClient.post(
     `/me/ai/providers/${encodeURIComponent(providerId)}/models`,
     undefined,
+    { retryCount: 0 },
+  ))
+}
+
+function serializeProbe(input: ProviderProbeInput) {
+  return {
+    base_url: input.baseUrl,
+    api_key: input.apiKey ? input.apiKey : null,
+    provider_id: input.providerId ?? null,
+    timeout_seconds: input.timeoutSeconds,
+    custom_headers: input.customHeaders,
+  }
+}
+
+/** Test a provider form that has not been saved yet. */
+export async function probePersonalProvider(input: ProviderProbeInput): Promise<ProviderTestResult> {
+  return parseProviderTest(await apiClient.post(
+    '/me/ai/providers/probe',
+    serializeProbe(input),
+    { retryCount: 0 },
+  ))
+}
+
+/** List models for a provider form that has not been saved yet. */
+export async function probePersonalProviderModels(input: ProviderProbeInput): Promise<ProviderModelsResult> {
+  return parseProviderModels(await apiClient.post(
+    '/me/ai/providers/probe/models',
+    serializeProbe(input),
     { retryCount: 0 },
   ))
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import AiMemoryPanel from '../components/AiMemoryPanel.vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -7,13 +8,14 @@ import LoadingState from '../components/LoadingState.vue'
 import {
   createPersonalProvider,
   deletePersonalProvider,
-  fetchPersonalProviderModels,
   listPersonalProviders,
-  testPersonalProvider,
+  probePersonalProvider,
+  probePersonalProviderModels,
   updatePersonalProvider,
   type AiProvider,
   type ProviderCreateInput,
   type ProviderPatchInput,
+  type ProviderProbeInput,
   type ProviderTestResult,
 } from '../api/personal-ai'
 import '../ai-admin.css'
@@ -78,14 +80,16 @@ function openEdit(provider: AiProvider): void {
   formOpen.value = true
 }
 
-async function loadFormModels(): Promise<void> {
-  const provider = editingProvider.value
-  if (!provider || formModelsLoading.value) return
+async function loadFormModels(input: ProviderProbeInput): Promise<void> {
+  if (formModelsLoading.value) return
   formModelsLoading.value = true
   formModelError.value = null
   try {
-    const result = await fetchPersonalProviderModels(provider.id)
+    const result = await probePersonalProviderModels(input)
     formModels.value = result.success ? result.models : []
+    if (!result.success) {
+      toast.error('获取模型失败', '检查 Base URL 和 API Key 后重试。')
+    }
   } catch (error) {
     formModels.value = []
     formModelError.value = error
@@ -94,20 +98,19 @@ async function loadFormModels(): Promise<void> {
   }
 }
 
-async function testFormProvider(): Promise<void> {
-  const provider = editingProvider.value
-  if (!provider || formTestLoading.value) return
+async function testFormProvider(input: ProviderProbeInput): Promise<void> {
+  if (formTestLoading.value) return
   formTestLoading.value = true
   formTestResult.value = null
   try {
-    const result = await testPersonalProvider(provider.id)
+    const result = await probePersonalProvider(input)
     formTestResult.value = result
     if (result.success) {
       toast.success('连接成功', result.latencyMs === null ? undefined : `响应耗时 ${result.latencyMs} ms。`)
+      if (result.models.length) formModels.value = result.models
     } else {
       toast.error('连接未通过', '检查接口地址、模型 ID 和 API Key 后重试。')
     }
-    await load()
   } catch (error) {
     saveError.value = error
   } finally {
@@ -297,6 +300,8 @@ onMounted(() => {
         </div>
       </section>
 
+      <AiMemoryPanel />
+
       <ErrorNotice v-if="operationError" :error="operationError" :show-retry="false" />
 
       <section v-if="deleteTarget" class="alert alert-warning" role="alertdialog" aria-labelledby="delete-provider-title">
@@ -330,7 +335,7 @@ onMounted(() => {
         </div>
         <div>
           <h3>建议顺序</h3>
-          <p class="field-hint">先保存配置，再在弹窗里测试连接，最后获取模型列表选择模型 ID。</p>
+          <p class="field-hint">先填好地址和 Key，在同一弹窗里获取模型、测试连接，再保存配置。</p>
         </div>
       </div>
     </aside>
@@ -342,7 +347,7 @@ onMounted(() => {
           :provider="editingProvider"
           :saving="saving"
           :error="saveError"
-          :can-fetch-models="Boolean(editingProvider)"
+          :can-fetch-models="true"
           :model-options="formModels"
           :model-loading="formModelsLoading"
           :model-error="formModelError"
