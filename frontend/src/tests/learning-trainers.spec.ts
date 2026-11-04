@@ -71,9 +71,9 @@ describe('FlashcardTrainer', () => {
     expect(wrapper.html()).not.toContain('She is probably right.')
   })
 
-  it('reveals the back only after the flip button is pressed', async () => {
+  it('reveals the back only after the card is pressed', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card').trigger('click')
 
     expect(wrapper.text()).toContain('很可能')
     expect(wrapper.emitted('reveal')).toHaveLength(1)
@@ -82,12 +82,15 @@ describe('FlashcardTrainer', () => {
   it('offers no rating buttons before the flip, so a rating cannot be guessed', () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
     const labels = wrapper.findAll('[role="button"]').map((button) => button.text())
-    expect(labels).toEqual(['翻到背面'])
+    expect(labels.some((label) => label.includes('无印象'))).toBe(false)
+    expect(labels.some((label) => label.includes('有印象'))).toBe(false)
+    expect(labels.some((label) => label.includes('已记住'))).toBe(false)
+    expect(wrapper.get('.study-card').attributes('role')).toBe('button')
   })
 
   it('emits both documented ratings after the flip', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card').trigger('click')
 
     const buttons = wrapper.findAll('[role="button"]')
     const again = buttons.find((button) => button.text() === '无印象')
@@ -101,7 +104,7 @@ describe('FlashcardTrainer', () => {
 
   it('emits master for the "already known" path', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card').trigger('click')
     const master = wrapper.findAll('[role="button"]').find((button) => button.text() === '已记住')
     await master!.trigger('click')
     expect(wrapper.emitted('master')).toHaveLength(1)
@@ -109,7 +112,7 @@ describe('FlashcardTrainer', () => {
 
   it('re-hides the back when the question changes', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() } })
-    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card').trigger('click')
     expect(wrapper.text()).toContain('很可能')
 
     await wrapper.setProps({ question: flashcard({ questionId: 'q-9', front: 'seldom', back: '很少' }) })
@@ -119,7 +122,7 @@ describe('FlashcardTrainer', () => {
 
   it('moves focus to the next card so keyboard users are not stranded', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard() }, attachTo: document.body })
-    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card').trigger('click')
     // Flipping unmounts the button, so focus must move to the revealed answer.
     expect(document.activeElement).toBe(wrapper.get('.study-card__back').element)
 
@@ -134,7 +137,7 @@ describe('FlashcardTrainer', () => {
 
   it('blocks rating while disabled', async () => {
     const wrapper = mount(FlashcardTrainer, { props: { question: flashcard(), disabled: true } })
-    await wrapper.get('[role="button"].study-card__flip').trigger('click')
+    await wrapper.get('[role="button"].study-card').trigger('click')
     const good = wrapper.findAll('[role="button"]').find((button) => button.text() === '有印象')
     expect(good!.attributes('aria-disabled')).toBeDefined()
     await good!.trigger('click')

@@ -27,6 +27,8 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
 
 <template>
   <section class="practice-result" aria-labelledby="practice-result-title">
+    <div class="practice-result__layout">
+    <aside class="practice-result__aside">
     <header class="practice-result__hero">
       <div>
         <p class="eyebrow">练习结果</p>
@@ -42,6 +44,9 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
       <div><strong>{{ submittedAtLabel }}</strong><span>提交时间</span></div>
     </section>
 
+    </aside>
+
+    <div class="practice-result__answers">
     <p v-if="result.errorCode" class="alert alert-warning">
       <strong>评分没有完成</strong>
       <span>请稍后重试；本次结果不会显示默认分数。</span>
@@ -92,5 +97,7 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
         </div>
       </section>
     </article>
+    </div>
+    </div>
   </section>
 </template>

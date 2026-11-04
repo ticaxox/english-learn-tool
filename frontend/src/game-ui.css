@@ -3994,3 +3994,57 @@
 .personal-workspace .coach-history-dialog .coach-conversation { padding: 10px 12px; }
 .personal-workspace .coach-history-dialog .coach-conversation__title { color: var(--ui-ink); }
 .personal-workspace .coach-history-dialog .coach-conversation__meta { color: var(--ui-muted); }
+
+/* Flashcard: click the card to flip; the back splits word and meaning; ratings live outside. */
+.memory-main-card .study-card:not(.is-revealed) { cursor: pointer; }
+.memory-main-card .study-card__face { display: grid; gap: 1rem; }
+.memory-main-card .study-card__word-block { display: grid; gap: 0.35rem; justify-items: center; }
+.memory-main-card .study-card.is-revealed .study-card__face {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 28px;
+  align-items: center;
+}
+.memory-main-card .study-card.is-revealed .study-card__word-block {
+  padding-right: 28px;
+  border-right: 1px solid var(--ui-line);
+}
+.memory-main-card .study-card__back { display: grid; gap: 8px; }
+.memory-main-card .study-card__rating { justify-content: center; margin-top: 6px; }
+
+/* Choice: heavier labels, wider columns. */
+.memory-main-card .choice-list { gap: 18px 32px; }
+.memory-main-card .choice-list--words .choice-option__label { font-weight: 900; }
+
+/* Waiting card copy is centred. */
+.personal-workspace .practice-generation-panel { text-align: center; }
+.personal-workspace .practice-generation-panel .button-row { justify-content: center; }
+
+/* Result: answers on the left, score and stats on the right. */
+.personal-workspace .practice-result__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 14px 20px;
+  align-items: start;
+}
+.personal-workspace .practice-result__aside { display: grid; grid-column: 2; grid-row: 1; gap: 14px; align-content: start; }
+.personal-workspace .practice-result__hero { flex-direction: column; align-items: flex-start; gap: 8px; }
+.personal-workspace .practice-result__score { white-space: nowrap; }
+.personal-workspace .practice-result__aside .practice-result__summary { grid-template-columns: minmax(0, 1fr); }
+.personal-workspace .practice-result__answers { display: grid; grid-column: 1; grid-row: 1; gap: 14px; }
+
+@media (max-width: 980px) {
+  .personal-workspace .practice-result__layout { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .practice-result__aside,
+  .personal-workspace .practice-result__answers { grid-column: 1; grid-row: auto; }
+  .personal-workspace .practice-result__aside { order: -1; }
+}
+
+/* In a session the study card is the only surface; rating actions sit on the page. */
+.personal-workspace .memory-workbench-grid.is-session .memory-main-card {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .memory-main-card .choice-list { gap: 18px 32px; }

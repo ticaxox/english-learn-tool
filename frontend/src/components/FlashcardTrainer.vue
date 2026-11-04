@@ -56,50 +56,57 @@ function rate(rating: FlashcardRating): void {
 </script>
 
 <template>
-  <section class="study-card" aria-labelledby="flashcard-front">
+  <section
+    class="study-card"
+    :class="{ 'is-revealed': revealed }"
+    :aria-labelledby="revealed ? 'flashcard-back' : 'flashcard-front'"
+    :role="revealed ? undefined : 'button'"
+    :tabindex="revealed ? undefined : 0"
+    @click="flip"
+    @keydown.enter.prevent="flip"
+    @keydown.space.prevent="flip"
+  >
     <p class="study-card__meta">
       <span class="study-badge">翻卡</span>
       <span>剩余 {{ props.question.remaining }} 张</span>
     </p>
 
-    <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>
-    <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
+    <div class="study-card__face">
+      <div class="study-card__word-block">
+        <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>
+        <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
+      </div>
 
-    <!--
-      Flipping stays available while a submission is in flight: blocking it would
-      leave the learner staring at a card whose answer they already know. Only
-      the rating actions are gated by `disabled`.
-    -->
-    <DivButton
-      v-if="!revealed"
-      class="button study-card__flip"
-      type="button"
-      @click="flip"
-    >
-      翻到背面
-    </DivButton>
-
-    <div v-else ref="backRegion" class="study-card__back" aria-live="polite" tabindex="-1">
-      <p v-if="props.question.partOfSpeech" class="study-card__phonetic">{{ props.question.partOfSpeech }}</p>
-      <p v-if="props.question.back" class="study-card__definition">{{ props.question.back }}</p>
-      <p v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</p>
-      <p v-if="props.question.example" class="study-card__example">{{ props.question.example }}</p>
-      <div class="button-row">
-        <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('again')">
-          无印象
-        </DivButton>
-        <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('good')">
-          有印象
-        </DivButton>
-        <DivButton
-          class="button-secondary"
-          type="button"
-          :disabled="props.disabled"
-          @click="emit('master')"
-        >
-          已记住
-        </DivButton>
+      <div
+        v-if="revealed"
+        id="flashcard-back"
+        ref="backRegion"
+        class="study-card__back"
+        aria-live="polite"
+        tabindex="-1"
+      >
+        <p v-if="props.question.partOfSpeech" class="study-card__phonetic">{{ props.question.partOfSpeech }}</p>
+        <p v-if="props.question.back" class="study-card__definition">{{ props.question.back }}</p>
+        <p v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</p>
+        <p v-if="props.question.example" class="study-card__example">{{ props.question.example }}</p>
       </div>
     </div>
   </section>
+
+  <div v-if="revealed" class="button-row study-card__rating">
+    <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('again')">
+      无印象
+    </DivButton>
+    <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('good')">
+      有印象
+    </DivButton>
+    <DivButton
+      class="button-secondary"
+      type="button"
+      :disabled="props.disabled"
+      @click="emit('master')"
+    >
+      已记住
+    </DivButton>
+  </div>
 </template>
