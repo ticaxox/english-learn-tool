@@ -25,7 +25,13 @@ from app.models.identity import User, UserProfile
 from app.models.learning import DailyPlan, MistakeFlag
 from app.models.practice import PracticeGeneration, PracticeSession
 from app.models.wordbooks import Wordbook, WordbookActivation, WordbookEntry
-from app.schemas.ai_tasks import CoachAction, CoachReplyContext, CoachReplyOutput, CoachReplyRequest
+from app.schemas.ai_tasks import (
+    CoachAction,
+    CoachHistoryTurn,
+    CoachReplyContext,
+    CoachReplyOutput,
+    CoachReplyRequest,
+)
 from app.schemas.coach import (
     CoachAcceptedResponse,
     CoachActionReceiptResponse,
@@ -397,6 +403,28 @@ async def create_coach_message(
             stream_url=f"{settings.api_v1_prefix}/coach/streams/{assistant.id}",
         )
 
+    context_cutoff = utcnow() - timedelta(hours=settings.coach_context_expire_hours)
+    history_rows = list(
+        (
+            await session.scalars(
+                select(CoachMessage)
+                .where(
+                    CoachMessage.conversation_id == conversation.id,
+                    CoachMessage.status == "completed",
+                    CoachMessage.content.is_not(None),
+                    CoachMessage.created_at >= context_cutoff,
+                )
+                .order_by(CoachMessage.created_at.desc(), CoachMessage.sequence.desc())
+                .limit(12)
+            )
+        ).all()
+    )
+    history = [
+        CoachHistoryTurn(role=row.role, content=row.content[:4000])
+        for row in reversed(history_rows)
+        if row.content
+    ]
+
     last_sequence = int(
         await session.scalar(
             select(func.coalesce(func.max(CoachMessage.sequence), 0)).where(
@@ -440,6 +468,7 @@ async def create_coach_message(
         context=CoachReplyContext(
             user_message=content,
             learning_summary={"page_context": context},
+            history=history,
             conversation_id=conversation.id,
             message_id=assistant.id,
             page_context=context,

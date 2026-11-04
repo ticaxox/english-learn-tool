@@ -192,18 +192,12 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
     }
   }
 
-  async function answerChoice(questionId: string, optionId: string): Promise<void> {
-    const result = await submit({ kind: 'choice-answer', questionId, optionId, elapsedMs: elapsedMs() })
-    if (result) {
-      await advanceAfterFeedback(result)
-    }
+  async function answerChoice(questionId: string, optionId: string): Promise<StudyFeedback | null> {
+    return submit({ kind: 'choice-answer', questionId, optionId, elapsedMs: elapsedMs() })
   }
 
-  async function answerSpelling(questionId: string, answer: string): Promise<void> {
-    const result = await submit({ kind: 'spelling-answer', questionId, answer, elapsedMs: elapsedMs() })
-    if (result) {
-      await advanceAfterFeedback(result)
-    }
+  async function answerSpelling(questionId: string, answer: string): Promise<StudyFeedback | null> {
+    return submit({ kind: 'spelling-answer', questionId, answer, elapsedMs: elapsedMs() })
   }
 
   /**
@@ -222,6 +216,13 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
    * Move to the next server-provided card. The frontend never decides that the
    * queue is empty on its own: `remaining === 0` and an empty read end it.
    */
+  /** Continue after a paused (wrong) answer: move on using the last server feedback. */
+  async function advance(): Promise<void> {
+    if (feedback.value) {
+      await advanceAfterFeedback(feedback.value)
+    }
+  }
+
   async function advanceAfterFeedback(result: StudyFeedback): Promise<void> {
     if (result.remaining <= 0) {
       finished.value = true
@@ -273,6 +274,7 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
     rateFlashcard,
     answerChoice,
     answerSpelling,
+    advance,
     markMastered,
     endSession,
     reset,

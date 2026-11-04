@@ -71,9 +71,15 @@ class SubjectiveGradingContext(StrictModel):
     items: list[BatchGradingItemContext] = Field(default_factory=list, max_length=20)
 
 
+class CoachHistoryTurn(StrictModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=4_000)
+
+
 class CoachReplyContext(StrictModel):
     user_message: str = Field(min_length=1, max_length=8_000)
     learning_summary: dict[str, Any] = Field(default_factory=dict)
+    history: list[CoachHistoryTurn] = Field(default_factory=list, max_length=20)
     conversation_id: UUID | None = None
     message_id: UUID | None = None
     page_context: dict[str, Any] = Field(default_factory=dict)

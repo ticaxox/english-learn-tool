@@ -26,6 +26,8 @@ function card(remaining = 3): StudyQuestion {
 function feedback(remaining: number, requeued = false): StudyFeedback {
   return {
     headline: '服务端已记录',
+    gradedCorrect: null,
+    correctAnswer: null,
     detail: null,
     removed: false,
     requeued,
@@ -222,6 +224,21 @@ describe('memory session orchestration', () => {
     const [, event] = api.submit.mock.calls[0]
     expect(event).toMatchObject({ kind: 'choice-answer', questionId: 'q-9', optionId: 'o-3' })
     expect(JSON.stringify(event)).not.toMatch(/correct|answer_key|is_right/)
+  })
+
+
+  it('returns a wrong verdict without advancing, then advances on continue', async () => {
+    const api = makeApi()
+    api.submit.mockResolvedValueOnce({ ...feedback(2), gradedCorrect: false, correctAnswer: 'probably' })
+    const session = useMemorySession({ api })
+    await session.open('choice')
+
+    const result = await session.answerChoice('q-1', 'o-1')
+    expect(result?.gradedCorrect).toBe(false)
+    expect(api.loadQuestion).toHaveBeenCalledTimes(1)
+
+    await session.advance()
+    expect(api.loadQuestion).toHaveBeenCalledTimes(2)
   })
 
   it('sends the spelling answer verbatim for the server to grade', async () => {

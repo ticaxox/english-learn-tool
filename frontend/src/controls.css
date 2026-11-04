@@ -1193,3 +1193,17 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Four options share one row and stretch with the question column. */
+.personal-workspace .practice-options--four { flex-wrap: nowrap; gap: 12px; }
+
+.personal-workspace .practice-options--four .practice-option-unit {
+  flex: 1 1 0;
+  max-width: none;
+  min-width: 0;
+}
+
+@media (max-width: 980px) {
+  .personal-workspace .practice-options--four { flex-wrap: wrap; }
+  .personal-workspace .practice-options--four .practice-option-unit { flex: 1 1 45%; }
+}

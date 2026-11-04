@@ -1471,7 +1471,7 @@
     right: 0;
     bottom: 0;
     left: auto;
-    width: min(420px, calc(100vw - 212px));
+    width: min(460px, calc(100vw - 212px));
     height: 100vh;
     border: 0;
     border-left: 2px solid var(--ui-line-strong);
@@ -1492,10 +1492,10 @@
 
 /* Wide screens dock the coach: the page narrows instead of being covered. */
 @media (min-width: 1181px) {
-  .personal-workspace .ia-coach-panel { width: 400px; }
+  .personal-workspace .ia-coach-panel { width: 460px; }
 
   .personal-workspace.is-coach-open .workspace-main {
-    margin-right: 400px;
+    margin-right: 460px;
     transition: margin-right 180ms ease;
   }
 
@@ -1505,7 +1505,7 @@
 }
 
 @media (min-width: 861px) and (max-width: 1180px) {
-  .personal-workspace .ia-coach-panel { width: min(420px, calc(100vw - 212px)); }
+  .personal-workspace .ia-coach-panel { width: min(460px, calc(100vw - 212px)); }
   .personal-workspace.is-coach-open .workspace-main { margin-right: 0; }
 }
 
@@ -4108,4 +4108,80 @@
   width: 100%;
   max-width: none;
   margin-inline: 0;
+}
+
+/* Wrong-answer detail: the word, its sound and meaning, then continue. */
+.personal-workspace .memory-wrong-detail {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 32px 28px;
+  text-align: center;
+}
+
+.personal-workspace .memory-wrong-detail h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+}
+
+.personal-workspace .memory-wrong-detail .memory-wrong-detail__phonetic {
+  margin: 0;
+  color: var(--ui-muted);
+  font-family: var(--font-code, monospace);
+  font-size: 0.95rem;
+}
+
+.personal-workspace .memory-wrong-detail .memory-wrong-detail__meaning {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+
+/* Meta lines sit above the study card; the card keeps a roomier height. */
+.study-meta-line {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 10px;
+  color: var(--ui-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.memory-main-card .study-card {
+  min-height: 240px;
+  align-content: center;
+}
+
+/* Back of the card: no divider between word and meaning; one line under them. */
+.memory-main-card .study-card.is-revealed .study-card__word-block {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.personal-workspace .memory-main-card .study-card__face > .study-card__example {
+  width: 100%;
+  margin: 0 !important;
+  padding: 14px 0 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--ui-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  text-align: left;
+}
+
+/* Four practice options stay on one row and stretch. */
+.personal-workspace .practice-options--four { flex-wrap: nowrap; gap: 12px; }
+
+.personal-workspace .practice-options--four .practice-option-unit {
+  flex: 1 1 0;
+  max-width: none;
+  min-width: 0;
+}
+
+@media (max-width: 980px) {
+  .personal-workspace .practice-options--four { flex-wrap: wrap; }
+  .personal-workspace .practice-options--four .practice-option-unit { flex: 1 1 45%; }
 }

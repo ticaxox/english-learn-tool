@@ -5,9 +5,11 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from app.models.coach import CoachMessage
+from app.models.ai import AiJob
+from app.models.coach import CoachConversation, CoachMessage
 from app.models.identity import UserProfile
 from app.services.ai_jobs import process_ai_job
+from app.services.auth import utcnow
 from app.services.coach import cleanup_coach_data
 from tests.ai_support import create_provider, fake_provider_server, login
 
@@ -40,6 +42,62 @@ async def _create_message(
     )
     assert response.status_code == 202, response.text
     return response.json()
+
+
+async def test_coach_context_drops_history_older_than_expiry(client, app, member_user):
+    headers = await login(client, member_user.username)
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        created = await client.post(
+            "/api/v1/coach/conversations",
+            headers=headers,
+            json={"title": "上下文窗口"},
+        )
+        conversation_id = UUID(created.json()["id"])
+
+        now = utcnow()
+        async with app.state.session_factory() as session:
+            conversation = await session.get(CoachConversation, conversation_id)
+            assert conversation is not None
+            session.add_all(
+                [
+                    CoachMessage(
+                        conversation_id=conversation_id,
+                        user_id=member_user.id,
+                        role="user",
+                        content="已经过期的旧问题",
+                        status="completed",
+                        sequence=1,
+                        created_at=now - timedelta(days=2),
+                        completed_at=now - timedelta(days=2),
+                    ),
+                    CoachMessage(
+                        conversation_id=conversation_id,
+                        user_id=member_user.id,
+                        role="assistant",
+                        content="仍然有效的最近回答",
+                        status="completed",
+                        sequence=2,
+                        created_at=now - timedelta(hours=1),
+                        completed_at=now - timedelta(hours=1),
+                    ),
+                ]
+            )
+            conversation.message_count += 2
+            await session.commit()
+
+        accepted = await _create_message(
+            client, headers, str(conversation_id), "ctx-key-1", "新的问题"
+        )
+        async with app.state.session_factory() as session:
+            message = await session.get(CoachMessage, UUID(accepted["message_id"]))
+            assert message is not None and message.ai_job_id is not None
+            job = await session.get(AiJob, message.ai_job_id)
+
+        history = job.input_context["history"]
+        joined = " ".join(turn["content"] for turn in history)
+        assert "仍然有效的最近回答" in joined
+        assert "已经过期的旧问题" not in joined
 
 
 async def test_coach_message_sse_actions_undo_and_idempotency(client, app, member_user):

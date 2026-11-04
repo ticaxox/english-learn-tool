@@ -634,6 +634,8 @@ export function parseStudyFeedback(payload: unknown): StudyFeedback {
 
   return {
     headline,
+    gradedCorrect: gradedCorrect === true ? true : gradedCorrect === false ? false : null,
+    correctAnswer,
     detail: gradedCorrect === false && correctAnswer ? `正确答案：${correctAnswer}` : null,
     removed: itemCompleted,
     requeued: !itemCompleted && !sessionCompleted,

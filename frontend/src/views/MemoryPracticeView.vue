@@ -138,14 +138,47 @@ async function rateFlashcard(questionId: string, rating: 'again' | 'good'): Prom
   heartbeat.markInteraction()
 }
 
+interface WrongCard {
+  word: string
+  phonetic: string | null
+  meaning: string
+}
+
+const wrongCard = ref<WrongCard | null>(null)
+
 async function answerChoice(questionId: string, optionId: string): Promise<void> {
-  await session.answerChoice(questionId, optionId)
+  const question = session.question.value
+  const feedback = await session.answerChoice(questionId, optionId)
   heartbeat.markInteraction()
+  if (feedback?.gradedCorrect === false) {
+    wrongCard.value = {
+      word: feedback.correctAnswer ?? '',
+      phonetic: question?.kind === 'choice' ? question.phonetic : null,
+      meaning: question?.kind === 'choice' ? question.prompt : '',
+    }
+    return
+  }
+  if (feedback) await session.advance()
 }
 
 async function answerSpelling(questionId: string, answer: string): Promise<void> {
-  await session.answerSpelling(questionId, answer)
+  const question = session.question.value
+  const feedback = await session.answerSpelling(questionId, answer)
   heartbeat.markInteraction()
+  if (feedback?.gradedCorrect === false) {
+    wrongCard.value = {
+      word: feedback.correctAnswer ?? '',
+      phonetic: question?.kind === 'spelling' ? question.phonetic : null,
+      meaning: question?.kind === 'spelling' ? question.definition : '',
+    }
+    return
+  }
+  if (feedback) await session.advance()
+}
+
+async function continueAfterWrong(): Promise<void> {
+  wrongCard.value = null
+  await session.advance()
 }
 
 async function master(questionId: string): Promise<void> {
@@ -179,6 +212,7 @@ async function confirmEndSession(): Promise<void> {
 }
 
 function restart(): void {
+  wrongCard.value = null
   session.reset()
   heartbeat.stop()
   timer.reset()
@@ -322,6 +356,14 @@ watch(challengeModule, async (module, previous) => {
 
 
         <LoadingState v-if="session.busy.value && !session.question.value" label="正在提交…" />
+
+        <section v-if="wrongCard" class="workspace-card memory-wrong-detail" aria-live="polite">
+          <p class="eyebrow">答错了</p>
+          <h2>{{ wrongCard.word }}</h2>
+          <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
+          <p class="memory-wrong-detail__meaning">{{ wrongCard.meaning }}</p>
+          <DivButton class="button" type="button" @click="continueAfterWrong">继续</DivButton>
+        </section>
 
         <FlashcardTrainer
           v-else-if="session.question.value?.kind === 'flashcard'"

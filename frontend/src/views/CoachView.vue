@@ -11,11 +11,6 @@ import '../coach.css'
 
 const coach = useCoachWorkspace()
 const draft = ref('')
-const newTitle = ref('')
-const showCreate = ref(false)
-const historyOpen = ref(false)
-const renameId = ref<string | null>(null)
-const renameTitle = ref('')
 const composer = ref<HTMLTextAreaElement | null>(null)
 const messageArea = ref<HTMLElement | null>(null)
 const suggestedPrompts = [
@@ -76,31 +71,9 @@ async function scrollToBottom(): Promise<void> {
   if (messageArea.value) messageArea.value.scrollTop = messageArea.value.scrollHeight
 }
 
-async function selectConversation(conversationId: string): Promise<void> {
-  renameId.value = null
-  await coach.selectConversation(conversationId)
-  await focusComposer()
-}
-
-async function createConversation(): Promise<void> {
-  const title = newTitle.value.trim()
-  const created = await coach.createConversation(title || undefined)
-  if (created) {
-    newTitle.value = ''
-    showCreate.value = false
-    await focusComposer()
-  }
-}
-
-function beginRename(conversationId: string, title: string): void {
-  renameId.value = conversationId
-  renameTitle.value = title
-}
-
-async function saveRename(): Promise<void> {
-  if (!renameId.value) return
-  const saved = await coach.renameConversation(renameId.value, renameTitle.value)
-  if (saved) renameId.value = null
+async function startConversation(): Promise<void> {
+  const created = await coach.createConversation()
+  if (created) await focusComposer()
 }
 
 async function clearConversation(): Promise<void> {
@@ -108,11 +81,6 @@ async function clearConversation(): Promise<void> {
   if (!conversation) return
   if (!window.confirm(`确认清空“${conversation.title}”的全部消息？对话标题会保留。`)) return
   await coach.removeConversation(conversation.id, true)
-}
-
-async function deleteConversation(conversationId: string, title: string): Promise<void> {
-  if (!window.confirm(`确认删除对话“${title}”？删除后无法恢复。`)) return
-  await coach.removeConversation(conversationId, false)
 }
 
 async function submitMessage(): Promise<void> {
@@ -173,93 +141,15 @@ onBeforeUnmount(() => {
 
     <div class="coach-main-topbar">
       <DivButton
-        class="button-secondary button-small coach-history-toggle"
+        class="button-secondary button-small coach-clear-toggle"
         type="button"
-        :aria-expanded="historyOpen"
-        @click="historyOpen = !historyOpen"
+        @click="clearConversation"
       >
-        历史对话
+        清空聊天记录
       </DivButton>
     </div>
 
     <div class="coach-layout">
-      <div v-if="historyOpen" class="coach-history-backdrop" @click.self="historyOpen = false">
-      <aside class="panel coach-sidebar coach-history-dialog" role="dialog" aria-modal="true" aria-labelledby="coach-history-title">
-        <div class="coach-sidebar__heading">
-          <div>
-            <p class="eyebrow">对话</p>
-            <h2 id="coach-history-title">长期对话</h2>
-          </div>
-          <div class="coach-history-dialog__actions">
-            <DivButton class="button-secondary button-small" type="button" @click="showCreate = !showCreate">
-              新建
-            </DivButton>
-            <DivButton class="button-secondary button-small" type="button" @click="historyOpen = false">
-              关闭
-            </DivButton>
-          </div>
-        </div>
-
-        <form v-if="showCreate" class="coach-create" @submit.prevent="createConversation">
-          <label class="field">
-            <span>对话标题（可留空）</span>
-            <input v-model="newTitle" maxlength="200" placeholder="例如：本周学习计划" />
-          </label>
-          <div class="button-row">
-            <DivButton class="button button-small" type="submit">创建对话</DivButton>
-            <DivButton class="button-secondary button-small" type="button" @click="showCreate = false">取消</DivButton>
-          </div>
-        </form>
-
-        <LoadingState v-if="coach.conversationsLoading.value && coach.conversations.value.length === 0" label="正在加载对话…" />
-        <ErrorNotice
-          v-else-if="coach.conversationsError.value"
-          :error="coach.conversationsError.value"
-          retry-label="重新读取会话"
-          @retry="coach.loadConversations(true)"
-        />
-
-        <div v-else-if="coach.conversations.value.length === 0" class="coach-sidebar-empty">
-          <p>还没有长期对话。</p>
-          <p class="field-hint">有需要时，随时回来继续。</p>
-        </div>
-
-        <div role="list" v-else class="coach-conversation-list">
-          <div role="listitem" v-for="conversation in coach.conversations.value" :key="conversation.id">
-            <DivButton
-              class="coach-conversation"
-              :class="{ 'coach-conversation--active': conversation.id === coach.selectedConversationId.value }"
-              type="button"
-              @click="selectConversation(conversation.id)"
-            >
-              <span class="coach-conversation__title">{{ conversation.title }}</span>
-              <span class="coach-conversation__meta">{{ conversation.messageCount }} 条消息 · {{ formatTime(conversation.lastMessageAt) }}</span>
-            </DivButton>
-            <div class="coach-conversation__actions">
-              <DivButton class="link-button" type="button" @click="beginRename(conversation.id, conversation.title)">改名</DivButton>
-              <DivButton class="link-button" type="button" @click="selectConversation(conversation.id).then(clearConversation)">清空</DivButton>
-              <DivButton class="link-button link-button--danger" type="button" @click="deleteConversation(conversation.id, conversation.title)">删除</DivButton>
-            </div>
-            <form v-if="renameId === conversation.id" class="coach-rename" @submit.prevent="saveRename">
-              <input v-model="renameTitle" maxlength="200" aria-label="新对话标题" />
-              <DivButton class="button button-small" type="submit">保存</DivButton>
-              <DivButton class="button-secondary button-small" type="button" @click="renameId = null">取消</DivButton>
-            </form>
-          </div>
-        </div>
-
-        <DivButton
-          v-if="coach.conversationsHasMore.value"
-          class="button-secondary button-small coach-load-more"
-          type="button"
-          :disabled="coach.conversationsLoading.value"
-          @click="coach.loadMoreConversations()"
-        >
-          加载更多会话
-        </DivButton>
-      </aside>
-      </div>
-
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
@@ -269,7 +159,7 @@ onBeforeUnmount(() => {
           <div class="coach-suggested-prompts" aria-label="建议提问">
             <DivButton v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</DivButton>
           </div>
-          <DivButton class="button member-primary-button" type="button" @click="showCreate = true">开始对话 <AppIcon name="arrow" /></DivButton>
+          <DivButton class="button member-primary-button" type="button" @click="startConversation">开始对话 <AppIcon name="arrow" /></DivButton>
         </div>
 
         <template v-else>
@@ -279,18 +169,7 @@ onBeforeUnmount(() => {
               <h2>{{ coach.selectedConversation.value.title }}</h2>
               <p class="field-hint">{{ coach.selectedConversation.value.messageCount }} 条消息 · 只对当前账号可见</p>
             </div>
-            <div class="button-row">
-              <DivButton class="button-secondary button-small" type="button" @click="beginRename(coach.selectedConversation.value.id, coach.selectedConversation.value.title)">改名</DivButton>
-              <DivButton class="button-secondary button-small" type="button" @click="clearConversation">清空</DivButton>
-            </div>
           </header>
-
-          <form v-if="renameId === coach.selectedConversation.value.id" class="coach-rename coach-rename--main" @submit.prevent="saveRename">
-            <input v-model="renameTitle" maxlength="200" aria-label="新对话标题" />
-            <DivButton class="button button-small" type="submit">保存</DivButton>
-            <DivButton class="button-secondary button-small" type="button" @click="renameId = null">取消</DivButton>
-          </form>
-
 
           <ErrorNotice
             v-if="coach.messagesError.value"

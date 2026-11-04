@@ -56,6 +56,11 @@ function rate(rating: FlashcardRating): void {
 </script>
 
 <template>
+  <p class="study-meta-line">
+    <span class="study-badge">翻卡</span>
+    <span>剩余 {{ props.question.remaining }} 张</span>
+  </p>
+
   <section
     class="study-card"
     :class="{ 'is-revealed': revealed }"
@@ -66,11 +71,6 @@ function rate(rating: FlashcardRating): void {
     @keydown.enter.prevent="flip"
     @keydown.space.prevent="flip"
   >
-    <p class="study-card__meta">
-      <span class="study-badge">翻卡</span>
-      <span>剩余 {{ props.question.remaining }} 张</span>
-    </p>
-
     <div class="study-card__face">
       <div class="study-card__word-block">
         <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>

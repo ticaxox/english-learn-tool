@@ -90,17 +90,6 @@ describe('coach view', () => {
     expect(wrapper.get('.coach-receipt').text()).toContain('撤销这次调整')
   })
 
-  it('creates a conversation from the sidebar', async () => {
-    const wrapper = await mountView()
-    await wrapper.get('.coach-history-toggle').trigger('click')
-    await wrapper.findAll('[role="button"]').find((button) => button.text() === '新建')!.trigger('click')
-    await wrapper.get('.coach-create input').setValue('阅读训练')
-    await wrapper.get('form.coach-create').trigger('submit')
-    await flushPromises()
-    expect(coachMocks.createCoachConversation).toHaveBeenCalledWith('阅读训练')
-    expect(wrapper.text()).toContain('阅读训练')
-  })
-
   it('sends on Enter and displays the final server reply and usage', async () => {
     coachMocks.listCoachMessages.mockResolvedValue({ items: [], nextCursor: null, hasMore: false })
     const wrapper = await mountView()
@@ -117,18 +106,13 @@ describe('coach view', () => {
     expect(wrapper.text()).not.toContain('本次可用')
   })
 
-  it('requires confirmation and distinguishes clear from delete', async () => {
+  it('clears the chat after confirmation', async () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const wrapper = await mountView()
-    await wrapper.get('.coach-history-toggle').trigger('click')
-    await wrapper.findAll('[role="button"]').find((button) => button.text() === '清空')!.trigger('click')
+    await wrapper.get('.coach-clear-toggle').trigger('click')
     await flushPromises()
     expect(coachMocks.deleteCoachConversation).toHaveBeenCalledWith('conversation-1', true)
-
-    await wrapper.findAll('[role="button"]').find((button) => button.text() === '删除')!.trigger('click')
-    await flushPromises()
-    expect(coachMocks.deleteCoachConversation).toHaveBeenCalledWith('conversation-1', false)
-    expect(confirm).toHaveBeenCalledTimes(2)
+    expect(confirm).toHaveBeenCalledTimes(1)
   })
 
   it('undoes an action only after the server confirms', async () => {

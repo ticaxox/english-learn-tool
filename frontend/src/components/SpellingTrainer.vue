@@ -30,6 +30,14 @@ watch(
 )
 
 const canSubmit = computed(() => grid.complete.value && !props.disabled)
+
+// Filling the last letter is the answer: no separate submit button.
+watch(
+  () => grid.complete.value,
+  (done) => {
+    if (done && !props.disabled) submit()
+  },
+)
 const blankLabel = computed(() =>
   props.question.blankType ? SPELLING_BLANK_LABELS[props.question.blankType] : '按提示拼写',
 )
@@ -144,12 +152,13 @@ function submit(): void {
 </script>
 
 <template>
+  <p class="study-meta-line">
+    <span class="study-badge">拼写</span>
+    <span>{{ blankLabel }}</span>
+    <span>剩余 {{ props.question.remaining }} 张</span>
+  </p>
+
   <section class="study-card" aria-labelledby="spelling-definition">
-    <p class="study-card__meta">
-      <span class="study-badge">拼写</span>
-      <span>{{ blankLabel }}</span>
-      <span>剩余 {{ props.question.remaining }} 张</span>
-    </p>
 
     <h2 id="spelling-definition" class="study-card__prompt" tabindex="-1">{{ props.question.definition }}</h2>
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
@@ -182,10 +191,6 @@ function submit(): void {
           @focus="handleFocus(blank.index)"
         />
       </template>
-    </div>
-
-    <div class="button-row">
-      <DivButton class="button" type="button" :disabled="!canSubmit" @click="submit">提交拼写</DivButton>
     </div>
   </section>
 </template>

@@ -259,7 +259,6 @@ onMounted(() => {
           <p class="field-hint">今日地图只会使用勾选的题型和学习方式，至少各保留一项。</p>
           <div class="settings-choice-row">
             <div class="settings-choice-block">
-              <span class="field-label">学习方式</span>
               <div class="settings-choice-grid">
                 <DivButton
                   v-for="option in DRILL_MODE_OPTIONS"
@@ -275,7 +274,6 @@ onMounted(() => {
               </div>
             </div>
             <div class="settings-choice-block">
-              <span class="field-label">练习题型</span>
               <div class="settings-choice-grid">
                 <DivButton
                   v-for="option in PRACTICE_TYPE_OPTIONS"

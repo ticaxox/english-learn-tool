@@ -317,21 +317,20 @@ describe('SpellingTrainer', () => {
     expect(wrapper.html()).not.toContain('opportunity')
   })
 
-  it('keeps submission blocked until every editable cell is filled', async () => {
+  it('submits only after every editable cell is filled', async () => {
     const wrapper = mount(SpellingTrainer, { props: { question: spelling() } })
-    const submit = () => wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')
-
-    expect(submit()!.attributes('aria-disabled')).toBeDefined()
-
     const inputs = wrapper.findAll('input')
+
     await inputs[0].setValue('p')
     await inputs[0].trigger('input')
-    // One of two editable cells filled: still incomplete.
-    expect(submit()!.attributes('aria-disabled')).toBeDefined()
+    await wrapper.vm.$nextTick()
+    // One of two editable cells filled: nothing is sent yet.
+    expect(wrapper.emitted('answer')).toBeUndefined()
 
     await inputs[1].setValue('t')
     await inputs[1].trigger('input')
-    expect(submit()!.attributes('aria-disabled')).toBeUndefined()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('answer')).toEqual([['opt']])
   })
 
   it('moves the active cell forward as each letter is typed', async () => {
@@ -347,15 +346,15 @@ describe('SpellingTrainer', () => {
     expect((active[0].element as HTMLInputElement).value).toBe('')
   })
 
-  it('enables submission once every blank is filled', async () => {
+  it('submits automatically once every blank is filled', async () => {
     const wrapper = mount(SpellingTrainer, { props: { question: spelling() } })
     const inputs = wrapper.findAll('input')
     for (const [index, letter] of ['p', 'p'].entries()) {
       await inputs[index].setValue(letter)
       await inputs[index].trigger('input')
     }
-    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')
-    expect(submit!.attributes('aria-disabled')).toBeUndefined()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('answer')).toEqual([['opp']])
   })
 
   it('submits the concatenated answer including the prefilled letter', async () => {
@@ -366,7 +365,7 @@ describe('SpellingTrainer', () => {
     await inputs[1].setValue('t')
     await inputs[1].trigger('input')
 
-    await wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')!.trigger('click')
+    await wrapper.vm.$nextTick()
     expect(wrapper.emitted('answer')).toEqual([['opt']])
   })
 
@@ -409,8 +408,7 @@ describe('SpellingTrainer', () => {
     await inputs[2].setValue('c')
     await inputs[2].trigger('input')
 
-    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交拼写')
-    await submit!.trigger('click')
+    await wrapper.vm.$nextTick()
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
 })

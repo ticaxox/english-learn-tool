@@ -92,6 +92,7 @@ class Settings(BaseSettings):
     ai_daily_coach_messages: int = Field(default=100, ge=1, le=1000)
     coach_message_retention_days: int = Field(default=7, ge=1, le=30)
     coach_context_ttl_days: int = Field(default=7, ge=1, le=30)
+    coach_context_expire_hours: int = Field(default=24, ge=1, le=720)
     coach_action_undo_hours: int = Field(default=24, ge=1, le=168)
     ai_daily_question_generation: int = Field(default=20, ge=1, le=500)
     ai_daily_subjective_grading: int = Field(default=50, ge=1, le=1000)

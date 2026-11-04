@@ -197,6 +197,10 @@ export type FlashcardRating = 'again' | 'good'
 export interface StudyFeedback {
   /** Server-confirmed outcome text; never computed locally. */
   headline: string
+  /** Graded correctness; null for ungraded actions such as reveals or ratings. */
+  gradedCorrect: boolean | null
+  /** The correct word for a wrong graded answer; null otherwise. */
+  correctAnswer: string | null
   detail: string | null
   /** Server says the word leaves the current queue. */
   removed: boolean

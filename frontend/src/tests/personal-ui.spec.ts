@@ -84,7 +84,7 @@ describe('T-FE-020 personal UI system', () => {
   it('docks the coach beside the workspace without collapsing page columns', () => {
     const css = source('../game-ui.css')
     expect(css).toContain('.personal-workspace.is-coach-open .workspace-main')
-    expect(css).toContain('margin-right: 400px')
+    expect(css).toContain('margin-right: 460px')
     const personal = source('../personal-ui.css')
     expect(personal).not.toContain('.personal-workspace.is-coach-open .crumb-today-layout')
   })
