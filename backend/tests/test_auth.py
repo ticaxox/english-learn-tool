@@ -133,19 +133,11 @@ async def test_change_username_checks_password_uniqueness_and_login(
     login_response = await login(client, admin_user.username)
     headers = bearer(login_response.json()["access_token"])
 
-    wrong = await client.patch(
-        ME_PATH,
-        headers=headers,
-        json={"username": "renamed_admin", "current_password": "Wrong-Pass-123!"},
-    )
-    assert wrong.status_code == 401
-    assert wrong.json()["code"] == "AUTH_INVALID_CREDENTIALS"
-
     other = await user_factory(role="member")
     taken = await client.patch(
         ME_PATH,
         headers=headers,
-        json={"username": other.username, "current_password": TEST_USER_PASSWORD},
+        json={"username": other.username},
     )
     assert taken.status_code == 409
     assert taken.json()["code"] == "USERNAME_TAKEN"
@@ -153,7 +145,7 @@ async def test_change_username_checks_password_uniqueness_and_login(
     unchanged = await client.patch(
         ME_PATH,
         headers=headers,
-        json={"username": admin_user.username, "current_password": TEST_USER_PASSWORD},
+        json={"username": admin_user.username},
     )
     assert unchanged.status_code == 422
     assert unchanged.json()["code"] == "USERNAME_UNCHANGED"
@@ -161,7 +153,7 @@ async def test_change_username_checks_password_uniqueness_and_login(
     changed = await client.patch(
         ME_PATH,
         headers=headers,
-        json={"username": "renamed_admin", "current_password": TEST_USER_PASSWORD},
+        json={"username": "renamed_admin"},
     )
     assert changed.status_code == 200
     assert changed.json()["username"] == "renamed_admin"

@@ -709,24 +709,8 @@ async def change_username(
     *,
     context: AuthContext,
     username: str,
-    current_password: str,
 ) -> User:
     user = context.user
-    if not verify_password(current_password, user.password_hash):
-        await commit_failure_audit(
-            session,
-            actor=user,
-            action="auth.username.change",
-            target_type="user",
-            target_id=user.id,
-            target_username=user.username_normalized,
-            reason_code="AUTH_INVALID_CREDENTIALS",
-        )
-        raise AppError(
-            status_code=401,
-            code="AUTH_INVALID_CREDENTIALS",
-            message="The current password is incorrect.",
-        )
     normalized = normalize_username(username)
     if normalized == user.username_normalized:
         raise AppError(

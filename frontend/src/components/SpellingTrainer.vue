@@ -187,6 +187,5 @@ function submit(): void {
     <div class="button-row">
       <DivButton class="button" type="button" :disabled="!canSubmit" @click="submit">提交拼写</DivButton>
     </div>
-    <p class="inline-note">大小写不影响结果。</p>
   </section>
 </template>

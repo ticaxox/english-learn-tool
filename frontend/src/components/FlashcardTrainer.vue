@@ -100,7 +100,6 @@ function rate(rating: FlashcardRating): void {
           已记住
         </DivButton>
       </div>
-      <p class="inline-note">选择后会自动安排下次复习。</p>
     </div>
   </section>
 </template>

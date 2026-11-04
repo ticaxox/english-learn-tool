@@ -255,7 +255,6 @@ async def change_username_endpoint(
         session,
         context=context,
         username=payload.username,
-        current_password=payload.current_password,
     )
     return _user_response(user)
 

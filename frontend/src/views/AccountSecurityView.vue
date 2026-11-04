@@ -16,7 +16,6 @@ const error = ref<unknown>(null)
 const saved = ref(false)
 
 const username = ref(auth.user?.username ?? '')
-const usernamePassword = ref('')
 const usernameSubmitting = ref(false)
 const usernameError = ref<unknown>(null)
 const usernameSaved = ref(false)
@@ -30,14 +29,9 @@ async function submitUsername(): Promise<void> {
     usernameError.value = new ValidationError(nameError)
     return
   }
-  if (!usernamePassword.value) {
-    usernameError.value = new ValidationError('请输入当前密码。')
-    return
-  }
   usernameSubmitting.value = true
   try {
-    await auth.changeUsername({ username: name, current_password: usernamePassword.value })
-    usernamePassword.value = ''
+    await auth.changeUsername({ username: name })
     usernameSaved.value = true
   } catch (changeError) {
     usernameError.value = changeError
@@ -120,17 +114,6 @@ async function submit(): Promise<void> {
           :disabled="usernameSubmitting"
         />
         <p class="field-hint">3–32 位英文字母、数字或下划线。</p>
-      </div>
-      <div class="field">
-        <label for="settings-username-password">当前密码</label>
-        <input
-          id="settings-username-password"
-          v-model="usernamePassword"
-          type="password"
-          autocomplete="current-password"
-          required
-          :disabled="usernameSubmitting"
-        />
       </div>
       <div class="button-row">
         <DivButton type="submit" :disabled="usernameSubmitting">{{ usernameSubmitting ? '正在更新…' : '保存用户名' }}</DivButton>

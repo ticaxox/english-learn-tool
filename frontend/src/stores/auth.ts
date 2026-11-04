@@ -23,7 +23,6 @@ export interface ChangePasswordPayload {
 
 export interface ChangeUsernamePayload {
   username: string
-  current_password: string
 }
 
 export class PasswordChangedLoginRequiredError extends Error {

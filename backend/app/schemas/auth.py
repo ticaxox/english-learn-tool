@@ -32,7 +32,6 @@ class ChangePasswordRequest(BaseModel):
 
 class UsernameChangeRequest(BaseModel):
     username: str = Field(min_length=3, max_length=32)
-    current_password: str = Field(min_length=1, max_length=128)
 
     @field_validator("username")
     @classmethod

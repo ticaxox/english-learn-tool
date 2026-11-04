@@ -63,6 +63,17 @@ const challengePrefs = reactive<{ practiceTypes: string[]; drillModes: string[] 
   drillModes: DRILL_MODE_OPTIONS.map((option) => option.key),
 })
 
+function togglePref(key: 'drillModes' | 'practiceTypes', value: string): void {
+  const list = challengePrefs[key]
+  const index = list.indexOf(value)
+  if (index >= 0) {
+    if (list.length === 1) return
+    list.splice(index, 1)
+  } else {
+    list.push(value)
+  }
+}
+
 const completionDays = computed(() => {
   if (!activeWordbookSize.value || form.dailyNewWords <= 0) return null
   return Math.ceil(activeWordbookSize.value / form.dailyNewWords)
@@ -250,19 +261,33 @@ onMounted(() => {
             <div class="settings-choice-block">
               <span class="field-label">学习方式</span>
               <div class="settings-choice-grid">
-                <label v-for="option in DRILL_MODE_OPTIONS" :key="option.key" class="checkbox">
-                  <input v-model="challengePrefs.drillModes" type="checkbox" :value="option.key" />
-                  <span>{{ option.label }}</span>
-                </label>
+                <DivButton
+                  v-for="option in DRILL_MODE_OPTIONS"
+                  :key="option.key"
+                  class="settings-toggle"
+                  :class="{ 'is-active': challengePrefs.drillModes.includes(option.key) }"
+                  :aria-pressed="challengePrefs.drillModes.includes(option.key)"
+                  type="button"
+                  @click="togglePref('drillModes', option.key)"
+                >
+                  {{ option.label }}
+                </DivButton>
               </div>
             </div>
             <div class="settings-choice-block">
               <span class="field-label">练习题型</span>
               <div class="settings-choice-grid">
-                <label v-for="option in PRACTICE_TYPE_OPTIONS" :key="option.key" class="checkbox">
-                  <input v-model="challengePrefs.practiceTypes" type="checkbox" :value="option.key" />
-                  <span>{{ option.label }}</span>
-                </label>
+                <DivButton
+                  v-for="option in PRACTICE_TYPE_OPTIONS"
+                  :key="option.key"
+                  class="settings-toggle"
+                  :class="{ 'is-active': challengePrefs.practiceTypes.includes(option.key) }"
+                  :aria-pressed="challengePrefs.practiceTypes.includes(option.key)"
+                  type="button"
+                  @click="togglePref('practiceTypes', option.key)"
+                >
+                  {{ option.label }}
+                </DivButton>
               </div>
             </div>
           </div>

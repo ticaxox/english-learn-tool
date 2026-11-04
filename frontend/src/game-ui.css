@@ -3420,6 +3420,26 @@
   width: max-content;
 }
 
+.personal-workspace .settings-toggle {
+  padding: 8px 16px;
+  border: 1.5px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.personal-workspace .settings-toggle:hover { border-color: var(--ui-line-strong); }
+
+.personal-workspace .settings-toggle.is-active {
+  border-color: var(--g-green-edge);
+  background: var(--g-green-soft);
+  color: var(--g-green-edge);
+  box-shadow: inset 0 -3px 0 var(--g-green-edge);
+}
+
 .personal-workspace .settings-form .settings-choice-row .settings-choice-block + .settings-choice-block {
   padding-left: 40px;
   border-left: 1px solid var(--ui-line);
@@ -3832,13 +3852,17 @@
 .personal-workspace .practice-type-picker {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
 .personal-workspace .practice-type-pill {
-  padding: 8px 18px;
-  border: 1.5px solid var(--ui-line);
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 20px;
+  border: 2px solid var(--ui-line);
   border-radius: 999px;
   background: var(--ui-surface);
   color: var(--ui-ink);
@@ -3847,13 +3871,19 @@
   cursor: pointer;
 }
 
-.personal-workspace .practice-type-pill:hover { border-color: var(--ui-line-strong); }
+.personal-workspace .practice-type-pill svg { width: 18px; height: 18px; color: var(--pill, var(--ui-muted)); }
+.personal-workspace .practice-type-pill:hover { border-color: var(--pill, var(--ui-line-strong)); }
+.personal-workspace .practice-type-pill--fill_blank { --pill: var(--g-blue-edge); --pill-soft: var(--g-blue-soft); }
+.personal-workspace .practice-type-pill--reading { --pill: var(--g-green-edge); --pill-soft: var(--g-green-soft); }
+.personal-workspace .practice-type-pill--translation { --pill: var(--g-orange-edge); --pill-soft: var(--g-orange-soft); }
+.personal-workspace .practice-type-pill--writing { --pill: var(--g-purple-edge); --pill-soft: var(--g-purple-soft); }
+.personal-workspace .practice-type-pill--random { --pill: var(--g-gold-edge); --pill-soft: var(--g-gold-soft); }
 
 .personal-workspace .practice-type-pill.is-active {
-  border-color: var(--g-green-edge);
-  background: var(--g-green-soft);
-  color: var(--g-green-edge);
-  box-shadow: inset 0 -3px 0 var(--g-green-edge);
+  border-color: var(--pill);
+  background: var(--pill-soft);
+  color: var(--pill);
+  box-shadow: inset 0 -3px 0 var(--pill);
 }
 
 /* The waiting card is a centred column, not a left-hand sheet. */
@@ -3885,3 +3915,82 @@
 /* Card chrome follows the centred content. */
 .personal-workspace .memory-main-card .study-card__meta { justify-content: center; }
 .personal-workspace .memory-main-card .study-card__flip { margin-inline: auto; }
+
+/* Bigger letters, roomier cards. */
+.personal-workspace .memory-main-card .study-card { gap: 1.15rem; }
+
+.personal-workspace .memory-main-card .spelling-grid { gap: 0.55rem; }
+
+.personal-workspace .memory-main-card .spelling-grid input.spelling-cell {
+  width: 3rem;
+  min-width: 3rem;
+  height: 3.6rem;
+  font-size: 1.5rem;
+}
+
+.personal-workspace .memory-main-card .choice-list {
+  max-width: 720px;
+  gap: 16px 20px;
+}
+
+.personal-workspace .memory-main-card .choice-option { padding: 14px 18px; }
+.personal-workspace .memory-main-card .choice-option__label { font-size: 1.16rem; }
+
+.personal-workspace .memory-end-dialog { gap: 20px; padding: 28px 32px; }
+.personal-workspace .memory-end-dialog .button-row { gap: 14px; margin-top: 6px; }
+
+/* Keep the model caret anchored on hover. */
+.personal-workspace .ai-model-caret,
+.personal-workspace .ai-model-caret:hover,
+.personal-workspace .ai-model-caret:active { transform: translateY(-50%); }
+
+/* Coach: history toggle rides beside the close button; history is a modal. */
+.personal-workspace .ia-coach-panel .coach-main-topbar {
+  position: fixed;
+  top: 13px;
+  right: 62px;
+  z-index: 5;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.personal-workspace .coach-history-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(31 17 11 / 38%);
+}
+
+.personal-workspace .coach-history-dialog {
+  display: grid;
+  gap: 12px;
+  width: min(560px, calc(100vw - 48px));
+  max-height: min(70vh, 640px);
+  overflow-y: auto;
+  padding: 20px 22px;
+  border-radius: 18px;
+  background: var(--ui-surface);
+}
+
+.personal-workspace .coach-history-dialog__actions { display: flex; gap: 8px; }
+
+/* The coach speaks in a bubble too, not bare text. */
+.personal-workspace .ia-coach-panel .coach-message--assistant {
+  justify-self: start;
+  max-width: 92%;
+  padding: 9px 12px;
+  border-radius: 14px;
+  background: var(--ui-surface-subtle);
+}
+
+/* Word options: outrank the legacy 1rem rule in controls.css. */
+.personal-workspace .memory-main-card .choice-list--words .choice-option__label { font-size: 1.2rem; }
+
+/* History modal rows need dark text on the gold active row. */
+.personal-workspace .coach-history-dialog .coach-conversation { padding: 10px 12px; }
+.personal-workspace .coach-history-dialog .coach-conversation__title { color: var(--ui-ink); }
+.personal-workspace .coach-history-dialog .coach-conversation__meta { color: var(--ui-muted); }

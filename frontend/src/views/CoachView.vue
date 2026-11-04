@@ -178,20 +178,26 @@ onBeforeUnmount(() => {
         :aria-expanded="historyOpen"
         @click="historyOpen = !historyOpen"
       >
-        {{ historyOpen ? '收起历史对话' : '历史对话' }}
+        历史对话
       </DivButton>
     </div>
 
     <div class="coach-layout">
-      <aside v-if="historyOpen" class="panel coach-sidebar" aria-label="教练会话列表">
+      <div v-if="historyOpen" class="coach-history-backdrop" @click.self="historyOpen = false">
+      <aside class="panel coach-sidebar coach-history-dialog" role="dialog" aria-modal="true" aria-labelledby="coach-history-title">
         <div class="coach-sidebar__heading">
           <div>
             <p class="eyebrow">对话</p>
-            <h2>长期对话</h2>
+            <h2 id="coach-history-title">长期对话</h2>
           </div>
-          <DivButton class="button-secondary button-small" type="button" @click="showCreate = !showCreate">
-            新建
-          </DivButton>
+          <div class="coach-history-dialog__actions">
+            <DivButton class="button-secondary button-small" type="button" @click="showCreate = !showCreate">
+              新建
+            </DivButton>
+            <DivButton class="button-secondary button-small" type="button" @click="historyOpen = false">
+              关闭
+            </DivButton>
+          </div>
         </div>
 
         <form v-if="showCreate" class="coach-create" @submit.prevent="createConversation">
@@ -252,6 +258,7 @@ onBeforeUnmount(() => {
           加载更多会话
         </DivButton>
       </aside>
+      </div>
 
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">

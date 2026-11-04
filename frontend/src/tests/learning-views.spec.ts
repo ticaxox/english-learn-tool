@@ -134,7 +134,11 @@ describe('learning surfaces with the frozen contract', () => {
     expect(wrapper.text()).toContain('关卡生成')
     expect(wrapper.text()).not.toContain('目标考试')
     expect(wrapper.text()).not.toContain('记忆模块')
-    expect(wrapper.findAll('.settings-choice-grid input[type="checkbox"]')).toHaveLength(7)
+    const toggles = wrapper.findAll('.settings-toggle')
+    expect(toggles).toHaveLength(7)
+    expect(toggles[0].attributes('aria-pressed')).toBe('true')
+    await toggles[0].trigger('click')
+    expect(toggles[0].attributes('aria-pressed')).toBe('false')
   })
 
   it('shows all three modules and marks disabled choices from the server config', async () => {

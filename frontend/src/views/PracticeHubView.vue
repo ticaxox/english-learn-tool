@@ -105,6 +105,14 @@ function selectType(next: PracticeSelection): void {
   count.value = next === 'writing' ? 1 : 5
 }
 
+const typeIcons: Record<PracticeSelection, 'book' | 'cards' | 'arrow' | 'spark' | 'star'> = {
+  fill_blank: 'book',
+  reading: 'cards',
+  translation: 'arrow',
+  writing: 'spark',
+  random: 'star',
+}
+
 const typeOptions = computed(() => [
   ...practiceTypes.map((type) => ({ key: type as PracticeSelection, label: PRACTICE_TYPE_LABELS[type] })),
   { key: 'random' as PracticeSelection, label: '随机' },
@@ -252,11 +260,12 @@ onMounted(() => {
               v-for="option in typeOptions"
               :key="option.key"
               class="practice-type-pill"
-              :class="{ 'is-active': practiceType === option.key }"
+              :class="[`practice-type-pill--${option.key}`, { 'is-active': practiceType === option.key }]"
               :aria-pressed="practiceType === option.key"
               type="button"
               @click="chooseType(option.key)"
             >
+              <AppIcon :name="typeIcons[option.key]" />
               {{ option.label }}
             </DivButton>
           </div>
