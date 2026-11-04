@@ -838,6 +838,40 @@ async def process_ai_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
                 await session.rollback()
         await release_concurrency_slot(redis, user_id=user.id, job_id=job_uuid)
         return {"status": "failed", "error_code": "AI_INTERNAL_ERROR"}
+    except asyncio.CancelledError:
+        # ARQ cancels the coroutine on its job timeout. Without this branch the
+        # job would stay "running" until the stale sweep, leaving the learner on
+        # a spinner; record a real failure the poller can surface right away.
+        logger.warning("ai.job.worker_timeout", extra={"job_id": job_id})
+        try:
+            async with factory() as session:
+                job = await session.scalar(
+                    select(AiJob).where(AiJob.id == job_uuid).with_for_update()
+                )
+                if job is not None and job.status == "running":
+                    job.status = "failed"
+                    job.error_code = "AI_JOB_TIMEOUT"
+                    job.error_message = "The AI task timed out before the provider answered."
+                    job.retryable = True
+                    job.finished_at = utcnow()
+                    session.add(
+                        _event(job, "ai.job.failed", metadata={"error_code": job.error_code})
+                    )
+                    await _apply_practice_failure(session, job)
+                    await _apply_coach_failure(session, job)
+                    await _apply_challenge_failure(session, job)
+                    await _notify_ai_terminal(session, job, succeeded=False)
+                    await _release_quota(session, job.id)
+                    await session.commit()
+                else:
+                    await session.rollback()
+        except Exception:  # noqa: BLE001 - never mask the original cancellation
+            logger.exception("ai.job.timeout_cleanup_failed", extra={"job_id": job_id})
+        try:
+            await release_concurrency_slot(redis, user_id=job.user_id, job_id=job_uuid)
+        except BaseException:  # noqa: BLE001 - keep the cancellation as the outcome
+            logger.exception("ai.job.timeout_release_failed", extra={"job_id": job_id})
+        raise
 
     async with factory() as session:
         job = await session.scalar(select(AiJob).where(AiJob.id == job_uuid).with_for_update())

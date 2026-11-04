@@ -285,3 +285,47 @@ async def test_ai_job_status_is_private_to_its_owner(
         )
         assert admin_hidden.status_code == 404
         assert admin_hidden.json()["code"] == "AI_JOB_NOT_FOUND"
+
+
+async def test_worker_timeout_marks_the_job_failed_instead_of_leaving_it_running(
+    client, app, member_user, monkeypatch
+):
+    import asyncio
+    from uuid import uuid4
+
+    from app.services.ai_security import ProviderHttpClient
+
+    headers = await login(client, member_user.username)
+    context, _ = practice_context()
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        created = await _create_job(client, headers, context, f"timeout-{uuid4().hex}")
+        assert created.status_code == 202, created.text
+        job_id = created.json()["job_id"]
+
+        async def hang(*args, **kwargs):
+            await asyncio.sleep(3600)
+
+        monkeypatch.setattr(ProviderHttpClient, "chat_json", hang)
+        task = asyncio.create_task(
+            process_ai_job(
+                {
+                    "session_factory": app.state.session_factory,
+                    "settings": app.state.settings,
+                    "redis": app.state.redis,
+                },
+                job_id,
+            )
+        )
+        await asyncio.sleep(0.5)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    async with app.state.session_factory() as session:
+        job = await session.get(AiJob, UUID(job_id))
+        assert job is not None
+        assert job.status == "failed"
+        assert job.error_code == "AI_JOB_TIMEOUT"
+        assert job.retryable is True
+        assert job.finished_at is not None

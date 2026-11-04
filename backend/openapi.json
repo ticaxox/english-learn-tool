@@ -622,99 +622,13 @@
         "title": "AiJobStatusResponse",
         "type": "object"
       },
-      "AiMemoryClearResponse": {
-        "properties": {
-          "deleted_count": {
-            "title": "Deleted Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "deleted_count"
-        ],
-        "title": "AiMemoryClearResponse",
-        "type": "object"
-      },
-      "AiMemoryCreateRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "content": {
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Content",
-            "type": "string"
-          },
-          "kind": {
-            "default": "custom",
-            "enum": [
-              "profile",
-              "practice",
-              "chat",
-              "preference",
-              "custom"
-            ],
-            "title": "Kind",
-            "type": "string"
-          }
-        },
-        "required": [
-          "content"
-        ],
-        "title": "AiMemoryCreateRequest",
-        "type": "object"
-      },
-      "AiMemoryListResponse": {
-        "properties": {
-          "counts": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "title": "Counts",
-            "type": "object"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/AiMemoryResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "counts"
-        ],
-        "title": "AiMemoryListResponse",
-        "type": "object"
-      },
-      "AiMemoryResponse": {
+      "AiMemoryDocumentResponse": {
         "properties": {
           "content": {
             "title": "Content",
             "type": "string"
           },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "kind": {
-            "enum": [
-              "profile",
-              "practice",
-              "chat",
-              "preference",
-              "custom"
-            ],
-            "title": "Kind",
-            "type": "string"
-          },
-          "last_used_at": {
+          "updated_at": {
             "anyOf": [
               {
                 "format": "date-time",
@@ -724,86 +638,28 @@
                 "type": "null"
               }
             ],
-            "title": "Last Used At"
-          },
-          "pinned": {
-            "title": "Pinned",
-            "type": "boolean"
-          },
-          "source": {
-            "enum": [
-              "auto",
-              "user"
-            ],
-            "title": "Source",
-            "type": "string"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
+            "title": "Updated At"
           }
         },
         "required": [
-          "id",
-          "kind",
           "content",
-          "source",
-          "pinned",
-          "created_at",
-          "updated_at",
-          "last_used_at"
+          "updated_at"
         ],
-        "title": "AiMemoryResponse",
+        "title": "AiMemoryDocumentResponse",
         "type": "object"
       },
-      "AiMemoryUpdateRequest": {
+      "AiMemoryDocumentUpdate": {
         "additionalProperties": false,
+        "description": "The coach's memory is one editable document, not categorised records.",
         "properties": {
           "content": {
-            "anyOf": [
-              {
-                "maxLength": 500,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content"
-          },
-          "kind": {
-            "anyOf": [
-              {
-                "enum": [
-                  "profile",
-                  "practice",
-                  "chat",
-                  "preference",
-                  "custom"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kind"
-          },
-          "pinned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pinned"
+            "default": "",
+            "maxLength": 6000,
+            "title": "Content",
+            "type": "string"
           }
         },
-        "title": "AiMemoryUpdateRequest",
+        "title": "AiMemoryDocumentUpdate",
         "type": "object"
       },
       "AiPracticeSummary": {
@@ -2177,34 +2033,6 @@
         "title": "CoachHistoryTurn",
         "type": "object"
       },
-      "CoachMemoryLine": {
-        "additionalProperties": false,
-        "properties": {
-          "content": {
-            "maxLength": 520,
-            "minLength": 1,
-            "title": "Content",
-            "type": "string"
-          },
-          "kind": {
-            "enum": [
-              "profile",
-              "practice",
-              "chat",
-              "preference",
-              "custom"
-            ],
-            "title": "Kind",
-            "type": "string"
-          }
-        },
-        "required": [
-          "kind",
-          "content"
-        ],
-        "title": "CoachMemoryLine",
-        "type": "object"
-      },
       "CoachMessageCreate": {
         "additionalProperties": false,
         "properties": {
@@ -2389,13 +2217,17 @@
             "title": "Learning Summary",
             "type": "object"
           },
-          "memories": {
-            "items": {
-              "$ref": "#/components/schemas/CoachMemoryLine"
-            },
-            "maxItems": 40,
-            "title": "Memories",
-            "type": "array"
+          "memory_document": {
+            "anyOf": [
+              {
+                "maxLength": 6000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Document"
           },
           "message_id": {
             "anyOf": [
@@ -14056,40 +13888,15 @@
         ]
       }
     },
-    "/api/v1/me/ai/memories": {
+    "/api/v1/me/ai/memory": {
       "get": {
-        "operationId": "list_my_memories_endpoint_api_v1_me_ai_memories_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "kind",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "profile",
-                    "practice",
-                    "chat",
-                    "preference",
-                    "custom"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Kind"
-            }
-          }
-        ],
+        "operationId": "get_my_memory_endpoint_api_v1_me_ai_memory_get",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiMemoryListResponse"
+                  "$ref": "#/components/schemas/AiMemoryDocumentResponse"
                 }
               }
             },
@@ -14141,245 +13948,19 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List the AI memories the coach may use for the current user",
+        "summary": "Read the single AI memory document of the current user",
         "tags": [
           "system",
           "personal ai"
         ]
       },
-      "post": {
-        "operationId": "create_my_memory_endpoint_api_v1_me_ai_memories_post",
+      "put": {
+        "operationId": "save_my_memory_endpoint_api_v1_me_ai_memory_put",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiMemoryCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiMemoryResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authentication is required."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The AI provider was not found."
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The AI provider conflicts with current state."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The request is invalid."
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Add a memory the coach must keep for the current user",
-        "tags": [
-          "system",
-          "personal ai"
-        ]
-      }
-    },
-    "/api/v1/me/ai/memories/clear-auto": {
-      "post": {
-        "operationId": "clear_my_auto_memories_endpoint_api_v1_me_ai_memories_clear_auto_post",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiMemoryClearResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authentication is required."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The AI provider was not found."
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The AI provider conflicts with current state."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The request is invalid."
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Delete every automatically recorded memory of the current user",
-        "tags": [
-          "system",
-          "personal ai"
-        ]
-      }
-    },
-    "/api/v1/me/ai/memories/{memory_id}": {
-      "delete": {
-        "operationId": "delete_my_memory_endpoint_api_v1_me_ai_memories__memory_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "memory_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Memory Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authentication is required."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The AI provider was not found."
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The AI provider conflicts with current state."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "The request is invalid."
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Delete one memory owned by the current user",
-        "tags": [
-          "system",
-          "personal ai"
-        ]
-      },
-      "patch": {
-        "operationId": "update_my_memory_endpoint_api_v1_me_ai_memories__memory_id__patch",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "memory_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Memory Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiMemoryUpdateRequest"
+                "$ref": "#/components/schemas/AiMemoryDocumentUpdate"
               }
             }
           },
@@ -14390,7 +13971,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiMemoryResponse"
+                  "$ref": "#/components/schemas/AiMemoryDocumentResponse"
                 }
               }
             },
@@ -14442,7 +14023,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Edit one memory owned by the current user",
+        "summary": "Replace the single AI memory document of the current user",
         "tags": [
           "system",
           "personal ai"

@@ -28,7 +28,6 @@ from app.models.wordbooks import Wordbook, WordbookActivation, WordbookEntry
 from app.schemas.ai_tasks import (
     CoachAction,
     CoachHistoryTurn,
-    CoachMemoryLine,
     CoachReplyContext,
     CoachReplyOutput,
     CoachReplyRequest,
@@ -58,7 +57,7 @@ from app.schemas.practice import PracticeCreateRequest
 from app.services.ai_concurrency import release_concurrency_slot
 from app.services.ai_jobs import cancel_user_job, create_ai_job
 from app.services.ai_memory import (
-    memory_lines_for_context,
+    memory_document_for_context,
     record_chat_memory,
     sync_profile_memories,
 )
@@ -435,10 +434,7 @@ async def create_coach_message(
     # older version of the product.
     await sync_profile_memories(session, user)
     await record_chat_memory(session, user, content)
-    memories = [
-        CoachMemoryLine(kind=kind, content=text)
-        for kind, text in await memory_lines_for_context(session, user.id)
-    ]
+    memory_document = await memory_document_for_context(session, user.id)
 
     last_sequence = int(
         await session.scalar(
@@ -484,7 +480,7 @@ async def create_coach_message(
             user_message=content,
             learning_summary={"page_context": context},
             history=history,
-            memories=memories,
+            memory_document=memory_document,
             conversation_id=conversation.id,
             message_id=assistant.id,
             page_context=context,

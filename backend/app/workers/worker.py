@@ -23,7 +23,10 @@ class WorkerSettings:
     on_startup = worker_runtime_startup
     on_shutdown = worker_runtime_shutdown
     max_jobs = 4
-    job_timeout = 360
+    # The provider budget is timeout (up to 120 s) × (retry limit + 1) plus
+    # backoff, so the worker must outlast that worst case and still write the
+    # failure state instead of being killed mid-job.
+    job_timeout = 600
     keep_result = 3600
     health_check_interval = 30
     health_check_key = "english-learn:worker-health"

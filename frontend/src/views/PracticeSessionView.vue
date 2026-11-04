@@ -59,6 +59,7 @@ const draftConflict = computed(
 const canRegenerate = computed(
   () => (session.value?.status === 'ready' || session.value?.status === 'failed') && !hasAnyAnswer.value && !practice.busy.value,
 )
+const generationTimedOut = computed(() => session.value?.errorCode === 'AI_JOB_TIMEOUT')
 
 function newKey(prefix: string): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return `${prefix}-${crypto.randomUUID()}`
@@ -197,6 +198,7 @@ void practice.load()
         <p class="eyebrow">正在生成练习</p>
         <h2>正在生成第 {{ session.generationNumber }} 组题目</h2>
         <p>题目正在生成，请稍候。</p>
+        <p class="field-hint">通常需要 1–2 分钟；如果等待过久会自动结束，可以再重试。</p>
         <div class="practice-generation-loader" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="button-row">
           <DivButton class="button-secondary" type="button" @click="cancelGeneration">取消生成</DivButton>
@@ -207,7 +209,8 @@ void practice.load()
       <section v-else-if="session.status === 'failed'" class="panel">
         <p class="eyebrow">生成失败</p>
         <h2>题目生成失败</h2>
-        <p>请稍后重试，或重新创建练习。</p>
+        <p v-if="generationTimedOut">这次等待 AI 的时间过长，题目还没有生成完。可以直接重试。</p>
+        <p v-else>请稍后重试，或重新创建练习。</p>
         <div class="button-row">
           <DivButton class="button" type="button" :disabled="practice.busy.value" @click="regenerate">重新生成</DivButton>
           <RouterLink class="button-secondary" to="/practice">新建练习</RouterLink>
