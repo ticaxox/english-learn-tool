@@ -53,6 +53,7 @@ const customHeadersText = ref('{}')
 const apiKey = ref('')
 const showKey = ref(false)
 const modelsOpen = ref(false)
+const modelsFetched = ref(false)
 const errors = reactive<Record<string, string>>({})
 
 const editing = computed(() => Boolean(props.provider))
@@ -86,6 +87,7 @@ function reset(): void {
   apiKey.value = ''
   showKey.value = false
   modelsOpen.value = false
+  modelsFetched.value = false
   Object.keys(errors).forEach((key) => delete errors[key])
 }
 
@@ -261,13 +263,25 @@ function cancel(): void {
             class="button-secondary ai-model-fetch"
             type="button"
             :disabled="modelLoading"
-            @click="emit('fetch-models')"
+            @click="modelsFetched = true; emit('fetch-models')"
           >
             {{ modelLoading ? '读取中…' : '获取模型' }}
           </DivButton>
+          <DivButton
+            v-if="editing"
+            class="button-secondary"
+            type="button"
+            :disabled="testLoading"
+            @click="emit('test')"
+          >
+            {{ testLoading ? '连接中…' : '测试连接' }}
+          </DivButton>
         </div>
+        <p v-if="editing && testResult" class="field-hint">
+          {{ testResult.success ? `连接正常 · ${testResult.latencyMs ?? '—'} ms` : '连接失败，请检查地址、模型和 Key。' }}
+        </p>
         <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
-        <p v-else-if="modelOptions && modelOptions.length === 0" class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
+        <p v-else-if="modelsFetched && !modelLoading && modelOptions && modelOptions.length === 0" class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
         <ErrorNotice v-if="modelError" :error="modelError" :show-retry="false" />
 
         <div v-if="canFetchModels && modelsOpen" class="ai-model-menu" role="listbox" aria-label="可用模型">
@@ -319,14 +333,6 @@ function cancel(): void {
         </div>
         <p v-if="editing && !errors.apiKey" class="field-hint">已保存的 Key 不会回显；需要更换时直接输入新 Key。</p>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
-        <div v-if="editing" class="ai-test-row">
-          <DivButton class="button-secondary" type="button" :disabled="testLoading" @click="emit('test')">
-            {{ testLoading ? '连接中…' : '测试连接' }}
-          </DivButton>
-          <span v-if="testResult" class="field-hint">
-            {{ testResult.success ? `连接正常 · ${testResult.latencyMs ?? '—'} ms` : '连接失败，请检查地址、模型和 Key。' }}
-          </span>
-        </div>
       </div>
 
       <div class="field">

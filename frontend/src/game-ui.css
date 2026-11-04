@@ -2610,6 +2610,7 @@
 
 .personal-workspace .ai-model-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: stretch;
 }
@@ -3777,34 +3778,40 @@
 /* Provider form: the model picker lives in the field; the key has an eye toggle. */
 .personal-workspace .ai-model-input {
   position: relative;
+  display: flex;
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .personal-workspace .ai-model-input input {
   width: 100%;
+  max-width: none;
   padding-right: 44px;
 }
 
+/* The picker sits inside the field's right edge, not beside it. */
 .personal-workspace .ai-model-caret {
   position: absolute;
   top: 50%;
-  right: 6px;
+  right: 8px;
   display: grid;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   place-items: center;
-  border: 1px solid var(--ui-line);
-  border-radius: 8px;
-  background: var(--ui-surface);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   color: var(--ui-muted);
   transform: translateY(-50%);
 }
 
-.personal-workspace .ai-model-caret:hover {
-  border-color: var(--ui-line-strong);
-  color: var(--ui-ink);
-}
+.personal-workspace .ai-model-caret:hover { background: #f7ecd8; color: var(--ui-ink); }
+
+/* Legacy global input cap (learning.css) must not shrink dialog fields. */
+.personal-workspace .ai-form input[type="text"],
+.personal-workspace .ai-form input[type="url"],
+.personal-workspace .ai-form input[type="password"],
+.personal-workspace .ai-form input[type="number"] { max-width: none; }
 
 .personal-workspace .ai-secret-toggle {
   display: grid;
