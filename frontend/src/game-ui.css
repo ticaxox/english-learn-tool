@@ -3814,9 +3814,20 @@
 
 @media (min-width: 1100px) {
   .personal-workspace .workspace-topbar { position: relative; }
-  /* Direct children only: the learning group holds its own tabs. */
-  .personal-workspace .workspace-topbar > .workspace-topbar-tabs,
+  /* Settings tabs centre; the learning switch stays left, its tabs centre. */
+  .personal-workspace .workspace-topbar > .workspace-topbar-tabs {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
   .personal-workspace .workspace-topbar > .workspace-topbar-learning {
+    position: static;
+    flex: 1 1 auto;
+    transform: none;
+  }
+
+  .personal-workspace .workspace-topbar-learning .workspace-topbar-tabs {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
