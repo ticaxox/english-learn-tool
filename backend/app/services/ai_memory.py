@@ -102,10 +102,13 @@ async def upsert_memory(
             select(AiMemory).where(AiMemory.user_id == user_id, AiMemory.memory_key == key)
         )
         if existing is not None:
-            existing.content = cleaned
-            existing.kind = kind
-            existing.source = source
-            await session.flush()
+            # Only touch the row when something changed, so an unchanged sync
+            # does not reorder the list or move the "updated" date every turn.
+            if (existing.content, existing.kind, existing.source) != (cleaned, kind, source):
+                existing.content = cleaned
+                existing.kind = kind
+                existing.source = source
+                await session.flush()
             return existing
     memory = AiMemory(user_id=user_id, kind=kind, content=cleaned, source=source, memory_key=key)
     session.add(memory)

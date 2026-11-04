@@ -57,7 +57,11 @@ from app.schemas.notifications import (
 from app.schemas.practice import PracticeCreateRequest
 from app.services.ai_concurrency import release_concurrency_slot
 from app.services.ai_jobs import cancel_user_job, create_ai_job
-from app.services.ai_memory import memory_lines_for_context, record_chat_memory
+from app.services.ai_memory import (
+    memory_lines_for_context,
+    record_chat_memory,
+    sync_profile_memories,
+)
 from app.services.ai_usage import quota_limits
 from app.services.ai_validation import sanitize_untrusted_json
 from app.services.audit import add_audit_event
@@ -426,6 +430,10 @@ async def create_coach_message(
         for row in reversed(history_rows)
         if row.content
     ]
+    # Make sure the learner profile and stated preferences are present before
+    # the coach reads its memory slice, even if settings were saved in an
+    # older version of the product.
+    await sync_profile_memories(session, user)
     await record_chat_memory(session, user, content)
     memories = [
         CoachMemoryLine(kind=kind, content=text)
