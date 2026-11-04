@@ -173,7 +173,7 @@ describe('ChoiceTrainer', () => {
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
     expect(wrapper.text()).toContain('选项暂时不可用')
-    expect(wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')!.attributes('aria-disabled')).toBeDefined()
+    expect(wrapper.findAll('[role="button"]')).toHaveLength(0)
   })
 
   it('rejects an option list that disagrees with option_count', () => {
@@ -209,7 +209,6 @@ describe('ChoiceTrainer', () => {
     const inputs = wrapper.findAll('input[type="radio"]')
     expect(inputs).toHaveLength(2)
     await inputs[0].setValue()
-    await wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')!.trigger('click')
     expect(wrapper.emitted('answer')).toEqual([['有弹性的']])
   })
 
@@ -235,15 +234,12 @@ describe('ChoiceTrainer', () => {
     const wrapper = mount(ChoiceTrainer, { props: { question: choice() } })
     const inputs = wrapper.findAll('input[type="radio"]')
     await inputs[2].setValue()
-    await wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')!.trigger('click')
     expect(wrapper.emitted('answer')).toEqual([['o-3']])
   })
 
-  it('does not emit before a choice is made', async () => {
+  it('does not emit before a choice is made', () => {
     const wrapper = mount(ChoiceTrainer, { props: { question: choice() } })
-    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')
-    expect(submit!.attributes('aria-disabled')).toBeDefined()
-    await submit!.trigger('click')
+    expect(wrapper.findAll('[role="button"]')).toHaveLength(0)
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
 
@@ -273,19 +269,16 @@ describe('ChoiceTrainer', () => {
   it('resets the selection when the question changes', async () => {
     const wrapper = mount(ChoiceTrainer, { props: { question: choice() } })
     await wrapper.findAll('input[type="radio"]')[0].setValue()
-    expect(wrapper.findAll('input[type="radio"]')[0].attributes('checked')).toBeDefined()
+    expect(wrapper.emitted('answer')).toHaveLength(1)
 
     await wrapper.setProps({ question: choice({ questionId: 'q-8', prompt: '另一题' }) })
-    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')
-    expect(submit!.attributes('aria-disabled')).toBeDefined()
+    expect(wrapper.findAll('input[type="radio"]')[0].attributes('checked')).toBeUndefined()
+    expect(wrapper.emitted('answer')).toHaveLength(1)
   })
 
-  it('prevents a second submission while disabled', async () => {
+  it('does not answer while disabled', async () => {
     const wrapper = mount(ChoiceTrainer, { props: { question: choice(), disabled: true } })
     await wrapper.findAll('input[type="radio"]')[1].setValue()
-    const submit = wrapper.findAll('[role="button"]').find((button) => button.text() === '提交答案')
-    expect(submit!.attributes('aria-disabled')).toBeDefined()
-    await submit!.trigger('click')
     expect(wrapper.emitted('answer')).toBeUndefined()
   })
 })

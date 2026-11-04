@@ -51,22 +51,13 @@ watch(
   },
 )
 
-const canSubmit = computed(
-  () => selected.value !== null && !props.disabled && optionsWellFormed.value,
-)
-
 function choose(optionId: string): void {
-  if (props.disabled) {
+  if (props.disabled || !optionsWellFormed.value) {
     return
   }
+  // Choosing is the answer: no separate submit step.
   selected.value = optionId
-}
-
-function submit(): void {
-  if (!canSubmit.value || selected.value === null) {
-    return
-  }
-  emit('answer', selected.value)
+  emit('answer', optionId)
 }
 </script>
 
@@ -104,9 +95,5 @@ function submit(): void {
         <span class="choice-option__label">{{ option.label }}</span>
       </label>
     </fieldset>
-
-    <div class="button-row">
-      <DivButton class="button" type="button" :disabled="!canSubmit" @click="submit">提交答案</DivButton>
-    </div>
   </section>
 </template>

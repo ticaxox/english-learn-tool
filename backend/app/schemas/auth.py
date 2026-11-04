@@ -30,6 +30,16 @@ class ChangePasswordRequest(BaseModel):
         return value
 
 
+class UsernameChangeRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=32)
+    current_password: str = Field(min_length=1, max_length=128)
+
+    @field_validator("username")
+    @classmethod
+    def username_is_valid(cls, value: str) -> str:
+        return validate_username(value)
+
+
 class UserSelf(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -88,11 +88,11 @@ function rate(rating: FlashcardRating): void {
         <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('again')">
           无印象
         </DivButton>
-        <DivButton class="button" type="button" :disabled="!canRate" @click="rate('good')">
+        <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('good')">
           有印象
         </DivButton>
         <DivButton
-          class="button-secondary button-small"
+          class="button-secondary"
           type="button"
           :disabled="props.disabled"
           @click="emit('master')"

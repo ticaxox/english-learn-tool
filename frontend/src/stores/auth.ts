@@ -21,6 +21,11 @@ export interface ChangePasswordPayload {
   new_password: string
 }
 
+export interface ChangeUsernamePayload {
+  username: string
+  current_password: string
+}
+
 export class PasswordChangedLoginRequiredError extends Error {
   readonly cause: unknown
 
@@ -157,6 +162,17 @@ export const useAuthStore = defineStore('auth', () => {
     await restoreSession()
   }
 
+  async function changeUsername(payload: ChangeUsernamePayload): Promise<void> {
+    lastError.value = null
+    try {
+      const result = await apiClient.patch<unknown>('/auth/me', payload)
+      user.value = parseCurrentUser(result)
+    } catch (error) {
+      lastError.value = error
+      throw error
+    }
+  }
+
   async function changePassword(payload: ChangePasswordPayload): Promise<void> {
     const currentUsername = user.value?.username
     if (!currentUsername) {
@@ -229,6 +245,7 @@ export const useAuthStore = defineStore('auth', () => {
     ensureInitialized,
     retryInitialization,
     changePassword,
+    changeUsername,
     refreshAccessToken,
     markSessionExpired,
     clearSession,

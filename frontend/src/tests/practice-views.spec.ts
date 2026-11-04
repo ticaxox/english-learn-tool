@@ -122,7 +122,8 @@ describe('practice views', () => {
 
   it('resolves the random type to a concrete one before creating', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=random')
-    expect((wrapper.get('#practice-type').element as HTMLSelectElement).value).toBe('random')
+    const randomPill = wrapper.findAll('.practice-type-pill').find((pill) => pill.text() === '随机')
+    expect(randomPill?.classes()).toContain('is-active')
     await wrapper.get('form').trigger('submit')
     await flushPromises()
     const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import AppIcon from './AppIcon.vue'
 import ErrorNotice from './ErrorNotice.vue'
 import type {
   AiProvider,
@@ -51,7 +50,6 @@ const enabled = ref(true)
 const isDefault = ref(false)
 const customHeadersText = ref('{}')
 const apiKey = ref('')
-const showKey = ref(false)
 const modelsOpen = ref(false)
 const modelsFetched = ref(false)
 const errors = reactive<Record<string, string>>({})
@@ -85,7 +83,6 @@ function reset(): void {
   isDefault.value = provider?.isDefault ?? false
   customHeadersText.value = provider ? JSON.stringify(provider.customHeaders, null, 2) : '{}'
   apiKey.value = ''
-  showKey.value = false
   modelsOpen.value = false
   modelsFetched.value = false
   Object.keys(errors).forEach((key) => delete errors[key])
@@ -310,27 +307,16 @@ function cancel(): void {
 
       <div class="field">
         <label for="provider-api-key">API Key</label>
-        <div class="ai-secret-row">
-          <input
-            id="provider-api-key"
-            v-model="apiKey"
-            :type="showKey ? 'text' : 'password'"
-            autocomplete="new-password"
-            spellcheck="false"
-            maxlength="4096"
-            :placeholder="editing ? (maskedKey || '留空保持当前 Key') : '至少 8 个字符'"
-            :aria-invalid="Boolean(errors.apiKey)"
-          />
-          <DivButton
-            class="ai-secret-toggle"
-            type="button"
-            :aria-label="showKey ? '隐藏 Key' : '显示 Key'"
-            :aria-pressed="showKey"
-            @click="showKey = !showKey"
-          >
-            <AppIcon name="eye" />
-          </DivButton>
-        </div>
+        <input
+          id="provider-api-key"
+          v-model="apiKey"
+          type="password"
+          autocomplete="new-password"
+          spellcheck="false"
+          maxlength="4096"
+          :placeholder="editing ? (maskedKey || '留空保持当前 Key') : '至少 8 个字符'"
+          :aria-invalid="Boolean(errors.apiKey)"
+        />
         <p v-if="editing && !errors.apiKey" class="field-hint">已保存的 Key 不会回显；需要更换时直接输入新 Key。</p>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
       </div>

@@ -25,6 +25,13 @@ describe('error presentation', () => {
     expect(presentation.message).not.toContain('schema')
   })
 
+  it('explains username conflicts in product language', () => {
+    const taken = toErrorPresentation(new ApiError(409, 'USERNAME_TAKEN', 'taken', null, 'r1', false))
+    const unchanged = toErrorPresentation(new ApiError(422, 'USERNAME_UNCHANGED', 'same', null, 'r2', false))
+    expect(taken.title).toBe('这个用户名已被使用')
+    expect(unchanged.title).toBe('用户名没有变化')
+  })
+
   it('explains a service outage in product language', () => {
     const presentation = toErrorPresentation(
       new ApiError(502, 'HTTP_502', 'Bad Gateway', null, 'gateway-request', true),

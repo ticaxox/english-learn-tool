@@ -198,7 +198,8 @@ export async function completeMemorySession(
   sessionId: string,
   options: FetchOptions = {},
 ): Promise<void> {
-  await apiClient.post(`/memory/sessions/${encodeURIComponent(sessionId)}/complete`, undefined, {
+  // FastAPI still expects a JSON body for the empty SessionCompleteRequest model.
+  await apiClient.post(`/memory/sessions/${encodeURIComponent(sessionId)}/complete`, {}, {
     signal: options.signal,
     retryCount: 0,
   })

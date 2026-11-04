@@ -3827,3 +3827,61 @@
 .personal-workspace .ai-secret-toggle svg { width: 18px; height: 18px; }
 .personal-workspace .ai-secret-toggle:hover { border-color: var(--ui-line-strong); color: var(--ui-ink); }
 .personal-workspace .ai-secret-toggle[aria-pressed="true"] { background: var(--g-gold-soft); color: var(--ui-ink); }
+
+/* ------------------------------------------------ practice type picker */
+.personal-workspace .practice-type-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.personal-workspace .practice-type-pill {
+  padding: 8px 18px;
+  border: 1.5px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-size: 0.94rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.personal-workspace .practice-type-pill:hover { border-color: var(--ui-line-strong); }
+
+.personal-workspace .practice-type-pill.is-active {
+  border-color: var(--g-green-edge);
+  background: var(--g-green-soft);
+  color: var(--g-green-edge);
+  box-shadow: inset 0 -3px 0 var(--g-green-edge);
+}
+
+/* The waiting card is a centred column, not a left-hand sheet. */
+.personal-workspace .practice-generation-panel {
+  width: min(100%, 760px);
+  margin-inline: auto;
+}
+
+/* ------------------------------------------------ memory: centred session */
+.personal-workspace .memory-workbench-grid.is-session {
+  grid-template-columns: minmax(0, 980px);
+  justify-content: center;
+}
+
+.personal-workspace .memory-workbench-grid.is-session .memory-context-card { display: none; }
+
+.personal-workspace .memory-main-card .study-card { text-align: center; }
+.personal-workspace .memory-main-card .study-card .button-row { justify-content: center; }
+.personal-workspace .memory-main-card .study-card__example { margin-inline: auto; }
+.personal-workspace .memory-main-card .spelling-grid { justify-content: center; }
+.personal-workspace .memory-main-card .choice-list { max-width: 660px; margin-inline: auto; }
+.personal-workspace .memory-main-card .choice-option { justify-content: center; }
+.personal-workspace .memory-main-card .choice-option__label { font-size: 1.06rem; }
+
+.personal-workspace .memory-end-dialog { text-align: center; }
+.personal-workspace .memory-end-dialog .dialog-heading,
+.personal-workspace .memory-end-dialog .button-row { justify-content: center; }
+
+/* Card chrome follows the centred content. */
+.personal-workspace .memory-main-card .study-card__meta { justify-content: center; }
+.personal-workspace .memory-main-card .study-card__flip { margin-inline: auto; }

@@ -19,6 +19,7 @@ from app.core.security import (
     hash_csrf_token,
     hash_password,
     hash_refresh_token,
+    normalize_username,
     password_needs_rehash,
     verify_password,
 )
@@ -701,3 +702,66 @@ async def get_authenticated_context(
         jti=claims.jti,
         token_expires_at=claims.expires_at,
     )
+
+
+async def change_username(
+    session: AsyncSession,
+    *,
+    context: AuthContext,
+    username: str,
+    current_password: str,
+) -> User:
+    user = context.user
+    if not verify_password(current_password, user.password_hash):
+        await commit_failure_audit(
+            session,
+            actor=user,
+            action="auth.username.change",
+            target_type="user",
+            target_id=user.id,
+            target_username=user.username_normalized,
+            reason_code="AUTH_INVALID_CREDENTIALS",
+        )
+        raise AppError(
+            status_code=401,
+            code="AUTH_INVALID_CREDENTIALS",
+            message="The current password is incorrect.",
+        )
+    normalized = normalize_username(username)
+    if normalized == user.username_normalized:
+        raise AppError(
+            status_code=422,
+            code="USERNAME_UNCHANGED",
+            message="The new username must differ from the current one.",
+        )
+    taken = await session.scalar(
+        select(User.id).where(User.username_normalized == normalized, User.id != user.id).limit(1)
+    )
+    if taken is not None:
+        await commit_failure_audit(
+            session,
+            actor=user,
+            action="auth.username.change",
+            target_type="user",
+            target_id=user.id,
+            target_username=normalized,
+            reason_code="USERNAME_TAKEN",
+        )
+        raise AppError(
+            status_code=409,
+            code="USERNAME_TAKEN",
+            message="The username is already in use.",
+        )
+    user.username = username.strip()
+    user.username_normalized = normalized
+    add_audit_event(
+        session,
+        actor=user,
+        action="auth.username.change",
+        target_type="user",
+        target_id=user.id,
+        target_username=normalized,
+        outcome="success",
+    )
+    await session.commit()
+    return user

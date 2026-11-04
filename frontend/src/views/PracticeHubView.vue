@@ -105,8 +105,12 @@ function selectType(next: PracticeSelection): void {
   count.value = next === 'writing' ? 1 : 5
 }
 
-function onTypeChange(event: Event): void {
-  const next = (event.target as HTMLSelectElement).value as PracticeSelection
+const typeOptions = computed(() => [
+  ...practiceTypes.map((type) => ({ key: type as PracticeSelection, label: PRACTICE_TYPE_LABELS[type] })),
+  { key: 'random' as PracticeSelection, label: '随机' },
+])
+
+function chooseType(next: PracticeSelection): void {
   selectType(next)
   void router.replace({ query: { ...route.query, type: next === 'random' ? undefined : next } })
 }
@@ -243,15 +247,21 @@ onMounted(() => {
         <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
 
         <form class="practice-form" novalidate @submit.prevent="create">
+          <div class="practice-type-picker" role="group" aria-label="题型">
+            <DivButton
+              v-for="option in typeOptions"
+              :key="option.key"
+              class="practice-type-pill"
+              :class="{ 'is-active': practiceType === option.key }"
+              :aria-pressed="practiceType === option.key"
+              type="button"
+              @click="chooseType(option.key)"
+            >
+              {{ option.label }}
+            </DivButton>
+          </div>
+          <p v-if="practiceType === 'random'" class="field-hint">从可选题型里随机抽一种；题量选 1 题时也可能抽到作文。</p>
           <div class="practice-form-grid">
-            <div class="field">
-              <label for="practice-type">题型</label>
-              <select id="practice-type" :value="practiceType" @change="onTypeChange">
-                <option v-for="type in practiceTypes" :key="type" :value="type">{{ PRACTICE_TYPE_LABELS[type] }}</option>
-                <option value="random">随机题型</option>
-              </select>
-              <p v-if="practiceType === 'random'" class="field-hint">从可选题型里随机抽一种；题量选 1 题时也可能抽到作文。</p>
-            </div>
             <div class="field">
               <label for="practice-source">来源</label>
               <select id="practice-source" v-model="source">

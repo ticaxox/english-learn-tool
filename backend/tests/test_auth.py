@@ -127,6 +127,49 @@ async def test_change_password_rejects_wrong_old_and_unchanged_password(
     assert all("password" not in str(event.context).lower() for event in events)
 
 
+async def test_change_username_checks_password_uniqueness_and_login(
+    client, admin_user, user_factory
+) -> None:
+    login_response = await login(client, admin_user.username)
+    headers = bearer(login_response.json()["access_token"])
+
+    wrong = await client.patch(
+        ME_PATH,
+        headers=headers,
+        json={"username": "renamed_admin", "current_password": "Wrong-Pass-123!"},
+    )
+    assert wrong.status_code == 401
+    assert wrong.json()["code"] == "AUTH_INVALID_CREDENTIALS"
+
+    other = await user_factory(role="member")
+    taken = await client.patch(
+        ME_PATH,
+        headers=headers,
+        json={"username": other.username, "current_password": TEST_USER_PASSWORD},
+    )
+    assert taken.status_code == 409
+    assert taken.json()["code"] == "USERNAME_TAKEN"
+
+    unchanged = await client.patch(
+        ME_PATH,
+        headers=headers,
+        json={"username": admin_user.username, "current_password": TEST_USER_PASSWORD},
+    )
+    assert unchanged.status_code == 422
+    assert unchanged.json()["code"] == "USERNAME_UNCHANGED"
+
+    changed = await client.patch(
+        ME_PATH,
+        headers=headers,
+        json={"username": "renamed_admin", "current_password": TEST_USER_PASSWORD},
+    )
+    assert changed.status_code == 200
+    assert changed.json()["username"] == "renamed_admin"
+
+    assert (await login(client, "renamed_admin")).status_code == 200
+    assert (await login(client, admin_user.username)).status_code == 401
+
+
 async def test_login_errors_are_uniform_and_disabled_accounts_cannot_authenticate(
     client, app, member_user
 ) -> None:

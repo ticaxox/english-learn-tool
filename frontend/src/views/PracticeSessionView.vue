@@ -206,7 +206,6 @@ void practice.load()
           <DivButton class="button-secondary" type="button" @click="cancelGeneration">取消生成</DivButton>
           <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
         </div>
-        <p class="inline-note">取消后不再等待结果；如果生成失败，可以直接重试。</p>
       </section>
 
       <section v-else-if="session.status === 'failed'" class="panel">

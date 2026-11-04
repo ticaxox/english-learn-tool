@@ -155,19 +155,24 @@ async function master(questionId: string): Promise<void> {
 
 const endConfirmOpen = ref(false)
 const ending = ref(false)
+const endError = ref<unknown>(null)
 
 function endSession(): void {
+  endError.value = null
   endConfirmOpen.value = true
 }
 
 async function confirmEndSession(): Promise<void> {
   if (ending.value) return
   ending.value = true
+  endError.value = null
   try {
     await session.endSession()
     heartbeat.stop()
     timer.stop()
     endConfirmOpen.value = false
+  } catch (error) {
+    endError.value = error
   } finally {
     ending.value = false
   }
@@ -245,7 +250,7 @@ watch(challengeModule, async (module, previous) => {
       <ErrorNotice :error="configError" retry-label="重新读取配置" @retry="loadConfig" />
     </section>
 
-    <div v-else class="memory-workbench-grid">
+    <div v-else class="memory-workbench-grid" :class="{ 'is-session': Boolean(session.question.value) || session.finished.value }">
       <section class="workspace-card memory-main-card">
         <template v-if="showModulePicker">
           <header class="workspace-section-header">
@@ -315,11 +320,6 @@ watch(challengeModule, async (module, previous) => {
           </div>
         </section>
 
-        <section v-if="session.feedback.value" class="study-feedback" aria-live="polite">
-          <strong>{{ session.feedback.value.headline }}</strong>
-          <p v-if="session.feedback.value.detail">{{ session.feedback.value.detail }}</p>
-          <p v-if="session.feedback.value.requeued" class="inline-note">这张卡会在稍后重新出现。</p>
-        </section>
 
         <LoadingState v-if="session.busy.value && !session.question.value" label="正在提交…" />
 
@@ -390,6 +390,7 @@ watch(challengeModule, async (module, previous) => {
           </div>
         </header>
         <p class="field-hint">未完成的目标不会被算作完成，已记住的词会保留。</p>
+        <ErrorNotice v-if="endError" :error="endError" :show-retry="false" />
         <div class="button-row">
           <DivButton class="button-danger" type="button" :disabled="ending" @click="confirmEndSession">
             {{ ending ? '正在结束…' : '结束本次' }}

@@ -105,7 +105,7 @@ describe('T-FE-020 personal information architecture', () => {
       global: { plugins: [router] },
     })
     const tabs = wrapper.findAll('.workspace-topbar-tab')
-    expect(tabs.map((tab) => tab.text().trim())).toEqual(['词书', '学习设置', 'AI 配置', '账户与安全'])
+    expect(tabs.map((tab) => tab.text().trim())).toEqual(['词书', '学习设置', 'AI 配置', '我的账户'])
     expect(tabs.map((tab) => tab.attributes('href'))).toEqual([
       '/settings/wordbooks',
       '/settings/learning',

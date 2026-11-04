@@ -9,12 +9,19 @@ from app.core.config import Settings
 from app.core.security import CSRF_COOKIE_NAME, CSRF_HEADER_NAME, REFRESH_COOKIE_NAME
 from app.db.session import get_db_session
 from app.models.identity import User
-from app.schemas.auth import AuthSessionResponse, ChangePasswordRequest, LoginRequest, UserSelf
+from app.schemas.auth import (
+    AuthSessionResponse,
+    ChangePasswordRequest,
+    LoginRequest,
+    UsernameChangeRequest,
+    UserSelf,
+)
 from app.schemas.common import ErrorResponse
 from app.services.auth import (
     AuthContext,
     IssuedSession,
     change_password,
+    change_username,
     login,
     logout,
     refresh_session,
@@ -227,6 +234,30 @@ async def change_password_endpoint(
     _clear_session_cookies(response, request.app.state.settings)
     response.status_code = status.HTTP_204_NO_CONTENT
     return response
+
+
+@router.patch(
+    "/me",
+    response_model=UserSelf,
+    responses={
+        **_UNAUTHORIZED_RESPONSE,
+        409: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+    summary="Change the caller's username after confirming the password",
+)
+async def change_username_endpoint(
+    payload: UsernameChangeRequest,
+    context: Annotated[AuthContext, Depends(get_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> UserSelf:
+    user = await change_username(
+        session,
+        context=context,
+        username=payload.username,
+        current_password=payload.current_password,
+    )
+    return _user_response(user)
 
 
 @router.get(

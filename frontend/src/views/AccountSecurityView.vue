@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { ValidationError } from '../api/errors'
-import { validateStrongPassword } from '../lib/validation'
+import { validateStrongPassword, validateUsername } from '../lib/validation'
 import { PasswordChangedLoginRequiredError, useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
@@ -14,6 +14,37 @@ const confirmPassword = ref('')
 const submitting = ref(false)
 const error = ref<unknown>(null)
 const saved = ref(false)
+
+const username = ref(auth.user?.username ?? '')
+const usernamePassword = ref('')
+const usernameSubmitting = ref(false)
+const usernameError = ref<unknown>(null)
+const usernameSaved = ref(false)
+
+async function submitUsername(): Promise<void> {
+  usernameError.value = null
+  usernameSaved.value = false
+  const name = username.value.trim()
+  const nameError = validateUsername(name)
+  if (nameError) {
+    usernameError.value = new ValidationError(nameError)
+    return
+  }
+  if (!usernamePassword.value) {
+    usernameError.value = new ValidationError('请输入当前密码。')
+    return
+  }
+  usernameSubmitting.value = true
+  try {
+    await auth.changeUsername({ username: name, current_password: usernamePassword.value })
+    usernamePassword.value = ''
+    usernameSaved.value = true
+  } catch (changeError) {
+    usernameError.value = changeError
+  } finally {
+    usernameSubmitting.value = false
+  }
+}
 
 async function submit(): Promise<void> {
   error.value = null
@@ -63,6 +94,50 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
+  <section class="panel ia-account-security" aria-labelledby="account-username-title">
+    <div class="ia-subsection-header">
+      <div>
+        <p class="eyebrow">我的账户</p>
+        <h2 id="account-username-title">登录用户名</h2>
+        <p>修改后请用新用户名登录；学习记录和显示名称不变。</p>
+      </div>
+    </div>
+
+    <p v-if="usernameSaved" class="alert alert-success" role="status">用户名已更新。</p>
+    <ErrorNotice v-if="usernameError" :error="usernameError" :show-retry="false" />
+
+    <form class="form-stack ia-security-form" @submit.prevent="submitUsername">
+      <div class="field">
+        <label for="settings-username">新用户名</label>
+        <input
+          id="settings-username"
+          v-model="username"
+          type="text"
+          autocomplete="username"
+          minlength="3"
+          maxlength="32"
+          required
+          :disabled="usernameSubmitting"
+        />
+        <p class="field-hint">3–32 位英文字母、数字或下划线。</p>
+      </div>
+      <div class="field">
+        <label for="settings-username-password">当前密码</label>
+        <input
+          id="settings-username-password"
+          v-model="usernamePassword"
+          type="password"
+          autocomplete="current-password"
+          required
+          :disabled="usernameSubmitting"
+        />
+      </div>
+      <div class="button-row">
+        <DivButton type="submit" :disabled="usernameSubmitting">{{ usernameSubmitting ? '正在更新…' : '保存用户名' }}</DivButton>
+      </div>
+    </form>
+  </section>
+
   <section class="panel ia-account-security" aria-labelledby="account-security-title">
     <div class="ia-subsection-header">
       <div>

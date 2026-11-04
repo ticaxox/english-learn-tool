@@ -142,6 +142,24 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       }
     }
 
+    if (error.code === 'USERNAME_TAKEN') {
+      return {
+        title: '这个用户名已被使用',
+        message: '换一个用户名再试。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.code === 'USERNAME_UNCHANGED') {
+      return {
+        title: '用户名没有变化',
+        message: '新用户名与当前用户名相同。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
     if (error.code === 'AUTH_INVALID_CREDENTIALS') {
       return {
         title: '用户名或密码不正确',

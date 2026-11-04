@@ -74,7 +74,7 @@ const sectionTabs = computed(() => {
       { label: '词书', to: '/settings/wordbooks', active: path.startsWith('/settings/wordbooks') },
       { label: '学习设置', to: '/settings/learning', active: path.startsWith('/settings/learning') },
       { label: 'AI 配置', to: '/settings/ai', active: path.startsWith('/settings/ai') },
-      { label: '账户与安全', to: '/settings/security', active: path.startsWith('/settings/security') },
+      { label: '我的账户', to: '/settings/security', active: path.startsWith('/settings/security') },
     ]
   }
   return []
