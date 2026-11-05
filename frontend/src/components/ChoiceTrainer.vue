@@ -62,7 +62,7 @@ function choose(optionId: string): void {
 </script>
 
 <template>
-  <section class="study-card" aria-labelledby="choice-prompt">
+  <section class="study-card study-card--choice" aria-labelledby="choice-prompt">
     <h2 id="choice-prompt" ref="promptHeading" class="study-card__prompt" tabindex="-1">{{ props.question.prompt }}</h2>
     <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
 

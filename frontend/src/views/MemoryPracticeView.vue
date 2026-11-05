@@ -145,6 +145,14 @@ interface WrongCard {
   word: string
   phonetic: string | null
   meaning: string
+  kind: 'choice' | 'spelling'
+  typed: string | null
+}
+
+function typedLetterIsWrong(card: WrongCard, index: number): boolean {
+  const typed = card.typed ?? ''
+  const correct = card.word
+  return (typed[index] ?? '').toLowerCase() !== (correct[index] ?? '').toLowerCase()
 }
 
 const wrongCard = ref<WrongCard | null>(null)
@@ -158,6 +166,10 @@ async function answerChoice(questionId: string, optionId: string): Promise<void>
       word: feedback.correctAnswer ?? '',
       phonetic: question?.kind === 'choice' ? question.phonetic : null,
       meaning: question?.kind === 'choice' ? question.prompt : '',
+      kind: 'choice',
+      typed: question?.kind === 'choice'
+        ? question.options.find((option) => option.optionId === optionId)?.label ?? null
+        : null,
     }
     return
   }
@@ -173,6 +185,8 @@ async function answerSpelling(questionId: string, answer: string): Promise<void>
       word: feedback.correctAnswer ?? '',
       phonetic: question?.kind === 'spelling' ? question.phonetic : null,
       meaning: question?.kind === 'spelling' ? question.definition : '',
+      kind: 'spelling',
+      typed: answer,
     }
     return
   }
@@ -379,6 +393,19 @@ watch(challengeModule, async (module, previous) => {
           <h2>{{ wrongCard.word }}</h2>
           <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
           <p class="memory-wrong-detail__meaning">{{ wrongCard.meaning }}</p>
+          <p v-if="wrongCard.typed" class="memory-wrong-detail__answer">
+            <span class="memory-wrong-detail__answer-label">
+              {{ wrongCard.kind === 'spelling' ? '你填了：' : '你选了：' }}
+            </span>
+            <span v-if="wrongCard.kind === 'spelling'" class="memory-wrong-detail__letters">
+              <span
+                v-for="(letter, index) in wrongCard.typed"
+                :key="index"
+                :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
+              >{{ letter }}</span>
+            </span>
+            <span v-else class="memory-wrong-detail__chosen">{{ wrongCard.typed }}</span>
+          </p>
           <DivButton class="button" type="button" @click="continueAfterWrong">继续</DivButton>
         </section>
 

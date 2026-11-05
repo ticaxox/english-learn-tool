@@ -288,7 +288,9 @@ void practice.load()
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />
               <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value || !allAnswered" @click="submit">
-                {{ practice.busy.value ? '正在提交…' : '提交全部答案' }} <AppIcon name="arrow" />
+                <span class="practice-submit-label">{{ practice.busy.value ? '正在提交…' : '提交全部答案' }}</span>
+                <span class="practice-submit-label practice-submit-label--short">{{ practice.busy.value ? '提交中…' : '提交' }}</span>
+                <AppIcon name="arrow" />
               </SvgPlateButton>
               <DivButton class="button-secondary practice-regenerate-button" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</DivButton>
             </section>
