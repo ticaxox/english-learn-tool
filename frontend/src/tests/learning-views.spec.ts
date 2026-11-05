@@ -71,6 +71,8 @@ const profile: LearningProfile = {
   learningGroup: 'A 组',
   memoryConfig: config,
   needsOnboarding: false,
+  practicePoolTargets: {},
+  challengeGenerationTime: null,
   planEffectiveFrom: null,
 }
 
@@ -134,6 +136,8 @@ describe('learning surfaces with the frozen contract', () => {
     expect(wrapper.text()).toContain('关卡生成')
     expect(wrapper.text()).not.toContain('目标考试')
     expect(wrapper.text()).not.toContain('记忆模块')
+    expect(wrapper.findAll('.pool-grid select')).toHaveLength(16)
+    expect(wrapper.find('#challenge-generation-time').exists()).toBe(true)
     const toggles = wrapper.findAll('.settings-toggle')
     expect(toggles).toHaveLength(7)
     expect(toggles[0].attributes('aria-pressed')).toBe('true')

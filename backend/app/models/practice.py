@@ -5,6 +5,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     Float,
@@ -66,6 +67,9 @@ class PracticeSession(Base):
         PGUUID(as_uuid=True), ForeignKey("wordbooks.id", ondelete="CASCADE")
     )
     question_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_pool: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
     status: Mapped[str] = mapped_column(
         String(16), nullable=False, default="generating", server_default=text("'generating'")
     )
@@ -260,4 +264,50 @@ class PracticeDeletion(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class PracticePoolItem(Base):
+    """A pre-generated practice session waiting to be claimed.
+
+    The row is deleted the moment the learner starts that session; the session
+    itself then behaves like any other practice session. ``attempts`` counts how
+    many generations this slot has used so a broken provider cannot loop.
+    """
+
+    __tablename__ = "practice_pool_items"
+    __table_args__ = (
+        CheckConstraint(
+            "question_count >= 1 AND question_count <= 20", name="question_count_range"
+        ),
+        CheckConstraint("attempts >= 1", name="attempts_positive"),
+        UniqueConstraint("session_id", name="uq_practice_pool_items_session"),
+        Index(
+            "ix_practice_pool_items_user_type_count",
+            "user_id",
+            "practice_type",
+            "question_count",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    practice_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    question_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    session_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("practice_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    attempts: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1, server_default=text("1")
+    )
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )

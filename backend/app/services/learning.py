@@ -88,6 +88,8 @@ def _profile_response(profile: UserProfile) -> LearningProfileResponse:
         timezone=profile.timezone,
         onboarding_completed=profile.onboarding_completed,
         notification_preferences=profile.notification_preferences or {},
+        practice_pool_targets=profile.practice_pool_targets or {},
+        challenge_generation_time=profile.challenge_generation_time,
         updated_at=profile.updated_at,
     )
 
@@ -153,6 +155,10 @@ async def update_profile(
         profile.daily_study_minutes = payload.daily_study_minutes
     if payload.notification_preferences is not None:
         profile.notification_preferences = payload.notification_preferences
+    if "practice_pool_targets" in fields and payload.practice_pool_targets is not None:
+        profile.practice_pool_targets = payload.practice_pool_targets
+    if "challenge_generation_time" in fields:
+        profile.challenge_generation_time = payload.challenge_generation_time
     if payload.onboarding_completed is not None:
         profile.onboarding_completed = payload.onboarding_completed
     elif profile.target_exam is not None:

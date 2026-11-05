@@ -4,20 +4,25 @@ import logging
 from datetime import timedelta
 from typing import Any
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from arq import cron
 from sqlalchemy import or_, select
 
+from app.models.challenge import DailyChallengePlan
+from app.models.identity import User, UserProfile
 from app.models.wordbooks import WordbookJob
 from app.services.ai_jobs import reconcile_stale_ai_jobs
 from app.services.auth import utcnow
-from app.services.challenge import expire_and_cleanup_challenges
+from app.services.challenge import expire_and_cleanup_challenges, generate_today
 from app.services.coach import cleanup_coach_data
+from app.services.learning import local_date_for
 from app.services.notifications import (
     cleanup_expired_notifications,
     enqueue_scheduled_notification_events,
     process_notification_outbox,
 )
+from app.services.practice_pool import ensure_pool_for_user_id, pool_users
 from app.services.wordbook_queue import (
     SCHEDULER_QUEUE_NAME,
     QueueDispatchKind,
@@ -236,10 +241,86 @@ async def scheduler_tick(ctx: dict[str, Any]) -> None:
     )
 
 
+async def practice_pool_tick(ctx: dict[str, Any]) -> None:
+    """Top up the pre-generated practice stock for every configured learner."""
+    factory = ctx.get("session_factory")
+    if factory is None:
+        return
+    settings = ctx["settings"]
+    async with factory() as session:
+        user_ids = await pool_users(session)
+    results = {"created": 0, "retried": 0, "skipped": 0, "users": 0}
+    for user_id in user_ids:
+        try:
+            async with factory() as session:
+                outcome = await ensure_pool_for_user_id(session, ctx["redis"], settings, user_id)
+        except Exception:  # noqa: BLE001 - one learner must not stop the tick
+            logger.exception("scheduler.practice_pool_failed", extra={"user_id": str(user_id)})
+            continue
+        results["users"] += 1
+        for key in ("created", "retried", "skipped"):
+            results[key] += outcome[key]
+    if results["users"]:
+        logger.info("scheduler.practice_pool_tick", extra=results)
+
+
+async def challenge_schedule_tick(ctx: dict[str, Any]) -> None:
+    """Generate today's learning map for learners whose configured time matches."""
+    factory = ctx.get("session_factory")
+    if factory is None:
+        return
+    settings = ctx["settings"]
+    now = utcnow()
+    local_now = now.astimezone(ZoneInfo(settings.app_timezone))
+    current = local_now.strftime("%H:%M")
+    async with factory() as session:
+        user_ids = list(
+            (
+                await session.scalars(
+                    select(UserProfile.user_id).where(
+                        UserProfile.challenge_generation_time == current
+                    )
+                )
+            ).all()
+        )
+    generated = 0
+    for user_id in user_ids:
+        async with factory() as session:
+            user = await session.get(User, user_id)
+            if user is None:
+                continue
+            local_date = local_date_for(settings, user, now=now)
+            existing = await session.scalar(
+                select(DailyChallengePlan.id).where(
+                    DailyChallengePlan.user_id == user_id,
+                    DailyChallengePlan.local_date == local_date,
+                )
+            )
+            if existing is not None:
+                continue
+            try:
+                await generate_today(session, ctx["redis"], user, settings)
+                generated += 1
+            except Exception:  # noqa: BLE001 - retry on the next matching day
+                logger.exception(
+                    "scheduler.challenge_generation_failed",
+                    extra={"user_id": str(user_id)},
+                )
+    if user_ids:
+        logger.info(
+            "scheduler.challenge_schedule_tick",
+            extra={"matching_users": len(user_ids), "generated": generated, "at": current},
+        )
+
+
 class SchedulerSettings:
     functions = [scheduler_tick]
     queue_name = SCHEDULER_QUEUE_NAME
-    cron_jobs = [cron(scheduler_tick, minute=set(range(60)), unique=False)]
+    cron_jobs = [
+        cron(scheduler_tick, minute=set(range(60)), unique=False),
+        cron(practice_pool_tick, minute=set(range(0, 60, 2)), unique=True),
+        cron(challenge_schedule_tick, minute=set(range(60)), unique=True),
+    ]
     redis_settings = get_redis_settings()
     on_startup = worker_runtime_startup
     on_shutdown = worker_runtime_shutdown

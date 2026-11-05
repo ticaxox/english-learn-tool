@@ -57,6 +57,19 @@ const DRILL_MODE_OPTIONS = [
   { key: 'choice', label: '选择' },
   { key: 'spelling', label: '拼写' },
 ] as const
+const POOL_TYPES = [
+  { key: 'fill_blank', label: '填空' },
+  { key: 'reading', label: '阅读' },
+  { key: 'translation', label: '翻译' },
+  { key: 'writing', label: '作文' },
+] as const
+const POOL_COUNTS: Record<string, number[]> = {
+  fill_blank: [3, 5, 10, 15, 20],
+  reading: [3, 5, 10, 15, 20],
+  translation: [3, 5, 10, 15, 20],
+  writing: [1],
+}
+const POOL_TARGET_OPTIONS = [0, 1, 2]
 
 const challengePrefs = reactive<{ practiceTypes: string[]; drillModes: string[] }>({
   practiceTypes: PRACTICE_TYPE_OPTIONS.map((option) => option.key),
@@ -74,6 +87,28 @@ function togglePref(key: 'drillModes' | 'practiceTypes', value: string): void {
   }
 }
 
+function poolTarget(type: string, count: number): number {
+  return form.practicePoolTargets?.[type]?.[String(count)] ?? 0
+}
+
+function setPoolTarget(type: string, count: number, event: Event): void {
+  const value = Number((event.target as HTMLSelectElement).value) || 0
+  const next = { ...(form.practicePoolTargets ?? {}) }
+  const row = { ...(next[type] ?? {}) }
+  if (value === 0) delete row[String(count)]
+  else row[String(count)] = value
+  if (Object.keys(row).length) next[type] = row
+  else delete next[type]
+  form.practicePoolTargets = next
+}
+
+const challengeTime = computed({
+  get: () => form.challengeGenerationTime ?? '',
+  set: (value: string) => {
+    form.challengeGenerationTime = value || null
+  },
+})
+
 const completionDays = computed(() => {
   if (!activeWordbookSize.value || form.dailyNewWords <= 0) return null
   return Math.ceil(activeWordbookSize.value / form.dailyNewWords)
@@ -85,6 +120,8 @@ const form = reactive<LearningProfileUpdate>({
   dailyNewWords: 20,
   dailyMinutes: 30,
   memoryConfig: defaultMemoryConfig(),
+  practicePoolTargets: {},
+  challengeGenerationTime: null,
 })
 
 const today = todayIsoDate()
@@ -98,6 +135,8 @@ function applyProfile(value: LearningProfile): void {
   form.dailyNewWords = value.dailyNewWords
   form.dailyMinutes = value.dailyMinutes
   form.memoryConfig = cloneConfig(value.memoryConfig)
+  form.practicePoolTargets = JSON.parse(JSON.stringify(value.practicePoolTargets ?? {}))
+  form.challengeGenerationTime = value.challengeGenerationTime
   const stored = (value.memoryConfig.preferences?.challenge ?? {}) as {
     practiceTypes?: string[]
     drillModes?: string[]
@@ -288,6 +327,50 @@ onMounted(() => {
                 </DivButton>
               </div>
             </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>AI 练习预生成</legend>
+          <p class="field-hint">
+            为每种题型和题量预留几套题目。用掉一套后后台会自动补一套；0 表示不预生成，每个组合最多 2 套。
+          </p>
+          <div class="pool-grid" role="table" aria-label="AI 练习预生成数量">
+            <div class="pool-grid__row pool-grid__row--head" role="row">
+              <span role="columnheader">题型</span>
+              <span v-for="count in POOL_COUNTS.fill_blank" :key="count" role="columnheader">
+                {{ count }} 题
+              </span>
+            </div>
+            <div v-for="type in POOL_TYPES" :key="type.key" class="pool-grid__row" role="row">
+              <span role="rowheader">{{ type.label }}</span>
+              <template v-for="count in POOL_COUNTS[type.key]" :key="count">
+                <select
+                  :aria-label="`${type.label} ${count} 题的预生成套数`"
+                  :value="poolTarget(type.key, count)"
+                  @change="setPoolTarget(type.key, count, $event)"
+                >
+                  <option v-for="target in POOL_TARGET_OPTIONS" :key="target" :value="target">
+                    {{ target }}
+                  </option>
+                </select>
+              </template>
+              <span
+                v-for="pad in 5 - POOL_COUNTS[type.key].length"
+                :key="`pad-${pad}`"
+                class="pool-grid__pad"
+                aria-hidden="true"
+              >—</span>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>学习地图</legend>
+          <div class="field">
+            <label for="challenge-generation-time">每天自动生成时间</label>
+            <input id="challenge-generation-time" v-model="challengeTime" type="time" />
+            <p class="field-hint">到点后后台自动生成当天的学习地图；留空则在打开地图时再生成。</p>
           </div>
         </fieldset>
 

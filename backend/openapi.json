@@ -3617,6 +3617,17 @@
       },
       "LearningProfilePatch": {
         "properties": {
+          "challenge_generation_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Challenge Generation Time"
+          },
           "daily_new_words": {
             "anyOf": [
               {
@@ -3678,6 +3689,23 @@
             ],
             "title": "Onboarding Completed"
           },
+          "practice_pool_targets": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Pool Targets"
+          },
           "target_exam": {
             "anyOf": [
               {
@@ -3702,6 +3730,17 @@
       },
       "LearningProfileResponse": {
         "properties": {
+          "challenge_generation_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Challenge Generation Time"
+          },
           "daily_new_words": {
             "title": "Daily New Words",
             "type": "integer"
@@ -3752,6 +3791,16 @@
           "onboarding_completed": {
             "title": "Onboarding Completed",
             "type": "boolean"
+          },
+          "practice_pool_targets": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "title": "Practice Pool Targets",
+            "type": "object"
           },
           "target_exam": {
             "anyOf": [

@@ -979,3 +979,48 @@ async def test_reset_today_progress_clears_sessions_and_requeues_words(
     empty = await client.post("/api/v1/memory/progress/reset", headers=headers, json={})
     assert empty.status_code == 200
     assert empty.json()["words_reset"] >= 1
+
+
+async def test_an_active_session_from_an_earlier_day_is_not_resumed(
+    app, client, member_user
+) -> None:
+    headers = await login(client, member_user.username)
+    wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=6)
+    await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
+    await client.get(TODAY_PATH, headers=headers)
+
+    entry_id, plan_word_id = await _first_plan_word(app, member_user.id, wordbook_id)
+    await _force_due(app, member_user.id, wordbook_id, entry_id, plan_word_id)
+
+    created = await client.post(SESSIONS_PATH, headers=headers, json={"module": "choice"})
+    assert created.status_code == 201, created.text
+    old_id = UUID(created.json()["session_id"])
+
+    async with app.state.session_factory() as session:
+        old = await session.get(MemorySession, old_id)
+        assert old is not None
+        old.local_date = old.local_date - timedelta(days=3)
+        await session.commit()
+
+    again = await client.post(SESSIONS_PATH, headers=headers, json={"module": "choice"})
+    assert again.status_code == 201, again.text
+    assert UUID(again.json()["session_id"]) != old_id
+    assert again.json()["next_item"] is not None
+
+    async with app.state.session_factory() as session:
+        old = await session.get(MemorySession, old_id)
+        assert old is not None
+        assert old.status == "abandoned"
+
+    # Reset also clears active sessions left open on earlier days.
+    async with app.state.session_factory() as session:
+        current = await session.get(MemorySession, UUID(again.json()["session_id"]))
+        assert current is not None
+        current.local_date = current.local_date - timedelta(days=2)
+        await session.commit()
+
+    reset = await client.post("/api/v1/memory/progress/reset", headers=headers, json={})
+    assert reset.status_code == 200, reset.text
+    async with app.state.session_factory() as session:
+        stale = await session.get(MemorySession, UUID(again.json()["session_id"]))
+        assert stale is None

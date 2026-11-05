@@ -19,6 +19,7 @@ from app.models.practice import (
     PracticeDeletion,
     PracticeEvent,
     PracticeGeneration,
+    PracticePoolItem,
     PracticeQuestion,
     PracticeSession,
     PracticeSubmission,
@@ -61,6 +62,7 @@ from app.services.ai_memory import record_practice_memory
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
 from app.services.learning import local_date_for
+from app.services.wordbook_queue import WORDBOOK_QUEUE_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +264,50 @@ def _exam_type(user: User, difficulty: str | None) -> str:
     return profile.target_exam if profile and profile.target_exam else "CET4"
 
 
+async def claim_pool_session(
+    session: AsyncSession,
+    user: User,
+    payload: PracticeCreateRequest,
+    *,
+    idempotency_key: str,
+    request_hash: str,
+) -> PracticeSession | None:
+    """Take one ready pre-generated set for this request, if one exists."""
+    row = (
+        await session.execute(
+            select(PracticePoolItem, PracticeSession)
+            .join(PracticeSession, PracticeSession.id == PracticePoolItem.session_id)
+            .where(
+                PracticePoolItem.user_id == user.id,
+                PracticePoolItem.practice_type == payload.practice_type,
+                PracticePoolItem.question_count == payload.count,
+                PracticeSession.status == "ready",
+            )
+            .order_by(PracticePoolItem.created_at.asc())
+            .with_for_update(skip_locked=True)
+            .limit(1)
+        )
+    ).first()
+    if row is None:
+        return None
+    item, practice = row
+    practice.is_pool = False
+    practice.source = payload.source
+    practice.difficulty = payload.difficulty
+    practice.idempotency_key = idempotency_key
+    practice.request_hash = request_hash
+    practice.source_context = {
+        **practice.source_context,
+        "source": payload.source,
+        "difficulty": payload.difficulty,
+        "claimed_from_pool": True,
+    }
+    await session.delete(item)
+    await session.commit()
+    await session.refresh(practice)
+    return practice
+
+
 async def create_practice_session(
     session: AsyncSession,
     pool: ArqRedis,
@@ -292,6 +338,22 @@ async def create_practice_session(
                 message="The Idempotency-Key was used for a different practice request.",
             )
         return await _session_response(session, existing)
+
+    claimed = await claim_pool_session(
+        session, user, payload, idempotency_key=idempotency_key, request_hash=request_hash
+    )
+    if claimed is not None:
+        # Refill the pool in the background; claiming must not wait for it.
+        try:
+            await pool.enqueue_job(
+                "replenish_practice_pool",
+                str(user.id),
+                _job_id=f"pool-replenish:{user.id}:{uuid4().hex}",
+                _queue_name=WORDBOOK_QUEUE_NAME,
+            )
+        except Exception:  # noqa: BLE001 - the scheduler also tops up pools
+            logger.warning("practice_pool.replenish_enqueue_failed", exc_info=True)
+        return await _session_response(session, claimed)
 
     wordbook_id, target_entry_ids = await _resolve_target_entries(session, user, settings, payload)
     session_id = uuid4()
@@ -363,6 +425,96 @@ async def create_practice_session(
     await session.commit()
     practice = await _load_owned_session(session, user, session_id)
     return await _session_response(session, practice)
+
+
+async def create_pool_practice_session(
+    session: AsyncSession,
+    pool: ArqRedis,
+    user: User,
+    settings: Settings,
+    *,
+    practice_type: str,
+    count: int,
+) -> PracticeSession:
+    """Generate one ready-to-use practice set ahead of time.
+
+    The session is marked ``is_pool`` and stays out of the learner's records
+    until they claim it. Whole-book words keep the content valid even when the
+    daily plan rotates.
+    """
+    payload = PracticeCreateRequest(
+        practice_type=practice_type,  # type: ignore[arg-type]
+        source="whole_book",
+        count=count,
+    )
+    wordbook_id, target_entry_ids = await _resolve_target_entries(session, user, settings, payload)
+    session_id = uuid4()
+    generation_id = uuid4()
+    practice = PracticeSession(
+        id=session_id,
+        user_id=user.id,
+        practice_type=practice_type,
+        source="whole_book",
+        difficulty=None,
+        wordbook_id=wordbook_id,
+        question_count=count,
+        status="generating",
+        generation_number=1,
+        current_generation_id=generation_id,
+        source_context={
+            "practice_type": practice_type,
+            "source": "whole_book",
+            "count": count,
+            "difficulty": None,
+            "wordbook_id": str(wordbook_id) if wordbook_id else None,
+            "target_entry_ids": [str(entry_id) for entry_id in target_entry_ids],
+            "pre_generated": True,
+        },
+        idempotency_key=f"pool:{session_id}",
+        request_hash="0" * 64,
+        is_pool=True,
+    )
+    generation = PracticeGeneration(
+        id=generation_id,
+        session_id=session_id,
+        generation_number=1,
+        status="generating",
+    )
+    session.add(practice)
+    await session.flush()
+    session.add(generation)
+    await session.flush()
+    session.add(
+        _event(practice, "practice.pool_created", metadata={"practice_type": practice_type})
+    )
+    generation_request = PracticeGenerationRequest(
+        task_type="practice_generation",
+        context=PracticeGenerationContext(
+            practice_type=practice_type,  # type: ignore[arg-type]
+            count=count,
+            source="whole_book",
+            difficulty=None,
+            wordbook_id=wordbook_id,
+            target_entry_ids=target_entry_ids,
+            practice_session_id=session_id,
+        ),
+    )
+    job, _ = await create_ai_job(
+        session,
+        pool,
+        user,
+        settings,
+        generation_request,
+        idempotency_key=f"practice-pool:{session_id}",
+    )
+    generation_row = await session.get(PracticeGeneration, generation_id)
+    if generation_row is not None:
+        generation_row.ai_job_id = job.id
+    practice_row = await session.get(PracticeSession, session_id)
+    if practice_row is not None:
+        practice_row.ai_job_id = job.id
+    await session.commit()
+    return await _load_owned_session(session, user, session_id)
 
 
 async def get_practice_session(

@@ -1,6 +1,15 @@
 from app.services.wordbook_queue import SCHEDULER_QUEUE_NAME, WORDBOOK_QUEUE_NAME
-from app.workers.scheduler import SchedulerSettings, scheduler_tick
-from app.workers.worker import WorkerSettings, worker_heartbeat
+from app.workers.scheduler import (
+    SchedulerSettings,
+    challenge_schedule_tick,
+    practice_pool_tick,
+    scheduler_tick,
+)
+from app.workers.worker import (
+    WorkerSettings,
+    replenish_practice_pool,
+    worker_heartbeat,
+)
 
 
 async def test_worker_and_scheduler_entries_are_runnable() -> None:
@@ -9,8 +18,12 @@ async def test_worker_and_scheduler_entries_are_runnable() -> None:
 
     assert heartbeat == {"status": "ok"}
     assert worker_heartbeat in WorkerSettings.functions
+    assert replenish_practice_pool in WorkerSettings.functions
     assert scheduler_tick in SchedulerSettings.functions
-    assert len(SchedulerSettings.cron_jobs) == 1
+    cron_functions = {job.coroutine for job in SchedulerSettings.cron_jobs}
+    assert scheduler_tick in cron_functions
+    assert practice_pool_tick in cron_functions
+    assert challenge_schedule_tick in cron_functions
 
 
 def test_scheduler_and_business_worker_use_separate_queues() -> None:

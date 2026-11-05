@@ -30,6 +30,8 @@ function baseUpdate() {
     dailyNewWords: 20,
     dailyMinutes: 30,
     memoryConfig: defaultMemoryConfig(),
+    practicePoolTargets: {},
+    challengeGenerationTime: null,
   }
 }
 
@@ -103,6 +105,8 @@ describe('validateProfile aggregation', () => {
         dailyNewWords: 2,
         dailyMinutes: 400,
         memoryConfig: { ...defaultMemoryConfig(), flashcard: { enabled: false, blankType: null }, choice: { enabled: false, blankType: null }, spelling: { enabled: false, blankType: null } },
+        practicePoolTargets: {},
+        challengeGenerationTime: null,
       },
       TODAY,
     )

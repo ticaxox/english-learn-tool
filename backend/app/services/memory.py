@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import and_, delete, func, select, update
+from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -133,11 +133,17 @@ async def reset_today_progress(
     wordbook, the words themselves and older history stay untouched.
     """
     today = local_date_for(settings, user)
+    # Today's sessions, plus any active session left open on an earlier day:
+    # that stale session would otherwise be resumed instead of a fresh one.
     sessions = list(
         (
             await session.scalars(
                 select(MemorySession).where(
-                    MemorySession.user_id == user.id, MemorySession.local_date == today
+                    MemorySession.user_id == user.id,
+                    or_(
+                        MemorySession.local_date == today,
+                        MemorySession.status == "active",
+                    ),
                 )
             )
         ).all()
@@ -576,6 +582,28 @@ async def start_session(
             message="This training module is disabled in the memory configuration.",
         )
     preferences = dict(config.preferences or {})
+    # A session belongs to one local day. An active session from an earlier day
+    # would otherwise be resumed forever (and show "本轮完成" once its items are
+    # done), so close those before looking for today's session.
+    stale_sessions = list(
+        (
+            await session.scalars(
+                select(MemorySession).where(
+                    MemorySession.user_id == user.id,
+                    MemorySession.wordbook_id == book.id,
+                    MemorySession.module == payload.module,
+                    MemorySession.status == "active",
+                    MemorySession.local_date != local_date,
+                )
+            )
+        ).all()
+    )
+    if stale_sessions:
+        now = utcnow()
+        for stale in stale_sessions:
+            stale.status = "abandoned"
+            stale.completed_at = now
+        await session.flush()
     existing = await session.scalar(
         select(MemorySession).where(
             MemorySession.user_id == user.id,
