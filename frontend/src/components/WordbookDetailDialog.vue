@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import {
   getWordbookDetail,
+  type Wordbook,
   type WordbookDetail,
   type WordbookStatus,
 } from '../api/wordbooks'
@@ -9,12 +10,26 @@ import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
 import LoadingState from './LoadingState.vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   wordbookId: string
-}>()
+  book?: Wordbook | null
+  canActivate?: boolean
+  canExport?: boolean
+  canDelete?: boolean
+  activating?: boolean
+}>(), {
+  book: null,
+  canActivate: false,
+  canExport: false,
+  canDelete: false,
+  activating: false,
+})
 
 const emit = defineEmits<{
-  close: []
+  (event: 'close'): void
+  (event: 'activate'): void
+  (event: 'export'): void
+  (event: 'delete'): void
 }>()
 
 const PAGE_SIZE = 50
@@ -120,6 +135,14 @@ onMounted(() => {
         <div>
           <p class="eyebrow">只读词书详情</p>
           <h2 id="wordbook-detail-title">{{ detail?.wordbook.name ?? '词书详情' }}</h2>
+        </div>
+        <div v-if="book" class="wordbook-detail-actions">
+          <DivButton v-if="canActivate" class="button-small" type="button" :disabled="activating" @click="emit('activate')">
+            {{ activating ? '激活中…' : '设为主词书' }}
+          </DivButton>
+          <DivButton v-else class="button-secondary button-small" type="button" disabled>已在使用</DivButton>
+          <DivButton v-if="canExport" class="button-secondary button-small" type="button" @click="emit('export')">导出</DivButton>
+          <DivButton v-if="canDelete" class="button-danger button-small" type="button" @click="emit('delete')">删除</DivButton>
         </div>
         <DivButton class="icon-button" type="button" aria-label="关闭词书详情" @click="close">×</DivButton>
       </header>

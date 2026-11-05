@@ -1409,8 +1409,19 @@
   align-items: start;
 }
 
+.personal-workspace .settings-pair > fieldset + fieldset {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
 @media (max-width: 980px) {
   .personal-workspace .settings-pair { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .settings-pair > fieldset + fieldset {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--ui-line-strong);
+  }
 }
 
 @media (max-width: 640px) {
@@ -1512,18 +1523,19 @@
 
 .personal-workspace .wordbook-card--compact {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-columns: 48px minmax(0, 1fr) 18px;
   gap: 14px;
   min-height: 0 !important;
-  padding: 12px 14px;
+  padding: 10px 20px 10px 10px;
+  cursor: pointer;
 }
 
 .personal-workspace .wordbook-card--compact .wordbook-cover {
-  width: 64px;
-  height: 64px;
-  min-height: 64px;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .personal-workspace .wordbook-card--compact .wordbook-cover-letter { font-size: 1.5rem; }
@@ -1531,18 +1543,32 @@
 .personal-workspace .wordbook-card--compact .wordbook-card-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 16px;
+  gap: 14px;
   align-items: center;
   min-height: 0 !important;
-  padding: 0;
+  padding: 0 !important;
 }
 
 .personal-workspace .wordbook-card--compact .wordbook-card-body h3 {
-  grid-column: 1;
-  font-size: 1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-size: 0.98rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.personal-workspace .wordbook-card--compact .wordbook-entry-count { grid-column: 1; }
+.personal-workspace .wordbook-card--compact .wordbook-entry-count {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
 
 .personal-workspace .wordbook-card--compact .wordbook-card-badges {
   grid-column: 2;
@@ -1719,7 +1745,7 @@
 .practice-tasks-head h2 { margin: 0 0 2px; }
 .practice-tasks-head p { margin: 0; color: var(--ui-muted); font-size: 0.82rem; }
 
-.practice-task-tabs { display: flex; gap: 6px; }
+.practice-task-tabs { display: flex; gap: 6px; margin-left: auto; }
 
 .practice-task-tab {
   padding: 6px 12px;
@@ -1741,27 +1767,26 @@
 .practice-task-list { display: grid; }
 
 .practice-task-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  width: 100%;
   align-items: center;
-  padding: 11px 0;
+  padding: 11px 2px;
+  border: 0;
   border-bottom: 1px solid var(--ui-line);
+  background: none;
+  color: var(--ui-ink);
+  text-align: left;
+  cursor: pointer;
 }
 
 .practice-task-row:last-child { border-bottom: 0; }
 
-.practice-task-row__main {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  align-items: center;
-  min-width: 0;
-}
-
 .practice-task-type { color: var(--ui-muted); font-size: 0.72rem; font-weight: 850; }
-.practice-task-row__main strong { font-size: 0.9rem; }
-.practice-task-row__main small { width: 100%; color: var(--ui-muted); font-size: 0.74rem; }
+.practice-task-row > strong { font-size: 0.9rem; }
+.practice-task-count { color: var(--ui-muted); font-size: 0.76rem; font-weight: 700; }
+.practice-task-row > svg { width: 15px; height: 15px; margin-left: auto; color: var(--ui-muted); }
 
 .practice-task-status {
   padding: 2px 8px;
@@ -1777,13 +1802,14 @@
 .practice-task-status.is-submitted { background: #e2f3e5; color: #1f7a34; }
 .practice-task-status.is-failed { background: #ffe1dc; color: #b3261e; }
 
-.practice-task-row__actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
-
 .practice-task-all { justify-self: start; font-size: 0.78rem; font-weight: 800; }
 
+@media (max-width: 1180px) {
+  .personal-workspace .practice-tasks-card { order: 2; }
+}
+
 @media (max-width: 720px) {
-  .personal-workspace .practice-task-row { grid-template-columns: minmax(0, 1fr); }
-  .personal-workspace .practice-task-row__actions { justify-content: flex-start; }
+  .personal-workspace .practice-task-row { gap: 4px 8px; }
 }
 
 /* AI quota panel: a clean three-column row per quota kind. */
@@ -1845,4 +1871,137 @@
   color: var(--ui-ink);
   font-size: 0.85rem;
   font-weight: 850;
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .practice-type-pill__label { display: none; }
+
+  .personal-workspace .practice-type-pill {
+    gap: 0;
+    padding: 8px 0;
+  }
+
+  .personal-workspace .practice-type-pill svg { width: 20px; height: 20px; }
+
+  .personal-workspace .practice-create-footer {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .personal-workspace .practice-create-footer__meta { align-items: center; text-align: center; }
+
+  .personal-workspace .practice-hub .practice-generate-action {
+    width: min(100%, 260px) !important;
+    margin-inline: auto;
+  }
+
+  .personal-workspace .practice-hub .workspace-page-lead { display: none; }
+  .personal-workspace .practice-hub .workspace-page-header { margin-bottom: 18px; }
+  .personal-workspace .practice-hub .practice-create-footer__meta p { display: none; }
+  .personal-workspace .practice-hub .practice-form { gap: 10px; margin-top: 12px; padding-top: 12px; }
+  .personal-workspace .practice-hub .practice-create-footer { padding-top: 10px; }
+}
+
+/* Settings: single-line key/value rows for the lower options. */
+.personal-workspace .settings-form .field--inline {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px 14px;
+  align-items: center;
+}
+
+.personal-workspace .settings-form .field--inline > label {
+  flex: 0 0 auto;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.personal-workspace .settings-form .field--inline > select,
+.personal-workspace .settings-form .field--inline > input {
+  flex: 1 1 160px;
+  max-width: 240px;
+}
+
+
+.personal-workspace .wordbook-row-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--ui-muted);
+  justify-self: end;
+}
+
+.wordbook-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* Reading article: only the top/left structure stays, no right/bottom frame. */
+.personal-workspace .practice-article {
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+}
+
+/* Practice task dialog: header actions, inline meta, action row. */
+.dialog-card.practice-task-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  padding: 24px 26px;
+}
+
+.practice-task-dialog__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--cookie-300);
+}
+
+.practice-task-dialog__head .eyebrow {
+  margin: 0 0 4px;
+}
+
+.practice-task-dialog__head h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.practice-task-dialog__head .button-secondary {
+  flex: 0 0 auto;
+}
+
+.practice-task-dialog__meta {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
+.practice-task-dialog__meta div {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.practice-task-dialog__meta dt {
+  flex: 0 0 3.5em;
+  color: var(--ui-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+.practice-task-dialog__meta dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.practice-task-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
 }

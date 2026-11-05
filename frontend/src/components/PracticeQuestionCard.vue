@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { PracticeOption, PracticeQuestion } from '../api/practice'
+import { PRACTICE_TYPE_LABELS, type PracticeOption, type PracticeQuestion } from '../api/practice'
 import OptionBadge from './OptionBadge.vue'
 
 const props = defineProps<{
@@ -91,9 +91,9 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     </div>
 
     <div v-else class="practice-writing">
-      <p class="practice-prompt-note">写作题目（英文）</p>
+      <p class="practice-prompt-note">题目</p>
       <p v-if="question.prompt" class="practice-prompt-text">{{ question.prompt }}</p>
-      <p v-if="question.requirements.length" class="practice-prompt-note">写作要求</p>
+      <p v-if="question.requirements.length" class="practice-prompt-note">要求</p>
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
       </div>
@@ -131,7 +131,6 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     </fieldset>
 
     <div v-else-if="!inReview" class="field">
-      <label :for="answerId">你的答案</label>
       <textarea
         :id="answerId"
         class="practice-answer-textarea"
@@ -139,12 +138,9 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         :disabled="disabled"
         maxlength="20000"
         :rows="question.questionType === 'translation' ? 2 : 6"
-        placeholder="请在这里作答"
+        :aria-label="`${PRACTICE_TYPE_LABELS[question.questionType]}作答`"
         @input="update(($event.target as HTMLTextAreaElement).value)"
       ></textarea>
-      <p v-if="question.questionType !== 'translation'" class="field-hint">
-        当前字数：{{ modelValue.length }} / 20000
-      </p>
     </div>
 
 

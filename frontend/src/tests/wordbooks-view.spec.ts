@@ -109,7 +109,10 @@ describe('WordbooksView personal shelf', () => {
   it('guards activation against a double click and refreshes the personal catalog', async () => {
     const wrapper = mountView('admin')
     await flushPromises()
-    const activateButton = cardByText(wrapper, 'My Reading Notes')
+    await cardByText(wrapper, 'My Reading Notes').trigger('click')
+    await flushPromises()
+    const activateButton = wrapper
+      .get('.wordbook-detail-dialog')
       .findAll('[role="button"]')
       .find((candidate) => candidate.text().includes('设为主词书'))
     if (!activateButton) throw new Error('Activate button not found')
@@ -163,9 +166,12 @@ describe('WordbooksView personal shelf', () => {
       const wrapper = mountView(role)
       await flushPromises()
       const card = cardByText(wrapper, 'My Reading Notes')
-      expect(card.text()).toContain('设为主词书')
-      expect(card.text()).toContain('导出')
-      expect(card.text()).toContain('删除')
+      await card.trigger('click')
+      await flushPromises()
+      const dialog = wrapper.get('.wordbook-detail-dialog')
+      expect(dialog.text()).toContain('设为主词书')
+      expect(dialog.text()).toContain('导出')
+      expect(dialog.text()).toContain('删除')
       wrapper.unmount()
     }
   })

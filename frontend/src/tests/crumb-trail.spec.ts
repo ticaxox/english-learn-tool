@@ -47,7 +47,7 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(wordbooks).toContain('crumb-bookshelf')
     expect(wordbooks).toContain('crumb-shelf-header')
     expect(wordbooks).toContain('crumb-current-book')
-    expect(source('../components/WordbookShelfCard.vue')).toContain('wordbook-card-badges')
+    expect(source('../components/WordbookShelfCard.vue')).toContain('wordbook-row-arrow')
   })
 
   it('renders numbered book covers with structural bite marks', async () => {
@@ -67,7 +67,9 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     })
 
     expect(wrapper.find('.crumb-book-number').exists()).toBe(false)
-    expect(wrapper.get('.wordbook-card-badges').text()).toContain('可用')
+    expect(wrapper.find('.wordbook-card-badges').exists()).toBe(false)
+    await wrapper.get('.wordbook-card').trigger('click')
+    expect(wrapper.emitted('detail')).toHaveLength(1)
     expect(wrapper.get('.wordbook-cover').classes()).toContain('wordbook-cover--clay')
     expect(wrapper.get('.wordbook-cover-letter').text()).toBe('C')
     await wrapper.setProps({ book: { ...book, name: 'Harbor Reader' } })

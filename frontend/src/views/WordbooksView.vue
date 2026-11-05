@@ -38,6 +38,7 @@ const filters = reactive({
 })
 
 const detailId = ref<string | null>(null)
+const selectedBook = computed(() => visibleBooks.value.find((book) => book.id === detailId.value) ?? null)
 const importOpen = ref(false)
 const exportTarget = ref<Wordbook | null>(null)
 const deleteTarget = ref<Wordbook | null>(null)
@@ -332,7 +333,19 @@ onMounted(() => {
       @close="importOpen = false"
       @completed="importCompleted"
     />
-    <WordbookDetailDialog v-if="detailId" :wordbook-id="detailId" @close="detailId = null" />
+    <WordbookDetailDialog
+      v-if="detailId"
+      :wordbook-id="detailId"
+      :book="selectedBook"
+      :can-activate="selectedBook ? canActivateWordbook(selectedBook) : false"
+      :can-export="selectedBook ? canExport(selectedBook) : false"
+      :can-delete="selectedBook ? canDelete(selectedBook) : false"
+      :activating="selectedBook ? activatingId === selectedBook.id : false"
+      @close="detailId = null"
+      @activate="selectedBook && activate(selectedBook)"
+      @export="selectedBook && (exportTarget = selectedBook)"
+      @delete="selectedBook && (deleteTarget = selectedBook)"
+    />
     <WordbookExportDialog v-if="exportTarget" :wordbook="exportTarget" @close="exportTarget = null" />
     <WordbookDeleteDialog
       v-if="deleteTarget"

@@ -17,6 +17,7 @@ import MemoryPracticeView from '../views/MemoryPracticeView.vue'
 import PersonalAiConfigView from '../views/PersonalAiConfigView.vue'
 import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
+import PracticeTasksView from '../views/PracticeTasksView.vue'
 import MistakesView from '../views/MistakesView.vue'
 import SettingsHubView from '../views/SettingsHubView.vue'
 import TodayView from '../views/TodayView.vue'
@@ -71,6 +72,11 @@ const routes: RouteRecordRaw[] = [
         path: 'practice',
         name: 'practice',
         component: PracticeHubView,
+      },
+      {
+        path: 'practice/tasks',
+        name: 'practice-tasks',
+        component: PracticeTasksView,
       },
       {
         path: 'practice/records',

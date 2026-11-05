@@ -102,7 +102,9 @@ describe('member-facing Chinese copy density', () => {
     const practice = source('../views/PracticeHubView.vue')
     expect(practice).toContain('AI 练习')
     expect(practice).toContain('生成练习')
-    expect(practice).toContain('题目列表')
+    expect(practice).toContain('PracticeTaskList')
+    const tasks = source('../components/PracticeTaskList.vue')
+    expect(tasks).toContain('题目列表')
 
     const challenge = source('../views/ChallengeView.vue')
     expect(challenge).toContain('每日闯关')

@@ -4655,15 +4655,15 @@
 
 /* Ending dialog: noticeably larger spacing, verified on screen. */
 .personal-workspace .memory-end-dialog {
-  gap: 34px;
-  padding: 44px 48px;
+  gap: 22px;
+  padding: 30px 40px;
 }
 
 .personal-workspace .memory-end-dialog .field-hint { margin: 0; }
 
 .personal-workspace .memory-end-dialog .button-row {
-  gap: 22px;
-  margin-top: 34px;
+  gap: 20px;
+  margin-top: 18px;
 }
 
 /* Wrong card: word left, sound and meaning right, continue outside. */
@@ -4805,4 +4805,27 @@
   font-size: 1.02rem;
   font-weight: 700;
   line-height: 1.75;
+}
+
+
+/* Reading material: no right/bottom frame, larger article type. */
+.personal-workspace .practice-article-panel {
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.personal-workspace .practice-article {
+  font-size: 1.16rem;
+  line-height: 1.85;
+}
+
+/* Translation / writing prompt hierarchy. */
+.personal-workspace .practice-translation .practice-prompt-text {
+  font-size: 1.16rem;
+  font-weight: 800;
+}
+
+.personal-workspace .practice-writing .practice-requirements {
+  padding-left: 0;
+  list-style: none;
 }

@@ -100,17 +100,13 @@ describe('member redesign', () => {
     expect(card.find('.wordbook-cover h3').exists()).toBe(false)
     expect(card.text()).toContain('Business English')
     expect(card.text()).toContain('128 词条')
-    expect(card.get('.wordbook-card-badges').text()).toContain('可用')
+    expect(card.find('.wordbook-card-badges').exists()).toBe(false)
 
-    await card.get('[aria-label="查看 Business English 的词条"]').trigger('click')
-    await card.get('[aria-label="将 Business English 设为当前主词书"]').trigger('click')
-    await card.get('[aria-label="导出 Business English"]').trigger('click')
-    await card.get('[aria-label="删除 Business English"]').trigger('click')
-
+    await card.trigger('click')
     expect(wrapper.emitted('detail')).toHaveLength(1)
-    expect(wrapper.emitted('activate')).toHaveLength(1)
-    expect(wrapper.emitted('export')).toHaveLength(1)
-    expect(wrapper.emitted('delete')).toHaveLength(1)
+    expect(wrapper.emitted('activate')).toBeUndefined()
+    expect(wrapper.emitted('export')).toBeUndefined()
+    expect(wrapper.emitted('delete')).toBeUndefined()
   })
 
   it('keeps member shell free of browser business storage', () => {

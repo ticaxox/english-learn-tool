@@ -467,7 +467,6 @@ watch(challengeModule, async (module, previous) => {
 
       <aside v-if="session.hasSession.value || session.finished.value" class="workspace-card memory-session-rail" aria-label="本次训练">
         <div class="memory-rail-head">
-          <h1 class="memory-rail-title">{{ selectedModule ? MEMORY_MODULE_LABELS[selectedModule] : '记忆练习' }}</h1>
           <p v-if="session.question.value" class="memory-rail-remaining">
             本轮剩余 <strong>{{ session.question.value.remaining }}</strong> 张
           </p>
