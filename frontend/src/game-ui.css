@@ -4133,7 +4133,9 @@
 
 /* Study card keeps its own surface and inner spacing on the memory page. */
 .personal-workspace .memory-page .memory-main-card .study-card {
+  display: grid;
   width: 100%;
+  margin-inline: auto;
   min-height: 200px;
   padding: 30px 36px;
   border: 2px solid var(--ui-line-strong) !important;

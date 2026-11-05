@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+from datetime import datetime, timedelta
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -520,34 +521,76 @@ async def create_pool_practice_session(
     return await _load_owned_session(session, user, session_id)
 
 
+STALE_GENERATION_SECONDS = 900
+
+
+def reconcile_generation_status(
+    practice: PracticeSession, job: AiJob | None, *, now: datetime
+) -> bool:
+    """Bring a stuck generating session in line with its AI job.
+
+    A worker can die between marking the job failed and updating the practice
+    session; a queued/running job can also outlive the worker timeout. Either
+    way the learner must see a retryable failure instead of an endless
+    "generating" row.
+    """
+
+    if practice.status != "generating" or job is None:
+        return False
+    if job.status in {"failed", "cancelled"}:
+        practice.status = "failed"
+        practice.error_code = job.error_code or "AI_JOB_FAILED"
+        practice.error_message = job.error_message or "生成任务失败，请重试。"
+        return True
+    if job.status in {"queued", "running"}:
+        reference = job.started_at or job.created_at
+        if now - reference <= timedelta(seconds=STALE_GENERATION_SECONDS):
+            return False
+        practice.status = "failed"
+        practice.error_code = "AI_JOB_TIMEOUT"
+        practice.error_message = "生成任务超时，请重试。"
+        job.status = "failed"
+        job.error_code = "AI_JOB_TIMEOUT"
+        job.error_message = "生成任务超时，请重试。"
+        job.finished_at = now
+        job.retryable = True
+        return True
+    return False
+
+
 async def list_recent_sessions(
     session: AsyncSession, user: User, *, limit: int = 20
 ) -> PracticeSessionListResponse:
-    rows = list(
-        (
-            await session.scalars(
-                select(PracticeSession)
-                .where(PracticeSession.user_id == user.id, PracticeSession.is_pool.is_(False))
-                .order_by(PracticeSession.created_at.desc())
-                .limit(limit)
-            )
-        ).all()
-    )
+    rows = (
+        await session.execute(
+            select(PracticeSession, AiJob)
+            .outerjoin(AiJob, AiJob.id == PracticeSession.ai_job_id)
+            .where(PracticeSession.user_id == user.id, PracticeSession.is_pool.is_(False))
+            .order_by(PracticeSession.created_at.desc())
+            .limit(limit)
+        )
+    ).all()
+    now = utcnow()
+    changed = False
+    for practice, job in rows:
+        changed = reconcile_generation_status(practice, job, now=now) or changed
+    if changed:
+        await session.commit()
     return PracticeSessionListResponse(
         items=[
             PracticeSessionSummary(
-                id=row.id,
-                practice_type=row.practice_type,
-                source=row.source,
-                status=row.status,
-                question_count=row.question_count,
-                score=row.score,
-                created_at=row.created_at,
-                submitted_at=row.submitted_at,
-                error_code=row.error_code,
-                error_message=row.error_message,
+                id=practice.id,
+                practice_type=practice.practice_type,
+                source=practice.source,
+                status=practice.status,
+                question_count=practice.question_count,
+                score=practice.score,
+                created_at=practice.created_at,
+                submitted_at=practice.submitted_at,
+                error_code=practice.error_code,
+                error_message=practice.error_message,
             )
-            for row in rows
+            for practice, _job in rows
         ]
     )
 

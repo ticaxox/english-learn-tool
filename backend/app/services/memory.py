@@ -777,7 +777,10 @@ async def _judge(
     correct = definition_zh if asks_for_english else entry.headword
     if not correct:
         return None, None
-    return _normalize_answer(answer) == _normalize_answer(correct), None
+    is_correct = _normalize_answer(answer) == _normalize_answer(correct)
+    # After grading the correct word is safe to reveal; the wrong-answer card
+    # needs it, otherwise it can only show the meaning the learner just saw.
+    return is_correct, None if is_correct else correct
 
 
 async def _requeue(session: AsyncSession, item: MemorySessionItem, session_id: UUID) -> None:

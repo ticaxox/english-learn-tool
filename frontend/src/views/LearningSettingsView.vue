@@ -306,7 +306,7 @@ onMounted(() => {
 
         <div class="settings-pair">
           <fieldset>
-            <legend>AI 练习预生成</legend>
+            <legend>AI练习预生成</legend>
             <div class="field field--inline">
               <label for="practice-pool-target">预生成库存</label>
               <select id="practice-pool-target" v-model.number="form.practicePoolTarget">
@@ -318,7 +318,7 @@ onMounted(() => {
           </fieldset>
 
           <fieldset>
-            <legend>学习地图</legend>
+            <legend>学习地图生成时间</legend>
             <div class="field field--inline">
               <label for="challenge-generation-time">每天自动生成时间</label>
               <input id="challenge-generation-time" v-model="challengeTime" type="time" />

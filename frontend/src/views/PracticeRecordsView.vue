@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
@@ -16,7 +16,6 @@ import {
   type PracticeSource,
   type PracticeType,
 } from '../api/practice'
-import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../practice.css'
 
 const props = withDefaults(defineProps<{ onlyMistakes?: boolean }>(), { onlyMistakes: false })
@@ -88,6 +87,19 @@ async function load(): Promise<void> {
   }
 }
 
+
+/** The result is rendered by a v-else-if chain, so wait for it to exist. */
+async function revealResult(): Promise<void> {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const result = document.querySelector<HTMLElement>('.practice-result')
+    if (result) {
+      window.scrollTo({ top: result.getBoundingClientRect().top + window.scrollY - 96, behavior: 'smooth' })
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+}
+
 async function openDetail(record: PracticeRecordSummary): Promise<void> {
   detailLoading.value = true
   detailError.value = null
@@ -99,6 +111,8 @@ async function openDetail(record: PracticeRecordSummary): Promise<void> {
   } finally {
     detailLoading.value = false
   }
+  await nextTick()
+  await revealResult()
 }
 
 function toggleSelected(id: string): void {
@@ -149,10 +163,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="practice-page practice-records-page">
-    <PracticeTopBar mode="practice" active="" />
-
-    <header class="practice-session-header">
+  <article class="practice-page practice-records-page workspace-page">
+    <header class="workspace-page-header">
       <div>
         <p class="eyebrow">{{ props.onlyMistakes ? 'AI 练习错题' : '练习记录' }}</p>
         <h1>{{ props.onlyMistakes ? '需要再练的 AI 题' : '练习记录与结果' }}</h1>

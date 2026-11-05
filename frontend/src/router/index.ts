@@ -82,14 +82,12 @@ const routes: RouteRecordRaw[] = [
         path: 'practice/records',
         name: 'practice-records',
         component: PracticeRecordsView,
-        meta: { immersive: true },
       },
       {
         path: 'practice/mistakes',
         name: 'practice-mistakes',
         component: PracticeRecordsView,
         props: { onlyMistakes: true },
-        meta: { immersive: true },
       },
       {
         path: 'practice/:sessionId',

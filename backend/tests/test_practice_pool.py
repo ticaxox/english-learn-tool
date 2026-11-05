@@ -221,3 +221,48 @@ async def test_background_tasks_can_be_listed_deleted_and_retried(app, client, m
         assert deleted.status_code == 204
         remaining = await client.get("/api/v1/me/ai/background-tasks", headers=headers)
         assert all(entry["id"] != task["id"] for entry in remaining.json()["items"])
+
+
+async def test_stale_generating_pool_task_is_reported_failed(
+    app, client, member_user
+) -> None:
+    from datetime import timedelta
+
+    from app.services.auth import utcnow
+
+    headers = await login(client, member_user.username)
+    wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
+    await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
+    profile = await client.patch(
+        PROFILE_PATH,
+        headers=headers,
+        json={"practice_pool_target": 1},
+    )
+    assert profile.status_code == 200, profile.text
+
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        async with app.state.session_factory() as session:
+            user = await session.get(User, member_user.id)
+            assert user is not None
+            await ensure_pool(session, app.state.arq, user, app.state.settings)
+            item = await session.scalar(
+                select(PracticePoolItem).where(PracticePoolItem.user_id == member_user.id)
+            )
+            assert item is not None
+            practice = await session.get(PracticeSession, item.session_id)
+            assert practice is not None and practice.ai_job_id is not None
+            job = await session.get(AiJob, practice.ai_job_id)
+            assert job is not None
+            stale = utcnow() - timedelta(hours=1)
+            practice.status = "generating"
+            job.status = "running"
+            job.started_at = stale
+            job.finished_at = None
+            await session.commit()
+
+    listed = await client.get("/api/v1/me/ai/background-tasks", headers=headers)
+    assert listed.status_code == 200, listed.text
+    task = next(row for row in listed.json()["items"] if row["id"] == str(item.id))
+    assert task["status"] == "failed"
+    assert task["error_code"] == "AI_JOB_TIMEOUT"

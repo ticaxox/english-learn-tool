@@ -106,6 +106,22 @@ function sourceLabel(row: TaskRow): string {
   return row.source ? PRACTICE_SOURCE_LABELS[row.source] : '专项练习'
 }
 
+/** Rows are named by when they were created, not by a generic source label. */
+function taskName(row: TaskRow): string {
+  const date = new Date(row.createdAt)
+  if (Number.isNaN(date.getTime())) return '练习'
+  const time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+  const today = new Date()
+  if (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  ) {
+    return `今天 ${time}`
+  }
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${time}`
+}
+
 function statusLabel(row: TaskRow): string {
   return STATUS_LABELS[row.status] ?? row.status
 }
@@ -235,11 +251,11 @@ onMounted(() => {
         role="listitem"
         type="button"
         class="practice-task-row"
-        :aria-label="`${PRACTICE_TYPE_LABELS[row.practiceType]}，${sourceLabel(row)}，${statusLabel(row)}，${row.count} 题`"
+        :aria-label="`${PRACTICE_TYPE_LABELS[row.practiceType]}，${taskName(row)}，${statusLabel(row)}，${row.count} 题`"
         @click="openDialog(row)"
       >
         <span class="practice-task-type">{{ PRACTICE_TYPE_LABELS[row.practiceType] }}</span>
-        <strong>{{ sourceLabel(row) }}</strong>
+        <strong>{{ taskName(row) }}</strong>
         <span class="practice-task-status" :class="`is-${row.status}`">{{ statusLabel(row) }}</span>
         <span class="practice-task-count">{{ row.count }} 题</span>
         <AppIcon name="arrow" />

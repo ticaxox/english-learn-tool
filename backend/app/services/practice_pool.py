@@ -25,7 +25,11 @@ from app.models.practice import PracticePoolItem, PracticeSession
 from app.schemas.practice import BackgroundTaskListResponse, BackgroundTaskResponse
 from app.services.ai_jobs import cancel_user_job
 from app.services.auth import utcnow
-from app.services.practice import create_pool_practice_session, regenerate_practice_session
+from app.services.practice import (
+    create_pool_practice_session,
+    reconcile_generation_status,
+    regenerate_practice_session,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -279,6 +283,12 @@ async def list_background_tasks(session: AsyncSession, user: User) -> Background
             .limit(100)
         )
     ).all()
+    now = utcnow()
+    changed = False
+    for _item, practice, job in rows:
+        changed = reconcile_generation_status(practice, job, now=now) or changed
+    if changed:
+        await session.commit()
     return BackgroundTaskListResponse(
         items=[_task_response(item, practice, job) for item, practice, job in rows]
     )
