@@ -276,6 +276,7 @@ async def create_ai_job(
     quota_amount: int = 1,
     quota_items: list[str] | None = None,
     commit: bool = True,
+    background: bool = False,
 ) -> tuple[AiJobStatusResponse, bool]:
     if not idempotency_key or len(idempotency_key) > 128:
         raise AppError(
@@ -331,13 +332,16 @@ async def create_ai_job(
             message="No enabled AI provider is available.",
         )
     job_id = uuid4()
-    acquired = await acquire_concurrency_slot(
-        pool,
-        user_id=user.id,
-        job_id=job_id,
-        limit=settings.ai_concurrency_limit,
-        stale_seconds=settings.ai_job_stale_seconds,
-    )
+    # Background pre-generation must not hold the learner's interactive slots.
+    acquired = True
+    if not background:
+        acquired = await acquire_concurrency_slot(
+            pool,
+            user_id=user.id,
+            job_id=job_id,
+            limit=settings.ai_concurrency_limit,
+            stale_seconds=settings.ai_job_stale_seconds,
+        )
     if not acquired:
         raise AppError(
             status_code=429,
@@ -363,14 +367,17 @@ async def create_ai_job(
     try:
         session.add(job)
         await session.flush()
-        await _reserve_quota(
-            session,
-            settings=settings,
-            user=user,
-            job=job,
-            amount=quota_amount,
-            quota_items=quota_items,
-        )
+        if not background:
+            # Pre-generated practice is background prefetch: it must not spend
+            # the learner's interactive daily quota.
+            await _reserve_quota(
+                session,
+                settings=settings,
+                user=user,
+                job=job,
+                amount=quota_amount,
+                quota_items=quota_items,
+            )
         session.add(_event(job, "ai.job.created", metadata={"task_type": task_type}))
         if commit:
             await session.commit()

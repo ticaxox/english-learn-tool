@@ -23,7 +23,7 @@ class LearningProfileResponse(BaseModel):
     timezone: str
     onboarding_completed: bool
     notification_preferences: dict[str, Any] = Field(default_factory=dict)
-    practice_pool_targets: dict[str, dict[str, int]] = Field(default_factory=dict)
+    practice_pool_target: int = Field(default=0, ge=0, le=2)
     challenge_generation_time: str | None = None
     updated_at: datetime
 
@@ -35,7 +35,7 @@ class LearningProfilePatch(BaseModel):
     daily_study_minutes: int | None = Field(default=None, ge=15, le=180)
     notification_preferences: dict[str, Any] | None = None
     onboarding_completed: bool | None = None
-    practice_pool_targets: dict[str, dict[str, int]] | None = None
+    practice_pool_target: int | None = Field(default=None, ge=0, le=2)
     challenge_generation_time: str | None = None
 
     @field_validator("challenge_generation_time")
@@ -49,42 +49,6 @@ class LearningProfilePatch(BaseModel):
         match = re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", cleaned)
         if match is None:
             raise ValueError("challenge_generation_time must be HH:MM")
-        return cleaned
-
-    @field_validator("practice_pool_targets")
-    @classmethod
-    def valid_pool_targets(
-        cls, value: dict[str, dict[str, int]] | None
-    ) -> dict[str, dict[str, int]] | None:
-        if value is None:
-            return None
-        allowed = {
-            "fill_blank": {3, 5, 10, 15, 20},
-            "reading": {3, 5, 10, 15, 20},
-            "translation": {3, 5, 10, 15, 20},
-            "writing": {1},
-        }
-        cleaned: dict[str, dict[str, int]] = {}
-        total = 0
-        for practice_type, counts in value.items():
-            if practice_type not in allowed or not isinstance(counts, dict):
-                raise ValueError("practice_pool_targets contains an unknown practice type")
-            for raw_count, raw_target in counts.items():
-                try:
-                    count = int(raw_count)
-                    target = int(raw_target)
-                except (TypeError, ValueError) as exc:
-                    raise ValueError("practice_pool_targets must map counts to integers") from exc
-                if count not in allowed[practice_type]:
-                    raise ValueError("practice_pool_targets contains an unsupported count")
-                if target < 0 or target > 2:
-                    raise ValueError("each pre-generated target must be between 0 and 2")
-                if target == 0:
-                    continue
-                total += target
-                if total > 12:
-                    raise ValueError("at most 12 pre-generated sets may be configured")
-                cleaned.setdefault(practice_type, {})[str(count)] = target
         return cleaned
 
     @field_validator("exam_date")

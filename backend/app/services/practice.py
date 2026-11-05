@@ -506,6 +506,7 @@ async def create_pool_practice_session(
         settings,
         generation_request,
         idempotency_key=f"practice-pool:{session_id}",
+        background=True,
     )
     generation_row = await session.get(PracticeGeneration, generation_id)
     if generation_row is not None:
@@ -594,6 +595,7 @@ async def regenerate_practice_session(
     session_id: UUID,
     *,
     idempotency_key: str,
+    background: bool = False,
 ) -> PracticeSessionResponse:
     practice = await _load_owned_session(session, user, session_id, lock=True)
     if practice.status == "submitted":
@@ -659,6 +661,7 @@ async def regenerate_practice_session(
         settings,
         generation_request,
         idempotency_key=f"practice-gen:{practice.id}:{practice.generation_number}",
+        background=background,
     )
     generation = await session.get(PracticeGeneration, generation_id)
     if generation is not None:

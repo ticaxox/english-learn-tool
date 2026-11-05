@@ -3689,22 +3689,18 @@
             ],
             "title": "Onboarding Completed"
           },
-          "practice_pool_targets": {
+          "practice_pool_target": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "additionalProperties": {
-                    "type": "integer"
-                  },
-                  "type": "object"
-                },
-                "type": "object"
+                "maximum": 2.0,
+                "minimum": 0.0,
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Practice Pool Targets"
+            "title": "Practice Pool Target"
           },
           "target_exam": {
             "anyOf": [
@@ -3792,15 +3788,12 @@
             "title": "Onboarding Completed",
             "type": "boolean"
           },
-          "practice_pool_targets": {
-            "additionalProperties": {
-              "additionalProperties": {
-                "type": "integer"
-              },
-              "type": "object"
-            },
-            "title": "Practice Pool Targets",
-            "type": "object"
+          "practice_pool_target": {
+            "default": 0,
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Practice Pool Target",
+            "type": "integer"
           },
           "target_exam": {
             "anyOf": [

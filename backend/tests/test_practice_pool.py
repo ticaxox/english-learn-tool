@@ -38,10 +38,10 @@ async def test_ready_pool_set_is_claimed_and_replenished(app, client, member_use
     profile = await client.patch(
         PROFILE_PATH,
         headers=headers,
-        json={"practice_pool_targets": {"fill_blank": {"3": 1}}},
+        json={"practice_pool_target": 1},
     )
     assert profile.status_code == 200, profile.text
-    assert profile.json()["practice_pool_targets"] == {"fill_blank": {"3": 1}}
+    assert profile.json()["practice_pool_target"] == 1
 
     with fake_provider_server() as server:
         await create_provider(client, headers, base_url=server.base_url)
@@ -49,11 +49,15 @@ async def test_ready_pool_set_is_claimed_and_replenished(app, client, member_use
             user = await session.get(User, member_user.id)
             assert user is not None
             counts = await ensure_pool(session, app.state.arq, user, app.state.settings)
-        assert counts["created"] == 1
+        assert counts["created"] >= 1
 
         async with app.state.session_factory() as session:
             item = await session.scalar(
-                select(PracticePoolItem).where(PracticePoolItem.user_id == member_user.id)
+                select(PracticePoolItem).where(
+                    PracticePoolItem.user_id == member_user.id,
+                    PracticePoolItem.practice_type == "fill_blank",
+                    PracticePoolItem.question_count == 3,
+                )
             )
             assert item is not None
             pool_session = await session.get(PracticeSession, item.session_id)
@@ -88,10 +92,14 @@ async def test_ready_pool_set_is_claimed_and_replenished(app, client, member_use
         assert created.json()["status"] == "ready"
 
         async with app.state.session_factory() as session:
-            remaining = await session.scalars(
-                select(PracticePoolItem).where(PracticePoolItem.user_id == member_user.id)
+            remaining = await session.scalar(
+                select(PracticePoolItem).where(
+                    PracticePoolItem.user_id == member_user.id,
+                    PracticePoolItem.practice_type == "fill_blank",
+                    PracticePoolItem.question_count == 3,
+                )
             )
-            assert list(remaining) == []
+            assert remaining is None
             claimed = await session.get(PracticeSession, item.session_id)
             assert claimed is not None
             assert claimed.is_pool is False
@@ -105,7 +113,7 @@ async def test_failed_pool_generation_is_retried(app, client, member_user) -> No
     await client.patch(
         PROFILE_PATH,
         headers=headers,
-        json={"practice_pool_targets": {"fill_blank": {"3": 1}}},
+        json={"practice_pool_target": 1},
     )
 
     with fake_provider_server() as server:
@@ -115,7 +123,11 @@ async def test_failed_pool_generation_is_retried(app, client, member_user) -> No
             await ensure_pool(session, app.state.arq, user, app.state.settings)
         async with app.state.session_factory() as session:
             item = await session.scalar(
-                select(PracticePoolItem).where(PracticePoolItem.user_id == member_user.id)
+                select(PracticePoolItem).where(
+                    PracticePoolItem.user_id == member_user.id,
+                    PracticePoolItem.practice_type == "fill_blank",
+                    PracticePoolItem.question_count == 3,
+                )
             )
             assert item is not None
             pool_session = await session.get(PracticeSession, item.session_id)

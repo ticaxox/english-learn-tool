@@ -77,7 +77,7 @@ export interface LearningProfile {
   needsOnboarding: boolean
   /** Server instant from which the latest change applies to planning. */
   planEffectiveFrom: string | null
-  practicePoolTargets: Record<string, Record<string, number>>
+  practicePoolTarget: number
   challengeGenerationTime: string | null
 }
 
@@ -260,7 +260,7 @@ export interface LearningProfileUpdate {
   dailyNewWords: number
   dailyMinutes: number
   memoryConfig: MemoryConfig
-  practicePoolTargets: Record<string, Record<string, number>>
+  practicePoolTarget: number
   challengeGenerationTime: string | null
 }
 

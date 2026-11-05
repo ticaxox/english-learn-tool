@@ -139,7 +139,7 @@ describe('profile and memory config', () => {
       dailyNewWords: 25,
       dailyMinutes: 45,
       memoryConfig: defaultMemoryConfig(),
-      practicePoolTargets: { fill_blank: { '3': 1 } },
+      practicePoolTarget: 1,
       challengeGenerationTime: '06:30',
     }) as Record<string, unknown>
     expect(payload).toEqual({
@@ -147,7 +147,7 @@ describe('profile and memory config', () => {
       exam_date: null,
       daily_new_words: 25,
       daily_study_minutes: 45,
-      practice_pool_targets: { fill_blank: { '3': 1 } },
+      practice_pool_target: 1,
       challenge_generation_time: '06:30',
     })
     expect(payload).not.toHaveProperty('flashcard_enabled')

@@ -80,6 +80,10 @@ class UserProfile(Base):
             "daily_study_minutes >= 15 AND daily_study_minutes <= 180",
             name="user_profile_daily_study_minutes_range",
         ),
+        CheckConstraint(
+            "practice_pool_target >= 0 AND practice_pool_target <= 2",
+            name="practice_pool_target_range",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -111,8 +115,8 @@ class UserProfile(Base):
     notification_preferences: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
     )
-    practice_pool_targets: Mapped[dict[str, Any]] = mapped_column(
-        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    practice_pool_target: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
     )
     challenge_generation_time: Mapped[str | None] = mapped_column(String(5))
     created_at: Mapped[datetime] = mapped_column(

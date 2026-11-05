@@ -374,7 +374,7 @@ export function parseLearningProfile(payload: unknown, memoryConfig: MemoryConfi
     memoryConfig,
     needsOnboarding: !requireBoolean(body[CONTRACT.profile.onboardingCompleted], endpoint, 'onboarding_completed'),
     planEffectiveFrom: null,
-    practicePoolTargets: parsePoolTargets(body.practice_pool_targets),
+    practicePoolTarget: typeof body.practice_pool_target === 'number' ? body.practice_pool_target : 0,
     challengeGenerationTime: optionalString(body.challenge_generation_time, endpoint, 'challenge_generation_time'),
   }
 }
@@ -388,26 +388,11 @@ export function serializeProfileUpdate(update: LearningProfileUpdate): unknown {
     [CONTRACT.profile.examDate]: update.examDate,
     [CONTRACT.profile.dailyNewWords]: update.dailyNewWords,
     [CONTRACT.profile.dailyMinutes]: update.dailyMinutes,
-    practice_pool_targets: update.practicePoolTargets,
+    practice_pool_target: update.practicePoolTarget,
     challenge_generation_time: update.challengeGenerationTime,
   }
 }
 
-function parsePoolTargets(value: unknown): Record<string, Record<string, number>> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
-  const result: Record<string, Record<string, number>> = {}
-  for (const [practiceType, counts] of Object.entries(value as Record<string, unknown>)) {
-    if (!counts || typeof counts !== 'object' || Array.isArray(counts)) continue
-    const row: Record<string, number> = {}
-    for (const [count, target] of Object.entries(counts as Record<string, unknown>)) {
-      if (typeof target === 'number' && Number.isFinite(target) && target > 0) {
-        row[count] = target
-      }
-    }
-    if (Object.keys(row).length) result[practiceType] = row
-  }
-  return result
-}
 
 export function parseMemoryConfig(payload: unknown): MemoryConfig {
   const endpoint = '/memory/config'
