@@ -115,12 +115,11 @@ describe('T-FE-020 personal information architecture', () => {
     expect(wrapper.get('.workspace-topbar-tab.is-active').text()).toContain('AI 配置')
   })
 
-  it('keeps the learning map on the Today page instead of a separate destination', () => {
-    const challenge = source('../views/ChallengeView.vue')
+  it('keeps the Today page focused on tasks without the embedded map', () => {
     const today = source('../views/TodayView.vue')
-    expect(today).toContain('<ChallengeView embedded />')
-    expect(challenge).toContain('defineProps<{ embedded?: boolean }>()')
-    expect(challenge).not.toContain('<PracticeChooser')
+    expect(today).not.toContain('<ChallengeView embedded />')
+    expect(today).not.toContain('闯关历史')
+    expect(today).toContain('crumb-trail-board')
   })
 
   it('does not restore legacy organization or notification routes in the production router', () => {

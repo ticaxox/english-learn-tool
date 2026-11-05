@@ -83,7 +83,6 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     </div>
 
     <div v-else-if="question.questionType === 'translation'" class="practice-translation">
-      <p class="practice-prompt-note">翻译原文</p>
       <p v-if="question.sourceText" class="practice-prompt-text">{{ question.sourceText }}</p>
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>

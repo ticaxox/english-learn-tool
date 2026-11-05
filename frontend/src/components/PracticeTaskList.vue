@@ -110,16 +110,9 @@ function sourceLabel(row: TaskRow): string {
 function taskName(row: TaskRow): string {
   const date = new Date(row.createdAt)
   if (Number.isNaN(date.getTime())) return '练习'
+  const day = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
   const time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-  const today = new Date()
-  if (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  ) {
-    return `今天 ${time}`
-  }
-  return `${date.getMonth() + 1}月${date.getDate()}日 ${time}`
+  return `${day} ${time}`
 }
 
 function statusLabel(row: TaskRow): string {

@@ -305,25 +305,19 @@ onMounted(() => {
         </fieldset>
 
         <div class="settings-pair">
-          <fieldset>
-            <legend>AI练习预生成</legend>
-            <div class="field field--inline">
-              <label for="practice-pool-target">预生成库存</label>
-              <select id="practice-pool-target" v-model.number="form.practicePoolTarget">
-                <option v-for="target in POOL_TARGET_OPTIONS" :key="target" :value="target">
-                  {{ target === 0 ? '关闭' : `${target} 套` }}
-                </option>
-              </select>
-            </div>
-          </fieldset>
+          <div class="field field--inline">
+            <label for="practice-pool-target">AI练习预生成</label>
+            <select id="practice-pool-target" v-model.number="form.practicePoolTarget">
+              <option v-for="target in POOL_TARGET_OPTIONS" :key="target" :value="target">
+                {{ target === 0 ? '关闭' : `${target} 套` }}
+              </option>
+            </select>
+          </div>
 
-          <fieldset>
-            <legend>学习地图生成时间</legend>
-            <div class="field field--inline">
-              <label for="challenge-generation-time">每天自动生成时间</label>
-              <input id="challenge-generation-time" v-model="challengeTime" type="time" />
-            </div>
-          </fieldset>
+          <div class="field field--inline">
+            <label for="challenge-generation-time">学习地图生成时间</label>
+            <input id="challenge-generation-time" v-model="challengeTime" type="time" />
+          </div>
         </div>
 
         <div class="button-row">

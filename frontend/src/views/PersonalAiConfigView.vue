@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AiMemoryPanel from '../components/AiMemoryPanel.vue'
 import AiQuotaPanel from '../components/AiQuotaPanel.vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
@@ -38,8 +38,6 @@ const formModelsLoading = ref(false)
 const formModelError = ref<unknown>(null)
 const formTestLoading = ref(false)
 const formTestResult = ref<ProviderTestResult | null>(null)
-const globalTimeout = ref(120)
-const globalSaving = ref(false)
 
 const sortedProviders = computed(() => [...providers.value].sort((left, right) => {
   if (left.priority !== right.priority) return left.priority - right.priority
@@ -175,31 +173,6 @@ function toggleEnabled(provider: AiProvider): void {
   void patchProvider(provider.id, { enabled: !provider.enabled }, `enabled:${provider.id}`)
 }
 
-watch(providers, (list) => {
-  if (list.length > 0) globalTimeout.value = list[0].timeoutSeconds
-}, { immediate: true })
-
-async function saveGlobalTimeout(): Promise<void> {
-  if (globalSaving.value || providers.value.length === 0) return
-  const value = Number(globalTimeout.value)
-  if (!Number.isInteger(value) || value < 1 || value > 300) {
-    toast.error('超时必须是 1–300 秒')
-    return
-  }
-  globalSaving.value = true
-  try {
-    for (const provider of providers.value) {
-      await updatePersonalProvider(provider.id, { timeoutSeconds: value })
-    }
-    await load()
-    toast.success('已保存', `生成超时 ${value} 秒`)
-  } catch (error) {
-    operationError.value = error
-  } finally {
-    globalSaving.value = false
-  }
-}
-
 function updatePriority(provider: AiProvider, event: Event): void {
   const value = Number((event.target as HTMLInputElement).value)
   if (!Number.isInteger(value) || value < 0 || value > 10000 || value === provider.priority) return
@@ -285,23 +258,7 @@ onMounted(() => {
         </article>
       </div>
 
-      <AiQuotaPanel />
-
-      <section class="panel ai-global-config" aria-labelledby="ai-global-config-title">
-        <div>
-          <h3 id="ai-global-config-title">其他 API 配置</h3>
-          <p class="field-hint">这些配置对整个系统生效。</p>
-        </div>
-        <div class="ai-global-config__row">
-          <div class="field">
-            <label for="global-timeout">生成超时（秒，1–300）</label>
-            <input id="global-timeout" v-model.number="globalTimeout" type="number" min="1" max="300" step="1" />
-          </div>
-          <DivButton class="button-secondary" type="button" :disabled="globalSaving || providers.length === 0" @click="saveGlobalTimeout">
-            {{ globalSaving ? '正在保存…' : '保存' }}
-          </DivButton>
-        </div>
-      </section>
+      <AiQuotaPanel :providers="providers" @saved="load" />
 
       <AiMemoryPanel />
 

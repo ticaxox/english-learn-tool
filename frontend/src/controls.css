@@ -2167,3 +2167,284 @@
   padding: 16px 40px;
   font-size: 1.05rem;
 }
+
+/* AI limits: one card, three clearly separated quota groups, one save. */
+.personal-workspace .ai-quota-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.personal-workspace .ai-quota-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  background: var(--ui-surface-subtle, #fbf7ee);
+}
+
+.personal-workspace .ai-quota-row .ai-quota-row__copy {
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.personal-workspace .ai-quota-row .ai-quota-row__copy small { white-space: nowrap; }
+
+.personal-workspace .ai-quota-row__controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.personal-workspace .ai-quota-row .ai-quota-row__input {
+  flex: 0 0 92px;
+  width: 92px;
+}
+
+.personal-workspace .ai-quota-global {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--ui-line-strong);
+}
+
+.personal-workspace .ai-quota-global label { flex: 0 0 auto; font-weight: 800; }
+
+.personal-workspace .ai-quota-global input { width: 150px; }
+
+@media (max-width: 900px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Task list card: larger type throughout, absolute timestamps as names. */
+.personal-workspace .practice-tasks-card { padding: 18px 18px 14px; }
+
+.personal-workspace .practice-tasks-card .practice-tasks-head h2 { font-size: 1.35rem; }
+.personal-workspace .practice-tasks-card .practice-tasks-head p { font-size: 0.9rem; }
+
+.personal-workspace .practice-task-tab { padding: 8px 14px; font-size: 0.9rem; }
+
+.personal-workspace .practice-task-row {
+  grid-template-columns: 4.2rem 8rem auto auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 13px 2px;
+}
+
+.personal-workspace .practice-task-type { font-size: 0.8rem; }
+.personal-workspace .practice-task-row > strong { font-size: 1.02rem; }
+.personal-workspace .practice-task-status { padding: 3px 9px; font-size: 0.78rem; }
+.personal-workspace .practice-task-count { font-size: 0.84rem; }
+.personal-workspace .practice-task-row > svg { width: 17px; height: 17px; }
+
+@media (max-width: 720px) {
+  .personal-workspace .practice-task-row {
+    grid-template-columns: 3rem 6.5rem auto auto minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+/* Practice side rail: timer and submission share one card. */
+.personal-workspace .practice-session-side {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.personal-workspace .practice-session-side__timer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--ui-line);
+}
+
+/* Memory cards: word on the left, sound and meaning on the right. */
+.personal-workspace .memory-wrong-detail__card { padding: 38px 44px; }
+
+.personal-workspace .memory-wrong-detail__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  justify-items: stretch;
+  text-align: left;
+}
+
+.personal-workspace .memory-wrong-detail__grid h2 {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  text-align: left;
+}
+
+.personal-workspace .memory-wrong-detail__side {
+  gap: 8px;
+  justify-items: start;
+  text-align: left;
+}
+
+.personal-workspace .memory-wrong-detail__answer {
+  justify-content: flex-start;
+  margin: 6px 0 0;
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .memory-wrong-detail__card { padding: 30px 24px; }
+  .personal-workspace .memory-wrong-detail__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    justify-items: center;
+    text-align: center;
+  }
+  .personal-workspace .memory-wrong-detail__grid h2 { text-align: center; }
+  .personal-workspace .memory-wrong-detail__side { justify-items: center; text-align: center; }
+  .personal-workspace .memory-wrong-detail__answer { justify-content: center; }
+}
+
+/* A quiet reset entry survives on the module picker. */
+.personal-workspace .memory-reset-link {
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--ui-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Today: book and streak share one surface; the map block is gone. */
+.personal-workspace .crumb-today-side { gap: 0 !important; }
+
+.personal-workspace .crumb-book-note {
+  border-bottom-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.personal-workspace .crumb-today-side .study-stats {
+  margin-top: 0 !important;
+  border-top: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* Settings: tighter goal columns, bolder estimate, one-line keys. */
+.personal-workspace .settings-form fieldset.settings-goal-grid {
+  grid-template-columns: repeat(2, max-content);
+  gap: 18px 20px;
+}
+
+.personal-workspace .settings-goal-grid .field-badge {
+  padding: 9px 18px;
+  font-size: 1.02rem;
+  font-weight: 900;
+}
+
+.personal-workspace .settings-pair {
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: 16px 36px;
+  margin-top: 18px;
+}
+
+.personal-workspace .settings-pair > .field--inline { gap: 12px; }
+.personal-workspace .settings-pair > .field--inline > label { font-size: 0.86rem; font-weight: 800; }
+
+/* The today guide note carries only a sentence now, so it needs readable ink. */
+.personal-workspace .crumb-trail-footer { display: flex; gap: 16px; }
+
+.personal-workspace .crumb-guide-note {
+  flex: 1 1 auto;
+  width: 100%;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-guide-note p {
+  margin: 2px 0 0;
+  color: var(--ui-ink) !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5;
+}
+
+.personal-workspace .crumb-guide-note span {
+  color: var(--ui-muted) !important;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+/* Flashcards keep the same left/right structure before and after a flip. */
+.memory-main-card .study-card__face {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 32px;
+  align-items: center;
+}
+
+.memory-main-card .study-card__word-block {
+  justify-items: start;
+  text-align: left;
+}
+
+.memory-main-card .study-card__side {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  align-content: center;
+  text-align: left;
+}
+
+.memory-main-card .study-card__side .study-card__phonetic { margin: 0; }
+
+.memory-main-card .study-card__face > .study-card__example {
+  grid-column: 1 / -1;
+  text-align: left;
+}
+
+.memory-main-card .study-card.is-revealed .study-card__face {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  justify-items: stretch;
+}
+
+.memory-main-card .study-card.is-revealed .study-card__word-block {
+  justify-items: start;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .memory-main-card .study-card__face,
+  .memory-main-card .study-card.is-revealed .study-card__face {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    justify-items: center;
+    text-align: center;
+  }
+  .memory-main-card .study-card__word-block { justify-items: center; text-align: center; }
+  .memory-main-card .study-card__side { justify-items: center; text-align: center; }
+}
+
+/* Word and phonetic stay pinned to the same left edge before and after a flip. */
+.memory-main-card .study-card .study-card__face { align-items: start; }
+.memory-main-card .study-card .study-card__word-block,
+.memory-main-card .study-card.is-revealed .study-card__word-block {
+  justify-items: start;
+  text-align: left;
+}
+.memory-main-card .study-card .study-card__word { text-align: left; }
+.memory-main-card .study-card .study-card__side { align-content: start; }
+
+/* The study card's single track fills the card, so the face never shrinks. */
+.personal-workspace .memory-page .memory-main-card .study-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.memory-main-card .study-card.is-revealed .study-card__face { align-items: start; }
+
+.personal-workspace .memory-page .memory-main-card .study-card {
+  min-height: 260px;
+  align-content: start;
+}

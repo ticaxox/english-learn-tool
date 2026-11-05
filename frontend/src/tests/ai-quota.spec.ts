@@ -6,6 +6,7 @@ const apiMocks = vi.hoisted(() => ({
   fetchLearningProfile: vi.fn(),
   updateAiQuotaLimits: vi.fn(),
   fetchPracticeUsage: vi.fn(),
+  updatePersonalProvider: vi.fn(),
 }))
 
 vi.mock('../api/learning', async (importOriginal) => {
@@ -19,6 +20,10 @@ vi.mock('../api/learning', async (importOriginal) => {
 vi.mock('../api/practice', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api/practice')>()
   return { ...actual, fetchPracticeUsage: apiMocks.fetchPracticeUsage }
+})
+vi.mock('../api/personal-ai', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../api/personal-ai')>()
+  return { ...actual, updatePersonalProvider: apiMocks.updatePersonalProvider }
 })
 
 const usage = {
@@ -48,7 +53,7 @@ describe('AiQuotaPanel', () => {
     expect((rows[2].get('input[type="number"]').element as HTMLInputElement).value).toBe('50')
 
     await rows[1].get('input[type="checkbox"]').setValue(true)
-    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('保存额度'))!.trigger('click')
+    await wrapper.findAll('[role="button"]').find((button) => button.text().trim() === '保存')!.trigger('click')
     await flushPromises()
 
     expect(apiMocks.updateAiQuotaLimits).toHaveBeenCalledWith({

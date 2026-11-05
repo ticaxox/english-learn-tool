@@ -15,7 +15,6 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
 import StudyStatsPanel from '../components/StudyStatsPanel.vue'
-import ChallengeView from './ChallengeView.vue'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -235,14 +234,6 @@ onMounted(() => {
                 <p v-else>跟着这条路线走，今天就算稳稳落地。</p>
               </div>
             </div>
-            <RouterLink
-              v-if="primaryTask"
-              class="button crumb-primary-action today-primary-action"
-              :to="primaryTask.to"
-            >
-              {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
-              <AppIcon name="arrow" />
-            </RouterLink>
           </footer>
         </section>
 
@@ -264,7 +255,6 @@ onMounted(() => {
         </aside>
       </div>
 
-      <ChallengeView embedded />
     </template>
   </article>
 </template>

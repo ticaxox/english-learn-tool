@@ -270,20 +270,19 @@ void practice.load()
           </div>
 
           <aside class="member-practice-session-aside" aria-label="作答操作">
-            <section v-if="sessionTimer.running.value" class="panel practice-rail-clock" aria-label="本次计时">
-              <span class="practice-rail-clock__label">本次用时</span>
-              <span class="practice-stage-clock" :class="{ 'is-expired': sessionTimer.expired.value }">
-                <AppIcon name="today" />
-                <span>{{ timerLimit ? '倒计时' : '正计时' }} {{ sessionTimer.label.value }}</span>
-              </span>
-            </section>
-            <section class="panel practice-submit-panel member-practice-submit">
+            <section class="panel practice-session-side" aria-label="作答操作">
+              <div v-if="sessionTimer.running.value" class="practice-session-side__timer">
+                <span class="practice-rail-clock__label">本次用时</span>
+                <span class="practice-stage-clock" :class="{ 'is-expired': sessionTimer.expired.value }">
+                  <AppIcon name="today" />
+                  <span>{{ timerLimit ? '倒计时' : '正计时' }} {{ sessionTimer.label.value }}</span>
+                </span>
+              </div>
               <div class="practice-submit-progress">
                 <div class="practice-submit-progress__top">
                   <span>已答 {{ answeredCount }} / {{ questions.length }}</span>
                 </div>
                 <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
-                <p class="field-hint">{{ allAnswered ? '全部题目已作答，可以提交。' : `还有 ${questions.length - answeredCount} 题未作答。` }}</p>
               </div>
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />

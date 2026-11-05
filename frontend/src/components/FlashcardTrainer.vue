@@ -69,22 +69,24 @@ function rate(rating: FlashcardRating): void {
     <div class="study-card__face">
       <div class="study-card__word-block">
         <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>
-        <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
       </div>
 
-      <div
-        v-if="revealed"
-        id="flashcard-back"
-        ref="backRegion"
-        class="study-card__back"
-        aria-live="polite"
-        tabindex="-1"
-      >
-        <p class="study-card__meaning">
-          <span v-if="props.question.partOfSpeech" class="study-card__phonetic">{{ props.question.partOfSpeech }}</span>
-          <span v-if="props.question.back" class="study-card__definition">{{ props.question.back }}</span>
-          <span v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</span>
-        </p>
+      <div class="study-card__side">
+        <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
+        <div
+          v-if="revealed"
+          id="flashcard-back"
+          ref="backRegion"
+          class="study-card__back"
+          aria-live="polite"
+          tabindex="-1"
+        >
+          <p class="study-card__meaning">
+            <span v-if="props.question.partOfSpeech" class="study-card__phonetic">{{ props.question.partOfSpeech }}</span>
+            <span v-if="props.question.back" class="study-card__definition">{{ props.question.back }}</span>
+            <span v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</span>
+          </p>
+        </div>
       </div>
 
       <p v-if="revealed && props.question.example" class="study-card__example">{{ props.question.example }}</p>

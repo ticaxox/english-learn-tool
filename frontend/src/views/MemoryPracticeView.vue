@@ -256,6 +256,14 @@ function restart(): void {
   void loadConfig()
 }
 
+// A finished or ended session returns straight to the module picker.
+watch(
+  () => session.finished.value,
+  (finished) => {
+    if (finished) restart()
+  },
+)
+
 onMounted(async () => {
   await Promise.all([loadConfig(), loadTodayPlan()])
   if (challengeSessionId.value && challengeModule.value) {
@@ -336,6 +344,9 @@ watch(challengeModule, async (module, previous) => {
                 </select>
               </label>
               <span class="workspace-meta">{{ activeModules.length }} 种可用</span>
+              <DivButton class="memory-reset-link" type="button" :disabled="resetting" @click="resetTodayProgress">
+                重置今日进度
+              </DivButton>
             </div>
           </header>
 
@@ -390,24 +401,22 @@ watch(challengeModule, async (module, previous) => {
 
         <section v-if="wrongCard" class="memory-wrong-detail" aria-live="polite">
           <div class="workspace-card memory-wrong-detail__card">
-            <p class="eyebrow">答错了</p>
             <div class="memory-wrong-detail__grid">
               <h2>{{ wrongCard.word }}</h2>
               <div class="memory-wrong-detail__side">
                 <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
                 <p class="memory-wrong-detail__meaning">{{ wrongCard.meaning }}</p>
+                <p v-if="wrongCard.kind === 'spelling' && wrongCard.typed" class="memory-wrong-detail__answer">
+                  <span class="memory-wrong-detail__letters">
+                    <span
+                      v-for="(letter, index) in wrongCard.typed"
+                      :key="index"
+                      :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
+                    >{{ letter }}</span>
+                  </span>
+                </p>
               </div>
             </div>
-            <p v-if="wrongCard.typed" class="memory-wrong-detail__answer">
-              <span v-if="wrongCard.kind === 'spelling'" class="memory-wrong-detail__letters">
-                <span
-                  v-for="(letter, index) in wrongCard.typed"
-                  :key="index"
-                  :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
-                >{{ letter }}</span>
-              </span>
-              <span v-else class="memory-wrong-detail__chosen">{{ wrongCard.typed }}</span>
-            </p>
           </div>
           <DivButton class="button memory-wrong-detail__continue" type="button" @click="continueAfterWrong">
             继续
@@ -436,25 +445,6 @@ watch(challengeModule, async (module, previous) => {
           :disabled="session.busy.value"
           @answer="(value) => answerSpelling(session.question.value!.questionId, value)"
         />
-
-        <section v-if="session.finished.value" class="workspace-complete-state">
-          <span class="workspace-status">本轮完成</span>
-          <h2>这次复习完成了</h2>
-          <p>可以回到今日进度，或继续查看错词。</p>
-          <div class="button-row">
-            <DivButton class="button workspace-primary-button" type="button" @click="restart">再练一轮</DivButton>
-            <DivButton
-              class="button-secondary"
-              type="button"
-              :disabled="resetting"
-              @click="resetTodayProgress"
-            >
-              {{ resetting ? '正在重置…' : '重置今日进度' }}
-            </DivButton>
-            <RouterLink class="button workspace-secondary-button" to="/overview">查看今日进度</RouterLink>
-            <RouterLink class="button workspace-secondary-button" to="/memory/mistakes">查看错词</RouterLink>
-          </div>
-        </section>
 
         <section v-if="showModulePicker && selectedModule && session.lastError.value" class="memory-resume-row">
           <DivButton class="button workspace-secondary-button" type="button" @click="resume">继续上一次会话</DivButton>
