@@ -4711,3 +4711,88 @@
   .personal-workspace .memory-wrong-detail__grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .personal-workspace .memory-wrong-detail__side { justify-items: center; text-align: center; }
 }
+
+/* More air between the study card and its rail. */
+.personal-workspace .memory-workbench-grid.is-session { gap: 30px; }
+
+.personal-workspace .memory-page .memory-main-card .study-card--choice {
+  padding-top: 44px !important;
+  padding-bottom: 48px !important;
+}
+
+/* End dialog actions sit a little lower, away from the copy. */
+.personal-workspace .memory-end-dialog .button-row {
+  margin-top: 46px;
+}
+
+/* Side quests branch off the main trail instead of listing below the map. */
+.personal-workspace .crumb-branches {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  max-width: 720px;
+  margin: 22px auto 0;
+  padding: 34px 0 4px;
+}
+
+.personal-workspace .crumb-branches::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 34px;
+  border-left: 3px dashed var(--ui-line-strong);
+  content: "";
+}
+
+.personal-workspace .crumb-branch-label {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+}
+
+.personal-workspace .branch-station {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: min(460px, 100%);
+  margin: 0;
+  padding: 10px 14px;
+  border: 2px dashed var(--ui-line-strong);
+  border-radius: 16px;
+  background: var(--ui-surface);
+  text-align: left;
+}
+
+.personal-workspace .branch-station__mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--g-gold-soft);
+  color: var(--g-gold-edge);
+}
+
+.personal-workspace .branch-station__copy { display: grid; flex: 1 1 auto; gap: 2px; min-width: 0; }
+.personal-workspace .branch-station__copy strong { color: var(--ui-ink); font-size: 0.92rem; }
+.personal-workspace .branch-station__copy small { color: var(--ui-muted); font-size: 0.75rem; }
+.personal-workspace .branch-station__action { margin-left: auto; color: var(--ui-ink); font-size: 0.78rem; font-weight: 850; white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .personal-workspace .crumb-branches { padding-top: 26px; }
+  .personal-workspace .branch-station { width: 100%; }
+}
+
+/* Today's tasks read as one sentence instead of a stack of tiles. */
+.personal-workspace .today-task-sentence {
+  margin: 6px 0 0;
+  max-width: 46rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.75;
+}

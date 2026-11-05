@@ -1384,3 +1384,255 @@
 }
 
 .background-tasks-empty p { margin: 0; }
+
+/* Learning settings: compact daily-goal inputs and a two-column lower half. */
+.personal-workspace .settings-form #daily-new-words,
+.personal-workspace .settings-form #daily-minutes { max-width: 220px; }
+
+.personal-workspace .field-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.personal-workspace .settings-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .personal-workspace .settings-pair { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .settings-form .field,
+  .personal-workspace .practice-create-form .field {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+  }
+
+  .personal-workspace .settings-form .field > label,
+  .personal-workspace .practice-create-form .field > label {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .personal-workspace .settings-form .field > input,
+  .personal-workspace .settings-form .field > select,
+  .personal-workspace .practice-create-form .field > input,
+  .personal-workspace .practice-create-form .field > select {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .personal-workspace .settings-form .field > .field-hint { flex-basis: 100%; margin: 0; }
+
+  .personal-workspace .settings-form .field-inline-note {
+    display: flex;
+    flex: 1 1 0;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .personal-workspace .settings-form .field-inline-note input { flex: 1 1 0; min-width: 0; }
+
+  .personal-workspace .settings-form .field > label { font-size: 0.82rem; }
+
+  .personal-workspace .settings-choice-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .personal-workspace .settings-choice-block:nth-child(2) .settings-choice-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+/* AI memory: compact row, document opens in a dialog. */
+.personal-workspace .ai-memory-panel { padding: 18px; }
+
+.personal-workspace .ai-memory-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+}
+
+.ai-memory-row__copy { flex: 1 1 auto; min-width: 0; }
+.ai-memory-row__copy h3 { margin: 0 0 2px; }
+.ai-memory-row__copy .field-hint { margin: 0; }
+
+.personal-workspace .ai-memory-stamp {
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.personal-workspace .ai-memory-dialog {
+  display: grid;
+  gap: 14px;
+  width: min(760px, calc(100vw - 40px));
+  max-height: min(82vh, 760px);
+  padding: 22px 24px;
+  overflow-y: auto;
+}
+
+.ai-memory-dialog__head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ai-memory-dialog__head h2 { margin: 2px 0 4px; }
+.ai-memory-dialog__head .eyebrow { margin: 0; }
+.ai-memory-dialog__head .ai-memory-stamp { display: block; }
+
+/* Wordbook shelf reads as a list of rows, not a grid of book covers. */
+.personal-workspace .wordbook-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px;
+}
+
+.personal-workspace .wordbook-grid::after { display: none; }
+
+.personal-workspace .wordbook-card--compact {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 0 !important;
+  padding: 12px 14px;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-cover {
+  width: 64px;
+  height: 64px;
+  min-height: 64px;
+  border: 0;
+  border-radius: 12px;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-cover-letter { font-size: 1.5rem; }
+
+.personal-workspace .wordbook-card--compact .wordbook-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 16px;
+  align-items: center;
+  padding: 0;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-card-body h3 {
+  grid-column: 1;
+  font-size: 1rem;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-entry-count { grid-column: 1; }
+
+.personal-workspace .wordbook-card--compact .wordbook-card-badges {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+}
+
+.personal-workspace .wordbook-card--compact .wordbook-card-actions {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-self: end;
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .wordbook-card--compact { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
+  .personal-workspace .wordbook-card--compact .wordbook-cover { width: 52px; height: 52px; min-height: 52px; }
+  .personal-workspace .wordbook-card--compact .wordbook-card-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .personal-workspace .wordbook-card--compact .wordbook-card-badges,
+  .personal-workspace .wordbook-card--compact .wordbook-card-actions {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .practice-form .field {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+  }
+
+  .personal-workspace .practice-form .field > label {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .personal-workspace .practice-form .field > select,
+  .personal-workspace .practice-form .field > input {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .personal-workspace .practice-form-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px;
+  }
+
+  .personal-workspace .practice-type-picker {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .personal-workspace .practice-type-pill {
+    flex: 1 1 0;
+    gap: 4px;
+    justify-content: center;
+    min-width: 0;
+    padding: 8px 4px;
+    font-size: 0.76rem;
+  }
+
+  .personal-workspace .practice-type-pill svg { width: 15px; height: 15px; }
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .settings-toggle {
+    padding: 8px 6px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+}
+
+
+.personal-workspace .settings-form fieldset.settings-goal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 260px));
+  gap: 16px 28px;
+  align-items: start;
+  justify-content: start;
+}
+
+.personal-workspace .settings-goal-grid legend { grid-column: 1 / -1; }
+
+@media (max-width: 640px) {
+  .personal-workspace .settings-form fieldset.settings-goal-grid { grid-template-columns: minmax(0, 1fr); }
+}

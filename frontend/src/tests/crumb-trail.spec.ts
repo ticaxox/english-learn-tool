@@ -35,8 +35,7 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     const today = source('../views/TodayView.vue')
     expect(today).toContain('crumb-today')
     expect(today).toContain('crumb-trail-board')
-    expect(today).toContain('crumb-stop')
-    expect(today).toContain('crumb-route-progress')
+    expect(today).toContain('today-task-sentence')
     expect(today).toContain('crumb-primary-action')
     expect(today).toContain('CrumboMark')
     expect(today).not.toContain('today-workbench')
@@ -82,7 +81,7 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(challenge).toContain('crumb-challenge')
     expect(challenge).toContain('crumb-stations')
     expect(challenge).toContain('map-station--boss')
-    expect(challenge).toContain('CrumboMark')
+    expect(challenge).toContain('crumb-branches')
   })
 
   it('defines the CrumbTrail palette and no-legacy structure tokens', () => {

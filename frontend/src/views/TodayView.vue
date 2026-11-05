@@ -20,11 +20,7 @@ import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
 import { isContractFrozen } from '../api/contract-adapter'
-import {
-  TODAY_STATUS_LABELS,
-  type AiPracticeSummary,
-  type TodayPlan,
-} from '../types/learning'
+import { TODAY_STATUS_LABELS, type TodayPlan } from '../types/learning'
 import '../learning.css'
 
 const plan = ref<TodayPlan | null>(null)
@@ -39,20 +35,14 @@ const needsActiveWordbook = computed(
 const statusLabel = computed(() =>
   plan.value ? TODAY_STATUS_LABELS[plan.value.status] : null,
 )
-const aiPractice = computed<AiPracticeSummary | null>(() => plan.value?.aiPractice ?? null)
-
-const aiUnavailableLabel = computed(() => {
-  if (!aiPractice.value) return null
-  switch (aiPractice.value.state) {
-    case 'not_available':
-      return 'AI 练习准备中'
-    case 'not_configured':
-      return 'AI 练习尚未配置'
-    case 'available':
-      return 'AI 练习可用'
-    default:
-      return 'AI 练习状态未知'
-  }
+const todayTaskSentence = computed(() => {
+  const phrases = todayTasks.value.map((task) => {
+    if (task.key === 'new-words') return `学习 ${task.target} 个新词`
+    if (task.key === 'due-reviews') return `完成 ${task.target} 个到期复习`
+    if (task.key === 'learning-minutes') return `积累 ${task.target} 分钟学习时间`
+    return `${task.title} ${task.target} ${task.unit}`
+  })
+  return phrases.length ? `今天要${phrases.join('，')}。` : ''
 })
 
 function percent(completed: number, target: number): number {
@@ -229,61 +219,11 @@ onMounted(() => {
         <section class="crumb-trail-board">
           <header class="crumb-trail-board-head">
             <div>
-              <span class="crumb-eyebrow">今日任务 · 面包屑路线</span>
-              <h2>今天要捡 {{ todayTasks.length }} 块</h2>
+              <span class="crumb-eyebrow">今日任务</span>
+              <p class="today-task-sentence">{{ todayTaskSentence }}</p>
             </div>
             <strong>{{ completedTaskCount }} / {{ todayTasks.length }} 完成</strong>
           </header>
-
-          <div
-            class="crumb-route-progress"
-            :style="{ '--crumb-progress': `${todayTasks.length ? (completedTaskCount / todayTasks.length) * 100 : 0}%` }"
-            role="progressbar"
-            :aria-valuenow="completedTaskCount"
-            aria-valuemin="0"
-            :aria-valuemax="Math.max(todayTasks.length, 1)"
-            aria-label="今日面包屑路线进度"
-          >
-            <span v-for="(task, index) in todayTasks" :key="task.key" :class="{ 'is-done': task.done, 'is-current': index === activeTaskIndex && !task.done }">
-              {{ index + 1 }}
-            </span>
-          </div>
-
-          <div role="list" class="crumb-trail-list" aria-label="今日任务">
-            <div role="listitem"
-              v-for="(task, index) in todayTasks"
-              :key="task.key"
-              class="today-tile crumb-stop"
-              :class="[`crumb-stop--${task.key}`, { 'is-done': task.done, 'is-current': index === activeTaskIndex && !task.done }]"
-            >
-              <div class="crumb-stop-marker" aria-hidden="true">
-                <span>{{ index + 1 }}</span>
-              </div>
-              <div class="crumb-stop-card">
-                <div class="crumb-stop-heading">
-                  <div>
-                    <span class="crumb-stop-label">{{ task.eyebrow }} · {{ task.label }}</span>
-                    <h3>{{ task.title }}</h3>
-                  </div>
-                  <span class="crumb-stop-state">{{ task.done ? '已拾取' : index === activeTaskIndex ? '正在走' : '下一站' }}</span>
-                </div>
-                <div class="crumb-stop-meta">
-                  <span class="today-tile__value"><strong>{{ task.completed }}</strong><span>/ {{ task.target }} {{ task.unit }}</span></span>
-                  <div
-                    class="crumb-task-progress"
-                    role="progressbar"
-                    :aria-valuenow="task.completed"
-                    aria-valuemin="0"
-                    :aria-valuemax="Math.max(task.target, 1)"
-                    :aria-label="`${task.label}进度 ${task.completed} / ${task.target}`"
-                  >
-                    <span :style="{ width: `${task.percent}%` }"></span>
-                  </div>
-                </div>
-              </div>
-              <AppIcon :name="task.icon" />
-            </div>
-          </div>
 
           <footer class="crumb-trail-footer">
             <div class="crumb-guide-note">
@@ -321,15 +261,6 @@ onMounted(() => {
 
           <StudyStatsPanel compact />
 
-          <section class="crumb-ai-note">
-            <span class="crumb-ai-dot" aria-hidden="true"><AppIcon name="spark" /></span>
-            <div>
-              <span class="crumb-eyebrow">AI 练习</span>
-              <strong>{{ aiUnavailableLabel }}</strong>
-              <p>想加练时，再开一轮。</p>
-            </div>
-            <RouterLink class="crumb-inline-link" to="/practice">去看看</RouterLink>
-          </section>
         </aside>
       </div>
 

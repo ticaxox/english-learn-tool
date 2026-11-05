@@ -136,7 +136,7 @@ describe('challenge view', () => {
     const { wrapper } = await mountView()
     expect(wrapper.text()).toContain('今日闯关')
     expect(wrapper.findAll('.crumb-stations .map-station')).toHaveLength(3)
-    expect(wrapper.findAll('.challenge-optional .challenge-node')).toHaveLength(1)
+    expect(wrapper.findAll('.crumb-branches .branch-station')).toHaveLength(1)
     expect(wrapper.text()).toContain('复习回廊')
     expect(wrapper.text()).toContain('新词营地')
     expect(wrapper.text()).toContain('终点挑战')

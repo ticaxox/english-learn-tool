@@ -29,7 +29,7 @@ from app.services.practice import create_pool_practice_session, regenerate_pract
 
 logger = logging.getLogger(__name__)
 
-MAX_TARGET_PER_COMBO = 2
+MAX_TARGET_PER_COMBO = 5
 MAX_ATTEMPTS = 3
 RETRY_COOLDOWN_SECONDS = 90
 STALE_FAILED_SECONDS = 6 * 3600

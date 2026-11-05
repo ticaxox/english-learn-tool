@@ -28,9 +28,9 @@ function book(): Wordbook {
 describe('T-FE-017 workspace depth', () => {
   it('adds a readable Today progress ring and real streak/goal support', () => {
     const today = source('../views/TodayView.vue')
-    expect(today).toContain('crumb-route-progress')
+    expect(today).toContain('today-task-sentence')
     expect(today).toContain('<StudyStatsPanel')
-    expect(today).toContain('crumb-stop-state')
+    expect(today).toContain('crumb-primary-action')
   })
 
   it('keeps compact wordbook cards free of technical English metadata', () => {
@@ -76,7 +76,7 @@ describe('T-FE-017 workspace depth', () => {
 
   it('adds an actionable next step and status legend to the challenge map', () => {
     const challenge = source('../views/ChallengeView.vue')
-    expect(challenge).toContain('challenge-next-step')
+    expect(challenge).toContain('crumb-branches')
     expect(challenge).toContain('challenge-state-legend')
   })
 })

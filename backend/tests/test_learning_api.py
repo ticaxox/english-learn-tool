@@ -112,6 +112,14 @@ async def test_profile_defaults_validation_and_next_day_snapshot(
     assert updated.json()["target_exam"] == "IELTS"
     assert updated.json()["daily_new_words"] == 12
 
+    pool_high = await client.patch(PROFILE_PATH, headers=headers, json={"practice_pool_target": 5})
+    assert pool_high.status_code == 200, pool_high.text
+    assert pool_high.json()["practice_pool_target"] == 5
+    pool_invalid = await client.patch(
+        PROFILE_PATH, headers=headers, json={"practice_pool_target": 6}
+    )
+    assert pool_invalid.status_code == 422
+
     wordbook_id = await _seed_wordbook(app, owner_id=member_user.id, entries=16)
     await _activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
 

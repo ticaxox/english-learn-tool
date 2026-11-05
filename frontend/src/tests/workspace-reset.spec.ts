@@ -28,7 +28,7 @@ describe('T-FE-016 member workspace reset', () => {
   it('puts real Today tasks and the single primary action before supporting information', () => {
     const today = source('today')
     expect(today).toContain('crumb-trail-board')
-    expect(today).toContain('crumb-trail-list')
+    expect(today).toContain('today-task-sentence')
     expect(today).toContain('today-primary-action')
     expect(today).toContain('crumb-today-side')
     expect(today).not.toContain('member-hero')

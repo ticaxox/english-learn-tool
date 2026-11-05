@@ -81,7 +81,7 @@ class UserProfile(Base):
             name="user_profile_daily_study_minutes_range",
         ),
         CheckConstraint(
-            "practice_pool_target >= 0 AND practice_pool_target <= 2",
+            "practice_pool_target >= 0 AND practice_pool_target <= 5",
             name="practice_pool_target_range",
         ),
     )

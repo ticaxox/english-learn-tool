@@ -21,6 +21,15 @@ function saveButton(wrapper: ReturnType<typeof mount>) {
   return wrapper.findAll('[role="button"]').find((button) => button.text().includes('保存记忆'))
 }
 
+async function openDialog() {
+  const wrapper = mount(AiMemoryPanel)
+  await flushPromises()
+  const open = wrapper.findAll('[role="button"]').find((button) => button.text().includes('查看 / 修改'))
+  await open!.trigger('click')
+  await flushPromises()
+  return wrapper
+}
+
 describe('AiMemoryPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -29,8 +38,7 @@ describe('AiMemoryPanel', () => {
   })
 
   it('shows the one memory document in an editable box', async () => {
-    const wrapper = mount(AiMemoryPanel)
-    await flushPromises()
+    const wrapper = await openDialog()
     const textarea = wrapper.get('#ai-memory-document').element as HTMLTextAreaElement
     expect(textarea.value).toBe(documentBody.content)
     expect(wrapper.text()).toContain('最近更新')
@@ -38,8 +46,7 @@ describe('AiMemoryPanel', () => {
   })
 
   it('saves the edited document as a whole', async () => {
-    const wrapper = mount(AiMemoryPanel)
-    await flushPromises()
+    const wrapper = await openDialog()
     await wrapper.get('#ai-memory-document').setValue('用户信息：目标考试：六级\n手动笔记：多练长难句。')
     await saveButton(wrapper)!.trigger('click')
     await flushPromises()
@@ -49,8 +56,7 @@ describe('AiMemoryPanel', () => {
   })
 
   it('keeps the save action disabled until something changes', async () => {
-    const wrapper = mount(AiMemoryPanel)
-    await flushPromises()
+    const wrapper = await openDialog()
     expect(saveButton(wrapper)!.attributes('aria-disabled')).toBeDefined()
     await wrapper.get('#ai-memory-document').setValue('新的内容')
     expect(saveButton(wrapper)!.attributes('aria-disabled')).toBeUndefined()

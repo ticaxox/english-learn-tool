@@ -6,7 +6,6 @@ const props = defineProps<{ embedded?: boolean }>()
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import CrumboMark from '../components/CrumboMark.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ChallengeBossPanel from '../components/ChallengeBossPanel.vue'
 import {
@@ -387,19 +386,6 @@ onMounted(() => {
         </div>
       </section>
 
-      <section v-if="nextNode" class="challenge-next-step" aria-labelledby="challenge-next-title">
-        <CrumboMark size="medium" />
-        <div class="challenge-next-step__copy">
-          <p class="workspace-kicker">下一步</p>
-          <h2 id="challenge-next-title">{{ nextNode.title }}</h2>
-          <p>{{ nextNode.description }}</p>
-        </div>
-        <span class="challenge-node__status" :class="`challenge-node__status--${nextNode.status}`">{{ CHALLENGE_STATUS_LABELS[nextNode.status] }}</span>
-        <DivButton class="button workspace-primary-button" type="button" :disabled="nodeLoading || readOnly" @click="openNode(nextNode)">
-          {{ nodeActionLabel(nextNode) }}
-        </DivButton>
-      </section>
-
       <div v-if="readOnly" class="alert alert-warning" role="status">
         <strong>跨日地图只读</strong>
         <p>这份地图已过期，只能查看结果。</p>
@@ -481,23 +467,24 @@ onMounted(() => {
           </DivButton>
         </div>
 
-        <div v-if="optionalNodes.length > 0" class="challenge-optional">
-          <div class="challenge-map__heading">
-            <div><p class="eyebrow">可选支线</p><h2>支线任务</h2></div>
-            <span class="field-hint">不影响主线顺序</span>
-          </div>
-          <article v-for="node in optionalNodes" :key="node.id" class="challenge-node challenge-node--optional" :class="nodeStatusClass(node)">
-            <div class="challenge-node__marker" aria-hidden="true"><AppIcon name="spark" /></div>
-            <div class="challenge-node__body">
-              <div class="challenge-node__heading">
-                <div><p class="eyebrow">可选支线</p><h3>{{ node.title }}</h3></div>
-                <span class="challenge-node__status" :class="`challenge-node__status--${node.status}`">{{ CHALLENGE_STATUS_LABELS[node.status] }}</span>
-              </div>
-              <p>{{ node.description }}</p>
-              <p class="field-hint">预计 {{ node.estimatedMinutes }} 分钟</p>
-              <DivButton class="button-secondary button-small" type="button" :disabled="nodeLoading" @click="openNode(node)">{{ nodeActionLabel(node) }}</DivButton>
-            </div>
-          </article>
+        <div v-if="optionalNodes.length > 0" class="crumb-branches" aria-label="可选支线">
+          <span class="crumb-branch-label">可选支线 · 不影响主线顺序</span>
+          <DivButton
+            v-for="node in optionalNodes"
+            :key="node.id"
+            type="button"
+            class="branch-station"
+            :class="nodeStatusClass(node)"
+            :aria-label="`支线：${node.title}，${CHALLENGE_STATUS_LABELS[node.status]}`"
+            @click="openNode(node)"
+          >
+            <span class="branch-station__mark" aria-hidden="true"><AppIcon name="spark" /></span>
+            <span class="branch-station__copy">
+              <strong>{{ node.title }}</strong>
+              <small>{{ CHALLENGE_STATUS_LABELS[node.status] }} · 预计 {{ node.estimatedMinutes }} 分钟</small>
+            </span>
+            <span class="branch-station__action">{{ nodeActionLabel(node) }}</span>
+          </DivButton>
         </div>
       </section>
 

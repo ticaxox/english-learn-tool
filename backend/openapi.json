@@ -3787,7 +3787,7 @@
           "practice_pool_target": {
             "anyOf": [
               {
-                "maximum": 2.0,
+                "maximum": 5.0,
                 "minimum": 0.0,
                 "type": "integer"
               },
@@ -3885,7 +3885,7 @@
           },
           "practice_pool_target": {
             "default": 0,
-            "maximum": 2.0,
+            "maximum": 5.0,
             "minimum": 0.0,
             "title": "Practice Pool Target",
             "type": "integer"

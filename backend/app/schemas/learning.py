@@ -23,7 +23,7 @@ class LearningProfileResponse(BaseModel):
     timezone: str
     onboarding_completed: bool
     notification_preferences: dict[str, Any] = Field(default_factory=dict)
-    practice_pool_target: int = Field(default=0, ge=0, le=2)
+    practice_pool_target: int = Field(default=0, ge=0, le=5)
     challenge_generation_time: str | None = None
     updated_at: datetime
 
@@ -35,7 +35,7 @@ class LearningProfilePatch(BaseModel):
     daily_study_minutes: int | None = Field(default=None, ge=15, le=180)
     notification_preferences: dict[str, Any] | None = None
     onboarding_completed: bool | None = None
-    practice_pool_target: int | None = Field(default=None, ge=0, le=2)
+    practice_pool_target: int | None = Field(default=None, ge=0, le=5)
     challenge_generation_time: str | None = None
 
     @field_validator("challenge_generation_time")

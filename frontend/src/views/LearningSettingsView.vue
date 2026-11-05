@@ -57,7 +57,7 @@ const DRILL_MODE_OPTIONS = [
   { key: 'choice', label: '选择' },
   { key: 'spelling', label: '拼写' },
 ] as const
-const POOL_TARGET_OPTIONS = [0, 1, 2]
+const POOL_TARGET_OPTIONS = [0, 1, 2, 3, 4, 5]
 
 const challengePrefs = reactive<{ practiceTypes: string[]; drillModes: string[] }>({
   practiceTypes: PRACTICE_TYPE_OPTIONS.map((option) => option.key),
@@ -226,10 +226,10 @@ onMounted(() => {
       </div>
 
       <form class="panel settings-form" novalidate @submit.prevent="save">
-        <fieldset>
+        <fieldset class="settings-goal-grid">
           <legend>每日目标</legend>
           <div class="field">
-            <label for="daily-new-words">每日新词量（{{ DAILY_NEW_WORDS_MIN }}–{{ DAILY_NEW_WORDS_MAX }}）</label>
+            <label for="daily-new-words">每日新词量</label>
             <input
               id="daily-new-words"
               v-model.number="form.dailyNewWords"
@@ -246,7 +246,7 @@ onMounted(() => {
           </div>
 
           <div class="field">
-            <label for="daily-minutes">每日学习时长（{{ DAILY_MINUTES_MIN }}–{{ DAILY_MINUTES_MAX }} 分钟）</label>
+            <label for="daily-minutes">每日学习时长</label>
             <div class="field-inline-note">
               <input
                 id="daily-minutes"
@@ -258,7 +258,7 @@ onMounted(() => {
                 :aria-invalid="Boolean(fieldErrors.dailyMinutes)"
                 :aria-describedby="fieldErrors.dailyMinutes ? 'daily-minutes-error' : undefined"
               />
-              <p v-if="completionDays !== null" class="field-hint">预计 {{ completionDays }} 天学完</p>
+              <span v-if="completionDays !== null" class="field-badge" :title="`预计 ${completionDays} 天学完`">≈ {{ completionDays }} 天</span>
             </div>
             <p v-if="fieldErrors.dailyMinutes" id="daily-minutes-error" class="field-error" role="alert">
               {{ fieldErrors.dailyMinutes }}
@@ -268,7 +268,6 @@ onMounted(() => {
 
         <fieldset>
           <legend>关卡生成</legend>
-          <p class="field-hint">今日地图只会使用勾选的题型和学习方式，至少各保留一项。</p>
           <div class="settings-choice-row">
             <div class="settings-choice-block">
               <div class="settings-choice-grid">
@@ -303,32 +302,34 @@ onMounted(() => {
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend>AI 练习预生成</legend>
-          <p class="field-hint">
-            为每种题型和题量预留几套题目。用掉一套后后台会自动补一套；0 表示不预生成，每个组合最多 2 套。
-          </p>
-          <div class="field">
-            <label for="practice-pool-target">预生成库存（每种题型、每种题量）</label>
-            <select id="practice-pool-target" v-model.number="form.practicePoolTarget">
-              <option v-for="target in POOL_TARGET_OPTIONS" :key="target" :value="target">
-                {{ target === 0 ? '关闭' : `${target} 套` }}
-              </option>
-            </select>
+        <div class="settings-pair">
+          <fieldset>
+            <legend>AI 练习预生成</legend>
             <p class="field-hint">
-              所有题型和题量都按这个数量提前准备；用掉一套后后台自动补一套。数字越大消耗的 AI 次数越多。
+              为每种题型和题量预留几套题目。用掉一套后后台会自动补一套；0 表示不预生成，每个组合最多 5 套。
             </p>
-          </div>
-        </fieldset>
+            <div class="field">
+              <label for="practice-pool-target">预生成库存</label>
+              <select id="practice-pool-target" v-model.number="form.practicePoolTarget">
+                <option v-for="target in POOL_TARGET_OPTIONS" :key="target" :value="target">
+                  {{ target === 0 ? '关闭' : `${target} 套` }}
+                </option>
+              </select>
+              <p class="field-hint">
+                所有题型和题量都按这个数量提前准备；用掉一套后后台自动补一套。数字越大消耗的 AI 次数越多。
+              </p>
+            </div>
+          </fieldset>
 
-        <fieldset>
-          <legend>学习地图</legend>
-          <div class="field">
-            <label for="challenge-generation-time">每天自动生成时间</label>
-            <input id="challenge-generation-time" v-model="challengeTime" type="time" />
-            <p class="field-hint">到点后后台自动生成当天的学习地图；留空则在打开地图时再生成。</p>
-          </div>
-        </fieldset>
+          <fieldset>
+            <legend>学习地图</legend>
+            <div class="field">
+              <label for="challenge-generation-time">每天自动生成时间</label>
+              <input id="challenge-generation-time" v-model="challengeTime" type="time" />
+              <p class="field-hint">到点后后台自动生成当天的学习地图；留空则在打开地图时再生成。</p>
+            </div>
+          </fieldset>
+        </div>
 
         <div class="button-row">
           <DivButton class="button" type="submit" :disabled="saving">
