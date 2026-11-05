@@ -9,6 +9,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import ChallengeView from './ChallengeView.vue'
 import GoalRing from '../components/ui/GoalRing.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -255,6 +256,7 @@ onMounted(() => {
         </aside>
       </div>
 
+      <ChallengeView embedded />
     </template>
   </article>
 </template>

@@ -108,7 +108,7 @@ describe('member-facing Chinese copy density', () => {
 
     const challenge = source('../views/ChallengeView.vue')
     expect(challenge).toContain('每日闯关')
-    expect(challenge).toContain('今日主线')
+    expect(challenge).toContain('ChallengeDslMap')
 
     const coach = source('../views/CoachView.vue')
     expect(coach).toContain('AI 教练')

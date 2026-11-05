@@ -74,9 +74,11 @@ describe('T-FE-017 workspace depth', () => {
     expect(coach).toContain('coach-thinking')
   })
 
-  it('adds an actionable next step and status legend to the challenge map', () => {
+  it('adds a rendered DSL map with main-line and branch legends', () => {
     const challenge = source('../views/ChallengeView.vue')
-    expect(challenge).toContain('crumb-branches')
-    expect(challenge).toContain('challenge-state-legend')
+    const map = source('../components/ChallengeDslMap.vue')
+    expect(challenge).toContain('ChallengeDslMap')
+    expect(map).toContain('challenge-dsl-legend')
+    expect(map).toContain('is-branch')
   })
 })

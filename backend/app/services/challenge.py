@@ -275,6 +275,120 @@ async def _node_response(
     )
 
 
+NODE_TYPE_LABELS = {
+    "REVIEW": "复习",
+    "NEW_WORDS": "学习新词",
+    "WORD_DRILL": "专项巩固",
+    "AI_PRACTICE": "AI 练习",
+    "BOSS": "终点挑战",
+    "OPTIONAL_SIDE": "可选支线",
+}
+PRACTICE_TYPE_LABELS = {
+    "fill_blank": "填空",
+    "reading": "阅读",
+    "translation": "翻译",
+    "writing": "作文",
+}
+STATUS_LABELS = {
+    "locked": "未解锁",
+    "unlocked": "已解锁",
+    "in_progress": "进行中",
+    "completed": "已完成",
+    "failed": "失败",
+}
+
+
+def _node_question_type(node: ChallengeNode) -> str:
+    if node.node_type in {"REVIEW", "NEW_WORDS"}:
+        return "翻卡记忆"
+    if node.node_type == "WORD_DRILL":
+        return "拼写" if node.practice_spec.get("drill_mode") == "spelling" else "选择"
+    spec_type = node.practice_spec.get("practice_type")
+    if isinstance(spec_type, str):
+        return PRACTICE_TYPE_LABELS.get(spec_type, spec_type)
+    if node.node_type == "BOSS":
+        return "综合挑战"
+    if node.node_type == "OPTIONAL_SIDE":
+        return "可选练习"
+    return "综合练习"
+
+
+def _memory_module(node: ChallengeNode) -> str:
+    if node.node_type == "WORD_DRILL":
+        return "spelling" if node.practice_spec.get("drill_mode") == "spelling" else "choice"
+    return "flashcard"
+
+
+def _node_link(
+    plan: DailyChallengePlan, node: ChallengeNode, response: ChallengeNodeResponse
+) -> str:
+    if response.resource_type == "practice" and response.resource_id:
+        return f"/practice/{response.resource_id}"
+    if response.resource_type == "memory" and response.resource_id:
+        return (
+            f"/memory?sessionId={response.resource_id}"
+            f"&module={_memory_module(node)}&challengeId={plan.id}&nodeId={node.id}"
+        )
+    return "待开始"
+
+
+def build_challenge_map_dsl(
+    plan: DailyChallengePlan,
+    nodes: list[ChallengeNode],
+    responses: list[ChallengeNodeResponse],
+) -> str:
+    """Serialise the map as the Markdown-like language the page renders."""
+
+    response_by_id = {response.id: response for response in responses}
+    main = sorted((node for node in nodes if not node.optional), key=lambda n: n.order_index)
+    optional = sorted((node for node in nodes if node.optional), key=lambda n: n.order_index)
+    main_index = {node.id: index for index, node in enumerate(main)}
+
+    def next_main(node: ChallengeNode) -> ChallengeNode | None:
+        index = main_index.get(node.id, -1)
+        candidate = index + 1
+        return main[candidate] if 0 <= candidate < len(main) else None
+
+    def optional_parent(node: ChallengeNode) -> ChallengeNode | None:
+        earlier = [item for item in main if item.order_index < node.order_index]
+        return earlier[-1] if earlier else (main[0] if main else None)
+
+    lines = [f"# {plan.title or '今天的学习地图'}"]
+    if plan.summary:
+        lines.append(f"> {plan.summary.replace(chr(10), ' ').strip()}")
+    lines.append("")
+
+    ordered = main + optional
+    for node in ordered:
+        response = response_by_id.get(node.id)
+        status = response.status if response is not None else "locked"
+        if node.optional:
+            parent = optional_parent(node)
+            previous = parent.client_key if parent else "开始"
+            following = next_main(parent).client_key if parent and next_main(parent) else "终点"
+        else:
+            previous_node = main[main_index[node.id] - 1] if main_index[node.id] > 0 else None
+            previous = previous_node.client_key if previous_node else "开始"
+            following = next_main(node).client_key if next_main(node) else "终点"
+        link = _node_link(plan, node, response) if response is not None else "待开始"
+        lines.extend(
+            [
+                f"## [{node.client_key}] {node.title}",
+                f"- 类型: {NODE_TYPE_LABELS.get(node.node_type, node.node_type)}",
+                f"- 题目类型: {_node_question_type(node)}",
+                f"- 状态: {STATUS_LABELS.get(status, status)}",
+                f"- 时长: {node.estimated_minutes} 分钟",
+                f"- 说明: {node.description.replace(chr(10), ' ').strip()}",
+                f"- 链接: {link}",
+                f"- 前置: {previous}",
+                f"- 分支: {following}",
+                f"- 可选: {'是' if node.optional else '否'}",
+                "",
+            ]
+        )
+    return "\n".join(lines).strip()
+
+
 async def _plan_response(
     session: AsyncSession, plan: DailyChallengePlan, user: User, settings: Settings
 ) -> ChallengePlanResponse:
@@ -297,6 +411,9 @@ async def _plan_response(
     progress = {row.node_id: row for row in progress_rows}
     main = [node for node in nodes if not node.optional]
     completed = sum(progress[node.id].status == "completed" for node in main if node.id in progress)
+    node_responses = [
+        await _node_response(session, plan, node, progress.get(node.id)) for node in nodes
+    ]
     return ChallengePlanResponse(
         id=plan.id,
         local_date=plan.local_date,
@@ -314,7 +431,8 @@ async def _plan_response(
         error_message=plan.error_message,
         main_completed=completed,
         main_total=len(main),
-        nodes=[await _node_response(session, plan, node, progress.get(node.id)) for node in nodes],
+        map_dsl=build_challenge_map_dsl(plan, nodes, node_responses),
+        nodes=node_responses,
     )
 
 

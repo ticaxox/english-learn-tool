@@ -56,6 +56,7 @@ class ChallengePlanResponse(BaseModel):
     error_message: str | None = None
     main_completed: int = 0
     main_total: int = 0
+    map_dsl: str = ""
     nodes: list[ChallengeNodeResponse] = Field(default_factory=list)
 
 

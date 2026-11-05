@@ -8,6 +8,7 @@ import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ChallengeBossPanel from '../components/ChallengeBossPanel.vue'
+import ChallengeDslMap from '../components/ChallengeDslMap.vue'
 import {
   CHALLENGE_NODE_LABELS,
   CHALLENGE_STATUS_LABELS,
@@ -25,6 +26,7 @@ import {
   type ChallengePlan,
 } from '../api/challenge'
 import { ApiError, isApiError } from '../api/errors'
+import { parseChallengeMapDsl } from '../utils/challenge-map'
 import '../challenge.css'
 
 const route = useRoute()
@@ -48,6 +50,10 @@ const generationStatus = ref('')
 const cancelGenerationWait = ref(false)
 
 const selectedNode = ref<ChallengeNodeDetail | null>(null)
+const mapNodes = computed(() => parseChallengeMapDsl(plan.value?.mapDsl ?? '').nodes)
+const selectedMapNode = computed(() =>
+  mapNodes.value.find((node) => node.id === selectedNode.value?.node.clientKey) ?? null,
+)
 const nodeLoading = ref(false)
 const nodeError = ref<unknown>(null)
 const nodeStarting = ref(false)
@@ -61,11 +67,6 @@ const historyLoading = ref(false)
 const historyError = ref<unknown>(null)
 
 const routeChallengeId = computed(() => typeof route.params.challengeId === 'string' ? route.params.challengeId : null)
-const mainNodes = computed(() => (plan.value?.nodes ?? [])
-  .filter((node) => !node.optional)
-  .sort((left, right) => left.orderIndex - right.orderIndex))
-const optionalNodes = computed(() => (plan.value?.nodes ?? []).filter((node) => node.optional))
-const nextNode = computed(() => mainNodes.value.find((node) => node.status !== 'completed') ?? null)
 const planFailureError = computed(() => (plan.value?.status === 'failed'
   ? new ApiError(500, plan.value.errorCode ?? 'AI_JOB_FAILED', '今日地图生成失败，请稍后重试。', null, null, true)
   : null))
@@ -76,33 +77,6 @@ const readOnly = computed(() =>
 const progressPercent = computed(() => {
   if (!plan.value || plan.value.mainTotal <= 0) return 0
   return Math.min(100, Math.round((plan.value.mainCompleted / plan.value.mainTotal) * 100))
-})
-
-/** The route runs left to right, stations stepping above and below the line. */
-const STATION_SHIFTS = [0, -28, 0, 28]
-const mapTrackHeight = 190
-
-function stationShift(index: number): number {
-  return STATION_SHIFTS[index % STATION_SHIFTS.length]
-}
-
-const routePath = computed(() => {
-  const nodes = mainNodes.value
-  if (nodes.length < 2) return ''
-  const step = 100 / nodes.length
-  const point = (index: number): [number, number] => [
-    step * (index + 0.5),
-    50 + (stationShift(index) / mapTrackHeight) * 100,
-  ]
-  const [startX, startY] = point(0)
-  let path = `M ${startX.toFixed(2)} ${startY.toFixed(2)}`
-  for (let index = 1; index < nodes.length; index += 1) {
-    const [previousX, previousY] = point(index - 1)
-    const [x, y] = point(index)
-    const mid = (previousX + x) / 2
-    path += ` C ${mid.toFixed(2)} ${previousY.toFixed(2)}, ${mid.toFixed(2)} ${y.toFixed(2)}, ${x.toFixed(2)} ${y.toFixed(2)}`
-  }
-  return path
 })
 
 function historyTitle(item: { localDate: string; title?: string | null }): string {
@@ -116,24 +90,12 @@ function isNotGenerated(errorValue: unknown): boolean {
     && (errorValue.code === 'CHALLENGE_NOT_GENERATED' || errorValue.status === 404)
 }
 
-function nodeStatusClass(node: ChallengeNode): string {
-  return `challenge-node--${node.status}`
-}
-
 function memoryModule(node: ChallengeNode): string {
   if (node.nodeType === 'NEW_WORDS') return 'flashcard'
   if (node.nodeType === 'WORD_DRILL') {
     return node.practiceSpec.drill_mode === 'spelling' ? 'spelling' : 'choice'
   }
   return 'choice'
-}
-
-function nodeActionLabel(node: ChallengeNode): string {
-  if (node.status === 'locked') return '查看锁定原因'
-  if (node.status === 'in_progress') return '继续任务'
-  if (node.status === 'completed') return '查看结果'
-  if (node.status === 'failed') return '重新开始'
-  return '开始节点'
 }
 
 async function fetchPlan(): Promise<ChallengePlan> {
@@ -215,6 +177,15 @@ async function generateMap(): Promise<void> {
   } finally {
     generating.value = false
   }
+}
+
+function mapNodeTitle(clientKey: string): string {
+  return mapNodes.value.find((node) => node.id === clientKey)?.title ?? clientKey
+}
+
+function selectMapNode(clientKey: string): void {
+  const node = plan.value?.nodes.find((item) => item.clientKey === clientKey)
+  if (node) void openNode(node)
 }
 
 async function openNode(node: ChallengeNode): Promise<void> {
@@ -372,10 +343,9 @@ onMounted(() => {
           <p class="eyebrow">今日学习 · 学习地图</p>
           <h2>{{ plan.title || '今天的学习地图' }}</h2>
         </div>
-        <RouterLink class="button-secondary button-small" to="/challenges">闯关历史</RouterLink>
       </header>
 
-      <section class="panel challenge-summary" aria-label="今日闯关摘要">
+      <section v-if="!embedded" class="panel challenge-summary" aria-label="今日闯关摘要">
         <div class="challenge-summary__copy">
           <p class="eyebrow">{{ plan.localDate }} · {{ PLAN_STATUS_LABELS[plan.status] }}</p>
           <h2>{{ plan.summary || '按顺序完成，最后挑战终点。' }}</h2>
@@ -408,6 +378,18 @@ onMounted(() => {
           <DivButton class="icon-button" type="button" aria-label="关闭" @click="selectedNode = null">×</DivButton>
         </div>
         <p>{{ selectedNode.node.description }}</p>
+        <p v-if="selectedMapNode" class="field-hint">题目类型：{{ selectedMapNode.questionType }}</p>
+        <p v-if="selectedMapNode" class="field-hint">
+          前置：{{ selectedMapNode.previous.length ? selectedMapNode.previous.map(mapNodeTitle).join('、') : '开始' }}
+        </p>
+        <p v-if="selectedMapNode?.next.length" class="field-hint">
+          分支：{{ selectedMapNode.next.map(mapNodeTitle).join('、') }}
+        </p>
+        <p class="field-hint">
+          题目链接：
+          <RouterLink v-if="selectedMapNode?.link.startsWith('/')" :to="selectedMapNode.link">打开题目</RouterLink>
+          <span v-else>开始节点后生成</span>
+        </p>
         <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
         <p v-if="selectedNode.node.status === 'locked'" class="inline-note">完成前一个节点后解锁。</p>
         <p v-else-if="readOnly" class="inline-note">跨日地图只读，不能开始或重做节点。</p>
@@ -423,71 +405,11 @@ onMounted(() => {
         </section>
       </div>
 
-      <section v-if="mainNodes.length > 0" class="challenge-map" aria-labelledby="challenge-map-title">
-        <div class="challenge-map__heading">
-          <div><p class="eyebrow">主线</p><h2 id="challenge-map-title">今日主线</h2></div>
-          <div class="challenge-map__tools">
-            <div class="challenge-state-legend" aria-label="节点状态说明">
-              <span class="is-current">当前</span>
-              <span class="is-done">已完成</span>
-              <span class="is-locked">未解锁</span>
-            </div>
-            <span class="challenge-map__progress">{{ plan.mainCompleted }} / {{ plan.mainTotal }}</span>
-          </div>
-        </div>
-        <div
-          class="crumb-stations"
-          role="list"
-          aria-label="关卡路线"
-          :style="{ gridTemplateColumns: `repeat(${Math.max(mainNodes.length, 1)}, minmax(0, 1fr))` }"
-        >
-          <svg
-            v-if="mainNodes.length > 1"
-            class="crumb-route"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path :d="routePath" />
-          </svg>
-          <DivButton
-            v-for="(node, stationIndex) in mainNodes"
-            :key="node.id"
-            type="button"
-            role="listitem"
-            class="map-station"
-            :class="[nodeStatusClass(node), { 'map-station--boss': node.nodeType === 'BOSS' }]"
-            :style="{ '--station-shift': `${stationShift(stationIndex)}px` }"
-            :aria-label="`第 ${node.orderIndex} 关：${node.title}，${CHALLENGE_STATUS_LABELS[node.status]}`"
-            :aria-current="nextNode?.id === node.id ? 'step' : undefined"
-            @click="openNode(node)"
-          >
-            <span class="map-station__order" aria-hidden="true">{{ node.nodeType === 'BOSS' ? '★' : node.orderIndex }}</span>
-            <span class="map-station__caption">{{ node.title }}</span>
-          </DivButton>
-        </div>
-
-        <div v-if="optionalNodes.length > 0" class="crumb-branches" aria-label="可选支线">
-          <span class="crumb-branch-label">可选支线 · 不影响主线顺序</span>
-          <DivButton
-            v-for="node in optionalNodes"
-            :key="node.id"
-            type="button"
-            class="branch-station"
-            :class="nodeStatusClass(node)"
-            :aria-label="`支线：${node.title}，${CHALLENGE_STATUS_LABELS[node.status]}`"
-            @click="openNode(node)"
-          >
-            <span class="branch-station__mark" aria-hidden="true"><AppIcon name="spark" /></span>
-            <span class="branch-station__copy">
-              <strong>{{ node.title }}</strong>
-              <small>{{ CHALLENGE_STATUS_LABELS[node.status] }} · 预计 {{ node.estimatedMinutes }} 分钟</small>
-            </span>
-            <span class="branch-station__action">{{ nodeActionLabel(node) }}</span>
-          </DivButton>
-        </div>
-      </section>
-
+      <ChallengeDslMap
+        v-if="plan.mapDsl"
+        :dsl="plan.mapDsl"
+        @select="selectMapNode"
+      />
 
       <ErrorNotice v-if="planRefreshError" :error="planRefreshError" :show-retry="false" />
       <ChallengeBossPanel v-if="bossSession" :key="bossSession.sessionId" :challenge-id="plan.id" :node-id="bossSession.nodeId" :session-id="bossSession.sessionId" @completed="onBossCompleted" />

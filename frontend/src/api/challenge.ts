@@ -54,6 +54,7 @@ export interface ChallengePlan {
   errorMessage: string | null
   mainCompleted: number
   mainTotal: number
+  mapDsl: string
   nodes: ChallengeNode[]
 }
 
@@ -251,6 +252,7 @@ export function parseChallengePlan(value: unknown): ChallengePlan {
     errorMessage: optionalString(value.error_message, 'challenge.error_message'),
     mainCompleted: defaultedNumber(value.main_completed, 'challenge.main_completed', 0),
     mainTotal: defaultedNumber(value.main_total, 'challenge.main_total', 0),
+    mapDsl: optionalString(value.map_dsl, 'challenge.map_dsl') ?? '',
     nodes: value.nodes.map(parseChallengeNode),
   }
 }

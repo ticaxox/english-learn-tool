@@ -2448,3 +2448,161 @@
   min-height: 260px;
   align-content: start;
 }
+
+/* Daily map rendered from the Markdown-like map description. */
+.personal-workspace .challenge-dsl-map {
+  display: grid;
+  gap: 16px;
+  padding: 20px 22px;
+}
+
+.challenge-dsl-map__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.challenge-dsl-map__head h2 { margin: 0 0 4px; font-size: 1.3rem; }
+.challenge-dsl-map__head .field-hint { margin: 0; }
+
+.challenge-dsl-legend { display: flex; gap: 8px; font-size: 0.76rem; font-weight: 800; }
+.challenge-dsl-legend span { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--ui-line-strong); }
+.challenge-dsl-legend .is-main { background: var(--ui-surface); }
+.challenge-dsl-legend .is-branch { background: var(--ui-surface-subtle, #fbf7ee); border-style: dashed; }
+
+.challenge-dsl-track {
+  overflow-x: auto;
+  padding: 6px 2px 12px;
+}
+
+.challenge-dsl-canvas {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+  padding: 6px 0;
+}
+
+.challenge-dsl-links {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.challenge-dsl-links path {
+  fill: none;
+  stroke: var(--ui-line-strong);
+  stroke-width: 2;
+}
+
+.challenge-dsl-links path.is-branch {
+  stroke-dasharray: 6 6;
+  opacity: 0.75;
+}
+
+.challenge-dsl-columns {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 64px;
+  align-items: center;
+  min-height: 220px;
+}
+
+.challenge-dsl-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  justify-content: center;
+  min-width: 220px;
+}
+
+.challenge-dsl-slot { width: 220px; }
+
+.personal-workspace .challenge-dsl-card {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 16px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  text-align: left;
+  box-shadow: 0 3px 0 rgb(59 42 26 / 10%);
+}
+
+.personal-workspace .challenge-dsl-card:hover { transform: translateY(-2px); }
+
+.personal-workspace .challenge-dsl-card__type { color: var(--ui-muted); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; }
+.personal-workspace .challenge-dsl-card strong { font-size: 0.98rem; line-height: 1.35; }
+.personal-workspace .challenge-dsl-card__meta { color: var(--ui-muted); font-size: 0.74rem; font-weight: 700; }
+
+.personal-workspace .challenge-dsl-card.is-completed { border-color: #2f7d4c; background: #eaf6ec; }
+.personal-workspace .challenge-dsl-card.is-in_progress { border-color: #d08a1e; background: #fff6df; }
+.personal-workspace .challenge-dsl-card.is-failed { border-color: #b3261e; background: #fff0ed; }
+.personal-workspace .challenge-dsl-card.is-locked { opacity: 0.62; }
+.personal-workspace .challenge-dsl-card.is-branch { border-style: dashed; background: var(--ui-surface-subtle, #fbf7ee); }
+
+@media (max-width: 720px) {
+  .personal-workspace .challenge-dsl-map { padding: 16px 14px; }
+  .challenge-dsl-columns { gap: 40px; }
+  .challenge-dsl-column, .challenge-dsl-slot { min-width: 190px; width: 190px; }
+}
+
+/* Fit the daily map into the content column and keep its cards readable. */
+.personal-workspace .challenge-dsl-columns { gap: 30px; }
+.personal-workspace .challenge-dsl-column,
+.personal-workspace .challenge-dsl-slot { min-width: 190px; width: 190px; }
+
+.personal-workspace .challenge-dsl-card:hover {
+  background: inherit;
+  color: inherit;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .challenge-dsl-columns { gap: 24px; }
+  .personal-workspace .challenge-dsl-column,
+  .personal-workspace .challenge-dsl-slot { min-width: 168px; width: 168px; }
+}
+
+.personal-workspace .challenge-dsl-columns { align-items: flex-start; min-height: 0; }
+.personal-workspace .challenge-dsl-column { justify-content: flex-start; }
+.personal-workspace .challenge-dsl-column,
+.personal-workspace .challenge-dsl-slot { min-width: 186px; width: 186px; }
+
+/* AI quota groups never leave one row; narrow screens scroll the row. */
+@media (max-width: 900px) {
+  .personal-workspace .ai-quota-list {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
+
+/* The unflipped flashcard is a centred prompt, not a two-column answer. */
+.memory-main-card .study-card:not(.is-revealed) {
+  align-content: center;
+}
+
+.memory-main-card .study-card:not(.is-revealed) .study-card__face {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.memory-main-card .study-card:not(.is-revealed) .study-card__word-block,
+.memory-main-card .study-card:not(.is-revealed) .study-card__side {
+  justify-items: center;
+  text-align: center;
+}
+
+.memory-main-card .study-card:not(.is-revealed) .study-card__word { text-align: center; }
+
+.personal-workspace .challenge-dsl-column,
+.personal-workspace .challenge-dsl-slot { min-width: 184px; width: 184px; }

@@ -94,6 +94,46 @@ const mainNodes = [
 ]
 const optionalNode = makeNode({ id: '44444444-4444-4444-8444-444444444444', clientKey: 'side-1', nodeType: 'OPTIONAL_SIDE', orderIndex: 4, title: '可选支线', optional: true, status: 'unlocked' })
 
+function mapStatusLabel(status: ChallengeNode['status']): string {
+  return { locked: '未解锁', unlocked: '已解锁', in_progress: '进行中', completed: '已完成', failed: '失败' }[status]
+}
+
+function makeMapDsl(nodes: ChallengeNode[] = [...mainNodes, optionalNode]): string {
+  const section = (
+    key: string,
+    title: string,
+    type: string,
+    questionType: string,
+    status: string,
+    minutes: number,
+    previous: string,
+    next: string,
+    optional: boolean,
+  ): string => `## [${key}] ${title}
+- 类型: ${type}
+- 题目类型: ${questionType}
+- 状态: ${status}
+- 时长: ${minutes} 分钟
+- 说明: ${title}的说明。
+- 链接: 待开始
+- 前置: ${previous}
+- 分支: ${next}
+- 可选: ${optional ? '是' : '否'}
+`
+  const [review, fresh, boss, side] = nodes
+  return [
+    '# 今日闯关',
+    '> 先复习，再学习，最后完成挑战。',
+    '',
+    section('review-1', review.title, '复习', '翻卡记忆', mapStatusLabel(review.status), 8, '开始', 'new-1', false),
+    section('new-1', fresh.title, '学习新词', '翻卡记忆', mapStatusLabel(fresh.status), 5, 'review-1', 'boss-1', false),
+    section('boss-1', boss.title, '终点挑战', '填空', mapStatusLabel(boss.status), 4, 'new-1', '终点', false),
+    ...(side
+      ? [section('side-1', side.title, '可选支线', '可选练习', mapStatusLabel(side.status), 4, 'boss-1', '终点', true)]
+      : []),
+  ].join(String.fromCharCode(10))
+}
+
 function shanghaiToday(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date())
 }
@@ -105,7 +145,7 @@ function makePlan(overrides: Partial<ChallengePlan> = {}): ChallengePlan {
     id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', localDate: currentLocalDate, status: 'ready', title: '今日闯关',
     summary: '先复习，再学习，最后完成挑战。', targetMinutes: 30, dailyPlanId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     aiJobId: null, generatedAt: '2026-10-23T08:00:00Z', lockedAt: '2026-10-23T08:00:00Z', challengeCompletedAt: null,
-    expiresAt: '2099-10-24T00:00:00Z', errorCode: null, errorMessage: null, mainCompleted: 0, mainTotal: 3,
+    expiresAt: '2099-10-24T00:00:00Z', errorCode: null, errorMessage: null, mainCompleted: 0, mainTotal: 3, mapDsl: makeMapDsl(overrides.nodes ?? [...mainNodes, optionalNode]),
     nodes: [...mainNodes, optionalNode], ...overrides,
   }
 }
@@ -135,8 +175,8 @@ describe('challenge view', () => {
   it('renders the server map, statuses, progress, optional branch, and history', async () => {
     const { wrapper } = await mountView()
     expect(wrapper.text()).toContain('今日闯关')
-    expect(wrapper.findAll('.crumb-stations .map-station')).toHaveLength(3)
-    expect(wrapper.findAll('.crumb-branches .branch-station')).toHaveLength(1)
+    expect(wrapper.findAll('.challenge-dsl-card')).toHaveLength(4)
+    expect(wrapper.findAll('.challenge-dsl-card.is-branch')).toHaveLength(1)
     expect(wrapper.text()).toContain('复习回廊')
     expect(wrapper.text()).toContain('新词营地')
     expect(wrapper.text()).toContain('终点挑战')
@@ -200,7 +240,7 @@ describe('challenge view', () => {
 
   it('starts a memory node and preserves the server session in the route', async () => {
     const { wrapper, router } = await mountView()
-    await wrapper.findAll('.map-station')[0].trigger('click')
+    await wrapper.findAll('.challenge-dsl-card')[0].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('开始节点')
     await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '开始节点')!.trigger('click')
@@ -213,7 +253,7 @@ describe('challenge view', () => {
   it('shows locked nodes without a start action', async () => {
     challengeMocks.getChallengeNodeDetail.mockResolvedValueOnce(detail(mainNodes[1], []))
     const { wrapper } = await mountView()
-    await wrapper.findAll('.map-station')[1].trigger('click')
+    await wrapper.findAll('.challenge-dsl-card')[1].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('完成前一个节点后解锁')
     expect(wrapper.findAll('.challenge-node-dialog [role="button"]').some((button) => button.text() === '开始节点')).toBe(false)
@@ -223,7 +263,7 @@ describe('challenge view', () => {
     challengeMocks.getChallengeNodeDetail.mockResolvedValueOnce(detail(mainNodes[2], ['start']))
     challengeMocks.startChallengeNode.mockResolvedValueOnce({ challengeId: makePlan().id, nodeId: mainNodes[2].id, status: 'in_progress', resourceType: 'practice', resourceId: 'boss-session-1', jobId: 'job-1', message: 'The practice task is ready.' })
     const { wrapper } = await mountView()
-    await wrapper.findAll('.map-station')[2].trigger('click')
+    await wrapper.findAll('.challenge-dsl-card')[2].trigger('click')
     await flushPromises()
     await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '开始节点')!.trigger('click')
     await flushPromises()
@@ -254,7 +294,7 @@ describe('challenge view', () => {
     challengeMocks.getChallengeNodeDetail.mockResolvedValueOnce(detail(initial.nodes[2], ['resume']))
     challengeMocks.startChallengeNode.mockResolvedValueOnce({ challengeId: initial.id, nodeId: mainNodes[2].id, status: 'in_progress', resourceType: 'practice', resourceId: 'boss-session-1', jobId: 'job-1', message: 'The practice task is ready.' })
     const { wrapper } = await mountView()
-    await wrapper.findAll('.map-station')[2].trigger('click')
+    await wrapper.findAll('.challenge-dsl-card')[2].trigger('click')
     await flushPromises()
     await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '继续节点')!.trigger('click')
     await flushPromises()
@@ -293,7 +333,7 @@ describe('challenge view', () => {
     challengeMocks.getTodayChallenge.mockResolvedValueOnce(completedPlan)
     challengeMocks.getChallengeNodeDetail.mockResolvedValueOnce(detail(completedBoss, ['view_result']))
     const { wrapper, router } = await mountView()
-    await wrapper.findAll('.map-station')[2].trigger('click')
+    await wrapper.findAll('.challenge-dsl-card')[2].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('终点挑战已完成，可查看结果')
     await wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '查看节点结果')!.trigger('click')
@@ -305,7 +345,7 @@ describe('challenge view', () => {
     challengeMocks.getTodayChallenge.mockResolvedValueOnce(makePlan({ localDate: '2026-10-20' }))
     const { wrapper } = await mountView()
     expect(wrapper.text()).toContain('跨日地图只读')
-    await wrapper.findAll('.map-station')[0].trigger('click')
+    await wrapper.findAll('.challenge-dsl-card')[0].trigger('click')
     await flushPromises()
     expect(wrapper.text()).toContain('跨日地图只读，不能开始或重做节点')
     const start = wrapper.findAll('.challenge-node-dialog [role="button"]').find((button) => button.text() === '开始节点')

@@ -1687,6 +1687,11 @@
             "title": "Main Total",
             "type": "integer"
           },
+          "map_dsl": {
+            "default": "",
+            "title": "Map Dsl",
+            "type": "string"
+          },
           "nodes": {
             "items": {
               "$ref": "#/components/schemas/ChallengeNodeResponse"

@@ -115,11 +115,14 @@ describe('T-FE-020 personal information architecture', () => {
     expect(wrapper.get('.workspace-topbar-tab.is-active').text()).toContain('AI 配置')
   })
 
-  it('keeps the Today page focused on tasks without the embedded map', () => {
+  it('renders the daily map from its Markdown-like description on Today', () => {
     const today = source('../views/TodayView.vue')
-    expect(today).not.toContain('<ChallengeView embedded />')
-    expect(today).not.toContain('闯关历史')
+    const challenge = source('../views/ChallengeView.vue')
+    expect(today).toContain('<ChallengeView embedded />')
     expect(today).toContain('crumb-trail-board')
+    expect(challenge).toContain('ChallengeDslMap')
+    expect(challenge).toContain('mapDsl')
+    expect(challenge).toContain('parseChallengeMapDsl')
   })
 
   it('does not restore legacy organization or notification routes in the production router', () => {

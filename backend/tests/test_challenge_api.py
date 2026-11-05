@@ -141,6 +141,11 @@ async def test_challenge_generation_sync_boss_and_replay(client, app, member_use
         assert len(today.json()["nodes"]) == 3
         assert today.json()["nodes"][0]["status"] == "unlocked"
         assert today.json()["nodes"][2]["status"] == "locked"
+        map_dsl = today.json()["map_dsl"]
+        assert "## [review-1] 复习回廊" in map_dsl
+        assert "- 题目类型: 翻卡记忆" in map_dsl
+        assert "- 前置: 开始" in map_dsl
+        assert "- 分支: new-1" in map_dsl
 
         replay = await client.post("/api/v1/challenges/today/generate", headers=headers)
         assert replay.status_code == 202

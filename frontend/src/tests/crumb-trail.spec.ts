@@ -78,12 +78,14 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(wrapper.get('.wordbook-cover-letter').text()).toBe('J')
   })
 
-  it('uses a curved CrumbTrail route and castle boss structure', () => {
+  it('renders the daily map from the DSL instead of a station strip', () => {
     const challenge = source('../views/ChallengeView.vue')
+    const map = source('../components/ChallengeDslMap.vue')
     expect(challenge).toContain('crumb-challenge')
-    expect(challenge).toContain('crumb-stations')
-    expect(challenge).toContain('map-station--boss')
-    expect(challenge).toContain('crumb-branches')
+    expect(challenge).toContain('ChallengeDslMap')
+    expect(map).toContain('challenge-dsl-card')
+    expect(map).toContain('challenge-dsl-links')
+    expect(map).toContain('is-branch')
   })
 
   it('defines the CrumbTrail palette and no-legacy structure tokens', () => {
