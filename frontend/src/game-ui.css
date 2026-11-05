@@ -4712,8 +4712,18 @@
   .personal-workspace .memory-wrong-detail__side { justify-items: center; text-align: center; }
 }
 
-/* More air between the study card and its rail. */
-.personal-workspace .memory-workbench-grid.is-session { gap: 30px; }
+/* More air between the study card and its rail; the card itself stays narrow. */
+.personal-workspace .memory-workbench-grid.is-session {
+  grid-template-columns: minmax(0, 1fr) 292px;
+  gap: 48px;
+}
+
+.personal-workspace .memory-main-card .study-card,
+.personal-workspace .memory-main-card .memory-wrong-detail,
+.personal-workspace .memory-main-card .workspace-complete-state {
+  max-width: 620px;
+  margin-inline: auto;
+}
 
 .personal-workspace .memory-page .memory-main-card .study-card--choice {
   padding-top: 44px !important;

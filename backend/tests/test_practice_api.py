@@ -427,3 +427,23 @@ async def test_practice_generation_and_grading_failures_do_not_default_score(
             item for item in usage.json()["quotas"] if item["quota_kind"] == "subjective_grading"
         )
         assert subjective["reserved"] == 0
+
+
+async def test_recent_sessions_are_listed_and_can_be_deleted(client, app, member_user) -> None:
+    headers = await login(client, member_user.username)
+    wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
+    await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        fill = await _generate(app, client, headers, server, "fill_blank", 3)
+
+    listed = await client.get(f"{PRACTICE_PATH}/sessions?limit=10", headers=headers)
+    assert listed.status_code == 200, listed.text
+    ids = [item["id"] for item in listed.json()["items"]]
+    assert fill["id"] in ids
+
+    deleted = await client.delete(f"{PRACTICE_PATH}/sessions/{fill['id']}", headers=headers)
+    assert deleted.status_code == 204
+
+    after = await client.get(f"{PRACTICE_PATH}/sessions?limit=10", headers=headers)
+    assert all(item["id"] != fill["id"] for item in after.json()["items"])

@@ -90,6 +90,7 @@ def _profile_response(profile: UserProfile) -> LearningProfileResponse:
         notification_preferences=profile.notification_preferences or {},
         practice_pool_target=profile.practice_pool_target,
         challenge_generation_time=profile.challenge_generation_time,
+        ai_quota_limits=profile.ai_quota_limits or {},
         updated_at=profile.updated_at,
     )
 
@@ -159,6 +160,8 @@ async def update_profile(
         profile.practice_pool_target = payload.practice_pool_target
     if "challenge_generation_time" in fields:
         profile.challenge_generation_time = payload.challenge_generation_time
+    if "ai_quota_limits" in fields and payload.ai_quota_limits is not None:
+        profile.ai_quota_limits = payload.ai_quota_limits
     if payload.onboarding_completed is not None:
         profile.onboarding_completed = payload.onboarding_completed
     elif profile.target_exam is not None:

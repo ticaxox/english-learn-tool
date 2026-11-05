@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Query, Request, status
+from fastapi import APIRouter, Depends, Header, Query, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_completed_auth_context
@@ -21,6 +21,7 @@ from app.schemas.practice import (
     PracticeRecordDetail,
     PracticeRecordListResponse,
     PracticeResultResponse,
+    PracticeSessionListResponse,
     PracticeSessionResponse,
     PracticeSubmitRequest,
     PracticeSubmitResponse,
@@ -29,11 +30,13 @@ from app.services.auth import AuthContext
 from app.services.practice import (
     create_practice_session,
     delete_practice_records,
+    delete_session,
     get_practice_record,
     get_practice_result,
     get_practice_session,
     list_practice_events,
     list_practice_records,
+    list_recent_sessions,
     regenerate_practice_session,
     save_practice_draft,
     start_practice_session,
@@ -87,6 +90,36 @@ async def create_practice_session_endpoint(
         payload,
         idempotency_key=idempotency_key,
     )
+
+
+@router.get(
+    "/sessions",
+    response_model=PracticeSessionListResponse,
+    responses=_RESPONSES,
+    summary="List the caller's recent practice sessions with their live status",
+)
+async def list_sessions_endpoint(
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    limit: int = Query(default=20, ge=1, le=100),
+) -> PracticeSessionListResponse:
+    return await list_recent_sessions(session, context.user, limit=limit)
+
+
+@router.delete(
+    "/sessions/{session_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=_RESPONSES,
+    summary="Delete one of the caller's practice sessions",
+)
+async def delete_session_endpoint(
+    request: Request,
+    session_id: UUID,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> Response:
+    await delete_session(session, request.app.state.arq, context.user, session_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get(

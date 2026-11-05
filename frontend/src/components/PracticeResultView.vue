@@ -29,6 +29,7 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
   <section class="practice-result" aria-labelledby="practice-result-title">
     <div class="practice-result__layout">
     <aside class="practice-result__aside">
+    <section class="practice-result__card">
     <header class="practice-result__hero">
       <div>
         <p class="eyebrow">练习结果</p>
@@ -42,6 +43,7 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
       <div><strong>{{ result.correctCount ?? '—' }}</strong><span>答对</span></div>
       <div><strong>{{ result.wrongCount ?? '—' }}</strong><span>错题</span></div>
       <div><strong>{{ submittedAtLabel }}</strong><span>提交时间</span></div>
+    </section>
     </section>
 
     </aside>

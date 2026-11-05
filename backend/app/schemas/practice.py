@@ -223,3 +223,20 @@ class BackgroundTaskResponse(BaseModel):
 
 class BackgroundTaskListResponse(BaseModel):
     items: list[BackgroundTaskResponse]
+
+
+class PracticeSessionSummary(BaseModel):
+    id: UUID
+    practice_type: PracticeType
+    source: PracticeSource
+    status: PracticeSessionStatus
+    question_count: int
+    score: float | None = None
+    created_at: datetime
+    submitted_at: datetime | None = None
+    error_code: str | None = None
+    error_message: str | None = None
+
+
+class PracticeSessionListResponse(BaseModel):
+    items: list[PracticeSessionSummary]

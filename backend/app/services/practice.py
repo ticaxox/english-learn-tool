@@ -53,11 +53,13 @@ from app.schemas.practice import (
     PracticeRecordListResponse,
     PracticeRecordSummary,
     PracticeResultResponse,
+    PracticeSessionListResponse,
     PracticeSessionResponse,
+    PracticeSessionSummary,
     PracticeSubmitRequest,
     PracticeSubmitResponse,
 )
-from app.services.ai_jobs import create_ai_job
+from app.services.ai_jobs import cancel_user_job, create_ai_job
 from app.services.ai_memory import record_practice_memory
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
@@ -516,6 +518,53 @@ async def create_pool_practice_session(
         practice_row.ai_job_id = job.id
     await session.commit()
     return await _load_owned_session(session, user, session_id)
+
+
+async def list_recent_sessions(
+    session: AsyncSession, user: User, *, limit: int = 20
+) -> PracticeSessionListResponse:
+    rows = list(
+        (
+            await session.scalars(
+                select(PracticeSession)
+                .where(PracticeSession.user_id == user.id, PracticeSession.is_pool.is_(False))
+                .order_by(PracticeSession.created_at.desc())
+                .limit(limit)
+            )
+        ).all()
+    )
+    return PracticeSessionListResponse(
+        items=[
+            PracticeSessionSummary(
+                id=row.id,
+                practice_type=row.practice_type,
+                source=row.source,
+                status=row.status,
+                question_count=row.question_count,
+                score=row.score,
+                created_at=row.created_at,
+                submitted_at=row.submitted_at,
+                error_code=row.error_code,
+                error_message=row.error_message,
+            )
+            for row in rows
+        ]
+    )
+
+
+async def delete_session(
+    session: AsyncSession, pool: ArqRedis, user: User, session_id: UUID
+) -> None:
+    practice = await _load_owned_session(session, user, session_id, lock=True)
+    if practice.status == "generating" and practice.ai_job_id is not None:
+        job = await session.get(AiJob, practice.ai_job_id)
+        if job is not None and job.status in {"queued", "running"}:
+            try:
+                await cancel_user_job(session, pool, user, job.id)
+            except AppError:
+                pass
+    await session.delete(practice)
+    await session.commit()
 
 
 async def get_practice_session(

@@ -4,8 +4,9 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import { createPracticeSession, fetchPracticeUsage, listPracticeMistakes, listPracticeRecords, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
+import { createPracticeSession, deletePracticeSession, fetchPracticeUsage, listPracticeMistakes, listRecentPracticeSessions, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, regeneratePracticeSession, type PracticeCreateInput, type PracticeDifficulty, type PracticeRecordSummary, type PracticeSessionSummary, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
+import { deleteBackgroundTask, listBackgroundTasks, retryBackgroundTask, type BackgroundTask } from '../api/background-tasks'
 import { fetchLearningProfile, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
 import PracticeSessionView from './PracticeSessionView.vue'
@@ -30,8 +31,11 @@ const creating = ref(false)
 const createError = ref<unknown>(null)
 const usage = ref<PracticeUsage | null>(null)
 const usageError = ref<unknown>(null)
-const records = ref<PracticeRecordSummary[]>([])
-const recordsError = ref<unknown>(null)
+const sessions = ref<PracticeSessionSummary[]>([])
+const poolTasks = ref<BackgroundTask[]>([])
+const taskError = ref<unknown>(null)
+const taskBusyId = ref<string | null>(null)
+const taskTab = ref<'questions' | 'mistakes'>('questions')
 const mistakes = ref<PracticeRecordSummary[]>([])
 const mistakesTotal = ref(0)
 const mistakesError = ref<unknown>(null)
@@ -180,15 +184,135 @@ async function loadUsage(): Promise<void> {
   }
 }
 
-async function loadRecords(): Promise<void> {
+interface TaskRow {
+  key: string
+  kind: 'session' | 'pool'
+  id: string
+  practiceType: PracticeType
+  source: PracticeSource | null
+  status: 'generating' | 'ready' | 'submitted' | 'failed' | 'cancelled'
+  count: number
+  score: number | null
+  createdAt: string
+  submittedAt: string | null
+  errorCode: string | null
+}
+
+const taskRows = computed<TaskRow[]>(() => {
+  const rows: TaskRow[] = [
+    ...sessions.value.map((row) => ({
+      key: `session-${row.id}`,
+      kind: 'session' as const,
+      id: row.id,
+      practiceType: row.practiceType,
+      source: row.source,
+      status: row.status,
+      count: row.questionCount,
+      score: row.score,
+      createdAt: row.createdAt,
+      submittedAt: row.submittedAt,
+      errorCode: row.errorCode,
+    })),
+    ...poolTasks.value.map((task) => ({
+      key: `pool-${task.id}`,
+      kind: 'pool' as const,
+      id: task.id,
+      practiceType: task.practiceType,
+      source: null,
+      status: task.status === 'ready' ? ('ready' as const) : task.status,
+      count: task.questionCount,
+      score: null,
+      createdAt: task.createdAt,
+      submittedAt: null,
+      errorCode: task.errorCode,
+    })),
+  ]
+  return rows.sort((left, right) => right.createdAt.localeCompare(left.createdAt)).slice(0, 12)
+})
+
+const TASK_STATUS_LABELS: Record<TaskRow['status'], string> = {
+  generating: '生成中',
+  ready: '待练习',
+  submitted: '已完成',
+  failed: '生成失败',
+  cancelled: '已取消',
+}
+
+function taskStatusLabel(row: TaskRow): string {
+  return TASK_STATUS_LABELS[row.status] ?? row.status
+}
+
+function taskSourceLabel(row: TaskRow): string {
+  if (row.kind === 'pool') return '预生成套题'
+  return row.source ? PRACTICE_SOURCE_LABELS[row.source] : '专项练习'
+}
+
+function formatTaskDate(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+}
+
+function openTask(row: TaskRow): void {
+  void router.push({ name: 'practice', query: { session: row.id } })
+}
+
+async function loadTasks(): Promise<void> {
+  const [sessionResult, poolResult] = await Promise.allSettled([
+    listRecentPracticeSessions(20),
+    listBackgroundTasks(),
+  ])
+  if (sessionResult.status === 'fulfilled') sessions.value = sessionResult.value
+  else sessions.value = []
+  if (poolResult.status === 'fulfilled') poolTasks.value = poolResult.value
+  else poolTasks.value = []
+  taskError.value = sessionResult.status === 'rejected' ? sessionResult.reason : null
+}
+
+async function retryTask(row: TaskRow): Promise<void> {
+  if (taskBusyId.value) return
+  taskBusyId.value = row.id
   try {
-    const page = await listPracticeRecords({ limit: 5 })
-    records.value = page.items
-    recordsError.value = null
-  } catch (error) {
-    records.value = []
-    recordsError.value = error
+    if (row.kind === 'pool') {
+      await retryBackgroundTask(row.id)
+    } else {
+      await regeneratePracticeSession(row.id, newKey())
+    }
+    await loadTasks()
+    toast.success('已重新开始生成', '稍后回来查看状态即可。')
+  } catch {
+    toast.error('重试失败', '请稍后再试。')
+  } finally {
+    taskBusyId.value = null
   }
+}
+
+async function removeTask(row: TaskRow): Promise<void> {
+  if (taskBusyId.value) return
+  const confirmed = window.confirm('删除这条题目？正在生成的题目会被取消。')
+  if (!confirmed) return
+  taskBusyId.value = row.id
+  try {
+    if (row.kind === 'pool') await deleteBackgroundTask(row.id)
+    else await deletePracticeSession(row.id)
+    await loadTasks()
+    toast.push({ title: '已删除', tone: 'info' })
+  } catch {
+    toast.error('删除失败', '请稍后再试。')
+  } finally {
+    taskBusyId.value = null
+  }
+}
+
+async function startPoolTask(row: TaskRow): Promise<void> {
+  selectType(row.practiceType)
+  count.value = row.count
+  await create()
 }
 
 async function loadMistakes(): Promise<void> {
@@ -218,8 +342,14 @@ function quotaRemaining(kind: 'question_generation' | 'subjective_grading'): num
   return usage.value?.quotas.find((quota) => quota.quotaKind === kind)?.remaining ?? null
 }
 
+function quotaText(kind: 'question_generation' | 'subjective_grading'): string {
+  const remaining = quotaRemaining(kind)
+  if (remaining === null) return '—'
+  return remaining < 0 ? '不限' : String(remaining)
+}
+
 onMounted(() => {
-  void Promise.all([loadUsage(), loadRecords(), loadMistakes(), loadWordbooks()])
+  void Promise.all([loadUsage(), loadTasks(), loadMistakes(), loadWordbooks()])
 })
 </script>
 
@@ -234,13 +364,10 @@ onMounted(() => {
         <h1>做一组有针对性的练习</h1>
         <p class="workspace-page-lead">从今天的学习内容出题，计时和拼写挖空也在这里设置。</p>
       </div>
-      <div class="workspace-header-actions">
-        <RouterLink class="button workspace-secondary-button" to="/practice/records">练习记录</RouterLink>
-        <RouterLink class="button workspace-secondary-button" to="/practice/mistakes">错题本</RouterLink>
-      </div>
     </header>
 
 
+      <div class="practice-hub-layout">
       <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">
         <header class="workspace-section-header practice-create-heading">
           <div>
@@ -248,8 +375,8 @@ onMounted(() => {
             <h2 id="practice-create-title">今天想练什么</h2>
           </div>
           <div class="practice-quota-inline" aria-label="今日练习额度">
-            <span title="今日还可用 AI 生成题目的次数">生成余量 <strong>{{ quotaRemaining('question_generation') ?? '—' }}</strong></span>
-            <span title="今日还可提交主观题评分的次数">评分余量 <strong>{{ quotaRemaining('subjective_grading') ?? '—' }}</strong></span>
+            <span title="今日还可用 AI 生成题目的次数">生成余量 <strong>{{ quotaText('question_generation') }}</strong></span>
+            <span title="今日还可提交主观题评分的次数">评分余量 <strong>{{ quotaText('subjective_grading') }}</strong></span>
           </div>
         </header>
         <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
@@ -341,29 +468,91 @@ onMounted(() => {
         </form>
       </section>
 
-    <section class="workspace-card practice-records-rail" aria-label="最近练习">
-        <header class="workspace-section-header practice-rail-heading">
+      <section class="workspace-card practice-tasks-card" aria-label="题目列表">
+        <header class="workspace-section-header practice-tasks-head">
           <div>
-            <h2>最近记录</h2>
-            <p>接着上次继续。</p>
+            <h2>题目列表</h2>
+            <p>每次生成都会多一条，按状态继续、重试或删除。</p>
           </div>
-          <RouterLink to="/practice/records">全部</RouterLink>
+          <div class="practice-task-tabs" role="group" aria-label="题目列表切换">
+            <DivButton class="practice-task-tab" :class="{ 'is-active': taskTab === 'questions' }" :aria-pressed="taskTab === 'questions'" type="button" @click="taskTab = 'questions'">题目列表</DivButton>
+            <DivButton class="practice-task-tab" :class="{ 'is-active': taskTab === 'mistakes' }" :aria-pressed="taskTab === 'mistakes'" type="button" @click="taskTab = 'mistakes'">错题本</DivButton>
+          </div>
         </header>
-        <ErrorNotice v-if="recordsError" :error="recordsError" :show-retry="false" retry-label="重试" @retry="loadRecords" />
-        <div role="list" v-else-if="records.length" class="practice-record-list practice-record-list--row">
-          <div role="listitem" v-for="record in records" :key="record.id">
-            <RouterLink :to="{ name: 'practice', query: { session: record.id } }">
-              <span class="practice-record-type">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
-              <strong>{{ record.source ? PRACTICE_SOURCE_LABELS[record.source] : '专项练习' }}</strong>
-              <small>{{ record.totalQuestions }} 题 · {{ record.score === null ? '未评分' : `${record.score} 分` }}</small>
-            </RouterLink>
+
+        <template v-if="taskTab === 'questions'">
+          <ErrorNotice v-if="taskError" :error="taskError" :show-retry="false" retry-label="重试" @retry="loadTasks" />
+          <div v-else-if="taskRows.length" role="list" class="practice-task-list" aria-label="题目列表">
+            <div role="listitem" v-for="row in taskRows" :key="row.key" class="practice-task-row">
+              <div class="practice-task-row__main">
+                <span class="practice-task-type">{{ PRACTICE_TYPE_LABELS[row.practiceType] }}</span>
+                <strong>{{ taskSourceLabel(row) }}</strong>
+                <span class="practice-task-status" :class="`is-${row.status}`">{{ taskStatusLabel(row) }}</span>
+                <small>
+                  {{ row.count }} 题 · {{ formatTaskDate(row.createdAt) }}
+                  <template v-if="row.score !== null"> · {{ row.score }} 分</template>
+                </small>
+              </div>
+              <div class="practice-task-row__actions">
+                <DivButton
+                  v-if="row.kind === 'pool' && row.status === 'ready'"
+                  class="button-secondary button-small"
+                  type="button"
+                  :disabled="taskBusyId !== null"
+                  @click="startPoolTask(row)"
+                >开始</DivButton>
+                <DivButton
+                  v-else-if="row.status === 'ready' || row.status === 'generating' || row.status === 'submitted'"
+                  class="button-secondary button-small"
+                  type="button"
+                  @click="openTask(row)"
+                >{{ row.status === 'submitted' ? '查看' : '继续' }}</DivButton>
+                <DivButton
+                  v-if="row.status === 'failed'"
+                  class="button-secondary button-small"
+                  type="button"
+                  :disabled="taskBusyId !== null"
+                  @click="retryTask(row)"
+                >重试</DivButton>
+                <DivButton
+                  class="button-secondary button-small"
+                  type="button"
+                  :disabled="taskBusyId !== null"
+                  @click="removeTask(row)"
+                >删除</DivButton>
+              </div>
+            </div>
           </div>
-        </div>
-        <div v-else class="practice-rail-empty">
-          <strong>还没有记录</strong>
-          <p>生成第一组练习后，记录会出现在这里。</p>
-        </div>
-    </section>
+          <div v-else class="practice-rail-empty">
+            <strong>还没有题目</strong>
+            <p>生成第一组练习后，这里会按状态列出。</p>
+          </div>
+        </template>
+
+        <template v-else>
+          <ErrorNotice v-if="mistakesError" :error="mistakesError" :show-retry="false" retry-label="重试" @retry="loadMistakes" />
+          <div v-else-if="mistakes.length" role="list" class="practice-task-list" aria-label="错题本">
+            <div role="listitem" v-for="record in mistakes" :key="record.id" class="practice-task-row">
+              <div class="practice-task-row__main">
+                <span class="practice-task-type">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
+                <strong>{{ record.source ? PRACTICE_SOURCE_LABELS[record.source] : '专项练习' }}</strong>
+                <small>{{ record.totalQuestions }} 题 · {{ record.score === null ? '未评分' : `${record.score} 分` }}</small>
+              </div>
+              <div class="practice-task-row__actions">
+                <RouterLink class="button-secondary button-small" :to="{ name: 'practice', query: { session: record.id } }">查看</RouterLink>
+              </div>
+            </div>
+          </div>
+          <div v-else class="practice-rail-empty">
+            <strong>还没有错题</strong>
+            <p>完成练习后，错题会出现在这里。</p>
+          </div>
+          <RouterLink v-if="mistakesTotal > 0" class="practice-task-all" to="/practice/mistakes">查看全部 {{ mistakesTotal }} 条错题</RouterLink>
+        </template>
+
+        <RouterLink class="practice-task-all" to="/practice/records">查看全部练习记录</RouterLink>
+      </section>
+      </div>
     </template>
   </article>
 </template>

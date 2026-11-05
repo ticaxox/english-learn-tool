@@ -70,6 +70,11 @@ export async function updateLearningProfile(
   return parseLearningProfile(payload, config)
 }
 
+/** Persist per-user AI quota overrides; -1 means unlimited. */
+export async function updateAiQuotaLimits(limits: Record<string, number>): Promise<void> {
+  await apiClient.patch('/users/me/profile', { ai_quota_limits: limits }, { retryCount: 0 })
+}
+
 export async function fetchTodayPlan(options: FetchOptions = {}): Promise<TodayPlan> {
   const payload = await apiClient.get('/learning/today', { signal: options.signal })
   return parseTodayPlan(payload)

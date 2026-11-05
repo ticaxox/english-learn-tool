@@ -41,7 +41,7 @@ describe('T-FE-016 member workspace reset', () => {
     expect(source('memory')).toContain('memory-workbench')
     expect(source('memory')).not.toContain('memory-hero')
     expect(source('practice')).toContain('practice-create-panel')
-    expect(source('practice')).toContain('practice-records-rail')
+    expect(source('practice')).toContain('practice-tasks-card')
     expect(source('practice')).not.toContain('practice-room-mascot')
     expect(source('coach')).toContain('coach-workspace')
     expect(source('challenge')).toContain('challenge-game-stage')

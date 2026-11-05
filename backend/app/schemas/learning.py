@@ -25,6 +25,7 @@ class LearningProfileResponse(BaseModel):
     notification_preferences: dict[str, Any] = Field(default_factory=dict)
     practice_pool_target: int = Field(default=0, ge=0, le=5)
     challenge_generation_time: str | None = None
+    ai_quota_limits: dict[str, int] = Field(default_factory=dict)
     updated_at: datetime
 
 
@@ -37,6 +38,22 @@ class LearningProfilePatch(BaseModel):
     onboarding_completed: bool | None = None
     practice_pool_target: int | None = Field(default=None, ge=0, le=5)
     challenge_generation_time: str | None = None
+    ai_quota_limits: dict[str, int] | None = None
+
+    @field_validator("ai_quota_limits")
+    @classmethod
+    def valid_quota_limits(cls, value: dict[str, int] | None) -> dict[str, int] | None:
+        if value is None:
+            return None
+        allowed = {"coach_messages", "question_generation", "subjective_grading"}
+        cleaned: dict[str, int] = {}
+        for kind, raw in value.items():
+            if kind not in allowed:
+                raise ValueError("ai_quota_limits contains an unknown quota kind")
+            if not isinstance(raw, int) or raw < -1 or raw > 10000:
+                raise ValueError("quota limits must be -1 (unlimited) or 0-10000")
+            cleaned[kind] = raw
+        return cleaned
 
     @field_validator("challenge_generation_time")
     @classmethod

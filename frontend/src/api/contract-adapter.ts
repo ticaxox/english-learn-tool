@@ -360,6 +360,15 @@ function profilePayload(payload: unknown): Record<string, unknown> {
   return requireRecord(payload, '/users/me/profile', '响应体')
 }
 
+function parseQuotaLimits(value: unknown): Record<string, number> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const result: Record<string, number> = {}
+  for (const [kind, limit] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof limit === 'number' && Number.isInteger(limit)) result[kind] = limit
+  }
+  return result
+}
+
 export function parseLearningProfile(payload: unknown, memoryConfig: MemoryConfig): LearningProfile {
   const endpoint = '/users/me/profile'
   const body = profilePayload(payload)
@@ -376,6 +385,7 @@ export function parseLearningProfile(payload: unknown, memoryConfig: MemoryConfi
     planEffectiveFrom: null,
     practicePoolTarget: typeof body.practice_pool_target === 'number' ? body.practice_pool_target : 0,
     challengeGenerationTime: optionalString(body.challenge_generation_time, endpoint, 'challenge_generation_time'),
+    aiQuotaLimits: parseQuotaLimits(body.ai_quota_limits),
   }
 }
 
@@ -390,6 +400,7 @@ export function serializeProfileUpdate(update: LearningProfileUpdate): unknown {
     [CONTRACT.profile.dailyMinutes]: update.dailyMinutes,
     practice_pool_target: update.practicePoolTarget,
     challenge_generation_time: update.challengeGenerationTime,
+    ai_quota_limits: update.aiQuotaLimits,
   }
 }
 

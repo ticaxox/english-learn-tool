@@ -508,10 +508,10 @@ export function parsePracticeUsage(payload: unknown): PracticeUsage {
       const quota = record(item, `${context}.quotas[${index}]`)
       return {
         quotaKind: enumValue(quota.quota_kind, QUOTA_KINDS, context, `quotas[${index}].quota_kind`),
-        limit: integerValue(quota.limit, context, `quotas[${index}].limit`),
+        limit: integerValue(quota.limit, context, `quotas[${index}].limit`, -1),
         used: integerValue(quota.used, context, `quotas[${index}].used`),
         reserved: integerValue(quota.reserved, context, `quotas[${index}].reserved`),
-        remaining: integerValue(quota.remaining, context, `quotas[${index}].remaining`),
+        remaining: integerValue(quota.remaining, context, `quotas[${index}].remaining`, -1),
       }
     }),
     concurrency: {
@@ -566,6 +566,54 @@ export async function savePracticeDraft(sessionId: string, input: PracticeDraftI
     { retryCount: 0 },
   )
   return parsePracticeDraft(payload)
+}
+
+export interface PracticeSessionSummary {
+  id: string
+  practiceType: PracticeType
+  source: PracticeSource
+  status: PracticeSessionStatus
+  questionCount: number
+  score: number | null
+  createdAt: string
+  submittedAt: string | null
+  errorCode: string | null
+  errorMessage: string | null
+}
+
+function parseSessionSummary(value: unknown, index: number): PracticeSessionSummary {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`练习会话第 ${index + 1} 条格式不正确。`)
+  }
+  const body = value as Record<string, unknown>
+  const status = body.status
+  if (!['generating', 'ready', 'submitted', 'failed', 'cancelled'].includes(String(status))) {
+    throw new Error('练习会话状态无法识别。')
+  }
+  return {
+    id: String(body.id),
+    practiceType: String(body.practice_type) as PracticeType,
+    source: String(body.source) as PracticeSource,
+    status: status as PracticeSessionStatus,
+    questionCount: Number(body.question_count),
+    score: typeof body.score === 'number' ? body.score : null,
+    createdAt: String(body.created_at),
+    submittedAt: typeof body.submitted_at === 'string' ? body.submitted_at : null,
+    errorCode: typeof body.error_code === 'string' ? body.error_code : null,
+    errorMessage: typeof body.error_message === 'string' ? body.error_message : null,
+  }
+}
+
+export async function listRecentPracticeSessions(limit = 20): Promise<PracticeSessionSummary[]> {
+  const payload = await apiClient.get(`/practice/sessions?limit=${limit}`)
+  const body = payload as Record<string, unknown>
+  return Array.isArray(body.items)
+    ? body.items.map((item, index) => parseSessionSummary(item, index))
+    : []
+}
+
+export async function deletePracticeSession(id: string): Promise<void> {
+  await apiClient.delete<void>(`/practice/sessions/${encodeURIComponent(id)}`, { retryCount: 0 })
 }
 
 export async function regeneratePracticeSession(sessionId: string, idempotencyKey: string): Promise<PracticeSession> {

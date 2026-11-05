@@ -27,9 +27,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "UPDATE user_profiles SET practice_pool_target = 2 WHERE practice_pool_target > 2"
-    )
+    op.execute("UPDATE user_profiles SET practice_pool_target = 2 WHERE practice_pool_target > 2")
     op.drop_constraint(op.f(CONSTRAINT), "user_profiles", type_="check")
     op.create_check_constraint(
         op.f(CONSTRAINT),

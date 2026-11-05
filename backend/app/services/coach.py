@@ -61,7 +61,7 @@ from app.services.ai_memory import (
     record_chat_memory,
     sync_profile_memories,
 )
-from app.services.ai_usage import quota_limits
+from app.services.ai_usage import resolved_quota_limits
 from app.services.ai_validation import sanitize_untrusted_json
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
@@ -968,7 +968,8 @@ async def finalize_coach_success(session: AsyncSession, job: AiJob, settings: Se
         (await session.scalars(select(AiUsageLedger).where(AiUsageLedger.job_id == job.id))).all()
     )
     units = sum(ledger.consumed for ledger in ledgers)
-    limit = quota_limits(settings)[job.quota_kind] if job.quota_kind else 0
+    limits = await resolved_quota_limits(session, job.user_id, settings)
+    limit = limits[job.quota_kind] if job.quota_kind else 0
     usage = {"quota_kind": job.quota_kind, "units": units, "limit": limit}
     await add_stream_event(session, message_id, "usage", usage)
     await add_stream_event(

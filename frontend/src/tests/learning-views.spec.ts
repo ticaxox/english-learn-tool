@@ -73,6 +73,7 @@ const profile: LearningProfile = {
   needsOnboarding: false,
   practicePoolTarget: 0,
   challengeGenerationTime: null,
+  aiQuotaLimits: {},
   planEffectiveFrom: null,
 }
 

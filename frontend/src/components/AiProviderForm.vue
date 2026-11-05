@@ -365,7 +365,6 @@ function cancel(): void {
           :placeholder="editing ? (maskedKey || '留空保持当前 Key') : '至少 8 个字符'"
           :aria-invalid="Boolean(errors.apiKey)"
         />
-        <p v-if="editing && !errors.apiKey" class="field-hint">已保存的 Key 不会回显；需要更换时直接输入新 Key。</p>
         <p v-if="errors.apiKey" class="field-error" role="alert">{{ errors.apiKey }}</p>
       </div>
 
@@ -373,7 +372,6 @@ function cancel(): void {
         <label for="provider-headers">自定义请求头（JSON）</label>
         <textarea id="provider-headers" v-model="customHeadersText" rows="3" spellcheck="false"></textarea>
         <p v-if="errors.customHeaders" class="field-error" role="alert">{{ errors.customHeaders }}</p>
-        <p class="field-hint">最多 10 个；Authorization、Cookie、Host 等安全头不可覆盖。</p>
       </div>
 
       <label v-if="!compact" class="checkbox">

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.models.ai import AiJob, AiUsageLedger
-from app.models.identity import User
+from app.models.identity import User, UserProfile
 from app.schemas.ai import (
     AdminAiUsageResponse,
     AdminProviderAggregate,
@@ -36,6 +36,21 @@ def quota_limits(settings: Settings) -> dict[str, int]:
     }
 
 
+async def resolved_quota_limits(
+    session: AsyncSession, user_id, settings: Settings
+) -> dict[str, int]:
+    """Global limits with the learner's overrides; -1 means unlimited."""
+    limits = quota_limits(settings)
+    overrides = await session.scalar(
+        select(UserProfile.ai_quota_limits).where(UserProfile.user_id == user_id)
+    )
+    if isinstance(overrides, dict):
+        for kind, value in overrides.items():
+            if kind in limits and isinstance(value, int) and value >= -1:
+                limits[kind] = value
+    return limits
+
+
 async def user_usage(
     session: AsyncSession,
     redis: Redis,
@@ -45,7 +60,7 @@ async def user_usage(
     local_date: date | None = None,
 ) -> AiUserUsageResponse:
     target_date = local_date or local_date_for(settings, user, now=utcnow())
-    limits = quota_limits(settings)
+    limits = await resolved_quota_limits(session, user.id, settings)
     rows = (
         await session.execute(
             select(
@@ -79,7 +94,7 @@ async def user_usage(
                 limit=limit,
                 used=used,
                 reserved=reserved,
-                remaining=max(limit - used - reserved, 0),
+                remaining=-1 if limit < 0 else max(limit - used - reserved, 0),
             )
         )
     return AiUserUsageResponse(

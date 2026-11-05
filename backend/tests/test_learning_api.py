@@ -294,3 +294,29 @@ async def test_states_and_plans_use_real_foreign_keys(app, member_user) -> None:
     assert states == []
     assert plans == []
     assert wordbook_id
+
+
+async def test_ai_quota_limits_can_be_unlimited(client, member_user) -> None:
+    headers = await _login(client, member_user.username)
+    patched = await client.patch(
+        PROFILE_PATH,
+        headers=headers,
+        json={"ai_quota_limits": {"question_generation": -1}},
+    )
+    assert patched.status_code == 200, patched.text
+    assert patched.json()["ai_quota_limits"] == {"question_generation": -1}
+
+    usage = await client.get("/api/v1/ai/usage/me", headers=headers)
+    assert usage.status_code == 200, usage.text
+    quota = next(
+        item for item in usage.json()["quotas"] if item["quota_kind"] == "question_generation"
+    )
+    assert quota["limit"] == -1
+    assert quota["remaining"] == -1
+
+    invalid = await client.patch(
+        PROFILE_PATH,
+        headers=headers,
+        json={"ai_quota_limits": {"question_generation": -2}},
+    )
+    assert invalid.status_code == 422

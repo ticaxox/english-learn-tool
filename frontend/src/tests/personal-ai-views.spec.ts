@@ -39,12 +39,12 @@ describe('PersonalAiConfigView', () => {
     await flushPromises()
 
     expect(wrapper.find('.personal-ai-main').exists()).toBe(true)
-    expect(wrapper.find('.personal-ai-aside .personal-ai-guide').exists()).toBe(true)
+    expect(wrapper.find('.personal-ai-aside').exists()).toBe(false)
 
     await wrapper.get('.personal-ai-empty [role="button"]').trigger('click')
     // The provider form opens as a floating dialog, not inside the column.
     expect(wrapper.find('.ai-provider-dialog .ai-form-panel').exists()).toBe(true)
-    expect(wrapper.find('.personal-ai-aside .personal-ai-guide').exists()).toBe(true)
+    expect(wrapper.find('.personal-ai-aside').exists()).toBe(false)
   })
 
   it('keeps provider data on the server list rather than embedding fixtures', async () => {

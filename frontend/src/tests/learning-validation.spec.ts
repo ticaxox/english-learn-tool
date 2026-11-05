@@ -32,6 +32,7 @@ function baseUpdate() {
     memoryConfig: defaultMemoryConfig(),
     practicePoolTarget: 0,
     challengeGenerationTime: null,
+    aiQuotaLimits: {},
   }
 }
 
@@ -107,6 +108,7 @@ describe('validateProfile aggregation', () => {
         memoryConfig: { ...defaultMemoryConfig(), flashcard: { enabled: false, blankType: null }, choice: { enabled: false, blankType: null }, spelling: { enabled: false, blankType: null } },
         practicePoolTarget: 0,
         challengeGenerationTime: null,
+        aiQuotaLimits: {},
       },
       TODAY,
     )

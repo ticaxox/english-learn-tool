@@ -95,6 +95,7 @@ const form = reactive<LearningProfileUpdate>({
   memoryConfig: defaultMemoryConfig(),
   practicePoolTarget: 0,
   challengeGenerationTime: null,
+  aiQuotaLimits: {},
 })
 
 const today = todayIsoDate()
@@ -110,6 +111,7 @@ function applyProfile(value: LearningProfile): void {
   form.memoryConfig = cloneConfig(value.memoryConfig)
   form.practicePoolTarget = value.practicePoolTarget ?? 0
   form.challengeGenerationTime = value.challengeGenerationTime
+  form.aiQuotaLimits = { ...(value.aiQuotaLimits ?? {}) }
   const stored = (value.memoryConfig.preferences?.challenge ?? {}) as {
     practiceTypes?: string[]
     drillModes?: string[]

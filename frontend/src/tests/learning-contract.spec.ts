@@ -141,6 +141,7 @@ describe('profile and memory config', () => {
       memoryConfig: defaultMemoryConfig(),
       practicePoolTarget: 1,
       challengeGenerationTime: '06:30',
+      aiQuotaLimits: {},
     }) as Record<string, unknown>
     expect(payload).toEqual({
       target_exam: 'CET4',
@@ -149,6 +150,7 @@ describe('profile and memory config', () => {
       daily_study_minutes: 45,
       practice_pool_target: 1,
       challenge_generation_time: '06:30',
+      ai_quota_limits: {},
     })
     expect(payload).not.toHaveProperty('flashcard_enabled')
   })

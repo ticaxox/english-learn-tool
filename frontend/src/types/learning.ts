@@ -79,6 +79,7 @@ export interface LearningProfile {
   planEffectiveFrom: string | null
   practicePoolTarget: number
   challengeGenerationTime: string | null
+  aiQuotaLimits: Record<string, number>
 }
 
 export type TodayStatus = 'not_started' | 'in_progress' | 'completed' | 'extra_available'
@@ -262,6 +263,7 @@ export interface LearningProfileUpdate {
   memoryConfig: MemoryConfig
   practicePoolTarget: number
   challengeGenerationTime: string | null
+  aiQuotaLimits: Record<string, number>
 }
 
 /**

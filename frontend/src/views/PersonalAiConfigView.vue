@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import AiMemoryPanel from '../components/AiMemoryPanel.vue'
-import BackgroundTasksPanel from '../components/BackgroundTasksPanel.vue'
+import AiQuotaPanel from '../components/AiQuotaPanel.vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -230,6 +230,8 @@ onMounted(() => {
 <template>
   <section class="personal-ai-page" :class="{ 'personal-ai-page--editing': formOpen }" aria-labelledby="personal-ai-title">
     <div class="personal-ai-main">
+      <AiQuotaPanel />
+
       <div class="personal-ai-toolbar">
         <div>
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
@@ -303,8 +305,6 @@ onMounted(() => {
 
       <AiMemoryPanel />
 
-      <BackgroundTasksPanel />
-
       <ErrorNotice v-if="operationError" :error="operationError" :show-retry="false" />
 
       <section v-if="deleteTarget" class="alert alert-warning" role="alertdialog" aria-labelledby="delete-provider-title">
@@ -319,29 +319,6 @@ onMounted(() => {
       </section>
     </div>
 
-    <aside class="personal-ai-aside" aria-label="AI 提供商配置说明">
-      <div class="personal-ai-guide">
-        <div>
-          <p class="eyebrow">配置说明</p>
-          <h3>配置后就能用</h3>
-          <div role="list" class="personal-ai-guide__list">
-            <div role="listitem">AI 教练对话与学习计划调整</div>
-            <div role="listitem">AI 练习生成、评分与错题解析</div>
-            <div role="listitem">每日闯关的题目生成</div>
-          </div>
-        </div>
-        <div>
-          <h3>密钥怎么保存</h3>
-          <p class="field-hint">
-            密钥加密保存，列表只显示掩码；已保存的 Key 不会回显，需要更换时在编辑弹窗里输入新 Key。
-          </p>
-        </div>
-        <div>
-          <h3>建议顺序</h3>
-          <p class="field-hint">先填好地址和 Key，在同一弹窗里获取模型、测试连接，再保存配置。</p>
-        </div>
-      </div>
-    </aside>
 
     <div v-if="formOpen" class="dialog-backdrop" @click.self="closeForm">
       <section class="dialog-card ai-provider-dialog" role="dialog" aria-modal="true" aria-label="AI 提供商配置">

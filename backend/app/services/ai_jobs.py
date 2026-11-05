@@ -24,7 +24,7 @@ from app.schemas.ai_tasks import AiJobCreateRequest
 from app.services.ai_concurrency import acquire_concurrency_slot, release_concurrency_slot
 from app.services.ai_secrets import ApiKeyCipher
 from app.services.ai_security import ProviderHttpClient, ProviderRequestError
-from app.services.ai_usage import quota_limits
+from app.services.ai_usage import resolved_quota_limits
 from app.services.ai_validation import output_schema, repair_prompt, validate_task_output
 from app.services.auth import utcnow
 from app.services.learning import local_date_for
@@ -173,7 +173,7 @@ async def _reserve_quota(
             message="AI quota items must be unique.",
         )
     unit_count = len(items)
-    limits = quota_limits(settings)
+    limits = await resolved_quota_limits(session, user.id, settings)
     limit = limits[job.quota_kind]
     local_date = local_date_for(settings, user)
     # Serialize reserve/consume operations for one user, day, and quota kind.
@@ -201,7 +201,7 @@ async def _reserve_quota(
         )
         or 0
     )
-    if used + reserved + unit_count > limit:
+    if limit >= 0 and used + reserved + unit_count > limit:
         raise AppError(
             status_code=429,
             code="AI_QUOTA_EXHAUSTED",
