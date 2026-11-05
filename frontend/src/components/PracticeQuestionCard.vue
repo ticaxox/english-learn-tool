@@ -23,6 +23,8 @@ const questionLabel = computed(() => `第 ${props.index + 1} 题，共 ${props.t
 const isChoice = computed(() => ['fill_blank', 'reading'].includes(props.question.questionType))
 const inReview = computed(() => props.review !== null && props.review !== undefined)
 const optionLayout = computed<'four' | 'two' | 'one'>(() => {
+  // Reading questions always give each option its own row.
+  if (props.question.questionType === 'reading') return 'one'
   const longest = props.question.options.reduce((max, option) => Math.max(max, (option.text ?? '').trim().length), 0)
   if (longest <= 16) return 'four'
   if (longest <= 32) return 'two'
@@ -81,14 +83,17 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     </div>
 
     <div v-else-if="question.questionType === 'translation'" class="practice-translation">
-      <p v-if="question.sourceText" class="practice-source-text">{{ question.sourceText }}</p>
+      <p class="practice-prompt-note">翻译原文</p>
+      <p v-if="question.sourceText" class="practice-prompt-text">{{ question.sourceText }}</p>
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
       </div>
     </div>
 
     <div v-else class="practice-writing">
-      <p v-if="question.prompt" class="practice-source-text">{{ question.prompt }}</p>
+      <p class="practice-prompt-note">写作题目（英文）</p>
+      <p v-if="question.prompt" class="practice-prompt-text">{{ question.prompt }}</p>
+      <p v-if="question.requirements.length" class="practice-prompt-note">写作要求</p>
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
       </div>
@@ -129,14 +134,17 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
       <label :for="answerId">你的答案</label>
       <textarea
         :id="answerId"
+        class="practice-answer-textarea"
         :value="modelValue"
         :disabled="disabled"
         maxlength="20000"
-        rows="6"
+        :rows="question.questionType === 'translation' ? 2 : 6"
         placeholder="请在这里作答"
         @input="update(($event.target as HTMLTextAreaElement).value)"
       ></textarea>
-      <p class="field-hint">当前字数：{{ modelValue.length }} / 20000</p>
+      <p v-if="question.questionType !== 'translation'" class="field-hint">
+        当前字数：{{ modelValue.length }} / 20000
+      </p>
     </div>
 
 

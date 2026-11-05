@@ -4508,3 +4508,206 @@
     white-space: nowrap;
   }
 }
+
+/* --------------------------------------------------------------- latest pass */
+
+/* All four practice types use the same plain prompt block. */
+.personal-workspace .practice-prompt-text {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.personal-workspace .practice-prompt-note {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.personal-workspace .practice-answer-textarea {
+  width: 100%;
+  min-height: 4.6rem;
+  padding: 12px 14px;
+  border: 1.5px solid var(--ui-line-strong);
+  border-radius: 14px;
+  background: var(--ui-surface);
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.personal-workspace .practice-answer-textarea:focus-visible {
+  border-color: var(--ui-ink);
+  outline: 3px solid rgb(255 150 0 / 35%);
+  outline-offset: 2px;
+}
+
+/* The answering rail is one surface on phones. */
+@media (max-width: 980px) {
+  .personal-workspace .member-practice-session-page .member-practice-session-aside {
+    padding: 8px 10px;
+    border: 1.5px solid var(--ui-line-strong);
+    border-radius: 16px;
+    background: var(--ui-surface);
+    box-shadow: 0 4px 0 rgb(59 42 26 / 8%);
+  }
+
+  .personal-workspace .member-practice-session-page .member-practice-session-aside .panel {
+    padding: 0;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Memory choice: two by two on phones too. */
+@media (max-width: 720px) {
+  .personal-workspace .memory-main-card .choice-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .personal-workspace .memory-main-card .choice-option {
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 4px;
+    padding: 10px 6px;
+  }
+  .personal-workspace .memory-main-card .choice-option__label { font-size: 0.86rem; }
+}
+
+/* Three module cards side by side on desktop. */
+@media (min-width: 981px) {
+  .personal-workspace .memory-action-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .personal-workspace .memory-action-card {
+    grid-template-columns: minmax(0, 1fr) 18px;
+    grid-template-areas:
+      "icon arrow"
+      "copy copy"
+      "status status";
+    align-content: start;
+    row-gap: 10px;
+    min-height: 176px;
+    padding: 16px;
+  }
+
+  .personal-workspace .memory-action-card .memory-action-icon {
+    grid-area: icon;
+    width: 36px;
+    height: 36px;
+  }
+
+  .personal-workspace .memory-action-card .memory-action-copy { grid-area: copy; }
+
+  .personal-workspace .memory-action-card .memory-action-status {
+    grid-area: status;
+    display: grid;
+    gap: 2px;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .personal-workspace .memory-action-card > svg {
+    grid-area: arrow;
+    align-self: start;
+  }
+}
+
+/* Memory session bar: one calm row on phones. */
+@media (max-width: 980px) {
+  .personal-workspace .memory-session-kicker { display: none; }
+
+  .personal-workspace .memory-session-rail {
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .personal-workspace .memory-rail-head {
+    display: flex;
+    flex: 0 1 auto;
+    gap: 8px;
+    min-width: 0;
+    align-items: baseline;
+  }
+
+  .personal-workspace .memory-rail-title { font-size: 1.15rem; }
+  .personal-workspace .memory-rail-remaining { font-size: 0.74rem; color: var(--ui-muted); }
+  .personal-workspace .memory-rail-clock { padding: 4px 8px; font-size: 0.72rem; }
+
+  .personal-workspace .memory-session-rail .memory-rail-end {
+    min-height: 32px;
+    margin-left: auto;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+}
+
+/* Ending dialog: noticeably larger spacing, verified on screen. */
+.personal-workspace .memory-end-dialog {
+  gap: 34px;
+  padding: 44px 48px;
+}
+
+.personal-workspace .memory-end-dialog .field-hint { margin: 0; }
+
+.personal-workspace .memory-end-dialog .button-row {
+  gap: 22px;
+  margin-top: 34px;
+}
+
+/* Wrong card: word left, sound and meaning right, continue outside. */
+.personal-workspace .memory-wrong-detail {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  padding: 0;
+}
+
+.personal-workspace .memory-wrong-detail__card {
+  width: 100%;
+  display: grid;
+  gap: 20px;
+  padding: 34px 40px;
+}
+
+.personal-workspace .memory-wrong-detail__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+}
+
+.personal-workspace .memory-wrong-detail__grid h2 {
+  margin: 0;
+  text-align: center;
+}
+
+.personal-workspace .memory-wrong-detail__side {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  text-align: left;
+}
+
+.personal-workspace .memory-wrong-detail__answer {
+  justify-content: center;
+  margin: 0;
+}
+
+.personal-workspace .memory-wrong-detail__continue { justify-self: center; }
+
+@media (max-width: 640px) {
+  .personal-workspace .memory-wrong-detail__grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .personal-workspace .memory-wrong-detail__side { justify-items: center; text-align: center; }
+}

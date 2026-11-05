@@ -388,25 +388,30 @@ watch(challengeModule, async (module, previous) => {
 
         <LoadingState v-if="session.busy.value && !session.question.value" label="正在提交…" />
 
-        <section v-if="wrongCard" class="workspace-card memory-wrong-detail" aria-live="polite">
-          <p class="eyebrow">答错了</p>
-          <h2>{{ wrongCard.word }}</h2>
-          <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
-          <p class="memory-wrong-detail__meaning">{{ wrongCard.meaning }}</p>
-          <p v-if="wrongCard.typed" class="memory-wrong-detail__answer">
-            <span class="memory-wrong-detail__answer-label">
-              {{ wrongCard.kind === 'spelling' ? '你填了：' : '你选了：' }}
-            </span>
-            <span v-if="wrongCard.kind === 'spelling'" class="memory-wrong-detail__letters">
-              <span
-                v-for="(letter, index) in wrongCard.typed"
-                :key="index"
-                :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
-              >{{ letter }}</span>
-            </span>
-            <span v-else class="memory-wrong-detail__chosen">{{ wrongCard.typed }}</span>
-          </p>
-          <DivButton class="button" type="button" @click="continueAfterWrong">继续</DivButton>
+        <section v-if="wrongCard" class="memory-wrong-detail" aria-live="polite">
+          <div class="workspace-card memory-wrong-detail__card">
+            <p class="eyebrow">答错了</p>
+            <div class="memory-wrong-detail__grid">
+              <h2>{{ wrongCard.word }}</h2>
+              <div class="memory-wrong-detail__side">
+                <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
+                <p class="memory-wrong-detail__meaning">{{ wrongCard.meaning }}</p>
+              </div>
+            </div>
+            <p v-if="wrongCard.typed" class="memory-wrong-detail__answer">
+              <span v-if="wrongCard.kind === 'spelling'" class="memory-wrong-detail__letters">
+                <span
+                  v-for="(letter, index) in wrongCard.typed"
+                  :key="index"
+                  :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
+                >{{ letter }}</span>
+              </span>
+              <span v-else class="memory-wrong-detail__chosen">{{ wrongCard.typed }}</span>
+            </p>
+          </div>
+          <DivButton class="button memory-wrong-detail__continue" type="button" @click="continueAfterWrong">
+            继续
+          </DivButton>
         </section>
 
         <FlashcardTrainer

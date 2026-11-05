@@ -207,3 +207,19 @@ class PracticeEventListResponse(BaseModel):
     total: int
     offset: int
     limit: int
+
+
+class BackgroundTaskResponse(BaseModel):
+    id: UUID
+    practice_type: PracticeType
+    question_count: int
+    status: Literal["generating", "ready", "failed"]
+    attempts: int
+    error_code: str | None = None
+    error_message: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class BackgroundTaskListResponse(BaseModel):
+    items: list[BackgroundTaskResponse]

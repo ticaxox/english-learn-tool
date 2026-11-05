@@ -160,3 +160,64 @@ async def test_failed_pool_generation_is_retried(app, client, member_user) -> No
 
         server.queue_json(200, practice_output(entry_ids[:3]))
         assert (await _run_job(app, retry_job_id))["status"] == "succeeded"
+
+
+async def test_background_tasks_can_be_listed_deleted_and_retried(app, client, member_user) -> None:
+    headers = await login(client, member_user.username)
+    wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
+    await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
+    await client.patch(PROFILE_PATH, headers=headers, json={"practice_pool_target": 1})
+
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        async with app.state.session_factory() as session:
+            user = await session.get(User, member_user.id)
+            await ensure_pool(session, app.state.arq, user, app.state.settings)
+        async with app.state.session_factory() as session:
+            item = await session.scalar(
+                select(PracticePoolItem).where(
+                    PracticePoolItem.user_id == member_user.id,
+                    PracticePoolItem.practice_type == "fill_blank",
+                    PracticePoolItem.question_count == 3,
+                )
+            )
+            assert item is not None
+            pool_session = await session.get(PracticeSession, item.session_id)
+            assert pool_session and pool_session.ai_job_id
+            job_id = pool_session.ai_job_id
+
+        listed = await client.get("/api/v1/me/ai/background-tasks", headers=headers)
+        assert listed.status_code == 200, listed.text
+        task = next(
+            (
+                entry
+                for entry in listed.json()["items"]
+                if entry["practice_type"] == "fill_blank" and entry["question_count"] == 3
+            ),
+            None,
+        )
+        assert task is not None
+        assert task["status"] == "generating"
+
+        ready_retry = await client.post(
+            f"/api/v1/me/ai/background-tasks/{task['id']}/retry", headers=headers
+        )
+        assert ready_retry.status_code == 409
+        assert ready_retry.json()["code"] == "BACKGROUND_TASK_NOT_FAILED"
+
+        server.queue_json(500, {"error": "provider failed"})
+        assert (await _run_job(app, job_id))["status"] == "failed"
+
+        retried = await client.post(
+            f"/api/v1/me/ai/background-tasks/{task['id']}/retry", headers=headers
+        )
+        assert retried.status_code == 200, retried.text
+        assert retried.json()["status"] == "generating"
+        assert retried.json()["attempts"] >= 2
+
+        deleted = await client.delete(
+            f"/api/v1/me/ai/background-tasks/{task['id']}", headers=headers
+        )
+        assert deleted.status_code == 204
+        remaining = await client.get("/api/v1/me/ai/background-tasks", headers=headers)
+        assert all(entry["id"] != task["id"] for entry in remaining.json()["items"])

@@ -20,6 +20,7 @@ from app.schemas.ai import (
 )
 from app.schemas.ai_memory import AiMemoryDocumentResponse, AiMemoryDocumentUpdate
 from app.schemas.common import ErrorResponse
+from app.schemas.practice import BackgroundTaskListResponse, BackgroundTaskResponse
 from app.services.ai_memory import get_document, save_document
 from app.services.ai_providers import (
     create_provider,
@@ -33,6 +34,11 @@ from app.services.ai_providers import (
     update_provider,
 )
 from app.services.auth import AuthContext
+from app.services.practice_pool import (
+    delete_background_task,
+    list_background_tasks,
+    retry_background_task,
+)
 
 router = APIRouter(prefix="/me/ai", tags=["personal ai"])
 
@@ -209,3 +215,50 @@ async def save_my_memory_endpoint(
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> AiMemoryDocumentResponse:
     return await save_document(session, context.user, payload)
+
+
+@router.get(
+    "/background-tasks",
+    response_model=BackgroundTaskListResponse,
+    responses=_RESPONSES,
+    summary="List the current user's pre-generated practice tasks",
+)
+async def list_background_tasks_endpoint(
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> BackgroundTaskListResponse:
+    return await list_background_tasks(session, context.user)
+
+
+@router.post(
+    "/background-tasks/{task_id}/retry",
+    response_model=BackgroundTaskResponse,
+    responses=_RESPONSES,
+    summary="Retry one failed pre-generated practice task",
+)
+async def retry_background_task_endpoint(
+    request: Request,
+    task_id: UUID,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> BackgroundTaskResponse:
+    settings: Settings = request.app.state.settings
+    return await retry_background_task(
+        session, request.app.state.arq, context.user, settings, task_id
+    )
+
+
+@router.delete(
+    "/background-tasks/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=_RESPONSES,
+    summary="Delete one pre-generated practice task",
+)
+async def delete_background_task_endpoint(
+    request: Request,
+    task_id: UUID,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> Response:
+    await delete_background_task(session, request.app.state.arq, context.user, task_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

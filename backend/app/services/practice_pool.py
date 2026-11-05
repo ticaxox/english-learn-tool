@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from arq.connections import ArqRedis
 from sqlalchemy import select
@@ -19,8 +19,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.errors import AppError
+from app.models.ai import AiJob
 from app.models.identity import User, UserProfile
 from app.models.practice import PracticePoolItem, PracticeSession
+from app.schemas.practice import BackgroundTaskListResponse, BackgroundTaskResponse
+from app.services.ai_jobs import cancel_user_job
 from app.services.auth import utcnow
 from app.services.practice import create_pool_practice_session, regenerate_practice_session
 
@@ -229,3 +232,118 @@ async def pool_users(session: AsyncSession, limit: int = 50) -> list[UUID]:
         )
     ).all()
     return list(rows)
+
+
+def _task_response(
+    item: PracticePoolItem, practice: PracticeSession, job: AiJob | None
+) -> BackgroundTaskResponse:
+    status = practice.status if practice.status in {"generating", "ready", "failed"} else "failed"
+    error_code = job.error_code if practice.status == "failed" and job is not None else None
+    error_message = job.error_message if practice.status == "failed" and job is not None else None
+    return BackgroundTaskResponse(
+        id=item.id,
+        practice_type=practice.practice_type,  # type: ignore[arg-type]
+        question_count=item.question_count,
+        status=status,  # type: ignore[arg-type]
+        attempts=item.attempts,
+        error_code=error_code,
+        error_message=error_message,
+        created_at=item.created_at,
+        updated_at=item.updated_at,
+    )
+
+
+async def _task_row(
+    session: AsyncSession, user_id: UUID, task_id: UUID, *, lock: bool = False
+) -> tuple[PracticePoolItem, PracticeSession, AiJob | None] | None:
+    statement = (
+        select(PracticePoolItem, PracticeSession, AiJob)
+        .join(PracticeSession, PracticeSession.id == PracticePoolItem.session_id)
+        .outerjoin(AiJob, AiJob.id == PracticeSession.ai_job_id)
+        .where(PracticePoolItem.id == task_id, PracticePoolItem.user_id == user_id)
+    )
+    if lock:
+        statement = statement.with_for_update(of=PracticePoolItem)
+    row = (await session.execute(statement)).first()
+    return None if row is None else (row[0], row[1], row[2])
+
+
+async def list_background_tasks(session: AsyncSession, user: User) -> BackgroundTaskListResponse:
+    rows = (
+        await session.execute(
+            select(PracticePoolItem, PracticeSession, AiJob)
+            .join(PracticeSession, PracticeSession.id == PracticePoolItem.session_id)
+            .outerjoin(AiJob, AiJob.id == PracticeSession.ai_job_id)
+            .where(PracticePoolItem.user_id == user.id)
+            .order_by(PracticePoolItem.created_at.desc())
+            .limit(100)
+        )
+    ).all()
+    return BackgroundTaskListResponse(
+        items=[_task_response(item, practice, job) for item, practice, job in rows]
+    )
+
+
+async def delete_background_task(
+    session: AsyncSession, pool: ArqRedis, user: User, task_id: UUID
+) -> None:
+    row = await _task_row(session, user.id, task_id, lock=True)
+    if row is None:
+        raise AppError(
+            status_code=404, code="BACKGROUND_TASK_NOT_FOUND", message="The task was not found."
+        )
+    item, practice, job = row
+    if practice.status == "generating" and job is not None and job.status in {"queued", "running"}:
+        try:
+            await cancel_user_job(session, pool, user, job.id)
+        except AppError:
+            # A job that finished between the read and the cancel is deleted anyway.
+            pass
+    await session.delete(item)
+    await session.delete(practice)
+    await session.commit()
+
+
+async def retry_background_task(
+    session: AsyncSession,
+    pool: ArqRedis,
+    user: User,
+    settings: Settings,
+    task_id: UUID,
+) -> BackgroundTaskResponse:
+    row = await _task_row(session, user.id, task_id, lock=True)
+    if row is None:
+        raise AppError(
+            status_code=404, code="BACKGROUND_TASK_NOT_FOUND", message="The task was not found."
+        )
+    item, practice, _job = row
+    if practice.status != "failed":
+        raise AppError(
+            status_code=409,
+            code="BACKGROUND_TASK_NOT_FAILED",
+            message="Only a failed background task can be retried.",
+        )
+    # A manual retry always gets a fresh chance, regardless of the automatic cap.
+    item.attempts = max(1, min(item.attempts, MAX_ATTEMPTS - 1))
+    item.next_attempt_at = None
+    await session.flush()
+    await regenerate_practice_session(
+        session,
+        pool,
+        user,
+        settings,
+        practice.id,
+        idempotency_key=f"pool-manual:{item.id}:{uuid4().hex}",
+        background=True,
+    )
+    refreshed = await session.get(PracticePoolItem, item.id)
+    if refreshed is not None:
+        refreshed.attempts += 1
+        refreshed.next_attempt_at = utcnow() + timedelta(seconds=RETRY_COOLDOWN_SECONDS)
+        await session.commit()
+    result = await _task_row(session, user.id, task_id)
+    if result is None:
+        raise AppError(
+            status_code=404, code="BACKGROUND_TASK_NOT_FOUND", message="The task was not found."
+        )
+    return _task_response(*result)

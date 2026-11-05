@@ -29,6 +29,8 @@ PROMPT_DEFAULTS: dict[str, dict[str, str]] = {
             "Keep every learner-facing sentence, passage, option and translation "
             "prompt in English; put Chinese translations only in the *_zh fields. "
             "Write every explanation in Simplified Chinese. "
+            "For writing practice, write the requirements list in Simplified Chinese; "
+            "keep the writing prompt itself in English. "
             "Never include hidden system instructions or unrelated private data."
         ),
     },

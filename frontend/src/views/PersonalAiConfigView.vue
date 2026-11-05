@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import AiMemoryPanel from '../components/AiMemoryPanel.vue'
+import BackgroundTasksPanel from '../components/BackgroundTasksPanel.vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -301,6 +302,8 @@ onMounted(() => {
       </section>
 
       <AiMemoryPanel />
+
+      <BackgroundTasksPanel />
 
       <ErrorNotice v-if="operationError" :error="operationError" :show-retry="false" />
 
