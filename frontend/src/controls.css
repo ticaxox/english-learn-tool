@@ -2720,3 +2720,236 @@
 /* Flashcard: the phonetic sits under the word in the left column. */
 .memory-main-card .study-card__word-block { align-content: start; }
 .memory-main-card .study-card__word-block .study-card__phonetic { margin: 4px 0 0; }
+
+/* Today: one board holds the route header, the task list and the side stats. */
+.personal-workspace .crumb-today-board {
+  display: grid;
+  gap: 18px;
+  padding: 20px 22px 20px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 26px;
+  background: var(--ui-surface);
+  box-shadow: 0 6px 0 rgb(59 42 26 / 8%);
+}
+
+/* The header, task list and side blocks are sections of that board, not cards. */
+.personal-workspace .crumb-today-board .crumb-today-header {
+  padding: 2px 2px 16px;
+  border: 0;
+  border-bottom: 2px dashed var(--ui-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.personal-workspace .crumb-today-board .crumb-today-layout { gap: 20px; align-items: start; }
+
+.personal-workspace .crumb-today-board .crumb-trail-board {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .crumb-today-board .crumb-trail-board-head { padding: 0 0 12px; }
+
+.personal-workspace .crumb-today-board .crumb-book-note,
+.personal-workspace .crumb-today-board .crumb-today-side .study-stats {
+  padding: 14px 0 0 !important;
+  border: 0 !important;
+  border-top: 2px dashed var(--ui-line) !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Wrong spelling: one word, with the mis-typed letters boxed in red. */
+.personal-workspace .memory-wrong-detail__word-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.personal-workspace .memory-wrong-detail__word-letters > span {
+  display: inline-block;
+  padding: 0 2px;
+  border-radius: 8px;
+}
+
+.personal-workspace .memory-wrong-detail__word-letters > span.is-wrong {
+  background: #ffe1dc;
+  color: #b3261e;
+  box-shadow: inset 0 0 0 2px #b3261e;
+}
+
+/* Learning settings: both rows share one column grid, so the boxes line up. */
+.personal-workspace .settings-form fieldset.settings-goal-grid,
+.personal-workspace .settings-pair {
+  grid-template-columns: 344px max-content;
+  gap: 18px 32px;
+  justify-content: start;
+}
+
+.personal-workspace .settings-pair { margin-top: 18px; }
+
+.personal-workspace .settings-goal-grid .field,
+.personal-workspace .settings-pair > .field--inline {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.personal-workspace .settings-goal-grid .field > label,
+.personal-workspace .settings-pair > .field--inline > label {
+  flex: 0 0 132px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.personal-workspace .settings-goal-grid .field > input,
+.personal-workspace .settings-pair > .field--inline > select,
+.personal-workspace .settings-pair > .field--inline > input {
+  flex: 0 0 200px;
+  width: 200px;
+  max-width: 200px;
+}
+
+.personal-workspace .settings-goal-grid .field-inline-note {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.personal-workspace .settings-goal-grid .field-inline-note input {
+  flex: 0 0 200px;
+  width: 200px;
+  max-width: 200px;
+}
+
+.personal-workspace .settings-goal-grid .field-error { flex-basis: 100%; }
+
+@media (max-width: 640px) {
+  .personal-workspace .settings-form fieldset.settings-goal-grid,
+  .personal-workspace .settings-pair { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .settings-goal-grid .field > label,
+  .personal-workspace .settings-pair > .field--inline > label { flex-basis: auto; }
+  .personal-workspace .settings-goal-grid .field > input,
+  .personal-workspace .settings-goal-grid .field-inline-note input,
+  .personal-workspace .settings-pair > .field--inline > select,
+  .personal-workspace .settings-pair > .field--inline > input {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* AI quota: usage count sits after the limit, not before it. */
+.personal-workspace .ai-quota-row__used {
+  margin-left: auto;
+  color: var(--ui-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* The board's task column stretches, so its tip and action close the column. */
+.personal-workspace .crumb-today-board .crumb-today-layout { align-items: stretch; }
+.personal-workspace .crumb-today-board .crumb-trail-board {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0 !important;
+}
+.personal-workspace .crumb-today-board .crumb-trail-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.personal-workspace .crumb-board-cta { display: inline-flex; }
+
+@media (max-width: 640px) {
+  .personal-workspace .crumb-board-cta { width: 100%; justify-content: center; }
+}
+
+/* The board carries the three daily tasks, so its width is used, not empty. */
+.personal-workspace .crumb-task-list {
+  display: grid;
+  margin: 14px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--ui-line);
+  list-style: none;
+}
+
+.personal-workspace .crumb-task-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 132px 16px;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--ui-line);
+  color: var(--ui-ink);
+  text-decoration: none;
+}
+
+.personal-workspace .crumb-task-row:hover { background: var(--ui-surface-subtle, #fbf7ee); }
+
+.personal-workspace .crumb-task-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 50%;
+  place-items: center;
+  background: var(--ui-surface-subtle, #fbf7ee);
+  color: var(--ui-forest, #14573d);
+}
+
+.personal-workspace .crumb-task-icon svg { width: 17px; height: 17px; }
+.personal-workspace .crumb-task-row > svg { width: 16px; height: 16px; color: var(--ui-muted); }
+
+.personal-workspace .crumb-task-copy {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.personal-workspace .crumb-task-copy strong { font-size: 0.95rem; }
+.personal-workspace .crumb-task-copy small {
+  color: var(--ui-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.personal-workspace .crumb-task-bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ui-line);
+}
+
+.personal-workspace .crumb-task-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ui-forest, #14573d);
+}
+
+.personal-workspace .crumb-task-list .is-done .crumb-task-icon {
+  border-color: #2f7d4c;
+  background: #eaf6ec;
+  color: #2f7d4c;
+}
+
+.personal-workspace .crumb-task-list .is-done .crumb-task-copy strong { color: var(--ui-muted); }
+
+@media (max-width: 520px) {
+  .personal-workspace .crumb-task-row { grid-template-columns: 34px minmax(0, 1fr) 16px; }
+  .personal-workspace .crumb-task-bar { display: none; }
+}

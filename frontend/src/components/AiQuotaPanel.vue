@@ -125,7 +125,6 @@ onMounted(() => {
       <div v-for="kind in KINDS" :key="kind.key" role="listitem" class="ai-quota-row">
         <div class="ai-quota-row__copy">
           <strong>{{ kind.label }}</strong>
-          <small>今日已用 {{ usageByKind[kind.key]?.used ?? 0 }} 次</small>
         </div>
         <div class="ai-quota-row__controls">
           <label class="ai-quota-row__unlimited">
@@ -144,6 +143,7 @@ onMounted(() => {
             :aria-label="`${kind.label}每日上限`"
           />
         </div>
+        <small class="ai-quota-row__used">今日已用 {{ usageByKind[kind.key]?.used ?? 0 }} 次</small>
       </div>
     </div>
 

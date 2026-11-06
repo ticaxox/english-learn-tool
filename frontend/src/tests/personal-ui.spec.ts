@@ -27,10 +27,9 @@ describe('T-FE-020 personal UI system', () => {
   it('keeps mobile Today copy horizontal and exposes the primary action above the fold', () => {
     const today = source('../views/TodayView.vue')
     const css = source('../personal-ui.css')
-    expect(today).toContain('crumb-today-mobile-cta')
+    expect(today).toContain('crumb-board-cta')
     expect(css).toContain('overflow-wrap: normal')
     expect(css).toContain('word-break: normal')
-    expect(css).toContain('.personal-workspace .crumb-trail-footer .crumb-primary-action { display: none; }')
   })
 
   it('uses one settings title and a grouped field layout', () => {

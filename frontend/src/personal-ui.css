@@ -1184,7 +1184,6 @@ body {
     justify-content: center;
     margin-top: var(--ui-space-2);
   }
-  .personal-workspace .crumb-trail-footer .crumb-primary-action { display: none; }
   .personal-workspace .crumb-today-stamp {
     display: none;
     min-width: 0;

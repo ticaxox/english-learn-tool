@@ -179,6 +179,7 @@ onMounted(() => {
     </section>
 
     <template v-else-if="plan">
+      <section class="crumb-today-board">
       <header class="crumb-today-header">
         <div class="crumb-today-intro">
           <div class="crumb-mascot-lockup">
@@ -189,14 +190,6 @@ onMounted(() => {
             </div>
           </div>
           <p class="crumb-today-note">{{ heroNote }}</p>
-          <RouterLink
-            v-if="primaryTask"
-            class="button crumb-primary-action crumb-today-mobile-cta"
-            :to="primaryTask.to"
-          >
-            {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
-            <AppIcon name="arrow" />
-          </RouterLink>
         </div>
         <div class="crumb-hero-status">
           <GoalRing
@@ -225,6 +218,22 @@ onMounted(() => {
             <strong>{{ completedTaskCount }} / {{ todayTasks.length }} 完成</strong>
           </header>
 
+          <ul class="crumb-task-list" aria-label="今日任务进度">
+            <li v-for="task in todayTasks" :key="task.key" :class="{ 'is-done': task.done }">
+              <RouterLink :to="task.to" class="crumb-task-row">
+                <span class="crumb-task-icon"><AppIcon :name="task.icon" /></span>
+                <span class="crumb-task-copy">
+                  <strong>{{ task.title }}</strong>
+                  <small>{{ task.completed }} / {{ task.target }} {{ task.unit }}</small>
+                </span>
+                <span class="crumb-task-bar" aria-hidden="true">
+                  <span :style="{ width: `${task.percent}%` }"></span>
+                </span>
+                <AppIcon name="arrow" />
+              </RouterLink>
+            </li>
+          </ul>
+
           <footer class="crumb-trail-footer">
             <div class="crumb-guide-note">
               <CrumboMark size="medium" />
@@ -235,6 +244,14 @@ onMounted(() => {
                 <p v-else>跟着这条路线走，今天就算稳稳落地。</p>
               </div>
             </div>
+            <RouterLink
+              v-if="primaryTask"
+              class="button crumb-primary-action crumb-board-cta"
+              :to="primaryTask.to"
+            >
+              {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
+              <AppIcon name="arrow" />
+            </RouterLink>
           </footer>
         </section>
 
@@ -255,6 +272,7 @@ onMounted(() => {
 
         </aside>
       </div>
+      </section>
 
       <ChallengeView embedded />
     </template>

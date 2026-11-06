@@ -413,22 +413,20 @@ watch(challengeModule, async (module, previous) => {
           <div class="workspace-card memory-wrong-detail__card">
             <div class="memory-wrong-detail__grid">
               <div class="memory-wrong-detail__word">
-                <h2>{{ wrongCard.word }}</h2>
+                <h2 v-if="wrongCard.kind !== 'spelling'">{{ wrongCard.word }}</h2>
+                <h2 v-else class="memory-wrong-detail__word-letters">
+                  <span
+                    v-for="(letter, index) in wrongCard.word"
+                    :key="index"
+                    :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
+                  >{{ letter }}</span>
+                </h2>
                 <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
               </div>
               <div class="memory-wrong-detail__side">
                 <p class="memory-wrong-detail__meaning">
                   <span v-if="wrongCard.partOfSpeech" class="memory-wrong-detail__pos">{{ wrongCard.partOfSpeech }}</span>
                   <span class="memory-wrong-detail__definition">{{ wrongCard.meaning }}</span>
-                </p>
-                <p v-if="wrongCard.kind === 'spelling' && wrongCard.typed" class="memory-wrong-detail__answer">
-                  <span class="memory-wrong-detail__letters">
-                    <span
-                      v-for="(letter, index) in wrongCard.typed"
-                      :key="index"
-                      :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
-                    >{{ letter }}</span>
-                  </span>
                 </p>
               </div>
             </div>
