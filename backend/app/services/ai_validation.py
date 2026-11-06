@@ -139,8 +139,10 @@ def validate_task_output(
         allowed = _uuid_set(practice.target_entry_ids)
         if output.practice_type != practice.practice_type:
             raise ValueError("AI_PRACTICE_TYPE_MISMATCH")
-        if practice.practice_type == "reading":
-            question_count = sum(len(item.questions) for item in output.items)
+        if practice.practice_type in {"reading", "mixed"}:
+            question_count = sum(
+                len(getattr(item, "questions", [])) or 1 for item in output.items
+            )
             if question_count != practice.count:
                 raise ValueError("AI_QUESTION_COUNT_MISMATCH")
         elif len(output.items) != practice.count:

@@ -40,6 +40,7 @@ PRACTICE_LABELS = {
     "reading": "阅读练习",
     "translation": "翻译练习",
     "writing": "作文练习",
+    "mixed": "混合练习",
 }
 CHALLENGE_TYPE_LABELS = {
     "fill_blank": "填空",

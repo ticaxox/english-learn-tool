@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 ExamType = Literal["CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
-PracticeType = Literal["fill_blank", "reading", "translation", "writing"]
+PracticeType = Literal["fill_blank", "reading", "translation", "writing", "mixed"]
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 ChallengeNodeType = Literal[
     "REVIEW", "NEW_WORDS", "WORD_DRILL", "AI_PRACTICE", "BOSS", "OPTIONAL_SIDE"
@@ -237,6 +237,16 @@ class PracticeGenerationOutput(StrictModel):
 
     @model_validator(mode="after")
     def validate_item_shapes(self) -> PracticeGenerationOutput:
+        if self.practice_type == "mixed":
+            # A mixed set may draw from every type, but the number of questions
+            # must still match the count the learner picked.
+            question_count = sum(
+                len(item.questions) if isinstance(item, ReadingPassage) else 1
+                for item in self.items
+            )
+            if question_count not in {3, 5, 10, 15, 20}:
+                raise ValueError("practice question count must be 3, 5, 10, 15, or 20")
+            return self
         expected = {
             "fill_blank": FillBlankItem,
             "reading": ReadingPassage,

@@ -24,6 +24,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 PRACTICE_TYPES = "'fill_blank', 'reading', 'translation', 'writing'"
+PRACTICE_SESSION_TYPES = PRACTICE_TYPES + ", 'mixed'"
 PRACTICE_SOURCES = "'today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty'"
 PRACTICE_SESSION_STATUSES = "'generating', 'ready', 'submitted', 'failed', 'cancelled'"
 PRACTICE_GENERATION_STATUSES = "'generating', 'ready', 'failed', 'superseded', 'cancelled'"
@@ -33,7 +34,7 @@ PRACTICE_SUBMISSION_STATUSES = "'scoring', 'completed', 'failed'"
 class PracticeSession(Base):
     __tablename__ = "practice_sessions"
     __table_args__ = (
-        CheckConstraint(f"practice_type IN ({PRACTICE_TYPES})", name="practice_type_valid"),
+        CheckConstraint(f"practice_type IN ({PRACTICE_SESSION_TYPES})", name="practice_type_valid"),
         CheckConstraint(f"source IN ({PRACTICE_SOURCES})", name="source_valid"),
         CheckConstraint(f"status IN ({PRACTICE_SESSION_STATUSES})", name="status_valid"),
         CheckConstraint(

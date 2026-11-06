@@ -777,13 +777,10 @@ def _answer_matches(answer: str, correct_option_id: str, options: list[dict[str,
     return False
 
 
-async def _grade_objective(
-    session: AsyncSession,
-    practice: PracticeSession,
-    submission: PracticeSubmission,
-    questions: list[PracticeQuestion],
-    answers: dict[str, str],
-) -> PracticeResultResponse:
+def _objective_results(
+    questions: list[PracticeQuestion], answers: dict[str, str]
+) -> tuple[list[PracticeQuestionResult], int]:
+    """Grade choice-style questions locally; returns the rows and correct count."""
     question_results: list[PracticeQuestionResult] = []
     correct_count = 0
     for question in questions:
@@ -811,6 +808,17 @@ async def _grade_objective(
                 explanation=private.get("explanation"),
             )
         )
+    return question_results, correct_count
+
+
+async def _grade_objective(
+    session: AsyncSession,
+    practice: PracticeSession,
+    submission: PracticeSubmission,
+    questions: list[PracticeQuestion],
+    answers: dict[str, str],
+) -> PracticeResultResponse:
+    question_results, correct_count = _objective_results(questions, answers)
     total = len(questions)
     wrong_count = total - correct_count
     score = round(correct_count / total * 100, 2) if total else 0.0
@@ -964,7 +972,13 @@ async def submit_practice_session(
     session.add(
         _event(practice, "practice.submitted", metadata={"submission_id": str(submission.id)})
     )
-    if practice.practice_type in {"fill_blank", "reading"}:
+    subjective_questions = [
+        question for question in questions if question.question_type in {"translation", "writing"}
+    ]
+    graded_locally = practice.practice_type in {"fill_blank", "reading"} or (
+        practice.practice_type == "mixed" and not subjective_questions
+    )
+    if graded_locally:
         result = await _grade_objective(session, practice, submission, questions, answers)
         await record_practice_memory(
             session,
@@ -983,7 +997,14 @@ async def submit_practice_session(
             result=result,
         )
     await _create_subjective_grading_job(
-        session, pool, user, settings, practice, submission, questions, answers
+        session,
+        pool,
+        user,
+        settings,
+        practice,
+        submission,
+        subjective_questions or questions,
+        answers,
     )
     await session.commit()
     return PracticeSubmitResponse(
@@ -1399,6 +1420,20 @@ async def materialize_practice_grading(session: AsyncSession, job: AiJob) -> Non
                 suggestions=item.suggestions,
             )
         )
+    correct_count: int | None = None
+    if practice.practice_type == "mixed":
+        # Mixed sets grade choice questions locally and only send the written
+        # ones to the AI; merge both halves back into question order.
+        objective = [
+            question
+            for question in questions
+            if question.question_type in {"fill_blank", "reading"}
+        ]
+        objective_rows, correct_count = _objective_results(objective, submission.answers)
+        merged = {row.question_id: row for row in [*objective_rows, *question_results]}
+        question_results = [
+            merged[str(question.id)] for question in questions if str(question.id) in merged
+        ]
     score = (
         round(sum(item.score or 0 for item in question_results) / len(question_results), 2)
         if question_results
@@ -1411,7 +1446,7 @@ async def materialize_practice_grading(session: AsyncSession, job: AiJob) -> Non
         submission_id=submission.id,
         status="completed",
         score=score,
-        correct_count=0,
+        correct_count=correct_count if correct_count is not None else 0,
         total_questions=submission.total_questions,
         wrong_count=wrong_count,
         questions=question_results,
@@ -1421,6 +1456,7 @@ async def materialize_practice_grading(session: AsyncSession, job: AiJob) -> Non
     submission.status = "completed"
     submission.result = result.model_dump(mode="json")
     submission.score = score
+    submission.correct_count = correct_count
     submission.wrong_count = wrong_count
     submission.completed_at = submitted_at
     practice.status = "submitted"

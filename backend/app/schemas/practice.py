@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-PracticeType = Literal["fill_blank", "reading", "translation", "writing"]
+PracticeType = Literal["fill_blank", "reading", "translation", "writing", "mixed"]
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 PracticeSessionStatus = Literal["generating", "ready", "submitted", "failed", "cancelled"]
 PracticeSubmissionStatus = Literal["scoring", "completed", "failed"]
