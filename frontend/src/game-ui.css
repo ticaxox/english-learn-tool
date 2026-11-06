@@ -3973,10 +3973,66 @@
 
 .memory-rail-state { margin: 0; color: var(--ui-muted); font-size: 0.88rem; }
 
-/* Rating buttons are the main action after a flip: give them real weight. */
+/* Session progress lives in the rail, never on the card. */
+.memory-rail-progress { display: grid; gap: 6px; margin-top: 8px; }
+
+.memory-rail-count {
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.memory-rail-track {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ui-line);
+}
+
+.memory-rail-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ui-forest, #14573d);
+  transition: width 200ms ease;
+}
+
+/* Narrow screens: the rail turns into one horizontal strip above the card. */
 @media (max-width: 980px) {
   .personal-workspace .memory-workbench-grid.is-session { grid-template-columns: minmax(0, 1fr); }
-  .personal-workspace .memory-session-rail { position: static; order: -1; }
+
+  .personal-workspace .memory-session-rail {
+    position: static;
+    order: -1;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+  }
+
+  .memory-rail-head { display: flex; gap: 10px; align-items: center; min-width: 0; }
+  .memory-rail-remaining { display: none; }
+  .memory-rail-progress { display: flex; gap: 8px; align-items: center; margin: 0; }
+  .memory-rail-count { font-size: 0.76rem; white-space: nowrap; }
+  .memory-rail-track { width: 56px; }
+
+  .memory-rail-block { display: flex; gap: 6px; align-items: center; padding: 0; border: 0; }
+  .memory-rail-label { display: none; }
+  .memory-rail-clock { font-size: 0.74rem; white-space: nowrap; }
+
+  .memory-session-rail .memory-rail-end {
+    width: auto;
+    min-height: 32px;
+    margin-left: auto;
+    padding: 4px 12px;
+    font-size: 0.76rem;
+    white-space: nowrap;
+  }
+
+  .memory-rail-state { margin: 0; font-size: 0.74rem; }
 }
 
 .personal-workspace .memory-main-card .study-card { text-align: center; }
@@ -4716,7 +4772,6 @@
 
 /* More air between the study card and its rail; the card itself stays narrow. */
 .personal-workspace .memory-workbench-grid.is-session {
-  grid-template-columns: minmax(0, 1fr) 292px;
   gap: 48px;
 }
 

@@ -83,6 +83,15 @@ const dueRemaining = computed(() => {
   return Math.max(todayPlan.value.dueReviews.target - todayPlan.value.dueReviews.completed, 0)
 })
 
+/** Session position, from the server's summary rather than local counting. */
+const sessionTotal = computed(() => session.total.value ?? 0)
+const cardsDone = computed(() => Math.max(0, sessionTotal.value - (session.question.value?.remaining ?? 0)))
+const cardIndex = computed(() => Math.min(sessionTotal.value, cardsDone.value + 1))
+const progressPercent = computed(() => {
+  if (sessionTotal.value <= 0) return 0
+  return Math.round((cardsDone.value / sessionTotal.value) * 100)
+})
+
 const showModulePicker = computed(() => !session.hasSession.value && !session.finished.value)
 
 async function loadConfig(): Promise<void> {
@@ -467,6 +476,12 @@ watch(challengeModule, async (module, previous) => {
             本轮剩余 <strong>{{ session.question.value.remaining }}</strong> 张
           </p>
           <p v-else class="memory-rail-remaining">本轮已完成</p>
+          <div class="memory-rail-progress">
+            <span class="memory-rail-count">第 {{ cardIndex }} / {{ sessionTotal || '—' }} 张</span>
+            <span class="memory-rail-track" aria-hidden="true">
+              <span :style="{ width: `${progressPercent}%` }"></span>
+            </span>
+          </div>
         </div>
 
         <div class="memory-rail-block">

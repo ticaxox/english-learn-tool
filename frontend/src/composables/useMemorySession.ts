@@ -58,6 +58,8 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
   const finished = ref(false)
   const lastError = ref<unknown>(null)
   const lastRequestId = ref<string | null>(null)
+  /** Cards in this session; derived from the summary so the rail can show progress. */
+  const total = ref<number | null>(null)
 
   /** Timestamp the current card became visible, used for elapsed_ms only. */
   let cardShownAt = now()
@@ -103,11 +105,13 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
     module.value = target
 
     try {
+      total.value = null
       if (existingSessionId) {
         sessionId.value = existingSessionId
       } else {
         const summary = await api.start(target)
         sessionId.value = summary.sessionId
+        total.value = summary.completed + summary.remaining
         if (summary.remaining <= 0) {
           finished.value = true
           question.value = null
@@ -121,6 +125,9 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
         return
       }
       question.value = next
+      // A resumed session (e.g. from a challenge node) has no summary; the first
+      // card is then the whole queue, which is accurate for a fresh node session.
+      total.value ??= next.remaining
       beginCard()
     } catch (error) {
       lastError.value = error
@@ -254,6 +261,7 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
     feedback.value = null
     finished.value = false
     lastError.value = null
+    total.value = null
     clearPendingKey()
   }
 
@@ -268,6 +276,7 @@ export function useMemorySession(options: MemorySessionOptions = {}) {
     lastRequestId,
     hasSession,
     remaining,
+    total,
     open,
     refreshQuestion,
     recordReveal,

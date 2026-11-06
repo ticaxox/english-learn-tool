@@ -557,7 +557,7 @@ body {
   transform: rotate(1deg);
 }
 .personal-workspace .crumb-today-layout {
-  grid-template-columns: minmax(0, 1fr) 286px;
+  grid-template-columns: minmax(0, 1fr) 240px;
   gap: var(--ui-space-4);
 }
 .personal-workspace .crumb-trail-board {

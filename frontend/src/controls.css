@@ -2449,39 +2449,53 @@
   align-content: start;
 }
 
-/* Daily map rendered from the Markdown-like map description. */
+/* Daily map: a board-game trail of chunky stops; details open in a dialog. */
 .personal-workspace .challenge-dsl-map {
   display: grid;
-  gap: 16px;
-  padding: 20px 22px;
+  gap: 12px;
+  padding: 16px 20px 20px;
 }
 
 .challenge-dsl-map__head {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  align-items: flex-start;
+  gap: 10px 18px;
+  align-items: flex-end;
   justify-content: space-between;
 }
 
-.challenge-dsl-map__head h2 { margin: 0 0 4px; font-size: 1.3rem; }
+.challenge-dsl-summary { margin: 0 0 2px; font-size: 0.95rem; font-weight: 800; }
+.challenge-dsl-summary strong { font-size: 1.2rem; }
 .challenge-dsl-map__head .field-hint { margin: 0; }
 
-.challenge-dsl-legend { display: flex; gap: 8px; font-size: 0.76rem; font-weight: 800; }
-.challenge-dsl-legend span { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--ui-line-strong); }
-.challenge-dsl-legend .is-main { background: var(--ui-surface); }
-.challenge-dsl-legend .is-branch { background: var(--ui-surface-subtle, #fbf7ee); border-style: dashed; }
+.challenge-dsl-legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ui-muted);
+}
+
+.challenge-dsl-legend span { display: inline-flex; gap: 6px; align-items: center; }
+.challenge-dsl-legend i {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 50%;
+  background: #ebe4d7;
+}
+.challenge-dsl-legend .is-done i { border-color: #b07c12; background: #f7c85a; }
+.challenge-dsl-legend .is-open i { border-color: #2f7d4c; background: #5fb36a; }
 
 .challenge-dsl-track {
   overflow-x: auto;
-  padding: 6px 2px 12px;
+  padding: 4px 2px 8px;
 }
 
 .challenge-dsl-canvas {
   position: relative;
-  width: max-content;
-  min-width: 100%;
-  padding: 6px 0;
+  margin-inline: auto;
 }
 
 .challenge-dsl-links {
@@ -2492,88 +2506,92 @@
   pointer-events: none;
 }
 
+/* Path states: walked = solid gold; ahead = crumb dots; next leg = green dots. */
 .challenge-dsl-links path {
   fill: none;
-  stroke: var(--ui-line-strong);
-  stroke-width: 2;
+  stroke: #d9cbb3;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 1 15;
 }
 
-.challenge-dsl-links path.is-branch {
-  stroke-dasharray: 6 6;
-  opacity: 0.75;
-}
-
-.challenge-dsl-columns {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  gap: 64px;
-  align-items: center;
-  min-height: 220px;
-}
-
-.challenge-dsl-column {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  justify-content: center;
-  min-width: 220px;
-}
-
-.challenge-dsl-slot { width: 220px; }
+.challenge-dsl-links path.is-done { stroke: #e8b53e; stroke-dasharray: none; }
+.challenge-dsl-links path.is-next { stroke: #7fbf7f; stroke-dasharray: 1 12; }
+.challenge-dsl-links path.is-branch { stroke-width: 4; stroke-dasharray: 2 12; opacity: 0.9; }
 
 .personal-workspace .challenge-dsl-card {
+  position: absolute;
+  z-index: 2;
   display: grid;
-  gap: 5px;
-  width: 100%;
-  padding: 14px 16px;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 16px;
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  text-align: left;
-  box-shadow: 0 3px 0 rgb(59 42 26 / 10%);
+  padding: 0;
+  border: 3px solid #c9bda9;
+  border-radius: 50%;
+  place-items: center;
+  background: #ebe4d7;
+  color: #8d7f6a;
+  box-shadow: 0 6px 0 #cfc2ac;
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
 }
 
-.personal-workspace .challenge-dsl-card:hover { transform: translateY(-2px); }
+.personal-workspace .challenge-dsl-card:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #cfc2ac; }
+.personal-workspace .challenge-dsl-card:active { transform: translateY(3px); box-shadow: 0 2px 0 #cfc2ac; }
 
-.personal-workspace .challenge-dsl-card__type { color: var(--ui-muted); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; }
-.personal-workspace .challenge-dsl-card strong { font-size: 0.98rem; line-height: 1.35; }
-.personal-workspace .challenge-dsl-card__meta { color: var(--ui-muted); font-size: 0.74rem; font-weight: 700; }
+.personal-workspace .challenge-dsl-card.is-completed { border-color: #b07c12; background: #f7c85a; color: #4a3200; box-shadow: 0 6px 0 #c1881a; }
+.personal-workspace .challenge-dsl-card.is-completed:hover { box-shadow: 0 9px 0 #c1881a; }
+.personal-workspace .challenge-dsl-card.is-in_progress { border-color: #2f7d4c; background: #5fb36a; color: #fff; box-shadow: 0 6px 0 #2f7d4c; }
+.personal-workspace .challenge-dsl-card.is-in_progress:hover { box-shadow: 0 9px 0 #2f7d4c; }
+.personal-workspace .challenge-dsl-card.is-unlocked { border-color: #2f7d4c; background: #f2faf1; color: #2f7d4c; box-shadow: 0 6px 0 #9cc5ab; }
+.personal-workspace .challenge-dsl-card.is-unlocked:hover { box-shadow: 0 9px 0 #9cc5ab; }
+.personal-workspace .challenge-dsl-card.is-failed { border-color: #b3261e; background: #f6c0b8; color: #7a1a14; box-shadow: 0 6px 0 #b3261e; }
+.personal-workspace .challenge-dsl-card.is-locked { filter: saturate(0.65); }
 
-.personal-workspace .challenge-dsl-card.is-completed { border-color: #2f7d4c; background: #eaf6ec; }
-.personal-workspace .challenge-dsl-card.is-in_progress { border-color: #d08a1e; background: #fff6df; }
-.personal-workspace .challenge-dsl-card.is-failed { border-color: #b3261e; background: #fff0ed; }
-.personal-workspace .challenge-dsl-card.is-locked { opacity: 0.62; }
-.personal-workspace .challenge-dsl-card.is-branch { border-style: dashed; background: var(--ui-surface-subtle, #fbf7ee); }
+.personal-workspace .challenge-dsl-card.is-branch { border-style: dashed; }
+
+.personal-workspace .challenge-dsl-card svg { width: 24px; height: 24px; }
+.personal-workspace .challenge-dsl-card.is-boss svg { width: 34px; height: 34px; }
+.challenge-dsl-card__mark { font-size: 1.3rem; font-weight: 900; line-height: 1; }
+.personal-workspace .challenge-dsl-check {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The current stop breathes once per cycle instead of carrying a label. */
+.challenge-dsl-card.is-focus::after {
+  position: absolute;
+  inset: -8px;
+  border: 3px solid rgb(95 179 106 / 55%);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+  animation: challenge-focus-ring 2.4s ease-out infinite;
+}
+
+@keyframes challenge-focus-ring {
+  0% { transform: scale(0.92); opacity: 0.85; }
+  70% { transform: scale(1.14); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.challenge-dsl-guide {
+  position: absolute;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 0 rgb(59 42 26 / 12%));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .challenge-dsl-card { transition: none; }
+  .challenge-dsl-card.is-focus::after { animation: none; opacity: 0; }
+}
 
 @media (max-width: 720px) {
-  .personal-workspace .challenge-dsl-map { padding: 16px 14px; }
-  .challenge-dsl-columns { gap: 40px; }
-  .challenge-dsl-column, .challenge-dsl-slot { min-width: 190px; width: 190px; }
+  .personal-workspace .challenge-dsl-map { padding: 14px 12px 16px; }
 }
-
-/* Fit the daily map into the content column and keep its cards readable. */
-.personal-workspace .challenge-dsl-columns { gap: 30px; }
-.personal-workspace .challenge-dsl-column,
-.personal-workspace .challenge-dsl-slot { min-width: 190px; width: 190px; }
-
-.personal-workspace .challenge-dsl-card:hover {
-  background: inherit;
-  color: inherit;
-  transform: translateY(-2px);
-}
-
-@media (max-width: 720px) {
-  .personal-workspace .challenge-dsl-columns { gap: 24px; }
-  .personal-workspace .challenge-dsl-column,
-  .personal-workspace .challenge-dsl-slot { min-width: 168px; width: 168px; }
-}
-
-.personal-workspace .challenge-dsl-columns { align-items: flex-start; min-height: 0; }
-.personal-workspace .challenge-dsl-column { justify-content: flex-start; }
-.personal-workspace .challenge-dsl-column,
-.personal-workspace .challenge-dsl-slot { min-width: 186px; width: 186px; }
 
 /* AI quota groups never leave one row; narrow screens scroll the row. */
 @media (max-width: 900px) {
@@ -2604,9 +2622,6 @@
 
 .memory-main-card .study-card:not(.is-revealed) .study-card__word { text-align: center; }
 
-.personal-workspace .challenge-dsl-column,
-.personal-workspace .challenge-dsl-slot { min-width: 184px; width: 184px; }
-
 /* AI quota cards: label, usage and controls on one line. */
 .personal-workspace .ai-quota-row {
   display: flex;
@@ -2633,60 +2648,9 @@
 /* Wordbook shelf: drop the dashed rule above the book rows. */
 .personal-workspace .crumb-wordbooks .wordbook-toolbar { border-bottom: 0 !important; }
 
-/* Daily map nodes are round waypoints; details live in the dialog. */
-.personal-workspace .challenge-dsl-columns { gap: 90px; align-items: flex-start; }
-.personal-workspace .challenge-dsl-column { gap: 20px; min-width: 64px; width: 64px; }
-.personal-workspace .challenge-dsl-slot { width: 64px; }
-
-.personal-workspace .challenge-dsl-card {
-  display: grid;
-  width: 64px;
-  height: 64px;
-  padding: 0;
-  place-items: center;
-  border: 3px solid var(--ui-line-strong);
-  border-radius: 50%;
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  box-shadow: 0 4px 0 rgb(59 42 26 / 12%);
-}
-
-.personal-workspace .challenge-dsl-card__mark { font-size: 1.15rem; font-weight: 900; }
-.personal-workspace .challenge-dsl-card .visually-hidden { position: absolute; }
-
-.personal-workspace .challenge-dsl-card.is-branch { border-style: dashed; }
-.personal-workspace .challenge-dsl-card.is-completed { background: #eaf6ec; border-color: #2f7d4c; }
-.personal-workspace .challenge-dsl-card.is-in_progress { background: #fff6df; border-color: #d08a1e; }
-.personal-workspace .challenge-dsl-card.is-failed { background: #fff0ed; border-color: #b3261e; }
-.personal-workspace .challenge-dsl-card.is-locked { opacity: 0.55; }
-
-@media (max-width: 720px) {
-  .personal-workspace .challenge-dsl-columns { gap: 48px; }
-  .personal-workspace .challenge-dsl-column,
-  .personal-workspace .challenge-dsl-slot { width: 56px; min-width: 56px; }
-  .personal-workspace .challenge-dsl-card { width: 56px; height: 56px; }
-}
-
 @media (max-width: 900px) {
   .personal-workspace .ai-quota-list { grid-template-columns: repeat(3, minmax(240px, 1fr)); }
 }
-
-.personal-workspace .challenge-dsl-canvas { padding: 0; }
-.personal-workspace .challenge-dsl-columns { align-items: flex-start; min-height: 0; }
-
-@media (max-width: 720px) {
-  .personal-workspace .challenge-dsl-columns { gap: 90px; }
-  .personal-workspace .challenge-dsl-column,
-  .personal-workspace .challenge-dsl-slot { width: 64px; min-width: 64px; }
-  .personal-workspace .challenge-dsl-card { width: 64px; height: 64px; }
-}
-
-.personal-workspace .challenge-dsl-track { display: flex; justify-content: center; }
-@media (max-width: 720px) {
-  .personal-workspace .challenge-dsl-track { justify-content: flex-start; }
-}
-
-.personal-workspace .challenge-dsl-canvas { min-width: 0; }
 
 /* All memory card copy is vertically centred inside the surface. */
 .personal-workspace .memory-page .memory-main-card .study-card { align-content: center; }

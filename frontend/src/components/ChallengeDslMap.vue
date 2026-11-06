@@ -1,36 +1,30 @@
 <script setup lang="ts">
 /**
- * Render the server's Markdown-like map description as a clickable path.
+ * Render the server's Markdown-like map description as a board-game trail.
  *
- * Columns follow the longest path from the start; a branch sits below its
- * parent. Geometry comes from the same fixed node size and gaps the CSS uses,
+ * Every stop is one chunky token; the wave keeps the row from reading as a
+ * linear table. The path is drawn from the same fixed geometry the CSS uses,
  * so connectors stay attached without measuring the DOM.
  */
 import { computed } from 'vue'
+import AppIcon from './AppIcon.vue'
+import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, type ChallengeMapNode } from '../utils/challenge-map'
 
 const props = defineProps<{ dsl: string }>()
 const emit = defineEmits<{ select: [id: string] }>()
 
-const NODE = 64
-const COLUMN_GAP = 90
-const ROW_GAP = 20
+const NODE = 80
+const BOSS = 96
+const BRANCH = 60
+const COLUMN = 146
+const WAVE = 46
+const TOP = 58
+const BRANCH_GAP = 34
 
 const map = computed(() => parseChallengeMapDsl(props.dsl))
 
-const nodeMarks = computed(() => {
-  const marks = new Map<string, string>()
-  let order = 0
-  for (const node of map.value.nodes) {
-    if (node.optional) {
-      marks.set(node.id, '✦')
-      continue
-    }
-    order += 1
-    marks.set(node.id, node.typeLabel.includes('终点') ? '★' : String(order))
-  }
-  return marks
-})
+const isBoss = (node: ChallengeMapNode): boolean => node.typeLabel.includes('终点')
 
 const depths = computed(() => {
   const byId = new Map(map.value.nodes.map((node) => [node.id, node]))
@@ -53,93 +47,149 @@ const depths = computed(() => {
   return result
 })
 
-interface Column {
-  depth: number
-  nodes: ChallengeMapNode[]
-}
-
-const columns = computed<Column[]>(() => {
-  const grouped = new Map<number, ChallengeMapNode[]>()
+const columns = computed(() => {
+  const grouped = new Map<number, { main: ChallengeMapNode[]; branches: ChallengeMapNode[] }>()
   for (const node of map.value.nodes) {
     const depth = depths.value.get(node.id) ?? 0
-    const bucket = grouped.get(depth) ?? []
-    bucket.push(node)
+    const bucket = grouped.get(depth) ?? { main: [], branches: [] }
+    if (node.optional) bucket.branches.push(node)
+    else bucket.main.push(node)
     grouped.set(depth, bucket)
   }
   return [...grouped.entries()]
     .sort(([left], [right]) => left - right)
-    .map(([depth, nodes]) => ({
+    .map(([depth, bucket]) => ({
       depth,
-      nodes: [...nodes].sort((left, right) => {
-        if (left.optional !== right.optional) return left.optional ? 1 : -1
-        return left.title.localeCompare(right.title, 'zh-CN')
-      }),
+      main: bucket.main[0] ?? null,
+      branches: [...bucket.branches].sort((a, b) => a.title.localeCompare(b.title, 'zh-CN')),
     }))
 })
 
-interface Point {
+interface Placed {
+  node: ChallengeMapNode
   x: number
   y: number
-  column: number
+  size: number
 }
 
 const layout = computed(() => {
-  const points = new Map<string, Point>()
-  let maxRows = 1
-  columns.value.forEach((column, columnIndex) => {
-    maxRows = Math.max(maxRows, column.nodes.length)
-    column.nodes.forEach((node, rowIndex) => {
-      points.set(node.id, {
-        x: columnIndex * (NODE + COLUMN_GAP) + NODE / 2,
-        y: rowIndex * (NODE + ROW_GAP) + NODE / 2,
-        column: columnIndex,
-      })
-    })
-  })
-  return {
-    points,
-    width: Math.max(1, columns.value.length * NODE + (columns.value.length - 1) * COLUMN_GAP),
-    height: Math.max(NODE, maxRows * NODE + (maxRows - 1) * ROW_GAP),
+  const list: Placed[] = []
+  const byId = new Map<string, Placed>()
+  let columnIndex = 0
+  for (const column of columns.value) {
+    if (!column.main) continue
+    const node = column.main
+    const size = isBoss(node) ? BOSS : NODE
+    const centerX = columnIndex * COLUMN + BOSS / 2 + 10
+    const y = TOP + (columnIndex % 2) * WAVE
+    const placed = { node, x: centerX - size / 2, y, size }
+    list.push(placed)
+    byId.set(node.id, placed)
+    columnIndex += 1
   }
+  for (const column of columns.value) {
+    for (const branch of column.branches) {
+      const parentId = branch.previous.find((id) => byId.has(id))
+      const parent = parentId ? byId.get(parentId)! : null
+      if (!parent) continue
+      const centerX = parent.x + parent.size / 2
+      const y = parent.y + parent.size + BRANCH_GAP
+      const placed = { node: branch, x: centerX - BRANCH / 2, y, size: BRANCH }
+      list.push(placed)
+      byId.set(branch.id, placed)
+    }
+  }
+  const width = list.reduce((max, item) => Math.max(max, item.x + item.size), 0) + 10
+  const height = list.reduce((max, item) => Math.max(max, item.y + item.size), 0) + 18
+  return { list, byId, width: Math.max(width, 1), height: Math.max(height, 1) }
 })
 
-const edges = computed(() => {
-  const { points } = layout.value
-  const result: Array<{ id: string; path: string; optional: boolean }> = []
+/** The stop the learner should act on next. Locked stops only get the number. */
+const focusId = computed(() => {
+  const nodes = map.value.nodes.filter((node) => !node.optional)
+  return nodes.find((node) => node.statusKey === 'in_progress')?.id
+    ?? nodes.find((node) => node.statusKey === 'unlocked')?.id
+    ?? ''
+})
+
+const hasFocus = computed(() => Boolean(focusId.value))
+const guide = computed(() => {
+  const placed = focusId.value ? layout.value.byId.get(focusId.value) : null
+  if (!placed) return null
+  return { left: `${placed.x + placed.size - 10}px`, top: `${placed.y - 34}px` }
+})
+
+interface Edge {
+  id: string
+  path: string
+  classes: Record<string, boolean>
+}
+
+const edges = computed<Edge[]>(() => {
+  const result: Edge[] = []
   for (const node of map.value.nodes) {
-    const child = points.get(node.id)
+    const child = layout.value.byId.get(node.id)
     if (!child) continue
     for (const parentId of node.previous) {
-      const parent = points.get(parentId)
+      const parent = layout.value.byId.get(parentId)
       if (!parent) continue
-      let path: string
-      if (parent.column === child.column) {
-        const y1 = parent.y + NODE / 2
-        const y2 = child.y - NODE / 2
-        path = `M ${parent.x} ${y1} C ${parent.x} ${y1 + 20}, ${child.x} ${y2 - 20}, ${child.x} ${y2}`
-      } else {
-        const x1 = parent.x + NODE / 2
-        const x2 = child.x - NODE / 2
-        const bend = Math.max(24, (x2 - x1) / 2)
-        path = `M ${x1} ${parent.y} C ${x1 + bend} ${parent.y}, ${x2 - bend} ${child.y}, ${x2} ${child.y}`
-      }
-      result.push({ id: `${parentId}->${node.id}`, path, optional: node.optional })
+      const path = node.optional
+        ? `M ${parent.x + parent.size / 2} ${parent.y + parent.size} C ${parent.x + parent.size / 2} ${parent.y + parent.size + BRANCH_GAP / 2}, ${child.x + child.size / 2} ${child.y - BRANCH_GAP / 2}, ${child.x + child.size / 2} ${child.y}`
+        : `M ${parent.x + parent.size} ${parent.y + parent.size / 2} C ${parent.x + parent.size + 46} ${parent.y + parent.size / 2}, ${child.x - 46} ${child.y + child.size / 2}, ${child.x} ${child.y + child.size / 2}`
+      result.push({
+        id: `${parentId}->${node.id}`,
+        path,
+        classes: {
+          'is-done': node.statusKey === 'completed',
+          // The leg leaving the current stop is the one the learner takes next.
+          'is-next': parentId === focusId.value,
+          'is-branch': node.optional,
+        },
+      })
     }
   }
   return result
 })
+
+const orderById = computed(() => {
+  const result = new Map<string, number>()
+  let order = 0
+  for (const node of map.value.nodes) {
+    if (node.optional) continue
+    order += 1
+    result.set(node.id, order)
+  }
+  return result
+})
+
+const remaining = computed(() => map.value.nodes.filter((node) => node.statusKey !== 'completed').length)
+const minutesLeft = computed(() => map.value.nodes
+  .filter((node) => node.statusKey !== 'completed')
+  .reduce((total, node) => total + node.minutes, 0))
+
+function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
+  return {
+    [`is-${node.statusKey}`]: true,
+    'is-boss': isBoss(node),
+    'is-branch': node.optional,
+    'is-focus': node.id === focusId.value && hasFocus.value,
+  }
+}
 </script>
 
 <template>
   <section class="challenge-dsl-map panel" aria-label="闯关地图">
     <header class="challenge-dsl-map__head">
       <div>
-        <p class="eyebrow">闯关地图</p>
-        <p class="field-hint">按连线顺序解锁；虚线支线可自由选择。</p>
+        <p class="challenge-dsl-summary">
+          还剩 <strong>{{ remaining }}</strong> 关<template v-if="minutesLeft > 0"> · 约 {{ minutesLeft }} 分钟</template>
+        </p>
+        <p class="field-hint">点一下节点，看这一关的说明和开始按钮。</p>
       </div>
-      <div class="challenge-dsl-legend" aria-label="地图图例">
-        <span class="is-main">主线</span>
-        <span class="is-branch">支线</span>
+      <div class="challenge-dsl-legend" aria-hidden="true">
+        <span class="is-done"><i></i>已完成</span>
+        <span class="is-open"><i></i>进行中</span>
+        <span class="is-locked"><i></i>未解锁</span>
       </div>
     </header>
 
@@ -159,27 +209,37 @@ const edges = computed(() => {
             v-for="edge in edges"
             :key="edge.id"
             :d="edge.path"
-            :class="{ 'is-branch': edge.optional }"
+            :class="edge.classes"
           />
         </svg>
 
-        <div class="challenge-dsl-columns">
-          <div v-for="column in columns" :key="column.depth" class="challenge-dsl-column">
-            <div v-for="node in column.nodes" :key="node.id" class="challenge-dsl-slot">
-              <DivButton
-                type="button"
-                class="challenge-dsl-card"
-                :class="[`is-${node.statusKey}`, { 'is-branch': node.optional }]"
-                :title="node.title"
-                :aria-label="`${node.title}，${node.typeLabel}，${node.questionType}，${node.statusLabel}，${node.minutes} 分钟`"
-                @click="emit('select', node.id)"
-              >
-                <span class="challenge-dsl-card__mark">{{ nodeMarks.get(node.id) }}</span>
-                <span class="visually-hidden">{{ node.title }}</span>
-              </DivButton>
-            </div>
-          </div>
-        </div>
+        <DivButton
+          v-for="placed in layout.list"
+          :key="placed.node.id"
+          type="button"
+          class="challenge-dsl-card"
+          :class="cardClasses(placed.node)"
+          :style="{ left: `${placed.x}px`, top: `${placed.y}px`, width: `${placed.size}px`, height: `${placed.size}px` }"
+          :title="placed.node.title"
+          :aria-label="`${placed.node.title}，${placed.node.typeLabel}，${placed.node.questionType}，${placed.node.statusLabel}，${placed.node.minutes} 分钟`"
+          @click="emit('select', placed.node.id)"
+        >
+          <svg
+            v-if="placed.node.statusKey === 'completed'"
+            class="challenge-dsl-check"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="m5 12.5 4.5 4.5L19 7.5" />
+          </svg>
+          <AppIcon v-else-if="isBoss(placed.node)" name="star" />
+          <AppIcon v-else-if="placed.node.optional" name="spark" />
+          <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
+          <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
+          <span class="visually-hidden">{{ placed.node.title }}</span>
+        </DivButton>
+
+        <CrumboMark v-if="guide" size="small" class="challenge-dsl-guide" :style="guide" />
       </div>
     </div>
   </section>
