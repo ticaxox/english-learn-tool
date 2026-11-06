@@ -251,10 +251,7 @@ onMounted(() => {
 
     <section class="workspace-card wordbooks-panel crumb-bookshelf">
       <div class="wordbook-toolbar">
-        <div class="wordbook-toolbar-title">
-          <strong>个人词书</strong>
-          <span>{{ personalBookCount }} 本</span>
-        </div>
+        <h2 class="wordbook-toolbar-heading">{{ filterActive ? '搜索结果' : '词书书架' }}</h2>
 
         <label class="wordbook-search">
           <span class="sr-only">搜索全部个人词书</span>
@@ -265,6 +262,8 @@ onMounted(() => {
             autocomplete="off"
           />
         </label>
+
+        <span class="count-pill">{{ filterActive ? `${filteredBooks.length} 个结果` : `${personalBookCount} 本` }}</span>
 
         <DivButton class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
           {{ loading ? '读取中…' : '刷新' }}
@@ -292,11 +291,7 @@ onMounted(() => {
           <p>换一个关键词，或清除搜索后查看全部个人词书。</p>
         </div>
 
-        <section v-if="filteredBooks.length" class="wordbook-group" aria-labelledby="private-books-heading">
-          <div class="wordbook-group-heading">
-            <h2 id="private-books-heading">{{ filterActive ? '搜索结果' : '词书书架' }}</h2>
-            <span class="count-pill">{{ filterActive ? `${filteredBooks.length} 个结果` : `${personalBookCount} 本` }}</span>
-          </div>
+        <section v-if="filteredBooks.length" class="wordbook-group" aria-label="词书书架">
           <div class="wordbook-grid">
             <WordbookShelfCard
               v-for="(book, index) in visibleBooks"

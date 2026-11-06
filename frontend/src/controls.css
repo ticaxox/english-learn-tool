@@ -2953,3 +2953,109 @@
   .personal-workspace .crumb-task-row { grid-template-columns: 34px minmax(0, 1fr) 16px; }
   .personal-workspace .crumb-task-bar { display: none; }
 }
+
+/* Today board: left column is the route, right column is the day's status. */
+.personal-workspace .crumb-today-main { display: grid; gap: 14px; align-content: start; }
+.personal-workspace .crumb-today-board .crumb-today-header { padding-bottom: 14px; }
+
+.personal-workspace .crumb-today-board .crumb-today-side {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.personal-workspace .crumb-today-side .crumb-hero-status {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding-bottom: 4px;
+}
+
+/* Merged blocks: no dashed seams inside the left route or the right status. */
+.personal-workspace .crumb-today-board .crumb-book-note,
+.personal-workspace .crumb-today-board .crumb-today-side .study-stats {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.personal-workspace .crumb-today-board .crumb-trail-footer {
+  border-top: 0 !important;
+  background: transparent !important;
+}
+
+/* Wordbooks: the shelf heading joins the search row; no rule above the list. */
+.personal-workspace .wordbook-toolbar {
+  grid-template-columns: auto minmax(220px, 1fr) auto auto;
+  border-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .wordbook-toolbar { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .personal-workspace .wordbook-toolbar-heading { grid-column: 1 / -1; }
+  .personal-workspace .wordbook-toolbar .wordbook-search { width: 100%; }
+}
+
+.personal-workspace .wordbook-toolbar-heading {
+  margin: 0;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.personal-workspace .wordbook-toolbar .wordbook-search { flex: 1 1 320px; margin: 0; }
+.personal-workspace .wordbook-toolbar .count-pill { margin-left: 4px; }
+
+/* Mobile settings: one control width, right-aligned, estimate on its own line. */
+@media (max-width: 640px) {
+  .personal-workspace .settings-goal-grid .field,
+  .personal-workspace .settings-pair > .field--inline {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .personal-workspace .settings-goal-grid .field > label,
+  .personal-workspace .settings-pair > .field--inline > label { flex: none; }
+
+  .personal-workspace .settings-goal-grid .field > input,
+  .personal-workspace .settings-pair > .field--inline > select,
+  .personal-workspace .settings-pair > .field--inline > input {
+    width: 200px;
+    max-width: 200px;
+    justify-self: end;
+  }
+
+  .personal-workspace .settings-goal-grid .field-inline-note {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    width: 200px;
+    justify-self: end;
+  }
+
+  .personal-workspace .settings-goal-grid .field-inline-note input {
+    width: 200px;
+    max-width: 200px;
+  }
+}
+
+/* Mobile AI config: provider actions share one row; quotas stack. */
+@media (max-width: 720px) {
+  .personal-workspace .personal-ai-provider { gap: 10px 12px; }
+  .personal-workspace .personal-ai-provider__main { flex: 1 1 100%; }
+  .personal-workspace .personal-ai-provider__priority { order: 2; }
+  .personal-workspace .personal-ai-provider__actions {
+    order: 3;
+    width: auto;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .personal-workspace .ai-quota-list {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+}

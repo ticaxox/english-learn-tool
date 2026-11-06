@@ -180,6 +180,8 @@ onMounted(() => {
 
     <template v-else-if="plan">
       <section class="crumb-today-board">
+      <div class="crumb-today-layout">
+        <div class="crumb-today-main">
       <header class="crumb-today-header">
         <div class="crumb-today-intro">
           <div class="crumb-mascot-lockup">
@@ -191,24 +193,8 @@ onMounted(() => {
           </div>
           <p class="crumb-today-note">{{ heroNote }}</p>
         </div>
-        <div class="crumb-hero-status">
-          <GoalRing
-            v-if="newWordsTask"
-            :value="newWordsTask.completed"
-            :max="newWordsTask.target"
-            :size="124"
-            :stroke="12"
-            caption="新词"
-            class="crumb-hero-ring"
-          />
-          <div class="crumb-today-stamp">
-            <span>{{ plan.localDate }}</span>
-            <strong>{{ statusLabel }}</strong>
-          </div>
-        </div>
       </header>
 
-      <div class="crumb-today-layout">
         <section class="crumb-trail-board">
           <header class="crumb-trail-board-head">
             <div>
@@ -254,8 +240,25 @@ onMounted(() => {
             </RouterLink>
           </footer>
         </section>
+        </div>
 
         <aside class="crumb-today-side">
+          <div class="crumb-hero-status">
+            <GoalRing
+              v-if="newWordsTask"
+              :value="newWordsTask.completed"
+              :max="newWordsTask.target"
+              :size="124"
+              :stroke="12"
+              caption="新词"
+              class="crumb-hero-ring"
+            />
+            <div class="crumb-today-stamp">
+              <span>{{ plan.localDate }}</span>
+              <strong>{{ statusLabel }}</strong>
+            </div>
+          </div>
+
           <section class="crumb-book-note">
             <span class="crumb-eyebrow">当前词书</span>
             <div class="crumb-book-note-body">

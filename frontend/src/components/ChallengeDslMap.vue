@@ -161,9 +161,13 @@ const verticalLayout = computed<Layout>(() => {
     for (const branch of column.branches) {
       const parent = branchParent(branch, byId)
       if (!parent) continue
-      const preferred = parent.x + parent.size / 2 + 78
-      const centerX = Math.min(preferred, V_WIDTH - BRANCH / 2 - 4)
-      const placed = { node: branch, x: centerX - BRANCH / 2, y: parent.y + 16, size: BRANCH }
+      const centerX = parent.x + parent.size / 2
+      const placed = {
+        node: branch,
+        x: centerX - BRANCH / 2,
+        y: parent.y + parent.size + 24,
+        size: BRANCH,
+      }
       list.push(placed)
       byId.set(branch.id, placed)
     }
@@ -210,7 +214,7 @@ const edges = computed<Edge[]>(() => {
       let path: string
       if (vertical.value) {
         path = node.optional
-          ? `M ${parent.x + parent.size} ${parentCenterY} C ${parent.x + parent.size + 34} ${parentCenterY}, ${child.x - 34} ${childCenterY}, ${child.x} ${childCenterY}`
+          ? `M ${parentCenterX} ${parent.y + parent.size} C ${parentCenterX} ${parent.y + parent.size + 20}, ${childCenterX} ${child.y - 20}, ${childCenterX} ${child.y}`
           : `M ${parentCenterX} ${parent.y + parent.size} C ${parentCenterX} ${parent.y + parent.size + 44}, ${childCenterX} ${child.y - 44}, ${childCenterX} ${child.y}`
       } else {
         path = node.optional
