@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.models.ai import AiJob, AiJobEvent, AiPrompt, AiProvider, AiUsageLedger
+from app.models.coach import CoachAttachment
 from app.models.identity import User
 from app.schemas.ai import AiJobStatusResponse
 from app.schemas.ai_tasks import AiJobCreateRequest
@@ -27,6 +28,7 @@ from app.services.ai_security import ProviderHttpClient, ProviderRequestError
 from app.services.ai_usage import resolved_quota_limits
 from app.services.ai_validation import output_schema, repair_prompt, validate_task_output
 from app.services.auth import utcnow
+from app.services.coach_uploads import read_attachment
 from app.services.learning import local_date_for
 from app.services.wordbook_queue import WORDBOOK_QUEUE_NAME
 
@@ -496,6 +498,7 @@ async def _call_with_provider(
     schema: dict[str, Any],
     repair_text: str | None = None,
     deadline: float | None = None,
+    images: list[tuple[str, bytes]] | None = None,
 ) -> str:
     cipher = ApiKeyCipher(settings.secret_encryption_key.get_secret_value())
     api_key = cipher.decrypt(provider.api_key_ciphertext)
@@ -530,6 +533,7 @@ async def _call_with_provider(
                 user_content=user_content,
                 schema_name=schema_name,
                 schema=schema,
+                images=images,
             )
         except ProviderRequestError as exc:
             last_error = exc
@@ -538,6 +542,36 @@ async def _call_with_provider(
             await asyncio.sleep(settings.ai_provider_retry_backoff_seconds * (2**attempt))
     assert last_error is not None
     raise last_error
+
+
+async def _coach_images(
+    session: AsyncSession, settings: Settings, job: AiJob
+) -> list[tuple[str, bytes]]:
+    """Load the images a coach message carries, in upload order."""
+    if job.task_type != "coach_reply":
+        return []
+    attachment_ids = job.input_context.get("attachment_ids") or []
+    if not attachment_ids:
+        return []
+    rows = list(
+        (
+            await session.scalars(
+                select(CoachAttachment)
+                .where(
+                    CoachAttachment.id.in_(attachment_ids),
+                    CoachAttachment.user_id == job.user_id,
+                )
+                .order_by(CoachAttachment.created_at.asc())
+            )
+        ).all()
+    )
+    images: list[tuple[str, bytes]] = []
+    for row in rows:
+        try:
+            images.append((row.content_type, read_attachment(settings, row)))
+        except AppError:
+            continue
+    return images
 
 
 async def generate_structured(
@@ -558,6 +592,7 @@ async def generate_structured(
     repairs = 0
     last_error: AiGenerationError | None = None
     deadline = time.monotonic() + settings.ai_generation_budget_seconds
+    images = await _coach_images(session, settings, job)
 
     def remaining() -> int:
         return int(deadline - time.monotonic())
@@ -588,6 +623,7 @@ async def generate_structured(
                     schema_name=job.task_type,
                     schema=schema,
                     deadline=deadline,
+                    images=images,
                 )
                 chosen = provider
                 break

@@ -24,6 +24,7 @@ x-backend-environment: &backend-environment
   DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
   DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-5}
   WORDBOOK_STORAGE_DIR: /app/var/wordbooks
+  COACH_UPLOAD_DIR: /app/var/coach
   PYTHONDONTWRITEBYTECODE: "1"
   PYTHONUNBUFFERED: "1"
 
@@ -40,6 +41,11 @@ x-wordbook-volume: &wordbook-volume
   type: volume
   source: wordbook-data
   target: /app/var/wordbooks
+
+x-coach-volume: &coach-volume
+  type: volume
+  source: coach-data
+  target: /app/var/coach
 
 services:
   postgres:
@@ -91,6 +97,7 @@ services:
     environment: *backend-environment
     volumes:
       - *wordbook-volume
+      - *coach-volume
     command:
       - uvicorn
       - app.main:app
@@ -125,6 +132,7 @@ services:
     environment: *backend-environment
     volumes:
       - *wordbook-volume
+      - *coach-volume
     command: ["arq", "app.workers.worker.WorkerSettings"]
     depends_on:
       redis:
@@ -145,6 +153,7 @@ services:
     environment: *backend-environment
     volumes:
       - *wordbook-volume
+      - *coach-volume
     command: ["arq", "app.workers.scheduler.SchedulerSettings"]
     depends_on:
       redis:
@@ -200,3 +209,4 @@ volumes:
   postgres-data:
   redis-data:
   wordbook-data:
+  coach-data:

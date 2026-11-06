@@ -7,6 +7,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from arq.connections import ArqRedis
+from fastapi import UploadFile
 from pydantic import ValidationError
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,7 @@ from app.core.errors import AppError
 from app.models.ai import AiJob, AiJobEvent, AiUsageLedger
 from app.models.coach import (
     CoachActionReceipt,
+    CoachAttachment,
     CoachContextSnapshot,
     CoachConversation,
     CoachMessage,
@@ -36,6 +38,7 @@ from app.schemas.coach import (
     CoachAcceptedResponse,
     CoachActionReceiptResponse,
     CoachActivateWordbookParameters,
+    CoachAttachmentResponse,
     CoachConversationCreate,
     CoachConversationListResponse,
     CoachConversationPatch,
@@ -65,6 +68,11 @@ from app.services.ai_usage import resolved_quota_limits
 from app.services.ai_validation import sanitize_untrusted_json
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
+from app.services.coach_uploads import (
+    delete_attachment_files,
+    read_attachment,
+    save_coach_attachment,
+)
 from app.services.learning import local_date_for
 from app.services.notifications import notify_ai_action
 from app.services.practice import _event as practice_event
@@ -106,8 +114,19 @@ def _receipt_response(receipt: CoachActionReceipt) -> CoachActionReceiptResponse
     )
 
 
+def _attachment_response(attachment: CoachAttachment) -> CoachAttachmentResponse:
+    return CoachAttachmentResponse(
+        id=attachment.id,
+        filename=attachment.filename,
+        content_type=attachment.content_type,
+        size_bytes=attachment.size_bytes,
+    )
+
+
 def _message_response(
-    message: CoachMessage, actions: list[CoachActionReceipt] | None = None
+    message: CoachMessage,
+    actions: list[CoachActionReceipt] | None = None,
+    attachments: list[CoachAttachment] | None = None,
 ) -> CoachMessageResponse:
     return CoachMessageResponse(
         id=message.id,
@@ -121,6 +140,7 @@ def _message_response(
         created_at=message.created_at,
         completed_at=message.completed_at,
         actions=[_receipt_response(item) for item in (actions or [])],
+        attachments=[_attachment_response(item) for item in (attachments or [])],
     )
 
 
@@ -144,11 +164,36 @@ async def _actions_for_messages(
     return result
 
 
+async def _attachments_for_messages(
+    session: AsyncSession, messages: list[CoachMessage]
+) -> dict[UUID, list[CoachAttachment]]:
+    if not messages:
+        return {}
+    rows = list(
+        (
+            await session.scalars(
+                select(CoachAttachment)
+                .where(CoachAttachment.message_id.in_([message.id for message in messages]))
+                .order_by(CoachAttachment.created_at.asc())
+            )
+        ).all()
+    )
+    result: dict[UUID, list[CoachAttachment]] = {}
+    for row in rows:
+        if row.message_id is not None:
+            result.setdefault(row.message_id, []).append(row)
+    return result
+
+
 async def _message_responses(
     session: AsyncSession, messages: list[CoachMessage]
 ) -> list[CoachMessageResponse]:
     actions = await _actions_for_messages(session, messages)
-    return [_message_response(message, actions.get(message.id, [])) for message in messages]
+    attachments = await _attachments_for_messages(session, messages)
+    return [
+        _message_response(message, actions.get(message.id, []), attachments.get(message.id, []))
+        for message in messages
+    ]
 
 
 def _encode_cursor(value: str, identifier: UUID) -> str:
@@ -262,13 +307,29 @@ async def rename_conversation(
 
 
 async def delete_or_clear_conversation(
-    session: AsyncSession, user: User, conversation_id: UUID, *, clear_only: bool
+    session: AsyncSession,
+    settings: Settings,
+    user: User,
+    conversation_id: UUID,
+    *,
+    clear_only: bool,
 ) -> None:
     conversation = await _load_conversation(session, user, conversation_id, lock=True)
+    attachments = list(
+        (
+            await session.scalars(
+                select(CoachAttachment).where(CoachAttachment.conversation_id == conversation.id)
+            )
+        ).all()
+    )
     if not clear_only:
         await session.delete(conversation)
         await session.commit()
+        delete_attachment_files(settings, attachments)
         return
+    await session.execute(
+        delete(CoachAttachment).where(CoachAttachment.conversation_id == conversation.id)
+    )
     await session.execute(
         delete(CoachActionReceipt).where(CoachActionReceipt.conversation_id == conversation.id)
     )
@@ -288,6 +349,7 @@ async def delete_or_clear_conversation(
     conversation.message_count = 0
     conversation.last_message_at = None
     await session.commit()
+    delete_attachment_files(settings, attachments)
 
 
 async def list_messages(
@@ -336,7 +398,8 @@ async def list_messages(
 async def get_message(session: AsyncSession, user: User, message_id: UUID) -> CoachMessageResponse:
     message = await _load_message(session, user, message_id)
     actions = await _actions_for_messages(session, [message])
-    return _message_response(message, actions.get(message.id, []))
+    attachments = await _attachments_for_messages(session, [message])
+    return _message_response(message, actions.get(message.id, []), attachments.get(message.id, []))
 
 
 async def get_action_receipt(
@@ -355,6 +418,41 @@ async def get_action_receipt(
             message="The coach action was not found.",
         )
     return _receipt_response(receipt)
+
+
+async def add_coach_attachment(
+    session: AsyncSession,
+    settings: Settings,
+    user: User,
+    conversation_id: UUID,
+    upload: UploadFile,
+) -> CoachAttachmentResponse:
+    conversation = await _load_conversation(session, user, conversation_id)
+    attachment = await save_coach_attachment(settings, user, conversation, upload)
+    session.add(attachment)
+    await session.commit()
+    return _attachment_response(attachment)
+
+
+async def get_coach_attachment_file(
+    session: AsyncSession,
+    settings: Settings,
+    user: User,
+    attachment_id: UUID,
+) -> tuple[CoachAttachment, bytes]:
+    attachment = await session.scalar(
+        select(CoachAttachment).where(
+            CoachAttachment.id == attachment_id,
+            CoachAttachment.user_id == user.id,
+        )
+    )
+    if attachment is None:
+        raise AppError(
+            status_code=404,
+            code="COACH_ATTACHMENT_NOT_FOUND",
+            message="The image was not found.",
+        )
+    return attachment, read_attachment(settings, attachment)
 
 
 async def create_coach_message(
@@ -376,6 +474,33 @@ async def create_coach_message(
     content = payload.content.strip()
     context = sanitize_untrusted_json(payload.page_context)
     conversation = await _load_conversation(session, user, conversation_id, lock=True)
+    attachments: list[CoachAttachment] = []
+    if payload.attachment_ids:
+        attachment_ids = list(dict.fromkeys(payload.attachment_ids))
+        if len(attachment_ids) > settings.coach_upload_max_per_message:
+            raise AppError(
+                status_code=422,
+                code="COACH_ATTACHMENT_LIMIT",
+                message="A message can carry at most four images.",
+            )
+        attachments = list(
+            (
+                await session.scalars(
+                    select(CoachAttachment).where(
+                        CoachAttachment.id.in_(attachment_ids),
+                        CoachAttachment.user_id == user.id,
+                        CoachAttachment.conversation_id == conversation.id,
+                        CoachAttachment.message_id.is_(None),
+                    )
+                )
+            ).all()
+        )
+        if len(attachments) != len(attachment_ids):
+            raise AppError(
+                status_code=422,
+                code="COACH_ATTACHMENT_INVALID",
+                message="One or more images are missing or already attached.",
+            )
     existing_user = await session.scalar(
         select(CoachMessage).where(
             CoachMessage.user_id == user.id,
@@ -463,6 +588,11 @@ async def create_coach_message(
         sequence=last_sequence + 2,
     )
     session.add_all([user_message, assistant])
+    if attachments:
+        # The id is generated at flush time, so link only after it exists.
+        await session.flush()
+        for attachment in attachments:
+            attachment.message_id = user_message.id
     session.add(
         CoachContextSnapshot(
             conversation_id=conversation.id,
@@ -477,7 +607,8 @@ async def create_coach_message(
     request = CoachReplyRequest(
         task_type="coach_reply",
         context=CoachReplyContext(
-            user_message=content,
+            user_message=content or "（用户发来一张图片）",
+            attachment_ids=[attachment.id for attachment in attachments],
             learning_summary={"page_context": context},
             history=history,
             memory_document=memory_document,
@@ -825,6 +956,52 @@ async def _apply_action(
             message="The coach action is not allowed.",
         )
     return before, after, []
+
+
+MCP_ACTION_TYPES = (
+    "adjust_daily_plan",
+    "start_practice",
+    "activate_wordbook",
+    "mark_review_focus",
+)
+
+
+async def apply_coach_tool(
+    session: AsyncSession,
+    pool: ArqRedis,
+    user: User,
+    settings: Settings,
+    action_type: str,
+    parameters: dict[str, Any],
+) -> dict[str, Any]:
+    """Apply one whitelisted action for an external MCP caller.
+
+    The coach loop keeps its receipt/undo bookkeeping; this path applies the same
+    action through the same executor and reports the before/after state.
+    """
+    if action_type not in MCP_ACTION_TYPES:
+        raise AppError(
+            status_code=422,
+            code="COACH_ACTION_NOT_ALLOWED",
+            message="The coach action is not exposed as a tool.",
+        )
+    action = CoachAction(
+        action_type=action_type,
+        parameters=parameters,
+        summary=f"MCP 工具调用：{action_type}",
+    )
+    try:
+        before, after, _ = await _apply_action(
+            session, pool, user, settings, action, receipt_id=uuid4()
+        )
+    except ValidationError as exc:
+        raise AppError(
+            status_code=422,
+            code="COACH_ACTION_PARAMETERS_INVALID",
+            message="The action parameters were invalid.",
+        ) from exc
+    await session.commit()
+    return {"action_type": action_type, "before": before, "after": after}
 
 
 async def materialize_coach_success(
@@ -1257,6 +1434,20 @@ async def cleanup_coach_data(
 ) -> dict[str, int]:
     current = now or utcnow()
     cutoff = current - timedelta(days=settings.coach_message_retention_days)
+    stale_messages = select(CoachMessage.id).where(
+        CoachMessage.created_at < cutoff,
+        CoachMessage.status.in_(("completed", "failed")),
+    )
+    stale_attachments = list(
+        (
+            await session.scalars(
+                select(CoachAttachment).where(CoachAttachment.message_id.in_(stale_messages))
+            )
+        ).all()
+    )
+    await session.execute(
+        delete(CoachAttachment).where(CoachAttachment.message_id.in_(stale_messages))
+    )
     message_result = await session.execute(
         delete(CoachMessage).where(
             CoachMessage.created_at < cutoff,
@@ -1291,7 +1482,9 @@ async def cleanup_coach_data(
             )
         )
     await session.commit()
+    delete_attachment_files(settings, stale_attachments)
     return {
         "messages": int(message_result.rowcount or 0),
         "contexts": int(context_result.rowcount or 0),
+        "attachments": len(stale_attachments),
     }

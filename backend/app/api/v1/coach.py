@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Query, Request, Response, status
+from fastapi import APIRouter, Depends, File, Header, Query, Request, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +19,7 @@ from app.models.coach import CoachMessage, CoachStreamEvent
 from app.schemas.coach import (
     CoachAcceptedResponse,
     CoachActionReceiptResponse,
+    CoachAttachmentResponse,
     CoachConversationCreate,
     CoachConversationListResponse,
     CoachConversationPatch,
@@ -32,10 +33,12 @@ from app.schemas.coach import (
 from app.schemas.common import ErrorResponse
 from app.services.auth import AuthContext
 from app.services.coach import (
+    add_coach_attachment,
     create_coach_message,
     create_conversation,
     delete_or_clear_conversation,
     get_action_receipt,
+    get_coach_attachment_file,
     get_message,
     list_conversations,
     list_messages,
@@ -163,13 +166,62 @@ async def rename_conversation_endpoint(
     summary="Delete or clear an own coach conversation",
 )
 async def delete_conversation_endpoint(
+    request: Request,
     conversation_id: UUID,
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
     clear: Annotated[bool, Query()] = False,
 ) -> Response:
-    await delete_or_clear_conversation(session, context.user, conversation_id, clear_only=clear)
+    await delete_or_clear_conversation(
+        session,
+        request.app.state.settings,
+        context.user,
+        conversation_id,
+        clear_only=clear,
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/conversations/{conversation_id}/attachments",
+    response_model=CoachAttachmentResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses=_RESPONSES,
+    summary="Upload an image for a coach message",
+)
+async def upload_attachment_endpoint(
+    request: Request,
+    conversation_id: UUID,
+    file: Annotated[UploadFile, File()],
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> CoachAttachmentResponse:
+    settings: Settings = request.app.state.settings
+    return await add_coach_attachment(
+        session, settings, context.user, conversation_id, file
+    )
+
+
+@router.get(
+    "/attachments/{attachment_id}",
+    responses=_RESPONSES,
+    summary="Read an own coach image",
+)
+async def read_attachment_endpoint(
+    request: Request,
+    attachment_id: UUID,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> Response:
+    settings: Settings = request.app.state.settings
+    attachment, payload = await get_coach_attachment_file(
+        session, settings, context.user, attachment_id
+    )
+    return Response(
+        content=payload,
+        media_type=attachment.content_type,
+        headers={"Cache-Control": "private, no-store"},
+    )
 
 
 @router.get(

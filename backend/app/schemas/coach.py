@@ -63,16 +63,20 @@ class CoachConversationListResponse(BaseModel):
 
 
 class CoachMessageCreate(_StrictModel):
-    content: str = Field(min_length=1, max_length=8_000)
+    content: str = Field(max_length=8_000)
     page_context: dict[str, Any] = Field(default_factory=dict)
+    attachment_ids: list[UUID] = Field(default_factory=list, max_length=4)
 
     @field_validator("content")
     @classmethod
-    def content_not_blank(cls, value: str) -> str:
-        normalized = value.strip()
-        if not normalized:
+    def content_trimmed(cls, value: str) -> str:
+        return value.strip()
+
+    @model_validator(mode="after")
+    def content_or_attachment(self) -> CoachMessageCreate:
+        if not self.content and not self.attachment_ids:
             raise ValueError("content must not be blank")
-        return normalized
+        return self
 
     @field_validator("page_context")
     @classmethod
@@ -108,6 +112,13 @@ class CoachActionReceiptResponse(BaseModel):
     undone_at: datetime | None = None
 
 
+class CoachAttachmentResponse(BaseModel):
+    id: UUID
+    filename: str
+    content_type: str
+    size_bytes: int
+
+
 class CoachMessageResponse(BaseModel):
     id: UUID
     conversation_id: UUID
@@ -120,6 +131,7 @@ class CoachMessageResponse(BaseModel):
     created_at: datetime
     completed_at: datetime | None = None
     actions: list[CoachActionReceiptResponse] = Field(default_factory=list)
+    attachments: list[CoachAttachmentResponse] = Field(default_factory=list)
 
 
 class CoachMessageListResponse(BaseModel):

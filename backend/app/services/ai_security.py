@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import ipaddress
 import socket
 from dataclasses import dataclass
@@ -283,12 +284,32 @@ class ProviderHttpClient:
         user_content: str,
         schema_name: str,
         schema: dict[str, object],
+        images: list[tuple[str, bytes]] | None = None,
     ) -> str:
+        # OpenAI-compatible vision: the user turn becomes a content array with
+        # the text first and one image_url part per attachment.
+        user_message: object = user_content
+        if images:
+            user_message = [
+                {"type": "text", "text": user_content},
+                *[
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": (
+                                f"data:{content_type};base64,"
+                                f"{base64.b64encode(payload).decode()}"
+                            )
+                        },
+                    }
+                    for content_type, payload in images
+                ],
+            ]
         request_body: dict[str, object] = {
             "model": model_id,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_content},
+                {"role": "user", "content": user_message},
             ],
             "temperature": 0.2,
             "max_tokens": self.settings.ai_provider_max_tokens,

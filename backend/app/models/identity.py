@@ -11,6 +11,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    UniqueConstraint,
     func,
     text,
 )
@@ -229,3 +230,26 @@ class ImportPreview(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class PersonalAccessToken(Base):
+    """Bearer token for external MCP clients; only the SHA-256 digest is stored."""
+
+    __tablename__ = "personal_access_tokens"
+    __table_args__ = (
+        UniqueConstraint("token_hash", name="uq_personal_access_tokens_hash"),
+        Index("ix_personal_access_tokens_user_created", "user_id", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    token_prefix: Mapped[str] = mapped_column(String(16), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

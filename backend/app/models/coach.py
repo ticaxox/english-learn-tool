@@ -194,3 +194,32 @@ class CoachActionReceipt(Base):
     )
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     undone_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class CoachAttachment(Base):
+    __tablename__ = "coach_attachments"
+    __table_args__ = (
+        CheckConstraint("size_bytes > 0", name="size_positive"),
+        Index("ix_coach_attachments_conversation_created", "conversation_id", "created_at"),
+        Index("ix_coach_attachments_user_created", "user_id", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    conversation_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("coach_conversations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    message_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("coach_messages.id", ondelete="CASCADE")
+    )
+    filename: Mapped[str] = mapped_column(String(200), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    storage_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

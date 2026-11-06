@@ -25,7 +25,7 @@ COPY --from=builder /app/.venv /app/.venv
 COPY --chown=app:app backend/ /app/
 COPY --chown=app:app deploy/health/ /app/deploy/health/
 
-RUN install -d -o app -g app -m 0750 /app/var/wordbooks
+RUN install -d -o app -g app -m 0750 /app/var/wordbooks \n    && install -d -o app -g app -m 0750 /app/var/coach
 
 USER 10001:10001
 EXPOSE 8000

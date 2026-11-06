@@ -95,6 +95,9 @@ class Settings(BaseSettings):
     coach_context_ttl_days: int = Field(default=7, ge=1, le=30)
     coach_context_expire_hours: int = Field(default=24, ge=1, le=720)
     coach_action_undo_hours: int = Field(default=24, ge=1, le=168)
+    coach_upload_dir: str = "/app/var/coach"
+    coach_upload_max_bytes: int = Field(default=5 * 1024 * 1024, ge=64 * 1024, le=10 * 1024 * 1024)
+    coach_upload_max_per_message: int = Field(default=4, ge=1, le=4)
     ai_daily_question_generation: int = Field(default=20, ge=1, le=500)
     ai_daily_subjective_grading: int = Field(default=50, ge=1, le=1000)
 
@@ -164,6 +167,18 @@ class Settings(BaseSettings):
         ):
             raise ValueError(
                 "WORDBOOK_STORAGE_DIR must be an absolute path shared by API and workers"
+            )
+        return normalized
+
+    @field_validator("coach_upload_dir")
+    @classmethod
+    def validate_coach_upload_dir(cls, value: str) -> str:
+        normalized = value.strip()
+        if not (
+            PurePosixPath(normalized).is_absolute() or PureWindowsPath(normalized).is_absolute()
+        ):
+            raise ValueError(
+                "COACH_UPLOAD_DIR must be an absolute path shared by API and workers"
             )
         return normalized
 

@@ -78,6 +78,7 @@ class CoachHistoryTurn(StrictModel):
 
 class CoachReplyContext(StrictModel):
     user_message: str = Field(min_length=1, max_length=8_000)
+    attachment_ids: list[UUID] = Field(default_factory=list, max_length=4)
     learning_summary: dict[str, Any] = Field(default_factory=dict)
     history: list[CoachHistoryTurn] = Field(default_factory=list, max_length=20)
     memory_document: str | None = Field(default=None, max_length=6_000)
