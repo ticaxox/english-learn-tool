@@ -12,7 +12,7 @@
 import { apiClient } from './client'
 import { ContractError } from './errors'
 
-export type PracticeType = 'fill_blank' | 'reading' | 'translation' | 'writing'
+export type PracticeType = 'fill_blank' | 'reading' | 'translation' | 'writing' | 'mixed'
 export type PracticeSource = 'today_new' | 'today_review' | 'memory_mistakes' | 'whole_book' | 'difficulty'
 export type PracticeDifficulty = 'CET4' | 'CET6' | 'POSTGRAD' | 'IELTS' | 'TOEFL'
 export type PracticeSessionStatus = 'generating' | 'ready' | 'submitted' | 'failed' | 'cancelled'
@@ -682,6 +682,7 @@ export const PRACTICE_TYPE_LABELS: Record<PracticeType, string> = {
   reading: '阅读',
   translation: '翻译',
   writing: '作文',
+  mixed: '随机',
 }
 
 export const PRACTICE_SOURCE_LABELS: Record<PracticeSource, string> = {

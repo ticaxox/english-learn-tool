@@ -56,7 +56,7 @@ describe('T-FE-017 workspace depth', () => {
   it('shows all three memory styles with enabled and disabled states', () => {
     const memory = source('../views/MemoryPracticeView.vue')
     expect(memory).toContain('`memory-action-card--${module}`')
-    expect(memory).toContain('memory-action-status')
+    expect(memory).toContain('is-disabled')
     expect(memory).toContain(':disabled="!activeModules.includes(module)"')
   })
 

@@ -120,13 +120,17 @@ describe('practice views', () => {
     expect(router.currentRoute.value.query.session).toBeTruthy()
   })
 
-  it('has no random practice type and falls back to fill-blank', async () => {
-    const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=random')
+  it('offers a mixed type that keeps several question types in one set', async () => {
+    const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=mixed')
     const labels = wrapper.findAll('.practice-type-pill').map((pill) => pill.text())
-    expect(labels).not.toContain('随机')
+    expect(labels).toContain('随机')
+    expect(labels).toHaveLength(5)
     const active = wrapper.findAll('.practice-type-pill.is-active').map((pill) => pill.text())
-    expect(active).toHaveLength(1)
-    expect(active[0]).not.toBe('随机')
+    expect(active).toEqual(['随机'])
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!
+    expect(input.practiceType).toBe('mixed')
   })
 
   it('renders a choice question without any answer or explanation fields', () => {

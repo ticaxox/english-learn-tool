@@ -158,7 +158,6 @@ describe('learning surfaces with the frozen contract', () => {
     const disabled = wrapper.findAll('.module-card[aria-disabled="true"]')
     expect(disabled).toHaveLength(1)
     expect(disabled[0].text()).toContain('选择')
-    expect(disabled[0].text()).toContain('未启用')
   })
 
   it('shows the real empty mistakes state', async () => {

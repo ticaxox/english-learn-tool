@@ -17,11 +17,13 @@ const router = useRouter()
 const route = useRoute()
 const activeSessionId = computed(() => (typeof route.query.session === 'string' && route.query.session ? route.query.session : null))
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
-function queryType(value: unknown): PracticeSelection | null {
-  return typeof value === 'string' && practiceTypes.includes(value as PracticeType) ? value as PracticeType : null
+const practiceTypeOptions: PracticeType[] = [...practiceTypes, 'mixed']
+function queryType(value: unknown): PracticeType | null {
+  return typeof value === 'string' && practiceTypeOptions.includes(value as PracticeType)
+    ? (value as PracticeType)
+    : null
 }
-type PracticeSelection = PracticeType
-const practiceType = ref<PracticeSelection>(queryType(route.query.type) ?? 'fill_blank')
+const practiceType = ref<PracticeType>(queryType(route.query.type) ?? 'fill_blank')
 const source = ref<PracticeSource>('today_new')
 const count = ref(practiceType.value === 'writing' ? 1 : 5)
 const difficulty = ref<PracticeDifficulty>('CET6')
@@ -90,23 +92,24 @@ function signature(input: PracticeCreateInput): string {
   return JSON.stringify(input)
 }
 
-function selectType(next: PracticeSelection): void {
+function selectType(next: PracticeType): void {
   practiceType.value = next
   count.value = next === 'writing' ? 1 : 5
 }
 
-const typeIcons: Record<PracticeSelection, 'book' | 'cards' | 'arrow' | 'spark'> = {
+const typeIcons: Record<PracticeType, 'book' | 'cards' | 'arrow' | 'spark' | 'star'> = {
   fill_blank: 'book',
   reading: 'cards',
   translation: 'arrow',
   writing: 'spark',
+  mixed: 'star',
 }
 
 const typeOptions = computed(() =>
-  practiceTypes.map((type) => ({ key: type as PracticeSelection, label: PRACTICE_TYPE_LABELS[type] })),
+  practiceTypeOptions.map((type) => ({ key: type, label: PRACTICE_TYPE_LABELS[type] })),
 )
 
-function chooseType(next: PracticeSelection): void {
+function chooseType(next: PracticeType): void {
   selectType(next)
   void router.replace({ query: { ...route.query, type: next } })
 }
@@ -231,6 +234,7 @@ onMounted(() => {
               <span class="practice-type-pill__label">{{ option.label }}</span>
             </DivButton>
           </div>
+          <p v-if="practiceType === 'mixed'" class="field-hint">同一组题里混合多种题型，按整组题量生成。</p>
           <div class="practice-form-grid">
             <div class="field">
               <label for="practice-source">来源</label>

@@ -381,13 +381,6 @@ watch(challengeModule, async (module, previous) => {
               <span class="memory-action-icon"><AppIcon :name="module === 'spelling' ? 'star' : module === 'choice' ? 'cards' : 'book'" /></span>
               <span class="memory-action-copy">
                 <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
-                <span class="module-card__hint">
-                  {{ module === 'flashcard' ? '看词回忆释义' : module === 'choice' ? '选出正确释义' : '按提示拼写' }}
-                </span>
-              </span>
-              <span class="memory-action-status" :class="{ 'is-disabled': !activeModules.includes(module) }">
-                <strong>{{ activeModules.includes(module) ? (dueRemaining === null ? '读取中' : `${dueRemaining} 个待复习`) : '未启用' }}</strong>
-                <small>{{ activeModules.includes(module) ? '可开始' : '到设置开启' }}</small>
               </span>
               <AppIcon :name="activeModules.includes(module) ? 'arrow' : 'lock'" />
             </DivButton>

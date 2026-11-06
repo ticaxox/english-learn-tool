@@ -54,6 +54,7 @@ const typeDescriptions: Record<PracticeType, string> = {
   reading: '文章理解',
   translation: '英译中 / 中译英',
   writing: 'AI 评分作文',
+  mixed: '多种题型混合',
 }
 
 watch(practiceType, (type) => {

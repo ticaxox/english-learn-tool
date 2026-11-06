@@ -37,6 +37,7 @@ const practiceIcons: Record<PracticeType, TabIcon> = {
   reading: 'cards',
   translation: 'arrow',
   writing: 'spark',
+  mixed: 'star',
 }
 
 const tabs = computed<Array<{ id: string; label: string; icon: TabIcon }>>(() => (
