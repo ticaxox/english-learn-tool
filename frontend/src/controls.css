@@ -3059,3 +3059,9 @@
     padding-bottom: 0;
   }
 }
+
+/* Compact shelf rows carry no rule above the wordbook name. */
+.personal-workspace .wordbook-card--compact .wordbook-card-body {
+  border-top: 0 !important;
+  background: transparent !important;
+}
