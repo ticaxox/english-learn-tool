@@ -1,23 +1,36 @@
 <script setup lang="ts">
 /**
- * Render the server's Markdown-like map description as a clickable graph.
+ * Render the server's Markdown-like map description as a clickable path.
  *
- * Columns follow the longest path from the start; branches stack under the
- * node they split from. Curved SVG links mirror the `前置 / 分支` lines, so the
- * map stays driven by the text instead of a hard-coded station strip.
+ * Columns follow the longest path from the start; a branch sits below its
+ * parent. Geometry comes from the same fixed node size and gaps the CSS uses,
+ * so connectors stay attached without measuring the DOM.
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { parseChallengeMapDsl, type ChallengeMapNode } from '../utils/challenge-map'
 
 const props = defineProps<{ dsl: string }>()
 const emit = defineEmits<{ select: [id: string] }>()
 
+const NODE = 64
+const COLUMN_GAP = 90
+const ROW_GAP = 20
+
 const map = computed(() => parseChallengeMapDsl(props.dsl))
-const track = ref<HTMLElement | null>(null)
-const slots = ref<Record<string, HTMLElement | null>>({})
-const edges = ref<Array<{ id: string; path: string; optional: boolean }>>([])
-const canvasSize = ref({ width: 0, height: 0 })
-let observer: ResizeObserver | null = null
+
+const nodeMarks = computed(() => {
+  const marks = new Map<string, string>()
+  let order = 0
+  for (const node of map.value.nodes) {
+    if (node.optional) {
+      marks.set(node.id, '✦')
+      continue
+    }
+    order += 1
+    marks.set(node.id, node.typeLabel.includes('终点') ? '★' : String(order))
+  }
+  return marks
+})
 
 const depths = computed(() => {
   const byId = new Map(map.value.nodes.map((node) => [node.id, node]))
@@ -32,7 +45,6 @@ const depths = computed(() => {
     const parentDepth = parents.length
       ? Math.max(...parents.map((parent) => resolve(parent, trail)))
       : -1
-    // A branch sits in the same column as its parent, below it.
     const depth = parents.length ? (node.optional ? parentDepth : parentDepth + 1) : 0
     result.set(node.id, depth)
     return depth
@@ -65,70 +77,56 @@ const columns = computed<Column[]>(() => {
     }))
 })
 
-function setSlot(id: string, element: unknown): void {
-  slots.value[id] = (element as HTMLElement | null) ?? null
+interface Point {
+  x: number
+  y: number
+  column: number
 }
 
-async function drawEdges(): Promise<void> {
-  await nextTick()
-  const container = track.value
-  if (!container) return
-  const containerRect = container.getBoundingClientRect()
-  canvasSize.value = { width: container.scrollWidth, height: container.scrollHeight }
-  const nextEdges: Array<{ id: string; path: string; optional: boolean }> = []
-  for (const node of map.value.nodes) {
-    const child = slots.value[node.id]
-    if (!child) continue
-    const childRect = child.getBoundingClientRect()
-    for (const parentId of node.previous) {
-      const parent = slots.value[parentId]
-      if (!parent) continue
-      const parentRect = parent.getBoundingClientRect()
-      const sameColumn = Math.abs(parentRect.left - childRect.left) < 8
-      let path: string
-      if (sameColumn) {
-        const x = parentRect.left + parentRect.width / 2 - containerRect.left
-        const y1 = parentRect.bottom - containerRect.top
-        const y2 = childRect.top - containerRect.top
-        path = `M ${x} ${y1} C ${x} ${y1 + 20}, ${x} ${y2 - 20}, ${x} ${y2}`
-      } else {
-        const x1 = parentRect.right - containerRect.left
-        const y1 = parentRect.top + parentRect.height / 2 - containerRect.top
-        const x2 = childRect.left - containerRect.left
-        const y2 = childRect.top + childRect.height / 2 - containerRect.top
-        const bend = Math.max(28, (x2 - x1) / 2)
-        path = `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`
-      }
-      nextEdges.push({
-        id: `${parentId}->${node.id}`,
-        path,
-        optional: node.optional,
+const layout = computed(() => {
+  const points = new Map<string, Point>()
+  let maxRows = 1
+  columns.value.forEach((column, columnIndex) => {
+    maxRows = Math.max(maxRows, column.nodes.length)
+    column.nodes.forEach((node, rowIndex) => {
+      points.set(node.id, {
+        x: columnIndex * (NODE + COLUMN_GAP) + NODE / 2,
+        y: rowIndex * (NODE + ROW_GAP) + NODE / 2,
+        column: columnIndex,
       })
-    }
+    })
+  })
+  return {
+    points,
+    width: Math.max(1, columns.value.length * NODE + (columns.value.length - 1) * COLUMN_GAP),
+    height: Math.max(NODE, maxRows * NODE + (maxRows - 1) * ROW_GAP),
   }
-  edges.value = nextEdges
-}
-
-watch(
-  () => props.dsl,
-  () => {
-    slots.value = {}
-    void drawEdges()
-  },
-)
-
-onMounted(() => {
-  void drawEdges()
-  if (typeof ResizeObserver !== 'undefined') {
-    observer = new ResizeObserver(() => void drawEdges())
-    if (track.value) observer.observe(track.value)
-  }
-  window.addEventListener('resize', drawEdges)
 })
 
-onBeforeUnmount(() => {
-  observer?.disconnect()
-  window.removeEventListener('resize', drawEdges)
+const edges = computed(() => {
+  const { points } = layout.value
+  const result: Array<{ id: string; path: string; optional: boolean }> = []
+  for (const node of map.value.nodes) {
+    const child = points.get(node.id)
+    if (!child) continue
+    for (const parentId of node.previous) {
+      const parent = points.get(parentId)
+      if (!parent) continue
+      let path: string
+      if (parent.column === child.column) {
+        const y1 = parent.y + NODE / 2
+        const y2 = child.y - NODE / 2
+        path = `M ${parent.x} ${y1} C ${parent.x} ${y1 + 20}, ${child.x} ${y2 - 20}, ${child.x} ${y2}`
+      } else {
+        const x1 = parent.x + NODE / 2
+        const x2 = child.x - NODE / 2
+        const bend = Math.max(24, (x2 - x1) / 2)
+        path = `M ${x1} ${parent.y} C ${x1 + bend} ${parent.y}, ${x2 - bend} ${child.y}, ${x2} ${child.y}`
+      }
+      result.push({ id: `${parentId}->${node.id}`, path, optional: node.optional })
+    }
+  }
+  return result
 })
 </script>
 
@@ -145,13 +143,16 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <div ref="track" class="challenge-dsl-track" :style="{ '--map-columns': columns.length }">
-      <div class="challenge-dsl-canvas">
+    <div class="challenge-dsl-track">
+      <div
+        class="challenge-dsl-canvas"
+        :style="{ width: `${layout.width}px`, height: `${layout.height}px` }"
+      >
         <svg
           class="challenge-dsl-links"
-          :width="canvasSize.width"
-          :height="canvasSize.height"
-          :viewBox="`0 0 ${canvasSize.width || 1} ${canvasSize.height || 1}`"
+          :width="layout.width"
+          :height="layout.height"
+          :viewBox="`0 0 ${layout.width} ${layout.height}`"
           aria-hidden="true"
         >
           <path
@@ -164,22 +165,17 @@ onBeforeUnmount(() => {
 
         <div class="challenge-dsl-columns">
           <div v-for="column in columns" :key="column.depth" class="challenge-dsl-column">
-            <div
-              v-for="node in column.nodes"
-              :key="node.id"
-              :ref="(element) => setSlot(node.id, element)"
-              class="challenge-dsl-slot"
-            >
+            <div v-for="node in column.nodes" :key="node.id" class="challenge-dsl-slot">
               <DivButton
                 type="button"
                 class="challenge-dsl-card"
                 :class="[`is-${node.statusKey}`, { 'is-branch': node.optional }]"
-                :aria-label="`${node.title}，${node.typeLabel}，${node.statusLabel}`"
+                :title="node.title"
+                :aria-label="`${node.title}，${node.typeLabel}，${node.questionType}，${node.statusLabel}，${node.minutes} 分钟`"
                 @click="emit('select', node.id)"
               >
-                <span class="challenge-dsl-card__type">{{ node.typeLabel }} · {{ node.questionType }}</span>
-                <strong>{{ node.title }}</strong>
-                <span class="challenge-dsl-card__meta">{{ node.minutes }} 分钟 · {{ node.statusLabel }}</span>
+                <span class="challenge-dsl-card__mark">{{ nodeMarks.get(node.id) }}</span>
+                <span class="visually-hidden">{{ node.title }}</span>
               </DivButton>
             </div>
           </div>

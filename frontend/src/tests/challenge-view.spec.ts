@@ -358,7 +358,7 @@ describe('challenge view', () => {
     const { wrapper } = await mountView()
     await wrapper.findAll('[role="button"]').find((button) => button.text() === '刷新地图')!.trigger('click')
     await flushPromises()
-    expect(wrapper.text()).toContain('已完成')
+    expect(wrapper.findAll('.challenge-dsl-card')[0].attributes('aria-label')).toContain('已完成')
     expect(wrapper.text()).toContain('主线 1 / 3')
 
     challengeMocks.getTodayChallenge.mockRejectedValueOnce(new ApiError(429, 'AI_QUOTA_EXHAUSTED', 'Quota exhausted.', null, 'challenge-429', true))

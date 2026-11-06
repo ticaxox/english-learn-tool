@@ -2606,3 +2606,84 @@
 
 .personal-workspace .challenge-dsl-column,
 .personal-workspace .challenge-dsl-slot { min-width: 184px; width: 184px; }
+
+/* AI quota cards: label, usage and controls on one line. */
+.personal-workspace .ai-quota-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+}
+
+.personal-workspace .ai-quota-row .ai-quota-row__copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  gap: 6px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.personal-workspace .ai-quota-row .ai-quota-row__copy strong { font-size: 0.86rem; white-space: nowrap; }
+.personal-workspace .ai-quota-row .ai-quota-row__copy small { font-size: 0.66rem; white-space: nowrap; }
+.personal-workspace .ai-quota-row .ai-quota-row__controls { flex: 0 0 auto; }
+.personal-workspace .ai-quota-row .ai-quota-row__input { flex: 0 0 76px; width: 76px; }
+
+/* Wordbook shelf: drop the dashed rule above the book rows. */
+.personal-workspace .crumb-wordbooks .wordbook-toolbar { border-bottom: 0 !important; }
+
+/* Daily map nodes are round waypoints; details live in the dialog. */
+.personal-workspace .challenge-dsl-columns { gap: 90px; align-items: flex-start; }
+.personal-workspace .challenge-dsl-column { gap: 20px; min-width: 64px; width: 64px; }
+.personal-workspace .challenge-dsl-slot { width: 64px; }
+
+.personal-workspace .challenge-dsl-card {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  place-items: center;
+  border: 3px solid var(--ui-line-strong);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  box-shadow: 0 4px 0 rgb(59 42 26 / 12%);
+}
+
+.personal-workspace .challenge-dsl-card__mark { font-size: 1.15rem; font-weight: 900; }
+.personal-workspace .challenge-dsl-card .visually-hidden { position: absolute; }
+
+.personal-workspace .challenge-dsl-card.is-branch { border-style: dashed; }
+.personal-workspace .challenge-dsl-card.is-completed { background: #eaf6ec; border-color: #2f7d4c; }
+.personal-workspace .challenge-dsl-card.is-in_progress { background: #fff6df; border-color: #d08a1e; }
+.personal-workspace .challenge-dsl-card.is-failed { background: #fff0ed; border-color: #b3261e; }
+.personal-workspace .challenge-dsl-card.is-locked { opacity: 0.55; }
+
+@media (max-width: 720px) {
+  .personal-workspace .challenge-dsl-columns { gap: 48px; }
+  .personal-workspace .challenge-dsl-column,
+  .personal-workspace .challenge-dsl-slot { width: 56px; min-width: 56px; }
+  .personal-workspace .challenge-dsl-card { width: 56px; height: 56px; }
+}
+
+@media (max-width: 900px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: repeat(3, minmax(240px, 1fr)); }
+}
+
+.personal-workspace .challenge-dsl-canvas { padding: 0; }
+.personal-workspace .challenge-dsl-columns { align-items: flex-start; min-height: 0; }
+
+@media (max-width: 720px) {
+  .personal-workspace .challenge-dsl-columns { gap: 90px; }
+  .personal-workspace .challenge-dsl-column,
+  .personal-workspace .challenge-dsl-slot { width: 64px; min-width: 64px; }
+  .personal-workspace .challenge-dsl-card { width: 64px; height: 64px; }
+}
+
+.personal-workspace .challenge-dsl-track { display: flex; justify-content: center; }
+@media (max-width: 720px) {
+  .personal-workspace .challenge-dsl-track { justify-content: flex-start; }
+}
+
+.personal-workspace .challenge-dsl-canvas { min-width: 0; }
