@@ -6,7 +6,7 @@
  * linear table. The path is drawn from the same fixed geometry the CSS uses,
  * so connectors stay attached without measuring the DOM.
  */
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, type ChallengeMapNode } from '../utils/challenge-map'
@@ -21,6 +21,31 @@ const COLUMN = 146
 const WAVE = 46
 const TOP = 58
 const BRANCH_GAP = 34
+
+// Portrait phones and tablets get a vertical trail; wide screens a horizontal one.
+const VERTICAL_QUERY = '(max-width: 819px)'
+const V_ROW = 124
+const V_AMPLITUDE = 44
+const V_TOP = 44
+const V_WIDTH = 320
+
+const vertical = ref(false)
+let query: MediaQueryList | null = null
+
+function syncOrientation(event?: MediaQueryListEvent): void {
+  vertical.value = event ? event.matches : Boolean(query?.matches)
+}
+
+onMounted(() => {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+  query = window.matchMedia(VERTICAL_QUERY)
+  syncOrientation()
+  query.addEventListener?.('change', syncOrientation)
+})
+
+onUnmounted(() => {
+  query?.removeEventListener?.('change', syncOrientation)
+})
 
 const map = computed(() => parseChallengeMapDsl(props.dsl))
 
@@ -72,7 +97,20 @@ interface Placed {
   size: number
 }
 
-const layout = computed(() => {
+interface Layout {
+  list: Placed[]
+  byId: Map<string, Placed>
+  width: number
+  height: number
+}
+
+function branchParent(branch: ChallengeMapNode, byId: Map<string, Placed>): Placed | null {
+  const parentId = branch.previous.find((id) => byId.has(id))
+  return parentId ? byId.get(parentId)! : null
+}
+
+/** Wide screens: one row that gently rises and falls. */
+const horizontalLayout = computed<Layout>(() => {
   const list: Placed[] = []
   const byId = new Map<string, Placed>()
   let columnIndex = 0
@@ -89,8 +127,7 @@ const layout = computed(() => {
   }
   for (const column of columns.value) {
     for (const branch of column.branches) {
-      const parentId = branch.previous.find((id) => byId.has(id))
-      const parent = parentId ? byId.get(parentId)! : null
+      const parent = branchParent(branch, byId)
       if (!parent) continue
       const centerX = parent.x + parent.size / 2
       const y = parent.y + parent.size + BRANCH_GAP
@@ -103,6 +140,39 @@ const layout = computed(() => {
   const height = list.reduce((max, item) => Math.max(max, item.y + item.size), 0) + 18
   return { list, byId, width: Math.max(width, 1), height: Math.max(height, 1) }
 })
+
+/** Portrait: the same trail read top to bottom, like a level path in a game. */
+const verticalLayout = computed<Layout>(() => {
+  const list: Placed[] = []
+  const byId = new Map<string, Placed>()
+  let index = 0
+  for (const column of columns.value) {
+    if (!column.main) continue
+    const node = column.main
+    const size = isBoss(node) ? BOSS : NODE
+    const centerX = V_WIDTH / 2 + (index % 2 === 0 ? -V_AMPLITUDE : V_AMPLITUDE)
+    const y = V_TOP + index * V_ROW
+    const placed = { node, x: centerX - size / 2, y, size }
+    list.push(placed)
+    byId.set(node.id, placed)
+    index += 1
+  }
+  for (const column of columns.value) {
+    for (const branch of column.branches) {
+      const parent = branchParent(branch, byId)
+      if (!parent) continue
+      const preferred = parent.x + parent.size / 2 + 78
+      const centerX = Math.min(preferred, V_WIDTH - BRANCH / 2 - 4)
+      const placed = { node: branch, x: centerX - BRANCH / 2, y: parent.y + 16, size: BRANCH }
+      list.push(placed)
+      byId.set(branch.id, placed)
+    }
+  }
+  const height = list.reduce((max, item) => Math.max(max, item.y + item.size), 0) + 30
+  return { list, byId, width: V_WIDTH, height: Math.max(height, 1) }
+})
+
+const layout = computed(() => (vertical.value ? verticalLayout.value : horizontalLayout.value))
 
 /** The stop the learner should act on next. Locked stops only get the number. */
 const focusId = computed(() => {
@@ -133,14 +203,26 @@ const edges = computed<Edge[]>(() => {
     for (const parentId of node.previous) {
       const parent = layout.value.byId.get(parentId)
       if (!parent) continue
-      const path = node.optional
-        ? `M ${parent.x + parent.size / 2} ${parent.y + parent.size} C ${parent.x + parent.size / 2} ${parent.y + parent.size + BRANCH_GAP / 2}, ${child.x + child.size / 2} ${child.y - BRANCH_GAP / 2}, ${child.x + child.size / 2} ${child.y}`
-        : `M ${parent.x + parent.size} ${parent.y + parent.size / 2} C ${parent.x + parent.size + 46} ${parent.y + parent.size / 2}, ${child.x - 46} ${child.y + child.size / 2}, ${child.x} ${child.y + child.size / 2}`
+      const parentCenterX = parent.x + parent.size / 2
+      const parentCenterY = parent.y + parent.size / 2
+      const childCenterX = child.x + child.size / 2
+      const childCenterY = child.y + child.size / 2
+      let path: string
+      if (vertical.value) {
+        path = node.optional
+          ? `M ${parent.x + parent.size} ${parentCenterY} C ${parent.x + parent.size + 34} ${parentCenterY}, ${child.x - 34} ${childCenterY}, ${child.x} ${childCenterY}`
+          : `M ${parentCenterX} ${parent.y + parent.size} C ${parentCenterX} ${parent.y + parent.size + 44}, ${childCenterX} ${child.y - 44}, ${childCenterX} ${child.y}`
+      } else {
+        path = node.optional
+          ? `M ${parentCenterX} ${parent.y + parent.size} C ${parentCenterX} ${parent.y + parent.size + BRANCH_GAP / 2}, ${childCenterX} ${child.y - BRANCH_GAP / 2}, ${childCenterX} ${child.y}`
+          : `M ${parent.x + parent.size} ${parentCenterY} C ${parent.x + parent.size + 46} ${parentCenterY}, ${child.x - 46} ${childCenterY}, ${child.x} ${childCenterY}`
+      }
       result.push({
         id: `${parentId}->${node.id}`,
         path,
         classes: {
-          'is-done': node.statusKey === 'completed',
+          // A leg already walked is gold even when its far stop is still open.
+          'is-done': node.statusKey === 'completed' || parent.node.statusKey === 'completed',
           // The leg leaving the current stop is the one the learner takes next.
           'is-next': parentId === focusId.value,
           'is-branch': node.optional,

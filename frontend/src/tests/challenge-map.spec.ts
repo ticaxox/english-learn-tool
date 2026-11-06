@@ -1,4 +1,7 @@
+import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { describe, expect, it } from 'vitest'
+import ChallengeDslMap from '../components/ChallengeDslMap.vue'
 import { parseChallengeMapDsl } from '../utils/challenge-map'
 
 const DSL = `# 今日闯关
@@ -65,5 +68,43 @@ describe('challenge map DSL', () => {
 `)
     expect(map.nodes[3].optional).toBe(true)
     expect(map.nodes[3].previous).toEqual(['boss-1'])
+  })
+})
+
+describe('challenge map layout', () => {
+  it('keeps one row on wide screens', () => {
+    const wrapper = mount(ChallengeDslMap, { props: { dsl: DSL } })
+    const tops = wrapper.findAll('.challenge-dsl-card').map((card) => Number.parseInt((card.element as HTMLElement).style.top, 10))
+    expect(new Set(tops).size).toBeLessThanOrEqual(2)
+  })
+
+  it('stacks the trail vertically on portrait screens', async () => {
+    const original = window.matchMedia
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: (query: string) => ({
+        matches: true,
+        media: query,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      }),
+    })
+    try {
+      const wrapper = mount(ChallengeDslMap, { props: { dsl: DSL } })
+      await nextTick()
+      const tops = wrapper.findAll('.challenge-dsl-card')
+        .map((card) => Number.parseInt((card.element as HTMLElement).style.top, 10))
+      expect(tops).toEqual([...tops].sort((left, right) => left - right))
+      const canvas = wrapper.get('.challenge-dsl-canvas').element as HTMLElement
+      expect(Number.parseInt(canvas.style.width, 10)).toBe(320)
+      expect(Number.parseInt(canvas.style.height, 10)).toBeGreaterThan(Number.parseInt(canvas.style.width, 10))
+    } finally {
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        writable: true,
+        value: original,
+      })
+    }
   })
 })
