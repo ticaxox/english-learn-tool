@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppIcon from '../components/AppIcon.vue'
+import CoachImage from '../components/CoachImage.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import LoadingState from '../components/LoadingState.vue'
 import SpokenText from '../components/SpokenText.vue'
-import { COACH_ACTION_LABELS, type CoachActionReceipt, type CoachMessage } from '../api/coach'
+import {
+  COACH_ACTION_LABELS,
+  uploadCoachAttachment,
+  type CoachActionReceipt,
+  type CoachMessage,
+} from '../api/coach'
 import { isApiError } from '../api/errors'
 import { useCoachWorkspace } from '../composables/useCoachWorkspace'
 import { useSpeechRecognition } from '../composables/useSpeechRecognition'
@@ -17,6 +23,66 @@ const dictation = useSpeechRecognition((text) => {
   draft.value = draft.value.trim() ? `${draft.value.trim()} ${text}` : text
   void focusComposer()
 })
+
+const MAX_ATTACHMENTS = 4
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+const attachmentInput = ref<HTMLInputElement | null>(null)
+const pendingAttachments = ref<Array<{ id: string; filename: string; preview: string }>>([])
+const uploadingAttachment = ref(false)
+const attachmentError = ref<string | null>(null)
+
+function chooseAttachments(): void {
+  attachmentInput.value?.click()
+}
+
+function clearAttachments(): void {
+  for (const item of pendingAttachments.value) URL.revokeObjectURL(item.preview)
+  pendingAttachments.value = []
+}
+
+function removeAttachment(index: number): void {
+  const [removed] = pendingAttachments.value.splice(index, 1)
+  if (removed) URL.revokeObjectURL(removed.preview)
+}
+
+async function onAttachmentChange(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files ?? [])
+  input.value = ''
+  const conversation = coach.selectedConversation.value
+  if (!conversation || files.length === 0) return
+  attachmentError.value = null
+  const room = MAX_ATTACHMENTS - pendingAttachments.value.length
+  if (room <= 0) {
+    attachmentError.value = '一条消息最多 4 张图片'
+    return
+  }
+  uploadingAttachment.value = true
+  try {
+    for (const file of files.slice(0, room)) {
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        attachmentError.value = '只支持 PNG、JPEG 或 WebP 图片'
+        continue
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        attachmentError.value = '单张图片不能超过 5 MB'
+        continue
+      }
+      try {
+        const uploaded = await uploadCoachAttachment(conversation.id, file)
+        pendingAttachments.value.push({
+          id: uploaded.id,
+          filename: uploaded.filename,
+          preview: URL.createObjectURL(file),
+        })
+      } catch {
+        attachmentError.value = '图片上传失败，请重试'
+      }
+    }
+  } finally {
+    uploadingAttachment.value = false
+  }
+}
 const composer = ref<HTMLTextAreaElement | null>(null)
 const messageArea = ref<HTMLElement | null>(null)
 const suggestedPrompts = [
@@ -91,12 +157,14 @@ async function clearConversation(): Promise<void> {
 
 async function submitMessage(): Promise<void> {
   const content = draft.value.trim()
-  if (!content || coach.sending.value || coach.streamingMessageId.value) return
+  const attachmentIds = pendingAttachments.value.map((item) => item.id)
+  if ((!content && attachmentIds.length === 0) || coach.sending.value || coach.streamingMessageId.value) return
   // Clear the box as soon as it is sent; the reply may take a while.
   draft.value = ''
   await scrollToBottom()
-  const sent = await coach.sendMessage(content)
+  const sent = await coach.sendMessage(content, attachmentIds)
   if (!sent) draft.value = content
+  else clearAttachments()
   await focusComposer()
 }
 
@@ -126,8 +194,17 @@ onMounted(async () => {
   await focusComposer()
 })
 
+watch(
+  () => coach.selectedConversationId.value,
+  () => {
+    clearAttachments()
+    attachmentError.value = null
+  },
+)
+
 onBeforeUnmount(() => {
   coach.cancelStream()
+  clearAttachments()
 })
 </script>
 
@@ -223,6 +300,13 @@ onBeforeUnmount(() => {
                   <span></span><span></span><span></span>
                 </div>
                 <SpokenText v-else class="coach-message__text" :text="coach.messageText(message)" />
+                <div v-if="message.attachments?.length" class="coach-message__attachments">
+                  <CoachImage
+                    v-for="attachment in message.attachments ?? []"
+                    :key="attachment.id"
+                    :attachment="attachment"
+                  />
+                </div>
                 <div v-if="message.errorMessage" class="coach-message__error">
                   <p class="field-error" role="alert" :title="message.errorMessage">这次没有收到教练回复。</p>
                   <DivButton class="button-secondary button-small" type="button" @click="retryStream(message)">重新连接</DivButton>
@@ -266,6 +350,14 @@ onBeforeUnmount(() => {
 
           <form class="coach-composer" @submit.prevent="submitMessage">
             <label for="coach-message-input">给 AI 教练发消息</label>
+            <input
+              ref="attachmentInput"
+              class="visually-hidden"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              multiple
+              @change="onAttachmentChange"
+            />
             <textarea
               id="coach-message-input"
               ref="composer"
@@ -276,8 +368,28 @@ onBeforeUnmount(() => {
               :disabled="coach.sending.value || Boolean(coach.streamingMessageId.value)"
               @keydown="onComposerKeydown"
             />
+            <div v-if="pendingAttachments.length > 0" class="coach-composer__attachments">
+              <figure v-for="(item, index) in pendingAttachments" :key="item.id" class="coach-attachment">
+                <img :src="item.preview" :alt="item.filename" />
+                <DivButton
+                  class="coach-attachment__remove"
+                  type="button"
+                  :aria-label="`移除 ${item.filename}`"
+                  @click="removeAttachment(index)"
+                >×</DivButton>
+              </figure>
+            </div>
             <div class="coach-composer__footer">
               <span class="field-hint">{{ draft.length }} / 8000</span>
+              <DivButton
+                class="button-secondary button-small coach-attach"
+                type="button"
+                :disabled="uploadingAttachment || coach.sending.value || Boolean(coach.streamingMessageId.value)"
+                @click="chooseAttachments"
+              >
+                <AppIcon name="image" />
+                {{ uploadingAttachment ? '上传中…' : '图片' }}
+              </DivButton>
               <DivButton
                 v-if="dictation.supported.value"
                 class="button-secondary button-small coach-dictate"
@@ -290,7 +402,7 @@ onBeforeUnmount(() => {
                 <AppIcon name="speaker" />
                 {{ dictation.listening.value ? '正在听…' : '语音输入' }}
               </DivButton>
-              <DivButton class="button member-primary-button" type="submit" :disabled="!draft.trim() || coach.sending.value || Boolean(coach.streamingMessageId.value)">
+              <DivButton class="button member-primary-button" type="submit" :disabled="(!draft.trim() && pendingAttachments.length === 0) || coach.sending.value || Boolean(coach.streamingMessageId.value)">
                 {{ coach.sending.value || coach.streamingMessageId.value ? '正在接收回复…' : '发送消息' }} <AppIcon name="send" />
               </DivButton>
             </div>

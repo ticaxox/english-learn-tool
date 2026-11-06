@@ -55,6 +55,13 @@ export interface CoachActionReceipt {
   undoneAt: string | null
 }
 
+export interface CoachAttachment {
+  id: string
+  filename: string
+  contentType: string
+  sizeBytes: number
+}
+
 export interface CoachMessage {
   id: string
   conversationId: string
@@ -65,6 +72,7 @@ export interface CoachMessage {
   errorCode: string | null
   errorMessage: string | null
   actions: CoachActionReceipt[]
+  attachments?: CoachAttachment[]
   createdAt: string
   completedAt: string | null
 }
@@ -214,10 +222,22 @@ export function parseCoachConversationPage(value: unknown): CoachConversationPag
   }
 }
 
+export function parseCoachAttachment(value: unknown): CoachAttachment {
+  if (!isRecord(value)) throw new ContractError('教练附件不是对象。')
+  return {
+    id: requiredString(value.id, 'attachment.id'),
+    filename: requiredString(value.filename, 'attachment.filename'),
+    contentType: requiredString(value.content_type, 'attachment.content_type'),
+    sizeBytes: requiredNumber(value.size_bytes, 'attachment.size_bytes'),
+  }
+}
+
 export function parseCoachMessage(value: unknown): CoachMessage {
   if (!isRecord(value)) throw new ContractError('教练消息不是对象。')
   const actions = value.actions === undefined ? [] : value.actions
   if (!Array.isArray(actions)) throw new ContractError('教练消息 actions 必须是数组。')
+  const attachments = value.attachments === undefined ? [] : value.attachments
+  if (!Array.isArray(attachments)) throw new ContractError('教练消息 attachments 必须是数组。')
   return {
     id: requiredString(value.id, 'message.id'),
     conversationId: requiredString(value.conversation_id, 'message.conversation_id'),
@@ -228,6 +248,7 @@ export function parseCoachMessage(value: unknown): CoachMessage {
     errorCode: optionalString(value.error_code, 'message.error_code'),
     errorMessage: optionalString(value.error_message, 'message.error_message'),
     actions: actions.map(parseCoachActionReceipt),
+    attachments: attachments.map(parseCoachAttachment),
     createdAt: requiredString(value.created_at, 'message.created_at'),
     completedAt: optionalString(value.completed_at, 'message.completed_at'),
   }
@@ -341,21 +362,39 @@ export async function sendCoachMessage(
   content: string,
   idempotencyKey: string,
   pageContext: Record<string, unknown> = {},
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; attachmentIds?: string[] } = {},
 ): Promise<CoachAccepted> {
-  const body = Object.keys(pageContext).length > 0
-    ? { content, page_context: pageContext }
-    : { content }
+  const { attachmentIds = [], ...requestOptions } = options
+  const body: Record<string, unknown> = { content }
+  if (Object.keys(pageContext).length > 0) body.page_context = pageContext
+  if (attachmentIds.length > 0) body.attachment_ids = attachmentIds
   const payload = await apiClient.post(
     `/coach/conversations/${encodeURIComponent(conversationId)}/messages`,
     body,
     {
-      ...options,
+      ...requestOptions,
       retryCount: 0,
       headers: { 'Idempotency-Key': idempotencyKey },
     },
   )
   return parseCoachAccepted(payload)
+}
+
+export async function uploadCoachAttachment(conversationId: string, file: File): Promise<CoachAttachment> {
+  const form = new FormData()
+  form.append('file', file, file.name)
+  const payload = await apiClient.post(
+    `/coach/conversations/${encodeURIComponent(conversationId)}/attachments`,
+    form,
+    { retryCount: 0 },
+  )
+  return parseCoachAttachment(payload)
+}
+
+export async function fetchCoachAttachment(attachmentId: string): Promise<Blob> {
+  return apiClient.get<Blob>(`/coach/attachments/${encodeURIComponent(attachmentId)}`, {
+    responseType: 'blob',
+  })
 }
 
 export async function getCoachMessage(

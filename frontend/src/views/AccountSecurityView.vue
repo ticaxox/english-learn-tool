@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import LoadingState from '../components/LoadingState.vue'
 import { ValidationError } from '../api/errors'
+import {
+  createPersonalToken,
+  listPersonalTokens,
+  revokePersonalToken,
+  type PersonalToken,
+  type PersonalTokenCreated,
+} from '../api/tokens'
 import { validateStrongPassword, validateUsername } from '../lib/validation'
 import { PasswordChangedLoginRequiredError, useAuthStore } from '../stores/auth'
 
@@ -19,6 +27,80 @@ const username = ref(auth.user?.username ?? '')
 const usernameSubmitting = ref(false)
 const usernameError = ref<unknown>(null)
 const usernameSaved = ref(false)
+
+const tokens = ref<PersonalToken[]>([])
+const tokensLoading = ref(false)
+const tokenError = ref<unknown>(null)
+const tokenName = ref('')
+const tokenCreating = ref(false)
+const newToken = ref<PersonalTokenCreated | null>(null)
+const copyNotice = ref('')
+const revokingId = ref('')
+
+function formatTokenDate(value: string | null): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium' }).format(date)
+}
+
+async function loadTokens(): Promise<void> {
+  tokensLoading.value = true
+  tokenError.value = null
+  try {
+    tokens.value = await listPersonalTokens()
+  } catch (loadError) {
+    tokenError.value = loadError
+  } finally {
+    tokensLoading.value = false
+  }
+}
+
+async function submitToken(): Promise<void> {
+  const name = tokenName.value.trim()
+  if (!name || tokenCreating.value) return
+  tokenCreating.value = true
+  tokenError.value = null
+  copyNotice.value = ''
+  try {
+    newToken.value = await createPersonalToken(name)
+    tokenName.value = ''
+    await loadTokens()
+  } catch (createError) {
+    tokenError.value = createError
+  } finally {
+    tokenCreating.value = false
+  }
+}
+
+async function revokeToken(token: PersonalToken): Promise<void> {
+  if (revokingId.value) return
+  revokingId.value = token.id
+  tokenError.value = null
+  try {
+    await revokePersonalToken(token.id)
+    if (newToken.value?.id === token.id) newToken.value = null
+    await loadTokens()
+  } catch (revokeError) {
+    tokenError.value = revokeError
+  } finally {
+    revokingId.value = ''
+  }
+}
+
+async function copyToken(): Promise<void> {
+  if (!newToken.value) return
+  try {
+    await navigator.clipboard.writeText(newToken.value.token)
+    copyNotice.value = '已复制'
+  } catch {
+    copyNotice.value = '请手动选中复制'
+  }
+}
+
+onMounted(() => {
+  void loadTokens()
+})
 
 async function submitUsername(): Promise<void> {
   usernameError.value = null
@@ -176,5 +258,63 @@ async function submit(): Promise<void> {
         <DivButton type="submit" :disabled="submitting">{{ submitting ? '正在更新…' : '保存新密码' }}</DivButton>
       </div>
     </form>
+  </section>
+
+  <section class="panel ia-account-security" aria-labelledby="account-tokens-title">
+    <header>
+      <p class="eyebrow">MCP</p>
+      <h2 id="account-tokens-title">访问令牌</h2>
+      <p class="field-hint">外部 MCP 客户端用这里的令牌调用教练动作；令牌只在创建时显示一次。</p>
+    </header>
+
+    <form class="form-stack ia-security-form" @submit.prevent="submitToken">
+      <div class="field">
+        <label for="mcp-token-name">令牌名称</label>
+        <input
+          id="mcp-token-name"
+          v-model="tokenName"
+          maxlength="80"
+          placeholder="例如 Claude Desktop"
+          :disabled="tokenCreating"
+        />
+      </div>
+      <div class="button-row">
+        <DivButton type="submit" :disabled="tokenCreating || !tokenName.trim()">
+          {{ tokenCreating ? '正在生成…' : '生成令牌' }}
+        </DivButton>
+      </div>
+    </form>
+
+    <ErrorNotice v-if="tokenError" :error="tokenError" :show-retry="false" />
+
+    <div v-if="newToken" class="mcp-token-reveal">
+      <p class="field-hint">只显示这一次，请立即复制。</p>
+      <code>{{ newToken.token }}</code>
+      <DivButton class="button-secondary button-small" type="button" @click="copyToken">复制</DivButton>
+      <span v-if="copyNotice" class="field-hint">{{ copyNotice }}</span>
+    </div>
+
+    <LoadingState v-if="tokensLoading && tokens.length === 0" label="正在读取令牌…" />
+    <ul v-else-if="tokens.length" class="mcp-token-list">
+      <li v-for="token in tokens" :key="token.id">
+        <div>
+          <strong>{{ token.name }}</strong>
+          <small>
+            {{ token.prefix }}…
+            · 创建于 {{ formatTokenDate(token.createdAt) }}
+            <template v-if="token.lastUsedAt"> · 最近使用 {{ formatTokenDate(token.lastUsedAt) }}</template>
+          </small>
+        </div>
+        <DivButton
+          v-if="!token.revokedAt"
+          class="button-secondary button-small"
+          type="button"
+          :disabled="revokingId === token.id"
+          @click="revokeToken(token)"
+        >{{ revokingId === token.id ? '正在撤销…' : '撤销' }}</DivButton>
+        <span v-else class="field-hint">已撤销</span>
+      </li>
+    </ul>
+    <p v-else-if="!tokensLoading" class="field-hint">还没有访问令牌。</p>
   </section>
 </template>

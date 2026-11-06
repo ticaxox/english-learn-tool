@@ -101,7 +101,7 @@ describe('coach workspace orchestration', () => {
 
     expect(sent).toBe(true)
     expect(api.sendMessage).toHaveBeenCalledWith(
-      'conversation-1', '帮我安排今天的复习。', expect.any(String), { page_route: '/coach' },
+      'conversation-1', '帮我安排今天的复习。', expect.any(String), { page_route: '/coach' }, { attachmentIds: [] },
     )
     expect(workspace.messages.value.filter((message) => message.id === 'assistant-1')).toHaveLength(1)
     expect(workspace.messages.value.find((message) => message.id === 'assistant-1')?.content).toBe('先完成到期复习，再做 12 个新词。')

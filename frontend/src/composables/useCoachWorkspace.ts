@@ -120,6 +120,7 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
   let streamController: AbortController | null = null
   let pendingSendKey: string | null = null
   let pendingSendContent = ''
+  let pendingAttachmentKey = ''
 
   function cancelStream(): void {
     streamController?.abort()
@@ -368,16 +369,24 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
     }
   }
 
-  async function sendMessage(content: string): Promise<boolean> {
+  async function sendMessage(content: string, attachmentIds: string[] = []): Promise<boolean> {
     const trimmed = content.trim()
-    if (!selectedConversationId.value || !trimmed || sending.value || streamingMessageId.value) return false
-    if (pendingSendKey && pendingSendContent !== trimmed) {
+    const attachmentKey = attachmentIds.join(',')
+    if (
+      !selectedConversationId.value
+      || (!trimmed && attachmentIds.length === 0)
+      || sending.value
+      || streamingMessageId.value
+    ) return false
+    if (pendingSendKey && (pendingSendContent !== trimmed || pendingAttachmentKey !== attachmentKey)) {
       pendingSendKey = null
       pendingSendContent = ''
+      pendingAttachmentKey = ''
     }
     if (!pendingSendKey) {
       pendingSendKey = newIdempotencyKey()
       pendingSendContent = trimmed
+      pendingAttachmentKey = attachmentKey
     }
     sending.value = true
     sendError.value = null
@@ -388,9 +397,11 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
         trimmed,
         pendingSendKey,
         { page_route: '/coach' },
+        { attachmentIds },
       )
       pendingSendKey = null
       pendingSendContent = ''
+      pendingAttachmentKey = ''
       acceptedNotice.value = '消息已发送，正在等待教练回复。'
       await loadMessages(true, false)
       await consumeAccepted(accepted)

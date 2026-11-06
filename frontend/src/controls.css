@@ -3099,3 +3099,94 @@
 
 .personal-workspace .coach-dictate.is-listening { border-color: #b3261e; color: #b3261e; }
 .personal-workspace .coach-dictate-error { margin: 6px 0 0; color: #b3261e; }
+
+/* Coach images: message thumbnails and composer previews. */
+.personal-workspace .coach-message__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.personal-workspace .coach-image { margin: 0; max-width: 240px; }
+.personal-workspace .coach-image img {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.personal-workspace .coach-composer__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 4px 0 8px;
+}
+
+.personal-workspace .coach-attachment { position: relative; margin: 0; }
+.personal-workspace .coach-attachment img {
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.personal-workspace .coach-attachment__remove {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.personal-workspace .coach-composer__footer { flex-wrap: wrap; }
+
+/* MCP access tokens: one reveal block and a compact list. */
+.personal-workspace .mcp-token-reveal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px dashed var(--ui-line-strong);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface-subtle, #fbf7ee);
+}
+
+.personal-workspace .mcp-token-reveal code {
+  flex: 1 1 100%;
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+}
+
+.personal-workspace .mcp-token-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ui-line);
+}
+
+.personal-workspace .mcp-token-list li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.personal-workspace .mcp-token-list li > div { display: grid; gap: 2px; min-width: 0; }
+.personal-workspace .mcp-token-list small { color: var(--ui-muted); font-size: 0.76rem; }

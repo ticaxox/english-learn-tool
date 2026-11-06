@@ -19,6 +19,7 @@ withDefaults(
       | 'plus'
       | 'send'
       | 'speaker'
+      | 'image'
   }>(),
   { name: 'spark' },
 )
@@ -86,6 +87,11 @@ withDefaults(
     <template v-else-if="name === 'speaker'">
       <path d="M11 5 6 9H3v6h3l5 4V5Z" />
       <path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12" />
+    </template>
+    <template v-else-if="name === 'image'">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="9" cy="10" r="1.6" />
+      <path d="m4 18 5-5 4 4 3-3 4 4" />
     </template>
   </svg>
 </template>
