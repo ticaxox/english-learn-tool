@@ -4,13 +4,19 @@ import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 import LoadingState from '../components/LoadingState.vue'
+import SpokenText from '../components/SpokenText.vue'
 import { COACH_ACTION_LABELS, type CoachActionReceipt, type CoachMessage } from '../api/coach'
 import { isApiError } from '../api/errors'
 import { useCoachWorkspace } from '../composables/useCoachWorkspace'
+import { useSpeechRecognition } from '../composables/useSpeechRecognition'
 import '../coach.css'
 
 const coach = useCoachWorkspace()
 const draft = ref('')
+const dictation = useSpeechRecognition((text) => {
+  draft.value = draft.value.trim() ? `${draft.value.trim()} ${text}` : text
+  void focusComposer()
+})
 const composer = ref<HTMLTextAreaElement | null>(null)
 const messageArea = ref<HTMLElement | null>(null)
 const suggestedPrompts = [
@@ -216,7 +222,7 @@ onBeforeUnmount(() => {
                 >
                   <span></span><span></span><span></span>
                 </div>
-                <p v-else class="coach-message__text">{{ coach.messageText(message) }}</p>
+                <SpokenText v-else class="coach-message__text" :text="coach.messageText(message)" />
                 <div v-if="message.errorMessage" class="coach-message__error">
                   <p class="field-error" role="alert" :title="message.errorMessage">这次没有收到教练回复。</p>
                   <DivButton class="button-secondary button-small" type="button" @click="retryStream(message)">重新连接</DivButton>
@@ -272,10 +278,23 @@ onBeforeUnmount(() => {
             />
             <div class="coach-composer__footer">
               <span class="field-hint">{{ draft.length }} / 8000</span>
+              <DivButton
+                v-if="dictation.supported.value"
+                class="button-secondary button-small coach-dictate"
+                :class="{ 'is-listening': dictation.listening.value }"
+                type="button"
+                :aria-pressed="dictation.listening.value"
+                :disabled="coach.sending.value || Boolean(coach.streamingMessageId.value)"
+                @click="dictation.toggle()"
+              >
+                <AppIcon name="speaker" />
+                {{ dictation.listening.value ? '正在听…' : '语音输入' }}
+              </DivButton>
               <DivButton class="button member-primary-button" type="submit" :disabled="!draft.trim() || coach.sending.value || Boolean(coach.streamingMessageId.value)">
                 {{ coach.sending.value || coach.streamingMessageId.value ? '正在接收回复…' : '发送消息' }} <AppIcon name="send" />
               </DivButton>
             </div>
+            <p v-if="dictation.error.value" class="field-hint coach-dictate-error" role="status">{{ dictation.error.value }}</p>
           </form>
         </template>
       </section>

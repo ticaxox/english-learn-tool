@@ -12,6 +12,7 @@ import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
+import SpeakButton from '../components/SpeakButton.vue'
 import FlashcardTrainer from '../components/FlashcardTrainer.vue'
 import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
@@ -413,6 +414,7 @@ watch(challengeModule, async (module, previous) => {
           <div class="workspace-card memory-wrong-detail__card">
             <div class="memory-wrong-detail__grid">
               <div class="memory-wrong-detail__word">
+                <div class="memory-wrong-detail__word-row">
                 <h2 v-if="wrongCard.kind !== 'spelling'">{{ wrongCard.word }}</h2>
                 <h2 v-else class="memory-wrong-detail__word-letters">
                   <span
@@ -421,6 +423,8 @@ watch(challengeModule, async (module, previous) => {
                     :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
                   >{{ letter }}</span>
                 </h2>
+                <SpeakButton class="memory-wrong-detail__speak" :text="wrongCard.word" />
+                </div>
                 <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
               </div>
               <div class="memory-wrong-detail__side">

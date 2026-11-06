@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { PRACTICE_TYPE_LABELS, type PracticeOption, type PracticeQuestion } from '../api/practice'
 import OptionBadge from './OptionBadge.vue'
+import SpokenText from './SpokenText.vue'
 
 const props = defineProps<{
   question: PracticeQuestion
@@ -71,19 +72,19 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
 
     <div v-if="question.questionType === 'reading'" class="practice-reading">
       <template v-if="!hideArticle">
-        <p v-if="question.article" class="practice-article">{{ question.article }}</p>
+        <SpokenText v-if="question.article" class="practice-article" :text="question.article" />
         <p v-if="inReview && question.articleZh" class="practice-translation-note">{{ question.articleZh }}</p>
       </template>
-      <h3 :id="promptId">{{ question.prompt }}</h3>
+      <SpokenText :id="promptId" as="h3" :text="question.prompt ?? ''" />
     </div>
 
     <div v-else-if="question.questionType === 'fill_blank'" class="practice-fill-blank">
-      <h2 :id="promptId" class="practice-sentence">{{ question.sentence }}</h2>
+      <SpokenText :id="promptId" as="h2" class="practice-sentence" :text="question.sentence ?? ''" />
       <p v-if="inReview && question.sentenceZh" class="practice-translation-note">{{ question.sentenceZh }}</p>
     </div>
 
     <div v-else-if="question.questionType === 'translation'" class="practice-translation">
-      <p v-if="question.sourceText" class="practice-prompt-text">{{ question.sourceText }}</p>
+      <SpokenText v-if="question.sourceText" class="practice-prompt-text" :text="question.sourceText" />
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
       </div>
@@ -91,7 +92,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
 
     <div v-else class="practice-writing">
       <p class="practice-prompt-note">题目</p>
-      <p v-if="question.prompt" class="practice-prompt-text">{{ question.prompt }}</p>
+      <SpokenText v-if="question.prompt" class="practice-prompt-text" :text="question.prompt" />
       <p v-if="question.requirements.length" class="practice-prompt-note">要求</p>
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>

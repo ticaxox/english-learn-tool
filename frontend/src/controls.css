@@ -3065,3 +3065,37 @@
   border-top: 0 !important;
   background: transparent !important;
 }
+
+/* Pronunciation: a small speaker per word, tappable English words in text. */
+.personal-workspace .speak-button {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 1px solid var(--ui-line);
+  border-radius: 50%;
+  place-items: center;
+  background: var(--ui-surface-subtle, #fbf7ee);
+  color: var(--ui-muted);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.personal-workspace .speak-button:hover { border-color: var(--ui-line-strong); color: var(--ui-ink); }
+.personal-workspace .speak-button svg { width: 15px; height: 15px; }
+
+.study-card__word-row,
+.memory-wrong-detail__word-row { display: flex; align-items: center; gap: 10px; }
+.memory-wrong-detail__word-row .memory-wrong-detail__word-letters { flex-wrap: wrap; }
+
+.personal-workspace .spoken-text { white-space: pre-wrap; }
+.personal-workspace .spoken-word { cursor: pointer; border-radius: 4px; }
+.personal-workspace .spoken-word:hover {
+  background: var(--ui-surface-subtle, #fbf7ee);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.personal-workspace .coach-dictate.is-listening { border-color: #b3261e; color: #b3261e; }
+.personal-workspace .coach-dictate-error { margin: 6px 0 0; color: #b3261e; }

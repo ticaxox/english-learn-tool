@@ -5,6 +5,7 @@
  * that point, so it cannot be read from the page source.
  */
 import { computed, nextTick, ref, watch } from 'vue'
+import SpeakButton from './SpeakButton.vue'
 import type { FlashcardQuestion, FlashcardRating } from '../types/learning'
 
 const props = defineProps<{
@@ -68,7 +69,10 @@ function rate(rating: FlashcardRating): void {
   >
     <div class="study-card__face">
       <div class="study-card__word-block">
-        <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>
+        <div class="study-card__word-row">
+          <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>
+          <SpeakButton class="study-card__speak" :text="props.question.front" />
+        </div>
         <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
       </div>
 

@@ -18,6 +18,7 @@ withDefaults(
       | 'lock'
       | 'plus'
       | 'send'
+      | 'speaker'
   }>(),
   { name: 'spark' },
 )
@@ -81,6 +82,10 @@ withDefaults(
     </template>
     <template v-else-if="name === 'send'">
       <path d="m3 11 18-8-8 18-2-7-8-3ZM11 14l5-5" />
+    </template>
+    <template v-else-if="name === 'speaker'">
+      <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+      <path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12" />
     </template>
   </svg>
 </template>

@@ -9,6 +9,7 @@ import {
 import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
 import LoadingState from './LoadingState.vue'
+import SpeakButton from './SpeakButton.vue'
 
 const props = withDefaults(defineProps<{
   wordbookId: string
@@ -201,6 +202,7 @@ onMounted(() => {
           <div role="listitem" v-for="entry in detail.entries" :key="entry.id">
             <div class="wordbook-entry-word">
               <strong>{{ entry.headword }}</strong>
+              <SpeakButton :text="entry.headword" />
               <span v-if="entry.phonetic">{{ entry.phonetic }}</span>
               <span class="wordbook-entry-normalized">{{ entry.normalized_headword }}</span>
             </div>
