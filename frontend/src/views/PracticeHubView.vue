@@ -18,10 +18,9 @@ const route = useRoute()
 const activeSessionId = computed(() => (typeof route.query.session === 'string' && route.query.session ? route.query.session : null))
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
 function queryType(value: unknown): PracticeSelection | null {
-  if (value === 'random') return 'random'
   return typeof value === 'string' && practiceTypes.includes(value as PracticeType) ? value as PracticeType : null
 }
-type PracticeSelection = PracticeType | 'random'
+type PracticeSelection = PracticeType
 const practiceType = ref<PracticeSelection>(queryType(route.query.type) ?? 'fill_blank')
 const source = ref<PracticeSource>('today_new')
 const count = ref(practiceType.value === 'writing' ? 1 : 5)
@@ -72,13 +71,7 @@ let pendingSignature = ''
 
 const sources: PracticeSource[] = ['today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty']
 const difficulties: PracticeDifficulty[] = ['CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL']
-const counts = computed(() => (
-  practiceType.value === 'writing'
-    ? [1]
-    : practiceType.value === 'random'
-      ? [1, 3, 5, 10, 15, 20]
-      : [3, 5, 10, 15, 20]
-))
+const counts = computed(() => (practiceType.value === 'writing' ? [1] : [3, 5, 10, 15, 20]))
 const needsDifficulty = computed(() => source.value === 'difficulty')
 const needsWordbook = computed(() => source.value !== 'difficulty')
 onMounted(() => { void loadSpellingMode() })
@@ -102,28 +95,20 @@ function selectType(next: PracticeSelection): void {
   count.value = next === 'writing' ? 1 : 5
 }
 
-const typeIcons: Record<PracticeSelection, 'book' | 'cards' | 'arrow' | 'spark' | 'star'> = {
+const typeIcons: Record<PracticeSelection, 'book' | 'cards' | 'arrow' | 'spark'> = {
   fill_blank: 'book',
   reading: 'cards',
   translation: 'arrow',
   writing: 'spark',
-  random: 'star',
 }
 
-const typeOptions = computed(() => [
-  ...practiceTypes.map((type) => ({ key: type as PracticeSelection, label: PRACTICE_TYPE_LABELS[type] })),
-  { key: 'random' as PracticeSelection, label: '随机' },
-])
+const typeOptions = computed(() =>
+  practiceTypes.map((type) => ({ key: type as PracticeSelection, label: PRACTICE_TYPE_LABELS[type] })),
+)
 
 function chooseType(next: PracticeSelection): void {
   selectType(next)
-  void router.replace({ query: { ...route.query, type: next === 'random' ? undefined : next } })
-}
-
-function resolveType(selection: PracticeSelection): PracticeType {
-  if (selection !== 'random') return selection
-  const pool = count.value === 1 ? practiceTypes : practiceTypes.filter((type) => type !== 'writing')
-  return pool[Math.floor(Math.random() * pool.length)]
+  void router.replace({ query: { ...route.query, type: next } })
 }
 
 function validate(): string | null {
@@ -136,7 +121,7 @@ async function create(): Promise<void> {
   formError.value = validate()
   if (formError.value) return
   const input: PracticeCreateInput = {
-    practiceType: resolveType(practiceType.value),
+    practiceType: practiceType.value,
     source: source.value,
     count: count.value,
     difficulty: needsDifficulty.value ? difficulty.value : null,
@@ -246,7 +231,6 @@ onMounted(() => {
               <span class="practice-type-pill__label">{{ option.label }}</span>
             </DivButton>
           </div>
-          <p v-if="practiceType === 'random'" class="field-hint">从可选题型里随机抽一种；题量选 1 题时也可能抽到作文。</p>
           <div class="practice-form-grid">
             <div class="field">
               <label for="practice-source">来源</label>

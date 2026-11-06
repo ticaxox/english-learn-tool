@@ -120,14 +120,13 @@ describe('practice views', () => {
     expect(router.currentRoute.value.query.session).toBeTruthy()
   })
 
-  it('resolves the random type to a concrete one before creating', async () => {
+  it('has no random practice type and falls back to fill-blank', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=random')
-    const randomPill = wrapper.findAll('.practice-type-pill').find((pill) => pill.text() === '随机')
-    expect(randomPill?.classes()).toContain('is-active')
-    await wrapper.get('form').trigger('submit')
-    await flushPromises()
-    const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!
-    expect(['fill_blank', 'reading', 'translation', 'writing']).toContain(input.practiceType)
+    const labels = wrapper.findAll('.practice-type-pill').map((pill) => pill.text())
+    expect(labels).not.toContain('随机')
+    const active = wrapper.findAll('.practice-type-pill.is-active').map((pill) => pill.text())
+    expect(active).toHaveLength(1)
+    expect(active[0]).not.toBe('随机')
   })
 
   it('renders a choice question without any answer or explanation fields', () => {
