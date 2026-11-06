@@ -11,7 +11,6 @@ import ChallengeBossPanel from '../components/ChallengeBossPanel.vue'
 import ChallengeDslMap from '../components/ChallengeDslMap.vue'
 import {
   CHALLENGE_NODE_LABELS,
-  CHALLENGE_STATUS_LABELS,
   generateTodayChallenge,
   getChallenge,
   getChallengeHistory,
@@ -26,7 +25,6 @@ import {
   type ChallengePlan,
 } from '../api/challenge'
 import { ApiError, isApiError } from '../api/errors'
-import { parseChallengeMapDsl } from '../utils/challenge-map'
 import '../challenge.css'
 
 const route = useRoute()
@@ -50,10 +48,7 @@ const generationStatus = ref('')
 const cancelGenerationWait = ref(false)
 
 const selectedNode = ref<ChallengeNodeDetail | null>(null)
-const mapNodes = computed(() => parseChallengeMapDsl(plan.value?.mapDsl ?? '').nodes)
-const selectedMapNode = computed(() =>
-  mapNodes.value.find((node) => node.id === selectedNode.value?.node.clientKey) ?? null,
-)
+
 const nodeLoading = ref(false)
 const nodeError = ref<unknown>(null)
 const nodeStarting = ref(false)
@@ -177,10 +172,6 @@ async function generateMap(): Promise<void> {
   } finally {
     generating.value = false
   }
-}
-
-function mapNodeTitle(clientKey: string): string {
-  return mapNodes.value.find((node) => node.id === clientKey)?.title ?? clientKey
 }
 
 function selectMapNode(clientKey: string): void {
@@ -378,19 +369,6 @@ onMounted(() => {
           <DivButton class="icon-button" type="button" aria-label="关闭" @click="selectedNode = null">×</DivButton>
         </div>
         <p>{{ selectedNode.node.description }}</p>
-        <p v-if="selectedMapNode" class="field-hint">题目类型：{{ selectedMapNode.questionType }}</p>
-        <p v-if="selectedMapNode" class="field-hint">
-          前置：{{ selectedMapNode.previous.length ? selectedMapNode.previous.map(mapNodeTitle).join('、') : '开始' }}
-        </p>
-        <p v-if="selectedMapNode?.next.length" class="field-hint">
-          分支：{{ selectedMapNode.next.map(mapNodeTitle).join('、') }}
-        </p>
-        <p class="field-hint">
-          题目链接：
-          <RouterLink v-if="selectedMapNode?.link.startsWith('/')" :to="selectedMapNode.link">打开题目</RouterLink>
-          <span v-else>开始节点后生成</span>
-        </p>
-        <p class="field-hint">状态：{{ CHALLENGE_STATUS_LABELS[selectedNode.node.status] }} · 预计 {{ selectedNode.node.estimatedMinutes }} 分钟</p>
         <p v-if="selectedNode.node.status === 'locked'" class="inline-note">完成前一个节点后解锁。</p>
         <p v-else-if="readOnly" class="inline-note">跨日地图只读，不能开始或重做节点。</p>
         <p v-else-if="selectedNode.node.nodeType === 'BOSS' && selectedNode.node.status === 'completed'" class="inline-note">终点挑战已完成，可查看结果。</p>

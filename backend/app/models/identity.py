@@ -248,6 +248,9 @@ class PersonalAccessToken(Base):
     name: Mapped[str] = mapped_column(String(80), nullable=False)
     token_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     token_prefix: Mapped[str] = mapped_column(String(16), nullable=False)
+    is_default: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

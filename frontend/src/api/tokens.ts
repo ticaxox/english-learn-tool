@@ -6,6 +6,7 @@ export interface PersonalToken {
   id: string
   name: string
   prefix: string
+  isDefault: boolean
   createdAt: string
   lastUsedAt: string | null
   revokedAt: string | null
@@ -34,6 +35,7 @@ function parseToken(value: unknown): PersonalToken {
     id: text('id'),
     name: text('name'),
     prefix: text('prefix'),
+    isDefault: value.is_default === true,
     createdAt: text('created_at'),
     lastUsedAt: optional('last_used_at'),
     revokedAt: optional('revoked_at'),
@@ -59,4 +61,13 @@ export async function createPersonalToken(name: string): Promise<PersonalTokenCr
 
 export async function revokePersonalToken(id: string): Promise<void> {
   await apiClient.delete(`/me/tokens/${encodeURIComponent(id)}`)
+}
+
+export async function refreshPersonalToken(id: string): Promise<PersonalTokenCreated> {
+  const payload = await apiClient.post(`/me/tokens/${encodeURIComponent(id)}/refresh`)
+  const parsed = parseToken(payload)
+  if (!isRecord(payload) || typeof payload.token !== 'string') {
+    throw new ContractError('刷新访问令牌缺少 token。')
+  }
+  return { ...parsed, token: payload.token }
 }

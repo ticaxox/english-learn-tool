@@ -20,6 +20,7 @@ withDefaults(
       | 'send'
       | 'speaker'
       | 'image'
+      | 'paperclip'
   }>(),
   { name: 'spark' },
 )
@@ -92,6 +93,9 @@ withDefaults(
       <rect x="3" y="4" width="18" height="16" rx="2" />
       <circle cx="9" cy="10" r="1.6" />
       <path d="m4 18 5-5 4 4 3-3 4 4" />
+    </template>
+    <template v-else-if="name === 'paperclip'">
+      <path d="M20 11.5 12.4 19a4.5 4.5 0 0 1-6.4-6.4l7.6-7.6a3 3 0 0 1 4.3 4.3l-7.6 7.6a1.5 1.5 0 0 1-2.1-2.1l7-7" />
     </template>
   </svg>
 </template>

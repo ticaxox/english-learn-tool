@@ -33,6 +33,7 @@ from app.schemas.ai_tasks import (
     PracticeGenerationOutput,
     PracticeGenerationRequest,
     PracticeGradingBatchOutput,
+    PracticeItem,
     ReadingPassage,
     SubjectiveGradingContext,
     SubjectiveGradingRequest,
@@ -1204,26 +1205,12 @@ async def list_practice_events(
     )
 
 
-async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> None:
-    session_id = job.input_context.get("practice_session_id")
-    if not session_id or job.result is None:
-        return
-    try:
-        practice_id = UUID(str(session_id))
-    except ValueError:
-        return
-    practice = await session.scalar(
-        select(PracticeSession).where(PracticeSession.id == practice_id).with_for_update()
-    )
-    if practice is None or practice.status != "generating":
-        return
-    generation = await session.get(PracticeGeneration, practice.current_generation_id)
-    if generation is None or generation.status != "generating":
-        return
-    output = PracticeGenerationOutput.model_validate(job.result)
+def question_rows(
+    items: list[PracticeItem], generation: PracticeGeneration
+) -> list[PracticeQuestion]:
     questions: list[PracticeQuestion] = []
     position = 0
-    for item in output.items:
+    for item in items:
         if isinstance(item, FillBlankItem):
             public = {
                 "sentence": item.sentence,
@@ -1299,6 +1286,27 @@ async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> 
                 )
             )
             position += 1
+    return questions
+
+
+async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> None:
+    session_id = job.input_context.get("practice_session_id")
+    if not session_id or job.result is None:
+        return
+    try:
+        practice_id = UUID(str(session_id))
+    except ValueError:
+        return
+    practice = await session.scalar(
+        select(PracticeSession).where(PracticeSession.id == practice_id).with_for_update()
+    )
+    if practice is None or practice.status != "generating":
+        return
+    generation = await session.get(PracticeGeneration, practice.current_generation_id)
+    if generation is None or generation.status != "generating":
+        return
+    output = PracticeGenerationOutput.model_validate(job.result)
+    questions = question_rows(output.items, generation)
     session.add_all(questions)
     generation.status = "ready"
     generation.question_count = len(questions)

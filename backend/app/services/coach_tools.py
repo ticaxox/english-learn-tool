@@ -9,12 +9,14 @@ from __future__ import annotations
 from typing import Any
 
 from arq.connections import ArqRedis
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.models.identity import User
 from app.services.coach import apply_coach_tool
+from app.services.practice_authoring import AuthoredPracticeRequest, create_authored_practice
 
 PRACTICE_TYPES = ["fill_blank", "reading", "translation", "writing"]
 PRACTICE_SOURCES = ["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
@@ -57,6 +59,24 @@ TOOL_SPECS: dict[str, dict[str, Any]] = {
             "type": "object",
             "properties": {"wordbook_id": {"type": "string", "format": "uuid"}},
             "required": ["wordbook_id"],
+            "additionalProperties": False,
+        },
+    },
+    "create_practice_questions": {
+        "handler": "authoring",
+        "description": "直接写入一组自编练习题（不调用 AI 生成），返回练习会话 id。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "practice_type": {"type": "string", "enum": PRACTICE_TYPES},
+                "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "items": {"type": "object"},
+                },
+            },
+            "required": ["practice_type", "items"],
             "additionalProperties": False,
         },
     },
@@ -104,6 +124,23 @@ async def call_coach_tool(
             code="MCP_TOOL_ARGUMENTS_INVALID",
             message="Tool arguments must be an object.",
         )
+    if spec.get("handler") == "authoring":
+        try:
+            output = AuthoredPracticeRequest.model_validate({
+                "practice_type": (arguments or {}).get("practice_type"),
+                "items": (arguments or {}).get("items"),
+            })
+        except ValidationError as exc:
+            raise AppError(
+                status_code=422,
+                code="MCP_PRACTICE_INVALID",
+                message=str(exc.errors()[0].get("msg", "The practice payload was invalid.")),
+            ) from exc
+        practice = await create_authored_practice(session, user, output)
+        return {
+            "practice_session_id": str(practice.id),
+            "question_count": practice.question_count,
+        }
     return await apply_coach_tool(
         session,
         pool,

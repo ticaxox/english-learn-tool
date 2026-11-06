@@ -4664,6 +4664,11 @@
             "title": "Id",
             "type": "string"
           },
+          "is_default": {
+            "default": false,
+            "title": "Is Default",
+            "type": "boolean"
+          },
           "last_used_at": {
             "anyOf": [
               {
@@ -4738,6 +4743,11 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "is_default": {
+            "default": false,
+            "title": "Is Default",
+            "type": "boolean"
           },
           "last_used_at": {
             "anyOf": [
@@ -15802,7 +15812,7 @@
     },
     "/api/v1/me/tokens/{token_id}": {
       "delete": {
-        "operationId": "revoke_token_endpoint_api_v1_me_tokens__token_id__delete",
+        "operationId": "delete_token_endpoint_api_v1_me_tokens__token_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -15855,7 +15865,76 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Revoke Token Endpoint",
+        "summary": "Delete Token Endpoint",
+        "tags": [
+          "system",
+          "personal tokens"
+        ]
+      }
+    },
+    "/api/v1/me/tokens/{token_id}/refresh": {
+      "post": {
+        "operationId": "refresh_token_endpoint_api_v1_me_tokens__token_id__refresh_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Token Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonalTokenCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The token was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The request is invalid."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Refresh Token Endpoint",
         "tags": [
           "system",
           "personal tokens"

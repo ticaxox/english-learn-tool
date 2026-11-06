@@ -218,3 +218,62 @@ async def test_docx_attachment_text_reaches_the_provider(client, app, member_use
         payload = json.loads(user_content)
         assert payload["attachment_texts"][0]["filename"] == "notes.docx"
         assert "review the words patiently" in payload["attachment_texts"][0]["text"]
+
+
+def pdf_bytes(text: str) -> bytes:
+    from reportlab.pdfgen import canvas
+
+    buffer = io.BytesIO()
+    document = canvas.Canvas(buffer)
+    document.drawString(72, 720, text)
+    document.save()
+    return buffer.getvalue()
+
+
+async def test_pdf_attachment_text_reaches_the_provider(client, app, member_user):
+    headers = await login(client, member_user.username)
+    conversation_id = await _conversation(client, headers)
+
+    uploaded = await client.post(
+        f"/api/v1/coach/conversations/{conversation_id}/attachments",
+        headers=headers,
+        files={
+            "file": (
+                "notes.pdf",
+                pdf_bytes("Review the words patiently today"),
+                "application/pdf",
+            )
+        },
+    )
+    assert uploaded.status_code == 201, uploaded.text
+
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        server.queue_json(200, {"message": "看过 PDF 了。", "actions": []})
+        sent = await client.post(
+            f"/api/v1/coach/conversations/{conversation_id}/messages",
+            headers={**headers, "Idempotency-Key": "pdf-message"},
+            json={"content": "请看 PDF", "attachment_ids": [uploaded.json()["id"]]},
+        )
+        assert sent.status_code == 202, sent.text
+
+        async with app.state.session_factory() as session:
+            message = await session.get(CoachMessage, UUID(sent.json()["message_id"]))
+            assert message is not None and message.ai_job_id is not None
+            job_id = message.ai_job_id
+        await process_ai_job(
+            {
+                "session_factory": app.state.session_factory,
+                "settings": app.state.settings,
+                "redis": app.state.arq,
+            },
+            str(job_id),
+        )
+
+        call = next(
+            request
+            for request in server.requests
+            if request["method"] == "POST" and "/chat/completions" in request["path"]
+        )
+        payload = json.loads(call["body"]["messages"][1]["content"])
+        assert "patiently" in payload["attachment_texts"][0]["text"]

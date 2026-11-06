@@ -24,6 +24,7 @@ from app.models.identity import User
 
 MAX_FILENAME = 200
 DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+PDF_TYPE = "application/pdf"
 TEXT_LIMIT = 2 * 1024 * 1024
 TEXT_CHARS = 20_000
 
@@ -43,6 +44,8 @@ def _detect(payload: bytes, filename: str) -> tuple[str, str] | None:
     lower = filename.lower()
     if lower.endswith(".docx") and payload[:4] == b"PK\x03\x04":
         return DOCX_TYPE, ".docx"
+    if lower.endswith(".pdf") and payload[:5] == b"%PDF-":
+        return PDF_TYPE, ".pdf"
     if lower.endswith((".txt", ".md")):
         try:
             payload.decode("utf-8")
@@ -85,7 +88,7 @@ async def save_coach_attachment(
         raise AppError(
             status_code=415,
             code="COACH_ATTACHMENT_TYPE_UNSUPPORTED",
-            message="Only PNG, JPEG, WebP, DOCX, TXT and Markdown files are supported.",
+            message="Only images, DOCX, PDF, TXT and Markdown files are supported.",
         )
     content_type, extension = detected
 
@@ -131,7 +134,30 @@ def attachment_text(settings: Settings, attachment: CoachAttachment) -> str | No
     payload = read_attachment(settings, attachment)
     if attachment.content_type == DOCX_TYPE:
         return _docx_text(payload)
+    if attachment.content_type == PDF_TYPE:
+        return _pdf_text(payload)
     return payload.decode("utf-8", errors="replace")[:TEXT_CHARS]
+
+
+def _pdf_text(payload: bytes) -> str:
+    try:
+        from pypdf import PdfReader
+
+        reader = PdfReader(io.BytesIO(payload))
+    except Exception:  # noqa: BLE001 - a broken PDF must not fail the request
+        return ""
+    parts: list[str] = []
+    total = 0
+    for page in reader.pages[:30]:
+        try:
+            text = page.extract_text() or ""
+        except Exception:  # noqa: BLE001 - one bad page should not drop the rest
+            continue
+        parts.append(text)
+        total += len(text)
+        if total >= TEXT_CHARS:
+            break
+    return "\n".join(parts).strip()[:TEXT_CHARS]
 
 
 def _docx_text(payload: bytes) -> str:

@@ -24,6 +24,7 @@ class PersonalTokenResponse(BaseModel):
     id: UUID
     name: str
     prefix: str
+    is_default: bool = False
     created_at: datetime
     last_used_at: datetime | None = None
     revoked_at: datetime | None = None

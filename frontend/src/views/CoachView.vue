@@ -27,7 +27,7 @@ const dictation = useSpeechRecognition((text) => {
 const MAX_ATTACHMENTS = 4
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
-const DOC_EXTENSION = /\.(docx|txt|md)$/i
+const DOC_EXTENSION = /\.(docx|pdf|txt|md)$/i
 const attachmentInput = ref<HTMLInputElement | null>(null)
 const pendingAttachments = ref<
   Array<{ id: string; filename: string; kind: 'image' | 'doc'; preview: string | null }>
@@ -69,7 +69,7 @@ async function onAttachmentChange(event: Event): Promise<void> {
       const image = IMAGE_TYPES.includes(file.type)
       const document = DOC_EXTENSION.test(file.name)
       if (!image && !document) {
-        attachmentError.value = '只支持图片、DOCX、TXT 或 Markdown 附件'
+        attachmentError.value = '只支持图片、Word、PDF、TXT 或 Markdown 附件'
         continue
       }
       if (file.size > MAX_IMAGE_BYTES) {
@@ -363,7 +363,7 @@ onBeforeUnmount(() => {
               ref="attachmentInput"
               class="visually-hidden"
               type="file"
-              accept="image/png,image/jpeg,image/webp,.docx,.txt,.md"
+              accept="image/png,image/jpeg,image/webp,.docx,.pdf,.txt,.md"
               multiple
               @change="onAttachmentChange"
             />
@@ -397,7 +397,7 @@ onBeforeUnmount(() => {
                 :disabled="uploadingAttachment || coach.sending.value || Boolean(coach.streamingMessageId.value)"
                 @click="chooseAttachments"
               >
-                <AppIcon name="image" />
+                <AppIcon name="paperclip" />
               </DivButton>
               <DivButton
                 v-if="dictation.supported.value"

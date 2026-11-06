@@ -7,6 +7,7 @@ import { ValidationError } from '../api/errors'
 import {
   createPersonalToken,
   listPersonalTokens,
+  refreshPersonalToken,
   revokePersonalToken,
   type PersonalToken,
   type PersonalTokenCreated,
@@ -83,6 +84,21 @@ async function revokeToken(token: PersonalToken): Promise<void> {
     await loadTokens()
   } catch (revokeError) {
     tokenError.value = revokeError
+  } finally {
+    revokingId.value = ''
+  }
+}
+
+async function refreshToken(token: PersonalToken): Promise<void> {
+  if (revokingId.value) return
+  revokingId.value = token.id
+  tokenError.value = null
+  copyNotice.value = ''
+  try {
+    newToken.value = await refreshPersonalToken(token.id)
+    await loadTokens()
+  } catch (refreshError) {
+    tokenError.value = refreshError
   } finally {
     revokingId.value = ''
   }
@@ -298,21 +314,31 @@ async function submit(): Promise<void> {
     <ul v-else-if="tokens.length" class="mcp-token-list">
       <li v-for="token in tokens" :key="token.id">
         <div>
-          <strong>{{ token.name }}</strong>
+          <strong>
+            {{ token.name }}
+            <span v-if="token.isDefault" class="mcp-token-default">默认</span>
+          </strong>
           <small>
             {{ token.prefix }}…
             · 创建于 {{ formatTokenDate(token.createdAt) }}
             <template v-if="token.lastUsedAt"> · 最近使用 {{ formatTokenDate(token.lastUsedAt) }}</template>
           </small>
         </div>
-        <DivButton
-          v-if="!token.revokedAt"
-          class="button-secondary button-small"
-          type="button"
-          :disabled="revokingId === token.id"
-          @click="revokeToken(token)"
-        >{{ revokingId === token.id ? '正在撤销…' : '撤销' }}</DivButton>
-        <span v-else class="field-hint">已撤销</span>
+        <div class="mcp-token-actions">
+          <DivButton
+            class="button-secondary button-small"
+            type="button"
+            :disabled="revokingId === token.id"
+            @click="refreshToken(token)"
+          >{{ revokingId === token.id ? '正在刷新…' : '刷新' }}</DivButton>
+          <DivButton
+            v-if="!token.isDefault"
+            class="button-danger button-small"
+            type="button"
+            :disabled="revokingId === token.id"
+            @click="revokeToken(token)"
+          >删除</DivButton>
+        </div>
       </li>
     </ul>
     <p v-else-if="!tokensLoading" class="field-hint">还没有访问令牌。</p>

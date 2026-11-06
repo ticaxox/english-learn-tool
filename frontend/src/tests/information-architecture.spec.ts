@@ -118,11 +118,12 @@ describe('T-FE-020 personal information architecture', () => {
   it('renders the daily map from its Markdown-like description on Today', () => {
     const today = source('../views/TodayView.vue')
     const challenge = source('../views/ChallengeView.vue')
+    const map = source('../components/ChallengeDslMap.vue')
     expect(today).toContain('<ChallengeView embedded />')
     expect(today).toContain('crumb-trail-board')
     expect(challenge).toContain('ChallengeDslMap')
     expect(challenge).toContain('mapDsl')
-    expect(challenge).toContain('parseChallengeMapDsl')
+    expect(map).toContain('parseChallengeMapDsl')
   })
 
   it('does not restore legacy organization or notification routes in the production router', () => {
