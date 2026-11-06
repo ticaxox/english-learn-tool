@@ -164,6 +164,7 @@ export interface ChoiceQuestion {
   /** Server-declared option count; it is authoritative, not a UI constant. */
   optionCount: number
   phonetic: string | null
+  partOfSpeech: string | null
   remaining: number
 }
 
@@ -186,6 +187,7 @@ export interface SpellingQuestion {
   questionId: string
   definition: string
   phonetic: string | null
+  partOfSpeech: string | null
   blankType: SpellingBlankType | null
   cloze: string
   blanks: SpellingBlank[]

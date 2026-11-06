@@ -31,6 +31,7 @@ function choice(overrides: Partial<ChoiceQuestion> = {}): ChoiceQuestion {
     questionId: 'q-2',
     prompt: '选择「resilient」的正确释义',
     phonetic: '/rɪˈzɪliənt/',
+    partOfSpeech: 'adj.',
     options: [
       { optionId: 'o-1', label: '有弹性的；能恢复的' },
       { optionId: 'o-2', label: '沉默的' },
@@ -49,6 +50,7 @@ function spelling(overrides: Partial<SpellingQuestion> = {}): SpellingQuestion {
     questionId: 'q-3',
     definition: 'n. 机会；可能性',
     phonetic: '/ˌɒpəˈtjuːnəti/',
+    partOfSpeech: 'n.',
     blankType: 'first_letter',
     cloze: 'o________',
     blanks: [

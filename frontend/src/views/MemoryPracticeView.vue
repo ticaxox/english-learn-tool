@@ -144,6 +144,7 @@ async function rateFlashcard(questionId: string, rating: 'again' | 'good'): Prom
 interface WrongCard {
   word: string
   phonetic: string | null
+  partOfSpeech: string | null
   meaning: string
   kind: 'choice' | 'spelling'
   typed: string | null
@@ -165,11 +166,10 @@ async function answerChoice(questionId: string, optionId: string): Promise<void>
     wrongCard.value = {
       word: feedback.correctAnswer ?? '',
       phonetic: question?.kind === 'choice' ? question.phonetic : null,
+      partOfSpeech: question?.kind === 'choice' ? question.partOfSpeech : null,
       meaning: question?.kind === 'choice' ? question.prompt : '',
       kind: 'choice',
-      typed: question?.kind === 'choice'
-        ? question.options.find((option) => option.optionId === optionId)?.label ?? null
-        : null,
+      typed: null,
     }
     return
   }
@@ -184,6 +184,7 @@ async function answerSpelling(questionId: string, answer: string): Promise<void>
     wrongCard.value = {
       word: feedback.correctAnswer ?? '',
       phonetic: question?.kind === 'spelling' ? question.phonetic : null,
+      partOfSpeech: question?.kind === 'spelling' ? question.partOfSpeech : null,
       meaning: question?.kind === 'spelling' ? question.definition : '',
       kind: 'spelling',
       typed: answer,
@@ -402,10 +403,15 @@ watch(challengeModule, async (module, previous) => {
         <section v-if="wrongCard" class="memory-wrong-detail" aria-live="polite">
           <div class="workspace-card memory-wrong-detail__card">
             <div class="memory-wrong-detail__grid">
-              <h2>{{ wrongCard.word }}</h2>
-              <div class="memory-wrong-detail__side">
+              <div class="memory-wrong-detail__word">
+                <h2>{{ wrongCard.word }}</h2>
                 <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
-                <p class="memory-wrong-detail__meaning">{{ wrongCard.meaning }}</p>
+              </div>
+              <div class="memory-wrong-detail__side">
+                <p class="memory-wrong-detail__meaning">
+                  <span v-if="wrongCard.partOfSpeech" class="memory-wrong-detail__pos">{{ wrongCard.partOfSpeech }}</span>
+                  <span class="memory-wrong-detail__definition">{{ wrongCard.meaning }}</span>
+                </p>
                 <p v-if="wrongCard.kind === 'spelling' && wrongCard.typed" class="memory-wrong-detail__answer">
                   <span class="memory-wrong-detail__letters">
                     <span

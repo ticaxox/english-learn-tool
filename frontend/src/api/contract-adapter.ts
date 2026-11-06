@@ -587,6 +587,7 @@ export function parseStudyQuestion(payload: unknown, module: MemoryModule): Stud
       options: labels.map((label) => ({ optionId: label, label })),
       optionCount,
       phonetic: optionalString(card[CONTRACT.card.phonetic], endpoint, 'card.phonetic'),
+      partOfSpeech: optionalString(card[CONTRACT.card.partOfSpeech], endpoint, 'card.part_of_speech'),
       remaining,
     }
   }
@@ -597,6 +598,7 @@ export function parseStudyQuestion(payload: unknown, module: MemoryModule): Stud
     questionId,
     definition: requireString(card[CONTRACT.card.prompt], endpoint, 'card.prompt'),
     phonetic: optionalString(card[CONTRACT.card.phonetic], endpoint, 'card.phonetic'),
+    partOfSpeech: optionalString(card[CONTRACT.card.partOfSpeech], endpoint, 'card.part_of_speech'),
     blankType: parseBlankType(body, endpoint),
     cloze,
     blanks: blanksFromCloze(cloze),

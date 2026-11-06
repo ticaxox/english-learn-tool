@@ -2687,3 +2687,68 @@
 }
 
 .personal-workspace .challenge-dsl-canvas { min-width: 0; }
+
+/* All memory card copy is vertically centred inside the surface. */
+.personal-workspace .memory-page .memory-main-card .study-card { align-content: center; }
+
+/* Wrong-answer card: word above its phonetic on the left, word class and meaning right. */
+.personal-workspace .memory-wrong-detail__card {
+  display: grid;
+  align-content: center;
+  min-height: 260px;
+}
+
+.personal-workspace .memory-wrong-detail__grid {
+  align-items: stretch;
+}
+
+.personal-workspace .memory-wrong-detail__word {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: 120px;
+  text-align: left;
+}
+
+.personal-workspace .memory-wrong-detail__word h2 { margin: 0; text-align: left; }
+.personal-workspace .memory-wrong-detail__word .memory-wrong-detail__phonetic { margin: 0; }
+
+.personal-workspace .memory-wrong-detail__side {
+  align-content: center;
+  justify-items: start;
+  text-align: left;
+}
+
+.personal-workspace .memory-wrong-detail__meaning {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  margin: 0;
+}
+
+.personal-workspace .memory-wrong-detail__pos {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ui-surface-subtle, #fbf7ee);
+  color: var(--ui-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.personal-workspace .memory-wrong-detail__definition {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .memory-wrong-detail__word {
+    min-height: 0;
+    align-items: center;
+    text-align: center;
+  }
+  .personal-workspace .memory-wrong-detail__word h2 { text-align: center; }
+  .personal-workspace .memory-wrong-detail__side { justify-items: center; text-align: center; }
+  .personal-workspace .memory-wrong-detail__meaning { justify-content: center; }
+}
