@@ -4,6 +4,7 @@ import App from './App.vue'
 import DivButton from './components/DivButton.vue'
 import { apiClient } from './api/client'
 import { createAppRouter } from './router'
+import { markSurface, redirectForViewport, watchOrientation } from './lib/surface'
 import { useAuthStore } from './stores/auth'
 import './style.css'
 import './cookie-theme.css'
@@ -13,6 +14,11 @@ import './information-architecture.css'
 import './personal-ui.css'
 import './game-ui.css'
 import './controls.css'
+
+// Swap surfaces before the router is built, so its history base is right.
+redirectForViewport()
+markSurface()
+watchOrientation()
 
 const app = createApp(App)
 const pinia = createPinia()

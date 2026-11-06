@@ -23,6 +23,7 @@ import SettingsHubView from '../views/SettingsHubView.vue'
 import TodayView from '../views/TodayView.vue'
 import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
+import { surfaceBase } from '../lib/surface'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -160,7 +161,7 @@ export function createAppRouter(
   pinia: Pinia,
   history: RouterHistory = import.meta.env.MODE === 'test'
     ? createMemoryHistory()
-    : createWebHistory(import.meta.env.BASE_URL),
+    : createWebHistory(surfaceBase()),
 ) {
   const router = createRouter({
     history,
