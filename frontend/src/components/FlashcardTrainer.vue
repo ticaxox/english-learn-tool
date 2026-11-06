@@ -69,10 +69,10 @@ function rate(rating: FlashcardRating): void {
     <div class="study-card__face">
       <div class="study-card__word-block">
         <h2 id="flashcard-front" ref="frontHeading" class="study-card__word" tabindex="-1">{{ props.question.front }}</h2>
+        <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
       </div>
 
       <div class="study-card__side">
-        <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
         <div
           v-if="revealed"
           id="flashcard-back"

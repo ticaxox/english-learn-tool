@@ -2752,3 +2752,7 @@
   .personal-workspace .memory-wrong-detail__side { justify-items: center; text-align: center; }
   .personal-workspace .memory-wrong-detail__meaning { justify-content: center; }
 }
+
+/* Flashcard: the phonetic sits under the word in the left column. */
+.memory-main-card .study-card__word-block { align-content: start; }
+.memory-main-card .study-card__word-block .study-card__phonetic { margin: 4px 0 0; }
