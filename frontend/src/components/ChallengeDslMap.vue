@@ -9,7 +9,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
-import { parseChallengeMapDsl, type ChallengeMapNode } from '../utils/challenge-map'
+import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
 
 const props = defineProps<{ dsl: string }>()
 const emit = defineEmits<{ select: [id: string] }>()
@@ -30,7 +30,10 @@ const V_TOP = 44
 const V_WIDTH = 320
 
 const vertical = ref(false)
+const trackRef = ref<HTMLElement | null>(null)
+const trackWidth = ref(0)
 let query: MediaQueryList | null = null
+let resizeObserver: ResizeObserver | null = null
 
 function syncOrientation(event?: MediaQueryListEvent): void {
   vertical.value = event ? event.matches : Boolean(query?.matches)
@@ -41,10 +44,19 @@ onMounted(() => {
   query = window.matchMedia(VERTICAL_QUERY)
   syncOrientation()
   query.addEventListener?.('change', syncOrientation)
+  // The wide trail spreads across the card instead of leaving empty margins.
+  if (typeof ResizeObserver !== 'undefined' && trackRef.value) {
+    resizeObserver = new ResizeObserver((entries) => {
+      trackWidth.value = Math.round(entries[0]?.contentRect.width ?? 0)
+    })
+    resizeObserver.observe(trackRef.value)
+  }
 })
 
 onUnmounted(() => {
   query?.removeEventListener?.('change', syncOrientation)
+  resizeObserver?.disconnect()
+  resizeObserver = null
 })
 
 const map = computed(() => parseChallengeMapDsl(props.dsl))
@@ -113,12 +125,14 @@ function branchParent(branch: ChallengeMapNode, byId: Map<string, Placed>): Plac
 const horizontalLayout = computed<Layout>(() => {
   const list: Placed[] = []
   const byId = new Map<string, Placed>()
+  const mainCount = columns.value.filter((column) => column.main).length
+  const spacing = spreadSpacing(trackWidth.value, mainCount, BOSS, COLUMN)
   let columnIndex = 0
   for (const column of columns.value) {
     if (!column.main) continue
     const node = column.main
     const size = isBoss(node) ? BOSS : NODE
-    const centerX = columnIndex * COLUMN + BOSS / 2 + 10
+    const centerX = columnIndex * spacing + BOSS / 2 + 10
     const y = TOP + (columnIndex % 2) * WAVE
     const placed = { node, x: centerX - size / 2, y, size }
     list.push(placed)
@@ -279,7 +293,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
       </div>
     </header>
 
-    <div class="challenge-dsl-track">
+    <div ref="trackRef" class="challenge-dsl-track">
       <div
         class="challenge-dsl-canvas"
         :style="{ width: `${layout.width}px`, height: `${layout.height}px` }"

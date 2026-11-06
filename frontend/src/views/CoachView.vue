@@ -26,8 +26,12 @@ const dictation = useSpeechRecognition((text) => {
 
 const MAX_ATTACHMENTS = 4
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+const DOC_EXTENSION = /\.(docx|txt|md)$/i
 const attachmentInput = ref<HTMLInputElement | null>(null)
-const pendingAttachments = ref<Array<{ id: string; filename: string; preview: string }>>([])
+const pendingAttachments = ref<
+  Array<{ id: string; filename: string; kind: 'image' | 'doc'; preview: string | null }>
+>([])
 const uploadingAttachment = ref(false)
 const attachmentError = ref<string | null>(null)
 
@@ -36,13 +40,15 @@ function chooseAttachments(): void {
 }
 
 function clearAttachments(): void {
-  for (const item of pendingAttachments.value) URL.revokeObjectURL(item.preview)
+  for (const item of pendingAttachments.value) {
+    if (item.preview) URL.revokeObjectURL(item.preview)
+  }
   pendingAttachments.value = []
 }
 
 function removeAttachment(index: number): void {
   const [removed] = pendingAttachments.value.splice(index, 1)
-  if (removed) URL.revokeObjectURL(removed.preview)
+  if (removed?.preview) URL.revokeObjectURL(removed.preview)
 }
 
 async function onAttachmentChange(event: Event): Promise<void> {
@@ -60,12 +66,14 @@ async function onAttachmentChange(event: Event): Promise<void> {
   uploadingAttachment.value = true
   try {
     for (const file of files.slice(0, room)) {
-      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-        attachmentError.value = '只支持 PNG、JPEG 或 WebP 图片'
+      const image = IMAGE_TYPES.includes(file.type)
+      const document = DOC_EXTENSION.test(file.name)
+      if (!image && !document) {
+        attachmentError.value = '只支持图片、DOCX、TXT 或 Markdown 附件'
         continue
       }
       if (file.size > MAX_IMAGE_BYTES) {
-        attachmentError.value = '单张图片不能超过 5 MB'
+        attachmentError.value = '单个附件不能超过 5 MB'
         continue
       }
       try {
@@ -73,10 +81,11 @@ async function onAttachmentChange(event: Event): Promise<void> {
         pendingAttachments.value.push({
           id: uploaded.id,
           filename: uploaded.filename,
-          preview: URL.createObjectURL(file),
+          kind: image ? 'image' : 'doc',
+          preview: image ? URL.createObjectURL(file) : null,
         })
       } catch {
-        attachmentError.value = '图片上传失败，请重试'
+        attachmentError.value = '附件上传失败，请重试'
       }
     }
   } finally {
@@ -354,7 +363,7 @@ onBeforeUnmount(() => {
               ref="attachmentInput"
               class="visually-hidden"
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/png,image/jpeg,image/webp,.docx,.txt,.md"
               multiple
               @change="onAttachmentChange"
             />
@@ -364,13 +373,13 @@ onBeforeUnmount(() => {
               v-model="draft"
               maxlength="8000"
               rows="3"
-              placeholder="例如：帮我看看今天应该先复习什么？Enter 发送，Shift+Enter 换行。"
               :disabled="coach.sending.value || Boolean(coach.streamingMessageId.value)"
               @keydown="onComposerKeydown"
             />
             <div v-if="pendingAttachments.length > 0" class="coach-composer__attachments">
               <figure v-for="(item, index) in pendingAttachments" :key="item.id" class="coach-attachment">
-                <img :src="item.preview" :alt="item.filename" />
+                <img v-if="item.kind === 'image' && item.preview" :src="item.preview" :alt="item.filename" />
+                <span v-else class="coach-attachment__file">{{ item.filename }}</span>
                 <DivButton
                   class="coach-attachment__remove"
                   type="button"
@@ -380,15 +389,15 @@ onBeforeUnmount(() => {
               </figure>
             </div>
             <div class="coach-composer__footer">
-              <span class="field-hint">{{ draft.length }} / 8000</span>
               <DivButton
                 class="button-secondary button-small coach-attach"
                 type="button"
+                aria-label="添加附件"
+                title="添加附件（图片、DOCX、TXT、Markdown）"
                 :disabled="uploadingAttachment || coach.sending.value || Boolean(coach.streamingMessageId.value)"
                 @click="chooseAttachments"
               >
                 <AppIcon name="image" />
-                {{ uploadingAttachment ? '上传中…' : '图片' }}
               </DivButton>
               <DivButton
                 v-if="dictation.supported.value"

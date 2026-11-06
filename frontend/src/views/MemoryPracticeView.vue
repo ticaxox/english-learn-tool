@@ -335,7 +335,7 @@ watch(challengeModule, async (module, previous) => {
       </p>
 
       <div class="memory-workbench-grid" :class="{ 'is-session': Boolean(session.question.value) || session.finished.value }">
-        <section class="workspace-card memory-main-card">
+        <section class="workspace-card memory-main-card" :class="{ 'is-picker': showModulePicker }">
         <template v-if="showModulePicker">
           <header class="workspace-section-header">
             <div>

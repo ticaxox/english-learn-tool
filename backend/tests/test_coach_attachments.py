@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import io
+import json
+import zipfile
 from uuid import UUID
 
 from app.models.coach import CoachMessage
@@ -7,6 +10,21 @@ from app.services.ai_jobs import process_ai_job
 from tests.ai_support import create_provider, fake_provider_server, login
 
 PNG_BYTES = b"\x89PNG\r\n\x1a\n" + b"0" * 64
+
+
+def docx_bytes(text: str) -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr(
+            "word/document.xml",
+            (
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                f"<w:body><w:p><w:r><w:t>{text}</w:t></w:r></w:p></w:body></w:document>"
+            ),
+        )
+    return buffer.getvalue()
+
 
 
 async def _conversation(client, headers) -> str:
@@ -66,7 +84,7 @@ async def test_rejects_unsupported_type_and_oversized_image(client, member_user)
     text_file = await client.post(
         f"/api/v1/coach/conversations/{conversation_id}/attachments",
         headers=headers,
-        files={"file": ("notes.txt", b"hello", "text/plain")},
+        files={"file": ("notes.bin", b"hello", "application/octet-stream")},
     )
     assert text_file.status_code == 415
     assert text_file.json()["code"] == "COACH_ATTACHMENT_TYPE_UNSUPPORTED"
@@ -147,3 +165,56 @@ async def test_image_payload_reaches_the_provider(client, app, member_user):
         assert user_content[0]["type"] == "text"
         assert user_content[1]["type"] == "image_url"
         assert user_content[1]["image_url"]["url"].startswith("data:image/png;base64,")
+
+
+async def test_docx_attachment_text_reaches_the_provider(client, app, member_user):
+    headers = await login(client, member_user.username)
+    conversation_id = await _conversation(client, headers)
+
+    uploaded = await client.post(
+        f"/api/v1/coach/conversations/{conversation_id}/attachments",
+        headers=headers,
+        files={
+            "file": (
+                "notes.docx",
+                docx_bytes("今天的笔记：review the words patiently"),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        },
+    )
+    assert uploaded.status_code == 201, uploaded.text
+    attachment = uploaded.json()
+    assert attachment["filename"] == "notes.docx"
+
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        server.queue_json(200, {"message": "看过笔记了。", "actions": []})
+        sent = await client.post(
+            f"/api/v1/coach/conversations/{conversation_id}/messages",
+            headers={**headers, "Idempotency-Key": "docx-message"},
+            json={"content": "请看我的笔记", "attachment_ids": [attachment["id"]]},
+        )
+        assert sent.status_code == 202, sent.text
+
+        async with app.state.session_factory() as session:
+            message = await session.get(CoachMessage, UUID(sent.json()["message_id"]))
+            assert message is not None and message.ai_job_id is not None
+            job_id = message.ai_job_id
+        await process_ai_job(
+            {
+                "session_factory": app.state.session_factory,
+                "settings": app.state.settings,
+                "redis": app.state.arq,
+            },
+            str(job_id),
+        )
+
+        call = next(
+            request
+            for request in server.requests
+            if request["method"] == "POST" and "/chat/completions" in request["path"]
+        )
+        user_content = call["body"]["messages"][1]["content"]
+        payload = json.loads(user_content)
+        assert payload["attachment_texts"][0]["filename"] == "notes.docx"
+        assert "review the words patiently" in payload["attachment_texts"][0]["text"]

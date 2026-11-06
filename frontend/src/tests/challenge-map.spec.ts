@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { describe, expect, it } from 'vitest'
 import ChallengeDslMap from '../components/ChallengeDslMap.vue'
-import { parseChallengeMapDsl } from '../utils/challenge-map'
+import { parseChallengeMapDsl, spreadSpacing } from '../utils/challenge-map'
 
 const DSL = `# 今日闯关
 > 先复习，再学习。
@@ -106,5 +106,19 @@ describe('challenge map layout', () => {
         value: original,
       })
     }
+  })
+})
+
+describe('horizontal spread', () => {
+  it('keeps the minimum gap before the card is measured', () => {
+    expect(spreadSpacing(0, 5)).toBe(146)
+    expect(spreadSpacing(400, 5)).toBe(146)
+    expect(spreadSpacing(700, 1)).toBe(146)
+  })
+
+  it('fills a wide card with the stops', () => {
+    const spacing = spreadSpacing(1100, 5)
+    expect(spacing).toBeGreaterThan(146)
+    expect(spacing).toBeCloseTo((1100 - 96 - 20) / 4)
   })
 })

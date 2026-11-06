@@ -28,7 +28,11 @@ from app.services.ai_security import ProviderHttpClient, ProviderRequestError
 from app.services.ai_usage import resolved_quota_limits
 from app.services.ai_validation import output_schema, repair_prompt, validate_task_output
 from app.services.auth import utcnow
-from app.services.coach_uploads import read_attachment
+from app.services.coach_uploads import (
+    attachment_text,
+    is_image,
+    read_attachment,
+)
 from app.services.learning import local_date_for
 from app.services.wordbook_queue import WORDBOOK_QUEUE_NAME
 
@@ -544,15 +548,15 @@ async def _call_with_provider(
     raise last_error
 
 
-async def _coach_images(
+async def _coach_attachments(
     session: AsyncSession, settings: Settings, job: AiJob
-) -> list[tuple[str, bytes]]:
-    """Load the images a coach message carries, in upload order."""
+) -> tuple[list[tuple[str, bytes]], list[dict[str, str]]]:
+    """Images go to the model as image parts; documents as extracted text."""
     if job.task_type != "coach_reply":
-        return []
+        return [], []
     attachment_ids = job.input_context.get("attachment_ids") or []
     if not attachment_ids:
-        return []
+        return [], []
     rows = list(
         (
             await session.scalars(
@@ -566,12 +570,21 @@ async def _coach_images(
         ).all()
     )
     images: list[tuple[str, bytes]] = []
+    texts: list[dict[str, str]] = []
+    budget = 12_000
     for row in rows:
         try:
-            images.append((row.content_type, read_attachment(settings, row)))
+            if is_image(row.content_type):
+                images.append((row.content_type, read_attachment(settings, row)))
+                continue
+            text = (attachment_text(settings, row) or "").strip()
         except AppError:
             continue
-    return images
+        if text and budget > 0:
+            chunk = text[: min(6_000, budget)]
+            budget -= len(chunk)
+            texts.append({"filename": row.filename, "text": chunk})
+    return images, texts
 
 
 async def generate_structured(
@@ -592,7 +605,10 @@ async def generate_structured(
     repairs = 0
     last_error: AiGenerationError | None = None
     deadline = time.monotonic() + settings.ai_generation_budget_seconds
-    images = await _coach_images(session, settings, job)
+    images, attachment_texts = await _coach_attachments(session, settings, job)
+    call_context: dict[str, Any] = dict(job.input_context)
+    if attachment_texts:
+        call_context["attachment_texts"] = attachment_texts
 
     def remaining() -> int:
         return int(deadline - time.monotonic())
@@ -619,7 +635,7 @@ async def generate_structured(
                     settings,
                     provider,
                     prompt=job.prompt_snapshot,
-                    context=job.input_context,
+                    context=call_context,
                     schema_name=job.task_type,
                     schema=schema,
                     deadline=deadline,

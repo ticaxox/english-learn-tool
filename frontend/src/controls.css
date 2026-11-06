@@ -3190,3 +3190,67 @@
 
 .personal-workspace .mcp-token-list li > div { display: grid; gap: 2px; min-width: 0; }
 .personal-workspace .mcp-token-list small { color: var(--ui-muted); font-size: 0.76rem; }
+
+/* Picker: the three routes stand as their own books, not cards in a card. */
+.personal-workspace .memory-main-card.is-picker {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .memory-main-card.is-picker .workspace-section-header { padding: 4px 2px 14px; }
+.personal-workspace .memory-main-card.is-picker .memory-action-grid { gap: 16px; }
+
+.personal-workspace .memory-main-card.is-picker .memory-action-card {
+  min-height: 168px;
+  border-left-width: 10px !important;
+  border-radius: 8px 16px 16px 8px !important;
+  box-shadow: 0 6px 0 rgb(59 42 26 / 10%) !important;
+}
+
+/* Attachment-only button sits at the start of the coach composer. */
+.personal-workspace .coach-composer__footer { align-items: center; }
+.personal-workspace .coach-attach {
+  flex: 0 0 auto;
+  width: 32px;
+  min-height: 32px;
+  margin-right: auto;
+  padding: 0;
+  place-items: center;
+}
+.personal-workspace .coach-attach svg { width: 16px; height: 16px; }
+
+.personal-workspace .coach-attachment__file {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  padding: 6px;
+  border: 1px dashed var(--ui-line-strong);
+  border-radius: 10px;
+  place-items: center;
+  overflow: hidden;
+  background: var(--ui-surface-subtle, #fbf7ee);
+  color: var(--ui-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-align: center;
+  word-break: break-all;
+}
+
+.personal-workspace .coach-image__file {
+  display: inline-flex;
+  max-width: 240px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px dashed var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-surface-subtle, #fbf7ee);
+  color: var(--ui-ink);
+  font-size: 0.8rem;
+}
+
+.personal-workspace .coach-image__file svg { width: 16px; height: 16px; color: var(--ui-muted); }
+.personal-workspace .coach-image__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.personal-workspace .coach-image__ext { color: var(--ui-muted); font-size: 0.68rem; font-weight: 800; }

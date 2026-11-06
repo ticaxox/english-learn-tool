@@ -122,3 +122,12 @@ export function parseChallengeMapDsl(text: string): ChallengeMap {
   }
   return map
 }
+
+/**
+ * Horizontal gap between the main stops when the map should fill its card.
+ * Falls back to the minimum gap before the container has been measured.
+ */
+export function spreadSpacing(available: number, count: number, node = 96, minimum = 146): number {
+  if (count <= 1 || available <= 0) return minimum
+  return Math.max(minimum, (available - node - 20) / (count - 1))
+}

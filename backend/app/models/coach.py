@@ -217,7 +217,7 @@ class CoachAttachment(Base):
         PGUUID(as_uuid=True), ForeignKey("coach_messages.id", ondelete="CASCADE")
     )
     filename: Mapped[str] = mapped_column(String(200), nullable=False)
-    content_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(128), nullable=False)
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     storage_path: Mapped[str] = mapped_column(String(500), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
