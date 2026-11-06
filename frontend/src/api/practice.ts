@@ -198,7 +198,7 @@ export interface PracticeRecordQuery {
   limit?: number
 }
 
-const PRACTICE_TYPES: readonly PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
+const PRACTICE_TYPES: readonly PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'mixed']
 const PRACTICE_SOURCES: readonly PracticeSource[] = [
   'today_new',
   'today_review',

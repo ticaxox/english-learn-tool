@@ -109,6 +109,11 @@ describe('practice API contract', () => {
     expect(session.questions[0]).not.toHaveProperty('correctChoiceId')
   })
 
+  it('accepts a mixed session type', () => {
+    const session = parsePracticeSession({ ...sessionPayload, practice_type: 'mixed' })
+    expect(session.practiceType).toBe('mixed')
+  })
+
   it('rejects a pre-submit session that leaks private answer fields', () => {
     const leaked = {
       ...sessionPayload,

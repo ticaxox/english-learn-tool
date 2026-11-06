@@ -213,7 +213,7 @@ async function startPractice(): Promise<void> {
     <div v-else class="practice-chooser__panel" role="tabpanel" aria-label="AI 练习">
       <div class="practice-chooser__types">
         <DivButton
-          v-for="type in (['fill_blank', 'reading', 'translation', 'writing'] as PracticeType[])"
+          v-for="type in (['fill_blank', 'reading', 'translation', 'writing', 'mixed'] as PracticeType[])"
           :key="type"
           class="practice-chooser__type"
           :class="{ 'is-selected': practiceType === type }"

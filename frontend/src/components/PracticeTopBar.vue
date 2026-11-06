@@ -43,7 +43,7 @@ const practiceIcons: Record<PracticeType, TabIcon> = {
 const tabs = computed<Array<{ id: string; label: string; icon: TabIcon }>>(() => (
   props.mode === 'memory'
     ? MEMORY_MODULES.map((module: MemoryModule) => ({ id: module, label: MEMORY_MODULE_LABELS[module], icon: memoryIcons[module] }))
-    : (['fill_blank', 'reading', 'translation', 'writing'] as PracticeType[])
+    : (['fill_blank', 'reading', 'translation', 'writing', 'mixed'] as PracticeType[])
       .map((type) => ({ id: type, label: PRACTICE_TYPE_LABELS[type], icon: practiceIcons[type] }))
 ))
 

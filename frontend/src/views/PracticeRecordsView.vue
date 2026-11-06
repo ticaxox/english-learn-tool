@@ -38,7 +38,7 @@ const deleteError = ref<unknown>(null)
 let pendingDeleteKey: string | null = null
 let pendingDeleteSignature = ''
 
-const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
+const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'mixed']
 const practiceSources: PracticeSource[] = ['today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty']
 const page = computed(() => Math.floor(offset.value / limit) + 1)
 const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)))
