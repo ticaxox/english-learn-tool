@@ -797,7 +797,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Practice Type",
             "type": "string"
@@ -1505,7 +1506,8 @@
                 "fill_blank",
                 "reading",
                 "translation",
-                "writing"
+                "writing",
+                "mixed"
               ],
               "type": "string"
             },
@@ -4938,7 +4940,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Practice Type",
             "type": "string"
@@ -5190,7 +5193,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Practice Type",
             "type": "string"
@@ -5363,7 +5367,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Question Type",
             "type": "string"
@@ -5528,7 +5533,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Question Type",
             "type": "string"
@@ -5616,7 +5622,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Practice Type",
             "type": "string"
@@ -5774,7 +5781,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Practice Type",
             "type": "string"
@@ -6065,7 +6073,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Practice Type",
             "type": "string"
@@ -6174,7 +6183,8 @@
               "fill_blank",
               "reading",
               "translation",
-              "writing"
+              "writing",
+              "mixed"
             ],
             "title": "Practice Type",
             "type": "string"

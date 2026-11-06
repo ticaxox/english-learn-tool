@@ -1420,7 +1420,9 @@ async def materialize_practice_grading(session: AsyncSession, job: AiJob) -> Non
                 suggestions=item.suggestions,
             )
         )
-    correct_count: int | None = None
+    # Purely written practice has no locally graded questions, but the column is
+    # not null, so start from zero rather than leaving it unset.
+    correct_count = 0
     if practice.practice_type == "mixed":
         # Mixed sets grade choice questions locally and only send the written
         # ones to the AI; merge both halves back into question order.
@@ -1446,7 +1448,7 @@ async def materialize_practice_grading(session: AsyncSession, job: AiJob) -> Non
         submission_id=submission.id,
         status="completed",
         score=score,
-        correct_count=correct_count if correct_count is not None else 0,
+        correct_count=correct_count,
         total_questions=submission.total_questions,
         wrong_count=wrong_count,
         questions=question_results,

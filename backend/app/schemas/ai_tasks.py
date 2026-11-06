@@ -199,7 +199,9 @@ class ReadingPassage(StrictModel):
     id: str = Field(min_length=1, max_length=64)
     article: str = Field(min_length=1, max_length=20_000)
     article_zh: str = Field(min_length=1, max_length=20_000)
-    questions: list[ReadingQuestion] = Field(min_length=3, max_length=5)
+    # A mixed set may use a short passage for a single question; pure reading
+    # practice still has to match the chosen count exactly in ai_validation.
+    questions: list[ReadingQuestion] = Field(min_length=1, max_length=5)
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
     @field_validator("article")

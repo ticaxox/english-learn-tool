@@ -82,7 +82,20 @@ def _writing_output(entry_ids: list[str]) -> dict:
     }
 
 
+def _mixed_output(entry_ids: list[str]) -> dict:
+    fill = practice_output(entry_ids[:2])
+    reading = _reading_output(entry_ids)
+    return {
+        "practice_type": "mixed",
+        "items": [*fill["items"], {"id": "rp1", **{
+            key: value for key, value in reading["items"][0].items() if key != "questions"
+        }, "questions": reading["items"][0]["questions"][:1]}],
+    }
+
+
 def _generation_output(practice_type: str, entry_ids: list[str]) -> dict:
+    if practice_type == "mixed":
+        return _mixed_output(entry_ids)
     if practice_type == "fill_blank":
         return practice_output(entry_ids)
     if practice_type == "reading":
@@ -447,3 +460,36 @@ async def test_recent_sessions_are_listed_and_can_be_deleted(client, app, member
 
     after = await client.get(f"{PRACTICE_PATH}/sessions?limit=10", headers=headers)
     assert all(item["id"] != fill["id"] for item in after.json()["items"])
+
+
+async def test_mixed_practice_grades_choice_questions_locally(
+    client, app, member_user
+) -> None:
+    headers = await login(client, member_user.username)
+    wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
+    await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        mixed = await _generate(app, client, headers, server, "mixed", 3)
+        questions = await _questions(app, mixed["id"])
+        assert len(questions) == 3
+        answers = []
+        for index, question in enumerate(questions):
+            correct = question.private_payload["correct_option_id"]
+            wrong = next(
+                option["id"]
+                for option in question.public_payload["options"]
+                if option["id"] != correct
+            )
+            answers.append({"question_id": str(question.id), "answer": correct if index else wrong})
+        submitted = await client.post(
+            f"{PRACTICE_PATH}/sessions/{mixed['id']}/submit",
+            headers={**headers, "Idempotency-Key": f"mixed-submit-{uuid4().hex}"},
+            json={"answers": answers},
+        )
+        assert submitted.status_code == 202, submitted.text
+        body = submitted.json()
+        assert body["status"] == "completed"
+        assert body["result"]["total_questions"] == 3
+        assert body["result"]["correct_count"] == 2
+        assert body["result"]["score"] == 66.67
