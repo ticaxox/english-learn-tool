@@ -3590,3 +3590,9 @@
   padding-top: 14px;
   border-top: 1px dashed var(--ui-line);
 }
+
+/* Coach: full-width rows so the user bubble keeps its right alignment, and a
+   column height that leaves the composer fully visible. */
+.personal-workspace .coach-page .coach-layout--with-history { height: calc(100vh - 330px); }
+
+.personal-workspace .coach-page .coach-messages > * { width: 100%; }
