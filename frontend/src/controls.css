@@ -3572,3 +3572,21 @@
   }
   .personal-workspace .coach-page .coach-messages { max-height: 55vh; }
 }
+
+/* Coach chat: keep the thread next to the composer instead of floating at the top. */
+.personal-workspace .coach-page .coach-main { max-width: 900px; }
+
+.personal-workspace .coach-page .coach-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.personal-workspace .coach-page .coach-messages > * { flex: 0 0 auto; }
+
+.personal-workspace .coach-page .coach-messages > *:first-child { margin-top: auto; }
+
+.personal-workspace .coach-page .coach-composer {
+  padding-top: 14px;
+  border-top: 1px dashed var(--ui-line);
+}
