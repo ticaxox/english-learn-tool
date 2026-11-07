@@ -3460,3 +3460,22 @@
 }
 
 .personal-workspace .coach-page .coach-history { padding-right: 18px; }
+
+/* The slimmer task rail keeps every row on one line. */
+.personal-workspace .practice-task-row {
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.personal-workspace .practice-task-type,
+.personal-workspace .practice-task-status,
+.personal-workspace .practice-task-row > svg { flex: 0 0 auto; white-space: nowrap; }
+
+.personal-workspace .practice-task-row > strong {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.84rem;
+}
