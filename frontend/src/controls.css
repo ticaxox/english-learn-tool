@@ -3335,3 +3335,20 @@
   background: #1f9d55;
   transition: width 0.3s ease;
 }
+
+/* The reading passage spans the session width, above the questions and the rail. */
+.personal-workspace .member-practice-session-page > .practice-article-panel--wide {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+/* History delete stays a quiet icon button, not a filled chip. */
+.personal-workspace .coach-history__delete.div-button {
+  min-width: 0;
+  padding: 0.15rem 0.5rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui-muted);
+}
