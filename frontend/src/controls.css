@@ -3596,3 +3596,17 @@
 .personal-workspace .coach-page .coach-layout--with-history { height: calc(100vh - 330px); }
 
 .personal-workspace .coach-page .coach-messages > * { width: 100%; }
+
+/* Flex column ignores justify-self, so align the bubbles explicitly. */
+.personal-workspace .coach-page .coach-messages > * { width: auto; }
+
+.personal-workspace .coach-page .coach-message--user {
+  align-self: flex-end;
+  width: max-content;
+  max-width: 78%;
+}
+
+.personal-workspace .coach-page .coach-message--assistant {
+  align-self: flex-start;
+  max-width: 88%;
+}
