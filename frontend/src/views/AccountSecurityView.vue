@@ -186,7 +186,8 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <section class="panel ia-account-security" aria-labelledby="account-username-title">
+  <section class="panel ia-account-security" aria-labelledby="account-security-title">
+  <div class="ia-security-block ia-security-block--first" aria-labelledby="account-username-title">
     <div class="ia-subsection-header">
       <div>
         <p class="eyebrow">我的账户</p>
@@ -217,9 +218,7 @@ async function submit(): Promise<void> {
         <DivButton type="submit" :disabled="usernameSubmitting">{{ usernameSubmitting ? '正在更新…' : '保存用户名' }}</DivButton>
       </div>
     </form>
-  </section>
-
-  <section class="panel ia-account-security" aria-labelledby="account-security-title">
+  </div>
     <div class="ia-subsection-header">
       <div>
         <p class="eyebrow">账户安全</p>

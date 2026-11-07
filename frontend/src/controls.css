@@ -3479,3 +3479,96 @@
   white-space: nowrap;
   font-size: 0.84rem;
 }
+
+/* -------------------------------------- round 49: tidy the merged card layouts */
+
+/* Practice: the form starts right under the type pills, no stray divider. */
+.personal-workspace .practice-create-panel .practice-form {
+  margin-top: 12px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.personal-workspace .practice-hub .practice-type-picker { justify-content: flex-start; }
+
+/* AI settings: one card, dividers only between the three parts. */
+.personal-workspace .personal-ai-stack > .panel,
+.personal-workspace .personal-ai-stack > .ai-quota-panel,
+.personal-workspace .personal-ai-stack > .ai-memory-panel {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace .personal-ai-stack > .personal-ai-toolbar,
+.personal-workspace .personal-ai-stack > .personal-ai-list {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.personal-workspace .personal-ai-stack > .ai-memory-panel,
+.personal-workspace .personal-ai-stack > .ai-quota-panel {
+  padding-top: 18px !important;
+  border-top: 1px dashed var(--ui-line) !important;
+}
+
+/* Account: the first block sits at the top of the single card. */
+.personal-workspace .ia-security-block--first {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* ------------------------------------------ coach page: a real chat column */
+
+.personal-workspace .coach-page .coach-layout--with-history {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 26px;
+  align-items: stretch;
+  height: calc(100vh - 250px);
+  min-height: 460px;
+}
+
+.personal-workspace .coach-page .coach-history {
+  overflow: auto;
+}
+
+.personal-workspace .coach-page .coach-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.personal-workspace .coach-page .coach-main > .coach-main-header,
+.personal-workspace .coach-page .coach-main > .alert,
+.personal-workspace .coach-page .coach-main > .error-notice { flex: 0 0 auto; }
+
+.personal-workspace .coach-page .coach-messages {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 14px 2px 18px;
+  overflow: auto;
+}
+
+.personal-workspace .coach-page .coach-composer {
+  flex: 0 0 auto;
+  margin-top: 10px;
+}
+
+.personal-workspace .coach-page .coach-main-empty {
+  margin: auto;
+  max-width: 520px;
+}
+
+@media (max-width: 980px) {
+  .personal-workspace .coach-page .coach-layout--with-history {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+  .personal-workspace .coach-page .coach-messages { max-height: 55vh; }
+}
