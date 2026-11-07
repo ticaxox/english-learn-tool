@@ -95,57 +95,84 @@ def test_schema_rejects_missing_extra_and_wrong_count() -> None:
         )
 
 
-def test_reading_requires_200_words_and_matching_question_count() -> None:
-    entry_ids = [str(uuid4())]
-    questions = []
-    for index in range(3):
-        questions.append(
-            {
-                "id": f"rq{index}",
-                "prompt": "What is the main idea?",
-                "options": [
-                    {"id": "a", "text": "A"},
-                    {"id": "b", "text": "B"},
-                    {"id": "c", "text": "C"},
-                    {"id": "d", "text": "D"},
-                ],
-                "correct_option_id": "a",
-                "explanation": "The passage supports A.",
-            }
-        )
-    output = {
+def _reading_output(entry_ids: list[str], *, questions: int = 3, words: int = 200) -> dict:
+    return {
         "practice_type": "reading",
         "items": [
             {
                 "id": "p1",
-                "article": " ".join(["word"] * 200),
+                "article": " ".join(["word"] * words),
                 "article_zh": "文章",
-                "questions": questions,
+                "questions": [
+                    {
+                        "id": f"rq{index}",
+                        "prompt": "What is the main idea?",
+                        "options": [
+                            {"id": "a", "text": "A", "text_zh": "甲"},
+                            {"id": "b", "text": "B", "text_zh": "乙"},
+                            {"id": "c", "text": "C", "text_zh": "丙"},
+                            {"id": "d", "text": "D", "text_zh": "丁"},
+                        ],
+                        "correct_option_id": "a",
+                        "explanation": "The passage supports A.",
+                    }
+                    for index in range(questions)
+                ],
                 "target_entry_ids": [entry_ids[0]],
             }
         ],
     }
-    context = {
+
+
+def _reading_context(entry_ids: list[str], count: int = 3) -> dict:
+    return {
         "practice_type": "reading",
-        "count": 3,
+        "count": count,
         "source": "whole_book",
         "wordbook_id": str(uuid4()),
         "target_entry_ids": entry_ids,
+        "article_min_words": 180,
+        "article_max_words": 260,
     }
+
+
+def test_reading_is_one_passage_with_the_requested_questions() -> None:
+    entry_ids = [str(uuid4())]
+    context = _reading_context(entry_ids)
+
     result, summary = validate_task_output(
         task_type="practice_generation",
         context=context,
-        raw_text=json.dumps(output),
+        raw_text=json.dumps(_reading_output(entry_ids)),
     )
     assert result["practice_type"] == "reading"
     assert summary["question_count"] == 3
 
-    output["items"][0]["article"] = "too short"
-    with pytest.raises(ValueError, match="AI_SCHEMA_INVALID"):
+    # Ten questions never mean two articles.
+    split = _reading_output(entry_ids, words=300)
+    second = json.loads(json.dumps(split["items"][0]))
+    second["id"] = "p2"
+    second["questions"] = second["questions"][:2]
+    split["items"].append(second)
+    with pytest.raises(ValueError, match="AI_READING_SINGLE_PASSAGE_REQUIRED"):
+        validate_task_output(
+            task_type="practice_generation",
+            context=_reading_context(entry_ids, count=5),
+            raw_text=json.dumps(split),
+        )
+
+    with pytest.raises(ValueError, match="AI_ARTICLE_WORD_COUNT_OUT_OF_RANGE"):
         validate_task_output(
             task_type="practice_generation",
             context=context,
-            raw_text=json.dumps(output),
+            raw_text=json.dumps(_reading_output(entry_ids, words=40)),
+        )
+
+    with pytest.raises(ValueError, match="AI_QUESTION_COUNT_MISMATCH"):
+        validate_task_output(
+            task_type="practice_generation",
+            context=_reading_context(entry_ids, count=5),
+            raw_text=json.dumps(_reading_output(entry_ids, questions=3, words=240)),
         )
 
 

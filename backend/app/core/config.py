@@ -10,6 +10,26 @@ from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def parse_word_ranges(value: str) -> dict[int, tuple[int, int]]:
+    """Parse "3:180-260,5:220-320" into question count -> (min words, max words)."""
+    ranges: dict[int, tuple[int, int]] = {}
+    for chunk in value.split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        count_part, separator, range_part = chunk.partition(":")
+        low_part, dash, high_part = range_part.partition("-")
+        if separator != ":" or dash != "-":
+            raise ValueError("RANGES must look like count:min-max pairs")
+        low, high = int(low_part), int(high_part)
+        if low < 60 or high < low:
+            raise ValueError("RANGES need min >= 60 and max >= min")
+        ranges[int(count_part)] = (low, high)
+    if not ranges:
+        raise ValueError("RANGES must contain at least one range")
+    return ranges
+
+
 def _has_valid_http_base(value: str) -> bool:
     parsed = urlsplit(value)
     return (
@@ -87,6 +107,10 @@ class Settings(BaseSettings):
     ai_provider_retry_backoff_seconds: float = Field(default=0.25, ge=0, le=5)
     ai_job_stale_seconds: int = Field(default=900, ge=300, le=86400)
     ai_generation_budget_seconds: int = Field(default=540, ge=120, le=1800)
+    # "count:min-max,count:min-max" — one reading passage carries the whole set,
+    # so a shorter set gets a shorter article. Kept in config so it is tunable
+    # without a release.
+    reading_article_word_ranges: str = "3:180-260,5:220-320,10:320-460,15:400-560,20:480-680"
     ai_job_max_context_bytes: int = Field(default=64_000, ge=1024, le=1_000_000)
     ai_concurrency_limit: int = Field(default=2, ge=1, le=2)
     ai_prompt_max_chars: int = Field(default=100_000, ge=1000, le=200_000)
@@ -206,6 +230,20 @@ class Settings(BaseSettings):
     @property
     def cookie_secure(self) -> bool:
         return self.app_env == "production"
+
+    def article_word_range(self, count: int) -> tuple[int, int]:
+        """Word range for one reading passage of `count` questions."""
+        ranges = parse_word_ranges(self.reading_article_word_ranges)
+        if count in ranges:
+            return ranges[count]
+        nearest = min(ranges, key=lambda key: abs(key - count))
+        return ranges[nearest]
+
+    @field_validator("reading_article_word_ranges")
+    @classmethod
+    def validate_reading_article_word_ranges(cls, value: str) -> str:
+        parse_word_ranges(value)
+        return value
 
     def runtime_configuration_errors(self) -> list[str]:
         """Return non-secret configuration problems suitable for readiness details."""

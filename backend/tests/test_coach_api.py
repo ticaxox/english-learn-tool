@@ -468,3 +468,32 @@ async def test_coach_other_whitelisted_actions_are_scoped_and_recorded(client, a
                 )
             )
             assert flag is not None and flag.is_priority is True
+
+
+async def test_coach_conversations_keep_panel_and_page_histories_apart(client, member_user):
+    headers = await login(client, member_user.username)
+    panel = await client.post(
+        "/api/v1/coach/conversations", headers=headers, json={"title": "侧栏对话"}
+    )
+    page = await client.post(
+        "/api/v1/coach/conversations",
+        headers=headers,
+        json={"title": "页面对话", "scope": "page"},
+    )
+    assert panel.status_code == 201, panel.text
+    assert page.status_code == 201, page.text
+    assert panel.json()["scope"] == "panel"
+    assert page.json()["scope"] == "page"
+
+    panel_list = await client.get(
+        "/api/v1/coach/conversations", headers=headers, params={"scope": "panel"}
+    )
+    page_list = await client.get(
+        "/api/v1/coach/conversations", headers=headers, params={"scope": "page"}
+    )
+    assert [item["id"] for item in panel_list.json()["items"]] == [panel.json()["id"]]
+    assert [item["id"] for item in page_list.json()["items"]] == [page.json()["id"]]
+    # The default scope stays the floating panel.
+    default_list = await client.get("/api/v1/coach/conversations", headers=headers)
+    assert panel.json()["id"] in [item["id"] for item in default_list.json()["items"]]
+    assert page.json()["id"] not in [item["id"] for item in default_list.json()["items"]]

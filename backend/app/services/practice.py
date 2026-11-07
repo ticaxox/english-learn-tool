@@ -92,6 +92,16 @@ def _event(
     )
 
 
+def _article_range(
+    settings: Settings, practice_type: str, count: int
+) -> tuple[int | None, int | None]:
+    """Reading generates a single passage, so its length follows the question count."""
+    if practice_type != "reading":
+        return None, None
+    low, high = settings.article_word_range(count)
+    return low, high
+
+
 def _question_public(question: PracticeQuestion) -> PracticeQuestionPublic:
     payload = question.public_payload
     return PracticeQuestionPublic(
@@ -109,6 +119,7 @@ def _question_public(question: PracticeQuestion) -> PracticeQuestionPublic:
         target_language=payload.get("target_language"),
         requirements=payload.get("requirements", []),
         target_entry_ids=question.target_entry_ids,
+        target_words=payload.get("target_words", []),
     )
 
 
@@ -400,6 +411,9 @@ async def create_practice_session(
     )
     await session.flush()
 
+    article_min_words, article_max_words = _article_range(
+        settings, payload.practice_type, payload.count
+    )
     generation_request = PracticeGenerationRequest(
         task_type="practice_generation",
         context=PracticeGenerationContext(
@@ -410,6 +424,8 @@ async def create_practice_session(
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
             practice_session_id=session_id,
+            article_min_words=article_min_words,
+            article_max_words=article_max_words,
         ),
     )
     job, _ = await create_ai_job(
@@ -491,6 +507,7 @@ async def create_pool_practice_session(
     session.add(
         _event(practice, "practice.pool_created", metadata={"practice_type": practice_type})
     )
+    article_min_words, article_max_words = _article_range(settings, practice_type, count)
     generation_request = PracticeGenerationRequest(
         task_type="practice_generation",
         context=PracticeGenerationContext(
@@ -501,6 +518,8 @@ async def create_pool_practice_session(
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
             practice_session_id=session_id,
+            article_min_words=article_min_words,
+            article_max_words=article_max_words,
         ),
     )
     job, _ = await create_ai_job(
@@ -1310,6 +1329,30 @@ def question_rows(
     return questions
 
 
+async def _attach_target_words(
+    session: AsyncSession, questions: list[PracticeQuestion]
+) -> None:
+    """Copy the headwords behind each question's target entries into its public payload."""
+    wanted = {entry for question in questions for entry in question.target_entry_ids}
+    if not wanted:
+        return
+    rows = (
+        await session.execute(
+            select(WordbookEntry.id, WordbookEntry.headword).where(
+                WordbookEntry.id.in_([UUID(entry) for entry in wanted])
+            )
+        )
+    ).all()
+    headwords = {str(entry_id): headword for entry_id, headword in rows}
+    for question in questions:
+        question.public_payload = {
+            **question.public_payload,
+            "target_words": [
+                headwords[entry] for entry in question.target_entry_ids if entry in headwords
+            ],
+        }
+
+
 async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> None:
     session_id = job.input_context.get("practice_session_id")
     if not session_id or job.result is None:
@@ -1328,6 +1371,7 @@ async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> 
         return
     output = PracticeGenerationOutput.model_validate(job.result)
     questions = question_rows(output.items, generation)
+    await _attach_target_words(session, questions)
     session.add_all(questions)
     generation.status = "ready"
     generation.question_count = len(questions)

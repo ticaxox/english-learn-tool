@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 from collections.abc import AsyncIterator
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Header, Query, Request, Response, UploadFile, status
@@ -125,8 +125,11 @@ async def list_conversations_endpoint(
     session: Annotated[AsyncSession, Depends(get_db_session)],
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     cursor: str | None = None,
+    scope: Annotated[Literal["panel", "page"], Query()] = "panel",
 ) -> CoachConversationListResponse:
-    return await list_conversations(session, context.user, limit=limit, cursor=cursor)
+    return await list_conversations(
+        session, context.user, limit=limit, cursor=cursor, scope=scope
+    )
 
 
 @router.post(

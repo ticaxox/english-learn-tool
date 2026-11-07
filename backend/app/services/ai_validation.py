@@ -14,6 +14,7 @@ from app.schemas.ai_tasks import (
     PracticeGenerationContext,
     PracticeGenerationOutput,
     PracticeGradingBatchOutput,
+    ReadingPassage,
     SubjectiveGradingOutput,
 )
 
@@ -139,7 +140,22 @@ def validate_task_output(
         allowed = _uuid_set(practice.target_entry_ids)
         if output.practice_type != practice.practice_type:
             raise ValueError("AI_PRACTICE_TYPE_MISMATCH")
-        if practice.practice_type in {"reading", "mixed"}:
+        if practice.practice_type == "reading":
+            # One passage carries the whole set: ten questions never mean two articles.
+            passages = [item for item in output.items if isinstance(item, ReadingPassage)]
+            if len(passages) != 1:
+                raise ValueError("AI_READING_SINGLE_PASSAGE_REQUIRED")
+            passage = passages[0]
+            if len(passage.questions) != practice.count:
+                raise ValueError("AI_QUESTION_COUNT_MISMATCH")
+            if practice.article_min_words and practice.article_max_words:
+                words = len(re.findall(r"\b[\w'-]+\b", passage.article))
+                if not practice.article_min_words <= words <= practice.article_max_words:
+                    raise ValueError(
+                        "AI_ARTICLE_WORD_COUNT_OUT_OF_RANGE: "
+                        f"{words} not in {practice.article_min_words}-{practice.article_max_words}"
+                    )
+        elif practice.practice_type == "mixed":
             question_count = sum(
                 len(getattr(item, "questions", [])) or 1 for item in output.items
             )

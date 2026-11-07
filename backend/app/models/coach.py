@@ -35,6 +35,7 @@ class CoachConversation(Base):
     __tablename__ = "coach_conversations"
     __table_args__ = (
         CheckConstraint("status IN ('active', 'deleted')", name="status_valid"),
+        CheckConstraint("scope IN ('panel', 'page')", name="scope_valid"),
         Index("ix_coach_conversations_user_updated", "user_id", "updated_at"),
     )
 
@@ -45,6 +46,10 @@ class CoachConversation(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[str] = mapped_column(
         String(16), nullable=False, default="active", server_default=text("'active'")
+    )
+    # The floating panel and the full-screen page keep separate histories.
+    scope: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="panel", server_default=text("'panel'")
     )
     message_count: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")

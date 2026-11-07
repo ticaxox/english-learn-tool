@@ -88,6 +88,7 @@ def _conversation_response(conversation: CoachConversation) -> CoachConversation
         id=conversation.id,
         title=conversation.title,
         status=conversation.status,
+        scope=conversation.scope,
         message_count=conversation.message_count,
         last_message_at=conversation.last_message_at,
         created_at=conversation.created_at,
@@ -253,9 +254,18 @@ async def _load_message(
 
 
 async def list_conversations(
-    session: AsyncSession, user: User, *, limit: int = 20, cursor: str | None = None
+    session: AsyncSession,
+    user: User,
+    *,
+    limit: int = 20,
+    cursor: str | None = None,
+    scope: str = "panel",
 ) -> CoachConversationListResponse:
-    filters = [CoachConversation.user_id == user.id, CoachConversation.status == "active"]
+    filters = [
+        CoachConversation.user_id == user.id,
+        CoachConversation.status == "active",
+        CoachConversation.scope == scope,
+    ]
     if cursor:
         updated_at, cursor_id = _decode_cursor(cursor)
         timestamp = datetime.fromisoformat(updated_at)
@@ -289,7 +299,7 @@ async def list_conversations(
 async def create_conversation(
     session: AsyncSession, user: User, payload: CoachConversationCreate
 ) -> CoachConversationResponse:
-    conversation = CoachConversation(user_id=user.id, title=payload.title)
+    conversation = CoachConversation(user_id=user.id, title=payload.title, scope=payload.scope)
     session.add(conversation)
     await session.commit()
     await session.refresh(conversation)

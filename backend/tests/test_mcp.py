@@ -128,7 +128,7 @@ async def test_mcp_can_write_questions_without_ai(client, member_user):
     _, token = await _create_token(client, headers)
     auth = {"Authorization": f"Bearer {token}"}
     def option(option_id: str, text: str) -> dict:
-        return {"id": option_id, "text": text}
+        return {"id": option_id, "text": text, "text_zh": f"{text}的中文"}
 
     written = await client.post(
         "/api/v1/mcp",

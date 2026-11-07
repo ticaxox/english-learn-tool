@@ -24,6 +24,8 @@ class _StrictModel(BaseModel):
 
 class CoachConversationCreate(_StrictModel):
     title: str = Field(default="新的学习对话", min_length=1, max_length=200)
+    # "panel" is the floating window, "page" the full-screen coach page.
+    scope: Literal["panel", "page"] = "panel"
 
     @field_validator("title")
     @classmethod
@@ -50,6 +52,7 @@ class CoachConversationResponse(BaseModel):
     id: UUID
     title: str
     status: Literal["active", "deleted"]
+    scope: Literal["panel", "page"] = "panel"
     message_count: int
     last_message_at: datetime | None = None
     created_at: datetime

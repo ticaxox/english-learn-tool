@@ -40,6 +40,9 @@ class PracticeGenerationContext(StrictModel):
     wordbook_id: UUID | None = None
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=100)
     practice_session_id: UUID | None = None
+    # Reading only: how long the single passage should be for this question count.
+    article_min_words: int | None = Field(default=None, ge=60, le=2_000)
+    article_max_words: int | None = Field(default=None, ge=60, le=2_000)
 
     @model_validator(mode="after")
     def validate_count_and_source(self) -> PracticeGenerationContext:
@@ -144,13 +147,12 @@ AiJobCreateRequest = Annotated[
 class OptionOutput(StrictModel):
     id: str = Field(min_length=1, max_length=16)
     text: str = Field(min_length=1, max_length=1_000)
-    text_zh: str | None = Field(default=None, max_length=1_000)
+    # Every option carries a Chinese gloss so the learner can read the choices.
+    text_zh: str = Field(min_length=1, max_length=1_000)
 
     @field_validator("id", "text", "text_zh")
     @classmethod
-    def clean_text(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
+    def clean_text(cls, value: str) -> str:
         cleaned = plain_text(value)
         if not cleaned:
             raise ValueError("text must not be blank")
@@ -199,17 +201,17 @@ class ReadingPassage(StrictModel):
     id: str = Field(min_length=1, max_length=64)
     article: str = Field(min_length=1, max_length=20_000)
     article_zh: str = Field(min_length=1, max_length=20_000)
-    # A mixed set may use a short passage for a single question; pure reading
-    # practice still has to match the chosen count exactly in ai_validation.
-    questions: list[ReadingQuestion] = Field(min_length=1, max_length=5)
+    # One passage carries every question of the set. Its article length is checked
+    # against the count-based range in ai_validation, where the session count lives.
+    questions: list[ReadingQuestion] = Field(min_length=1, max_length=20)
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
-    @field_validator("article")
+    @field_validator("article", "article_zh")
     @classmethod
-    def article_has_at_least_200_words(cls, value: str) -> str:
+    def clean_article(cls, value: str) -> str:
         cleaned = plain_text(value)
-        if len(re.findall(r"\b[\w'-]+\b", cleaned)) < 200:
-            raise ValueError("reading articles must contain at least 200 words")
+        if not cleaned:
+            raise ValueError("article must not be blank")
         return cleaned
 
 

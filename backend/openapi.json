@@ -2037,6 +2037,15 @@
       "CoachConversationCreate": {
         "additionalProperties": false,
         "properties": {
+          "scope": {
+            "default": "panel",
+            "enum": [
+              "panel",
+              "page"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
           "title": {
             "default": "新的学习对话",
             "maxLength": 200,
@@ -2123,6 +2132,15 @@
           "message_count": {
             "title": "Message Count",
             "type": "integer"
+          },
+          "scope": {
+            "default": "panel",
+            "enum": [
+              "panel",
+              "page"
+            ],
+            "title": "Scope",
+            "type": "string"
           },
           "status": {
             "enum": [
@@ -5152,6 +5170,32 @@
       "PracticeGenerationContext": {
         "additionalProperties": false,
         "properties": {
+          "article_max_words": {
+            "anyOf": [
+              {
+                "maximum": 2000.0,
+                "minimum": 60.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Max Words"
+          },
+          "article_min_words": {
+            "anyOf": [
+              {
+                "maximum": 2000.0,
+                "minimum": 60.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Min Words"
+          },
           "count": {
             "maximum": 20.0,
             "minimum": 1.0,
@@ -5449,6 +5493,13 @@
               }
             ],
             "title": "Target Language"
+          },
+          "target_words": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Words",
+            "type": "array"
           }
         },
         "required": [
@@ -12951,6 +13002,20 @@
                 }
               ],
               "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "panel",
+              "enum": [
+                "panel",
+                "page"
+              ],
+              "title": "Scope",
+              "type": "string"
             }
           }
         ],
