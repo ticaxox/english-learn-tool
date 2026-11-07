@@ -52,6 +52,33 @@ def _uuid_set(values: list[UUID]) -> set[str]:
     return {str(value) for value in values}
 
 
+def _target_word_map(practice: PracticeGenerationContext) -> dict[str, str]:
+    return {
+        str(entry): word
+        for entry, word in zip(practice.target_entry_ids, practice.target_words, strict=False)
+    }
+
+
+def _mentions(text: str, word: str) -> bool:
+    pattern = rf"\b{re.escape(word.lower())}(?:s|es|ed|d|ing)?\b"
+    return re.search(pattern, text.lower()) is not None
+
+
+def _item_text(item: Any) -> str:
+    parts: list[str] = []
+    for field in ("sentence", "article", "prompt", "source_text"):
+        value = getattr(item, field, None)
+        if isinstance(value, str):
+            parts.append(value)
+    for option in getattr(item, "options", []) or []:
+        parts.append(option.text)
+    for question in getattr(item, "questions", []) or []:
+        parts.append(question.prompt)
+        parts.extend(option.text for option in question.options)
+    parts.extend(getattr(item, "requirements", []) or [])
+    return "\n".join(parts)
+
+
 def _collect_entry_ids(item: Any) -> set[str]:
     values = getattr(item, "target_entry_ids", [])
     return _uuid_set(values)
@@ -138,6 +165,7 @@ def validate_task_output(
         practice = PracticeGenerationContext.model_validate(context)
         output = PracticeGenerationOutput.model_validate(validated)
         allowed = _uuid_set(practice.target_entry_ids)
+        word_map = _target_word_map(practice)
         if output.practice_type != practice.practice_type:
             raise ValueError("AI_PRACTICE_TYPE_MISMATCH")
         if practice.practice_type == "reading":
@@ -169,6 +197,11 @@ def validate_task_output(
                 raise ValueError("AI_ENTRY_ID_OUT_OF_SCOPE")
             if practice.source != "difficulty" and not item_entry_ids:
                 raise ValueError("AI_TARGET_ENTRY_REQUIRED")
+            # The learner's words must actually appear, or nothing can be marked.
+            if item_entry_ids and word_map:
+                words = [word_map[entry] for entry in item_entry_ids if entry in word_map]
+                if words and not any(_mentions(_item_text(item), word) for word in words):
+                    raise ValueError("AI_TARGET_WORD_MISSING")
     elif task_type == "challenge_plan":
         challenge = ChallengePlanContext.model_validate(context)
         output = ChallengePlanOutput.model_validate(validated)

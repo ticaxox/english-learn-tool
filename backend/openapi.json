@@ -5263,6 +5263,14 @@
             "title": "Target Entry Ids",
             "type": "array"
           },
+          "target_words": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Target Words",
+            "type": "array"
+          },
           "wordbook_id": {
             "anyOf": [
               {

@@ -23,6 +23,21 @@ const readingArticleZh = computed(
 )
 const readingWords = computed(() => [...new Set((props.questions ?? []).flatMap((question) => question.targetWords))])
 
+// A mixed set may hold a passage whose questions share it; show the text once.
+const repeatedArticles = computed(() => {
+  const seen = new Set<string>()
+  const repeated = new Set<string>()
+  for (const question of props.questions ?? []) {
+    if (!question.article) continue
+    if (seen.has(question.article)) repeated.add(question.id)
+    else seen.add(question.article)
+  }
+  return repeated
+})
+function hideArticle(questionId: string): boolean {
+  return isReading.value || repeatedArticles.value.has(questionId)
+}
+
 const correctCount = computed(() => props.result.correctCount ?? 0)
 const wrongCount = computed(() => props.result.wrongCount ?? 0)
 const correctPercent = computed(() => {
@@ -73,7 +88,7 @@ const correctPercent = computed(() => {
         :question="questionMap.get(item.questionId)!"
         :index="index"
         :total="result.questions.length"
-        :hide-article="isReading"
+        :hide-article="hideArticle(item.questionId)"
         :model-value="item.userAnswer"
         :review="{ selected: item.userAnswer || null, correct: item.correctChoiceId }"
       />

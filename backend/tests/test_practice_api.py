@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import select
 
 from app.models.practice import PracticeQuestion, PracticeSession, PracticeSubmission
+from app.models.wordbooks import WordbookEntry
 from app.services.ai_jobs import process_ai_job
 from app.services.learning import local_date_for
 from tests.ai_support import (
@@ -19,7 +20,8 @@ PRACTICE_PATH = "/api/v1/practice"
 LOGIN_PATH = "/api/v1/auth/login"
 
 
-def _reading_output(entry_ids: list[str]) -> dict:
+def _reading_output(entry_ids: list[str], words: list[str] | None = None) -> dict:
+    words = words or ["word"] * len(entry_ids)
     questions = []
     for index in range(3):
         questions.append(
@@ -41,7 +43,7 @@ def _reading_output(entry_ids: list[str]) -> dict:
         "items": [
             {
                 "id": "p1",
-                "article": " ".join(["word"] * 200),
+                "article": " ".join([f"It was about {words[0]}"] * 50),
                 "article_zh": "文章",
                 "questions": questions,
                 "target_entry_ids": [entry_ids[0]],
@@ -50,13 +52,16 @@ def _reading_output(entry_ids: list[str]) -> dict:
     }
 
 
-def _translation_output(entry_ids: list[str]) -> dict:
+def _translation_output(
+    entry_ids: list[str], words: list[str] | None = None
+) -> dict:
+    words = words or ["word"] * len(entry_ids)
     return {
         "practice_type": "translation",
         "items": [
             {
                 "id": f"t{index}",
-                "source_text": f"Translate sentence {index}.",
+                "source_text": f"Translate the {words[index % len(words)]} sentence {index}.",
                 "source_language": "en",
                 "target_language": "zh",
                 "reference_translation": f"参考译文 {index}",
@@ -67,13 +72,14 @@ def _translation_output(entry_ids: list[str]) -> dict:
     }
 
 
-def _writing_output(entry_ids: list[str]) -> dict:
+def _writing_output(entry_ids: list[str], words: list[str] | None = None) -> dict:
+    words = words or ["word"] * len(entry_ids)
     return {
         "practice_type": "writing",
         "items": [
             {
                 "id": "w1",
-                "prompt": "Write about a harbor.",
+                "prompt": f"Write about {words[0]}.",
                 "requirements": ["Use at least 50 words."],
                 "reference_essay": "The harbor is busy.",
                 "target_entry_ids": [entry_ids[0]],
@@ -82,9 +88,10 @@ def _writing_output(entry_ids: list[str]) -> dict:
     }
 
 
-def _mixed_output(entry_ids: list[str]) -> dict:
-    fill = practice_output(entry_ids[:2])
-    reading = _reading_output(entry_ids)
+def _mixed_output(entry_ids: list[str], words: list[str] | None = None) -> dict:
+    words = words or ["word"] * len(entry_ids)
+    fill = practice_output(entry_ids[:2], words[:2])
+    reading = _reading_output(entry_ids, words)
     return {
         "practice_type": "mixed",
         "items": [*fill["items"], {"id": "rp1", **{
@@ -93,17 +100,20 @@ def _mixed_output(entry_ids: list[str]) -> dict:
     }
 
 
-def _generation_output(practice_type: str, entry_ids: list[str]) -> dict:
+def _generation_output(
+    practice_type: str, entry_ids: list[str], words: list[str] | None = None
+) -> dict:
+    words = words or ["word"] * len(entry_ids)
     if practice_type == "mixed":
-        return _mixed_output(entry_ids)
+        return _mixed_output(entry_ids, words)
     if practice_type == "fill_blank":
-        return practice_output(entry_ids)
+        return practice_output(entry_ids, words)
     if practice_type == "reading":
-        return _reading_output(entry_ids)
+        return _reading_output(entry_ids, words)
     if practice_type == "translation":
-        return _translation_output(entry_ids)
+        return _translation_output(entry_ids, words)
     if practice_type == "writing":
-        return _writing_output(entry_ids)
+        return _writing_output(entry_ids, words)
     raise AssertionError(practice_type)
 
 
@@ -186,7 +196,16 @@ async def _generate(app, client, headers, server, practice_type: str, count: int
         practice = await session.get(PracticeSession, UUID(created["id"]))
         assert practice is not None
         entry_ids = practice.source_context["target_entry_ids"][:count]
-    server.queue_json(200, _generation_output(practice_type, entry_ids))
+        rows = (
+            await session.execute(
+                select(WordbookEntry.id, WordbookEntry.headword).where(
+                    WordbookEntry.id.in_([UUID(entry) for entry in entry_ids])
+                )
+            )
+        ).all()
+        headwords = {str(entry_id): headword for entry_id, headword in rows}
+    words = [headwords.get(entry, "word") for entry in entry_ids]
+    server.queue_json(200, _generation_output(practice_type, entry_ids, words))
     await _run_job(app, await _job_id_for_session(app, created["id"]))
     response = await client.get(f"{PRACTICE_PATH}/sessions/{created['id']}", headers=headers)
     assert response.status_code == 200, response.text

@@ -176,6 +176,28 @@ def test_reading_is_one_passage_with_the_requested_questions() -> None:
         )
 
 
+def test_generation_must_use_the_supplied_target_words() -> None:
+    entry_ids = [str(uuid4())]
+    context = _reading_context(entry_ids)
+    context["target_words"] = ["harbor"]
+
+    with pytest.raises(ValueError, match="AI_TARGET_WORD_MISSING"):
+        validate_task_output(
+            task_type="practice_generation",
+            context=context,
+            raw_text=json.dumps(_reading_output(entry_ids)),
+        )
+
+    # A form of the word counts.
+    context["target_words"] = ["word"]
+    result, _ = validate_task_output(
+        task_type="practice_generation",
+        context=context,
+        raw_text=json.dumps(_reading_output(entry_ids)),
+    )
+    assert result["practice_type"] == "reading"
+
+
 def test_challenge_plan_requires_boss_last_and_full_new_word_coverage() -> None:
     new_ids = [str(uuid4()), str(uuid4())]
     due_ids = [str(uuid4())]

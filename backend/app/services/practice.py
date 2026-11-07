@@ -92,6 +92,21 @@ def _event(
     )
 
 
+async def _entry_headwords(session: AsyncSession, entry_ids: list[UUID]) -> list[str]:
+    """Headwords in the same order as the ids, for the generation prompt."""
+    if not entry_ids:
+        return []
+    rows = (
+        await session.execute(
+            select(WordbookEntry.id, WordbookEntry.headword).where(
+                WordbookEntry.id.in_(entry_ids)
+            )
+        )
+    ).all()
+    by_id = {entry_id: headword for entry_id, headword in rows}
+    return [by_id[entry_id] for entry_id in entry_ids if entry_id in by_id]
+
+
 def _article_range(
     settings: Settings, practice_type: str, count: int
 ) -> tuple[int | None, int | None]:
@@ -414,6 +429,7 @@ async def create_practice_session(
     article_min_words, article_max_words = _article_range(
         settings, payload.practice_type, payload.count
     )
+    target_words = await _entry_headwords(session, target_entry_ids)
     generation_request = PracticeGenerationRequest(
         task_type="practice_generation",
         context=PracticeGenerationContext(
@@ -423,6 +439,7 @@ async def create_practice_session(
             difficulty=payload.difficulty,
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
+            target_words=target_words,
             practice_session_id=session_id,
             article_min_words=article_min_words,
             article_max_words=article_max_words,
@@ -508,6 +525,7 @@ async def create_pool_practice_session(
         _event(practice, "practice.pool_created", metadata={"practice_type": practice_type})
     )
     article_min_words, article_max_words = _article_range(settings, practice_type, count)
+    target_words = await _entry_headwords(session, target_entry_ids)
     generation_request = PracticeGenerationRequest(
         task_type="practice_generation",
         context=PracticeGenerationContext(
@@ -517,6 +535,7 @@ async def create_pool_practice_session(
             difficulty=None,
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
+            target_words=target_words,
             practice_session_id=session_id,
             article_min_words=article_min_words,
             article_max_words=article_max_words,

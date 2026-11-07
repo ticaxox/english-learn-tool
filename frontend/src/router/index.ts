@@ -117,6 +117,7 @@ const routes: RouteRecordRaw[] = [
         path: 'coach',
         name: 'coach',
         component: CoachView,
+        props: { surface: 'page' },
       },
       {
         path: 'settings',

@@ -74,13 +74,16 @@ def practice_context(*, count: int = 3) -> tuple[dict[str, Any], list[str]]:
     )
 
 
-def practice_output(entry_ids: list[str]) -> dict[str, Any]:
+def practice_output(
+    entry_ids: list[str], words: list[str] | None = None
+) -> dict[str, Any]:
+    words = words or ["word"] * len(entry_ids)
     items = []
     for index, entry_id in enumerate(entry_ids):
         items.append(
             {
                 "id": f"q{index + 1}",
-                "sentence": f"The ____ is useful for learning number {index + 1}.",
+                "sentence": f"The ____ for {words[index]} is useful today.",
                 "sentence_zh": "这个空对学习很有用。",
                 "options": [
                     {"id": "a", "text": "word", "text_zh": "单词"},

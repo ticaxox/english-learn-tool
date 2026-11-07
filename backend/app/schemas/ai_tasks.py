@@ -39,6 +39,9 @@ class PracticeGenerationContext(StrictModel):
     difficulty: ExamType | None = None
     wordbook_id: UUID | None = None
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=100)
+    # Headwords for those ids, aligned with target_entry_ids, so the model can
+    # actually weave the learner's words into the text.
+    target_words: list[str] = Field(default_factory=list, max_length=100)
     practice_session_id: UUID | None = None
     # Reading only: how long the single passage should be for this question count.
     article_min_words: int | None = Field(default=None, ge=60, le=2_000)

@@ -155,6 +155,20 @@ const isReading = computed(() => session.value?.practiceType === 'reading')
 // Reading is one passage followed by its questions, never one article per question.
 const readingArticle = computed(() => questions.value.find((question) => question.article)?.article ?? '')
 const readingWords = computed(() => [...new Set(questions.value.flatMap((question) => question.targetWords))])
+// A mixed set may hold a passage whose questions share it; show the text once.
+const repeatedArticles = computed(() => {
+  const seen = new Set<string>()
+  const repeated = new Set<string>()
+  for (const question of questions.value) {
+    if (!question.article) continue
+    if (seen.has(question.article)) repeated.add(question.id)
+    else seen.add(question.article)
+  }
+  return repeated
+})
+function hideArticle(question: { id: string }): boolean {
+  return isReading.value || repeatedArticles.value.has(question.id)
+}
 
 async function cancelGeneration(): Promise<void> {
   // The server job is not aborted; leaving the session stops waiting for it.
@@ -241,7 +255,7 @@ void practice.load()
               :question="question"
               :index="index"
               :total="questions.length"
-              :hide-article="isReading"
+              :hide-article="hideArticle(question)"
               :model-value="answers[question.id] ?? ''"
               :disabled="practice.busy.value"
               @update:model-value="answers[question.id] = $event"

@@ -67,12 +67,13 @@ async def test_ready_pool_set_is_claimed_and_replenished(app, client, member_use
             assert job_id is not None
             job = await session.get(AiJob, job_id)
             entry_ids = job.input_context["target_entry_ids"]
+            words = job.input_context.get("target_words", [])
 
         import json
 
         from app.services.ai_validation import validate_task_output
 
-        payload = practice_output(entry_ids[:3])
+        payload = practice_output(entry_ids[:3], words[:3])
         validate_task_output(
             task_type="practice_generation",
             context=job.input_context,
@@ -157,8 +158,9 @@ async def test_failed_pool_generation_is_retried(app, client, member_user) -> No
             retry_job_id = retried_session.ai_job_id
             job = await session.get(AiJob, retry_job_id)
             entry_ids = job.input_context["target_entry_ids"]
+            words = job.input_context.get("target_words", [])
 
-        server.queue_json(200, practice_output(entry_ids[:3]))
+        server.queue_json(200, practice_output(entry_ids[:3], words[:3]))
         assert (await _run_job(app, retry_job_id))["status"] == "succeeded"
 
 
