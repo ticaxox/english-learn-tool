@@ -346,7 +346,7 @@ watch(challengeModule, async (module, previous) => {
 
       <div class="memory-workbench-grid" :class="{ 'is-session': Boolean(session.question.value) || session.finished.value }">
         <section class="workspace-card memory-main-card" :class="{ 'is-picker': showModulePicker }">
-        <template v-if="showModulePicker">
+        <template v-if="showModulePicker && !props.embedded">
           <header class="workspace-section-header">
             <div>
               <h2>今天练什么</h2>
@@ -507,7 +507,7 @@ watch(challengeModule, async (module, previous) => {
         <p v-else class="memory-rail-state">本轮训练已结束，成绩会记入今日进度。</p>
       </aside>
 
-      <aside v-else class="workspace-card memory-context-card" aria-label="当前学习信息">
+      <aside v-else-if="!props.embedded" class="workspace-card memory-context-card" aria-label="当前学习信息">
         <div>
           <p class="workspace-kicker">当前词书</p>
           <strong>{{ planLoading ? '正在读取…' : todayPlan?.wordbook?.name ?? (planError ? '暂未读取' : '尚未选择') }}</strong>

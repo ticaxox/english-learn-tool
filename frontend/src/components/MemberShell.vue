@@ -30,12 +30,12 @@ const primaryLinks = [
 
 const pageTitles: Record<string, string> = {
   overview: '今日学习',
-  memory: '记忆练习',
+  memory: '练习',
   'memory-mistakes': '记忆错词',
-  practice: 'AI 练习',
+  practice: '练习',
   'practice-records': '练习记录',
   'practice-mistakes': '练习错题',
-  'practice-session': 'AI 练习',
+  'practice-session': '练习',
   challenges: '学习地图',
   'challenge-detail': '学习地图',
   coach: 'AI 教练',
