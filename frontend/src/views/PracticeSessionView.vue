@@ -7,6 +7,7 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import LoadingState from '../components/LoadingState.vue'
 import PracticeQuestionCard from '../components/PracticeQuestionCard.vue'
+import SpokenText from '../components/SpokenText.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
 import { usePracticeSession } from '../composables/usePracticeSession'
 import { useToast } from '../composables/useToast'
@@ -150,18 +151,10 @@ async function regenerate(): Promise<void> {
   pendingRegenerateKey = null
 }
 
-const readingGroups = computed(() => {
-  const groups: Array<{ article: string; items: Array<{ question: (typeof questions.value)[number]; index: number }> }> = []
-  let index = 0
-  for (const question of questions.value) {
-    const item = { question, index: index++ }
-    const article = question.article ?? ''
-    const last = groups[groups.length - 1]
-    if (last && last.article === article) last.items.push(item)
-    else groups.push({ article, items: [item] })
-  }
-  return groups
-})
+const isReading = computed(() => session.value?.practiceType === 'reading')
+// Reading is one passage followed by its questions, never one article per question.
+const readingArticle = computed(() => questions.value.find((question) => question.article)?.article ?? '')
+const readingWords = computed(() => [...new Set(questions.value.flatMap((question) => question.targetWords))])
 
 async function cancelGeneration(): Promise<void> {
   // The server job is not aborted; leaving the session stops waiting for it.
@@ -227,6 +220,11 @@ void practice.load()
       </section>
 
       <template v-else-if="session.status === 'ready'">
+        <section v-if="isReading && readingArticle" class="panel practice-article-panel practice-article-panel--wide">
+          <p class="eyebrow">阅读材料</p>
+          <SpokenText class="practice-article" :text="readingArticle" :highlight="readingWords" />
+        </section>
+
         <div class="member-practice-session-layout">
           <div class="member-practice-workbench">
 
@@ -237,31 +235,13 @@ void practice.load()
             </section>
             <ErrorNotice v-else-if="practice.draftError.value" :error="practice.draftError.value" :show-retry="false" retry-label="重试" @retry="saveDraft" />
 
-            <template v-if="session.practiceType === 'reading'">
-              <section v-for="(group, groupIndex) in readingGroups" :key="`group-${groupIndex}`" class="practice-reading-group">
-                <section v-if="group.article" class="panel practice-article-panel">
-                  <p class="eyebrow">阅读材料</p>
-                  <p class="practice-article">{{ group.article }}</p>
-                </section>
-                <PracticeQuestionCard
-                  v-for="item in group.items"
-                  :key="item.question.id"
-                  :question="item.question"
-                  :index="item.index"
-                  :total="questions.length"
-                  hide-article
-                  :model-value="answers[item.question.id] ?? ''"
-                  :disabled="practice.busy.value"
-                  @update:model-value="answers[item.question.id] = $event"
-                />
-              </section>
-            </template>
             <PracticeQuestionCard
-              v-for="(question, index) in (session.practiceType === 'reading' ? [] : questions)"
+              v-for="(question, index) in questions"
               :key="question.id"
               :question="question"
               :index="index"
               :total="questions.length"
+              :hide-article="isReading"
               :model-value="answers[question.id] ?? ''"
               :disabled="practice.busy.value"
               @update:model-value="answers[question.id] = $event"

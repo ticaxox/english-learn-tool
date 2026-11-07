@@ -9,17 +9,23 @@
 import { computed } from 'vue'
 import { speak } from '../composables/useSpeechSynthesis'
 
-const props = withDefaults(defineProps<{ text: string; as?: string }>(), { as: 'p' })
+const props = withDefaults(
+  defineProps<{ text: string; as?: string; highlight?: string[] }>(),
+  { as: 'p', highlight: () => [] },
+)
 
 const EN_WORD = /[A-Za-z][A-Za-z'’-]*/g
 
+/** Words taken from the learner's wordbook, marked so they stand out while reading. */
+const targets = computed(() => new Set(props.highlight.map((word) => word.trim().toLowerCase()).filter(Boolean)))
+
 const parts = computed(() => {
-  const result: Array<{ text: string; word: boolean }> = []
+  const result: Array<{ text: string; word: boolean; target?: boolean }> = []
   let last = 0
   for (const match of props.text.matchAll(EN_WORD)) {
     const index = match.index ?? 0
     if (index > last) result.push({ text: props.text.slice(last, index), word: false })
-    result.push({ text: match[0], word: true })
+    result.push({ text: match[0], word: true, target: targets.value.has(match[0].toLowerCase()) })
     last = index + match[0].length
   }
   if (last < props.text.length) result.push({ text: props.text.slice(last), word: false })
@@ -36,7 +42,13 @@ function onWordClick(event: MouseEvent): void {
 <template>
   <component :is="as" class="spoken-text" @click="onWordClick">
     <template v-for="(part, index) in parts" :key="index">
-      <span v-if="part.word" class="spoken-word" :data-word="part.text" :title="`朗读 ${part.text}`">{{ part.text }}</span>
+      <span
+        v-if="part.word"
+        class="spoken-word"
+        :class="{ 'spoken-word--target': part.target }"
+        :data-word="part.text"
+        :title="`朗读 ${part.text}`"
+      >{{ part.text }}</span>
       <template v-else>{{ part.text }}</template>
     </template>
   </component>

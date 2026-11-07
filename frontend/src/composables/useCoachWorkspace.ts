@@ -77,7 +77,10 @@ function mergeMessagePage(current: CoachMessage[], incoming: CoachMessage[]): Co
   return [...byId.values()].sort((left, right) => left.sequence - right.sequence)
 }
 
-export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspaceApi) {
+export function useCoachWorkspace(
+  api: CoachWorkspaceApi = defaultCoachWorkspaceApi,
+  scope: 'panel' | 'page' = 'panel',
+) {
   const conversations = ref<CoachConversation[]>([])
   const conversationsCursor = ref<string | null>(null)
   const conversationsHasMore = ref(false)
@@ -258,6 +261,7 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
       const page = await api.listConversations({
         limit: CONVERSATION_LIMIT,
         cursor: reset ? null : conversationsCursor.value,
+        scope,
       })
       conversations.value = reset ? page.items : [
         ...conversations.value,
@@ -320,7 +324,7 @@ export function useCoachWorkspace(api: CoachWorkspaceApi = defaultCoachWorkspace
   async function createConversation(title?: string): Promise<CoachConversation | null> {
     conversationsError.value = null
     try {
-      const conversation = await api.createConversation(title)
+      const conversation = await api.createConversation(title, scope)
       conversations.value = [conversation, ...conversations.value.filter((item) => item.id !== conversation.id)]
       selectedConversationId.value = conversation.id
       clearConversationView()

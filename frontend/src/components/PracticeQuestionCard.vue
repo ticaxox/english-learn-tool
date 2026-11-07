@@ -72,14 +72,14 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
 
     <div v-if="question.questionType === 'reading'" class="practice-reading">
       <template v-if="!hideArticle">
-        <SpokenText v-if="question.article" class="practice-article" :text="question.article" />
+        <SpokenText v-if="question.article" class="practice-article" :text="question.article" :highlight="question.targetWords" />
         <p v-if="inReview && question.articleZh" class="practice-translation-note">{{ question.articleZh }}</p>
       </template>
       <SpokenText :id="promptId" as="h3" :text="question.prompt ?? ''" />
     </div>
 
     <div v-else-if="question.questionType === 'fill_blank'" class="practice-fill-blank">
-      <SpokenText :id="promptId" as="h2" class="practice-sentence" :text="question.sentence ?? ''" />
+      <SpokenText :id="promptId" as="h2" class="practice-sentence" :text="question.sentence ?? ''" :highlight="question.targetWords" />
       <p v-if="inReview && question.sentenceZh" class="practice-translation-note">{{ question.sentenceZh }}</p>
     </div>
 
@@ -126,7 +126,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
           <span class="practice-option__text">{{ option.text }}</span>
         </span>
         </label>
-        <small v-if="inReview && option.textZh" class="practice-option-translation">{{ option.textZh }}</small>
+        <small v-if="option.textZh" class="practice-option-translation">{{ option.textZh }}</small>
       </div>
     </fieldset>
 

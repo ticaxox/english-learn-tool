@@ -26,6 +26,8 @@ export interface CoachConversation {
   id: string
   title: string
   status: CoachConversationStatus
+  /** "panel" is the floating window; "page" is the full-screen coach page. */
+  scope: 'panel' | 'page'
   messageCount: number
   lastMessageAt: string | null
   createdAt: string
@@ -109,6 +111,7 @@ export interface CoachUndoResult {
 export interface CoachListQuery {
   limit?: number
   cursor?: string | null
+  scope?: 'panel' | 'page'
 }
 
 export interface CoachStreamOptions {
@@ -204,6 +207,7 @@ export function parseCoachConversation(value: unknown): CoachConversation {
     id: requiredString(value.id, 'conversation.id'),
     title: requiredString(value.title, 'conversation.title'),
     status: enumValue(value.status, CONVERSATION_STATUSES, 'conversation.status'),
+    scope: value.scope === 'page' ? 'page' : 'panel',
     messageCount: requiredNumber(value.message_count, 'conversation.message_count'),
     lastMessageAt: optionalString(value.last_message_at, 'conversation.last_message_at'),
     createdAt: requiredString(value.created_at, 'conversation.created_at'),
@@ -298,6 +302,7 @@ export function buildCoachQuery(query: CoachListQuery = {}): string {
   const params = new URLSearchParams()
   params.set('limit', String(query.limit ?? 20))
   if (query.cursor) params.set('cursor', query.cursor)
+  if (query.scope) params.set('scope', query.scope)
   return params.toString()
 }
 
@@ -311,9 +316,10 @@ export async function listCoachConversations(
 
 export async function createCoachConversation(
   title?: string,
+  scope: 'panel' | 'page' = 'panel',
   options: { signal?: AbortSignal } = {},
 ): Promise<CoachConversation> {
-  const payload = await apiClient.post('/coach/conversations', title ? { title } : {}, {
+  const payload = await apiClient.post('/coach/conversations', title ? { title, scope } : { scope }, {
     ...options,
     retryCount: 0,
   })

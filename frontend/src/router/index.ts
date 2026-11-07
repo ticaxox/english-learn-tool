@@ -21,6 +21,7 @@ import PracticeTasksView from '../views/PracticeTasksView.vue'
 import MistakesView from '../views/MistakesView.vue'
 import SettingsHubView from '../views/SettingsHubView.vue'
 import TodayView from '../views/TodayView.vue'
+import CoachView from '../views/CoachView.vue'
 import WordbooksView from '../views/WordbooksView.vue'
 import { useAuthStore } from '../stores/auth'
 import { surfaceBase } from '../lib/surface'
@@ -115,8 +116,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'coach',
         name: 'coach',
-        component: TodayView,
-        meta: { coachPanel: true },
+        component: CoachView,
       },
       {
         path: 'settings',

@@ -524,3 +524,81 @@
 }
 
 .coach-message__error .field-error { margin: 0; }
+
+/* ------------------------------------------- full-page coach: conversation history */
+
+.coach-history {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+  padding: 0.9rem;
+}
+
+.coach-history__head {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.coach-history__list {
+  display: grid;
+  gap: 0.3rem;
+  max-height: 60vh;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.coach-history__item {
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+  border-radius: 0.7rem;
+}
+
+.coach-history__item.is-active {
+  background: var(--ui-surface-subtle, #fbf7ee);
+  box-shadow: inset 3px 0 0 var(--brand-strong, #1f7a54);
+}
+
+.coach-history__open {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.coach-history__title {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-history__open small { color: var(--ui-muted); font-size: 0.75rem; }
+
+.coach-history__delete {
+  padding: 0.15rem 0.45rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--ui-muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.coach-history__delete:hover { color: #b3261e; background: rgb(179 38 30 / 8%); }
+
+@media (max-width: 980px) {
+  .coach-layout--with-history { grid-template-columns: minmax(0, 1fr); }
+  .coach-history__list { max-height: 14rem; }
+}

@@ -11,7 +11,7 @@ const baseSession: PracticeSession = {
 }
 const readySession: PracticeSession = {
   ...baseSession, status: 'ready', jobStatus: 'succeeded', questions: [
-    { id: 'q-1', position: 0, questionType: 'fill_blank', prompt: 'Prompt', sentence: 'Sentence', sentenceZh: null, article: null, articleZh: null, options: [{ id: 'o-1', text: 'A', textZh: null }], sourceText: null, sourceLanguage: null, targetLanguage: null, requirements: [], targetEntryIds: [] },
+    { id: 'q-1', position: 0, questionType: 'fill_blank', prompt: 'Prompt', sentence: 'Sentence', sentenceZh: null, article: null, articleZh: null, options: [{ id: 'o-1', text: 'A', textZh: null }], sourceText: null, sourceLanguage: null, targetLanguage: null, requirements: [], targetEntryIds: [], targetWords: [] },
   ],
 }
 const result: PracticeResult = {

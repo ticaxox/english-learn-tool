@@ -74,7 +74,7 @@ const wordbookPage: WordbookListPage = {
 const question: PracticeQuestion = {
   id: 'q-1', position: 0, questionType: 'fill_blank', prompt: 'Choose', sentence: 'The team remained ____.', sentenceZh: null,
   article: null, articleZh: null, options: [{ id: 'o-1', text: 'resilient', textZh: '有韧性的' }, { id: 'o-2', text: 'fragile', textZh: '脆弱的' }],
-  sourceText: null, sourceLanguage: null, targetLanguage: null, requirements: [], targetEntryIds: [],
+  sourceText: null, sourceLanguage: null, targetLanguage: null, requirements: [], targetEntryIds: [], targetWords: [],
 }
 const result: PracticeResult = {
   sessionId: 'session-1', submissionId: 'submission-1', status: 'completed', score: 100, correctCount: 1, totalQuestions: 1, wrongCount: 0,
@@ -179,10 +179,11 @@ describe('practice views', () => {
     expect(practiceMocks.listPracticeRecords).not.toHaveBeenCalled()
   })
 
-  it('keeps the answering view English-only and explains in Chinese on review', () => {
+  it('glosses every option in Chinese and marks results on review', () => {
     const answering = mount(PracticeQuestionCard, { props: { question, modelValue: '', index: 0, total: 1 } })
     expect(answering.text()).toContain('The team remained ____.')
-    expect(answering.text()).not.toContain('有韧性的')
+    // Every option carries its Chinese gloss while answering.
+    expect(answering.text()).toContain('有韧性的')
     expect(answering.text()).not.toContain('源语言')
 
     const review = mount(PracticeQuestionCard, {
@@ -193,6 +194,45 @@ describe('practice views', () => {
     expect(review.text()).toContain('有韧性的')
     expect(review.text()).not.toContain('正确')
     expect(review.text()).not.toContain('你的选择')
+  })
+
+  it('shows a reading passage once above its questions', () => {
+    const readingQuestion: PracticeQuestion = {
+      ...question,
+      questionType: 'reading',
+      article: 'Maya missed the garden she left in her hometown.',
+      articleZh: '玛雅想念她留在故乡的花园。',
+      prompt: 'What is the main idea?',
+      targetWords: ['garden'],
+    }
+    const readingResult: PracticeResult = {
+      ...result,
+      totalQuestions: 1,
+      questions: [
+        {
+          questionId: readingQuestion.id,
+          questionType: 'reading',
+          userAnswer: 'o-1',
+          gradedCorrect: true,
+          isMistake: false,
+          score: null,
+          correctChoiceId: 'o-1',
+          correctOptionText: null,
+          explanation: 'The passage supports it.',
+          referenceContent: null,
+          dimensions: [],
+          errors: [],
+          suggestions: [],
+        },
+      ],
+    }
+    const wrapper = mount(PracticeResultView, {
+      props: { result: readingResult, questions: [readingQuestion] },
+    })
+    expect(wrapper.findAll('.practice-article-panel--wide')).toHaveLength(1)
+    expect(wrapper.findAll('.practice-question-card .practice-article')).toHaveLength(0)
+    expect(wrapper.text()).toContain('玛雅想念她留在故乡的花园。')
+    expect(wrapper.find('.spoken-word--target').text()).toBe('garden')
   })
 
   it('shows one total score and re-renders the submitted options in the result', () => {

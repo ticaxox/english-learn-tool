@@ -48,6 +48,8 @@ export interface PracticeQuestion {
   targetLanguage: 'en' | 'zh' | null
   requirements: string[]
   targetEntryIds: string[]
+  /** Headwords to highlight inside the passage, sentence and options. */
+  targetWords: string[]
 }
 
 export interface PracticeSession {
@@ -327,6 +329,7 @@ function parseQuestion(value: unknown, index: number): PracticeQuestion {
     targetLanguage: nullableEnum(body.target_language, ['en', 'zh'] as const, context, 'target_language'),
     requirements: stringArray(body.requirements, context, 'requirements'),
     targetEntryIds: stringArray(body.target_entry_ids, context, 'target_entry_ids'),
+    targetWords: Array.isArray(body.target_words) ? stringArray(body.target_words, context, 'target_words') : [],
   }
 }
 

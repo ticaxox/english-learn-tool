@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import CoachView from '../views/CoachView.vue'
 import CrumboMark from './CrumboMark.vue'
@@ -12,7 +12,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{ signout: [] }>()
 const route = useRoute()
-const router = useRouter()
 const profileOpen = ref(false)
 const coachOpen = ref(false)
 const profileArea = ref<HTMLElement | null>(null)
@@ -20,13 +19,13 @@ const profileTrigger = ref<HTMLButtonElement | null>(null)
 const coachPanel = ref<HTMLElement | null>(null)
 const coachCloseButton = ref<HTMLButtonElement | null>(null)
 let previousFocus: HTMLElement | null = null
-let coachReturnPath = '/overview'
 
 
 const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
   { key: 'memory', label: '记忆练习', to: '/memory', icon: 'cards' as const },
   { key: 'practice', label: 'AI 练习', to: '/practice', icon: 'book' as const },
+  { key: 'coach', label: 'AI 教练', to: '/coach', icon: 'coach' as const },
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
 ] as const
 
@@ -61,6 +60,7 @@ const userInitials = computed(() => props.displayName.trim().slice(0, 2).toUpper
 function isGroupActive(key: string): boolean {
   if (key === 'practice') return route.path.startsWith('/practice')
   if (key === 'memory') return route.path.startsWith('/memory')
+  if (key === 'coach') return route.path.startsWith('/coach')
   if (key === 'settings') return route.path.startsWith('/settings')
   if (key === 'today') return route.path === '/overview' || route.path.startsWith('/challenges')
   return false
@@ -160,18 +160,9 @@ watch(coachOpen, async (open) => {
 
 watch(() => route.fullPath, () => {
   closeProfile()
-  // Old /coach deep links open the window over Today instead of a page.
-  if (route.name === 'coach') {
-    coachOpen.value = true
-    void router.replace(coachReturnPath || '/overview')
-  }
 })
 
 onMounted(() => {
-  if (route.name === 'coach') {
-    coachOpen.value = true
-    void router.replace(coachReturnPath || '/overview')
-  }
   document.addEventListener('click', onDocumentClick)
   document.addEventListener('keydown', onKeydown)
 })

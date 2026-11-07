@@ -52,11 +52,11 @@ function source(path: string): string {
 }
 
 describe('T-FE-020 personal information architecture', () => {
-  it('shows exactly four first-level destinations for every personal account', async () => {
+  it('shows five first-level destinations for every personal account', async () => {
     const { wrapper } = await mountShell()
     const labels = wrapper.findAll('.ia-nav-primary').map((link) => link.text().trim())
-    expect(labels).toEqual(['今日学习', '记忆练习', 'AI 练习', '设置'])
-    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
+    expect(labels).toEqual(['今日学习', '记忆练习', 'AI 练习', 'AI 教练', '设置'])
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(5)
     expect(wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
   })

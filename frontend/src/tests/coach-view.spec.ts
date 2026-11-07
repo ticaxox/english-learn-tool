@@ -28,7 +28,7 @@ vi.mock('../api/coach', async (importOriginal) => {
 })
 
 const conversation: CoachConversation = {
-  id: 'conversation-1', title: '本周学习计划', status: 'active', messageCount: 2,
+  id: 'conversation-1', title: '本周学习计划', status: 'active', scope: 'panel', messageCount: 2,
   lastMessageAt: '2026-10-23T06:00:00Z', createdAt: '2026-10-23T05:00:00Z', updatedAt: '2026-10-23T06:00:00Z',
 }
 const receipt: CoachActionReceipt = {
@@ -88,6 +88,22 @@ describe('coach view', () => {
     expect(wrapper.text()).toContain('调整学习计划')
     expect(wrapper.text()).toContain('把每日新词从 20 调整为 12')
     expect(wrapper.get('.coach-receipt').text()).toContain('撤销这次调整')
+  })
+
+  it('lists conversation history only on the full coach page', async () => {
+    const page = mount(CoachView, { props: { surface: 'page' } })
+    await flushPromises()
+    expect(page.find('.coach-history').exists()).toBe(true)
+    expect(page.get('.coach-history').text()).toContain('本周学习计划')
+    expect(coachMocks.listCoachConversations).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: 'page' }),
+    )
+
+    const panel = await mountView()
+    expect(panel.find('.coach-history').exists()).toBe(false)
+    expect(coachMocks.listCoachConversations).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: 'panel' }),
+    )
   })
 
   it('sends on Enter and displays the final server reply and usage', async () => {

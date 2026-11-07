@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PRACTICE_SUBMISSION_LABELS, type PracticeQuestion, type PracticeResult } from '../api/practice'
+import { type PracticeQuestion, type PracticeResult } from '../api/practice'
 import PracticeQuestionCard from './PracticeQuestionCard.vue'
+import SpokenText from './SpokenText.vue'
 
 const props = defineProps<{
   result: PracticeResult
@@ -10,42 +11,50 @@ const props = defineProps<{
 }>()
 
 const scoreLabel = computed(() => (props.result.score === null ? '—' : `${props.result.score} 分`))
-const submittedAtLabel = computed(() => {
-  if (!props.result.submittedAt) return '—'
-  const date = new Date(props.result.submittedAt)
-  if (Number.isNaN(date.getTime())) return '—'
-  return new Intl.DateTimeFormat('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
-})
 const questionMap = computed(() => new Map((props.questions ?? []).map((question) => [question.id, question])))
 const isChoiceType = (type: string): boolean => type === 'fill_blank' || type === 'reading'
+
+const isReading = computed(() => (props.questions ?? []).some((question) => question.questionType === 'reading'))
+const readingArticle = computed(
+  () => (props.questions ?? []).find((question) => question.questionType === 'reading' && question.article)?.article ?? '',
+)
+const readingArticleZh = computed(
+  () => (props.questions ?? []).find((question) => question.questionType === 'reading' && question.articleZh)?.articleZh ?? '',
+)
+const readingWords = computed(() => [...new Set((props.questions ?? []).flatMap((question) => question.targetWords))])
+
+const correctCount = computed(() => props.result.correctCount ?? 0)
+const wrongCount = computed(() => props.result.wrongCount ?? 0)
+const correctPercent = computed(() => {
+  const total = correctCount.value + wrongCount.value
+  return total > 0 ? Math.round((correctCount.value / total) * 100) : 0
+})
 </script>
 
 <template>
   <section class="practice-result" aria-labelledby="practice-result-title">
+    <section v-if="isReading && readingArticle" class="panel practice-article-panel practice-article-panel--wide">
+      <p class="eyebrow">阅读材料</p>
+      <SpokenText class="practice-article" :text="readingArticle" :highlight="readingWords" />
+      <p v-if="readingArticleZh" class="practice-translation-note practice-translation-note--article">{{ readingArticleZh }}</p>
+    </section>
+
     <div class="practice-result__layout">
     <aside class="practice-result__aside">
-    <section class="practice-result__card">
-    <header class="practice-result__hero">
-      <div>
-        <p class="eyebrow">练习结果</p>
-        <h2 id="practice-result-title">本次练习得分</h2>
-        <p class="inline-note">{{ PRACTICE_SUBMISSION_LABELS[result.status] }} · {{ result.totalQuestions }} 题</p>
+    <section class="panel practice-result__card">
+      <h2 id="practice-result-title" class="visually-hidden">本次练习得分</h2>
+      <div class="practice-result__scoreline">
+        <span class="practice-result__score">{{ scoreLabel }}</span>
+        <span class="practice-result__tally">答对 {{ correctCount }} · 错题 {{ wrongCount }}</span>
       </div>
-      <div class="practice-result__score">{{ scoreLabel }}</div>
-    </header>
-
-    <section class="practice-result__summary">
-      <div><strong>{{ result.correctCount ?? '—' }}</strong><span>答对</span></div>
-      <div><strong>{{ result.wrongCount ?? '—' }}</strong><span>错题</span></div>
-      <div><strong>{{ submittedAtLabel }}</strong><span>提交时间</span></div>
+      <div
+        class="practice-result__bar"
+        role="img"
+        :aria-label="`正确 ${correctCount} 题，错误 ${wrongCount} 题`"
+      >
+        <span class="practice-result__bar-fill" :style="{ width: `${correctPercent}%` }"></span>
+      </div>
     </section>
-    </section>
-
     </aside>
 
     <div class="practice-result__answers">
@@ -64,6 +73,7 @@ const isChoiceType = (type: string): boolean => type === 'fill_blank' || type ==
         :question="questionMap.get(item.questionId)!"
         :index="index"
         :total="result.questions.length"
+        :hide-article="isReading"
         :model-value="item.userAnswer"
         :review="{ selected: item.userAnswer || null, correct: item.correctChoiceId }"
       />

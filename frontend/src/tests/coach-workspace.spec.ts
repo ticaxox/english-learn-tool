@@ -11,7 +11,7 @@ import type {
 } from '../api/coach'
 
 const conversation: CoachConversation = {
-  id: 'conversation-1', title: '本周学习计划', status: 'active', messageCount: 2,
+  id: 'conversation-1', title: '本周学习计划', status: 'active', scope: 'panel', messageCount: 2,
   lastMessageAt: '2026-10-23T06:00:00Z', createdAt: '2026-10-23T05:00:00Z', updatedAt: '2026-10-23T06:00:00Z',
 }
 const secondConversation: CoachConversation = {

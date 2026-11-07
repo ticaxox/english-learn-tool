@@ -44,7 +44,7 @@ function book(): Wordbook {
 }
 
 describe('member redesign', () => {
-  it('keeps personal navigation compact with exactly four primary groups', async () => {
+  it('keeps personal navigation to five primary groups', async () => {
     const router = makeRouter()
     await router.push('/overview')
     await router.isReady()
@@ -53,14 +53,15 @@ describe('member redesign', () => {
       global: { plugins: [router] },
     })
 
-    expect(wrapper.findAll('.ia-nav-group')).toHaveLength(4)
+    expect(wrapper.findAll('.ia-nav-group')).toHaveLength(5)
     expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(0)
-    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(5)
+    expect(wrapper.get('.workspace-nav').text()).toContain('AI 教练')
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
     expect(wrapper.text()).toContain('今天也学一点')
   })
 
-  it('opens the coach as a global side panel instead of a left navigation item', async () => {
+  it('keeps the floating coach and also offers a full coach page', async () => {
     const router = makeRouter()
     await router.push('/overview')
     await router.isReady()
@@ -74,7 +75,9 @@ describe('member redesign', () => {
     // Floating window: the page underneath does not change.
     expect(router.currentRoute.value.name).toBe('overview')
     expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
-    expect(wrapper.find('.workspace-nav').text()).not.toContain('AI 教练')
+    // The panel has no history list; the page route does.
+    expect(wrapper.find('.ia-coach-panel .coach-history').exists()).toBe(false)
+    expect(wrapper.find('.workspace-nav a[href="/coach"]').exists()).toBe(true)
     // The shell marks itself so the desktop layout can give the coach real space.
     expect(wrapper.find('.personal-workspace.is-coach-open').exists()).toBe(true)
   })

@@ -3283,3 +3283,55 @@
   font-weight: 800;
 }
 .personal-workspace .mcp-token-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+
+/* ---------------------------------------------- reading passage, wordbook words */
+
+/* The passage sits above the questions and spans the whole session width. */
+.personal-workspace .practice-article-panel--wide { width: 100%; margin-bottom: 14px; }
+
+/* The Chinese translation of a long passage needs body-copy sizes. */
+.personal-workspace .practice-translation-note--article {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--ui-line);
+  font-size: 1rem;
+  line-height: 1.9;
+}
+
+/* Words taken from the learner's wordbook are marked inside the text. */
+.personal-workspace .spoken-word--target {
+  padding: 0 2px;
+  border-radius: 4px;
+  background: rgb(250 204 21 / 30%);
+  box-shadow: inset 0 -2px 0 rgb(217 119 6 / 55%);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------- result: score + answer bar */
+
+.personal-workspace .practice-result__card { display: grid; gap: 12px; padding: 18px 20px; }
+.personal-workspace .practice-result__scoreline {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.personal-workspace .practice-result__tally {
+  color: var(--ui-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.personal-workspace .practice-result__bar {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(220 38 38 / 22%);
+}
+.personal-workspace .practice-result__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1f9d55;
+  transition: width 0.3s ease;
+}

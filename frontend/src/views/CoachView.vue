@@ -17,7 +17,10 @@ import { useCoachWorkspace } from '../composables/useCoachWorkspace'
 import { useSpeechRecognition } from '../composables/useSpeechRecognition'
 import '../coach.css'
 
-const coach = useCoachWorkspace()
+const props = withDefaults(defineProps<{ surface?: 'panel' | 'page' }>(), { surface: 'panel' })
+const isPage = computed(() => props.surface === 'page')
+// The full-screen page keeps its own history; the floating panel never shows one.
+const coach = useCoachWorkspace(undefined, props.surface)
 const draft = ref('')
 const dictation = useSpeechRecognition((text) => {
   draft.value = draft.value.trim() ? `${draft.value.trim()} ${text}` : text
@@ -157,6 +160,22 @@ async function startConversation(): Promise<void> {
   if (created) await focusComposer()
 }
 
+async function openConversation(conversationId: string): Promise<void> {
+  await coach.selectConversation(conversationId)
+}
+
+async function removeConversation(conversationId: string): Promise<void> {
+  if (!window.confirm('删除这段对话？记录会保留在历史里但不再显示。')) return
+  await coach.removeConversation(conversationId, false)
+}
+
+function conversationTime(value: string | null): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric' }).format(date)
+}
+
 async function clearConversation(): Promise<void> {
   const conversation = coach.selectedConversation.value
   if (!conversation) return
@@ -241,7 +260,42 @@ onBeforeUnmount(() => {
       </DivButton>
     </div>
 
-    <div class="coach-layout">
+    <div class="coach-layout" :class="{ 'coach-layout--with-history': isPage }">
+      <aside v-if="isPage" class="panel coach-history" aria-label="历史记录">
+        <header class="coach-history__head">
+          <strong>历史记录</strong>
+          <DivButton class="button-secondary button-small" type="button" @click="startConversation">新对话</DivButton>
+        </header>
+        <ErrorNotice v-if="coach.conversationsError.value" :error="coach.conversationsError.value" :show-retry="false" />
+        <p v-if="!coach.conversationsLoading.value && coach.conversations.value.length === 0" class="field-hint">还没有历史对话。</p>
+        <ul class="coach-history__list">
+          <li
+            v-for="conversation in coach.conversations.value"
+            :key="conversation.id"
+            class="coach-history__item"
+            :class="{ 'is-active': conversation.id === coach.selectedConversationId.value }"
+          >
+            <button type="button" class="coach-history__open" @click="openConversation(conversation.id)">
+              <span class="coach-history__title">{{ conversation.title }}</span>
+              <small>{{ conversation.messageCount }} 条 · {{ conversationTime(conversation.updatedAt) }}</small>
+            </button>
+            <DivButton
+              class="coach-history__delete"
+              type="button"
+              :aria-label="`删除 ${conversation.title}`"
+              @click="removeConversation(conversation.id)"
+            >×</DivButton>
+          </li>
+        </ul>
+        <DivButton
+          v-if="coach.conversationsHasMore.value"
+          class="button-secondary button-small"
+          type="button"
+          :disabled="coach.conversationsLoading.value"
+          @click="coach.loadMoreConversations()"
+        >加载更早的对话</DivButton>
+      </aside>
+
       <section class="panel coach-main" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
