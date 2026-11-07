@@ -176,13 +176,6 @@ function conversationTime(value: string | null): string {
   return new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric' }).format(date)
 }
 
-async function clearConversation(): Promise<void> {
-  const conversation = coach.selectedConversation.value
-  if (!conversation) return
-  if (!window.confirm(`确认清空“${conversation.title}”的全部消息？对话标题会保留。`)) return
-  await coach.removeConversation(conversation.id, true)
-}
-
 async function submitMessage(): Promise<void> {
   const content = draft.value.trim()
   const attachmentIds = pendingAttachments.value.map((item) => item.id)
@@ -250,18 +243,8 @@ onBeforeUnmount(() => {
       <span class="coach-privacy-stamp"><AppIcon name="lock" /> 仅你可见</span>
     </header>
 
-    <div class="coach-main-topbar">
-      <DivButton
-        class="button-secondary button-small coach-clear-toggle"
-        type="button"
-        @click="clearConversation"
-      >
-        清空聊天记录
-      </DivButton>
-    </div>
-
     <div class="coach-layout" :class="{ 'coach-layout--with-history': isPage }">
-      <aside v-if="isPage" class="panel coach-history" aria-label="历史记录">
+      <aside v-if="isPage" class="coach-history" aria-label="历史记录">
         <header class="coach-history__head">
           <strong>历史记录</strong>
           <DivButton class="button-secondary button-small" type="button" @click="startConversation">新对话</DivButton>
@@ -296,7 +279,7 @@ onBeforeUnmount(() => {
         >加载更早的对话</DivButton>
       </aside>
 
-      <section class="panel coach-main" aria-label="教练对话">
+      <section class="coach-main" :class="{ panel: !isPage }" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
           <p class="eyebrow">AI 教练</p>

@@ -250,7 +250,6 @@ onMounted(() => {
         <span class="practice-task-type">{{ PRACTICE_TYPE_LABELS[row.practiceType] }}</span>
         <strong>{{ taskName(row) }}</strong>
         <span class="practice-task-status" :class="`is-${row.status}`">{{ statusLabel(row) }}</span>
-        <span class="practice-task-count">{{ row.count }} 题</span>
         <AppIcon name="arrow" />
       </DivButton>
     </div>

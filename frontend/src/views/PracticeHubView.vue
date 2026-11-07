@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import { createPracticeSession, fetchPracticeUsage, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
+import { createPracticeSession, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeSource, type PracticeType } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import { fetchLearningProfile, fetchMemoryConfig, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
@@ -54,8 +54,7 @@ const difficulty = ref<PracticeDifficulty>('CET6')
 const wordbookId = ref('')
 const creating = ref(false)
 const createError = ref<unknown>(null)
-const usage = ref<PracticeUsage | null>(null)
-const usageError = ref<unknown>(null)
+
 
 const wordbooks = ref<Wordbook[]>([])
 const wordbooksError = ref<unknown>(null)
@@ -179,16 +178,6 @@ async function create(): Promise<void> {
   }
 }
 
-async function loadUsage(): Promise<void> {
-  try {
-    usage.value = await fetchPracticeUsage()
-    usageError.value = null
-  } catch (error) {
-    usage.value = null
-    usageError.value = error
-  }
-}
-
 async function loadWordbooks(): Promise<void> {
   try {
     const page = await listWordbooks({ limit: 100 })
@@ -200,18 +189,8 @@ async function loadWordbooks(): Promise<void> {
   }
 }
 
-function quotaRemaining(kind: 'question_generation' | 'subjective_grading'): number | null {
-  return usage.value?.quotas.find((quota) => quota.quotaKind === kind)?.remaining ?? null
-}
-
-function quotaText(kind: 'question_generation' | 'subjective_grading'): string {
-  const remaining = quotaRemaining(kind)
-  if (remaining === null) return '—'
-  return remaining < 0 ? '不限' : String(remaining)
-}
-
 onMounted(() => {
-  void Promise.all([loadUsage(), loadWordbooks(), loadMemoryConfig()])
+  void Promise.all([loadWordbooks(), loadMemoryConfig()])
 })
 </script>
 
@@ -221,23 +200,7 @@ onMounted(() => {
     <PracticeSessionView v-else-if="activeSessionId" embedded :session-id="activeSessionId" />
 
     <template v-else>
-    <header class="workspace-page-header">
-      <div>
-        <p class="workspace-kicker">练习</p>
-        <h1>今天练什么</h1>
-        <p class="workspace-page-lead">记忆训练和 AI 出题都在这里；记忆练习从今天的真实队列开始。</p>
-      </div>
-    </header>
-
-    <section class="workspace-card practice-memory-panel" aria-labelledby="practice-memory-title">
-      <header class="workspace-section-header">
-        <div>
-          <p class="workspace-kicker">记忆练习</p>
-          <h2 id="practice-memory-title">翻卡、选择或拼写</h2>
-        </div>
-        <RouterLink class="workspace-meta" to="/settings/learning">调整训练与目标</RouterLink>
-      </header>
-      <div class="module-grid memory-action-grid">
+      <div class="module-grid memory-action-grid practice-memory-grid">
         <DivButton
           v-for="module in MEMORY_MODULES"
           :key="module"
@@ -254,21 +217,10 @@ onMounted(() => {
           <AppIcon :name="memoryEnabled(module) ? 'arrow' : 'lock'" />
         </DivButton>
       </div>
-    </section>
 
       <div class="practice-hub-layout">
       <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">
-        <header class="workspace-section-header practice-create-heading">
-          <div>
-            <p class="workspace-kicker">新建练习</p>
-            <h2 id="practice-create-title">今天想练什么</h2>
-          </div>
-          <div class="practice-quota-inline" aria-label="今日练习额度">
-            <span title="今日还可用 AI 生成题目的次数">生成余量 <strong>{{ quotaText('question_generation') }}</strong></span>
-            <span title="今日还可提交主观题评分的次数">评分余量 <strong>{{ quotaText('subjective_grading') }}</strong></span>
-          </div>
-        </header>
-        <ErrorNotice v-if="usageError" :error="usageError" :show-retry="false" retry-label="重试" @retry="loadUsage" />
+        <h2 id="practice-create-title" class="visually-hidden">新建练习</h2>
 
         <form class="practice-form" novalidate @submit.prevent="create">
           <div class="practice-type-picker" role="group" aria-label="题型">
@@ -286,7 +238,7 @@ onMounted(() => {
             </DivButton>
           </div>
           <p v-if="practiceType === 'mixed'" class="field-hint">同一组题里混合多种题型，按整组题量生成。</p>
-          <div class="practice-form-grid">
+          <div class="practice-form-row">
             <div class="field">
               <label for="practice-source">来源</label>
               <select id="practice-source" v-model="source">

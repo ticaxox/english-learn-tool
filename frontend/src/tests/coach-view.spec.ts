@@ -122,13 +122,9 @@ describe('coach view', () => {
     expect(wrapper.text()).not.toContain('本次可用')
   })
 
-  it('clears the chat after confirmation', async () => {
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+  it('no longer offers a clear-chat button', async () => {
     const wrapper = await mountView()
-    await wrapper.get('.coach-clear-toggle').trigger('click')
-    await flushPromises()
-    expect(coachMocks.deleteCoachConversation).toHaveBeenCalledWith('conversation-1', true)
-    expect(confirm).toHaveBeenCalledTimes(1)
+    expect(wrapper.find('.coach-clear-toggle').exists()).toBe(false)
   })
 
   it('undoes an action only after the server confirms', async () => {

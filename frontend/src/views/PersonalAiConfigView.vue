@@ -202,7 +202,9 @@ onMounted(() => {
 
 <template>
   <section class="personal-ai-page" :class="{ 'personal-ai-page--editing': formOpen }" aria-labelledby="personal-ai-title">
-    <div class="personal-ai-main">
+    <div class="personal-ai-main panel personal-ai-stack">
+      <AiQuotaPanel :providers="providers" @saved="load" />
+
       <div class="personal-ai-toolbar">
         <div>
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
@@ -257,8 +259,6 @@ onMounted(() => {
           </div>
         </article>
       </div>
-
-      <AiQuotaPanel :providers="providers" @saved="load" />
 
       <AiMemoryPanel />
 

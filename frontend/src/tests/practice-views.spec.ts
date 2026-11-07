@@ -179,11 +179,11 @@ describe('practice views', () => {
     expect(practiceMocks.listPracticeRecords).not.toHaveBeenCalled()
   })
 
-  it('glosses every option in Chinese and marks results on review', () => {
+  it('keeps option glosses out of the answering view and shows them on review', () => {
     const answering = mount(PracticeQuestionCard, { props: { question, modelValue: '', index: 0, total: 1 } })
     expect(answering.text()).toContain('The team remained ____.')
-    // Every option carries its Chinese gloss while answering.
-    expect(answering.text()).toContain('有韧性的')
+    // Glosses would give the answer away while the learner is choosing.
+    expect(answering.text()).not.toContain('有韧性的')
     expect(answering.text()).not.toContain('源语言')
 
     const review = mount(PracticeQuestionCard, {

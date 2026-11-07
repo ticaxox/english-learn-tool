@@ -126,7 +126,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
           <span class="practice-option__text">{{ option.text }}</span>
         </span>
         </label>
-        <small v-if="option.textZh" class="practice-option-translation">{{ option.textZh }}</small>
+        <small v-if="inReview && option.textZh" class="practice-option-translation">{{ option.textZh }}</small>
       </div>
     </fieldset>
 

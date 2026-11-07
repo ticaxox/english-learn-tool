@@ -111,7 +111,7 @@ describe('member-facing Chinese copy density', () => {
 
     const practice = source('../views/PracticeHubView.vue')
     // The practice page hosts both memory training and AI generation.
-    expect(practice).toContain('记忆练习')
+    expect(practice).toContain('MEMORY_MODULES')
     expect(practice).toContain('生成练习')
     expect(practice).toContain('PracticeTaskList')
     const tasks = source('../components/PracticeTaskList.vue')

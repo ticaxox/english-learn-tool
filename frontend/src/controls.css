@@ -3352,3 +3352,111 @@
   box-shadow: none;
   color: var(--ui-muted);
 }
+
+/* ------------------------------- practice hub: one-row filters, slimmer rail */
+
+.personal-workspace .practice-hub-layout { grid-template-columns: minmax(0, 1fr) 320px; }
+
+.personal-workspace .practice-memory-grid { margin-bottom: 18px; }
+
+/* Filters read as key–value pairs on one line, not a two-row grid. */
+.personal-workspace .practice-form-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px 16px;
+  align-items: center;
+}
+
+.personal-workspace .practice-form-row .field {
+  display: flex;
+  flex: 1 1 0;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  margin-bottom: 0.3rem;
+}
+
+.personal-workspace .practice-form-row .field > label {
+  flex: 0 0 auto;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.personal-workspace .practice-form-row .field > select { min-width: 0; }
+
+@media (max-width: 1180px) {
+  .personal-workspace .practice-form-row { flex-wrap: wrap; }
+  .personal-workspace .practice-form-row .field { flex: 1 1 45%; }
+}
+
+/* ------------------------------------------- AI settings: one card, flat parts */
+
+.personal-workspace .personal-ai-stack {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.personal-workspace .personal-ai-stack > .panel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.personal-workspace .personal-ai-stack > .panel + .panel,
+.personal-workspace .personal-ai-stack > .personal-ai-toolbar,
+.personal-workspace .personal-ai-stack > .personal-ai-list {
+  padding-top: 18px;
+  border-top: 1px dashed var(--ui-line);
+}
+
+.personal-workspace .personal-ai-stack > .personal-ai-list { display: grid; gap: 10px; }
+
+/* ------------------------------------ account security: one card, one-line rows */
+
+.personal-workspace .ia-security-block {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--ui-line);
+}
+
+/* Token name and its button share a line. */
+.personal-workspace .ia-token-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.personal-workspace .ia-token-form > input { flex: 1 1 auto; min-width: 0; }
+.personal-workspace .ia-token-form > .div-button { flex: 0 0 auto; }
+
+/* One line per token: name, prefix and dates never wrap onto a second row. */
+.personal-workspace .mcp-token-list li > div.mcp-token-main {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.personal-workspace .mcp-token-main small { overflow: hidden; text-overflow: ellipsis; }
+.personal-workspace .mcp-token-actions { flex-wrap: nowrap; }
+
+/* -------------------------------------- full coach page: no card layout at all */
+
+.personal-workspace .coach-page .coach-main,
+.personal-workspace .coach-page .coach-history {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.personal-workspace .coach-page .coach-history { padding-right: 18px; }

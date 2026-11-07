@@ -274,31 +274,25 @@ async function submit(): Promise<void> {
         <DivButton type="submit" :disabled="submitting">{{ submitting ? '正在更新…' : '保存新密码' }}</DivButton>
       </div>
     </form>
-  </section>
-
-  <section class="panel ia-account-security" aria-labelledby="account-tokens-title">
+    <div class="ia-security-block" aria-labelledby="account-tokens-title">
     <header>
       <p class="eyebrow">MCP</p>
       <h2 id="account-tokens-title">访问令牌</h2>
       <p class="field-hint">外部 MCP 客户端用这里的令牌调用教练动作；令牌只在创建时显示一次。</p>
     </header>
 
-    <form class="form-stack ia-security-form" @submit.prevent="submitToken">
-      <div class="field">
-        <label for="mcp-token-name">令牌名称</label>
-        <input
-          id="mcp-token-name"
-          v-model="tokenName"
-          maxlength="80"
-          placeholder="例如 Claude Desktop"
-          :disabled="tokenCreating"
-        />
-      </div>
-      <div class="button-row">
-        <DivButton type="submit" :disabled="tokenCreating || !tokenName.trim()">
-          {{ tokenCreating ? '正在生成…' : '生成令牌' }}
-        </DivButton>
-      </div>
+    <form class="ia-token-form" @submit.prevent="submitToken">
+      <label class="visually-hidden" for="mcp-token-name">令牌名称</label>
+      <input
+        id="mcp-token-name"
+        v-model="tokenName"
+        maxlength="80"
+        placeholder="例如 Claude Desktop"
+        :disabled="tokenCreating"
+      />
+      <DivButton type="submit" :disabled="tokenCreating || !tokenName.trim()">
+        {{ tokenCreating ? '正在生成…' : '生成令牌' }}
+      </DivButton>
     </form>
 
     <ErrorNotice v-if="tokenError" :error="tokenError" :show-retry="false" />
@@ -313,7 +307,7 @@ async function submit(): Promise<void> {
     <LoadingState v-if="tokensLoading && tokens.length === 0" label="正在读取令牌…" />
     <ul v-else-if="tokens.length" class="mcp-token-list">
       <li v-for="token in tokens" :key="token.id">
-        <div>
+        <div class="mcp-token-main">
           <strong>
             {{ token.name }}
             <span v-if="token.isDefault" class="mcp-token-default">默认</span>
@@ -330,7 +324,7 @@ async function submit(): Promise<void> {
             type="button"
             :disabled="revokingId === token.id"
             @click="refreshToken(token)"
-          >{{ revokingId === token.id ? '正在刷新…' : '刷新' }}</DivButton>
+          >{{ revokingId === token.id ? '正在重置…' : '重置' }}</DivButton>
           <DivButton
             v-if="!token.isDefault"
             class="button-danger button-small"
@@ -342,5 +336,7 @@ async function submit(): Promise<void> {
       </li>
     </ul>
     <p v-else-if="!tokensLoading" class="field-hint">还没有访问令牌。</p>
+  </div>
   </section>
+
 </template>
