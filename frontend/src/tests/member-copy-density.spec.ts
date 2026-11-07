@@ -28,6 +28,16 @@ function source(path: string): string {
   return readFileSync(new URL(path, import.meta.url), 'utf8')
 }
 
+describe('merged practice surface', () => {
+  it('hosts memory training on the practice page and redirects old links', () => {
+    const hub = source('../views/PracticeHubView.vue')
+    expect(hub).toContain('MemoryPracticeView')
+    expect(hub).toContain('MEMORY_MODULES')
+    const routes = source('../router/index.ts')
+    expect(routes).toContain("redirect: (to) => ({ name: 'practice', query: to.query })")
+  })
+})
+
 describe('member-facing Chinese copy density', () => {
   it('does not expose implementation language or editorial placeholder labels', () => {
     const forbidden = [
@@ -81,8 +91,8 @@ describe('member-facing Chinese copy density', () => {
   it('uses concise Chinese labels for the primary member surfaces', () => {
     const shell = source('../components/MemberShell.vue')
     expect(shell).toContain("label: '今日学习'")
-    expect(shell).toContain("label: '记忆练习'")
-    expect(shell).toContain("label: 'AI 练习'")
+    expect(shell).toContain("label: '练习'")
+    expect(shell).not.toContain("label: '记忆练习'")
     expect(shell).not.toContain("label: '组织管理'")
     expect(shell).toContain("label: '设置'")
     expect(shell).not.toContain("label: '每日闯关'")
@@ -100,7 +110,8 @@ describe('member-facing Chinese copy density', () => {
     expect(wordbooks).toContain('当前主词书')
 
     const practice = source('../views/PracticeHubView.vue')
-    expect(practice).toContain('AI 练习')
+    // The practice page hosts both memory training and AI generation.
+    expect(practice).toContain('记忆练习')
     expect(practice).toContain('生成练习')
     expect(practice).toContain('PracticeTaskList')
     const tasks = source('../components/PracticeTaskList.vue')

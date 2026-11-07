@@ -52,20 +52,21 @@ function source(path: string): string {
 }
 
 describe('T-FE-020 personal information architecture', () => {
-  it('shows five first-level destinations for every personal account', async () => {
+  it('shows four first-level destinations for every personal account', async () => {
     const { wrapper } = await mountShell()
     const labels = wrapper.findAll('.ia-nav-primary').map((link) => link.text().trim())
-    expect(labels).toEqual(['今日学习', '记忆练习', 'AI 练习', 'AI 教练', '设置'])
-    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(5)
+    expect(labels).toEqual(['今日学习', '练习', 'AI 教练', '设置'])
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
     expect(wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
   })
 
-  it('keeps practice and memory as their own first-level destinations', async () => {
+  it('keeps one practice destination that also hosts memory training', async () => {
     const { wrapper } = await mountShell()
     expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(0)
     expect(wrapper.find('.workspace-nav a[href="/practice"]').exists()).toBe(true)
-    expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(true)
+    // Memory training lives on the practice page, so it has no nav entry of its own.
+    expect(wrapper.find('.workspace-nav a[href="/memory"]').exists()).toBe(false)
     expect(wrapper.get('.workspace-nav').text()).not.toContain('学习中心')
     expect(wrapper.get('.workspace-nav').text()).not.toContain('通知')
 
@@ -78,7 +79,7 @@ describe('T-FE-020 personal information architecture', () => {
     })
     expect(practiceShell.findAll('.workspace-topbar-tab')).toHaveLength(0)
     expect(practiceShell.findAll('.workspace-mode')).toHaveLength(0)
-    expect(practiceShell.get('.workspace-topbar-heading').text()).toContain('AI 练习')
+    expect(practiceShell.get('.workspace-topbar-heading').text()).toContain('练习')
   })
 
   it('keeps profile actions and the global AI coach on the shared shell', async () => {

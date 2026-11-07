@@ -44,7 +44,7 @@ function book(): Wordbook {
 }
 
 describe('member redesign', () => {
-  it('keeps personal navigation to five primary groups', async () => {
+  it('keeps personal navigation to four primary groups', async () => {
     const router = makeRouter()
     await router.push('/overview')
     await router.isReady()
@@ -53,9 +53,9 @@ describe('member redesign', () => {
       global: { plugins: [router] },
     })
 
-    expect(wrapper.findAll('.ia-nav-group')).toHaveLength(5)
+    expect(wrapper.findAll('.ia-nav-group')).toHaveLength(4)
     expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(0)
-    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(5)
+    expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
     expect(wrapper.get('.workspace-nav').text()).toContain('AI 教练')
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
     expect(wrapper.text()).toContain('今天也学一点')

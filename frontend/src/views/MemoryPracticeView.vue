@@ -7,7 +7,7 @@
  * idempotency keys. Heartbeats run while a session is open.
  */
 import { computed, onMounted, ref, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -33,6 +33,8 @@ import {
 import '../learning.css'
 
 const route = useRoute()
+const router = useRouter()
+const props = withDefaults(defineProps<{ embedded?: boolean }>(), { embedded: false })
 const frozen = computed(() => isContractFrozen())
 const challengeSessionId = computed(() => typeof route.query.sessionId === 'string' ? route.query.sessionId : null)
 const challengeId = computed(() => typeof route.query.challengeId === 'string' ? route.query.challengeId : null)
@@ -259,6 +261,11 @@ async function resetTodayProgress(): Promise<void> {
 }
 
 function restart(): void {
+  if (props.embedded) {
+    // The hub owns the module picker, so a finished session returns to it.
+    void router.replace({ name: 'practice' })
+    return
+  }
   wrongCard.value = null
   session.reset()
   heartbeat.stop()
@@ -293,7 +300,10 @@ watch(challengeModule, async (module, previous) => {
 
 <template>
   <article class="memory-page memory-workbench workspace-page">
-    <header v-if="!session.hasSession.value && !session.finished.value" class="workspace-page-header">
+    <header
+      v-if="!props.embedded && !session.hasSession.value && !session.finished.value"
+      class="workspace-page-header"
+    >
       <div>
         <p class="workspace-kicker">记忆训练</p>
         <h1>选一种方式开始复习</h1>

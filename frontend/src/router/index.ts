@@ -13,7 +13,6 @@ import ChallengeView from '../views/ChallengeView.vue'
 import LoginView from '../views/LoginView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LearningSettingsView from '../views/LearningSettingsView.vue'
-import MemoryPracticeView from '../views/MemoryPracticeView.vue'
 import PersonalAiConfigView from '../views/PersonalAiConfigView.vue'
 import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
@@ -60,9 +59,10 @@ const routes: RouteRecordRaw[] = [
         redirect: { name: 'challenges' },
       },
       {
+        // Memory training lives on the practice page; old links keep working.
         path: 'memory',
         name: 'memory',
-        component: MemoryPracticeView,
+        redirect: (to) => ({ name: 'practice', query: to.query }),
       },
       {
         path: 'memory/mistakes',

@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { createPracticeSession, fetchPracticeUsage, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeSource, type PracticeType, type PracticeUsage } from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
-import { fetchLearningProfile, saveMemoryConfig } from '../api/learning'
+import { fetchLearningProfile, fetchMemoryConfig, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
 import PracticeSessionView from './PracticeSessionView.vue'
+import MemoryPracticeView from './MemoryPracticeView.vue'
+import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryModule } from '../types/learning'
 import PracticeTaskList from '../components/PracticeTaskList.vue'
 
 import '../practice.css'
@@ -16,6 +18,28 @@ import '../practice.css'
 const router = useRouter()
 const route = useRoute()
 const activeSessionId = computed(() => (typeof route.query.session === 'string' && route.query.session ? route.query.session : null))
+// Memory training is the same page: ?module=flashcard|choice|spelling starts it here.
+const memoryModule = computed<MemoryModule | null>(() => {
+  const value = route.query.module
+  return value === 'flashcard' || value === 'choice' || value === 'spelling' ? value : null
+})
+const memoryConfig = ref<MemoryConfig | null>(null)
+
+async function loadMemoryConfig(): Promise<void> {
+  try {
+    memoryConfig.value = await fetchMemoryConfig()
+  } catch {
+    memoryConfig.value = null
+  }
+}
+
+function memoryEnabled(module: MemoryModule): boolean {
+  return memoryConfig.value ? memoryConfig.value[module].enabled : true
+}
+
+function startMemory(module: MemoryModule): void {
+  void router.push({ name: 'practice', query: { module } })
+}
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
 const practiceTypeOptions: PracticeType[] = [...practiceTypes, 'mixed']
 function queryType(value: unknown): PracticeType | null {
@@ -187,23 +211,50 @@ function quotaText(kind: 'question_generation' | 'subjective_grading'): string {
 }
 
 onMounted(() => {
-  void Promise.all([loadUsage(), loadWordbooks()])
+  void Promise.all([loadUsage(), loadWordbooks(), loadMemoryConfig()])
 })
 </script>
 
 <template>
   <article class="practice-page practice-hub member-practice-page practice-workspace workspace-page">
-    <PracticeSessionView v-if="activeSessionId" embedded :session-id="activeSessionId" />
+    <MemoryPracticeView v-if="memoryModule" embedded />
+    <PracticeSessionView v-else-if="activeSessionId" embedded :session-id="activeSessionId" />
 
     <template v-else>
     <header class="workspace-page-header">
       <div>
-        <p class="workspace-kicker">AI 练习</p>
-        <h1>做一组有针对性的练习</h1>
-        <p class="workspace-page-lead">从今天的学习内容出题，计时和拼写挖空也在这里设置。</p>
+        <p class="workspace-kicker">练习</p>
+        <h1>今天练什么</h1>
+        <p class="workspace-page-lead">记忆训练和 AI 出题都在这里；记忆练习从今天的真实队列开始。</p>
       </div>
     </header>
 
+    <section class="workspace-card practice-memory-panel" aria-labelledby="practice-memory-title">
+      <header class="workspace-section-header">
+        <div>
+          <p class="workspace-kicker">记忆练习</p>
+          <h2 id="practice-memory-title">翻卡、选择或拼写</h2>
+        </div>
+        <RouterLink class="workspace-meta" to="/settings/learning">调整训练与目标</RouterLink>
+      </header>
+      <div class="module-grid memory-action-grid">
+        <DivButton
+          v-for="module in MEMORY_MODULES"
+          :key="module"
+          class="module-card memory-action-card"
+          :class="[`memory-action-card--${module}`, { 'is-disabled': !memoryEnabled(module) }]"
+          type="button"
+          :disabled="!memoryEnabled(module)"
+          @click="startMemory(module)"
+        >
+          <span class="memory-action-icon"><AppIcon :name="module === 'spelling' ? 'star' : module === 'choice' ? 'cards' : 'book'" /></span>
+          <span class="memory-action-copy">
+            <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
+          </span>
+          <AppIcon :name="memoryEnabled(module) ? 'arrow' : 'lock'" />
+        </DivButton>
+      </div>
+    </section>
 
       <div class="practice-hub-layout">
       <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">

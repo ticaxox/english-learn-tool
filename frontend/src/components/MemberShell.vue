@@ -23,8 +23,7 @@ let previousFocus: HTMLElement | null = null
 
 const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
-  { key: 'memory', label: '记忆练习', to: '/memory', icon: 'cards' as const },
-  { key: 'practice', label: 'AI 练习', to: '/practice', icon: 'book' as const },
+  { key: 'practice', label: '练习', to: '/practice', icon: 'book' as const },
   { key: 'coach', label: 'AI 教练', to: '/coach', icon: 'coach' as const },
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
 ] as const
@@ -58,8 +57,7 @@ const currentDate = computed(() =>
 const userInitials = computed(() => props.displayName.trim().slice(0, 2).toUpperCase() || 'CT')
 
 function isGroupActive(key: string): boolean {
-  if (key === 'practice') return route.path.startsWith('/practice')
-  if (key === 'memory') return route.path.startsWith('/memory')
+  if (key === 'practice') return route.path.startsWith('/practice') || route.path.startsWith('/memory')
   if (key === 'coach') return route.path.startsWith('/coach')
   if (key === 'settings') return route.path.startsWith('/settings')
   if (key === 'today') return route.path === '/overview' || route.path.startsWith('/challenges')
