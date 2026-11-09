@@ -3733,3 +3733,13 @@
 .personal-workspace .practice-question-card h2 {
   font-weight: 500;
 }
+
+/* The rail header may not exceed the card's content box. */
+.personal-workspace .practice-tasks-card { overflow: hidden; }
+.personal-workspace .practice-tasks-head { width: auto; max-width: 100%; }
+
+/* The coach owns the whole content area, not the narrow page column. */
+.personal-workspace .workspace-content:has(.coach-page) {
+  width: 100%;
+  max-width: none;
+}
