@@ -179,57 +179,15 @@ onMounted(() => {
     </section>
 
     <template v-else-if="plan">
-      <section class="crumb-today-board">
-      <div class="crumb-today-layout">
-        <div class="crumb-today-main">
-      <header class="crumb-today-header">
-        <div class="crumb-today-intro">
-          <div class="crumb-mascot-lockup">
-            <CrumboMark size="large" />
-            <div>
-              <p class="crumb-brand-kicker">CRUMBTRAIL · 今日学习路线</p>
-              <h1>跟着 Crumbo，捡完今天的知识碎屑。</h1>
-            </div>
-          </div>
-          <p class="crumb-today-note">{{ heroNote }}</p>
-        </div>
-      </header>
+      <section class="crumb-today-board crumb-trail-board crumb-merged">
+        <div class="crumb-merged-main">
+          <span class="crumb-eyebrow">今日学习 · 今日任务</span>
+          <h1 class="crumb-merged-title">
+            下一步：<b>{{ primaryTask ? primaryTask.title : '今天的任务已完成' }}</b>
+          </h1>
+          <p class="today-task-sentence">{{ todayTaskSentence }}</p>
 
-        <section class="crumb-trail-board">
-          <header class="crumb-trail-board-head">
-            <div>
-              <span class="crumb-eyebrow">今日任务</span>
-              <p class="today-task-sentence">{{ todayTaskSentence }}</p>
-            </div>
-            <strong>{{ completedTaskCount }} / {{ todayTasks.length }} 完成</strong>
-          </header>
-
-          <ul class="crumb-task-list" aria-label="今日任务进度">
-            <li v-for="task in todayTasks" :key="task.key" :class="{ 'is-done': task.done }">
-              <RouterLink :to="task.to" class="crumb-task-row">
-                <span class="crumb-task-icon"><AppIcon :name="task.icon" /></span>
-                <span class="crumb-task-copy">
-                  <strong>{{ task.title }}</strong>
-                  <small>{{ task.completed }} / {{ task.target }} {{ task.unit }}</small>
-                </span>
-                <span class="crumb-task-bar" aria-hidden="true">
-                  <span :style="{ width: `${task.percent}%` }"></span>
-                </span>
-                <AppIcon name="arrow" />
-              </RouterLink>
-            </li>
-          </ul>
-
-          <footer class="crumb-trail-footer">
-            <div class="crumb-guide-note">
-              <CrumboMark size="medium" />
-              <div>
-                <span>CRUMBO 提示</span>
-                <p v-if="plan.extraDueAvailable">还有 {{ plan.extraDueCount }} 块到期复习，可以继续捡。</p>
-                <p v-else-if="shortfallText">{{ shortfallText }}</p>
-                <p v-else>跟着这条路线走，今天就算稳稳落地。</p>
-              </div>
-            </div>
+          <div class="crumb-merged-actions">
             <RouterLink
               v-if="primaryTask"
               class="button crumb-primary-action crumb-board-cta"
@@ -238,46 +196,111 @@ onMounted(() => {
               {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
               <AppIcon name="arrow" />
             </RouterLink>
-          </footer>
-        </section>
+            <span class="crumb-merged-count">{{ completedTaskCount }} / {{ todayTasks.length }} 完成</span>
+          </div>
+
+          <ul class="crumb-task-list" aria-label="今日任务进度">
+            <li v-for="(task, index) in todayTasks" :key="task.key" :class="{ 'is-done': task.done }">
+              <RouterLink :to="task.to" class="crumb-task-row">
+                <span class="crumb-task-state" aria-hidden="true">{{ task.done ? '✓' : index + 1 }}</span>
+                <span class="crumb-task-title">{{ task.title }}</span>
+                <span class="crumb-task-value">{{ task.completed }} / {{ task.target }} {{ task.unit }}</span>
+              </RouterLink>
+            </li>
+          </ul>
         </div>
 
-        <aside class="crumb-today-side">
-          <div class="crumb-hero-status">
+        <aside class="crumb-merged-side crumb-today-side">
+          <div class="crumb-merged-ring">
             <GoalRing
               v-if="newWordsTask"
               :value="newWordsTask.completed"
               :max="newWordsTask.target"
-              :size="124"
-              :stroke="12"
+              :size="128"
+              :stroke="11"
               caption="新词"
-              class="crumb-hero-ring"
             />
-            <div class="crumb-today-stamp">
+            <div class="crumb-merged-stamp">
               <span>{{ plan.localDate }}</span>
               <strong>{{ statusLabel }}</strong>
             </div>
           </div>
 
-          <section class="crumb-book-note">
+          <div class="crumb-merged-book">
             <span class="crumb-eyebrow">当前词书</span>
-            <div class="crumb-book-note-body">
-              <span class="crumb-mini-cover">{{ plan.wordbook?.name.slice(0, 1) ?? '?' }}</span>
-              <div>
-                <h2>{{ plan.wordbook?.name ?? '尚未选择' }}</h2>
-                <p>{{ plan.wordbook ? '今天的面包屑都来自这本书。' : '先去词书页选一本。' }}</p>
-              </div>
-            </div>
-            <RouterLink class="crumb-inline-link" to="/wordbooks">{{ plan.wordbook ? '换一本' : '去选择' }}</RouterLink>
-          </section>
+            <strong>{{ plan.wordbook?.name ?? '尚未选择' }}</strong>
+            <RouterLink class="crumb-inline-link" to="/wordbooks">
+              {{ plan.wordbook ? '换一本' : '去选择' }}
+            </RouterLink>
+          </div>
 
           <StudyStatsPanel compact />
-
         </aside>
-      </div>
       </section>
 
       <ChallengeView embedded />
     </template>
   </article>
 </template>
+
+<style scoped>
+.crumb-merged {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 28px;
+  align-items: start;
+  padding: 22px 24px;
+  border: 1.5px solid var(--ink, #35240f);
+  border-radius: 16px;
+  background: var(--surface, #fffdf6);
+}
+.crumb-merged-main { min-width: 0; display: flex; flex-direction: column; }
+.crumb-merged-title {
+  font: 800 26px/1.28 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  margin: 6px 0 4px;
+  letter-spacing: -0.02em;
+}
+.crumb-merged-title b { color: var(--accent-ink, #2f6e33); font-weight: 800; }
+.today-task-sentence { margin: 0 0 14px; color: var(--muted, #6f5a3d); font-size: 13px; }
+.crumb-merged-actions { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.crumb-merged-count { font-size: 12px; color: var(--muted, #6f5a3d); }
+.crumb-task-list { list-style: none; margin: 0; padding: 0; }
+.crumb-task-list li { border-top: 1px dashed var(--line, #e4d7bd); }
+.crumb-task-list li:last-child { border-bottom: 1px dashed var(--line, #e4d7bd); }
+.crumb-task-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  text-decoration: none;
+  color: inherit;
+}
+.crumb-task-state {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--line, #e4d7bd);
+  display: grid; place-items: center;
+  font-size: 11px; color: var(--muted, #6f5a3d);
+}
+.crumb-task-row:hover .crumb-task-state { border-color: var(--accent, #3e8e41); }
+.crumb-task-title { font-size: 13.5px; }
+.crumb-task-list li.is-done .crumb-task-state {
+  background: var(--accent-soft, #e3f0e1);
+  border-color: var(--accent, #3e8e41);
+  color: var(--accent-ink, #2f6e33);
+}
+.crumb-task-value { font-size: 12.5px; color: var(--muted, #6f5a3d); font-variant-numeric: tabular-nums; }
+.crumb-task-list li.is-done .crumb-task-value { color: var(--accent-ink, #2f6e33); }
+.crumb-merged-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.crumb-merged-ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.crumb-merged-stamp { text-align: center; font-size: 11.5px; color: var(--muted, #6f5a3d); }
+.crumb-merged-stamp strong { display: block; color: var(--ink, #35240f); }
+.crumb-merged-book {
+  display: flex; flex-direction: column; gap: 2px;
+  border-top: 1px dashed var(--line, #e4d7bd); padding-top: 12px;
+}
+.crumb-merged-book strong { font-size: 14px; }
+@media (max-width: 900px) {
+  .crumb-merged { grid-template-columns: 1fr; gap: 18px; }
+}
+</style>
