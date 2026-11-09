@@ -3979,3 +3979,14 @@
   font-weight: 800;
   font-size: 0.9rem;
 }
+
+/* The today rail stacks the progress card above the ring; give it room to breathe. */
+.personal-workspace .crumb-merged-side { gap: 16px; }
+
+.personal-workspace .crumb-merged-side .progress-card {
+  padding: 12px 14px;
+  border: 1px dashed var(--ui-line);
+  border-radius: 12px;
+}
+
+.personal-workspace .crumb-merged-side .progress-card__quests li { font-size: 0.78rem; }
