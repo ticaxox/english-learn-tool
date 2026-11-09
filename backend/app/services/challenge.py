@@ -41,6 +41,7 @@ from app.schemas.learning import SessionCreateRequest
 from app.schemas.practice import PracticeAnswerInput, PracticeCreateRequest, PracticeSubmitRequest
 from app.services.ai_jobs import create_ai_job, get_user_job
 from app.services.auth import utcnow
+from app.services.gamification import award
 from app.services.learning import ensure_daily_plan, local_date_for
 from app.services.memory import start_session
 from app.services.practice import create_practice_for_challenge, submit_practice_session
@@ -206,6 +207,13 @@ async def _sync_plan(
             row.status = "completed"
             row.completed_at = row.completed_at or utcnow()
             changed = True
+            await award(
+                session,
+                settings,
+                user,
+                source_type="boss" if node.node_type == "BOSS" else "challenge_node",
+                source_id=str(node.id),
+            )
 
     main_nodes = [node for node in nodes if not node.optional]
     for index, node in enumerate(main_nodes):

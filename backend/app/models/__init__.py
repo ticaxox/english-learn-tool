@@ -14,6 +14,8 @@ from app.models.coach import (
     CoachMessage,
     CoachStreamEvent,
 )
+from app.models.coach_memory import CoachMemory
+from app.models.gamification import DailyQuest, UserGameStats, XpEvent
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
 from app.models.learning import (
     DailyActivity,
@@ -57,6 +59,7 @@ __all__ = [
     "AiUsageLedger",
     "AuditLog",
     "CoachActionReceipt",
+    "CoachMemory",
     "CoachContextSnapshot",
     "CoachConversation",
     "CoachMessage",
@@ -68,6 +71,7 @@ __all__ = [
     "DailyChallengePlan",
     "DailyActivity",
     "DailyPlan",
+    "DailyQuest",
     "DailyPlanWord",
     "ImportPreview",
     "LearningHeartbeat",
@@ -88,12 +92,14 @@ __all__ = [
     "RefreshToken",
     "SystemMetadata",
     "User",
+    "UserGameStats",
     "UserProfile",
     "UserWordState",
     "Wordbook",
     "WordbookActivation",
     "WordbookDefinition",
     "WordbookEntry",
+    "XpEvent",
     "WordbookExample",
     "WordbookImportPreview",
     "WordbookJob",

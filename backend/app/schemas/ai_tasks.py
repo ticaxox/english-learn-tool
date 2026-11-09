@@ -87,7 +87,12 @@ class CoachReplyContext(StrictModel):
     attachment_ids: list[UUID] = Field(default_factory=list, max_length=4)
     learning_summary: dict[str, Any] = Field(default_factory=dict)
     history: list[CoachHistoryTurn] = Field(default_factory=list, max_length=20)
+    # Assembled per turn: a computed profile, recalled memories and a learning
+    # summary. Kept separate from the old single document on purpose.
     memory_document: str | None = Field(default=None, max_length=6_000)
+    recalled_memories: list[str] = Field(default_factory=list, max_length=12)
+    profile_snapshot: str | None = Field(default=None, max_length=600)
+    learning_snapshot: str | None = Field(default=None, max_length=400)
     conversation_id: UUID | None = None
     message_id: UUID | None = None
     page_context: dict[str, Any] = Field(default_factory=dict)

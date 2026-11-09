@@ -2732,6 +2732,63 @@
   box-shadow: 0 6px 0 rgb(59 42 26 / 8%);
 }
 
+/* T-FE-021: the board is one panel with a task column and a stats column. */
+.personal-workspace .crumb-today-board.crumb-merged {
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 26px;
+  align-items: start;
+}
+.personal-workspace .crumb-merged-main { display: flex; flex-direction: column; min-width: 0; }
+.personal-workspace .crumb-merged-title {
+  margin: 6px 0 4px;
+  font: 800 26px/1.28 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+.personal-workspace .crumb-merged-title b { color: var(--ui-accent-ink, #2f6e33); }
+.personal-workspace .crumb-merged-actions { display: flex; align-items: center; gap: 14px; margin: 12px 0 10px; }
+.personal-workspace .crumb-merged-count { font-size: 12px; color: var(--ui-muted); }
+.personal-workspace .crumb-merged-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.personal-workspace .crumb-merged-ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.personal-workspace .crumb-merged-stamp { text-align: center; font-size: 11.5px; color: var(--ui-muted); }
+.personal-workspace .crumb-merged-stamp strong { display: block; color: var(--ui-ink); }
+.personal-workspace .crumb-merged-book {
+  display: flex; flex-direction: column; gap: 2px;
+  border-top: 2px dashed var(--ui-line); padding-top: 12px;
+}
+.personal-workspace .crumb-merged-book strong { font-size: 14px; }
+.personal-workspace .crumb-merged .crumb-task-list { list-style: none; margin: 0; padding: 0; }
+.personal-workspace .crumb-merged .crumb-task-list li { border-top: 2px dashed var(--ui-line); }
+.personal-workspace .crumb-merged .crumb-task-list li:last-child { border-bottom: 2px dashed var(--ui-line); }
+.personal-workspace .crumb-merged .crumb-task-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  text-decoration: none;
+  color: inherit;
+}
+.personal-workspace .crumb-merged .crumb-task-state {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--ui-line);
+  display: grid; place-items: center;
+  font-size: 11px; color: var(--ui-muted);
+}
+.personal-workspace .crumb-merged .crumb-task-title { font-size: 13.5px; }
+.personal-workspace .crumb-merged .crumb-task-value {
+  font-size: 12.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums;
+}
+.personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-state {
+  background: var(--ui-accent-soft, #e3f0e1);
+  border-color: var(--ui-accent, #3e8e41);
+  color: var(--ui-accent-ink, #2f6e33);
+}
+.personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-value { color: var(--ui-accent-ink, #2f6e33); }
+
+@media (max-width: 900px) {
+  .personal-workspace .crumb-today-board.crumb-merged { grid-template-columns: 1fr; gap: 18px; }
+}
+
 /* The header, task list and side blocks are sections of that board, not cards. */
 .personal-workspace .crumb-today-board .crumb-today-header {
   padding: 2px 2px 16px;

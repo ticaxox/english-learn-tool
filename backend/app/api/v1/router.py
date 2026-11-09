@@ -11,9 +11,11 @@ from app.api.v1.learning import router as learning_router
 from app.api.v1.mcp import router as mcp_router
 from app.api.v1.me_ai import router as me_ai_router
 from app.api.v1.me_tokens import router as me_tokens_router
+from app.api.v1.memories import router as memories_router
 from app.api.v1.memory import router as memory_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.practice import router as practice_router
+from app.api.v1.progress import router as progress_router
 from app.api.v1.wordbooks import exports_router as wordbook_exports_router
 from app.api.v1.wordbooks import router as wordbooks_router
 from app.schemas.system import ServiceInfo
@@ -27,9 +29,11 @@ router.include_router(admin_ai_router)
 router.include_router(admin_dashboard_router)
 router.include_router(ai_router)
 router.include_router(me_ai_router)
+router.include_router(memories_router)
 router.include_router(me_tokens_router)
 router.include_router(mcp_router)
 router.include_router(practice_router)
+router.include_router(progress_router)
 router.include_router(coach_router)
 router.include_router(challenges_router)
 router.include_router(notifications_router)

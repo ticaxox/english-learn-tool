@@ -62,9 +62,9 @@ from app.schemas.practice import (
     PracticeSubmitResponse,
 )
 from app.services.ai_jobs import cancel_user_job, create_ai_job
-from app.services.ai_memory import record_practice_memory
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
+from app.services.gamification import award
 from app.services.learning import local_date_for
 from app.services.wordbook_queue import WORDBOOK_QUEUE_NAME
 
@@ -1018,14 +1018,13 @@ async def submit_practice_session(
     )
     if graded_locally:
         result = await _grade_objective(session, practice, submission, questions, answers)
-        await record_practice_memory(
+        await award(
             session,
-            user.id,
-            practice_type=practice.practice_type,
-            total_questions=result.total_questions,
-            correct_count=result.correct_count,
-            wrong_count=result.wrong_count,
-            score=result.score,
+            settings,
+            user,
+            source_type="practice",
+            source_id=str(practice.id),
+            units=len(questions),
         )
         await session.commit()
         return PracticeSubmitResponse(
@@ -1529,15 +1528,6 @@ async def materialize_practice_grading(session: AsyncSession, job: AiJob) -> Non
     practice.wrong_count = wrong_count
     practice.submitted_at = submitted_at
     session.add(_event(practice, "practice.subjective_graded", metadata={"score": score}))
-    await record_practice_memory(
-        session,
-        job.user_id,
-        practice_type=practice.practice_type,
-        total_questions=submission.total_questions,
-        correct_count=None,
-        wrong_count=wrong_count,
-        score=score,
-    )
     await session.flush()
 
 

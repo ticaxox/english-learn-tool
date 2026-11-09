@@ -50,6 +50,7 @@ from app.schemas.learning import (
 from app.services import fsrs_scheduler
 from app.services.ai_memory import sync_profile_memories
 from app.services.auth import utcnow
+from app.services.gamification import award
 from app.services.learning import LEARNING_CALCULATION_VERSION, local_date_for
 
 REQUIRED_NEW_GOOD_COUNT = 2
@@ -832,6 +833,7 @@ async def submit_event(
     *,
     payload: SessionEventRequest,
     idempotency_key: str,
+    settings: Settings,
 ) -> SessionEventResponse:
     if len(idempotency_key) > 128:
         raise AppError(
@@ -1043,6 +1045,14 @@ async def submit_event(
     else:
         item.again_count += 1
     item.last_rating = rating
+    # One award per answered card, keyed by the event so a retry pays once.
+    await award(
+        session,
+        settings,
+        user,
+        source_type="review",
+        source_id=str(item.id) + ":" + str(state.review_count),
+    )
 
     required_goods = REQUIRED_NEW_GOOD_COUNT if item.reason == "new" else 1
     if rating == "good" and item.good_count >= required_goods:

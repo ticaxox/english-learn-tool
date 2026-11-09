@@ -59,15 +59,16 @@ from app.schemas.notifications import (
 from app.schemas.practice import PracticeCreateRequest
 from app.services.ai_concurrency import release_concurrency_slot
 from app.services.ai_jobs import cancel_user_job, create_ai_job
-from app.services.ai_memory import (
-    memory_document_for_context,
-    record_chat_memory,
-    sync_profile_memories,
-)
 from app.services.ai_usage import resolved_quota_limits
 from app.services.ai_validation import sanitize_untrusted_json
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
+from app.services.coach_memory import (
+    import_legacy_document,
+    learning_snapshot,
+    profile_snapshot,
+    recall_memories,
+)
 from app.services.coach_uploads import (
     delete_attachment_files,
     read_attachment,
@@ -564,12 +565,12 @@ async def create_coach_message(
         for row in reversed(history_rows)
         if row.content
     ]
-    # Make sure the learner profile and stated preferences are present before
-    # the coach reads its memory slice, even if settings were saved in an
-    # older version of the product.
-    await sync_profile_memories(session, user)
-    await record_chat_memory(session, user, content)
-    memory_document = await memory_document_for_context(session, user.id)
+    # Memory is assembled per turn: profile and recent results are computed,
+    # only typed memories are stored. Nothing appends to a growing document.
+    await import_legacy_document(session, user.id)
+    profile = await profile_snapshot(session, user)
+    recent = await learning_snapshot(session, user)
+    recalled = await recall_memories(session, user.id, content)
 
     last_sequence = int(
         await session.scalar(
@@ -621,7 +622,9 @@ async def create_coach_message(
             attachment_ids=[attachment.id for attachment in attachments],
             learning_summary={"page_context": context},
             history=history,
-            memory_document=memory_document,
+            profile_snapshot=profile or None,
+            learning_snapshot=recent or None,
+            recalled_memories=recalled,
             conversation_id=conversation.id,
             message_id=assistant.id,
             page_context=context,

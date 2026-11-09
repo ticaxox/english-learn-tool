@@ -2196,6 +2196,233 @@
         "title": "CoachHistoryTurn",
         "type": "object"
       },
+      "CoachMemoryCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "importance": {
+            "default": 3,
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Importance",
+            "type": "integer"
+          },
+          "kind": {
+            "default": "fact",
+            "enum": [
+              "preference",
+              "goal",
+              "constraint",
+              "fact",
+              "note"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "source": {
+            "default": "user_explicit",
+            "enum": [
+              "user_explicit",
+              "coach_inferred",
+              "imported"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "subject_key": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Key"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "CoachMemoryCreate",
+        "type": "object"
+      },
+      "CoachMemoryListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CoachMemoryResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "CoachMemoryListResponse",
+        "type": "object"
+      },
+      "CoachMemoryResponse": {
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "importance": {
+            "title": "Importance",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "preference",
+              "goal",
+              "constraint",
+              "fact",
+              "note"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "source": {
+            "enum": [
+              "user_explicit",
+              "coach_inferred",
+              "imported"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "superseded",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Key"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "content",
+          "source",
+          "status",
+          "importance",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CoachMemoryResponse",
+        "type": "object"
+      },
+      "CoachMemoryUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "importance": {
+            "anyOf": [
+              {
+                "maximum": 5.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importance"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "preference",
+                  "goal",
+                  "constraint",
+                  "fact",
+                  "note"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "subject_key": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Key"
+          }
+        },
+        "title": "CoachMemoryUpdate",
+        "type": "object"
+      },
       "CoachMessageCreate": {
         "additionalProperties": false,
         "properties": {
@@ -2399,6 +2626,18 @@
             "title": "History",
             "type": "array"
           },
+          "learning_snapshot": {
+            "anyOf": [
+              {
+                "maxLength": 400,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Learning Snapshot"
+          },
           "learning_summary": {
             "additionalProperties": true,
             "title": "Learning Summary",
@@ -2432,6 +2671,26 @@
             "additionalProperties": true,
             "title": "Page Context",
             "type": "object"
+          },
+          "profile_snapshot": {
+            "anyOf": [
+              {
+                "maxLength": 600,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Snapshot"
+          },
+          "recalled_memories": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Recalled Memories",
+            "type": "array"
           },
           "user_message": {
             "maxLength": 8000,
@@ -2578,6 +2837,39 @@
           "in_use"
         ],
         "title": "ConcurrencyUsage",
+        "type": "object"
+      },
+      "DailyQuestResponse": {
+        "properties": {
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "progress": {
+            "title": "Progress",
+            "type": "integer"
+          },
+          "reward_crumbs": {
+            "title": "Reward Crumbs",
+            "type": "integer"
+          },
+          "target": {
+            "title": "Target",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "progress",
+          "target",
+          "completed",
+          "reward_crumbs"
+        ],
+        "title": "DailyQuestResponse",
         "type": "object"
       },
       "DailyQuotaUsage": {
@@ -3308,6 +3600,87 @@
           "format"
         ],
         "title": "ExportCreateRequest",
+        "type": "object"
+      },
+      "GamificationProgressResponse": {
+        "properties": {
+          "active_today": {
+            "title": "Active Today",
+            "type": "boolean"
+          },
+          "crumbs": {
+            "title": "Crumbs",
+            "type": "integer"
+          },
+          "level": {
+            "$ref": "#/components/schemas/LevelProgress"
+          },
+          "local_date": {
+            "title": "Local Date",
+            "type": "string"
+          },
+          "quests": {
+            "items": {
+              "$ref": "#/components/schemas/DailyQuestResponse"
+            },
+            "title": "Quests",
+            "type": "array"
+          },
+          "streak": {
+            "title": "Streak",
+            "type": "integer"
+          },
+          "streak_best": {
+            "title": "Streak Best",
+            "type": "integer"
+          },
+          "xp": {
+            "title": "Xp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "xp",
+          "crumbs",
+          "level",
+          "streak",
+          "streak_best",
+          "active_today",
+          "quests",
+          "local_date"
+        ],
+        "title": "GamificationProgressResponse",
+        "type": "object"
+      },
+      "GamificationWeeklyResponse": {
+        "properties": {
+          "active_days": {
+            "title": "Active Days",
+            "type": "integer"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyDay"
+            },
+            "title": "Days",
+            "type": "array"
+          },
+          "streak": {
+            "title": "Streak",
+            "type": "integer"
+          },
+          "xp": {
+            "title": "Xp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "days",
+          "xp",
+          "active_days",
+          "streak"
+        ],
+        "title": "GamificationWeeklyResponse",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -4092,6 +4465,34 @@
           "sources"
         ],
         "title": "LearningStatsResponse",
+        "type": "object"
+      },
+      "LevelProgress": {
+        "properties": {
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "xp_for_next_level": {
+            "title": "Xp For Next Level",
+            "type": "integer"
+          },
+          "xp_into_level": {
+            "title": "Xp Into Level",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "title",
+          "xp_into_level",
+          "xp_for_next_level"
+        ],
+        "title": "LevelProgress",
         "type": "object"
       },
       "LivenessResponse": {
@@ -8096,6 +8497,34 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "WeeklyDay": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "crumbs": {
+            "title": "Crumbs",
+            "type": "integer"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "xp": {
+            "title": "Xp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "xp",
+          "crumbs",
+          "active"
+        ],
+        "title": "WeeklyDay",
         "type": "object"
       },
       "WordStateResponse": {
@@ -15768,6 +16197,353 @@
         "tags": [
           "system",
           "personal ai"
+        ]
+      }
+    },
+    "/api/v1/me/memories": {
+      "get": {
+        "operationId": "list_memories_endpoint_api_v1_me_memories_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_history",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include History",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachMemoryListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication failed or session expired."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The memory does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List the memories the coach keeps about the caller",
+        "tags": [
+          "system",
+          "coach memories"
+        ]
+      },
+      "post": {
+        "operationId": "create_memory_endpoint_api_v1_me_memories_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoachMemoryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachMemoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication failed or session expired."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The memory does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add a memory for the coach",
+        "tags": [
+          "system",
+          "coach memories"
+        ]
+      }
+    },
+    "/api/v1/me/memories/{memory_id}": {
+      "delete": {
+        "operationId": "delete_memory_endpoint_api_v1_me_memories__memory_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "memory_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Memory Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication failed or session expired."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The memory does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Forget a memory",
+        "tags": [
+          "system",
+          "coach memories"
+        ]
+      },
+      "patch": {
+        "operationId": "update_memory_endpoint_api_v1_me_memories__memory_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "memory_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Memory Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoachMemoryUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachMemoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication failed or session expired."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "The memory does not exist."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Edit a memory",
+        "tags": [
+          "system",
+          "coach memories"
+        ]
+      }
+    },
+    "/api/v1/me/progress": {
+      "get": {
+        "operationId": "get_progress_endpoint_api_v1_me_progress_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GamificationProgressResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication failed or session expired."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read the caller's level, streak and today's quests",
+        "tags": [
+          "system",
+          "progress"
+        ]
+      }
+    },
+    "/api/v1/me/progress/weekly": {
+      "get": {
+        "operationId": "get_weekly_endpoint_api_v1_me_progress_weekly_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GamificationWeeklyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication failed or session expired."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read the last seven days of activity",
+        "tags": [
+          "system",
+          "progress"
         ]
       }
     },

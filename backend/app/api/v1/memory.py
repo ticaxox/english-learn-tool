@@ -136,16 +136,19 @@ async def get_session_endpoint(
 async def submit_event_endpoint(
     session_id: UUID,
     payload: SessionEventRequest,
+    request: Request,
     idempotency_key: Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=128)],
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> SessionEventResponse:
+    settings: Settings = request.app.state.settings
     return await submit_event(
         session,
         context.user,
         session_id,
         payload=payload,
         idempotency_key=idempotency_key,
+        settings=settings,
     )
 
 

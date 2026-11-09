@@ -103,26 +103,9 @@ const activeTaskIndex = computed(() => {
   return index === -1 ? todayTasks.value.length - 1 : index
 })
 
-const shortfallText = computed(() => plan.value?.shortfallReason ? '今天的目标尚未全部完成。' : '')
 
 const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? null)
 const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
-
-const heroNote = computed(() => {
-  if (!plan.value) return '正在准备今天的学习计划。'
-  if (!plan.value.wordbook) {
-    return '先选一本词书，再开始今天的学习。'
-  }
-  if (plan.value.status === 'completed') {
-    return "“" + plan.value.wordbook.name + "” 今日目标已完成。想继续也可以加练。"
-  }
-  const pendingNew = Math.max(plan.value.newWords.target - plan.value.newWords.completed, 0)
-  const pendingReview = Math.max(plan.value.dueReviews.target - plan.value.dueReviews.completed, 0)
-  const pending = []
-  if (pendingNew > 0) pending.push(pendingNew + ' 个新词')
-  if (pendingReview > 0) pending.push(pendingReview + ' 个复习')
-  return pending.length ? '今天还有 ' + pending.join('、') + '。慢慢来。' : '今天的任务已经完成。'
-})
 
 async function load(createIfMissing = false): Promise<void> {
   if (!frozen.value) return
@@ -242,65 +225,3 @@ onMounted(() => {
     </template>
   </article>
 </template>
-
-<style scoped>
-.crumb-merged {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 250px;
-  gap: 28px;
-  align-items: start;
-  padding: 22px 24px;
-  border: 1.5px solid var(--ink, #35240f);
-  border-radius: 16px;
-  background: var(--surface, #fffdf6);
-}
-.crumb-merged-main { min-width: 0; display: flex; flex-direction: column; }
-.crumb-merged-title {
-  font: 800 26px/1.28 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  margin: 6px 0 4px;
-  letter-spacing: -0.02em;
-}
-.crumb-merged-title b { color: var(--accent-ink, #2f6e33); font-weight: 800; }
-.today-task-sentence { margin: 0 0 14px; color: var(--muted, #6f5a3d); font-size: 13px; }
-.crumb-merged-actions { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-.crumb-merged-count { font-size: 12px; color: var(--muted, #6f5a3d); }
-.crumb-task-list { list-style: none; margin: 0; padding: 0; }
-.crumb-task-list li { border-top: 1px dashed var(--line, #e4d7bd); }
-.crumb-task-list li:last-child { border-bottom: 1px dashed var(--line, #e4d7bd); }
-.crumb-task-row {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 4px;
-  text-decoration: none;
-  color: inherit;
-}
-.crumb-task-state {
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 1.5px solid var(--line, #e4d7bd);
-  display: grid; place-items: center;
-  font-size: 11px; color: var(--muted, #6f5a3d);
-}
-.crumb-task-row:hover .crumb-task-state { border-color: var(--accent, #3e8e41); }
-.crumb-task-title { font-size: 13.5px; }
-.crumb-task-list li.is-done .crumb-task-state {
-  background: var(--accent-soft, #e3f0e1);
-  border-color: var(--accent, #3e8e41);
-  color: var(--accent-ink, #2f6e33);
-}
-.crumb-task-value { font-size: 12.5px; color: var(--muted, #6f5a3d); font-variant-numeric: tabular-nums; }
-.crumb-task-list li.is-done .crumb-task-value { color: var(--accent-ink, #2f6e33); }
-.crumb-merged-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.crumb-merged-ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.crumb-merged-stamp { text-align: center; font-size: 11.5px; color: var(--muted, #6f5a3d); }
-.crumb-merged-stamp strong { display: block; color: var(--ink, #35240f); }
-.crumb-merged-book {
-  display: flex; flex-direction: column; gap: 2px;
-  border-top: 1px dashed var(--line, #e4d7bd); padding-top: 12px;
-}
-.crumb-merged-book strong { font-size: 14px; }
-@media (max-width: 900px) {
-  .crumb-merged { grid-template-columns: 1fr; gap: 18px; }
-}
-</style>
