@@ -16,6 +16,7 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
 import StudyStatsPanel from '../components/StudyStatsPanel.vue'
+import ProgressCard from '../components/ProgressCard.vue'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -194,6 +195,7 @@ onMounted(() => {
         </div>
 
         <aside class="crumb-merged-side crumb-today-side">
+          <ProgressCard />
           <div class="crumb-merged-ring">
             <GoalRing
               v-if="newWordsTask"

@@ -1,39 +1,41 @@
 <script setup lang="ts">
 /**
- * AI memory is one document, not a list of records.
+ * Memories the coach keeps about the learner.
  *
- * The settings page only shows a compact row; the document itself opens in a
- * floating dialog for reading and editing. The coach reads it before answering.
+ * Each row is a typed fact with its provenance, so the learner can see what the
+ * coach remembers, add one, or forget it. Nothing accumulates silently.
  */
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import AppIcon from './AppIcon.vue'
 import ErrorNotice from './ErrorNotice.vue'
 import LoadingState from './LoadingState.vue'
 import {
-  getAiMemoryDocument,
-  saveAiMemoryDocument,
-  type AiMemoryDocument,
-} from '../api/ai-memory'
-import { useToast } from '../composables/useToast'
+  COACH_MEMORY_KIND_LABELS,
+  COACH_MEMORY_SOURCE_LABELS,
+  createCoachMemory,
+  deleteCoachMemory,
+  listCoachMemories,
+  type CoachMemory,
+  type CoachMemoryKind,
+} from '../api/coach-memories'
 
-const LIMIT = 6000
+const KINDS: CoachMemoryKind[] = ['preference', 'goal', 'constraint', 'fact', 'note']
 
-const document = ref<AiMemoryDocument>({ content: '', updatedAt: null })
-const draft = ref('')
-const open = ref(false)
+const memories = ref<CoachMemory[]>([])
 const loading = ref(false)
 const loadError = ref<unknown>(null)
 const saveError = ref<unknown>(null)
 const saving = ref(false)
-const toast = useToast()
+const open = ref(false)
 
-const dirty = computed(() => draft.value !== document.value.content)
+const draftKind = ref<CoachMemoryKind>('preference')
+const draftContent = ref('')
 
 async function load(): Promise<void> {
   loading.value = true
   loadError.value = null
   try {
-    document.value = await getAiMemoryDocument()
-    draft.value = document.value.content
+    memories.value = await listCoachMemories()
   } catch (error) {
     loadError.value = error
   } finally {
@@ -49,21 +51,40 @@ function openDialog(): void {
 function closeDialog(): void {
   open.value = false
   saveError.value = null
+  draftContent.value = ''
 }
 
-async function save(): Promise<void> {
-  if (saving.value || !dirty.value) return
+async function add(): Promise<void> {
+  const content = draftContent.value.trim()
+  if (!content || saving.value) return
   saving.value = true
   saveError.value = null
   try {
-    document.value = await saveAiMemoryDocument(draft.value)
-    draft.value = document.value.content
-    toast.success('记忆已保存', '教练会按这份文档回答。')
+    await createCoachMemory({ kind: draftKind.value, content })
+    draftContent.value = ''
+    await load()
   } catch (error) {
     saveError.value = error
   } finally {
     saving.value = false
   }
+}
+
+async function forget(memory: CoachMemory): Promise<void> {
+  if (!window.confirm(`让教练忘记“${memory.content}”？`)) return
+  saveError.value = null
+  try {
+    await deleteCoachMemory(memory.id)
+    memories.value = memories.value.filter((item) => item.id !== memory.id)
+  } catch (error) {
+    saveError.value = error
+  }
+}
+
+function updatedLabel(memory: CoachMemory): string {
+  const date = new Date(memory.updatedAt)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric' }).format(date)
 }
 
 onMounted(() => {
@@ -77,52 +98,68 @@ onMounted(() => {
       <div class="ai-memory-row__copy">
         <h3 id="ai-memory-title">AI 记忆</h3>
       </div>
-      <DivButton class="button-secondary" type="button" @click="openDialog">打开</DivButton>
+      <span class="ai-memory-stamp">{{ memories.length }} 条</span>
+      <DivButton class="button-secondary" type="button" @click="openDialog">管理</DivButton>
+    </div>
+
+    <div v-if="open" class="dialog-backdrop" @click.self="closeDialog">
+      <section
+        class="dialog-card ai-memory-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-memory-dialog-title"
+      >
+        <header class="ai-memory-dialog__head">
+          <div>
+            <p class="eyebrow">AI 配置</p>
+            <h2 id="ai-memory-dialog-title">教练记住的事</h2>
+            <p class="field-hint">教练回答前会按相关性读取这些内容；你可以随时让它忘记。</p>
+          </div>
+          <DivButton class="workspace-icon-button" type="button" aria-label="关闭" @click="closeDialog">
+            <AppIcon name="close" />
+          </DivButton>
+        </header>
+
+        <form class="ai-memory-add" @submit.prevent="add">
+          <label class="visually-hidden" for="ai-memory-kind">类型</label>
+          <select id="ai-memory-kind" v-model="draftKind">
+            <option v-for="kind in KINDS" :key="kind" :value="kind">
+              {{ COACH_MEMORY_KIND_LABELS[kind] }}
+            </option>
+          </select>
+          <label class="visually-hidden" for="ai-memory-content">内容</label>
+          <input
+            id="ai-memory-content"
+            v-model="draftContent"
+            maxlength="500"
+            placeholder="例如：我习惯早上背单词"
+            :disabled="saving"
+          />
+          <DivButton type="submit" :disabled="saving || !draftContent.trim()">
+            {{ saving ? '正在保存…' : '记住' }}
+          </DivButton>
+        </form>
+
+        <ErrorNotice v-if="loadError" :error="loadError" retry-label="重新读取记忆" @retry="load" />
+        <ErrorNotice v-if="saveError" :error="saveError" :show-retry="false" />
+        <LoadingState v-if="loading && memories.length === 0" label="正在读取记忆…" />
+
+        <ul v-else-if="memories.length" class="ai-memory-list" aria-label="教练记忆">
+          <li v-for="memory in memories" :key="memory.id" class="ai-memory-item">
+            <span class="ai-memory-item__kind">{{ COACH_MEMORY_KIND_LABELS[memory.kind] }}</span>
+            <p class="ai-memory-item__content">{{ memory.content }}</p>
+            <small class="ai-memory-item__meta">
+              {{ COACH_MEMORY_SOURCE_LABELS[memory.source] }} · {{ updatedLabel(memory) }}
+            </small>
+            <DivButton class="button-secondary button-small" type="button" @click="forget(memory)">
+              忘记
+            </DivButton>
+          </li>
+        </ul>
+        <p v-else-if="!loading" class="field-hint">
+          教练还没有记住任何事。对话里说「记住…」，或在这里添加。
+        </p>
+      </section>
     </div>
   </section>
-
-  <div v-if="open" class="dialog-backdrop" @click.self="closeDialog">
-    <section
-      class="dialog-card ai-memory-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="ai-memory-dialog-title"
-    >
-      <header class="ai-memory-dialog__head">
-        <div>
-          <p class="eyebrow">AI 配置</p>
-          <h2 id="ai-memory-dialog-title">AI 记忆</h2>
-        </div>
-        <DivButton class="button-secondary button-small" type="button" @click="closeDialog">关闭</DivButton>
-      </header>
-
-      <LoadingState v-if="loading && !draft" label="正在读取 AI 记忆…" />
-      <ErrorNotice v-else-if="loadError" :error="loadError" retry-label="重新读取记忆" @retry="load" />
-
-      <template v-else>
-        <p class="field-hint">
-          学习档案、做题结果和对话要点会自动写进来，也可以直接改写。用「保存记忆」提交整份文档。
-        </p>
-        <label class="visually-hidden" for="ai-memory-document">AI 记忆文档</label>
-        <textarea
-          id="ai-memory-document"
-          v-model="draft"
-          class="ai-memory-document"
-          rows="12"
-          :maxlength="LIMIT"
-          placeholder="这里还是一张白纸。完成一轮练习、保存学习设置或和教练聊天后，这里会自动出现记录；也可以直接写下希望教练一直记住的内容。"
-        ></textarea>
-
-        <div class="ai-memory-actions">
-          <span class="ai-memory-count">{{ draft.length }} / {{ LIMIT }}</span>
-          <span v-if="dirty" class="ai-memory-dirty">有未保存的修改</span>
-          <DivButton class="button" type="button" :disabled="saving || !dirty" @click="save">
-            {{ saving ? '正在保存…' : '保存记忆' }}
-          </DivButton>
-        </div>
-
-        <ErrorNotice v-if="saveError" :error="saveError" :show-retry="false" retry-label="重试" @retry="save" />
-      </template>
-    </section>
-  </div>
 </template>

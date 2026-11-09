@@ -19,6 +19,7 @@ import {
   type PracticeAnswerInput,
 } from '../api/practice'
 import PracticeTopBar from '../components/PracticeTopBar.vue'
+import { fetchProgress } from '../api/progress'
 import '../practice.css'
 
 const props = withDefaults(defineProps<{ sessionId?: string; embedded?: boolean }>(), { embedded: false })
@@ -123,7 +124,10 @@ function answerPayload(): PracticeAnswerInput[] {
   }))
 }
 
+const award = ref<{ xp: number; crumbs: number; from: number; to: number } | null>(null)
+
 async function submit(): Promise<void> {
+  award.value = null
   formError.value = null
   if (!allAnswered.value) {
     formError.value = `还有 ${questions.value.length - answeredCount.value} 题未作答。请完成全部题目后提交。`
@@ -135,10 +139,25 @@ async function submit(): Promise<void> {
     pendingSubmitKey = newKey('practice-submit')
     pendingSubmitSignature = signature
   }
+  const before = await fetchProgress().catch(() => null)
   const response = await practice.submit(payload, pendingSubmitKey)
   if (response) {
     pendingSubmitKey = null
     pendingSubmitSignature = ''
+    // The server owns the numbers; diff two reads to show what this set earned.
+    const after = await fetchProgress().catch(() => null)
+    if (before && after) {
+      const xp = after.xp - before.xp
+      const crumbs = after.crumbs - before.crumbs
+      if (xp > 0 || crumbs > 0 || after.level.level > before.level.level) {
+        award.value = {
+          xp,
+          crumbs,
+          from: before.level.level,
+          to: after.level.level,
+        }
+      }
+    }
   }
 }
 
@@ -224,7 +243,13 @@ void practice.load()
         </div>
       </section>
 
-      <PracticeResultView v-else-if="result" :result="result" :questions="questions" />
+      <template v-else-if="result">
+        <p v-if="award" class="practice-award" role="status">
+          <span v-if="award.to > award.from">升级到 Lv.{{ award.to }}！</span>
+          <span>+{{ award.xp }} XP · +{{ award.crumbs }} 碎屑</span>
+        </p>
+        <PracticeResultView :result="result" :questions="questions" />
+      </template>
 
       <section v-else-if="session.status === 'submitted'" class="panel" aria-live="polite">
         <p class="eyebrow">主观题评分中</p>

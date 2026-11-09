@@ -1,0 +1,91 @@
+<script setup lang="ts">
+/**
+ * Level ring, streak and today's three quests.
+ *
+ * Everything is read from the server; the card never computes rewards itself.
+ */
+import { computed, onMounted, ref } from 'vue'
+import AppIcon from './AppIcon.vue'
+import ErrorNotice from './ErrorNotice.vue'
+import { fetchProgress, QUEST_LABELS, type GamificationProgress } from '../api/progress'
+
+const progress = ref<GamificationProgress | null>(null)
+const error = ref<unknown>(null)
+
+const percent = computed(() => {
+  const level = progress.value?.level
+  if (!level || level.xpForNextLevel <= 0) return 0
+  return Math.min(100, Math.round((level.xpIntoLevel / level.xpForNextLevel) * 100))
+})
+
+const quests = computed(() =>
+  (progress.value?.quests ?? []).map((quest) => ({
+    ...quest,
+    label: QUEST_LABELS[quest.key] ?? quest.key,
+    percent: quest.target > 0 ? Math.min(100, Math.round((quest.progress / quest.target) * 100)) : 0,
+  })),
+)
+
+async function load(): Promise<void> {
+  error.value = null
+  try {
+    progress.value = await fetchProgress()
+  } catch (loadError) {
+    error.value = loadError
+  }
+}
+
+onMounted(() => {
+  void load()
+})
+</script>
+
+<template>
+  <section class="progress-card" aria-label="学习进度">
+    <ErrorNotice v-if="error" :error="error" retry-label="重新读取进度" @retry="load" />
+
+    <template v-else-if="progress">
+      <header class="progress-card__head">
+        <div
+          class="progress-card__ring"
+          role="img"
+          :aria-label="`等级 ${progress.level.level}，距离下一级 ${progress.level.xpForNextLevel - progress.level.xpIntoLevel} 经验`"
+          :style="{ '--fill': `${percent}%` }"
+        >
+          <span>Lv.{{ progress.level.level }}</span>
+        </div>
+        <div class="progress-card__meta">
+          <strong>{{ progress.level.title }}</strong>
+          <span>{{ progress.level.xpIntoLevel }} / {{ progress.level.xpForNextLevel }} XP</span>
+          <span class="progress-card__crumbs">
+            <AppIcon name="star" /> 碎屑 {{ progress.crumbs }}
+          </span>
+        </div>
+        <div class="progress-card__streak" :class="{ 'is-active': progress.activeToday }">
+          <AppIcon name="spark" />
+          <strong>{{ progress.streak }}</strong>
+          <span>天连续</span>
+        </div>
+      </header>
+
+      <ul class="progress-card__quests" aria-label="今日任务">
+        <li
+          v-for="quest in quests"
+          :key="quest.key"
+          :class="{ 'is-done': quest.completed }"
+        >
+          <span class="progress-card__check" aria-hidden="true">{{ quest.completed ? '✓' : '' }}</span>
+          <span class="progress-card__quest">
+            <strong>{{ quest.label }}</strong>
+            <span class="progress-card__bar" aria-hidden="true">
+              <span :style="{ width: `${quest.percent}%` }"></span>
+            </span>
+          </span>
+          <span class="progress-card__value">
+            {{ quest.progress }} / {{ quest.target }}
+          </span>
+        </li>
+      </ul>
+    </template>
+  </section>
+</template>

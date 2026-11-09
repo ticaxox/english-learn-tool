@@ -1,31 +1,36 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AiMemoryPanel from '../components/AiMemoryPanel.vue'
+import type { CoachMemory } from '../api/coach-memories'
 
-const apiMocks = vi.hoisted(() => ({
-  getAiMemoryDocument: vi.fn(),
-  saveAiMemoryDocument: vi.fn(),
+const memoryMocks = vi.hoisted(() => ({
+  listCoachMemories: vi.fn(),
+  createCoachMemory: vi.fn(),
+  deleteCoachMemory: vi.fn(),
 }))
 
-vi.mock('../api/ai-memory', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../api/ai-memory')>()
-  return { ...actual, ...apiMocks }
+vi.mock('../api/coach-memories', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../api/coach-memories')>()
+  return { ...actual, ...memoryMocks }
 })
 
-const documentBody = {
-  content: '用户信息：目标考试：四级\n做题：填空练习 · 3 题 · 全部答对',
-  updatedAt: '2026-11-04T12:00:00Z',
+const memory: CoachMemory = {
+  id: 'memory-1',
+  kind: 'preference',
+  subjectKey: 'study_time',
+  content: '我习惯早上背单词',
+  source: 'user_explicit',
+  status: 'active',
+  importance: 3,
+  createdAt: '2026-11-09T01:00:00Z',
+  updatedAt: '2026-11-09T01:00:00Z',
+  lastUsedAt: null,
 }
 
-function saveButton(wrapper: ReturnType<typeof mount>) {
-  return wrapper.findAll('[role="button"]').find((button) => button.text().includes('保存记忆'))
-}
-
-async function openDialog() {
+async function openPanel() {
   const wrapper = mount(AiMemoryPanel)
   await flushPromises()
-  const open = wrapper.findAll('[role="button"]').find((button) => button.text().includes('打开'))
-  await open!.trigger('click')
+  await wrapper.findAll('[role="button"]').find((button) => button.text().includes('管理'))!.trigger('click')
   await flushPromises()
   return wrapper
 }
@@ -33,31 +38,39 @@ async function openDialog() {
 describe('AiMemoryPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    apiMocks.getAiMemoryDocument.mockResolvedValue(documentBody)
-    apiMocks.saveAiMemoryDocument.mockResolvedValue(documentBody)
+    memoryMocks.listCoachMemories.mockResolvedValue([memory])
+    memoryMocks.createCoachMemory.mockResolvedValue({ ...memory, id: 'memory-2' })
+    memoryMocks.deleteCoachMemory.mockResolvedValue(undefined)
   })
 
-  it('shows the one memory document in an editable box', async () => {
-    const wrapper = await openDialog()
-    const textarea = wrapper.get('#ai-memory-document').element as HTMLTextAreaElement
-    expect(textarea.value).toBe(documentBody.content)
-    expect(wrapper.findAll('.ai-memory-item')).toHaveLength(0)
+  it('lists typed memories with their source', async () => {
+    const wrapper = await openPanel()
+    expect(wrapper.text()).toContain('我习惯早上背单词')
+    expect(wrapper.text()).toContain('偏好')
+    expect(wrapper.text()).toContain('你说的')
+    // The old single-document textarea is gone.
+    expect(wrapper.find('#ai-memory-document').exists()).toBe(false)
   })
 
-  it('saves the edited document as a whole', async () => {
-    const wrapper = await openDialog()
-    await wrapper.get('#ai-memory-document').setValue('用户信息：目标考试：六级\n手动笔记：多练长难句。')
-    await saveButton(wrapper)!.trigger('click')
+  it('adds a memory with the chosen kind', async () => {
+    const wrapper = await openPanel()
+    await wrapper.get('#ai-memory-content').setValue('目标雅思 7.0')
+    await wrapper.get('#ai-memory-kind').setValue('goal')
+    await wrapper.get('form.ai-memory-add').trigger('submit')
     await flushPromises()
-    expect(apiMocks.saveAiMemoryDocument).toHaveBeenCalledWith(
-      '用户信息：目标考试：六级\n手动笔记：多练长难句。',
-    )
+    expect(memoryMocks.createCoachMemory).toHaveBeenCalledWith({
+      kind: 'goal',
+      content: '目标雅思 7.0',
+    })
   })
 
-  it('keeps the save action disabled until something changes', async () => {
-    const wrapper = await openDialog()
-    expect(saveButton(wrapper)!.attributes('aria-disabled')).toBeDefined()
-    await wrapper.get('#ai-memory-document').setValue('新的内容')
-    expect(saveButton(wrapper)!.attributes('aria-disabled')).toBeUndefined()
+  it('forgets a memory after confirmation', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const wrapper = await openPanel()
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('忘记'))!.trigger('click')
+    await flushPromises()
+    expect(confirm).toHaveBeenCalledTimes(1)
+    expect(memoryMocks.deleteCoachMemory).toHaveBeenCalledWith('memory-1')
+    expect(wrapper.text()).not.toContain('我习惯早上背单词')
   })
 })
