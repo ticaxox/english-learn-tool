@@ -8,6 +8,7 @@ import {
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import AccountSecurityView from '../views/AccountSecurityView.vue'
+import AdminKnowledgeView from '../views/AdminKnowledgeView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import ChallengeView from '../views/ChallengeView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -150,6 +151,12 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       {
+        path: 'admin/knowledge',
+        name: 'admin-knowledge',
+        component: AdminKnowledgeView,
+        meta: { adminOnly: true },
+      },
+      {
         path: ':pathMatch(.*)*',
         name: 'not-found',
         component: NotFoundView,
@@ -198,6 +205,10 @@ export function createAppRouter(
     }
 
     if (to.name === 'change-password') {
+      return { name: 'overview' }
+    }
+
+    if (to.meta.adminOnly && !auth.isAdmin) {
       return { name: 'overview' }
     }
 

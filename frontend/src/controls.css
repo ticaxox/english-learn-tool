@@ -3999,3 +3999,60 @@
 
 .personal-workspace .crumb-merged-side .crumb-merged-book { padding-top: 12px; }
 .personal-workspace .crumb-merged-book .crumb-inline-link { margin-top: 4px; font-size: 0.8rem; }
+
+/* ------------------------------------------- admin knowledge: import + probe */
+
+.personal-workspace .knowledge-admin { display: grid; gap: 18px; }
+
+.personal-workspace .knowledge-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 18px;
+  align-items: start;
+}
+
+.personal-workspace .knowledge-import,
+.personal-workspace .knowledge-list,
+.personal-workspace .knowledge-probe { display: grid; gap: 10px; padding: 18px; }
+
+.personal-workspace .knowledge-import textarea { min-height: 200px; font-family: inherit; }
+
+.personal-workspace .knowledge-import__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.personal-workspace .knowledge-list ul { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+
+.personal-workspace .knowledge-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--ui-line);
+}
+
+.personal-workspace .knowledge-row:last-child { border-bottom: 0; }
+.personal-workspace .knowledge-row__main { display: grid; gap: 2px; min-width: 0; }
+.personal-workspace .knowledge-row small { color: var(--ui-muted); font-size: 0.76rem; }
+
+.personal-workspace .knowledge-probe__form { display: flex; gap: 10px; }
+.personal-workspace .knowledge-probe__form > input { flex: 1 1 auto; }
+
+.personal-workspace .knowledge-hits { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.personal-workspace .knowledge-hits li {
+  padding: 10px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .knowledge-hits small { margin-left: 8px; color: var(--ui-muted); font-size: 0.74rem; }
+.personal-workspace .knowledge-hits p { margin: 6px 0 0; font-size: 0.84rem; line-height: 1.6; }
+
+@media (max-width: 1100px) {
+  .personal-workspace .knowledge-layout { grid-template-columns: minmax(0, 1fr); }
+}
