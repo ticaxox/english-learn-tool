@@ -36,6 +36,20 @@ TOOL_SPECS: dict[str, dict[str, Any]] = {
             "minProperties": 1,
         },
     },
+    "search_knowledge": {
+        "action_type": "search_knowledge",
+        "description": "在真题知识库里检索与问题相关的原文片段，返回带出处的引用。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "minLength": 1, "max_length": 500},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 10},
+            },
+            "required": ["query"],
+            "additionalProperties": False,
+        },
+        "handler": "search",
+    },
     "start_practice": {
         "action_type": "start_practice",
         "description": "按词书或难度开始一组 AI 练习，返回练习会话 id。",
@@ -124,6 +138,29 @@ async def call_coach_tool(
             code="MCP_TOOL_ARGUMENTS_INVALID",
             message="Tool arguments must be an object.",
         )
+    if spec.get("handler") == "search":
+        from app.services.knowledge import search
+
+        query = str((arguments or {}).get("query") or "").strip()
+        if not query:
+            raise AppError(
+                status_code=422,
+                code="MCP_TOOL_ARGUMENTS_INVALID",
+                message="A search query is required.",
+            )
+        limit = int((arguments or {}).get("limit") or 6)
+        hits = await search(session, settings, query=query, limit=min(limit, 10))
+        return {
+            "items": [
+                {
+                    "document_id": str(hit.document_id),
+                    "title": hit.title,
+                    "content": hit.content,
+                    "score": hit.score,
+                }
+                for hit in hits
+            ]
+        }
     if spec.get("handler") == "authoring":
         try:
             output = AuthoredPracticeRequest.model_validate({

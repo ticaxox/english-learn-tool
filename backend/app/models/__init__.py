@@ -17,6 +17,7 @@ from app.models.coach import (
 from app.models.coach_memory import CoachMemory
 from app.models.gamification import DailyQuest, UserGameStats, XpEvent
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
+from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
 from app.models.learning import (
     DailyActivity,
     DailyPlan,
@@ -74,6 +75,8 @@ __all__ = [
     "DailyQuest",
     "DailyPlanWord",
     "ImportPreview",
+    "KnowledgeChunk",
+    "KnowledgeDocument",
     "LearningHeartbeat",
     "MemoryConfig",
     "MemoryEvent",

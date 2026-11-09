@@ -86,6 +86,8 @@ class AiProvider(Base):
     enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default=text("true")
     )
+    # Optional: the model used for /embeddings on this provider.
+    embedding_model: Mapped[str | None] = mapped_column(String(120))
     custom_headers: Mapped[dict[str, str]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
     )

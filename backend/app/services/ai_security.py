@@ -272,6 +272,43 @@ class ProviderHttpClient:
                 models.append(item["id"])
         return sorted(set(models))
 
+    async def embeddings(
+        self,
+        *,
+        base_url: str,
+        api_key: str,
+        custom_headers: dict[str, str],
+        model_id: str,
+        timeout_seconds: int,
+        texts: list[str],
+    ) -> list[list[float]]:
+        """OpenAI-compatible embeddings; one vector per input, in order."""
+        payload = await self._request(
+            method="POST",
+            url=f"{base_url.rstrip('/')}/embeddings",
+            headers=self.headers(api_key, custom_headers),
+            timeout_seconds=timeout_seconds,
+            json={"model": model_id, "input": texts},
+        )
+        data = payload.get("data")
+        if not isinstance(data, list) or len(data) != len(texts):
+            raise ProviderRequestError(
+                code="AI_PROVIDER_INVALID_RESPONSE",
+                message="The AI provider returned an invalid embedding response.",
+                retryable=False,
+            )
+        vectors: list[list[float]] = []
+        for item in data:
+            vector = item.get("embedding") if isinstance(item, dict) else None
+            if not isinstance(vector, list) or not vector:
+                raise ProviderRequestError(
+                    code="AI_PROVIDER_INVALID_RESPONSE",
+                    message="The AI provider returned an invalid embedding vector.",
+                    retryable=False,
+                )
+            vectors.append([float(value) for value in vector])
+        return vectors
+
     async def chat_json(
         self,
         *,
