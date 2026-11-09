@@ -3746,3 +3746,13 @@
 
 /* The card is a grid: one shrunken track keeps its children inside the padding box. */
 .personal-workspace .practice-tasks-card { grid-template-columns: minmax(0, 1fr); }
+
+/* With the hint gone the generate action sits at the right edge. */
+.personal-workspace .practice-create-footer { justify-content: flex-end; }
+
+/* Question text stays regular even where a type-specific rule bolds it. */
+.personal-workspace .practice-question-card .practice-prompt-text,
+.personal-workspace .practice-question-card .practice-sentence,
+.personal-workspace .practice-question-card .practice-option__text {
+  font-weight: 500;
+}
