@@ -3743,3 +3743,6 @@
   width: 100%;
   max-width: none;
 }
+
+/* The card is a grid: one shrunken track keeps its children inside the padding box. */
+.personal-workspace .practice-tasks-card { grid-template-columns: minmax(0, 1fr); }
