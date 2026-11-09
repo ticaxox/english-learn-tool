@@ -3670,3 +3670,10 @@
 }
 
 .personal-workspace .ia-kv-row > input { width: 100%; max-width: none; }
+
+/* The empty-conversation intro reads as backdrop text, not another box. */
+.personal-workspace .coach-page .coach-messages-empty {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
