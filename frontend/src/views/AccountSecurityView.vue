@@ -94,8 +94,15 @@ async function refreshToken(token: PersonalToken): Promise<void> {
   tokenError.value = null
   copyNotice.value = ''
   try {
-    newToken.value = await refreshPersonalToken(token.id)
+    const refreshed = await refreshPersonalToken(token.id)
     await loadTokens()
+    // The default token backs the web coach: it applies in place, nothing to copy.
+    if (token.isDefault) {
+      newToken.value = null
+      copyNotice.value = '默认令牌已重置，网页会自动使用新令牌。'
+    } else {
+      newToken.value = refreshed
+    }
   } catch (refreshError) {
     tokenError.value = refreshError
   } finally {
@@ -282,10 +289,12 @@ async function saveAll(): Promise<void> {
 
     <div v-if="newToken" class="mcp-token-reveal">
       <p class="field-hint">只显示这一次，请立即复制。</p>
-      <code>{{ newToken.token }}</code>
-      <DivButton class="button-secondary button-small" type="button" @click="copyToken">复制</DivButton>
-      <span v-if="copyNotice" class="field-hint">{{ copyNotice }}</span>
+      <div class="mcp-token-reveal__row">
+        <code>{{ newToken.token }}</code>
+        <DivButton class="button-secondary button-small" type="button" @click="copyToken">复制</DivButton>
+      </div>
     </div>
+    <p v-if="copyNotice" class="field-hint">{{ copyNotice }}</p>
 
     <LoadingState v-if="tokensLoading && tokens.length === 0" label="正在读取令牌…" />
     <ul v-else-if="tokens.length" class="mcp-token-list">
@@ -298,7 +307,6 @@ async function saveAll(): Promise<void> {
           <small>
             {{ token.prefix }}…
             · 创建于 {{ formatTokenDate(token.createdAt) }}
-            <template v-if="token.lastUsedAt"> · 最近使用 {{ formatTokenDate(token.lastUsedAt) }}</template>
           </small>
         </div>
         <div class="mcp-token-actions">

@@ -299,7 +299,6 @@ onMounted(() => {
           </div>
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="practice-create-footer">
-            <p class="field-hint">答案与解析只在提交后出现。</p>
             <SvgPlateButton class="practice-generate-action" type="submit" :disabled="creating">
               {{ creating ? '正在生成…' : '生成练习' }} <AppIcon name="arrow" />
             </SvgPlateButton>

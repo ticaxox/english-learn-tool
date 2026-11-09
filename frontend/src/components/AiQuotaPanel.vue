@@ -112,9 +112,6 @@ onMounted(() => {
       <div>
         <h3 id="ai-quota-title">AI 额度与生成配置</h3>
       </div>
-      <DivButton class="button" type="button" :disabled="saving || loading || !usage" @click="save">
-        {{ saving ? '正在保存…' : '保存' }}
-      </DivButton>
     </header>
 
     <LoadingState v-if="loading && !usage" label="正在读取额度…" />
@@ -152,5 +149,11 @@ onMounted(() => {
     </div>
 
     <ErrorNotice v-if="saveError" :error="saveError" :show-retry="false" retry-label="重试" @retry="save" />
+
+    <div class="ai-quota-actions">
+      <DivButton class="button" type="button" :disabled="saving || loading || !usage" @click="save">
+        {{ saving ? '正在保存…' : '保存' }}
+      </DivButton>
+    </div>
   </section>
 </template>

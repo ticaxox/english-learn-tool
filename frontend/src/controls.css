@@ -3677,3 +3677,59 @@
   background: transparent;
   box-shadow: none;
 }
+
+/* ---------------------------- round 51: rail fit, wider coach, flat settings */
+
+/* The task rail header wraps instead of spilling past the card edge. */
+.personal-workspace .practice-tasks-card { min-width: 0; }
+.personal-workspace .practice-tasks-head { flex-wrap: wrap; gap: 6px 10px; }
+.personal-workspace .practice-tasks-head h2 { font-size: 1.2rem; }
+.personal-workspace .practice-task-tabs { margin-left: 0; flex-wrap: wrap; }
+.personal-workspace .practice-task-tab { padding: 4px 10px; font-size: 0.78rem; }
+
+/* The coach page uses the whole content width and viewport height. */
+.personal-workspace .coach-page { width: 100%; max-width: none; }
+.personal-workspace .coach-page .coach-layout--with-history {
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 22px;
+  height: calc(100vh - 130px);
+}
+.personal-workspace .coach-page .coach-main { max-width: none; }
+.personal-workspace .coach-page .coach-composer textarea { min-height: 64px; max-height: 140px; }
+
+/* Quota save sits at the bottom and applies the whole block. */
+.personal-workspace .ai-quota-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.personal-workspace .ai-quota-row__input { width: 72px; }
+
+.personal-workspace .coach-page .coach-composer textarea { height: 64px; }
+
+/* Token reveal: value on the left, copy on the right; rows spread out. */
+.personal-workspace .mcp-token-reveal__row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.personal-workspace .mcp-token-reveal__row code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.personal-workspace .mcp-token-main { justify-content: space-between; }
+.personal-workspace .mcp-token-list li { gap: 20px; }
+
+/* Question and option text is not bold by default; highlighted words carry the emphasis. */
+.personal-workspace .practice-sentence,
+.personal-workspace .practice-prompt-text,
+.personal-workspace .practice-option__text,
+.personal-workspace .practice-question-card h3,
+.personal-workspace .practice-question-card h2 {
+  font-weight: 500;
+}
