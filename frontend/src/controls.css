@@ -3661,10 +3661,11 @@
 .personal-workspace .coach-page .coach-messages-empty p { margin: 0; font-size: 0.95rem; }
 
 /* Token rows keep their two actions side by side, and key-value inputs share one width. */
-.personal-workspace .mcp-token-actions {
+.personal-workspace .mcp-token-list li > div.mcp-token-actions {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+  gap: 8px;
   align-items: center;
 }
 
