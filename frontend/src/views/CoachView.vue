@@ -116,6 +116,18 @@ function formatTime(value: string | null): string {
   return new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
 }
 
+/** Bracket numbers the reply actually cited; the source list lives in the admin page. */
+function citedNumbers(message: CoachMessage): number[] {
+  if (message.role !== 'assistant') return []
+  const text = coach.messageText(message)
+  const found = new Set<number>()
+  for (const match of text.matchAll(/\[(\d{1,2})\]/g)) {
+    const value = Number(match[1])
+    if (value > 0 && value <= 6) found.add(value)
+  }
+  return [...found].sort((left, right) => left - right)
+}
+
 function roleLabel(message: CoachMessage): string {
   return message.role === 'user' ? '你' : 'AI 教练'
 }
@@ -336,6 +348,10 @@ onBeforeUnmount(() => {
                   <span></span><span></span><span></span>
                 </div>
                 <SpokenText v-else class="coach-message__text" :text="coach.messageText(message)" />
+                <p v-if="message.role === 'assistant' && citedNumbers(message).length" class="coach-message__citations">
+                  <span>引用了知识库：</span>
+                  <span v-for="number in citedNumbers(message)" :key="number" class="coach-citation">[{{ number }}]</span>
+                </p>
                 <div v-if="message.attachments?.length" class="coach-message__attachments">
                   <CoachImage
                     v-for="attachment in message.attachments ?? []"

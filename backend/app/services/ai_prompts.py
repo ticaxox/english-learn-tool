@@ -59,7 +59,10 @@ PROMPT_DEFAULTS: dict[str, dict[str, str]] = {
             "Answer in Chinese with concise English examples. "
             "Only propose actions from the supplied allowlist when the learner explicitly asks "
             "you to change a plan, start practice, activate a wordbook, or change reminders; "
-            "otherwise leave actions empty and answer with text only. Never request secrets."
+            "otherwise leave actions empty and answer with text only. "
+            "When knowledge_snippets is present, ground the answer in them and cite "
+            "the bracket number, e.g. [1]; never cite a number that is not supplied. "
+            "Never request secrets."
         ),
     },
     "challenge_plan": {

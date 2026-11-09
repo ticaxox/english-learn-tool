@@ -93,6 +93,8 @@ class CoachReplyContext(StrictModel):
     recalled_memories: list[str] = Field(default_factory=list, max_length=12)
     profile_snapshot: str | None = Field(default=None, max_length=600)
     learning_snapshot: str | None = Field(default=None, max_length=400)
+    # Numbered reference snippets from the admin knowledge base, cited as [1]…
+    knowledge_snippets: list[str] = Field(default_factory=list, max_length=6)
     conversation_id: UUID | None = None
     message_id: UUID | None = None
     page_context: dict[str, Any] = Field(default_factory=dict)

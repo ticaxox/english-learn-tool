@@ -164,3 +164,48 @@ async def test_import_can_use_a_provider_embedding_model(client, admin_user) -> 
         )
     assert imported.status_code == 201, imported.text
     assert imported.json()["embedding_model"] is None
+
+
+async def test_coach_receives_matching_snippets(client, app, admin_user, member_user) -> None:
+    from uuid import UUID
+
+    from app.models.ai import AiJob
+    from app.models.coach import CoachMessage
+    from app.services.ai_jobs import process_ai_job
+
+    admin_headers = await login(client, admin_user.username)
+    await client.post(
+        ADMIN_PATH,
+        headers=admin_headers,
+        json={"source_type": "exam", "title": "真题", "content": EXAM_TEXT},
+    )
+
+    member_headers = await login(client, member_user.username)
+    with fake_provider_server() as server:
+        await create_provider(client, member_headers, base_url=server.base_url)
+        conversation = await client.post(
+            "/api/v1/coach/conversations", headers=member_headers, json={"title": "真题"}
+        )
+        server.queue_json(200, {"message": "夜市那题的答案选 A [1]。", "actions": []})
+        sent = await client.post(
+            f"/api/v1/coach/conversations/{conversation.json()['id']}/messages",
+            headers={**member_headers, "Idempotency-Key": "knowledge-coach"},
+            json={"content": "night market 那道阅读题的答案是什么"},
+        )
+        assert sent.status_code == 202, sent.text
+
+        async with app.state.session_factory() as session:
+            message = await session.get(CoachMessage, UUID(sent.json()["message_id"]))
+            assert message is not None and message.ai_job_id is not None
+            job = await session.get(AiJob, message.ai_job_id)
+        await process_ai_job(
+            {
+                "session_factory": app.state.session_factory,
+                "settings": app.state.settings,
+                "redis": app.state.arq,
+            },
+            str(job.id),
+        )
+
+    assert job.input_context["knowledge_snippets"], job.input_context
+    assert "夜市" in job.input_context["knowledge_snippets"][0]

@@ -602,3 +602,22 @@
   .coach-layout--with-history { grid-template-columns: minmax(0, 1fr); }
   .coach-history__list { max-height: 14rem; }
 }
+
+/* Citations stay quiet: a marker under the answer, not another bubble. */
+.coach-message__citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 8px 0 0;
+  color: var(--ui-muted);
+  font-size: 0.74rem;
+}
+
+.coach-citation {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--ui-surface-subtle);
+  color: var(--ui-forest, #2f6e33);
+  font-weight: 800;
+}
