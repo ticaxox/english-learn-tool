@@ -3361,19 +3361,18 @@
 
 /* Filters read as key–value pairs on one line, not a two-row grid. */
 .personal-workspace .practice-form-row {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 10px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 18px;
   align-items: center;
 }
 
 .personal-workspace .practice-form-row .field {
   display: flex;
-  flex: 1 1 0;
   gap: 8px;
   align-items: center;
   min-width: 0;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0;
 }
 
 .personal-workspace .practice-form-row .field > label {
@@ -3384,9 +3383,8 @@
 
 .personal-workspace .practice-form-row .field > select { min-width: 0; }
 
-@media (max-width: 1180px) {
-  .personal-workspace .practice-form-row { flex-wrap: wrap; }
-  .personal-workspace .practice-form-row .field { flex: 1 1 45%; }
+@media (max-width: 900px) {
+  .personal-workspace .practice-form-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ------------------------------------------- AI settings: one card, flat parts */
@@ -3489,7 +3487,7 @@
   border-top: 0;
 }
 
-.personal-workspace .practice-hub .practice-type-picker { justify-content: flex-start; }
+.personal-workspace .practice-hub .practice-type-picker { justify-content: center; }
 
 /* AI settings: one card, dividers only between the three parts. */
 .personal-workspace .personal-ai-stack > .panel,
@@ -3610,3 +3608,54 @@
   align-self: flex-start;
   max-width: 88%;
 }
+
+/* AI quota: three equal-sized boxes and a compact timeout field. */
+.personal-workspace .ai-quota-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.personal-workspace .ai-quota-row { width: 100%; }
+
+.personal-workspace .ai-quota-global { display: flex; gap: 12px; align-items: center; }
+
+.personal-workspace .ai-quota-global input { width: 160px; max-width: 160px; }
+
+/* Account: key–value rows, label and field on the same line. */
+.personal-workspace .ia-kv-form { display: grid; gap: 12px; }
+
+.personal-workspace .ia-kv-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.personal-workspace .ia-kv-row > label { margin: 0; white-space: nowrap; font-weight: 700; }
+.personal-workspace .ia-kv-row > input { width: 100%; }
+
+@media (max-width: 720px) {
+  .personal-workspace .ia-kv-row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
+
+/* Coach without a page header: the chat fills the screen. */
+.personal-workspace .coach-page .coach-layout--with-history { height: calc(100vh - 170px); }
+
+/* Empty conversation shows the intro as a quiet backdrop. */
+.personal-workspace .coach-page .coach-messages-empty {
+  display: grid;
+  gap: 6px;
+  margin: auto;
+  padding: 28px 24px;
+  color: var(--ui-muted);
+  text-align: center;
+}
+
+.personal-workspace .coach-page .coach-messages-empty strong {
+  color: var(--ui-ink);
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.personal-workspace .coach-page .coach-messages-empty p { margin: 0; font-size: 0.95rem; }

@@ -27,17 +27,6 @@ const saving = ref(false)
 const toast = useToast()
 
 const dirty = computed(() => draft.value !== document.value.content)
-const updatedLabel = computed(() => {
-  if (!document.value.updatedAt) return '还没有自动记录'
-  const date = new Date(document.value.updatedAt)
-  if (Number.isNaN(date.getTime())) return '最近已更新'
-  return `最近更新 ${new Intl.DateTimeFormat('zh-CN', {
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)}`
-})
 
 async function load(): Promise<void> {
   loading.value = true
@@ -87,10 +76,8 @@ onMounted(() => {
     <div class="ai-memory-row">
       <div class="ai-memory-row__copy">
         <h3 id="ai-memory-title">AI 记忆</h3>
-        <p class="field-hint">教练回答前会读这份文档；点击右侧可以查看和修改。</p>
       </div>
-      <span class="ai-memory-stamp">{{ updatedLabel }}</span>
-      <DivButton class="button-secondary" type="button" @click="openDialog">查看 / 修改</DivButton>
+      <DivButton class="button-secondary" type="button" @click="openDialog">打开</DivButton>
     </div>
   </section>
 
@@ -105,7 +92,6 @@ onMounted(() => {
         <div>
           <p class="eyebrow">AI 配置</p>
           <h2 id="ai-memory-dialog-title">AI 记忆</h2>
-          <p class="ai-memory-stamp">{{ updatedLabel }}</p>
         </div>
         <DivButton class="button-secondary button-small" type="button" @click="closeDialog">关闭</DivButton>
       </header>

@@ -24,7 +24,7 @@ function saveButton(wrapper: ReturnType<typeof mount>) {
 async function openDialog() {
   const wrapper = mount(AiMemoryPanel)
   await flushPromises()
-  const open = wrapper.findAll('[role="button"]').find((button) => button.text().includes('查看 / 修改'))
+  const open = wrapper.findAll('[role="button"]').find((button) => button.text().includes('打开'))
   await open!.trigger('click')
   await flushPromises()
   return wrapper
@@ -41,7 +41,6 @@ describe('AiMemoryPanel', () => {
     const wrapper = await openDialog()
     const textarea = wrapper.get('#ai-memory-document').element as HTMLTextAreaElement
     expect(textarea.value).toBe(documentBody.content)
-    expect(wrapper.text()).toContain('最近更新')
     expect(wrapper.findAll('.ai-memory-item')).toHaveLength(0)
   })
 

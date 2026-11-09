@@ -275,6 +275,17 @@ onMounted(() => {
               </select>
               <p v-if="wordbooksError" class="field-hint">词书列表读取失败；仍可留空使用当前激活词书。</p>
             </div>
+            <div class="field">
+              <label for="practice-timer">计时</label>
+              <select id="practice-timer" :value="timerLimit" @change="onTimerLimitChange">
+                <option :value="0">不限（正计时）</option>
+                <option :value="5">5 分钟</option>
+                <option :value="10">10 分钟</option>
+                <option :value="15">15 分钟</option>
+                <option :value="20">20 分钟</option>
+                <option :value="30">30 分钟</option>
+              </select>
+            </div>
           </div>
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
@@ -288,20 +299,7 @@ onMounted(() => {
           </div>
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="practice-create-footer">
-            <div class="practice-create-footer__meta">
-              <label class="practice-timer-control">
-                <span>计时</span>
-                <select id="practice-timer" :value="timerLimit" @change="onTimerLimitChange">
-                  <option :value="0">不限（正计时）</option>
-                  <option :value="5">5 分钟</option>
-                  <option :value="10">10 分钟</option>
-                  <option :value="15">15 分钟</option>
-                  <option :value="20">20 分钟</option>
-                  <option :value="30">30 分钟</option>
-                </select>
-              </label>
-              <p>答案与解析只在提交后出现。</p>
-            </div>
+            <p class="field-hint">答案与解析只在提交后出现。</p>
             <SvgPlateButton class="practice-generate-action" type="submit" :disabled="creating">
               {{ creating ? '正在生成…' : '生成练习' }} <AppIcon name="arrow" />
             </SvgPlateButton>

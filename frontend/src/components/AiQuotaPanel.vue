@@ -111,7 +111,6 @@ onMounted(() => {
     <header class="ai-quota-panel__head">
       <div>
         <h3 id="ai-quota-title">AI 额度与生成配置</h3>
-        <p class="field-hint">每天可用的 AI 次数；勾选「不限」后不再按次数限制。</p>
       </div>
       <DivButton class="button" type="button" :disabled="saving || loading || !usage" @click="save">
         {{ saving ? '正在保存…' : '保存' }}
@@ -143,7 +142,7 @@ onMounted(() => {
             :aria-label="`${kind.label}每日上限`"
           />
         </div>
-        <small class="ai-quota-row__used">今日已用 {{ usageByKind[kind.key]?.used ?? 0 }} 次</small>
+        <small class="ai-quota-row__used">已用 {{ usageByKind[kind.key]?.used ?? 0 }} 次</small>
       </div>
     </div>
 

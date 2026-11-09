@@ -231,17 +231,6 @@ onBeforeUnmount(() => {
 
 <template>
   <article class="coach-page member-coach-page coach-workspace workspace-page">
-    <header class="workspace-page-header coach-page-header">
-      <div class="coach-heading-lockup">
-        <span class="coach-avatar"><WhiskerCrumbMark size="small" /></span>
-        <div>
-          <p class="workspace-kicker">AI 教练</p>
-          <h1>和 Mr. Whisker 聊聊</h1>
-          <p class="workspace-page-lead">学习计划、复习顺序，或者一句想改得更自然的英文。</p>
-        </div>
-      </div>
-      <span class="coach-privacy-stamp"><AppIcon name="lock" /> 仅你可见</span>
-    </header>
 
     <div class="coach-layout" :class="{ 'coach-layout--with-history': isPage }">
       <aside v-if="isPage" class="coach-history" aria-label="历史记录">
@@ -283,8 +272,8 @@ onBeforeUnmount(() => {
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
           <p class="eyebrow">AI 教练</p>
-          <h2>从一段长期对话开始</h2>
-          <p>选择一段对话，或开始新的对话。</p>
+          <h2>和 Mr. Whisker 聊聊</h2>
+          <p>学习计划、复习顺序，或者一句想改得更自然的英文。</p>
           <div class="coach-suggested-prompts" aria-label="建议提问">
             <DivButton v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</DivButton>
           </div>
@@ -319,7 +308,8 @@ onBeforeUnmount(() => {
               加载更早消息
             </DivButton>
             <div v-if="coach.messages.value.length === 0 && !coach.messagesLoading.value" class="coach-messages-empty">
-              <p>这段对话还没有消息，先说一句吧。</p>
+              <strong>和 Mr. Whisker 聊聊</strong>
+              <p>学习计划、复习顺序，或者一句想改得更自然的英文。</p>
             </div>
 
             <article

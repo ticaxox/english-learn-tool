@@ -206,7 +206,6 @@ onMounted(() => {
       <div class="personal-ai-toolbar">
         <div>
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
-          <p class="field-hint">只显示当前账号自己的配置。数字越小越先用，失败时按顺序换下一个。</p>
         </div>
         <DivButton v-if="providers.length > 0" class="button" type="button" @click="openCreate">添加 AI 提供商</DivButton>
       </div>
