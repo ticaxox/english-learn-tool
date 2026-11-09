@@ -3990,3 +3990,12 @@
 }
 
 .personal-workspace .crumb-merged-side .progress-card__quests li { font-size: 0.78rem; }
+
+/* Side column: one dashed rule per block, so the rail reads as a list. */
+.personal-workspace .crumb-merged-side .crumb-merged-ring {
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--ui-line);
+}
+
+.personal-workspace .crumb-merged-side .crumb-merged-book { padding-top: 12px; }
+.personal-workspace .crumb-merged-book .crumb-inline-link { margin-top: 4px; font-size: 0.8rem; }
