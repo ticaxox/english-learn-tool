@@ -20,8 +20,11 @@ from app.schemas.knowledge import (
 from app.services.auth import AuthContext
 from app.services.knowledge import (
     archive_document,
+    archive_upload,
     import_document,
+    import_upload,
     list_documents,
+    list_uploads,
     search_response,
     update_document,
 )
@@ -113,3 +116,50 @@ async def search_endpoint(
 ) -> KnowledgeSearchResponse:
     settings: Settings = request.app.state.settings
     return await search_response(session, settings, context.user, query, limit)
+
+
+uploads_router = APIRouter(prefix="/me/knowledge", tags=["personal knowledge"])
+
+
+@uploads_router.get(
+    "",
+    response_model=KnowledgeDocumentListResponse,
+    responses=_RESPONSES,
+    summary="List the caller's own uploaded notes",
+)
+async def list_uploads_endpoint(
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> KnowledgeDocumentListResponse:
+    return KnowledgeDocumentListResponse(items=await list_uploads(session, context.user))
+
+
+@uploads_router.post(
+    "",
+    response_model=KnowledgeDocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses=_RESPONSES,
+    summary="Index one of the caller's notes for retrieval",
+)
+async def import_upload_endpoint(
+    payload: KnowledgeImportRequest,
+    request: Request,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> KnowledgeDocumentResponse:
+    settings: Settings = request.app.state.settings
+    return await import_upload(session, settings, context.user, payload)
+
+
+@uploads_router.delete(
+    "/{document_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=_RESPONSES,
+    summary="Remove one of the caller's own uploaded notes",
+)
+async def archive_upload_endpoint(
+    document_id: UUID,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> None:
+    await archive_upload(session, context.user, document_id)

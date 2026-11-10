@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-KnowledgeSourceType = Literal["exam", "wordbook"]
+KnowledgeSourceType = Literal["exam", "wordbook", "upload"]
 KnowledgeStatus = Literal["draft", "indexing", "ready", "failed", "archived"]
 
 
@@ -30,6 +30,7 @@ class KnowledgeDocumentUpdate(_StrictModel):
 
 class KnowledgeDocumentResponse(BaseModel):
     id: UUID
+    owner_scoped: bool = False
     source_type: KnowledgeSourceType
     title: str
     metadata: dict[str, Any] = Field(default_factory=dict)

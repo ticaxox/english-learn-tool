@@ -102,3 +102,39 @@ export async function searchKnowledge(query: string, limit = 6): Promise<Knowled
     }
   })
 }
+
+
+export interface PersonalDocument {
+  id: string
+  title: string
+  chunkCount: number
+  status: KnowledgeStatus
+  createdAt: string
+}
+
+export async function listMyKnowledge(): Promise<PersonalDocument[]> {
+  const payload = record(await apiClient.get('/me/knowledge'), '我的资料')
+  const items = Array.isArray(payload.items) ? payload.items : []
+  return items.map((item) => {
+    const body = record(item, '我的资料')
+    return {
+      id: String(body.id ?? ''),
+      title: String(body.title ?? ''),
+      chunkCount: Number(body.chunk_count ?? 0),
+      status: String(body.status ?? 'draft') as KnowledgeStatus,
+      createdAt: String(body.created_at ?? ''),
+    }
+  })
+}
+
+export async function uploadMyKnowledge(title: string, content: string): Promise<void> {
+  await apiClient.post(
+    '/me/knowledge',
+    { title, content, source_type: 'upload' },
+    { retryCount: 0 },
+  )
+}
+
+export async function deleteMyKnowledge(id: string): Promise<void> {
+  await apiClient.delete(`/me/knowledge/${encodeURIComponent(id)}`, { retryCount: 0 })
+}

@@ -149,7 +149,7 @@ async def call_coach_tool(
                 message="A search query is required.",
             )
         limit = int((arguments or {}).get("limit") or 6)
-        hits = await search(session, settings, query=query, limit=min(limit, 10))
+        hits = await search(session, settings, query=query, limit=min(limit, 10), viewer=user)
         return {
             "items": [
                 {

@@ -4215,3 +4215,21 @@
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* Personal knowledge: mirrors the memory manager's simple list. */
+.personal-workspace .personal-knowledge { display: grid; gap: 10px; padding: 18px; }
+.personal-workspace .personal-knowledge textarea { min-height: 120px; font-family: inherit; }
+.personal-workspace .personal-knowledge__actions { display: flex; gap: 10px; justify-content: flex-end; }
+.personal-workspace .personal-knowledge__list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+
+.personal-workspace .personal-knowledge__list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--ui-line);
+}
+
+.personal-workspace .personal-knowledge__list li:last-child { border-bottom: 0; }
+.personal-workspace .personal-knowledge__list small { color: var(--ui-muted); font-size: 0.74rem; }

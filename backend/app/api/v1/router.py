@@ -9,6 +9,7 @@ from app.api.v1.challenges import router as challenges_router
 from app.api.v1.coach import router as coach_router
 from app.api.v1.knowledge import admin_router as knowledge_admin_router
 from app.api.v1.knowledge import router as knowledge_router
+from app.api.v1.knowledge import uploads_router as knowledge_uploads_router
 from app.api.v1.learning import router as learning_router
 from app.api.v1.mcp import router as mcp_router
 from app.api.v1.me_ai import router as me_ai_router
@@ -27,6 +28,7 @@ router.include_router(auth_router)
 router.include_router(learning_router)
 router.include_router(knowledge_admin_router)
 router.include_router(knowledge_router)
+router.include_router(knowledge_uploads_router)
 router.include_router(memory_router)
 router.include_router(admin_router)
 router.include_router(admin_ai_router)

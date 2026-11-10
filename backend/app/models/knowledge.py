@@ -22,7 +22,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-KNOWLEDGE_SOURCE_TYPES = "'exam', 'wordbook'"
+KNOWLEDGE_SOURCE_TYPES = "'exam', 'wordbook', 'upload'"
 KNOWLEDGE_STATUSES = "'draft', 'indexing', 'ready', 'failed', 'archived'"
 
 
@@ -38,6 +38,10 @@ class KnowledgeDocument(Base):
     )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    # NULL means shared reference material; a value means one learner's upload.
+    owner_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE")
+    )
     source_type: Mapped[str] = mapped_column(String(16), nullable=False, default="exam")
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     # Free-form filters: year, paper, question types, tags.
