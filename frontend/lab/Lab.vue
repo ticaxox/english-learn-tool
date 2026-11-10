@@ -136,6 +136,12 @@ function toggleSlow(): void {
         <WeeklyReport />
         <BadgeWall />
       </section>
+      <LevelUpOverlay
+        v-if="showLevelUp"
+        :level="7"
+        title="守夜人"
+        @close="showLevelUp = false"
+      />
     </main>
   </div>
 </template>
