@@ -81,21 +81,18 @@ const kind = computed(() => (props.verdict?.correct ? 'correct' : 'wrong'))
   position: sticky;
   bottom: 0;
   margin-top: 1rem;
-  border-radius: 18px 18px 0 0;
+  border-radius: 18px;
   border: 0;
-  border-top: 4px solid;
   padding: 1rem 1.15rem 1.1rem;
 }
 
 .lesson-feedback.is-correct {
   background: var(--g-green-soft, #ddf7e1);
-  border-top-color: var(--g-green, #2fb344);
   color: #174d21;
 }
 
 .lesson-feedback.is-wrong {
   background: var(--g-red-soft, #ffe4e0);
-  border-top-color: var(--g-red, #d63c3c);
   color: #5d1b1b;
 }
 
@@ -196,18 +193,20 @@ const kind = computed(() => (props.verdict?.correct ? 'correct' : 'wrong'))
   transition: transform 120ms ease, filter 120ms ease;
 }
 
+/* Deeper than the brand green: white on #2fb344 is 2.74:1, which fails for
+   a 16px label. #1d7d2c carries the same hue at 5.2:1. */
 .lesson-feedback.is-correct .lesson-feedback__continue {
-  background: var(--g-green, #2fb344);
-  border-color: var(--g-green-edge, #1f8a30);
+  background: #1d7d2c;
+  border-color: #166326;
   color: #fff;
-  box-shadow: 0 4px 0 var(--g-green-edge, #1f8a30);
+  box-shadow: 0 4px 0 #166326;
 }
 
 .lesson-feedback.is-wrong .lesson-feedback__continue {
-  background: var(--g-red, #d63c3c);
-  border-color: var(--g-red-edge, #a82e2e);
+  background: #b83030;
+  border-color: #8f2525;
   color: #fff;
-  box-shadow: 0 4px 0 var(--g-red-edge, #a82e2e);
+  box-shadow: 0 4px 0 #8f2525;
 }
 
 .lesson-feedback__continue:hover { filter: brightness(1.05); }
