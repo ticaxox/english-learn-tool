@@ -4056,3 +4056,13 @@
 @media (max-width: 1100px) {
   .personal-workspace .knowledge-layout { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Halloween art: the covers carry their own colour, so no tinted tile behind them. */
+.personal-workspace .memory-action-icon,
+.memory-action-icon { display: grid; width: 56px; height: 56px; place-items: center; background: none; border-radius: 0; }
+.personal-workspace .memory-action-card .memory-action-icon { width: 56px; height: 56px; }
+.personal-workspace .memory-action-card { min-height: 132px; }
+.memory-action-art { width: 54px; height: 54px; object-fit: contain; display: block; }
+.coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0 auto 8px; }
+.practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
+.practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }

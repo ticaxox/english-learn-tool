@@ -14,6 +14,7 @@ import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryMod
 import PracticeTaskList from '../components/PracticeTaskList.vue'
 
 import '../practice.css'
+import { practiceBooks } from '../assets/halloween'
 
 const router = useRouter()
 const route = useRoute()
@@ -210,7 +211,9 @@ onMounted(() => {
           :disabled="!memoryEnabled(module)"
           @click="startMemory(module)"
         >
-          <span class="memory-action-icon"><AppIcon :name="module === 'spelling' ? 'star' : module === 'choice' ? 'cards' : 'book'" /></span>
+          <span class="memory-action-icon">
+            <img class="memory-action-art" :src="practiceBooks[module].day" alt="" />
+          </span>
           <span class="memory-action-copy">
             <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
           </span>
@@ -233,7 +236,13 @@ onMounted(() => {
               type="button"
               @click="chooseType(option.key)"
             >
-              <AppIcon :name="typeIcons[option.key]" />
+              <img
+                v-if="practiceBooks[option.key]"
+                class="practice-type-pill__art"
+                :src="practiceBooks[option.key].day"
+                alt=""
+              />
+              <AppIcon v-else :name="typeIcons[option.key]" />
               <span class="practice-type-pill__label">{{ option.label }}</span>
             </DivButton>
           </div>

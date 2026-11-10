@@ -31,6 +31,7 @@ import {
   type TodayPlan,
 } from '../types/learning'
 import '../learning.css'
+import { practiceBooks } from '../assets/halloween'
 
 const route = useRoute()
 const router = useRouter()
@@ -388,7 +389,9 @@ watch(challengeModule, async (module, previous) => {
               :disabled="!activeModules.includes(module)"
               @click="begin(module)"
             >
-              <span class="memory-action-icon"><AppIcon :name="module === 'spelling' ? 'star' : module === 'choice' ? 'cards' : 'book'" /></span>
+              <span class="memory-action-icon">
+                <img class="memory-action-art" :src="practiceBooks[module].day" alt="" />
+              </span>
               <span class="memory-action-copy">
                 <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
               </span>
