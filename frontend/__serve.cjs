@@ -1,3 +1,12 @@
+/**
+ * Serve the built dist on a port, proxying /api to the running stack.
+ *
+ *   node __serve.cjs [port] [apiBase]
+ *
+ * The backend checks Origin against CORS_ORIGINS, which lists the deployed
+ * host, so the proxy rewrites Origin on the way through. That is why this
+ * exists instead of `vite preview`: the pages must talk to the real backend.
+ */
 // Local preview of the built dist, proxying /api to the running stack so the
 // pages talk to the same backend the containerised deploy uses.
 const http = require('http'), fs = require('fs'), path = require('path')
