@@ -1464,6 +1464,14 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 /* The shelf is a shelf of books. Every card keeps the portrait face — phones
  * included — instead of collapsing to a spine, so the drawn cover has a shape
  * to sit in and the title reads like a title on a cover. */
+/* Standing books need a shelf to stand on: the page grid goes from one
+ * full-width row per book to as many books as fit across. */
+.personal-workspace .crumb-wordbooks .wordbook-grid,
+.personal-workspace .member-wordbooks-page .wordbook-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
+  gap: 18px 16px;
+}
+
 .personal-workspace .wordbook-card:not(.wordbook-card--compact) {
   grid-template-columns: minmax(0, 1fr);
 }
