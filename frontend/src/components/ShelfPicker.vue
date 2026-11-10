@@ -40,22 +40,16 @@ function pick(module: ShelfModule): void {
 <template>
   <div class="shelf" role="group" aria-label="选择一种复习方式">
     <button
-      v-for="(module, index) in modules"
+      v-for="module in modules"
       :key="module"
       class="module-card shelf-book"
       :class="[`shelf-book--${module}`, { 'is-locked': !enabled.includes(module) }]"
       type="button"
       :aria-disabled="enabled.includes(module) ? undefined : 'true'"
       :disabled="!enabled.includes(module)"
-      :style="{ '--i': index }"
       @click="pick(module)"
     >
-      <span class="shelf-book__body" aria-hidden="true">
-        <span class="shelf-book__cover">
-          <img class="shelf-book__art" :src="practiceBooks[module].day" alt="" />
-        </span>
-        <span class="shelf-book__spine"><i></i><i></i><i></i><i></i></span>
-      </span>
+      <img class="shelf-book__art" :src="practiceBooks[module].day" alt="" />
       <span class="shelf-book__title">{{ titles[module] }}</span>
       <span class="shelf-book__hint">{{ hints[module] }}</span>
     </button>
@@ -68,22 +62,21 @@ function pick(module: ShelfModule): void {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.4rem;
-  padding: 1.6rem 1.2rem 2.6rem;
-  /* The board is drawn by .shelf-board so the books overlap it like real books. */
+  gap: 1.2rem;
+  padding: 1.4rem 1rem 2.4rem;
 }
 
-/* The book is the object. `.module-card` in learning.css still draws a rounded
-   tinted plate, so this has to out-specify it — otherwise the book ends up
-   sitting inside a second rounded rectangle. */
+/* The generated artwork IS the book. `.module-card` in learning.css still
+   draws a tinted plate with a radius, so this has to out-specify it: the only
+   things on screen are the book, its name and one line of guidance. */
 .module-card.shelf-book,
 .module-card.shelf-book:hover,
-.module-card.shelf-book:active,
-.module-card.shelf-book:focus-visible {
+.module-card.shelf-book:active {
   position: relative;
   display: grid;
   justify-items: center;
-  gap: 0.3rem;
+  align-content: end;
+  gap: 0.25rem;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -92,7 +85,6 @@ function pick(module: ShelfModule): void {
   color: inherit;
   text-align: center;
   cursor: pointer;
-  perspective: 900px;
   transform: none;
   transition: none;
 }
@@ -103,67 +95,31 @@ function pick(module: ShelfModule): void {
   border-radius: 14px;
 }
 
-.shelf-book__body {
-  position: relative;
-  display: block;
-  width: 100%;
-  max-width: 148px;
-  aspect-ratio: 3 / 4;
-  transform-style: preserve-3d;
-  transform: rotateY(-18deg);
-  transition: transform 420ms cubic-bezier(0.2, 0.9, 0.25, 1.05);
-}
-
-/* The cover swings toward the reader; the spine stays as the hinge edge. */
-.shelf-book:hover .shelf-book__body,
-.shelf-book:focus-visible .shelf-book__body {
-  transform: rotateY(-4deg) translateY(-10px);
-}
-
-.shelf-book__cover {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 4px 10px 10px 4px;
-  background: var(--cover, #d9611f);
-  box-shadow:
-    inset -6px 0 0 rgb(0 0 0 / 12%),
-    0 10px 18px -8px rgb(40 24 8 / 45%);
-  overflow: hidden;
-}
-
 .shelf-book__art {
-  width: 76%;
-  height: 76%;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 0 rgb(0 0 0 / 12%));
-}
-
-.shelf-book__spine {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -14px;
-  display: grid;
-  gap: 6px;
-  align-content: space-evenly;
-  width: 16px;
-  padding: 10px 0;
-  border-radius: 4px 0 0 4px;
-  background: color-mix(in srgb, var(--cover, #d9611f) 72%, #2b1c17);
-  box-shadow: inset -3px 0 0 rgb(0 0 0 / 18%);
-}
-
-.shelf-book__spine i {
   display: block;
-  height: 2px;
-  background: rgb(255 255 255 / 34%);
+  width: min(100%, 190px);
+  height: auto;
+  /* The book stands on the board: a soft contact shadow, no box behind it. */
+  filter: drop-shadow(0 10px 10px rgb(40 24 8 / 26%));
+  transition: transform 260ms cubic-bezier(0.2, 0.9, 0.25, 1.05), filter 260ms ease;
 }
+
+.shelf-book:hover .shelf-book__art,
+.shelf-book:focus-visible .shelf-book__art {
+  transform: translateY(-10px) scale(1.03);
+  filter: drop-shadow(0 20px 16px rgb(40 24 8 / 30%));
+}
+
+/* A locked mode keeps its place on the shelf, chained and dimmed. */
+.shelf-book.is-locked { cursor: not-allowed; }
+.shelf-book.is-locked .shelf-book__art {
+  filter: grayscale(0.9) brightness(0.9) drop-shadow(0 8px 8px rgb(40 24 8 / 20%));
+  transform: none;
+}
+.shelf-book.is-locked .shelf-book__title { color: var(--ui-muted, #7a6448); }
 
 .shelf-book__title {
-  margin-top: 0.7rem;
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--ui-ink, #35240f);
 }
@@ -173,37 +129,24 @@ function pick(module: ShelfModule): void {
   color: var(--ui-muted, #7a6448);
 }
 
-.shelf-book--flashcard { --cover: #d9611f; }
-.shelf-book--choice { --cover: #5f7f3a; }
-.shelf-book--spelling { --cover: #d9be93; }
-
-/* A chained book leans back and loses its colour. */
-.shelf-book.is-locked { cursor: not-allowed; }
-.shelf-book.is-locked .shelf-book__body { transform: rotateY(-30deg) translateY(6px); }
-.shelf-book.is-locked .shelf-book__cover { filter: grayscale(0.85) brightness(0.92); }
-.shelf-book.is-locked .shelf-book__spine { background: #6b5a48; }
-.shelf-book.is-locked .shelf-book__title { color: var(--ui-muted, #7a6448); }
-
 .shelf-board {
   position: absolute;
   right: 0;
-  bottom: 0.9rem;
+  bottom: 1.1rem;
   left: 0;
-  height: 14px;
-  border-radius: 4px;
+  height: 13px;
+  border-radius: 3px;
   background: linear-gradient(#8a5a35, #6b4527);
-  box-shadow: 0 8px 14px -6px rgb(40 24 8 / 45%);
+  box-shadow: 0 10px 16px -8px rgb(40 24 8 / 50%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shelf-book__body { transition: none; transform: none; }
+  .shelf-book__art { transition: none; }
 }
 
 @media (max-width: 620px) {
-  .shelf {
-    gap: 0.8rem;
-    padding: 1rem 0.6rem 2.2rem;
-  }
-  .shelf-book__title { font-size: 0.92rem; }
+  .shelf { gap: 0.7rem; padding: 1rem 0.5rem 2rem; }
+  .shelf-book__title { font-size: 0.94rem; }
+  .shelf-book__hint { font-size: 0.72rem; }
 }
 </style>
