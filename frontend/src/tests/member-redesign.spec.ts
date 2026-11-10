@@ -82,27 +82,14 @@ describe('member redesign', () => {
     expect(wrapper.find('.personal-workspace.is-coach-open').exists()).toBe(true)
   })
 
-  it('renders the real wordbook as a shelf object and emits guarded actions', async () => {
-    const wrapper = mount(WordbookShelfCard, {
-      props: {
-        book: book(),
-        statusLabel: '可用',
-        statusDescription: '128 个词条',
-        formattedDate: '2026/10/22',
-        canActivate: true,
-        canExport: true,
-        canDelete: true,
-        activating: false,
-        compact: true,
-      },
-    })
+  it('renders the real wordbook as a bare shelf object that opens its panel', async () => {
+    const wrapper = mount(WordbookShelfCard, { props: { book: book() } })
 
     const card = wrapper.get('.wordbook-card')
-    expect(wrapper.classes()).toContain('wordbook-card--compact')
-    expect(card.get('.wordbook-card-body h3').text()).toBe('Business English')
-    expect(card.find('.wordbook-cover h3').exists()).toBe(false)
-    expect(card.text()).toContain('Business English')
-    expect(card.text()).toContain('128 词条')
+    expect(card.get('.wordbook-cover__name').text()).toBe('Business English')
+    // Nothing but the binding and the name: the actions live in the panel.
+    expect(card.find('.wordbook-card-actions').exists()).toBe(false)
+    expect(card.find('.wordbook-card-body').exists()).toBe(false)
     expect(card.find('.wordbook-card-badges').exists()).toBe(false)
 
     await card.trigger('click')

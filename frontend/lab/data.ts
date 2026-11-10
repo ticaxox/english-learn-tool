@@ -1,0 +1,88 @@
+/**
+ * Sample payloads for the motion lab only.
+ *
+ * Same shapes the server returns; nothing here is imported by the app.
+ */
+
+export const WEEKLY = {
+  days: [
+    { date: '2026-11-04', xp: 0, crumbs: 0, active: false },
+    { date: '2026-11-05', xp: 120, crumbs: 30, active: true },
+    { date: '2026-11-06', xp: 260, crumbs: 60, active: true },
+    { date: '2026-11-07', xp: 90, crumbs: 20, active: true },
+    { date: '2026-11-08', xp: 0, crumbs: 0, active: false },
+    { date: '2026-11-09', xp: 340, crumbs: 80, active: true },
+    { date: '2026-11-10', xp: 180, crumbs: 40, active: true },
+  ],
+  xp: 990,
+  active_days: 5,
+  streak: 5,
+  goals: [
+    { key: 'days', label: '一周学习 5 天', progress: 5, target: 5, completed: true },
+    { key: 'xp', label: '本周累计 800 XP', progress: 990, target: 800, completed: true },
+    { key: 'boss', label: '通过一次终点挑战', progress: 0, target: 1, completed: false },
+  ],
+}
+
+export const BADGES = {
+  items: [
+    { key: 'first_lesson', name: '初次拾屑', description: '完成第一次学习', unlocked: true, unlocked_at: '2026-10-28T09:12:00' },
+    { key: 'streak_3', name: '三日不辍', description: '连续学习 3 天', unlocked: true, unlocked_at: '2026-10-31T21:04:00' },
+    { key: 'streak_7', name: '七日连胜', description: '连续学习 7 天', unlocked: true, unlocked_at: '2026-11-06T20:31:00' },
+    { key: 'streak_30', name: '月度坚持', description: '连续学习 30 天', unlocked: false, unlocked_at: null },
+    { key: 'level_5', name: '探路者', description: '达到 5 级', unlocked: true, unlocked_at: '2026-11-09T19:47:00' },
+    { key: 'level_10', name: '收藏家', description: '达到 10 级', unlocked: false, unlocked_at: null },
+    { key: 'practice_10', name: '练习成瘾', description: '累计提交 10 组练习', unlocked: true, unlocked_at: '2026-11-07T18:20:00' },
+    { key: 'practice_50', name: '题海老手', description: '累计提交 50 组练习', unlocked: false, unlocked_at: null },
+    { key: 'perfect_5', name: '全对五连', description: '五组练习全部答对', unlocked: false, unlocked_at: null },
+    { key: 'boss_1', name: '首胜首领', description: '首次通过闯关终点', unlocked: false, unlocked_at: null },
+    { key: 'review_100', name: '百词成诵', description: '累计复习 100 张卡片', unlocked: true, unlocked_at: '2026-11-08T10:05:00' },
+    { key: 'quest_all', name: '今日全勤', description: '一天内完成三条每日任务', unlocked: false, unlocked_at: null },
+  ],
+}
+
+const NODES = [
+  { id: 'review-1', title: '复习回廊', type: '复习', question: '翻卡记忆', minutes: 8, description: '复习到期单词。', previous: '开始' },
+  { id: 'new-1', title: '新词营地', type: '学习新词', question: '翻卡记忆', minutes: 5, description: '学习今天的新词。', previous: 'review-1' },
+  { id: 'drill-1', title: '拼写矿坑', type: '拼写', question: '拼写', minutes: 6, description: '把新词拼一遍。', previous: 'new-1' },
+  { id: 'choice-1', title: '选择题市集', type: '练习', question: '选择', minutes: 5, description: '在句子里认出它们。', previous: 'drill-1' },
+  { id: 'boss-1', title: '终点挑战', type: '终点挑战', question: '填空', minutes: 4, description: '用填空收尾。', previous: 'choice-1' },
+]
+
+/** `done` = how many main stops are already cleared. */
+export function mapDsl(done: number): string {
+  const status = (index: number): string => {
+    if (index < done) return '已完成'
+    if (index === done) return '进行中'
+    if (index === done + 1) return '已解锁'
+    return '未解锁'
+  }
+  const lines: string[] = ['# 今日闯关', '> 先复习，再学习。', '']
+  NODES.forEach((node, index) => {
+    lines.push(
+      `## [${node.id}] ${node.title}`,
+      `- 类型: ${node.type}`,
+      `- 题目类型: ${node.question}`,
+      `- 状态: ${status(index)}`,
+      `- 时长: ${node.minutes} 分钟`,
+      `- 说明: ${node.description}`,
+      `- 链接: /memory`,
+      `- 前置: ${node.previous}`,
+      `- 可选: 否`,
+      '',
+    )
+  })
+  lines.push(
+    '## [side-1] 侧巷小测',
+    '- 类型: 支线',
+    '- 题目类型: 选择',
+    '- 状态: 已解锁',
+    '- 时长: 3 分钟',
+    '- 说明: 可选加练。',
+    '- 链接: /memory',
+    '- 前置: new-1',
+    '- 可选: 是',
+    '',
+  )
+  return lines.join('\n')
+}
