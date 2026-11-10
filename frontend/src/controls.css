@@ -4220,9 +4220,14 @@
   .member-practice-page .practice-question-card.practice-question-card--translation {
     border-width: 46px 54px 68px; border-image-width: 46px 54px 68px;
   }
+  /* Side rolls would eat forty percent of a phone's width, so the passage
+     turns upright and the rolls move to the top and bottom. */
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
-    border-width: 58px 74px 28px !important; border-image-width: 58px 74px 28px !important;
+    border-width: 40px 44px 56px !important;
+    border-image-width: 40px 44px 56px !important;
+    border-image-source: url('./assets/halloween/card/scroll-day.png') !important;
+    border-image-slice: 11% 13% 16% 13% fill !important;
   }
 }
 
@@ -4281,6 +4286,16 @@
   .member-practice-page .practice-article-panel {
     background: #4a4034 !important;
     border-image-source: url('./assets/halloween/card/scroll-wide-night.png') !important;
+  }
+
+  @media (max-width: 760px) {
+    .member-practice-session-page .practice-article-panel,
+    .member-practice-page .practice-article-panel {
+      border-width: 40px 44px 56px !important;
+      border-image-width: 40px 44px 56px !important;
+      border-image-source: url('./assets/halloween/card/scroll-night.png') !important;
+      border-image-slice: 11% 13% 16% 13% fill !important;
+    }
   }
 
   .member-practice-session-page .practice-question-card--writing .practice-writing,
