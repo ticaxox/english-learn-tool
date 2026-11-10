@@ -5,7 +5,7 @@ import type { PracticeResult, PracticeSession } from '../api/practice'
 
 const baseSession: PracticeSession = {
   id: 'session-1', practiceType: 'fill_blank', source: 'whole_book', difficulty: null,
-  wordbookId: 'book-1', status: 'generating', questionCount: 3, generationNumber: 1,
+  wordbookId: 'book-1', translationDirection: null, writingTargetWords: null, status: 'generating', questionCount: 3, generationNumber: 1,
   draftVersion: 0, draftAnswers: {}, questions: [], jobStatus: 'running', errorCode: null,
   errorMessage: null, createdAt: '2026-10-23T04:00:00Z', updatedAt: '2026-10-23T04:00:00Z',
 }

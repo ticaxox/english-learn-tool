@@ -401,6 +401,7 @@ def build_challenge_map_dsl(
                 f"- 类型: {NODE_TYPE_LABELS.get(node.node_type, node.node_type)}",
                 f"- 题目类型: {_node_question_type(node)}",
                 f"- 状态: {STATUS_LABELS.get(status, status)}",
+                f"- 星数: {response.stars if response is not None else 0}",
                 f"- 时长: {node.estimated_minutes} 分钟",
                 f"- 说明: {node.description.replace(chr(10), ' ').strip()}",
                 f"- 链接: {link}",

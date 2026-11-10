@@ -17,6 +17,9 @@ import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
 import StudyStatsPanel from '../components/StudyStatsPanel.vue'
 import ProgressCard from '../components/ProgressCard.vue'
+import BadgeWall from '../components/BadgeWall.vue'
+import WeeklyReport from '../components/WeeklyReport.vue'
+import { useGamification } from '../composables/useGamification'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -24,6 +27,8 @@ import { isContractFrozen } from '../api/contract-adapter'
 import { TODAY_STATUS_LABELS, type TodayPlan } from '../types/learning'
 import '../learning.css'
 
+const gamification = useGamification()
+const crumboMood = computed(() => gamification.crumboMood.value)
 const plan = ref<TodayPlan | null>(null)
 const loading = ref(false)
 const error = ref<unknown>(null)
@@ -138,6 +143,7 @@ async function load(createIfMissing = false): Promise<void> {
 
 onMounted(() => {
   void load()
+  void gamification.load()
 })
 </script>
 
@@ -152,7 +158,7 @@ onMounted(() => {
 
     <section v-else-if="error" class="crumb-state-panel" :class="needsActiveWordbook ? 'crumb-empty-state' : 'crumb-error-panel'">
       <div v-if="needsActiveWordbook" class="crumb-empty-note">
-        <CrumboMark size="medium" />
+        <CrumboMark size="medium" :mood="crumboMood" />
         <div>
           <strong>先选一本词书，路线才能开始。</strong>
           <p>选好词书后，今天的任务会自动出现。</p>
@@ -224,6 +230,11 @@ onMounted(() => {
       </section>
 
       <ChallengeView embedded />
+
+      <section class="today-extras">
+        <WeeklyReport />
+        <BadgeWall />
+      </section>
     </template>
   </article>
 </template>

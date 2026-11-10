@@ -244,8 +244,10 @@ void practice.load()
       </section>
 
       <template v-else-if="result">
-        <p v-if="award" class="practice-award" role="status">
-          <span v-if="award.to > award.from">升级到 Lv.{{ award.to }}！</span>
+        <p v-if="award" class="practice-award" :class="{ 'is-levelup': award.to > award.from }" role="status">
+          <span v-if="award.to > award.from" class="practice-award__levelup">
+            升级到 Lv.{{ award.to }}！
+          </span>
           <span>+{{ award.xp }} XP · +{{ award.crumbs }} 碎屑</span>
         </p>
         <PracticeResultView :result="result" :questions="questions" />

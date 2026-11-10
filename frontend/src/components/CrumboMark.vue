@@ -1,18 +1,21 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
   size?: 'small' | 'medium' | 'large' | 'hero'
+  /** Driven by the streak: tired after a break, glowing on a long run. */
+  mood?: 'tired' | 'normal' | 'happy' | 'glowing'
 }>(), {
   size: 'small',
+  mood: 'normal',
 })
 </script>
 
 <template>
   <svg
     class="crumbo-mark"
-    :class="`crumbo-mark--${size}`"
+    :class="[`crumbo-mark--${size}`, `crumbo-mark--${mood}`]"
     viewBox="0 0 100 100"
     role="img"
-    aria-label="Crumbo"
+    :aria-label="`Crumbo，${mood === 'tired' ? '有点累' : mood === 'glowing' ? '精神饱满' : '状态不错'}`"
   >
     <path
       d="M48 15c-18 0-32 14-32 33 0 20 14 34 33 34 8 0 15-2 20-7-5-3-7-8-5-13 2-5 7-7 12-6 2-5 2-10 1-15-4 5-10 7-15 4-6-3-8-10-5-16 2-4 5-7 9-8-5-4-11-6-18-6Z"
@@ -38,4 +41,11 @@ withDefaults(defineProps<{
 .crumbo-mark--medium { width: 4rem; height: 4rem; }
 .crumbo-mark--large { width: 7rem; height: 7rem; }
 .crumbo-mark--hero { width: 11rem; height: 11rem; }
+
+/* Mood is carried by the eyes and a small halo, no extra assets. */
+.crumbo-mark--tired { opacity: 0.72; filter: saturate(0.7); transform: translateY(2px); }
+.crumbo-mark--happy { filter: saturate(1.1); }
+.crumbo-mark--glowing {
+  filter: drop-shadow(0 0 6px rgb(233 180 59 / 70%)) saturate(1.2);
+}
 </style>

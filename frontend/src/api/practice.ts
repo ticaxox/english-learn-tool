@@ -14,7 +14,8 @@ import { ContractError } from './errors'
 
 export type PracticeType = 'fill_blank' | 'reading' | 'translation' | 'writing' | 'mixed'
 export type PracticeSource = 'today_new' | 'today_review' | 'memory_mistakes' | 'whole_book' | 'difficulty'
-export type PracticeDifficulty = 'CET4' | 'CET6' | 'POSTGRAD' | 'IELTS' | 'TOEFL'
+export type PracticeDifficulty = 'GAOKAO' | 'CET4' | 'CET6' | 'POSTGRAD' | 'IELTS' | 'TOEFL'
+export type TranslationDirection = 'en_to_zh' | 'zh_to_en' | 'mixed'
 export type PracticeSessionStatus = 'generating' | 'ready' | 'submitted' | 'failed' | 'cancelled'
 export type PracticeSubmissionStatus = 'scoring' | 'completed' | 'failed'
 export type PracticeQuotaKind = 'coach_messages' | 'question_generation' | 'subjective_grading'
@@ -25,6 +26,8 @@ export interface PracticeCreateInput {
   count: number
   difficulty: PracticeDifficulty | null
   wordbookId: string | null
+  translationDirection?: TranslationDirection | null
+  writingTargetWords?: number | null
 }
 
 export interface PracticeOption {
@@ -58,6 +61,8 @@ export interface PracticeSession {
   source: PracticeSource
   difficulty: PracticeDifficulty | null
   wordbookId: string | null
+  translationDirection: TranslationDirection | null
+  writingTargetWords: number | null
   status: PracticeSessionStatus
   questionCount: number
   generationNumber: number
@@ -208,7 +213,14 @@ const PRACTICE_SOURCES: readonly PracticeSource[] = [
   'whole_book',
   'difficulty',
 ]
-const DIFFICULTIES: readonly PracticeDifficulty[] = ['CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL']
+const DIFFICULTIES: readonly PracticeDifficulty[] = [
+  'GAOKAO',
+  'CET4',
+  'CET6',
+  'POSTGRAD',
+  'IELTS',
+  'TOEFL',
+]
 const SESSION_STATUSES: readonly PracticeSessionStatus[] = ['generating', 'ready', 'submitted', 'failed', 'cancelled']
 const SUBMISSION_STATUSES: readonly PracticeSubmissionStatus[] = ['scoring', 'completed', 'failed']
 const QUOTA_KINDS: readonly PracticeQuotaKind[] = ['coach_messages', 'question_generation', 'subjective_grading']
@@ -343,6 +355,14 @@ export function parsePracticeSession(payload: unknown): PracticeSession {
     source: enumValue(body.source, PRACTICE_SOURCES, context, 'source'),
     difficulty: nullableEnum(body.difficulty, DIFFICULTIES, context, 'difficulty'),
     wordbookId: nullableString(body.wordbook_id, context, 'wordbook_id'),
+    translationDirection: nullableEnum(
+      body.translation_direction,
+      ['en_to_zh', 'zh_to_en', 'mixed'] as const,
+      context,
+      'translation_direction',
+    ),
+    writingTargetWords:
+      typeof body.writing_target_words === 'number' ? body.writing_target_words : null,
     status: enumValue(body.status, SESSION_STATUSES, context, 'status'),
     questionCount: integerValue(body.question_count, context, 'question_count'),
     generationNumber: integerValue(body.generation_number, context, 'generation_number'),
@@ -541,6 +561,8 @@ function serializeCreate(input: PracticeCreateInput): Record<string, unknown> {
     count: input.count,
     difficulty: input.difficulty,
     wordbook_id: input.wordbookId,
+    translation_direction: input.translationDirection ?? null,
+    writing_target_words: input.writingTargetWords ?? null,
   }
 }
 

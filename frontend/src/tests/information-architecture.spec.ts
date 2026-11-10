@@ -127,9 +127,11 @@ describe('T-FE-020 personal information architecture', () => {
     expect(map).toContain('parseChallengeMapDsl')
   })
 
-  it('does not restore legacy organization or notification routes in the production router', () => {
+  it('keeps admin pages behind a guard and leaves notifications out', () => {
     const router = source('../router/index.ts')
-    expect(router).not.toContain("path: 'admin'")
+    // Admin screens exist for administrators only: the route meta is the guard.
+    expect(router).toContain("path: 'admin'")
+    expect(router).toContain('adminOnly: true')
     expect(router).not.toContain("path: 'notifications'")
     expect(router).toContain("path: 'ai'")
     expect(router).toContain('PersonalAiConfigView')

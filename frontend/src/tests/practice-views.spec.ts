@@ -54,6 +54,7 @@ async function mountRoute(component: Parameters<typeof mount>[0], path: string, 
 
 const session: PracticeSession = {
   id: 'session-1', practiceType: 'fill_blank', source: 'today_new', difficulty: null, wordbookId: null,
+  translationDirection: null, writingTargetWords: null,
   status: 'generating', questionCount: 5, generationNumber: 1, draftVersion: 0, draftAnswers: {},
   questions: [], jobStatus: 'queued', errorCode: null, errorMessage: null,
   createdAt: '2026-10-23T04:00:00Z', updatedAt: '2026-10-23T04:00:00Z',
@@ -112,10 +113,20 @@ describe('practice views', () => {
 
   it('offers all four practice types and creates a writing session with one question', async () => {
     const { wrapper, router } = await mountRoute(PracticeHubView, '/practice?type=writing')
-    expect((wrapper.get('#practice-count').element as HTMLSelectElement).value).toBe('1')
+    // Writing has no question-count choice; it always creates one essay.
+    expect(wrapper.find('#practice-count').exists()).toBe(false)
+    expect((wrapper.get('#practice-writing-length').element as HTMLSelectElement).value).toBe('150')
     await wrapper.get('form').trigger('submit')
     await flushPromises()
-    expect(practiceMocks.createPracticeSession).toHaveBeenCalledWith(expect.objectContaining({ practiceType: 'writing', count: 1 }), expect.any(String))
+    expect(practiceMocks.createPracticeSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        practiceType: 'writing',
+        count: 1,
+        writingTargetWords: 150,
+        translationDirection: null,
+      }),
+      expect.any(String),
+    )
     expect(router.currentRoute.value.name).toBe('practice')
     expect(router.currentRoute.value.query.session).toBeTruthy()
   })

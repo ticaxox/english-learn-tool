@@ -337,6 +337,13 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
           <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
           <span class="visually-hidden">{{ placed.node.title }}</span>
+          <span
+            v-if="placed.node.statusKey === 'completed' && placed.node.stars > 0"
+            class="challenge-dsl-stars"
+            :aria-label="`获得 ${placed.node.stars} 颗星`"
+          >
+            {{ '★'.repeat(placed.node.stars) }}
+          </span>
         </DivButton>
 
         <CrumboMark v-if="guide" size="small" class="challenge-dsl-guide" :style="guide" />

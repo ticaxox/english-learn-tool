@@ -23,6 +23,7 @@ export interface GamificationProgress {
   level: LevelProgress
   streak: number
   streakBest: number
+  freezeTokens: number
   activeToday: boolean
   quests: DailyQuest[]
   localDate: string
@@ -40,6 +41,7 @@ export interface GamificationWeekly {
   xp: number
   activeDays: number
   streak: number
+  goals: WeeklyGoal[]
 }
 
 export const QUEST_LABELS: Record<string, string> = {
@@ -84,6 +86,7 @@ export function parseProgress(value: unknown): GamificationProgress {
     },
     streak: num(body.streak),
     streakBest: num(body.streak_best),
+    freezeTokens: num(body.freeze_tokens),
     activeToday: body.active_today === true,
     quests: Array.isArray(body.quests) ? body.quests.map(parseQuest) : [],
     localDate: String(body.local_date ?? ''),
@@ -103,6 +106,18 @@ export function parseWeekly(value: unknown): GamificationWeekly {
     xp: num(body.xp),
     activeDays: num(body.active_days),
     streak: num(body.streak),
+    goals: Array.isArray(body.goals)
+      ? body.goals.map((item) => {
+          const goal = record(item, '周目标')
+          return {
+            key: String(goal.key ?? ''),
+            label: String(goal.label ?? ''),
+            progress: num(goal.progress),
+            target: Math.max(1, num(goal.target, 1)),
+            completed: goal.completed === true,
+          }
+        })
+      : [],
   }
 }
 
@@ -112,4 +127,36 @@ export async function fetchProgress(): Promise<GamificationProgress> {
 
 export async function fetchWeekly(): Promise<GamificationWeekly> {
   return parseWeekly(await apiClient.get('/me/progress/weekly'))
+}
+
+
+export interface Badge {
+  key: string
+  name: string
+  description: string
+  unlocked: boolean
+  unlockedAt: string | null
+}
+
+export interface WeeklyGoal {
+  key: string
+  label: string
+  progress: number
+  target: number
+  completed: boolean
+}
+
+export async function fetchBadges(): Promise<Badge[]> {
+  const body = record(await apiClient.get('/me/progress/badges'), '徽章列表')
+  const items = Array.isArray(body.items) ? body.items : []
+  return items.map((item) => {
+    const badge = record(item, '徽章')
+    return {
+      key: String(badge.key ?? ''),
+      name: String(badge.name ?? ''),
+      description: String(badge.description ?? ''),
+      unlocked: badge.unlocked === true,
+      unlockedAt: typeof badge.unlocked_at === 'string' ? badge.unlocked_at : null,
+    }
+  })
 }

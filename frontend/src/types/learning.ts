@@ -11,11 +11,19 @@
  * instead of a review item.
  */
 
-export type ExamTarget = 'CET4' | 'CET6' | 'POSTGRAD' | 'IELTS' | 'TOEFL'
+export type ExamTarget = 'GAOKAO' | 'CET4' | 'CET6' | 'POSTGRAD' | 'IELTS' | 'TOEFL'
 
-export const EXAM_TARGETS: readonly ExamTarget[] = ['CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL']
+export const EXAM_TARGETS: readonly ExamTarget[] = [
+  'GAOKAO',
+  'CET4',
+  'CET6',
+  'POSTGRAD',
+  'IELTS',
+  'TOEFL',
+]
 
 export const EXAM_TARGET_LABELS: Record<ExamTarget, string> = {
+  GAOKAO: '高考英语',
   CET4: '大学英语四级（CET-4）',
   CET6: '大学英语六级（CET-6）',
   POSTGRAD: '考研英语',

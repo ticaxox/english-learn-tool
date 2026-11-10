@@ -137,7 +137,13 @@ describe('practice API contract', () => {
     expect(url).toBe('/api/v1/practice/sessions')
     expect((init.headers as Headers).get('Idempotency-Key')).toBe('practice-create-key')
     expect(JSON.parse(String(init.body))).toEqual({
-      practice_type: 'fill_blank', source: 'whole_book', count: 3, difficulty: null, wordbook_id: 'book-1',
+      practice_type: 'fill_blank',
+      source: 'whole_book',
+      count: 3,
+      difficulty: null,
+      wordbook_id: 'book-1',
+      translation_direction: null,
+      writing_target_words: null,
     })
   })
 
