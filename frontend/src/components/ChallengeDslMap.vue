@@ -221,7 +221,9 @@ const hasFocus = computed(() => Boolean(focusId.value))
 const guide = computed(() => {
   const placed = focusId.value ? layout.value.byId.get(focusId.value) : null
   if (!placed) return null
-  return { left: `${placed.x + placed.size - 10}px`, top: `${placed.y - 34}px` }
+  // Sit the mascot to the upper-left of the focus node so it never covers the
+  // reward badge on the node itself.
+  return { left: `${placed.x - 26}px`, top: `${placed.y - 30}px` }
 })
 
 interface Edge {

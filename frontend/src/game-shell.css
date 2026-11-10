@@ -446,3 +446,17 @@
 }
 
 .personal-workspace .practice-submit-button:active { transform: translateY(3px); box-shadow: none; }
+
+/* Crumbo's line fills the board's lower left with something worth reading. */
+.personal-workspace .crumb-tip {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: auto;
+  padding: 12px 14px;
+  border: 1.5px dashed var(--game-line, #e8d7bb);
+  border-radius: 14px;
+  background: rgb(255 250 240 / 85%);
+}
+
+.personal-workspace .crumb-tip p { margin: 0; color: var(--ui-muted); font-size: 13px; line-height: 1.5; }

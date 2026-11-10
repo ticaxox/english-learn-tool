@@ -112,6 +112,17 @@ const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? nu
 const ringTask = computed(() => primaryTask.value ?? todayTasks.value[0] ?? null)
 const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
 
+const crumboTip = computed(() => {
+  const remaining = todayTasks.value.filter((task) => !task.done)
+  if (remaining.length === 0) return '今天的任务都完成了，可以再走一圈，也可以明天再来。'
+  const next = remaining[0]
+  const left = Math.max(0, next.target - next.completed)
+  if (next.key === 'due-reviews') return `还差 ${left} 个到期复习，先清掉它们最划算。`
+  if (next.key === 'new-words') return `还有 ${left} 个新词没学，学完今天的词就齐了。`
+  if (next.key === 'learning-minutes') return `再学 ${left} 分钟就攒够今天的时间了。`
+  return `接下来做「${next.title}」。`
+})
+
 async function load(createIfMissing = false): Promise<void> {
   if (!frozen.value) return
   loading.value = true
@@ -204,6 +215,11 @@ onMounted(() => {
               </RouterLink>
             </li>
           </ul>
+
+          <div class="crumb-tip">
+            <CrumboMark size="small" :mood="crumboMood" />
+            <p>{{ crumboTip }}</p>
+          </div>
         </div>
 
         <aside class="crumb-merged-side crumb-today-side">
