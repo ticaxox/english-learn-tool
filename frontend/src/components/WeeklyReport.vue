@@ -53,7 +53,7 @@ onMounted(() => {
           :class="{ 'is-active': day.active }"
           :title="`${day.date}：${day.xp} XP`"
         >
-          <span class="weekly-bars__bar" :style="{ height: `${Math.max(6, Math.round(day.xp / peak * 100))}%` }"></span>
+          <span class="weekly-bars__bar" :style="{ height: `${Math.max(4, Math.round((day.xp / peak) * 80))}px` }"></span>
           <small>{{ weekday(day.date) }}</small>
         </li>
       </ol>

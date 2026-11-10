@@ -4110,15 +4110,18 @@
 }
 
 .personal-workspace .weekly-bars li {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
-  justify-items: center;
-  align-content: end;
+  justify-content: flex-end;
+  align-items: center;
   height: 100%;
 }
 
 .personal-workspace .weekly-bars__bar {
+  display: block;
   width: 100%;
+  flex: 0 0 auto;
   border-radius: 6px 6px 2px 2px;
   background: var(--ui-line);
 }
