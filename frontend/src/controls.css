@@ -4734,3 +4734,207 @@ html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { col
   border-color: #4a7a6a;
   color: #7cf0c4;
 }
+
+/* ------------------------------------------------- wordbook detail dialog */
+
+/* The panel is a page about one book: a heading that names it, the actions,
+ * four figures, then the words. Everything is on one column with the entries
+ * scrolling, so the header never competes with the list. */
+.personal-workspace .wordbook-detail-dialog {
+  display: block;
+  width: min(760px, 94vw);
+  max-height: min(88vh, 820px);
+  padding: 0;
+  overflow-y: auto;
+  border-radius: 20px;
+}
+
+.personal-workspace .wordbook-detail-dialog .dialog-heading {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid var(--ui-line);
+  background: linear-gradient(180deg, var(--g-gold-soft), transparent 120%);
+}
+
+.personal-workspace .wordbook-detail-dialog .dialog-heading .eyebrow {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.personal-workspace .wordbook-detail-dialog .dialog-heading h2 {
+  margin: 0;
+  padding-right: 48px;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+/* The close control belongs in the corner, not in the flow beside the buttons. */
+.personal-workspace .wordbook-detail-dialog .dialog-heading .icon-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Four figures as a strip, not four stacked rows. */
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts > div {
+  display: grid;
+  gap: 2px;
+  padding: 9px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts dt {
+  color: var(--ui-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts dd {
+  margin: 0;
+  color: var(--ui-ink);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-meta {
+  padding: 14px 24px 0;
+}
+
+.personal-workspace .wordbook-detail-dialog .lead {
+  margin: 8px 24px 0;
+  color: var(--ui-muted);
+  font-size: 0.9rem;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 18px 24px 8px;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-heading h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+/* Each word is a line, not a card: the headword on the left, the meaning on
+ * the right, a hairline between them. */
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-list {
+  display: grid;
+  padding: 0 24px;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-list > [role='listitem'] {
+  display: grid;
+  grid-template-columns: minmax(140px, 210px) minmax(0, 1fr);
+  gap: 8px 18px;
+  padding: 13px 0;
+  border-bottom: 1px dashed var(--ui-line);
+  /* The old list drew each word as a tinted card; a row with a hairline is
+   * quieter and lets the eye run down the words. */
+  border-radius: 0;
+  background: none;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-list > [role='listitem']:last-child {
+  border-bottom: 0;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-word {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+  align-self: start;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-word strong {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-word > span {
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+}
+
+/* The folded form of the headword is bookkeeping, not part of the entry. */
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-normalized {
+  display: none;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-definition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  align-items: baseline;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-definition .part-of-speech {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--g-green-soft);
+  color: var(--g-green-edge);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-definition p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-heading .count-pill {
+  flex: 0 0 auto;
+}
+
+.personal-workspace .wordbook-detail-dialog > .pagination {
+  padding: 12px 24px 20px;
+  border-top: 1px solid var(--ui-line);
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .wordbook-detail-dialog .wordbook-detail-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .personal-workspace .wordbook-detail-dialog .wordbook-entry-list > [role='listitem'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
