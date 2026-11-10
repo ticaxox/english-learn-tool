@@ -380,3 +380,69 @@
 
 .levelup-title { margin: 2px 0 0; font-size: 16px; font-weight: 800; }
 .levelup-hint { margin: 10px 0 0; color: var(--ui-muted); font-size: 11px; }
+
+/* ------------------------------------------------------- sidebar + nav */
+
+/* The active destination gets a small level-plate look instead of a flat tint. */
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active {
+  border-color: var(--game-ink, #2b1d0f);
+  background: linear-gradient(180deg, #fffdf6, #f7ebd6);
+  box-shadow: 0 4px 0 rgb(43 29 15 / 14%);
+  color: var(--game-ink, #2b1d0f);
+  font-weight: 900;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link svg { color: currentColor; }
+
+/* Mobile bottom nav reads as four chunky buttons. */
+.personal-workspace .member-mobile-nav a {
+  border-radius: 14px;
+  transition: transform 0.12s ease, background 0.18s ease;
+}
+
+.personal-workspace .member-mobile-nav a:active { transform: scale(0.94); }
+
+/* The brand mark is the game's crest: a soft glow behind the cat. */
+.personal-workspace .workspace-brand-mark {
+  filter: drop-shadow(0 2px 0 rgb(43 29 15 / 12%));
+}
+
+/* ------------------------------------------------------------ empty states */
+
+.personal-workspace .crumb-empty-note {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 22px 24px;
+  border: 2px dashed var(--game-line, #e8d7bb);
+  border-radius: 18px;
+  background: var(--game-paper, #fffaf0);
+}
+
+.personal-workspace .crumb-empty-note strong { font-size: 16px; font-weight: 900; }
+
+/* ------------------------------------------------- practice type pills */
+
+/* Each exercise type is a small tile: icon plate, label, colour per type. */
+.personal-workspace .practice-type-pill {
+  border-radius: 16px;
+  box-shadow: 0 3px 0 rgb(43 29 15 / 8%);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.15s ease;
+}
+
+.personal-workspace .practice-type-pill:hover { transform: translateY(-2px); }
+
+.personal-workspace .practice-type-pill.is-active {
+  box-shadow: 0 4px 0 rgb(43 29 15 / 18%);
+  transform: translateY(-1px);
+}
+
+.personal-workspace .practice-type-pill:active { transform: translateY(1px); box-shadow: none; }
+
+/* ---------------------------------------------------------- submit plate */
+
+.personal-workspace .practice-submit-button {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.personal-workspace .practice-submit-button:active { transform: translateY(3px); box-shadow: none; }
