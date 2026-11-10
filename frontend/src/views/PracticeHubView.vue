@@ -15,7 +15,7 @@ import PracticeTaskList from '../components/PracticeTaskList.vue'
 
 import '../practice.css'
 import ShelfPicker from '../components/ShelfPicker.vue'
-import { practiceBooks } from '../assets/halloween'
+import { illustration, practiceBooks } from '../assets/halloween'
 
 const router = useRouter()
 const route = useRoute()
@@ -290,7 +290,7 @@ onMounted(() => {
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
           <div v-if="creating" class="practice-generation-state is-loading" role="status" aria-live="polite">
-            <span class="spinner" aria-hidden="true"></span>
+            <img class="practice-generation-art" :src="illustration.brewing.day" alt="" />
             <div><strong>正在生成练习</strong><span>正在读取素材并准备题目，请稍候。</span></div>
           </div>
           <div v-else-if="createError" class="practice-generation-state is-error" role="status">

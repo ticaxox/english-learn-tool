@@ -38,6 +38,8 @@ export const practiceBooks: PracticeArt = {
   writing: { day: writingDay, night: writingNight },
 }
 
+import wordbookCoverDay from './card/wordbook-cover-day.png'
+import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
 import cardFrameNight from './card/card-frame-night.png'
 import cardBack from './card/card-back.png'
@@ -48,6 +50,16 @@ export const questionCard = {
   back: cardBack,
 } as const
 
+/** A wordbook cover with nothing printed on it; the title and badges sit on top. */
+export const wordbookCover: ThemeMode = {
+  day: wordbookCoverDay,
+  night: wordbookCoverNight,
+}
+
+import brewingDay from './char/brewing-day.png'
+import brewingNight from './char/brewing-night.png'
+import emptySearchDay from './char/empty-search-day.png'
+import emptySearchNight from './char/empty-search-night.png'
 import crumboDay from './char/crumbo-day.png'
 import crumboNight from './char/crumbo-night.png'
 import emptyDay from './char/empty-day.png'
@@ -60,6 +72,10 @@ export const illustration = {
   crumbo: { day: crumboDay, night: crumboNight },
   empty: { day: emptyDay, night: emptyNight },
   result: { day: resultDay, night: resultNight },
+  /** Crumbo at the cauldron while a set of questions is being generated. */
+  brewing: { day: brewingDay, night: brewingNight },
+  /** Crumbo with a magnifier for an empty mistakes list. */
+  emptySearch: { day: emptySearchDay, night: emptySearchNight },
 } as const
 
 import badgesDay from './icon/badges-day.png'

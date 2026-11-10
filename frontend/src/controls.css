@@ -4077,3 +4077,14 @@
   background: none;
   box-shadow: none;
 }
+
+
+.practice-generation-art {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.mistakes-empty { display: grid; justify-items: center; gap: 0.4rem; text-align: center; }
+.mistakes-empty__art { width: min(180px, 52%); height: auto; margin-bottom: 0.4rem; }
