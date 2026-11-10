@@ -73,23 +73,34 @@ function pick(module: ShelfModule): void {
   /* The board is drawn by .shelf-board so the books overlap it like real books. */
 }
 
-.shelf-book {
+/* The book is the object. `.module-card` in learning.css still draws a rounded
+   tinted plate, so this has to out-specify it — otherwise the book ends up
+   sitting inside a second rounded rectangle. */
+.module-card.shelf-book,
+.module-card.shelf-book:hover,
+.module-card.shelf-book:active,
+.module-card.shelf-book:focus-visible {
   position: relative;
   display: grid;
   justify-items: center;
   gap: 0.3rem;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: none;
+  box-shadow: none;
+  color: inherit;
+  text-align: center;
   cursor: pointer;
   perspective: 900px;
-  transition: transform 220ms ease;
+  transform: none;
+  transition: none;
 }
 
-.shelf-book:focus-visible {
+.module-card.shelf-book:focus-visible {
   outline: 3px solid var(--g-blue, #1cb0f6);
-  outline-offset: 6px;
-  border-radius: 12px;
+  outline-offset: 8px;
+  border-radius: 14px;
 }
 
 .shelf-book__body {

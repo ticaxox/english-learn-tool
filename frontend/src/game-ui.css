@@ -622,11 +622,15 @@
 
 /* --------------------------------------------------------- study surfaces */
 
-.personal-workspace .study-card {
-  border: 2px solid var(--ui-line-strong) !important;
-  border-radius: 24px !important;
-  background: var(--ui-surface) !important;
-  box-shadow: 0 6px 0 rgb(59 42 26 / 9%) !important;
+/* The card owns its own faces, so this plate is gone: a card inside a rounded
+   panel read as a box in a box. Only the padding reset stays. */
+.personal-workspace .study-card,
+.personal-workspace .memory-main-card .study-card {
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 
 .personal-workspace .study-badge {
@@ -4187,17 +4191,19 @@
 .personal-workspace .memory-main-card .choice-list { gap: 18px 32px; }
 
 
-/* Study card keeps its own surface and inner spacing on the memory page. */
+/* The trainer draws its own card face; this layer only centres it on the page.
+   It used to add a second plate, which put a rounded card inside a rounded
+   panel — two boxes for one object. */
 .personal-workspace .memory-page .memory-main-card .study-card {
   display: grid;
   width: 100%;
   margin-inline: auto;
-  min-height: 200px;
-  padding: 30px 36px;
-  border: 2px solid var(--ui-line-strong) !important;
-  border-radius: 24px !important;
-  background: var(--ui-surface) !important;
-  box-shadow: 0 6px 0 rgb(59 42 26 / 9%) !important;
+  min-height: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
   align-content: center;
 }
 

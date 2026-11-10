@@ -4066,3 +4066,14 @@
 .coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0 auto 8px; }
 .practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
 .practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }
+
+/* While a question is on screen the card must sit on the page, not inside a
+   panel: the practice area drops its plate so the card is the only object. */
+.personal-workspace .memory-main-card,
+.personal-workspace .memory-main-card.is-picker {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}

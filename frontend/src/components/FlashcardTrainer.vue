@@ -246,12 +246,19 @@ function rate(rating: FlashcardRating): void {
   text-align: center;
 }
 
-.study-card {
+/* The card IS the object. The old `.study-card` plate (white fill, 24px radius)
+   was leaving the card sitting inside a second rounded rectangle. */
+.study-card,
+.personal-workspace .study-card,
+.personal-workspace .memory-main-card .study-card,
+.personal-workspace .study-card:not(.is-revealed) {
   display: block;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: none;
   box-shadow: none;
+  text-align: center;
 }
 
 .study-card:not(.is-revealed) { cursor: pointer; }
