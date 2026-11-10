@@ -154,3 +154,21 @@ export const SPELLING_QUESTION = {
   remaining: 8,
   blanks: [{ index: 4, prefilled: false, character: null }],
 } as never
+
+
+/** The player bar's payload: level, streak, crumbs and today's quests. */
+export const PROGRESS = {
+  xp: 1480,
+  crumbs: 260,
+  level: { level: 6, title: '拾屑人', xp_into_level: 180, xp_for_next_level: 460 },
+  streak: 9,
+  streak_best: 12,
+  active_today: true,
+  freeze_tokens: 1,
+  local_date: '2026-11-11',
+  quests: [
+    { key: 'review_due', progress: 14, target: 20, completed: false, reward_crumbs: 30 },
+    { key: 'practice_one', progress: 1, target: 1, completed: true, reward_crumbs: 40 },
+    { key: 'challenge_done', progress: 0, target: 1, completed: false, reward_crumbs: 60 },
+  ],
+}

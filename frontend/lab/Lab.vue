@@ -7,6 +7,8 @@ import { computed, ref } from 'vue'
 import ChallengeDslMap from '../src/components/ChallengeDslMap.vue'
 import WeeklyReport from '../src/components/WeeklyReport.vue'
 import BadgeWall from '../src/components/BadgeWall.vue'
+import GameHud from '../src/components/GameHud.vue'
+import LevelUpOverlay from '../src/components/LevelUpOverlay.vue'
 import ShelfPicker from '../src/components/ShelfPicker.vue'
 import ThemeSwitch from '../src/components/ThemeSwitch.vue'
 import WordbookShelfCard from '../src/components/WordbookShelfCard.vue'
@@ -27,6 +29,7 @@ const round = ref(0)
 const cleared = ref(3)
 const slow = ref(false)
 const detailId = ref<string | null>(null)
+const showLevelUp = ref(false)
 const selectedBook = computed(() => (detailId.value ? (SHELF as Array<{ id: string }>).find((item) => item.id === detailId.value) ?? null : null))
 
 function replay(): void {
@@ -68,6 +71,12 @@ function toggleSlow(): void {
     </header>
 
     <main class="lab-body">
+      <section class="lab-block">
+        <p class="lab-caption">玩家条 · 等级、经验、碎屑、连击、今日任务</p>
+        <GameHud />
+        <button type="button" class="lab-button" @click="showLevelUp = true">看升级庆祝</button>
+      </section>
+
       <section class="lab-block">
         <p class="lab-caption">书架 · 三种练法是三本书（悬停/聚焦时封面翻出来）</p>
         <ShelfPicker :modules="MODULES" :enabled="MODULES" :labels="LABELS" @pick="() => {}" />

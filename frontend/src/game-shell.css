@@ -17,6 +17,20 @@
 
 /* --------------------------------------------------------------- HUD */
 
+/* The HUD's own tokens follow the theme, so the bar relights with the page. */
+html[data-theme='night'] .personal-workspace {
+  --game-ink: #e8dcf5;
+  --game-paper: #251a44;
+  --game-shadow: 0 6px 0 rgb(8 3 20 / 55%);
+}
+
+html[data-theme='night'] .personal-workspace .game-hud {
+  border-color: #4d3f70;
+  background:
+    radial-gradient(circle at 92% -20%, rgb(255 200 0 / 16%), transparent 12rem),
+    linear-gradient(180deg, #2b1e4d, #211639);
+}
+
 .personal-workspace .game-hud {
   position: relative;
   display: grid;
@@ -133,6 +147,20 @@
 .personal-workspace .hud-stat span:last-child { color: var(--ui-muted); font-size: 10px; }
 .personal-workspace .hud-stat svg { width: 15px; height: 15px; color: var(--game-gold-deep); }
 .personal-workspace .hud-stat--streak.is-hot { border-color: rgb(232 89 12 / 45%); background: rgb(255 243 235 / 90%); }
+/* The stat chips are white plates by day; on the night plate they turn to
+ * glass, or their cream ink would disappear into them. */
+html[data-theme='night'] .personal-workspace .hud-stat {
+  border-color: #4d3f70;
+  background: rgb(255 255 255 / 8%);
+}
+
+html[data-theme='night'] .personal-workspace .hud-stat strong { color: var(--ui-ink); }
+
+html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
+  border-color: rgb(255 150 60 / 55%);
+  background: rgb(255 150 60 / 14%);
+}
+
 .personal-workspace .hud-flame { font-size: 14px; line-height: 1; }
 .personal-workspace .hud-stat--streak.is-hot .hud-flame { animation: hud-flicker 1.8s ease-in-out infinite; }
 
@@ -460,3 +488,10 @@
 }
 
 .personal-workspace .crumb-tip p { margin: 0; color: var(--ui-muted); font-size: 13px; line-height: 1.5; }
+
+.personal-workspace .hud-flame {
+  width: 15px;
+  height: 15px;
+  fill: var(--g-orange);
+  flex: 0 0 auto;
+}

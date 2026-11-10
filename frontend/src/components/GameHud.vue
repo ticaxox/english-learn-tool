@@ -32,7 +32,8 @@ const questTotal = computed(() => (progress.value?.quests ?? []).length)
 
 onMounted(async () => {
   if (!progress.value) await gamification.load()
-  if (xpValue.value) countUp(xpValue.value, progress.value?.xp ?? 0)
+  // Count the XP inside this level: the bar and the denominator show the same thing.
+  if (xpValue.value) countUp(xpValue.value, level.value?.xpIntoLevel ?? 0)
   const stats = root.value ? Array.from(root.value.querySelectorAll('.hud-stat')) : []
   popIn(stats, { y: 10, stagger: 0.07 })
   breathe(crumboRef.value)
@@ -74,7 +75,7 @@ watch(
         <span>碎屑</span>
       </li>
       <li class="hud-stat hud-stat--streak" :class="{ 'is-hot': (progress?.streak ?? 0) > 0 }">
-        <span class="hud-flame" aria-hidden="true">🔥</span>
+        <svg class="hud-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6c3.4 4.4 6.4 6.8 6.4 10.8A6.4 6.4 0 0 1 12 20a6.4 6.4 0 0 1-6.4-6.6C5.6 9.4 8.6 7 12 2.6Z" /></svg>
         <strong>{{ progress?.streak ?? 0 }}</strong>
         <span>天连续</span>
       </li>
