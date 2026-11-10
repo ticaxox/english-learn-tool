@@ -1427,6 +1427,19 @@ html[data-theme='night'] .personal-workspace .coach-action-notice {
   color: #ffcf9a;
 }
 
+/* Dialogs keep a plate of their own at night; the ink is already cream, so a
+ * cream panel would swallow it. */
+html[data-theme='night'] .personal-workspace .dialog-card,
+html[data-theme='night'] .personal-workspace .dialog-panel {
+  background: var(--ui-surface);
+  border-color: var(--ui-line);
+  color: var(--ui-ink);
+}
+
+html[data-theme='night'] .personal-workspace .dialog-card :is(dt, dd, h2, h3, strong) {
+  color: var(--ui-ink);
+}
+
 /* Secondary copy that carried its own warm brown ink. */
 html[data-theme='night'] .personal-workspace :is(
   .crumb-today-note,
@@ -1496,6 +1509,13 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 
 /* The cover is the object: the drawn binding, and nothing printed on it but
  * the book's own name. */
+/* One binding for every book while the art set has only one: the cover's own
+ * colour sits under the artwork so the old per-type tints cannot show through
+ * the painted smoke. */
+.personal-workspace .wordbook-grid .wordbook-cover {
+  background: #1f4535 !important;
+}
+
 .personal-workspace .wordbook-grid .wordbook-cover {
   position: relative;
   display: block;
@@ -1524,28 +1544,20 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   object-fit: fill;
 }
 
+/* The name is written on the cover, top and centre, with nothing behind it:
+ * the shadow is what carries it over the leather. */
 .personal-workspace .wordbook-cover__name {
   position: absolute;
-  right: 14%;
-  bottom: 13%;
-  left: 10%;
+  top: 11%;
+  right: 17%;
+  left: 11%;
   z-index: 1;
-  padding: 4px 6px;
-  border-radius: 5px;
-  background: rgb(20 14 8 / 48%);
   color: #fbf2da;
-  font-size: clamp(0.92rem, 1.6vw, 1.08rem);
+  font-size: clamp(0.95rem, 1.7vw, 1.12rem);
   font-weight: 900;
-  line-height: 1.3;
+  line-height: 1.32;
   text-align: center;
-  text-shadow: 0 1px 0 rgb(0 0 0 / 35%);
-}
-
-/* A private wordbook is bound in parchment, so its name sits on a light band. */
-.personal-workspace .wordbook-card--private .wordbook-cover__name {
-  background: rgb(255 250 238 / 82%);
-  color: #4a3208;
-  text-shadow: none;
+  text-shadow: 0 2px 3px rgb(0 0 0 / 60%), 0 0 12px rgb(0 0 0 / 40%);
 }
 
 /* The book in use is the one that glows, and the one with the bookmark in it. */

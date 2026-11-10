@@ -2,23 +2,19 @@
 /**
  * One wordbook, as a book on the shelf.
  *
- * The card carries no buttons and no badges: the binding says what kind of book
- * it is — a private wordbook is bound in the pumpkin-vine paper, an
- * organisation one in green leather — and the name is written straight on the
- * cover. Everything else (the entries, and the actions on them) lives in the
- * dialog this opens.
+ * The card carries no buttons and no badges: the name is written straight on
+ * the cover, top and centre. One binding stands in for every book until the
+ * art set grows more of them. Everything else — the entries, and the actions
+ * on them — lives in the dialog this opens.
  */
-import { computed } from 'vue'
 import ArtImage from './ArtImage.vue'
-import { questionCard, wordbookCover } from '../assets/halloween'
+import { wordbookCover } from '../assets/halloween'
 import type { Wordbook } from '../api/wordbooks'
 
-const props = defineProps<{ book: Wordbook }>()
+defineProps<{ book: Wordbook }>()
 const emit = defineEmits<{ detail: [] }>()
 
-const cover = computed(() =>
-  props.book.visibility === 'private' ? questionCard.frame : wordbookCover,
-)
+
 </script>
 
 <template>
@@ -33,7 +29,7 @@ const cover = computed(() =>
     @keydown.space.prevent="emit('detail')"
   >
     <span class="wordbook-cover">
-      <ArtImage class="wordbook-cover__art" :set="cover" />
+      <ArtImage class="wordbook-cover__art" :set="wordbookCover" />
       <span v-if="book.is_active" class="wordbook-cover__bookmark" aria-hidden="true"></span>
       <span class="wordbook-cover__name">{{ book.name }}</span>
     </span>

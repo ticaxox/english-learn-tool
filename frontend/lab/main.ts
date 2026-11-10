@@ -6,7 +6,7 @@ import { createApp } from 'vue'
 import '../src/composables/useTheme'
 import DivButton from '../src/components/DivButton.vue'
 import Lab from './Lab.vue'
-import { BADGES, WEEKLY } from './data'
+import { BADGES, WEEKLY, bookDetail } from './data'
 import { gsap } from '../src/composables/useMotion'
 import '../src/style.css'
 import '../src/cookie-theme.css'
@@ -33,6 +33,8 @@ window.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response>
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
   if (url.includes('/me/progress/weekly')) return reply(WEEKLY)
   if (url.includes('/me/progress/badges')) return reply(BADGES)
+  const book = url.match(/\/wordbooks\/([^?]+)/)
+  if (book) return reply(bookDetail(decodeURIComponent(book[1])))
   return passthrough(input, init)
 }
 

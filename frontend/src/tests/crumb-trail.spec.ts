@@ -68,19 +68,6 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(wrapper.get('.wordbook-cover__name').text()).toBe('Harbor Reader')
   })
 
-  it('binds a private wordbook differently from a shared one, without a word', async () => {
-    const shared = mount(WordbookShelfCard, { props: { book } })
-    const privateBook = mount(WordbookShelfCard, {
-      props: { book: { ...book, visibility: 'private', is_active: false } },
-    })
-
-    const sharedArt = shared.get('.wordbook-cover__art img').attributes('src') ?? ''
-    const privateArt = privateBook.get('.wordbook-cover__art img').attributes('src') ?? ''
-    expect(sharedArt).toContain('wordbook-cover')
-    expect(privateArt).toContain('card-frame')
-    expect(privateArt).not.toBe(sharedArt)
-  })
-
   it('marks the wordbook in use with a bookmark, not a label', () => {
     const active = mount(WordbookShelfCard, { props: { book } })
     const idle = mount(WordbookShelfCard, { props: { book: { ...book, is_active: false } } })

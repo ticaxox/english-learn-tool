@@ -3,7 +3,7 @@
  * Motion lab: the three gamification surfaces mounted with sample payloads so
  * the animations can be judged by eye, without a backend.
  */
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import ChallengeDslMap from '../src/components/ChallengeDslMap.vue'
 import WeeklyReport from '../src/components/WeeklyReport.vue'
 import BadgeWall from '../src/components/BadgeWall.vue'
@@ -11,18 +11,10 @@ import ShelfPicker from '../src/components/ShelfPicker.vue'
 import ThemeSwitch from '../src/components/ThemeSwitch.vue'
 import WordbookShelfCard from '../src/components/WordbookShelfCard.vue'
 import ArtImage from '../src/components/ArtImage.vue'
+import WordbookDetailDialog from '../src/components/WordbookDetailDialog.vue'
 import { illustration } from '../src/assets/halloween'
 import { gsap } from '../src/composables/useMotion'
-import { mapDsl } from './data'
-
-const SHELF = [
-  { id: '1', name: '四级核心词汇', description: '按真题频率排序', entry_count: 1200, version: 3, visibility: 'organization', status: 'ready', is_active: true, created_at: '2026-11-01T10:00:00', updated_at: '2026-11-09T10:00:00' },
-  { id: '2', name: '考研阅读高频', description: '十年真题里反复出现的词', entry_count: 860, version: 2, visibility: 'organization', status: 'ready', is_active: false, created_at: '2026-11-02T10:00:00', updated_at: '2026-11-08T10:00:00' },
-  { id: '3', name: '我的错词本', description: '', entry_count: 86, version: 1, visibility: 'private', status: 'ready', is_active: false, created_at: '2026-11-03T10:00:00', updated_at: '2026-11-08T10:00:00' },
-  { id: '4', name: '六级听力场景词', description: '校园、租房、面试三组场景', entry_count: 430, version: 1, visibility: 'organization', status: 'ready', is_active: false, created_at: '2026-11-04T10:00:00', updated_at: '2026-11-07T10:00:00' },
-  { id: '5', name: '雅思写作替换词', description: '', entry_count: 152, version: 1, visibility: 'private', status: 'ready', is_active: false, created_at: '2026-11-05T10:00:00', updated_at: '2026-11-06T10:00:00' },
-  { id: '6', name: '商务英语 800', description: '邮件与会议场景', entry_count: 800, version: 4, visibility: 'organization', status: 'ready', is_active: false, created_at: '2026-11-06T10:00:00', updated_at: '2026-11-09T10:00:00' },
-] as never[]
+import { SHELF, mapDsl } from './data'
 
 const MODULES = ['flashcard', 'choice', 'spelling'] as const
 const LABELS = { flashcard: '翻卡', choice: '选择', spelling: '拼写' }
@@ -30,6 +22,8 @@ const LABELS = { flashcard: '翻卡', choice: '选择', spelling: '拼写' }
 const round = ref(0)
 const cleared = ref(3)
 const slow = ref(false)
+const detailId = ref<string | null>(null)
+const selectedBook = computed(() => (detailId.value ? (SHELF as Array<{ id: string }>).find((item) => item.id === detailId.value) ?? null : null))
 
 function replay(): void {
   round.value += 1
@@ -83,11 +77,22 @@ function toggleSlow(): void {
               v-for="book in SHELF"
               :key="book.id"
               :book="book"
-              @detail="() => {}"
+              @detail="detailId = book.id"
             />
           </div>
         </div>
       </section>
+
+      <WordbookDetailDialog
+        v-if="selectedBook"
+        :wordbook-id="selectedBook.id"
+        :book="selectedBook as never"
+        :can-activate="true"
+        :can-export="true"
+        :can-delete="true"
+        :activating="false"
+        @close="detailId = null"
+      />
 
       <section class="lab-block">
         <p class="lab-caption">插画 · 同一构图的两次生成，切换时交叉淡出</p>

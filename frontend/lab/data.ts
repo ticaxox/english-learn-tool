@@ -86,3 +86,42 @@ export function mapDsl(done: number): string {
   )
   return lines.join('\n')
 }
+
+/** One shelf of books, and the entries behind the first one. */
+export const SHELF = [
+  { id: '1', name: '四级核心词汇', description: '按真题频率排序', entry_count: 1200, version: '3', visibility: 'organization', status: 'ready', is_active: true, created_at: '2026-11-01T10:00:00', updated_at: '2026-11-09T10:00:00' },
+  { id: '2', name: '考研阅读高频', description: '十年真题里反复出现的词', entry_count: 860, version: '2', visibility: 'organization', status: 'ready', is_active: false, created_at: '2026-11-02T10:00:00', updated_at: '2026-11-08T10:00:00' },
+  { id: '3', name: '我的错词本', description: '', entry_count: 86, version: '1', visibility: 'private', status: 'ready', is_active: false, created_at: '2026-11-03T10:00:00', updated_at: '2026-11-08T10:00:00' },
+  { id: '4', name: '六级听力场景词', description: '校园、租房、面试三组场景', entry_count: 430, version: '1', visibility: 'organization', status: 'ready', is_active: false, created_at: '2026-11-04T10:00:00', updated_at: '2026-11-07T10:00:00' },
+  { id: '5', name: '雅思写作替换词', description: '', entry_count: 152, version: '1', visibility: 'private', status: 'ready', is_active: false, created_at: '2026-11-05T10:00:00', updated_at: '2026-11-06T10:00:00' },
+  { id: '6', name: '商务英语 800', description: '邮件与会议场景', entry_count: 800, version: '4', visibility: 'organization', status: 'ready', is_active: false, created_at: '2026-11-06T10:00:00', updated_at: '2026-11-09T10:00:00' },
+] as never[]
+
+const WORDS: Array<[string, string, string, string]> = [
+  ['harbor', '/ˈhɑːbə/', 'v.', '怀有（想法、感情）'],
+  ['commute', '/kəˈmjuːt/', 'v.', '通勤'],
+  ['landmark', '/ˈlændmɑːk/', 'n.', '地标；里程碑'],
+  ['subsidy', '/ˈsʌbsədi/', 'n.', '补贴，津贴'],
+  ['thrive', '/θraɪv/', 'v.', '兴旺，茁壮成长'],
+  ['sustainable', '/səˈsteɪnəbl/', 'adj.', '可持续的'],
+]
+
+export const BOOK_ENTRIES = WORDS.map(([headword, phonetic, pos, zh], index) => ({
+  id: `entry-${index + 1}`,
+  headword,
+  normalized_headword: headword.toLowerCase(),
+  phonetic,
+  definitions: [{ part_of_speech: pos, definition_en: null, definition_zh: zh, examples: [] }],
+}))
+
+/** The wordbook detail payload the API would return for one book. */
+export function bookDetail(id: string): unknown {
+  const book = (SHELF as Array<{ id: string }>).find((item) => item.id === id) ?? (SHELF as Array<{ id: string }>)[0]
+  return {
+    wordbook: book,
+    entries: BOOK_ENTRIES,
+    total_entries: BOOK_ENTRIES.length,
+    offset: 0,
+    limit: 50,
+  }
+}
