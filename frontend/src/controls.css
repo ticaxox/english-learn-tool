@@ -2558,35 +2558,102 @@
   stroke-linejoin: round;
 }
 
-/* The current stop breathes once per cycle instead of carrying a label. */
+.personal-workspace .challenge-dsl-card__face {
+  display: grid;
+  place-items: center;
+}
+
+/* The current stop is alive: two rings lap it and the emblem breathes. */
+.challenge-dsl-card.is-focus::before,
 .challenge-dsl-card.is-focus::after {
   position: absolute;
-  inset: -8px;
-  border: 3px solid rgb(95 179 106 / 55%);
+  inset: -7px;
+  border: 3px solid rgb(95 179 106 / 60%);
   border-radius: 50%;
   content: "";
   pointer-events: none;
-  animation: challenge-focus-ring 2.4s ease-out infinite;
+  animation: challenge-focus-ring 2.6s ease-out infinite;
+}
+
+.challenge-dsl-card.is-focus::before { animation-delay: 1.3s; }
+
+.personal-workspace .challenge-dsl-card.is-focus {
+  animation: challenge-focus-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes challenge-focus-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgb(95 179 106 / 30%)); }
+  50% { filter: drop-shadow(0 0 10px rgb(95 179 106 / 60%)); }
+}
+
+.personal-workspace .challenge-dsl-card.is-focus .challenge-dsl-card__face {
+  animation: challenge-focus-breathe 2.6s ease-in-out infinite;
 }
 
 @keyframes challenge-focus-ring {
-  0% { transform: scale(0.92); opacity: 0.85; }
-  70% { transform: scale(1.14); opacity: 0; }
-  100% { opacity: 0; }
+  0% { transform: scale(0.88); opacity: 0.9; }
+  75% { transform: scale(1.26); opacity: 0; }
+  100% { transform: scale(1.26); opacity: 0; }
 }
 
+@keyframes challenge-focus-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Crumbo perches on top of the stop it stands on, clear of the reward tag. */
 .challenge-dsl-guide {
   position: absolute;
   z-index: 3;
+  display: grid;
   width: 42px;
   height: 42px;
+  place-items: center;
   pointer-events: none;
-  filter: drop-shadow(0 2px 0 rgb(59 42 26 / 12%));
+  /* Stands on the rim of the stop: bottom of the mascot meets the node's edge. */
+  transform: translate(-50%, calc(-100% - 28px));
+  filter: drop-shadow(0 3px 0 rgb(59 42 26 / 16%));
+}
+
+.challenge-dsl-guide .crumbo-mark { animation: challenge-guide-bob 2.4s ease-in-out infinite; }
+
+@keyframes challenge-guide-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-3px) rotate(2deg); }
+}
+
+/* Crumbs left behind by the walker, so the leg reads as just-walked. */
+.challenge-dsl-crumb {
+  position: absolute;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe9a8, #d9a400);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 55%);
+  pointer-events: none;
+}
+
+/* Landing on a stop: the node takes the weight, the reward tag pops. */
+.personal-workspace .challenge-dsl-card.is-landed .challenge-dsl-reward {
+  animation: challenge-reward-pop 620ms cubic-bezier(0.2, 1.7, 0.4, 1) both;
+}
+
+@keyframes challenge-reward-pop {
+  0% { transform: scale(0.5); }
+  55% { transform: scale(1.28); }
+  100% { transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .personal-workspace .challenge-dsl-card { transition: none; }
+  .challenge-dsl-card.is-focus::before,
   .challenge-dsl-card.is-focus::after { animation: none; opacity: 0; }
+  .personal-workspace .challenge-dsl-card.is-focus,
+  .personal-workspace .challenge-dsl-card.is-focus .challenge-dsl-card__face,
+  .challenge-dsl-guide .crumbo-mark,
+  .personal-workspace .challenge-dsl-card.is-landed .challenge-dsl-reward { animation: none; }
 }
 
 @media (max-width: 720px) {
@@ -4084,6 +4151,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 18px;
+  align-items: start;
   margin-top: 18px;
 }
 
@@ -4091,47 +4159,178 @@
 .personal-workspace .badge-wall {
   display: grid;
   gap: 12px;
+  align-content: start;
   padding: 18px;
   border: 1px solid var(--ui-line);
   border-radius: 14px;
   background: var(--ui-surface);
 }
 
+.personal-workspace .weekly-report__head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.personal-workspace .weekly-report__head strong { font-size: 1.05rem; }
+
+.personal-workspace .weekly-report__streak {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 9px 3px 6px;
+  border-radius: 999px;
+  background: var(--g-orange-soft);
+  color: #9a4a00;
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.personal-workspace .weekly-report__streak svg {
+  width: 15px;
+  height: 15px;
+  fill: var(--g-orange);
+  stroke: none;
+}
+
+/* Seven candles: height is the day's XP, a flame means the day was studied. */
 .personal-workspace .weekly-bars {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  gap: 8px;
+  gap: 6px;
   align-items: end;
-  height: 96px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.personal-workspace .weekly-bars li {
+.personal-workspace .weekly-day {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  justify-content: flex-end;
+  gap: 3px;
   align-items: center;
-  height: 100%;
+  min-width: 0;
 }
 
-.personal-workspace .weekly-bars__bar {
-  display: block;
+.personal-workspace .weekly-day__slot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   width: 100%;
-  flex: 0 0 auto;
-  border-radius: 6px 6px 2px 2px;
-  background: var(--ui-line);
+  height: 100px;
+  position: relative;
 }
 
-.personal-workspace .weekly-bars li.is-active .weekly-bars__bar { background: var(--ui-forest, #2f6e33); }
-.personal-workspace .weekly-bars small { color: var(--ui-muted); font-size: 0.7rem; }
+.personal-workspace .weekly-day__candle {
+  position: relative;
+  width: 16px;
+  border-radius: 3px 3px 2px 2px;
+  background: linear-gradient(180deg, #ddd0b2, #c3b494);
+  box-shadow: inset -5px 0 0 rgb(53 36 15 / 9%), 0 0 0 1px rgb(104 82 52 / 18%);
+  transform: scaleY(1);
+  transform-origin: 50% 100%;
+}
+
+/* Cold wax still gets a wick, so an unlit day reads as "not yet". */
+.personal-workspace .weekly-day__candle::before {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 2px;
+  height: 5px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: #6d6152;
+  content: "";
+}
+
+/* A wax drip down one side, so the candles are not identical tubes. */
+.personal-workspace .weekly-day__candle::after {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 5px;
+  height: 9px;
+  border-radius: 0 0 4px 4px;
+  background: rgb(255 255 255 / 45%);
+  content: "";
+}
+
+.personal-workspace .weekly-day.is-active .weekly-day__candle {
+  background: linear-gradient(180deg, #ffeeb8, #eeb655);
+  box-shadow: inset -5px 0 0 rgb(160 100 10 / 12%), 0 0 0 1px rgb(168 112 20 / 26%);
+}
+
+.personal-workspace .weekly-day.is-active .weekly-day__slot::after {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 46px;
+  height: 56px;
+  margin-left: -23px;
+  background: radial-gradient(ellipse at 50% 82%, rgb(255 190 60 / 30%), transparent 70%);
+  content: "";
+  pointer-events: none;
+}
+
+.personal-workspace .weekly-day__flame {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 10px;
+  height: 15px;
+  margin: 0 0 3px -5px;
+  border-radius: 50% 50% 50% 50% / 66% 66% 34% 34%;
+  background: radial-gradient(ellipse at 50% 78%, #fffbe0 0 20%, #ffc800 46%, #ff8a00 78%, #ef5f00 100%);
+  box-shadow: 0 0 11px 3px rgb(255 150 0 / 50%);
+  transform-origin: 50% 100%;
+  animation: candle-flicker 1.9s ease-in-out infinite alternate;
+}
+
+@keyframes candle-flicker {
+  from { transform: scale(0.97, 1.03) rotate(-2deg); opacity: 0.94; }
+  to { transform: scale(1.04, 0.96) rotate(3deg); opacity: 1; }
+}
+
+.personal-workspace .weekly-day__lamp {
+  position: relative;
+  color: var(--ui-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.personal-workspace .weekly-day.is-today .weekly-day__lamp {
+  color: var(--ui-ink);
+  font-weight: 900;
+}
+
+/* Today's dot hangs outside the flow so every candle keeps the same floor. */
+.personal-workspace .weekly-day.is-today .weekly-day__lamp::after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin: 3px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--g-orange);
+  content: "";
+}
+
+.personal-workspace .weekly-day__xp {
+  color: #a4917a;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
 
 .personal-workspace .weekly-goals {
   display: grid;
-  gap: 6px;
+  gap: 7px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -4139,53 +4338,275 @@
 
 .personal-workspace .weekly-goals li {
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
+
+.personal-workspace .weekly-goals__label { min-width: 0; }
 
 .personal-workspace .weekly-goals__check {
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 1.5px solid var(--ui-line);
   border-radius: 50%;
-  color: var(--ui-forest, #2f6e33);
-  font-size: 0.7rem;
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .weekly-goals__check svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--g-green-edge);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.4);
 }
 
 .personal-workspace .weekly-goals li.is-done .weekly-goals__check {
-  border-color: var(--ui-forest, #2f6e33);
-  background: var(--ui-forest-soft, #e3f0e1);
+  border-color: #2f9c47;
+  background: var(--g-green-soft);
 }
 
-.personal-workspace .weekly-goals small { color: var(--ui-muted); }
+.personal-workspace .weekly-goals li.is-done .weekly-goals__check svg {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms ease, transform 260ms cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+/* Completed goals land like a stamp once the candles are lit. */
+.personal-workspace .weekly-goals li.is-done.is-stamping .weekly-goals__check {
+  animation: goal-stamp 460ms cubic-bezier(0.2, 1.5, 0.35, 1) both;
+}
+
+@keyframes goal-stamp {
+  0% { transform: scale(1.75) rotate(-24deg); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.personal-workspace .weekly-goals small {
+  color: var(--ui-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .weekly-day__flame { animation: none; }
+  .personal-workspace .weekly-goals li.is-done.is-stamping .weekly-goals__check { animation: none; }
+  .personal-workspace .weekly-goals li.is-done .weekly-goals__check svg { transition: none; }
+}
+
+.personal-workspace .badge-wall__head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.personal-workspace .badge-wall__head strong { font-size: 1.1rem; }
+
+/* A thin rail under the count, so "3 of 12" also reads as a distance. */
+.personal-workspace .badge-wall__rail {
+  flex: 1 1 60px;
+  max-width: 180px;
+  height: 8px;
+  border: 2px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-surface-subtle);
+  overflow: hidden;
+}
+
+.personal-workspace .badge-wall__rail span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--g-gold), var(--g-orange));
+  transition: width 700ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
 
 .personal-workspace .badge-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(106px, 1fr));
+  gap: 6px 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Every badge is a struck medal; nothing is boxed in a card frame. */
 .personal-workspace .badge {
   display: grid;
   gap: 2px;
   justify-items: center;
-  padding: 10px 8px;
-  border: 1px dashed var(--ui-line);
-  border-radius: 12px;
+  padding: 4px 2px 6px;
   text-align: center;
 }
 
-.personal-workspace .badge.is-locked { opacity: 0.45; }
-.personal-workspace .badge__mark { color: #d97706; font-size: 1.2rem; }
-.personal-workspace .badge strong { font-size: 0.82rem; }
-.personal-workspace .badge small { color: var(--ui-muted); font-size: 0.7rem; line-height: 1.3; }
+.personal-workspace .badge__medal {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  perspective: 760px;
+}
+
+.personal-workspace .badge__turn {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.personal-workspace .badge__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.personal-workspace .badge__face--enamel { transform: rotateY(180deg); }
+
+.personal-workspace .badge__face svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Unearned: the same die pressed in cold stone, emblem dimmed to a cut-out. */
+.personal-workspace .badge__face--stone .badge__seal {
+  fill: #ded7c8;
+  stroke: #c7bda9;
+  stroke-width: 1.6;
+}
+
+.personal-workspace .badge__face--stone .badge__plate {
+  fill: #ebe5d8;
+  stroke: #d3c9b6;
+  stroke-width: 1.4;
+}
+
+.personal-workspace .badge__face--stone .badge__glyph {
+  fill: none;
+  stroke: #9d9078;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Earned: enamel. One accent per feat family, cut with a cream plate. */
+.personal-workspace .badge__face--enamel .badge__seal {
+  fill: var(--badge-accent, var(--g-gold));
+  stroke: rgb(53 36 15 / 22%);
+  stroke-width: 1.6;
+}
+
+.personal-workspace .badge__face--enamel .badge__plate {
+  fill: #fff8e8;
+  stroke: rgb(53 36 15 / 16%);
+  stroke-width: 1.4;
+}
+
+.personal-workspace .badge__face--enamel .badge__glyph {
+  fill: none;
+  stroke: #35240f;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .badge__face--enamel .badge__rivet { fill: #fff8e8; opacity: 0.85; }
+
+.personal-workspace .badge__medal::after {
+  position: absolute;
+  inset: 30% 6% -8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, rgb(59 42 26 / 24%), transparent 72%);
+  content: "";
+  z-index: 0;
+}
+
+/* A single glint crosses the enamel as it lands face-up. */
+.personal-workspace .badge__shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(115deg, transparent 34%, rgb(255 255 255 / 78%) 48%, transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.personal-workspace .badge__lock {
+  position: absolute;
+  right: 4px;
+  bottom: 6px;
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 50%;
+  background: #6d6152;
+  box-shadow: 0 2px 0 rgb(53 36 15 / 22%);
+  fill: none;
+  stroke: #f6efe2;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .badge__name {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .badge__desc {
+  color: var(--ui-muted);
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.personal-workspace .badge__foot {
+  color: var(--badge-accent, var(--g-gold-edge));
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+/* Locked medals sit back: no colour, no shadow lift, no glint. */
+.personal-workspace .badge.is-locked .badge__foot { color: #9b8d77; }
+.personal-workspace .badge.is-locked .badge__name { color: #7d6f5b; }
+.personal-workspace .badge.is-locked .badge__medal { filter: saturate(0.25); }
+
+.personal-workspace .badge.is-unlocked .badge__medal {
+  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+.personal-workspace .badge.is-unlocked:hover .badge__medal { transform: translateY(-4px) rotate(-2deg); }
+
+/* The glint fires once the medal has finished turning over. */
+.personal-workspace .badge.is-unlocked.is-flipped .badge__shine {
+  animation: badge-glint 900ms 120ms ease-out both;
+}
+
+@keyframes badge-glint {
+  0% { opacity: 0; transform: translateX(-44%) scale(0.9); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(44%) scale(0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .badge.is-unlocked .badge__turn .badge__shine { animation: none; opacity: 0; }
+  .personal-workspace .badge.is-unlocked .badge__medal,
+  .personal-workspace .badge-wall__rail span { transition: none; }
+}
 
 @media (max-width: 900px) {
   .personal-workspace .today-extras { grid-template-columns: minmax(0, 1fr); }

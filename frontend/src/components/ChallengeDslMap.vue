@@ -10,7 +10,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
-import { drawPaths, popIn } from '../composables/useMotion'
+import { bump, drawPaths, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
 const props = defineProps<{ dsl: string }>()
 const emit = defineEmits<{ select: [id: string] }>()
@@ -59,6 +59,8 @@ onUnmounted(() => {
   query?.removeEventListener?.('change', syncOrientation)
   resizeObserver?.disconnect()
   resizeObserver = null
+  walkTween?.kill()
+  walkTween = null
 })
 
 const map = computed(() => parseChallengeMapDsl(props.dsl))
@@ -196,19 +198,6 @@ const verticalLayout = computed<Layout>(() => {
 
 const layout = computed(() => (vertical.value ? verticalLayout.value : horizontalLayout.value))
 
-watch(layout, () => {
-  nextTick(() => {
-    if (!boardRef.value) return
-    drawPaths(boardRef.value.querySelector('.challenge-dsl-links'))
-    popIn(Array.from(boardRef.value.querySelectorAll('.challenge-dsl-card')), {
-      y: 12,
-      scale: 0.8,
-      stagger: 0.05,
-    })
-  })
-})
-
-
 /** The stop the learner should act on next. Locked stops only get the number. */
 const focusId = computed(() => {
   const nodes = map.value.nodes.filter((node) => !node.optional)
@@ -218,17 +207,223 @@ const focusId = computed(() => {
 })
 
 const hasFocus = computed(() => Boolean(focusId.value))
-const guide = computed(() => {
-  const placed = focusId.value ? layout.value.byId.get(focusId.value) : null
+
+/** Where Crumbo stands, in canvas pixels. Animated so it can walk the trail. */
+const guidePos = ref<{ x: number; y: number } | null>(null)
+const walking = ref(false)
+let walkTween: gsap.core.Tween | null = null
+
+/**
+ * The stop the learner was on last time the map was on screen. This module
+ * keeps it for the session, so coming back from a finished exercise still
+ * shows the mascot walking the leg just earned instead of finding it teleported.
+ */
+let lastStop: { id: string; at: number } | null = null
+const RETURN_WINDOW_MS = 10 * 60 * 1000
+
+function centerOf(id: string): { x: number; y: number } | null {
+  const placed = layout.value.byId.get(id)
   if (!placed) return null
-  // Sit the mascot to the upper-left of the focus node so it never covers the
-  // reward badge on the node itself.
-  return { left: `${placed.x - 26}px`, top: `${placed.y - 30}px` }
+  return { x: placed.x + placed.size / 2, y: placed.y + placed.size / 2 }
+}
+
+function cardElement(id: string): HTMLElement | null {
+  return boardRef.value?.querySelector<HTMLElement>(`[data-node="${id}"]`) ?? null
+}
+
+/** Keep the stop that matters on screen when the trail is wider than the card. */
+function keepFocusInSight(smooth: boolean): void {
+  const track = trackRef.value
+  const placed = focusId.value ? layout.value.byId.get(focusId.value) : null
+  if (!track || !placed) return
+  const center = placed.x + placed.size / 2
+  const left = Math.max(0, center - track.clientWidth / 2)
+  if (Math.abs(track.scrollLeft - left) < 4) return
+  if (!smooth || !motionAllowed()) {
+    track.scrollLeft = left
+    return
+  }
+  try {
+    track.scrollTo({ left, behavior: 'smooth' })
+  } catch {
+    track.scrollLeft = left
+  }
+}
+
+/** Drop one crumb behind the walker; it fades on its own. */
+function dropCrumb(x: number, y: number): void {
+  const canvas = boardRef.value?.querySelector('.challenge-dsl-canvas')
+  if (!canvas) return
+  const crumb = document.createElement('span')
+  crumb.className = 'challenge-dsl-crumb'
+  crumb.style.left = `${x}px`
+  crumb.style.top = `${y}px`
+  canvas.appendChild(crumb)
+  gsap.to(crumb, {
+    opacity: 0,
+    scale: 0.4,
+    duration: 0.75,
+    delay: 0.1,
+    ease: 'power2.out',
+    onComplete: () => crumb.remove(),
+  })
+}
+
+/**
+ * Point on the leg at `t`. The mascot travels centre to centre — the drawn
+ * line runs edge to edge — so it steps off and onto the stops it stands on.
+ */
+function pointOn(edge: Edge, start: { x: number; y: number }, end: { x: number; y: number }, t: number): { x: number; y: number } {
+  const u = 1 - t
+  const [c1, c2] = edge.controls
+  return {
+    x: u * u * u * start.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * end.x,
+    y: u * u * u * start.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * end.y,
+  }
+}
+
+function land(id: string, travelled: boolean): void {
+  const card = cardElement(id)
+  if (!card) return
+  bump(card, 1.12)
+  card.classList.add('is-landed')
+  window.setTimeout(() => card.classList.remove('is-landed'), 900)
+  if (travelled) {
+    const reward = card.querySelector('.challenge-dsl-reward')
+    if (reward) bump(reward, 1.6)
+  }
+}
+
+/**
+ * Walk the trail from one stop to the next instead of teleporting.
+ * The leg's gold is drawn in step with the mascot, so the trail reads as
+ * "you just came this way".
+ */
+function walkTo(fromId: string, toId: string): void {
+  const target = centerOf(toId)
+  if (!target) return
+  walkTween?.kill()
+  walkTween = null
+
+  const edge = edges.value.find((item) => item.id === `${fromId}->${toId}`)
+  const start = centerOf(fromId)
+  walking.value = false
+  if (!edge || !start || !motionAllowed() || !guidePos.value) {
+    // The stop jumped (two nodes finished at once) — set down, do not walk.
+    guidePos.value = target
+    land(toId, Boolean(edge))
+    return
+  }
+  walking.value = true
+
+  const leg = boardRef.value?.querySelector<SVGPathElement>(`[data-edge="${edge.id}"]`)
+  const duration = gsap.utils.clamp(0.55, 1.05, edge.length / 320)
+  if (leg) {
+    gsap.fromTo(leg, { drawSVG: '0%' }, { drawSVG: '100%', duration, ease: 'power1.inOut' })
+  }
+
+  const state = { t: 0 }
+  const crumbs = [0.18, 0.38, 0.58, 0.78]
+  let dropped = 0
+  walkTween = gsap.to(state, {
+    t: 1,
+    duration,
+    ease: 'power1.inOut',
+    onUpdate: () => {
+      const point = pointOn(edge, start, target, state.t)
+      // A small hop arc keeps the walk from looking like a slide.
+      guidePos.value = { x: point.x, y: point.y - Math.sin(state.t * Math.PI) * 12 }
+      if (dropped < crumbs.length && state.t >= crumbs[dropped]) {
+        dropCrumb(point.x, point.y)
+        dropped += 1
+      }
+    },
+    onComplete: () => {
+      guidePos.value = target
+      walkTween = null
+      walking.value = false
+      land(toId, true)
+    },
+  })
+}
+
+// Stand on the current stop, and walk there whenever the stop moves forward.
+watch(
+  focusId,
+  (next, previous) => {
+    if (!next) {
+      guidePos.value = null
+      return
+    }
+    const remembered = lastStop
+    lastStop = { id: next, at: Date.now() }
+    const from = previous && previous !== next
+      ? previous
+      : remembered && remembered.id !== next && Date.now() - remembered.at < RETURN_WINDOW_MS
+        ? remembered.id
+        : null
+    if (from && layout.value.byId.has(from)) {
+      // Start the mascot on the stop it left, then let it walk over. On the
+      // first render the board is not in the DOM yet, so wait one tick for the
+      // leg and the nodes to exist before measuring them.
+      guidePos.value = centerOf(from) ?? centerOf(next)
+      walking.value = true
+      const start = () => {
+        walkTo(from, next)
+        keepFocusInSight(true)
+      }
+      if (previous) start()
+      else void nextTick(start)
+      return
+    }
+    guidePos.value = centerOf(next)
+    nextTick(() => keepFocusInSight(false))
+  },
+  { immediate: true },
+)
+
+/**
+ * The board's own watcher. The entrance only replays when the geometry really
+ * changed — a finished stop re-derives the same positions and must not pop
+ * every card again under the walking mascot.
+ */
+let layoutKey = ''
+
+watch(layout, () => {
+  const key = [
+    vertical.value ? 'v' : 'h',
+    layout.value.width,
+    layout.value.height,
+    ...layout.value.list.map((placed) => `${placed.node.id}:${placed.x},${placed.y},${placed.size}`),
+  ].join('|')
+  if (key !== layoutKey && !walking.value) {
+    layoutKey = key
+    nextTick(() => {
+      if (!boardRef.value) return
+      drawPaths(boardRef.value.querySelector('.challenge-dsl-links'))
+      popIn(Array.from(boardRef.value.querySelectorAll('.challenge-dsl-card')), {
+        y: 12,
+        scale: 0.8,
+        stagger: 0.05,
+      })
+    })
+  }
+  layoutKey = key
+
+  // Never leave the mascot floating between stops after a resize.
+  if (walking.value || !focusId.value) return
+  guidePos.value = centerOf(focusId.value)
+  keepFocusInSight(false)
 })
 
 interface Edge {
   id: string
   path: string
+  /** Geometry kept alongside the path so the mascot can walk it exactly. */
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+  controls: [{ x: number; y: number }, { x: number; y: number }]
+  length: number
   classes: Record<string, boolean>
 }
 
@@ -244,19 +439,40 @@ const edges = computed<Edge[]>(() => {
       const parentCenterY = parent.y + parent.size / 2
       const childCenterX = child.x + child.size / 2
       const childCenterY = child.y + child.size / 2
-      let path: string
-      if (vertical.value) {
-        path = node.optional
-          ? `M ${parentCenterX} ${parent.y + parent.size} C ${parentCenterX} ${parent.y + parent.size + 20}, ${childCenterX} ${child.y - 20}, ${childCenterX} ${child.y}`
-          : `M ${parentCenterX} ${parent.y + parent.size} C ${parentCenterX} ${parent.y + parent.size + 44}, ${childCenterX} ${child.y - 44}, ${childCenterX} ${child.y}`
-      } else {
-        path = node.optional
-          ? `M ${parentCenterX} ${parent.y + parent.size} C ${parentCenterX} ${parent.y + parent.size + BRANCH_GAP / 2}, ${childCenterX} ${child.y - BRANCH_GAP / 2}, ${childCenterX} ${child.y}`
-          : `M ${parent.x + parent.size} ${parentCenterY} C ${parent.x + parent.size + 46} ${parentCenterY}, ${child.x - 46} ${childCenterY}, ${child.x} ${childCenterY}`
+      const from = {
+        x: vertical.value ? parentCenterX : parent.x + parent.size,
+        y: vertical.value ? parent.y + parent.size : parentCenterY,
       }
+      const to = {
+        x: vertical.value ? childCenterX : child.x,
+        y: vertical.value ? child.y : childCenterY,
+      }
+      let controls: [{ x: number; y: number }, { x: number; y: number }]
+      if (vertical.value) {
+        const lift = node.optional ? 20 : 44
+        controls = [
+          { x: parentCenterX, y: parent.y + parent.size + lift },
+          { x: childCenterX, y: child.y - lift },
+        ]
+      } else if (node.optional) {
+        controls = [
+          { x: parentCenterX, y: parent.y + parent.size + BRANCH_GAP / 2 },
+          { x: childCenterX, y: child.y - BRANCH_GAP / 2 },
+        ]
+      } else {
+        controls = [
+          { x: parent.x + parent.size + 46, y: parentCenterY },
+          { x: child.x - 46, y: childCenterY },
+        ]
+      }
+      const path = `M ${from.x} ${from.y} C ${controls[0].x} ${controls[0].y}, ${controls[1].x} ${controls[1].y}, ${to.x} ${to.y}`
       result.push({
         id: `${parentId}->${node.id}`,
         path,
+        from,
+        to,
+        controls,
+        length: Math.hypot(to.x - from.x, to.y - from.y),
         classes: {
           // A leg already walked is gold even when its far stop is still open.
           'is-done': node.statusKey === 'completed' || parent.node.statusKey === 'completed',
@@ -328,6 +544,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           <path
             v-for="edge in edges"
             :key="edge.id"
+            :data-edge="edge.id"
             :d="edge.path"
             :class="edge.classes"
           />
@@ -339,23 +556,26 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           type="button"
           class="challenge-dsl-card"
           :class="cardClasses(placed.node)"
+          :data-node="placed.node.id"
           :style="{ left: `${placed.x}px`, top: `${placed.y}px`, width: `${placed.size}px`, height: `${placed.size}px` }"
           :title="placed.node.title"
           :aria-label="`${placed.node.title}，${placed.node.typeLabel}，${placed.node.questionType}，${placed.node.statusLabel}，${placed.node.minutes} 分钟`"
           @click="emit('select', placed.node.id)"
         >
-          <svg
-            v-if="placed.node.statusKey === 'completed'"
-            class="challenge-dsl-check"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path d="m5 12.5 4.5 4.5L19 7.5" />
-          </svg>
-          <AppIcon v-else-if="isBoss(placed.node)" name="star" />
-          <AppIcon v-else-if="placed.node.optional" name="spark" />
-          <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
-          <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
+          <span class="challenge-dsl-card__face">
+            <svg
+              v-if="placed.node.statusKey === 'completed'"
+              class="challenge-dsl-check"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="m5 12.5 4.5 4.5L19 7.5" />
+            </svg>
+            <AppIcon v-else-if="isBoss(placed.node)" name="star" />
+            <AppIcon v-else-if="placed.node.optional" name="spark" />
+            <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
+            <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
+          </span>
           <span class="visually-hidden">{{ placed.node.title }}</span>
           <span
             v-if="nodeReward(placed.node) > 0"
@@ -374,7 +594,12 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           </span>
         </DivButton>
 
-        <CrumboMark v-if="guide" size="small" class="challenge-dsl-guide" :style="guide" />
+        <CrumboMark
+          v-if="guidePos"
+          size="small"
+          class="challenge-dsl-guide"
+          :style="{ left: `${guidePos.x}px`, top: `${guidePos.y}px` }"
+        />
       </div>
       </div>
     </div>
