@@ -4110,6 +4110,9 @@
 
 /* The slab itself: 44px band, flat middle fills with the stone colour. */
 .personal-workspace .practice-question-card--rune {
+  /* Matches the slab's stone centre: the fallback before the image lands, and
+     the surface a contrast check reads. */
+  background: #2a2148 !important;
   border-style: solid;
   border-width: 40px;
   border-image-source: var(--rune-slab);
