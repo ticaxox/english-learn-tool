@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
@@ -20,6 +20,7 @@ import {
 } from '../api/practice'
 import PracticeTopBar from '../components/PracticeTopBar.vue'
 import { fetchProgress } from '../api/progress'
+import { crumbBurst, popIn } from '../composables/useMotion'
 import '../practice.css'
 
 const props = withDefaults(defineProps<{ sessionId?: string; embedded?: boolean }>(), { embedded: false })
@@ -156,6 +157,10 @@ async function submit(): Promise<void> {
           from: before.level.level,
           to: after.level.level,
         }
+        // Let the result render, then pop the line and throw a crumb burst.
+        await nextTick()
+        popIn(document.querySelector('.practice-award'), { y: 10, scale: 0.94 })
+        if (xp > 0) crumbBurst(document.querySelector('.practice-award'))
       }
     }
   }

@@ -14,6 +14,7 @@ import './information-architecture.css'
 import './personal-ui.css'
 import './game-ui.css'
 import './controls.css'
+import './game-shell.css'
 
 // Swap surfaces before the router is built, so its history base is right.
 redirectForViewport()

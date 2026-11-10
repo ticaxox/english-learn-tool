@@ -6,7 +6,7 @@
  * only renders what the server returned and forwards learner actions with
  * idempotency keys. Heartbeats run while a session is open.
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -22,6 +22,7 @@ import { isApiError } from '../api/errors'
 import { useMemorySession } from '../composables/useMemorySession'
 import { useStudyHeartbeat } from '../composables/useStudyHeartbeat'
 import { useToast } from '../composables/useToast'
+import { crumbBurst, shake } from '../composables/useMotion'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import {
   MEMORY_MODULES,
@@ -151,6 +152,7 @@ async function resume(): Promise<void> {
 async function rateFlashcard(questionId: string, rating: 'again' | 'good'): Promise<void> {
   await session.rateFlashcard(questionId, rating)
   heartbeat.markInteraction()
+  if (rating === 'good') crumbBurst(document.querySelector('.memory-main-card'), 8)
 }
 
 interface WrongCard {
@@ -175,6 +177,8 @@ async function answerChoice(questionId: string, optionId: string): Promise<void>
   const feedback = await session.answerChoice(questionId, optionId)
   heartbeat.markInteraction()
   if (feedback?.gradedCorrect === false) {
+    await nextTick()
+    shake(document.querySelector('.choice-list'))
     wrongCard.value = {
       word: feedback.correctAnswer ?? '',
       phonetic: question?.kind === 'choice' ? question.phonetic : null,
@@ -193,6 +197,8 @@ async function answerSpelling(questionId: string, answer: string): Promise<void>
   const feedback = await session.answerSpelling(questionId, answer)
   heartbeat.markInteraction()
   if (feedback?.gradedCorrect === false) {
+    await nextTick()
+    shake(document.querySelector('.study-card'))
     wrongCard.value = {
       word: feedback.correctAnswer ?? '',
       phonetic: question?.kind === 'spelling' ? question.phonetic : null,

@@ -6,10 +6,11 @@
  * linear table. The path is drawn from the same fixed geometry the CSS uses,
  * so connectors stay attached without measuring the DOM.
  */
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
+import { drawPaths, popIn } from '../composables/useMotion'
 
 const props = defineProps<{ dsl: string }>()
 const emit = defineEmits<{ select: [id: string] }>()
@@ -31,6 +32,7 @@ const V_WIDTH = 320
 
 const vertical = ref(false)
 const trackRef = ref<HTMLElement | null>(null)
+const boardRef = ref<HTMLElement | null>(null)
 const trackWidth = ref(0)
 let query: MediaQueryList | null = null
 let resizeObserver: ResizeObserver | null = null
@@ -192,6 +194,19 @@ const verticalLayout = computed<Layout>(() => {
 
 const layout = computed(() => (vertical.value ? verticalLayout.value : horizontalLayout.value))
 
+watch(layout, () => {
+  nextTick(() => {
+    if (!boardRef.value) return
+    drawPaths(boardRef.value.querySelector('.challenge-dsl-links'))
+    popIn(Array.from(boardRef.value.querySelectorAll('.challenge-dsl-card')), {
+      y: 12,
+      scale: 0.8,
+      stagger: 0.05,
+    })
+  })
+})
+
+
 /** The stop the learner should act on next. Locked stops only get the number. */
 const focusId = computed(() => {
   const nodes = map.value.nodes.filter((node) => !node.optional)
@@ -294,6 +309,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
     </header>
 
     <div ref="trackRef" class="challenge-dsl-track">
+      <div ref="boardRef" class="challenge-dsl-board">
       <div
         class="challenge-dsl-canvas"
         :style="{ width: `${layout.width}px`, height: `${layout.height}px` }"
@@ -347,6 +363,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
         </DivButton>
 
         <CrumboMark v-if="guide" size="small" class="challenge-dsl-guide" :style="guide" />
+      </div>
       </div>
     </div>
   </section>

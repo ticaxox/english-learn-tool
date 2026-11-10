@@ -17,6 +17,7 @@ import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
 import StudyStatsPanel from '../components/StudyStatsPanel.vue'
 import ProgressCard from '../components/ProgressCard.vue'
+import GameHud from '../components/GameHud.vue'
 import BadgeWall from '../components/BadgeWall.vue'
 import WeeklyReport from '../components/WeeklyReport.vue'
 import { useGamification } from '../composables/useGamification'
@@ -169,6 +170,8 @@ onMounted(() => {
     </section>
 
     <template v-else-if="plan">
+      <GameHud />
+
       <section class="crumb-today-board crumb-trail-board crumb-merged">
         <div class="crumb-merged-main">
           <span class="crumb-eyebrow">今日学习 · 今日任务</span>

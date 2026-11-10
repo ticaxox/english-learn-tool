@@ -169,7 +169,10 @@ function submit(): void {
           v-else
           :ref="(element) => setInputRef(element as Element | null, blank.index)"
           class="spelling-cell"
-          :class="{ 'spelling-cell--active': grid.activeIndex.value === blank.index }"
+          :class="{
+              'spelling-cell--active': grid.activeIndex.value === blank.index,
+              'is-filled': Boolean(grid.values.value[blank.index]),
+            }"
           type="text"
           inputmode="text"
           autocomplete="off"
