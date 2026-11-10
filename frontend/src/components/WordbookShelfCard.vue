@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import ArtImage from './ArtImage.vue'
+import { wordbookCover } from '../assets/halloween'
 import AppIcon from './AppIcon.vue'
 import type { Wordbook } from '../api/wordbooks'
 
@@ -61,6 +63,7 @@ const coverTone = computed(() => {
         ? 'background-color:#244b64; background-image:radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem)'
         : 'background-color:var(--forest); background-image:radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem)'"
     >
+      <ArtImage class="wordbook-cover__art" :set="wordbookCover" />
       <template v-if="!compact">
         <span class="wordbook-spine">WHISKER PRESS</span>
         <div class="wordbook-card-topline">
