@@ -154,11 +154,13 @@ function submit(): void {
 </script>
 
 <template>
-  <section class="study-card" aria-labelledby="spelling-definition">
-
-    <h2 id="spelling-definition" class="study-card__prompt" tabindex="-1">{{ props.question.definition }}</h2>
-    <p v-if="props.question.phonetic" class="study-card__phonetic">{{ props.question.phonetic }}</p>
-    <p class="study-card__hint">{{ blankLabel }}</p>
+  <section class="study-card study-card--spelling" aria-labelledby="spelling-definition">
+    <div class="spell-head">
+      <span class="spell-head__eyebrow">按提示拼写</span>
+      <h2 id="spelling-definition" class="spell-head__prompt" tabindex="-1">{{ props.question.definition }}</h2>
+      <p v-if="props.question.phonetic" class="spell-head__phonetic">{{ props.question.phonetic }}</p>
+      <p class="spell-head__hint">{{ blankLabel }}</p>
+    </div>
 
     <div class="spelling-grid" role="group" aria-label="按字母顺序填写单词">
       <template v-for="blank in props.question.blanks" :key="blank.index">
@@ -194,3 +196,109 @@ function submit(): void {
     </div>
   </section>
 </template>
+
+<style scoped>
+.study-card--spelling {
+  display: grid;
+  gap: 1.6rem;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.spell-head {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.spell-head__eyebrow {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #a08a6a;
+}
+
+.spell-head__prompt {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.4rem, 3.6vw, 2rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: #2f2013;
+  max-width: 34ch;
+}
+
+.spell-head__phonetic {
+  margin: 0;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.94rem;
+  color: #7a6448;
+}
+
+.spell-head__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #9d8663;
+}
+
+/* Letter slots sit on the table like tiles, so each one reads as a cell to fill. */
+.spelling-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.spelling-cell {
+  display: grid;
+  place-items: center;
+  width: clamp(2.4rem, 6vw, 3.1rem);
+  height: clamp(2.9rem, 7vw, 3.7rem);
+  padding: 0;
+  border: 2px solid #3b2a1a;
+  border-radius: 10px;
+  background: #fffdf6;
+  box-shadow: 0 4px 0 #d8c3a0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  font-weight: 700;
+  color: #2f2013;
+  text-align: center;
+  text-transform: lowercase;
+  transition: transform 110ms ease, box-shadow 110ms ease, border-color 140ms ease;
+}
+
+.spelling-cell--prefilled {
+  border-color: #c9b492;
+  border-style: dashed;
+  background: #f6ecd8;
+  color: #8a7457;
+  box-shadow: 0 4px 0 #e0d0b2;
+}
+
+.spelling-cell--active {
+  border-color: #1f8a30;
+  background: #f0fdf2;
+  box-shadow: 0 4px 0 #9ed4a8, 0 0 0 3px rgb(31 138 48 / 18%);
+  transform: translateY(-2px);
+}
+
+.spelling-cell:focus-visible {
+  outline: none;
+  border-color: #1cb0f6;
+  box-shadow: 0 4px 0 #8fd0ee, 0 0 0 3px rgb(28 176 246 / 22%);
+}
+
+.spelling-cell:disabled { opacity: 0.6; }
+
+@media (prefers-reduced-motion: reduce) {
+  .spelling-cell { transition: none; }
+}
+</style>

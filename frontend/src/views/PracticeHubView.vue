@@ -24,6 +24,8 @@ import PracticeTaskList from '../components/PracticeTaskList.vue'
 import GameHud from '../components/GameHud.vue'
 
 import '../practice.css'
+import ShelfPicker from '../components/ShelfPicker.vue'
+import { illustration, practiceBooks } from '../assets/halloween'
 
 const router = useRouter()
 const route = useRoute()
@@ -46,6 +48,9 @@ async function loadMemoryConfig(): Promise<void> {
 function memoryEnabled(module: MemoryModule): boolean {
   return memoryConfig.value ? memoryConfig.value[module].enabled : true
 }
+
+/** The shelf needs the list, not a predicate; default open until config lands. */
+const enabledMemoryModules = computed(() => MEMORY_MODULES.filter(memoryEnabled))
 
 function startMemory(module: MemoryModule): void {
   void router.push({ name: 'practice', query: { module } })
@@ -232,23 +237,12 @@ onMounted(() => {
     <template v-else>
       <GameHud />
 
-      <div class="module-grid memory-action-grid practice-memory-grid">
-        <DivButton
-          v-for="module in MEMORY_MODULES"
-          :key="module"
-          class="module-card memory-action-card"
-          :class="[`memory-action-card--${module}`, { 'is-disabled': !memoryEnabled(module) }]"
-          type="button"
-          :disabled="!memoryEnabled(module)"
-          @click="startMemory(module)"
-        >
-          <span class="memory-action-icon"><AppIcon :name="module === 'spelling' ? 'star' : module === 'choice' ? 'cards' : 'book'" /></span>
-          <span class="memory-action-copy">
-            <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
-          </span>
-          <AppIcon :name="memoryEnabled(module) ? 'arrow' : 'lock'" />
-        </DivButton>
-      </div>
+      <ShelfPicker
+        :modules="MEMORY_MODULES"
+        :enabled="enabledMemoryModules"
+        :labels="MEMORY_MODULE_LABELS"
+        @pick="startMemory"
+      />
 
       <div class="practice-hub-layout">
       <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">
@@ -265,7 +259,13 @@ onMounted(() => {
               type="button"
               @click="chooseType(option.key)"
             >
-              <AppIcon :name="typeIcons[option.key]" />
+              <img
+                v-if="practiceBooks[option.key]"
+                class="practice-type-pill__art"
+                :src="practiceBooks[option.key].day"
+                alt=""
+              />
+              <AppIcon v-else :name="typeIcons[option.key]" />
               <span class="practice-type-pill__label">{{ option.label }}</span>
             </DivButton>
           </div>
@@ -336,7 +336,7 @@ onMounted(() => {
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
           <div v-if="creating" class="practice-generation-state is-loading" role="status" aria-live="polite">
-            <span class="spinner" aria-hidden="true"></span>
+            <img class="practice-generation-art" :src="illustration.brewing.day" alt="" />
             <div><strong>正在生成练习</strong><span>正在读取素材并准备题目，请稍候。</span></div>
           </div>
           <div v-else-if="createError" class="practice-generation-state is-error" role="status">

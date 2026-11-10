@@ -16,6 +16,7 @@ import { isApiError } from '../api/errors'
 import { useCoachWorkspace } from '../composables/useCoachWorkspace'
 import { useSpeechRecognition } from '../composables/useSpeechRecognition'
 import '../coach.css'
+import { illustration } from '../assets/halloween'
 
 const props = withDefaults(defineProps<{ surface?: 'panel' | 'page' }>(), { surface: 'panel' })
 const isPage = computed(() => props.surface === 'page')
@@ -282,7 +283,7 @@ onBeforeUnmount(() => {
 
       <section class="coach-main" :class="{ panel: !isPage }" aria-label="教练对话">
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
-          <div class="coach-empty-mark"><WhiskerCrumbMark size="small" /></div>
+          <img class="coach-empty-art" :src="illustration.empty.day" alt="" />
           <p class="eyebrow">AI 教练</p>
           <h2>和 Mr. Whisker 聊聊</h2>
           <p>学习计划、复习顺序，或者一句想改得更自然的英文。</p>

@@ -3324,14 +3324,6 @@
 }
 
 .personal-workspace .memory-main-card.is-picker .workspace-section-header { padding: 4px 2px 14px; }
-.personal-workspace .memory-main-card.is-picker .memory-action-grid { gap: 16px; }
-
-.personal-workspace .memory-main-card.is-picker .memory-action-card {
-  min-height: 168px;
-  border-left-width: 10px !important;
-  border-radius: 8px 16px 16px 8px !important;
-  box-shadow: 0 6px 0 rgb(59 42 26 / 10%) !important;
-}
 
 /* Attachment-only button sits at the start of the coach composer. */
 .personal-workspace .coach-composer__footer { align-items: center; }
@@ -3480,8 +3472,6 @@
 /* ------------------------------- practice hub: one-row filters, slimmer rail */
 
 .personal-workspace .practice-hub-layout { grid-template-columns: minmax(0, 1fr) 320px; }
-
-.personal-workspace .practice-memory-grid { margin-bottom: 18px; }
 
 /* Filters read as key–value pairs on one line, not a two-row grid. */
 .personal-workspace .practice-form-row {
@@ -4657,3 +4647,29 @@
 
 .personal-workspace .personal-knowledge__list li:last-child { border-bottom: 0; }
 .personal-workspace .personal-knowledge__list small { color: var(--ui-muted); font-size: 0.74rem; }
+/* Halloween art: the covers carry their own colour, so no tinted tile behind them. */
+.coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0 auto 8px; }
+.practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
+.practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }
+
+/* While a question is on screen the card must sit on the page, not inside a
+   panel: the practice area drops its plate so the card is the only object. */
+.personal-workspace .memory-main-card,
+.personal-workspace .memory-main-card.is-picker {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+
+.practice-generation-art {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.mistakes-empty { display: grid; justify-items: center; gap: 0.4rem; text-align: center; }
+.mistakes-empty__art { width: min(180px, 52%); height: auto; margin-bottom: 0.4rem; }

@@ -12,10 +12,13 @@ import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
-import SpeakButton from '../components/SpeakButton.vue'
 import FlashcardTrainer from '../components/FlashcardTrainer.vue'
 import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
+import LessonHud from '../components/LessonHud.vue'
+import LessonFeedback from '../components/LessonFeedback.vue'
+import { illustration } from '../assets/halloween'
+import ShelfPicker from '../components/ShelfPicker.vue'
 import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
 import { isApiError } from '../api/errors'
@@ -127,6 +130,7 @@ async function loadTodayPlan(): Promise<void> {
 }
 async function begin(module: MemoryModule, existingSessionId?: string): Promise<void> {
   selectedModule.value = module
+  resetRun()
   try {
     await session.open(module, existingSessionId)
     heartbeat.start()
@@ -155,65 +159,122 @@ async function rateFlashcard(questionId: string, rating: 'again' | 'good'): Prom
   if (rating === 'good') crumbBurst(document.querySelector('.memory-main-card'), 8)
 }
 
-interface WrongCard {
-  word: string
-  phonetic: string | null
-  partOfSpeech: string | null
-  meaning: string
-  kind: 'choice' | 'spelling'
-  typed: string | null
+interface Verdict {
+  correct: boolean
+  headline: string
 }
 
-function typedLetterIsWrong(card: WrongCard, index: number): boolean {
-  const typed = card.typed ?? ''
-  const correct = card.word
-  return (typed[index] ?? '').toLowerCase() !== (correct[index] ?? '').toLowerCase()
+const MAX_HEARTS = 5
+
+/**
+ * The beat after an answer. Every graded answer pauses here instead of
+ * silently advancing: that pause is where the combo and the correction land.
+ */
+const verdict = ref<Verdict | null>(null)
+const reveal = ref<{ word: string | null; phonetic: string | null; partOfSpeech: string | null; meaning: string | null } | null>(null)
+const combo = ref(0)
+const bestCombo = ref(0)
+const hearts = ref(MAX_HEARTS)
+/** This run's own tally — the server keeps the durable record. */
+const runCorrect = ref(0)
+const runWrong = ref(0)
+const showSummary = ref(false)
+
+const runAccuracy = computed(() => {
+  const graded = runCorrect.value + runWrong.value
+  return graded > 0 ? Math.round((runCorrect.value / graded) * 100) : 0
+})
+
+function resetRun(): void {
+  verdict.value = null
+  reveal.value = null
+  combo.value = 0
+  bestCombo.value = 0
+  hearts.value = MAX_HEARTS
+  runCorrect.value = 0
+  runWrong.value = 0
+  showSummary.value = false
 }
 
-const wrongCard = ref<WrongCard | null>(null)
+function showVerdict(correct: boolean, headline: string): void {
+  if (correct) {
+    combo.value += 1
+    bestCombo.value = Math.max(bestCombo.value, combo.value)
+    runCorrect.value += 1
+  } else {
+    combo.value = 0
+    runWrong.value += 1
+    hearts.value = Math.max(0, hearts.value - 1)
+  }
+  verdict.value = { correct, headline }
+}
+
+function rememberForReview(entry: { word: string | null; phonetic: string | null; partOfSpeech: string | null; meaning: string | null }): void {
+  reveal.value = entry
+}
 
 async function answerChoice(questionId: string, optionId: string): Promise<void> {
   const question = session.question.value
   const feedback = await session.answerChoice(questionId, optionId)
   heartbeat.markInteraction()
-  if (feedback?.gradedCorrect === false) {
-    await nextTick()
-    shake(document.querySelector('.choice-list'))
-    wrongCard.value = {
-      word: feedback.correctAnswer ?? '',
-      phonetic: question?.kind === 'choice' ? question.phonetic : null,
-      partOfSpeech: question?.kind === 'choice' ? question.partOfSpeech : null,
-      meaning: question?.kind === 'choice' ? question.prompt : '',
-      kind: 'choice',
-      typed: null,
-    }
+  if (!feedback || feedback.gradedCorrect === null) {
+    if (feedback) await session.advance()
     return
   }
-  if (feedback) await session.advance()
+  const correct = feedback.gradedCorrect
+  if (correct) {
+    reveal.value = null
+  } else {
+    // The card takes the hit before the correction lands.
+    void nextTick(() => shake(document.querySelector('.choice-list') ?? document.querySelector('.study-card')))
+    rememberForReview({
+      word: feedback.correctAnswer,
+      phonetic: question?.kind === 'choice' ? question.phonetic : null,
+      partOfSpeech: question?.kind === 'choice' ? question.partOfSpeech : null,
+      meaning: question?.kind === 'choice' ? question.prompt : null,
+    })
+  }
+  showVerdict(correct, feedback.headline)
 }
 
 async function answerSpelling(questionId: string, answer: string): Promise<void> {
   const question = session.question.value
   const feedback = await session.answerSpelling(questionId, answer)
   heartbeat.markInteraction()
-  if (feedback?.gradedCorrect === false) {
-    await nextTick()
-    shake(document.querySelector('.study-card'))
-    wrongCard.value = {
-      word: feedback.correctAnswer ?? '',
+  if (!feedback || feedback.gradedCorrect === null) {
+    if (feedback) await session.advance()
+    return
+  }
+  const correct = feedback.gradedCorrect
+  if (correct) {
+    reveal.value = null
+  } else {
+    void nextTick(() => shake(document.querySelector('.study-card')))
+    rememberForReview({
+      word: feedback.correctAnswer,
       phonetic: question?.kind === 'spelling' ? question.phonetic : null,
       partOfSpeech: question?.kind === 'spelling' ? question.partOfSpeech : null,
-      meaning: question?.kind === 'spelling' ? question.definition : '',
-      kind: 'spelling',
-      typed: answer,
+      meaning: question?.kind === 'spelling' ? question.definition : null,
+    })
+  }
+  showVerdict(correct, feedback.headline)
+}
+
+/** Leaving the pause: clear the sheet and pull the next card. */
+async function continueAfterVerdict(): Promise<void> {
+  verdict.value = null
+  reveal.value = null
+  // Hearts are the only thing that can end a run early; otherwise the queue
+  // decides. Zero hearts ends it on the spot, the way a run in a game does.
+  if (hearts.value <= 0) {
+    try {
+      await session.endSession()
+    } catch {
+      // The summary still reports what happened even if the close call fails.
+      showSummary.value = true
     }
     return
   }
-  if (feedback) await session.advance()
-}
-
-async function continueAfterWrong(): Promise<void> {
-  wrongCard.value = null
   await session.advance()
 }
 
@@ -266,13 +327,27 @@ async function resetTodayProgress(): Promise<void> {
   }
 }
 
+/** Same module, fresh run. */
+function startAgain(): void {
+  const module = selectedModule.value ?? session.module.value
+  showSummary.value = false
+  restart()
+  if (module) void begin(module)
+}
+
+/** Back to the shelf of books. */
+function backToPicker(): void {
+  showSummary.value = false
+  restart()
+}
+
 function restart(): void {
   if (props.embedded) {
     // The hub owns the module picker, so a finished session returns to it.
     void router.replace({ name: 'practice' })
     return
   }
-  wrongCard.value = null
+  resetRun()
   session.reset()
   heartbeat.stop()
   timer.reset()
@@ -280,11 +355,19 @@ function restart(): void {
   void loadConfig()
 }
 
-// A finished or ended session returns straight to the module picker.
+// A finished run lands on its own summary first — the numbers are the point of
+// finishing. Leaving the card and being dropped back on a picker skips that.
 watch(
   () => session.finished.value,
   (finished) => {
-    if (finished) restart()
+    if (!finished) return
+    timer.stop()
+    heartbeat.stop()
+    if (props.embedded) {
+      void router.replace({ name: 'practice' })
+      return
+    }
+    showSummary.value = true
   },
 )
 
@@ -350,7 +433,39 @@ watch(challengeModule, async (module, previous) => {
         记忆练习
       </p>
 
-      <div class="memory-workbench-grid" :class="{ 'is-session': Boolean(session.question.value) || session.finished.value }">
+      <!-- In a run, the HUD replaces the page furniture: position, combo, way out. -->
+      <LessonHud
+        v-if="session.question.value"
+        :index="cardIndex"
+        :total="sessionTotal"
+        :done="cardsDone"
+        :combo="combo"
+        :hearts="hearts"
+        :max-hearts="MAX_HEARTS"
+        :label="session.module.value ? MEMORY_MODULE_LABELS[session.module.value] : '记忆练习'"
+        @exit="endSession"
+      />
+
+      <!-- The payoff: what this run actually earned, then one way forward. -->
+      <section v-if="showSummary" class="lesson-summary" aria-labelledby="lesson-summary-title">
+        <img class="lesson-summary__art" :src="illustration.result.day" alt="" />
+        <div class="lesson-summary__body">
+          <p class="lesson-summary__kicker">本轮完成</p>
+          <h2 id="lesson-summary-title">{{ bestCombo >= 5 ? '手感正热' : '又清掉一轮' }}</h2>
+          <dl class="lesson-summary__stats">
+            <div><dt>答对</dt><dd>{{ runCorrect }}</dd></div>
+            <div><dt>答错</dt><dd>{{ runWrong }}</dd></div>
+            <div><dt>正确率</dt><dd>{{ runAccuracy }}%</dd></div>
+            <div><dt>连击</dt><dd>{{ bestCombo }}</dd></div>
+          </dl>
+          <div class="lesson-summary__actions">
+            <DivButton class="button" type="button" @click="startAgain">再来一轮</DivButton>
+            <DivButton class="button-secondary" type="button" @click="backToPicker">换一种练法</DivButton>
+          </div>
+        </div>
+      </section>
+
+      <div v-else class="memory-workbench-grid" :class="{ 'is-session': Boolean(session.question.value) || session.finished.value }">
         <section class="workspace-card memory-main-card" :class="{ 'is-picker': showModulePicker }">
         <template v-if="showModulePicker && !props.embedded">
           <header class="workspace-section-header">
@@ -381,26 +496,12 @@ watch(challengeModule, async (module, previous) => {
             <span>还没有启用训练方式。</span>
             <RouterLink to="/settings">去设置开启</RouterLink>
           </div>
-          <div class="module-grid memory-action-grid">
-            <DivButton
-              v-for="module in MEMORY_MODULES"
-              :key="module"
-              class="module-card memory-action-card"
-              :class="[
-                `memory-action-card--${module}`,
-                { 'is-disabled': !activeModules.includes(module) },
-              ]"
-              type="button"
-              :disabled="!activeModules.includes(module)"
-              @click="begin(module)"
-            >
-              <span class="memory-action-icon"><AppIcon :name="module === 'spelling' ? 'star' : module === 'choice' ? 'cards' : 'book'" /></span>
-              <span class="memory-action-copy">
-                <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
-              </span>
-              <AppIcon :name="activeModules.includes(module) ? 'arrow' : 'lock'" />
-            </DivButton>
-          </div>
+          <ShelfPicker
+            :modules="MEMORY_MODULES"
+            :enabled="activeModules"
+            :labels="MEMORY_MODULE_LABELS"
+            @pick="begin"
+          />
         </template>
 
         <section v-if="session.lastError.value" class="memory-session-error">
@@ -419,40 +520,10 @@ watch(challengeModule, async (module, previous) => {
 
         <LoadingState v-if="session.busy.value && !session.question.value" label="正在提交…" />
 
-        <section v-if="wrongCard" class="memory-wrong-detail" aria-live="polite">
-          <div class="workspace-card memory-wrong-detail__card">
-            <div class="memory-wrong-detail__grid">
-              <div class="memory-wrong-detail__word">
-                <div class="memory-wrong-detail__word-row">
-                <h2 v-if="wrongCard.kind !== 'spelling'">{{ wrongCard.word }}</h2>
-                <h2 v-else class="memory-wrong-detail__word-letters">
-                  <span
-                    v-for="(letter, index) in wrongCard.word"
-                    :key="index"
-                    :class="{ 'is-wrong': typedLetterIsWrong(wrongCard, index) }"
-                  >{{ letter }}</span>
-                </h2>
-                <SpeakButton class="memory-wrong-detail__speak" :text="wrongCard.word" />
-                </div>
-                <p v-if="wrongCard.phonetic" class="memory-wrong-detail__phonetic">{{ wrongCard.phonetic }}</p>
-              </div>
-              <div class="memory-wrong-detail__side">
-                <p class="memory-wrong-detail__meaning">
-                  <span v-if="wrongCard.partOfSpeech" class="memory-wrong-detail__pos">{{ wrongCard.partOfSpeech }}</span>
-                  <span class="memory-wrong-detail__definition">{{ wrongCard.meaning }}</span>
-                </p>
-              </div>
-            </div>
-          </div>
-          <DivButton class="button memory-wrong-detail__continue" type="button" @click="continueAfterWrong">
-            继续
-          </DivButton>
-        </section>
-
         <FlashcardTrainer
-          v-else-if="session.question.value?.kind === 'flashcard'"
+          v-if="session.question.value?.kind === 'flashcard'"
           :question="session.question.value"
-          :disabled="session.busy.value"
+          :disabled="session.busy.value || Boolean(verdict)"
           @reveal="() => session.recordReveal(session.question.value!.questionId)"
           @rate="(rating) => rateFlashcard(session.question.value!.questionId, rating)"
           @master="() => master(session.question.value!.questionId)"
@@ -461,15 +532,26 @@ watch(challengeModule, async (module, previous) => {
         <ChoiceTrainer
           v-else-if="session.question.value?.kind === 'choice'"
           :question="session.question.value"
-          :disabled="session.busy.value"
+          :disabled="session.busy.value || Boolean(verdict)"
           @answer="(optionId) => answerChoice(session.question.value!.questionId, optionId)"
         />
 
         <SpellingTrainer
           v-else-if="session.question.value?.kind === 'spelling'"
           :question="session.question.value"
-          :disabled="session.busy.value"
+          :disabled="session.busy.value || Boolean(verdict)"
           @answer="(value) => answerSpelling(session.question.value!.questionId, value)"
+        />
+
+        <LessonFeedback
+          :verdict="verdict"
+          :word="reveal?.word ?? null"
+          :phonetic="reveal?.phonetic ?? null"
+          :part-of-speech="reveal?.partOfSpeech ?? null"
+          :meaning="reveal?.meaning ?? null"
+          :combo="combo"
+          :busy="session.busy.value"
+          @continue="continueAfterVerdict"
         />
 
         <section v-if="showModulePicker && selectedModule && session.lastError.value" class="memory-resume-row">

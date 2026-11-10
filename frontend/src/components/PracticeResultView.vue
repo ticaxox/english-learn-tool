@@ -4,6 +4,7 @@ import { type PracticeQuestion, type PracticeResult } from '../api/practice'
 import PracticeQuestionCard from './PracticeQuestionCard.vue'
 import { countUp } from '../composables/useMotion'
 import SpokenText from './SpokenText.vue'
+import { illustration } from '../assets/halloween'
 
 const props = defineProps<{
   result: PracticeResult
@@ -63,6 +64,7 @@ const correctPercent = computed(() => {
 
     <div class="practice-result__layout">
     <aside class="practice-result__aside">
+    <img class="practice-result__art" :src="illustration.result.day" alt="" />
     <section class="panel practice-result__card">
       <h2 id="practice-result-title" class="visually-hidden">本次练习得分</h2>
       <div class="practice-result__scoreline">
