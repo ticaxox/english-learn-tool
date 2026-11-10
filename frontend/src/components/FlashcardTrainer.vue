@@ -230,16 +230,20 @@ function rate(rating: FlashcardRating): void {
   color: #2f2013;
 }
 
+/* A ruled line under the sentence, the way an example sits in a phrasebook —
+   not a coloured tab down one side. */
 .flipface__example {
   margin: 0;
-  padding: 0.8rem 1rem;
-  border-left: 3px solid #9ec9a8;
-  border-radius: 8px;
-  background: rgb(255 255 255 / 66%);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #4b3a26;
-  text-align: left;
+  padding: 0 0 0.55rem;
+  border: 0;
+  border-bottom: 1.5px dotted #b7c9b9;
+  background: none;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.98rem;
+  font-style: italic;
+  line-height: 1.65;
+  color: #5a4732;
+  text-align: center;
 }
 
 .study-card {
