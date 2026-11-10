@@ -18,18 +18,20 @@ const night = computed(() => themeMode.value === 'night')
 
 <template>
   <span class="art-swap">
-    <img
-      class="art-swap__frame"
-      :class="{ 'is-shown': !night }"
-      :src="props.set.day"
-      :alt="props.alt"
-    />
-    <img
-      class="art-swap__frame"
-      :class="{ 'is-shown': night }"
-      :src="props.set.night"
-      alt=""
-      aria-hidden="true"
-    />
+    <span class="art-swap__stack">
+      <img
+        class="art-swap__frame"
+        :class="{ 'is-shown': !night }"
+        :src="props.set.day"
+        :alt="props.alt"
+      />
+      <img
+        class="art-swap__frame"
+        :class="{ 'is-shown': night }"
+        :src="props.set.night"
+        alt=""
+        aria-hidden="true"
+      />
+    </span>
   </span>
 </template>

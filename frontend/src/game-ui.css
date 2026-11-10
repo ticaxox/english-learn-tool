@@ -1082,11 +1082,20 @@ html[data-theme='night'] .personal-workspace .theme-switch__moon {
 
 /* ------------------------------------------------------------- illustration */
 
-/* Day and night art stacked in one cell, cross-fading over 520ms. */
+/* Day and night art stacked in one cell, cross-fading over 520ms.
+ * The stack is the component's own element, so a per-use rule like
+ * `.coach-empty-art { display: block }` can size the outer wrapper without
+ * ever breaking the two paintings apart. */
 .art-swap {
-  display: inline-grid;
+  display: block;
   line-height: 0;
   vertical-align: middle;
+}
+
+.art-swap__stack {
+  display: grid;
+  width: 100%;
+  height: 100%;
 }
 
 .art-swap__frame {
@@ -1104,13 +1113,8 @@ html[data-theme='night'] .personal-workspace .theme-switch__moon {
   object-fit: contain;
 }
 
-/* A book fills its own shelf slot and stands on the board, not floating. */
-.shelf-book__art .art-swap { width: 100%; height: 100%; }
-.shelf-book__art .art-swap__frame {
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-}
+/* A book stands on the shelf board rather than floating in its slot. */
+.shelf-book__art .art-swap__frame { object-position: center bottom; }
 
 .art-swap__frame.is-shown { opacity: 1; }
 
@@ -1120,6 +1124,359 @@ html[data-theme='night'] .personal-workspace .theme-switch__moon {
   .personal-workspace .theme-switch__sun,
   .personal-workspace .theme-switch__moon,
   .art-swap__frame { transition: none; }
+}
+
+/* Every remaining daylight plate from the older stylesheets. Near-white and
+ * near-grey surfaces become the night plate; tinted ones keep their hue so a
+ * success plate still reads green and a warning still reads amber. The
+ * hand-written rules below refine the ones that carry meaning. */
+html[data-theme='night'] .personal-workspace .challenge-progress { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-map__progress { background: #2c2716; color: #e1ce98; }
+html[data-theme='night'] .personal-workspace .challenge-node { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--unlocked { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--completed { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--failed { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--locked { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--optional { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node__marker { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--unlocked { background: #172b1e; color: #98e1c5; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--in_progress { background: #2d2815; color: #e1ce98; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--completed { background: #172b1f; color: #98e1c4; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--locked { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .challenge-node-detail { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-boss__result { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-history__empty { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-history__item { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-history__item:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-orbit::before,
+html[data-theme='night'] .personal-workspace .coach-orbit::after { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-create input,
+html[data-theme='night'] .personal-workspace .coach-rename input { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-conversation-list [role="listitem"] { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-message { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-message--user { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-streaming-chip { background: #2c2716; color: #e1ce98; }
+html[data-theme='night'] .personal-workspace .coach-action-notice { background: #2b1f17; color: #e1aa98; }
+html[data-theme='night'] .personal-workspace .coach-receipt { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-receipt__status--applied { background: #172b1e; color: #98e1c6; }
+html[data-theme='night'] .personal-workspace .coach-receipt__status--undone { background: #2d2149; color: #98c9e1; }
+html[data-theme='night'] .personal-workspace .coach-usage { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-composer { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-composer textarea { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-orbit::before,
+html[data-theme='night'] .personal-workspace .notification-orbit::after { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-unread-pill,
+html[data-theme='night'] .personal-workspace .notification-channel-pill,
+html[data-theme='night'] .personal-workspace .notification-timezone { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-item { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-category-option { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-category-option:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-category-option--ai { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-switch { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-switch span { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-quiet-hours input { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-quota-strip { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-type-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .record-mini-list a { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-article,
+html[data-theme='night'] .personal-workspace .practice-source-text { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-question-card textarea { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-result__summary > div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .status-badge--danger { background: #2b1817; }
+html[data-theme='night'] .personal-workspace .contract-gate__mark { background: #2d2149; color: #e1cb98; }
+html[data-theme='night'] .personal-workspace .today-hero__badge { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .today-tile { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .study-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .choice-option { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .choice-option:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .spelling-cell { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-active-mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-tabs { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-tabs [role="button"]:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-tabs .wordbook-tab--active { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-search input { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-pill--organization { background: #2d2149; color: #98b5e1; }
+html[data-theme='night'] .personal-workspace .wordbook-pill--private { background: #2d2149; color: #98e1be; }
+html[data-theme='night'] .personal-workspace .wordbook-status { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .wordbook-status--ready,
+html[data-theme='night'] .personal-workspace .wordbook-status--active { background: #172b1d; color: #98e1ba; }
+html[data-theme='night'] .personal-workspace .wordbook-status--importing { background: #2b2617; color: #e1cd98; }
+html[data-theme='night'] .personal-workspace .wordbook-status--failed { background: #2b1817; color: #e19898; }
+html[data-theme='night'] .personal-workspace .wordbook-status--deleting { background: #2d2149; color: #be98e1; }
+html[data-theme='night'] .personal-workspace .wordbook-empty-mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .icon-button { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .icon-button:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-choice { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-choice:has(input:checked) { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-task-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .progress-track { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-detail-facts div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-entry-list > [role="listitem"] { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .part-of-speech { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-examples { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-preview-summary div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-preview-meta { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-subpanel { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-error-list [role="listitem"] { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-check { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-filter-note { background: #2d2149; color: #e1ca98; }
+html[data-theme='night'] .personal-workspace .wordbook-status--deleted { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .wordbook-definition { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-summary-error { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-warning-list [role="listitem"] { background: #2b2617; color: #e1cc98; }
+html[data-theme='night'] .personal-workspace .wordbook-sample-row { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-sample-definitions > div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace input[type="radio"]::after { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .ia-tabs,
+html[data-theme='night'] .personal-workspace .ia-settings-tabs { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .ia-tab--active { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .settings-form legend { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .inline-note { background: #2b2417; color: #e1be98; }
+html[data-theme='night'] .personal-workspace .practice-option__mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option--correct .practice-option__mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option--wrong .practice-option__mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-records-table .link-button { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .background-task__status.is-generating { background: #2b2417; color: #e1c698; }
+html[data-theme='night'] .personal-workspace .background-task__status.is-ready { background: #172b1b; color: #98e1a9; }
+html[data-theme='night'] .personal-workspace .background-task__status.is-failed { background: #2b1a17; color: #e19c98; }
+html[data-theme='night'] .personal-workspace .wordbook-card--compact.wordbook-card--active { background: #2b2617; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-generating { background: #2b2417; color: #e1c698; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-ready { background: #17222b; color: #98bfe1; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-submitted { background: #172b1b; color: #98e1a9; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-failed { background: #2b1a17; color: #e19c98; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-legend i { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-card { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-card.is-unlocked { background: #2d2149; color: #98e1b3; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-card.is-failed { background: #2e1814; color: #e19d98; }
+html[data-theme='night'] .personal-workspace .memory-wrong-detail__word-letters > span.is-wrong { background: #2b1a17; color: #e19c98; }
+html[data-theme='night'] .personal-workspace .crumb-task-list .is-done .crumb-task-icon { background: #2d2149; color: #98e1b3; }
+html[data-theme='night'] .personal-workspace .member-table tbody tr:hover .member-actions-cell { background: #2b2617; }
+html[data-theme='night'] .personal-workspace .field input,
+html[data-theme='night'] .personal-workspace .field textarea,
+html[data-theme='night'] .personal-workspace .field select { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .field input:disabled { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .alert-success { background: #2d2149; color: #98e1c4; }
+html[data-theme='night'] .personal-workspace .inline-note { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .sidebar { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .nav-list a.router-link-active { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .count-pill { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .filter-bar { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .data-table th { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .data-table tbody tr:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .mini-badge { background: #2b2617; color: #e1c898; }
+html[data-theme='night'] .personal-workspace .role-badge--admin { background: #2d2149; color: #98e1c6; }
+html[data-theme='night'] .personal-workspace .role-badge--member { background: #2d2149; color: #98b2e1; }
+html[data-theme='night'] .personal-workspace .status-badge { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .status-badge--active { background: #172b1d; color: #98e1ba; }
+html[data-theme='night'] .personal-workspace .empty-state { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .summary-grid div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .row-invalid { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .detail-list { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .secret-list [role="listitem"] { background: #2b2517; }
+html[data-theme='night'] .personal-workspace .secret-value code { background: #2d2149; }
+
+/* ---------------------------------------------------------------------------
+ * Surfaces the older layers still paint in literal daylight colours.
+ *
+ * None of these read a token, so they would stay cream on a night page. Each
+ * keeps its own hue instead of turning flat purple — the error plates stay
+ * red, the challenge plates stay gold, the green ones stay green — and the few
+ * that carried their own dark ink get ink that reads on the dark plate.
+ * ------------------------------------------------------------------------- */
+
+/* Hover states and quiet plates. */
+html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link:hover,
+html[data-theme='night'] .personal-workspace .workspace-concierge-link.member-concierge-link:hover,
+html[data-theme='night'] .personal-workspace .workspace-profile:hover,
+html[data-theme='night'] .personal-workspace .workspace-signout:hover,
+html[data-theme='night'] .personal-workspace .wordbook-tabs [role='button']:hover,
+html[data-theme='night'] .personal-workspace .memory-action-card:hover,
+html[data-theme='night'] .personal-workspace .practice-type-card:hover,
+html[data-theme='night'] .personal-workspace .memory-action-card:hover:not(:disabled),
+html[data-theme='night'] .personal-workspace .challenge-self-study__card:hover,
+html[data-theme='night'] .personal-workspace .choice-option:hover,
+html[data-theme='night'] .personal-workspace .practice-option:hover,
+html[data-theme='night'] .personal-workspace tbody tr:hover,
+html[data-theme='night'] .personal-workspace .data-table tbody tr:hover,
+html[data-theme='night'] .personal-workspace .mistake-table tbody tr:hover {
+  background: #33254f;
+}
+
+html[data-theme='night'] .personal-workspace .memory-action-card:disabled {
+  background: #2a2044;
+}
+
+html[data-theme='night'] .personal-workspace .memory-action-card.is-disabled .memory-action-icon {
+  background: #332747;
+}
+
+/* Rails. */
+html[data-theme='night'] .personal-workspace .workspace-progress,
+html[data-theme='night'] .personal-workspace .workspace-shell .progress,
+html[data-theme='night'] .personal-workspace .crumb-task-progress,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-progress {
+  background: #2b2049;
+}
+
+/* Panels and message plates. */
+html[data-theme='night'] .personal-workspace .today-task-row.is-current,
+html[data-theme='night'] .personal-workspace .today-task-footer,
+html[data-theme='night'] .personal-workspace .coach-message--assistant,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-summary,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-generate,
+html[data-theme='night'] .personal-workspace .wordbook-examples {
+  background: #2d2149;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-map {
+  background: #241a3d;
+}
+
+html[data-theme='night'] .personal-workspace .coach-message--user {
+  background: #26305a;
+}
+
+html[data-theme='night'] .personal-workspace .coach-message--user .coach-message-avatar {
+  background: #3a2f5e;
+}
+
+html[data-theme='night'] .personal-workspace .crumb-ai-note {
+  background: #24331f;
+}
+
+/* Forms. */
+html[data-theme='night'] .personal-workspace input:not([type='checkbox']):not([type='radio']),
+html[data-theme='night'] .personal-workspace textarea,
+html[data-theme='night'] .personal-workspace select {
+  background: #241a3d;
+  border-color: #4a3a70;
+}
+
+html[data-theme='night'] .personal-workspace .field input:disabled,
+html[data-theme='night'] .personal-workspace .field textarea:disabled,
+html[data-theme='night'] .personal-workspace .field select:disabled {
+  background: #2a2240;
+  color: #a496c0;
+}
+
+/* Challenge stops on the embedded map keep their status colour. */
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--completed,
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--completed {
+  background: #1d3a2f;
+}
+
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--unlocked {
+  background: #3a2d16;
+}
+
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--in_progress {
+  background: #3d2a1c;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--boss,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--boss .challenge-node__status {
+  background: #3a2d16;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--locked,
+html[data-theme='night'] .personal-workspace .challenge-node--locked,
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--locked {
+  background: #2a2440;
+  color: #a99dbd;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-node--failed,
+html[data-theme='night'] .personal-workspace .challenge-node__status--failed {
+  background: #3a1f26;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node__status,
+html[data-theme='night'] .personal-workspace .status-badge--muted,
+html[data-theme='night'] .personal-workspace .wordbook-status--deleting,
+html[data-theme='night'] .personal-workspace .challenge-node__status--locked,
+html[data-theme='night'] .personal-workspace .coach-receipt__status--undone {
+  background: #2a2440;
+  color: #b4a3cf;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node__status--completed,
+html[data-theme='night'] .personal-workspace .wordbook-preview-meta .wordbook-pill {
+  background: #1d3a2f;
+  color: #7fe0b0;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-preview-route span {
+  background: #3a2d16;
+  color: #ffd166;
+}
+
+/* Error plates. */
+html[data-theme='night'] .personal-workspace .button-danger,
+html[data-theme='night'] .personal-workspace .practice-generation-state.is-error,
+html[data-theme='night'] .personal-workspace .row-invalid,
+html[data-theme='night'] .personal-workspace .notification-category-option--ai {
+  background: #3a1e26;
+  color: #ffb3ab;
+}
+
+html[data-theme='night'] .personal-workspace .alert-error,
+html[data-theme='night'] .personal-workspace .workspace-shell .alert-error {
+  background: #3a1e26;
+  color: #ffb3ab;
+  border-color: #6d2c34;
+}
+
+html[data-theme='night'] .personal-workspace input[aria-invalid='true'],
+html[data-theme='night'] .personal-workspace textarea[aria-invalid='true'],
+html[data-theme='night'] .personal-workspace select[aria-invalid='true'] {
+  background: #3a1e26;
+}
+
+/* Receipts and notices. */
+html[data-theme='night'] .personal-workspace .coach-receipt {
+  background: #33264a;
+}
+
+html[data-theme='night'] .personal-workspace .coach-action-notice {
+  background: #3a2a1c;
+  color: #ffcf9a;
+}
+
+/* Secondary copy that carried its own warm brown ink. */
+html[data-theme='night'] .personal-workspace :is(
+  .crumb-today-note,
+  .crumb-stop-label,
+  .crumb-book-note p,
+  .crumb-ai-note p,
+  .crumb-empty-note p,
+  .crumb-shelf-heading p:last-child,
+  .crumb-wordbooks .wordbook-active-copy p,
+  .crumb-wordbooks .wordbook-entry-count,
+  .crumb-challenge .challenge-page-header .workspace-page-lead,
+  .crumb-challenge .challenge-next-step__copy p,
+  .crumb-challenge .challenge-state-legend,
+  .crumb-challenge .challenge-node__body > p,
+  .challenge-next-step__copy p,
+  .error-notice details,
+  .ia-tab
+) {
+  color: #b7a6cf;
+}
+
+html[data-theme='night'] .personal-workspace :is(
+  .background-task__error,
+  .coach-dictate-error,
+  .coach-dictate.is-listening,
+  .practice-generation-state.is-error strong
+) {
+  color: #ffb3ab;
+}
+
+html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
+  color: #ffb066;
 }
 
 /* --------------------------------------------------------------- book cards */
