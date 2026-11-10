@@ -17,12 +17,14 @@ import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
 import LessonHud from '../components/LessonHud.vue'
 import LessonFeedback from '../components/LessonFeedback.vue'
+import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { illustration } from '../assets/halloween'
 import ShelfPicker from '../components/ShelfPicker.vue'
 import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
 import { isApiError } from '../api/errors'
 import { useMemorySession } from '../composables/useMemorySession'
+import { useGamification } from '../composables/useGamification'
 import { useStudyHeartbeat } from '../composables/useStudyHeartbeat'
 import { useToast } from '../composables/useToast'
 import { crumbBurst, shake } from '../composables/useMotion'
@@ -57,6 +59,7 @@ const loadingConfig = ref(false)
 const selectedModule = ref<MemoryModule | null>(null)
 
 const session = useMemorySession()
+
 const timer = useSessionTimer()
 const toast = useToast()
 const resetting = ref(false)
@@ -372,7 +375,26 @@ watch(
   },
 )
 
+/** A finished run is worth the same celebration a submitted practice gets. */
+const gamification = useGamification()
+const levelUp = ref<{ level: number; title: string } | null>(null)
+let levelBefore = 0
+
+watch(showSummary, async (open) => {
+  if (!open) return
+  await gamification.load()
+  const now = gamification.progress.value
+  if (!now) return
+  if (levelBefore > 0 && now.level.level > levelBefore) {
+    levelUp.value = { level: now.level.level, title: now.level.title }
+  }
+  levelBefore = now.level.level
+})
+
 onMounted(async () => {
+  void gamification.load().then(() => {
+    levelBefore = gamification.progress.value?.level.level ?? 0
+  })
   await Promise.all([loadConfig(), loadTodayPlan()])
   if (challengeSessionId.value && challengeModule.value) {
     await begin(challengeModule.value, challengeSessionId.value)
@@ -503,7 +525,13 @@ watch(challengeModule, async (module, previous) => {
             :labels="MEMORY_MODULE_LABELS"
             @pick="begin"
           />
-        </template>
+          <LevelUpOverlay
+    v-if="levelUp"
+    :level="levelUp.level"
+    :title="levelUp.title"
+    @close="levelUp = null"
+  />
+</template>
 
         <section v-if="session.lastError.value" class="memory-session-error">
           <ErrorNotice
