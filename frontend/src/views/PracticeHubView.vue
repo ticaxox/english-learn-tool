@@ -21,6 +21,7 @@ import PracticeSessionView from './PracticeSessionView.vue'
 import MemoryPracticeView from './MemoryPracticeView.vue'
 import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryModule } from '../types/learning'
 import PracticeTaskList from '../components/PracticeTaskList.vue'
+import GameHud from '../components/GameHud.vue'
 
 import '../practice.css'
 
@@ -229,6 +230,8 @@ onMounted(() => {
     <PracticeSessionView v-else-if="activeSessionId" embedded :session-id="activeSessionId" />
 
     <template v-else>
+      <GameHud />
+
       <div class="module-grid memory-action-grid practice-memory-grid">
         <DivButton
           v-for="module in MEMORY_MODULES"
