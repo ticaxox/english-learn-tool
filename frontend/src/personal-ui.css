@@ -869,16 +869,6 @@ body {
 
 /* Memory: keep the training choice direct and the context secondary. */
 .personal-workspace .memory-workbench { align-items: start; }
-.personal-workspace .memory-action-card {
-  border: 1px solid var(--ui-line);
-  border-radius: var(--ui-radius-md);
-  box-shadow: none;
-}
-.personal-workspace .memory-action-card:hover:not(:disabled) {
-  border-color: var(--ui-forest);
-  background: #fffaf2;
-  transform: none;
-}
 .personal-workspace .memory-context-card { background: var(--ui-surface-subtle); }
 
 /* AI settings skeleton and live personal provider surface. */

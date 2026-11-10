@@ -823,20 +823,11 @@ html[data-theme='night'] .personal-workspace {
 
 /* ------------------------------------------------------------------ coach */
 
-.personal-workspace .ia-coach-panel { animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1); }
-
-/* Stage cards lift on hover, press on click. */
-.personal-workspace .practice-type-card:hover,
-.personal-workspace .memory-action-card:hover,
-.personal-workspace .challenge-node--unlocked:hover,
-.personal-workspace .challenge-node--in_progress:hover {
+.personal-workspace .ia-coach-panel { animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1); }/* Stage cards lift on hover, press on click. */
+.personal-workspace .practice-type-card:hover, .personal-workspace .challenge-node--unlocked:hover, .personal-workspace .challenge-node--in_progress:hover {
   transform: translateY(-2px);
   filter: brightness(1.02);
-}
-
-.personal-workspace .practice-type-card,
-.personal-workspace .memory-action-card,
-.personal-workspace .challenge-node { transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; }
+}.personal-workspace .practice-type-card, .personal-workspace .challenge-node { transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; }
 
 .personal-workspace .ia-coach-panel {
   border-left: 0;
@@ -1290,9 +1281,7 @@ html[data-theme='night'] .personal-workspace .summary-grid div { background: #2d
 html[data-theme='night'] .personal-workspace .row-invalid { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .detail-list { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .secret-list [role="listitem"] { background: #2b2517; }
-html[data-theme='night'] .personal-workspace .secret-value code { background: #2d2149; }
-
-/* ---------------------------------------------------------------------------
+html[data-theme='night'] .personal-workspace .secret-value code { background: #2d2149; }/* ---------------------------------------------------------------------------
  * Surfaces the older layers still paint in literal daylight colours.
  *
  * None of these read a token, so they would stay cream on a night page. Each
@@ -1302,29 +1291,8 @@ html[data-theme='night'] .personal-workspace .secret-value code { background: #2
  * ------------------------------------------------------------------------- */
 
 /* Hover states and quiet plates. */
-html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link:hover,
-html[data-theme='night'] .personal-workspace .workspace-concierge-link.member-concierge-link:hover,
-html[data-theme='night'] .personal-workspace .workspace-profile:hover,
-html[data-theme='night'] .personal-workspace .workspace-signout:hover,
-html[data-theme='night'] .personal-workspace .wordbook-tabs [role='button']:hover,
-html[data-theme='night'] .personal-workspace .memory-action-card:hover,
-html[data-theme='night'] .personal-workspace .practice-type-card:hover,
-html[data-theme='night'] .personal-workspace .memory-action-card:hover:not(:disabled),
-html[data-theme='night'] .personal-workspace .challenge-self-study__card:hover,
-html[data-theme='night'] .personal-workspace .choice-option:hover,
-html[data-theme='night'] .personal-workspace .practice-option:hover,
-html[data-theme='night'] .personal-workspace tbody tr:hover,
-html[data-theme='night'] .personal-workspace .data-table tbody tr:hover,
-html[data-theme='night'] .personal-workspace .mistake-table tbody tr:hover {
+html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link:hover, html[data-theme='night'] .personal-workspace .workspace-concierge-link.member-concierge-link:hover, html[data-theme='night'] .personal-workspace .workspace-profile:hover, html[data-theme='night'] .personal-workspace .workspace-signout:hover, html[data-theme='night'] .personal-workspace .wordbook-tabs [role='button']:hover, html[data-theme='night'] .personal-workspace .practice-type-card:hover, html[data-theme='night'] .personal-workspace .challenge-self-study__card:hover, html[data-theme='night'] .personal-workspace .choice-option:hover, html[data-theme='night'] .personal-workspace .practice-option:hover, html[data-theme='night'] .personal-workspace tbody tr:hover, html[data-theme='night'] .personal-workspace .data-table tbody tr:hover, html[data-theme='night'] .personal-workspace .mistake-table tbody tr:hover {
   background: #33254f;
-}
-
-html[data-theme='night'] .personal-workspace .memory-action-card:disabled {
-  background: #2a2044;
-}
-
-html[data-theme='night'] .personal-workspace .memory-action-card.is-disabled .memory-action-icon {
-  background: #332747;
 }
 
 /* Rails. */
@@ -1587,49 +1555,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 }
 
 .personal-workspace .workspace-nav-link:active { transform: translateY(2px); }
-
-/* ------------------------------------------------- memory stage cards + nav */
-
-.personal-workspace .memory-action-card {
-  min-height: 84px;
-  border: 2px solid var(--ui-line) !important;
-  border-radius: 16px !important;
-  background: var(--ui-surface) !important;
-  box-shadow: 0 3px 0 var(--ui-line) !important;
-  transition: transform 90ms ease, box-shadow 90ms ease;
-}
-
-.personal-workspace .memory-action-card:nth-child(1) {
-  border-color: var(--g-blue-edge) !important;
-  box-shadow: 0 3px 0 var(--g-blue-edge) !important;
-}
-
-.personal-workspace .memory-action-card:nth-child(1) .memory-action-icon { color: var(--g-blue-edge); }
-
-.personal-workspace .memory-action-card:nth-child(2) {
-  border-color: var(--g-green-edge) !important;
-  box-shadow: 0 3px 0 var(--g-green-edge) !important;
-}
-
-.personal-workspace .memory-action-card:nth-child(2) .memory-action-icon { color: var(--g-green-edge); }
-
-.personal-workspace .memory-action-card:nth-child(3) {
-  border-color: var(--g-orange-edge) !important;
-  box-shadow: 0 3px 0 var(--g-orange-edge) !important;
-}
-
-.personal-workspace .memory-action-card:nth-child(3) .memory-action-icon { color: var(--g-orange-edge); }
-
-.personal-workspace .memory-action-card:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ui-line) !important; }
-
-.personal-workspace .memory-action-icon {
-  display: grid;
-  width: 26px;
-  height: 26px;
-  place-items: center;
-  border: 0;
-  background: transparent;
-}
 
 /* Mobile tab bar: the active stop lifts out of the bar. */
 .personal-workspace .workspace-mobile-nav {
@@ -2579,10 +2504,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 .personal-workspace .practice-record-list strong { font-size: 0.95rem; }
 .personal-workspace .practice-record-list small { font-size: 0.8rem; }
 .personal-workspace .practice-record-type { font-size: 0.78rem; }
-
-.personal-workspace .memory-action-card .module-card__title { font-size: 1rem; }
-.personal-workspace .memory-action-card .module-card__hint { font-size: 0.84rem; }
-.personal-workspace .memory-action-card .memory-action-copy span { font-size: 0.84rem; }
 .personal-workspace .memory-main-card .workspace-section-header h2 { font-size: 1.15rem; }
 
 /* Badges read on the paper body, not on the dark cover. */
@@ -3661,124 +3582,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 }
 
 .personal-workspace .practice-option__text { line-height: 1.45; }
-
-/* ------------------------------------- learning centre: table-style chooser */
-
-.personal-workspace .practice-chooser { display: grid; gap: 0; }
-
-.personal-workspace .practice-chooser__tabs {
-  display: flex;
-  gap: 4px;
-  padding-left: 0;
-  border-bottom: 2px solid var(--ui-line);
-}
-
-.personal-workspace .practice-chooser__tab {
-  padding: 9px 22px;
-  border: 2px solid transparent;
-  border-bottom: 0;
-  border-radius: 12px 12px 0 0;
-  background: transparent;
-  color: var(--ui-muted);
-  font-size: 0.95rem;
-  font-weight: 850;
-  cursor: pointer;
-}
-
-.personal-workspace .practice-chooser__tab.is-active {
-  margin-bottom: -2px;
-  border-color: var(--ui-line);
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  box-shadow: inset 0 -3px 0 var(--g-orange-edge);
-}
-
-.personal-workspace .practice-chooser__panel {
-  padding: 14px 0 0;
-  border: 2px solid var(--ui-line);
-  border-top: 0;
-  border-radius: 0 0 var(--ui-radius-md) var(--ui-radius-md);
-  background: var(--ui-surface);
-}
-
-.personal-workspace .practice-chooser__rows { display: grid; gap: 8px; }
-
-.personal-workspace .practice-chooser__row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px solid var(--ui-line);
-  border-radius: 12px;
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  text-align: left;
-  cursor: pointer;
-}
-
-.personal-workspace .practice-chooser__row:hover:not(:disabled) {
-  border-color: var(--ui-line-strong);
-  background: var(--ui-surface-subtle);
-}
-.personal-workspace .practice-chooser__row:disabled { opacity: 0.55; cursor: not-allowed; }
-
-.personal-workspace .practice-chooser__mark {
-  display: grid;
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1.5px solid var(--ui-line-strong);
-  border-radius: 10px;
-  background: #fffaf0;
-}
-
-.personal-workspace .practice-chooser__copy { display: grid; flex: 1 1 auto; gap: 1px; }
-.personal-workspace .practice-chooser__copy strong { font-size: 0.95rem; }
-.personal-workspace .practice-chooser__copy small { color: var(--ui-muted); font-size: 0.8rem; }
-.personal-workspace .practice-chooser__state { flex: 0 0 auto; color: var(--ui-muted); font-size: 0.8rem; font-weight: 800; }
-
-.personal-workspace .practice-chooser__types {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.personal-workspace .practice-chooser__type {
-  display: grid;
-  gap: 1px;
-  padding: 9px 12px;
-  border: 2px solid var(--ui-line);
-  border-radius: 12px;
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  text-align: left;
-  cursor: pointer;
-}
-
-.personal-workspace .practice-chooser__type strong { font-size: 0.95rem; }
-.personal-workspace .practice-chooser__type small { color: var(--ui-muted); font-size: 0.78rem; }
-.personal-workspace .practice-chooser__type.is-selected { border-color: var(--g-blue-edge); background: var(--g-blue-soft); }
-
-.personal-workspace .practice-chooser__footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: 12px;
-}
-
-.personal-workspace .practice-chooser__count {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-right: auto;
-  font-weight: 800;
-}
-
-.personal-workspace .practice-chooser__count select { width: auto; min-width: 110px; }
 
 @media (max-width: 860px) {
   .personal-workspace .practice-chooser__types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -5274,39 +5077,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   .personal-workspace .memory-action-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
-  }
-
-  .personal-workspace .memory-action-card {
-    grid-template-columns: minmax(0, 1fr) 18px;
-    grid-template-areas:
-      "icon arrow"
-      "copy copy"
-      "status status";
-    align-content: start;
-    row-gap: 10px;
-    min-height: 176px;
-    padding: 16px;
-  }
-
-  .personal-workspace .memory-action-card .memory-action-icon {
-    grid-area: icon;
-    width: 36px;
-    height: 36px;
-  }
-
-  .personal-workspace .memory-action-card .memory-action-copy { grid-area: copy; }
-
-  .personal-workspace .memory-action-card .memory-action-status {
-    grid-area: status;
-    display: grid;
-    gap: 2px;
-    justify-items: start;
-    text-align: left;
-  }
-
-  .personal-workspace .memory-action-card > svg {
-    grid-area: arrow;
-    align-self: start;
   }
 }
 
