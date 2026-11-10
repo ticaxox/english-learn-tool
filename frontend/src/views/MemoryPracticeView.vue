@@ -35,6 +35,7 @@ import {
   type TodayPlan,
 } from '../types/learning'
 import '../learning.css'
+import ArtImage from '../components/ArtImage.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -448,7 +449,7 @@ watch(challengeModule, async (module, previous) => {
 
       <!-- The payoff: what this run actually earned, then one way forward. -->
       <section v-if="showSummary" class="lesson-summary" aria-labelledby="lesson-summary-title">
-        <img class="lesson-summary__art" :src="illustration.result.day" alt="" />
+        <ArtImage class="lesson-summary__art" :set="illustration.result" />
         <div class="lesson-summary__body">
           <p class="lesson-summary__kicker">本轮完成</p>
           <h2 id="lesson-summary-title">{{ bestCombo >= 5 ? '手感正热' : '又清掉一轮' }}</h2>

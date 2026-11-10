@@ -6,6 +6,8 @@ import { apiClient } from './api/client'
 import { createAppRouter } from './router'
 import { markSurface, redirectForViewport, watchOrientation } from './lib/surface'
 import { useAuthStore } from './stores/auth'
+// Paint the saved day/night mode before the first frame.
+import './composables/useTheme'
 import './style.css'
 import './cookie-theme.css'
 import './member-redesign.css'

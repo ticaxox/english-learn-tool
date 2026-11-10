@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import ArtImage from '../components/ArtImage.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import {
@@ -259,11 +260,10 @@ onMounted(() => {
               type="button"
               @click="chooseType(option.key)"
             >
-              <img
+              <ArtImage
                 v-if="practiceBooks[option.key]"
                 class="practice-type-pill__art"
-                :src="practiceBooks[option.key].day"
-                alt=""
+                :set="practiceBooks[option.key]"
               />
               <AppIcon v-else :name="typeIcons[option.key]" />
               <span class="practice-type-pill__label">{{ option.label }}</span>
@@ -336,7 +336,7 @@ onMounted(() => {
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
           <div v-if="creating" class="practice-generation-state is-loading" role="status" aria-live="polite">
-            <img class="practice-generation-art" :src="illustration.brewing.day" alt="" />
+            <ArtImage class="practice-generation-art" :set="illustration.brewing" />
             <div><strong>正在生成练习</strong><span>正在读取素材并准备题目，请稍候。</span></div>
           </div>
           <div v-else-if="createError" class="practice-generation-state is-error" role="status">

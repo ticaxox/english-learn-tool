@@ -4385,6 +4385,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Cold wax at night: the unlit days should not read as brighter than the lit
+ * ones next to them. */
+html[data-theme='night'] .personal-workspace .weekly-day:not(.is-active) .weekly-day__candle {
+  background: linear-gradient(180deg, #6b5f80, #55496b);
+  box-shadow: inset -5px 0 0 rgb(0 0 0 / 22%), 0 0 0 1px rgb(150 130 190 / 22%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .personal-workspace .weekly-day__flame { animation: none; }
   .personal-workspace .weekly-goals li.is-done.is-stamping .weekly-goals__check { animation: none; }
@@ -4591,6 +4598,23 @@
   35% { opacity: 1; }
   100% { opacity: 0; transform: translateX(44%) scale(0.9); }
 }
+
+/* At night an unearned medal is cold iron, not pale stone, or it outshines the
+ * bright ones it is supposed to sit behind. */
+html[data-theme='night'] .personal-workspace .badge__face--stone .badge__seal {
+  fill: #3b3054;
+  stroke: #4f4270;
+}
+
+html[data-theme='night'] .personal-workspace .badge__face--stone .badge__plate {
+  fill: #332a4b;
+  stroke: #473a66;
+}
+
+html[data-theme='night'] .personal-workspace .badge__face--stone .badge__glyph { stroke: #8c7dad; }
+html[data-theme='night'] .personal-workspace .badge__lock { background: #4a3d6b; }
+html[data-theme='night'] .personal-workspace .badge.is-locked .badge__name { color: #9a8cb8; }
+html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { color: #8577a3; }
 
 @media (prefers-reduced-motion: reduce) {
   .personal-workspace .badge.is-unlocked .badge__turn .badge__shine { animation: none; opacity: 0; }

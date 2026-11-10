@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
+import ThemeSwitch from './ThemeSwitch.vue'
 import CoachView from '../views/CoachView.vue'
 import CrumboMark from './CrumboMark.vue'
 import { getActivePinia } from 'pinia'
@@ -244,6 +245,8 @@ onBeforeUnmount(() => {
           <span>{{ currentDate }}</span>
         </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
+          <ThemeSwitch />
+
           <DivButton
             class="workspace-coach-button member-concierge-button ia-coach-toggle"
             type="button"

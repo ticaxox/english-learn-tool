@@ -49,11 +49,60 @@
   background-color: var(--ui-canvas);
 }
 
+/* Night is the same room after dark: deep purple paper, silvered brass, mint
+ * vines. Not a filter over the day look — the art has its own night version
+ * and these tokens only relight the surfaces around it. */
+html[data-theme='night'] {
+  color-scheme: dark;
+}
+
+html[data-theme='night'] .personal-workspace {
+  --ui-canvas: #1a1030;
+  --ui-sidebar: #221541;
+  --ui-surface: #271a49;
+  --ui-surface-subtle: #2f2156;
+  --ui-ink: #f4ecdc;
+  --ui-muted: #b4a3cf;
+  --ui-line: #3d2c66;
+  --ui-line-strong: #d8cdf8;
+
+  --g-green: #3ad183;
+  --g-green-edge: #1f9558;
+  --g-green-soft: #1c3b33;
+  --g-orange: #ff9f45;
+  --g-orange-edge: #c76a10;
+  --g-orange-soft: #3e2617;
+  --g-blue: #56b9ff;
+  --g-blue-edge: #1d7fc0;
+  --g-blue-soft: #16314a;
+  --g-purple: #bd8cff;
+  --g-purple-edge: #7f46c4;
+  --g-purple-soft: #30204c;
+  --g-red: #ff6f6f;
+  --g-red-edge: #b23333;
+  --g-red-soft: #3d1d22;
+  --g-gold: #ffd166;
+  --g-gold-edge: #b8891a;
+  --g-gold-soft: #3a2e13;
+
+  --crumb-forest: #5fd39a;
+  --crumb-pumpkin: #ff9f45;
+  --crumb-gold: #ffd166;
+
+  background-color: var(--ui-canvas);
+  color: var(--ui-ink);
+}
+
 /* ------------------------------------------------------------------ shell */
 
 .personal-workspace {
   background-image: radial-gradient(rgb(190 150 96 / 16%) 1px, transparent 1px);
   background-size: 22px 22px;
+}
+
+/* At night the dots become faint stars rather than paper grain. */
+html[data-theme='night'] .personal-workspace {
+  background-image: radial-gradient(rgb(190 170 255 / 22%) 1px, transparent 1px);
 }
 
 .personal-workspace .workspace-sidebar {
@@ -946,6 +995,131 @@
   background: var(--g-purple-soft);
   color: #4b1f78;
   box-shadow: 0 3px 0 var(--g-purple-edge);
+}
+
+html[data-theme='night'] .personal-workspace .workspace-coach-button.member-concierge-button {
+  color: #e6d7ff;
+}
+
+/* ------------------------------------------------------------- day / night */
+
+/* A brass plate that slides between a sun and a moon. */
+.personal-workspace .theme-switch {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.personal-workspace .theme-switch__track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: 60px;
+  height: 30px;
+  padding: 2px;
+  border: 2px solid #d9a400;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffeab4, #f4cf82);
+  box-shadow: inset 0 -2px 0 rgb(120 80 10 / 20%);
+  transition: background 520ms ease, border-color 520ms ease;
+}
+
+.personal-workspace .theme-switch__knob {
+  position: absolute;
+  inset: 2px auto 2px 2px;
+  width: calc(50% - 2px);
+  border-radius: 999px;
+  background: #fff8e8;
+  box-shadow: 0 2px 0 #c99a1c, inset 0 1px 0 rgb(255 255 255 / 70%);
+  transition: transform 520ms cubic-bezier(0.3, 1.4, 0.5, 1), background 520ms ease, box-shadow 520ms ease;
+}
+
+.personal-workspace .theme-switch__sun,
+.personal-workspace .theme-switch__moon {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #a8790a;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 520ms ease, opacity 520ms ease;
+}
+
+.personal-workspace .theme-switch__moon {
+  stroke: #c0ab86;
+  opacity: 0.65;
+}
+
+/* Night: the plate is silvered brass on deep purple, and it has slid over. */
+html[data-theme='night'] .personal-workspace .theme-switch__track {
+  border-color: #8f7ad0;
+  background: linear-gradient(180deg, #33225a, #1d1236);
+  box-shadow: inset 0 -2px 0 rgb(10 4 26 / 45%);
+}
+
+html[data-theme='night'] .personal-workspace .theme-switch__knob {
+  transform: translateX(100%);
+  background: radial-gradient(circle at 35% 30%, #f4ecdc, #c9bda8);
+  box-shadow: 0 2px 0 #6d5aa8, 0 0 10px rgb(190 170 255 / 45%);
+}
+
+html[data-theme='night'] .personal-workspace .theme-switch__sun {
+  stroke: #7b6a9e;
+  opacity: 0.6;
+}
+
+html[data-theme='night'] .personal-workspace .theme-switch__moon {
+  stroke: #2b1d12;
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------- illustration */
+
+/* Day and night art stacked in one cell, cross-fading over 520ms. */
+.art-swap {
+  display: inline-grid;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.art-swap__frame {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transition: opacity 520ms ease;
+}
+
+/* The question card's frame must fill the card, not size to the art. */
+.flipface__frame .art-swap__frame {
+  height: 100%;
+  object-fit: contain;
+}
+
+/* A book fills its own shelf slot and stands on the board, not floating. */
+.shelf-book__art .art-swap { width: 100%; height: 100%; }
+.shelf-book__art .art-swap__frame {
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.art-swap__frame.is-shown { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .theme-switch__track,
+  .personal-workspace .theme-switch__knob,
+  .personal-workspace .theme-switch__sun,
+  .personal-workspace .theme-switch__moon,
+  .art-swap__frame { transition: none; }
 }
 
 /* --------------------------------------------------------------- book cards */
