@@ -8,8 +8,11 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
+import BadgeEmblem from './BadgeEmblem.vue'
 import { fetchBadges, type Badge } from '../api/progress'
 import { countUp, gsap, motionAllowed, popIn } from '../composables/useMotion'
+
+withDefaults(defineProps<{ variant?: 'seal' | 'wax' | 'iron' }>(), { variant: 'iron' })
 
 const badges = ref<Badge[]>([])
 const error = ref<unknown>(null)
@@ -22,26 +25,6 @@ let revealTimeline: gsap.core.Timeline | null = null
 
 const unlocked = computed(() => badges.value.filter((badge) => badge.unlocked).length)
 const total = computed(() => badges.value.length)
-
-/**
- * The scalloped edge of a struck medal, generated rather than hand-written so
- * every badge shares the exact same die.
- */
-function sealPath(petals = 18, outer = 47.5, inner = 40): string {
-  const step = (Math.PI * 2) / petals
-  const point = (angle: number, radius: number): string => {
-    const x = 50 + Math.cos(angle - Math.PI / 2) * radius
-    const y = 50 + Math.sin(angle - Math.PI / 2) * radius
-    return `${x.toFixed(2)} ${y.toFixed(2)}`
-  }
-  let d = `M ${point(0, outer)}`
-  for (let index = 0; index < petals; index += 1) {
-    const next = (index + 1) * step
-    d += ` Q ${point(index * step + step / 2, inner)} ${point(next, outer)}`
-  }
-  return `${d} Z`
-}
-const SEAL = sealPath()
 
 /** Emblems drawn on the same 24×24 grid, stroked like the rest of the icon set. */
 const GLYPHS: Record<string, string[]> = {
@@ -211,23 +194,10 @@ onBeforeUnmount(() => {
         <span class="badge__medal">
           <span class="badge__turn">
             <span class="badge__face badge__face--stone">
-              <svg viewBox="0 0 100 100" aria-hidden="true">
-                <path class="badge__seal" :d="SEAL" />
-                <circle class="badge__plate" cx="50" cy="50" r="33" />
-                <g class="badge__glyph" transform="translate(50 50) scale(1.72) translate(-12 -12)">
-                  <path v-for="(d, index) in glyph(badge.key)" :key="index" :d="d" />
-                </g>
-              </svg>
+              <BadgeEmblem :glyph="glyph(badge.key)" :accent="accent(badge.key)" :earned="false" :variant="variant" />
             </span>
             <span class="badge__face badge__face--enamel">
-              <svg viewBox="0 0 100 100" aria-hidden="true">
-                <path class="badge__seal" :d="SEAL" />
-                <circle class="badge__plate" cx="50" cy="50" r="33" />
-                <g class="badge__glyph" transform="translate(50 50) scale(1.72) translate(-12 -12)">
-                  <path v-for="(d, index) in glyph(badge.key)" :key="index" :d="d" />
-                </g>
-                <circle class="badge__rivet" cx="50" cy="3.4" r="2.4" />
-              </svg>
+              <BadgeEmblem :glyph="glyph(badge.key)" :accent="accent(badge.key)" :earned="true" :variant="variant" />
               <span class="badge__shine" aria-hidden="true"></span>
             </span>
           </span>

@@ -19,6 +19,7 @@ import { gsap } from '../src/composables/useMotion'
 import { CHOICE_QUESTION, SHELF, SPELLING_QUESTION, mapDsl } from './data'
 
 const MODULES = ['flashcard', 'choice', 'spelling'] as const
+const BADGE_VARIANTS = ['seal', 'wax', 'iron'] as const
 const LABELS = { flashcard: '翻卡', choice: '选择', spelling: '拼写' }
 
 const round = ref(0)
@@ -95,6 +96,11 @@ function toggleSlow(): void {
         :activating="false"
         @close="detailId = null"
       />
+
+      <section v-for="variant in BADGE_VARIANTS" :key="variant" class="lab-block">
+        <p class="lab-caption">徽章 · {{ variant }} 版（左三枚已解锁，右三枚未解锁）</p>
+        <BadgeWall :variant="variant" />
+      </section>
 
       <section class="lab-block">
         <p class="lab-caption">记忆训练 · 选词与拼写共用一块石板</p>

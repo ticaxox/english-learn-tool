@@ -4539,6 +4539,115 @@ html[data-theme='night'] .personal-workspace .badge__lock { background: #4a3d6b;
 html[data-theme='night'] .personal-workspace .badge.is-locked .badge__name { color: #9a8cb8; }
 html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { color: #8577a3; }
 
+/* ------------------------------------------------------------ badge dies */
+
+/* The emblem is the same drawing on three different discs: an enamel medal, a
+ * wax seal, or a riveted iron plate. */
+.personal-workspace .emblem {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.personal-workspace .emblem--seal .emblem__disc {
+  fill: var(--badge-accent, #ffc800);
+  stroke: rgb(53 36 15 / 22%);
+  stroke-width: 1.6;
+}
+
+.personal-workspace .emblem--seal .emblem__plate {
+  fill: #fff8e8;
+  stroke: rgb(53 36 15 / 16%);
+  stroke-width: 1.4;
+}
+
+.personal-workspace .emblem--seal .emblem__glyph {
+  fill: none;
+  stroke: #35240f;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The face that shows before the turn is always the silhouette, whatever the
+ * badge's state — that is what makes the flip mean something. */
+.personal-workspace .emblem--seal:not(.is-earned) .emblem__disc {
+  fill: #ded7c8;
+  stroke: #c7bda9;
+}
+
+.personal-workspace .emblem--seal:not(.is-earned) .emblem__plate {
+  fill: #ebe5d8;
+  stroke: #d3c9b6;
+}
+
+.personal-workspace .emblem--seal:not(.is-earned) .emblem__glyph { stroke: #9d9078; }
+
+/* Wax: pressed, slightly uneven, with a runnel down one side. */
+.personal-workspace .emblem--wax .emblem__disc {
+  fill: var(--badge-accent, #d63c3c);
+  fill-rule: evenodd;
+  filter: drop-shadow(0 3px 2px rgb(40 12 4 / 38%));
+}
+
+.personal-workspace .emblem--wax .emblem__plate {
+  fill: rgb(255 246 224 / 16%);
+  stroke: rgb(255 244 214 / 34%);
+  stroke-width: 1.2;
+}
+
+.personal-workspace .emblem--wax .emblem__glyph {
+  fill: none;
+  stroke: #fff3d6;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .emblem--wax .emblem__drip { fill: var(--badge-accent, #d63c3c); }
+
+/* Iron: a riveted plate, rim lit by the badge's own colour. */
+.personal-workspace .emblem--iron .emblem__disc {
+  fill: #3a3648;
+  stroke: #575069;
+  stroke-width: 2;
+}
+
+.personal-workspace .emblem--iron .emblem__rim {
+  fill: none;
+  stroke: var(--badge-accent, #ffc800);
+  stroke-width: 2;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 6px var(--badge-accent, #ffc800));
+}
+
+.personal-workspace .emblem--iron .emblem__plate {
+  fill: #2b2738;
+  stroke: #4b4560;
+  stroke-width: 1.2;
+}
+
+.personal-workspace .emblem--iron .emblem__rivet { fill: #9d93b8; }
+
+.personal-workspace .emblem--iron .emblem__glyph {
+  fill: none;
+  stroke: var(--badge-accent, #ffc800);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px var(--badge-accent, #ffc800));
+}
+
+/* Unearned: cold wax, unlit iron — still a shape, never a celebration. */
+.personal-workspace .emblem--wax:not(.is-earned) .emblem__disc { fill: #4a4453; filter: none; }
+.personal-workspace .emblem--wax:not(.is-earned) .emblem__plate { stroke: rgb(255 255 255 / 12%); }
+.personal-workspace .emblem--wax:not(.is-earned) .emblem__glyph { stroke: #8e8798; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__disc { fill: #2f2b3c; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__rim { stroke: #5d5670; opacity: 0.45; filter: none; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__glyph { stroke: #6f6884; filter: none; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__rivet { fill: #6b6480; }
+
 @media (prefers-reduced-motion: reduce) {
   .personal-workspace .badge.is-unlocked .badge__turn .badge__shine { animation: none; opacity: 0; }
   .personal-workspace .badge.is-unlocked .badge__medal,
