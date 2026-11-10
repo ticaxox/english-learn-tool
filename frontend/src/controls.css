@@ -110,7 +110,9 @@
 
 /* --------------------------------------------------------- inputs + selects */
 
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]),
+/* The spelling cell is a carved stone chip, so it is excluded here: this rule's
+   border shorthand would reset its border-image. */
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell),
 .personal-workspace textarea,
 .personal-workspace select {
   border: 1.5px solid var(--ui-line-strong);
@@ -120,11 +122,11 @@
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]):hover,
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell):hover,
 .personal-workspace textarea:hover,
 .personal-workspace select:hover { border-color: #c9ab80; }
 
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]):focus,
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell):focus,
 .personal-workspace textarea:focus,
 .personal-workspace select:focus {
   border-color: var(--g-orange-edge);
@@ -4089,116 +4091,236 @@
 .mistakes-empty { display: grid; justify-items: center; gap: 0.4rem; text-align: center; }
 .mistakes-empty__art { width: min(180px, 52%); height: auto; margin-bottom: 0.4rem; }
 
-/* ============================================================
-   Fill-blank question as a carved stone slab.
-   The slab and the option chips are generated artwork used as 9-slice
-   sources: the chipped edge and the groove live in the border band, so
-   only the flat middle stretches to fit the sentence and the options.
-   ============================================================ */
-.personal-workspace .practice-question-card--rune {
-  border: 0;
+/* ============================================================================
+   Question surfaces, two materials.
+
+   Memory practice (choice, spelling) sits on carved stone. The slab and the
+   chip are generated artwork used as 9-slice sources: the chipped edge and the
+   carved groove live in the border band, so only the flat middle stretches.
+
+   AI practice (fill-blank, reading, translation, writing) is a parchment
+   sheet. The rolls live in the border band for the same reason.
+
+   Both materials ship a day and a night render; the night one is used when the
+   operating system asks for a dark scheme.
+   ========================================================================= */
+
+/* ---------- parchment: an AI practice question on a sheet ---------- */
+/* One question is one unrolled scroll: portrait, so the wooden rolls at the top
+   and bottom keep their shape. Band widths are the measured slice of the art
+   (743x760: 11% top, 13% sides, 16% bottom) scaled to the card width.
+   The doubled class outranks the session-page card shell, whose border
+   shorthand would otherwise reset the border image. */
+.member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
+.member-practice-session-page .practice-question-card.practice-question-card--reading,
+.member-practice-session-page .practice-question-card.practice-question-card--translation,
+.member-practice-page .practice-question-card.practice-question-card--fill_blank,
+.member-practice-page .practice-question-card.practice-question-card--reading,
+.member-practice-page .practice-question-card.practice-question-card--translation {
+  width: min(100%, 720px);
+  margin-inline: auto;
+  background: #f3e3c3;
+  background-clip: padding-box;
+  box-shadow: none;
+  border-style: solid;
+  border-width: 80px 92px 116px;
+  border-image-source: url('./assets/halloween/card/scroll-day.png');
+  border-image-slice: 11% 13% 16% 13% fill;
+  border-image-width: 80px 92px 116px;
+  border-image-repeat: stretch;
+  border-color: transparent;
+  border-radius: 0;
+  padding: 0 4px;
+}
+
+/* Writing: the prompt is cut into a stone plaque, the answer is written on a
+   scroll below it. Two objects, not one frame around both. */
+.member-practice-session-page .practice-question-card.practice-question-card--writing,
+.member-practice-page .practice-question-card.practice-question-card--writing {
+  width: min(100%, 720px);
+  margin-inline: auto;
+  gap: 1.1rem;
   background: none;
   box-shadow: none;
-  padding: 0;
-}
-
-.personal-workspace .practice-question-card--rune::before { content: none; }
-
-.personal-workspace .practice-question-card--rune > * {
-  position: relative;
-}
-
-/* The slab itself: 44px band, flat middle fills with the stone colour. */
-.personal-workspace .practice-question-card--rune {
-  /* Matches the slab's stone centre: the fallback before the image lands, and
-     the surface a contrast check reads. */
-  background: #2a2148 !important;
-  border-style: solid;
-  border-width: 40px;
-  border-image-source: var(--rune-slab);
-  border-image-slice: 14% fill;
-  border-image-width: 40px;
-  border-image-repeat: stretch;
+  border-width: 0;
+  border-image-source: none;
   border-radius: 0;
-  color: #f3e9d2;
-}
-
-.personal-workspace .practice-question-card--rune .practice-question-card__header,
-.personal-workspace .practice-question-card--rune .practice-fill-blank,
-.personal-workspace .practice-question-card--rune .practice-options {
-  color: #f3e9d2;
-}
-
-.personal-workspace .practice-question-card--rune .practice-question-number {
-  color: #7cf0c4;
-  background: none;
-  border-color: #4a4270;
-}
-
-.personal-workspace .practice-question-card--rune .status-badge {
-  background: rgb(124 240 196 / 14%);
-  border-color: #4a7a6a;
-  color: #7cf0c4;
-}
-
-.personal-workspace .practice-question-card--rune .practice-sentence {
-  color: #f3e9d2;
-  font-family: Georgia, 'Times New Roman', serif;
-}
-
-.personal-workspace .practice-question-card--rune .practice-sentence mark,
-.personal-workspace .practice-question-card--rune .practice-sentence b {
-  color: #ffc93c;
-  background: none;
-  border-bottom: 2px solid #ffc93c;
-  padding-bottom: 1px;
-}
-
-.personal-workspace .practice-question-card--rune .practice-translation-note {
-  color: #d9cff5;
-  border-color: #4a4270;
-}
-
-/* Each option is the stone chip. */
-.personal-workspace .practice-question-card--rune .practice-option {
   padding: 0;
+}
+
+.member-practice-session-page .practice-question-card--writing .practice-writing,
+.member-practice-page .practice-question-card--writing .practice-writing {
+  background: #d9c7a4;
+  background-clip: padding-box;
+  border-style: solid;
+  border-width: 22px 30px;
+  border-image-source: url('./assets/halloween/card/rune-chip-day.png');
+  border-image-slice: 10% 5% fill;
+  border-image-width: 22px 30px;
+  border-image-repeat: stretch;
+  border-color: transparent;
+  border-radius: 0;
+  padding: 4px 6px 8px;
+  color: #3a2819;
+}
+
+.member-practice-session-page .practice-question-card--writing .field,
+.member-practice-page .practice-question-card--writing .field {
+  background: #f3e3c3;
+  background-clip: padding-box;
+  border-style: solid;
+  border-width: 46px 54px 68px;
+  border-image-source: url('./assets/halloween/card/scroll-day.png');
+  border-image-slice: 11% 13% 16% 13% fill;
+  border-image-width: 46px 54px 68px;
+  border-image-repeat: stretch;
+  border-color: transparent;
+  border-radius: 0;
+  padding: 0 4px;
+}
+
+/* Ink straight on the sheet, never a white box floating on it. */
+.member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
+.member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
+.member-practice-page .practice-question-card--writing .practice-answer-textarea,
+.member-practice-page .practice-question-card--translation .practice-answer-textarea {
+  background: transparent;
+  border-style: solid;
+  border-width: 0 0 1px;
+  border-color: rgb(122 92 48 / 45%);
+  border-radius: 0;
+  box-shadow: none;
+  color: #3d2c18;
+}
+
+/* The reading passage gets its own sheet, same stock, laid out wide.
+   The workspace panel rule paints a 2px border !important, and a border
+   shorthand takes the border image with it, so this has to answer in kind. */
+.member-practice-session-page .practice-article-panel,
+.member-practice-page .practice-article-panel {
+  background: #f3e3c3 !important;
+  background-clip: padding-box;
+  box-shadow: none !important;
   border-style: solid !important;
-  border-width: 12px 16px !important;
-  border-color: transparent !important;
-  border-image-source: var(--rune-chip) !important;
-  border-image-slice: 22% 8% fill !important;
-  border-image-width: 12px 16px !important;
+  border-width: 92px 120px 44px !important;
+  border-image-source: url('./assets/halloween/card/scroll-wide-day.png') !important;
+  border-image-slice: 13% 10% 6% 10% fill !important;
+  border-image-width: 92px 120px 44px !important;
   border-image-repeat: stretch !important;
+  border-color: transparent !important;
   border-radius: 0 !important;
-  background: none !important;
-  color: #f3e9d2;
-  transition: filter 140ms ease;
 }
 
-.personal-workspace .practice-question-card--rune .practice-option:hover { filter: brightness(1.25); }
-
-.personal-workspace .practice-question-card--rune .practice-option__body { padding: 8px 4px; }
-
-.personal-workspace .practice-question-card--rune .practice-option__text { color: #f3e9d2; }
-
-.personal-workspace .practice-question-card--rune .practice-option__input:checked ~ * ,
-.personal-workspace .practice-question-card--rune .practice-option.is-selected {
-  border-image-source: var(--rune-chip-on);
+@media (max-width: 760px) {
+  .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
+  .member-practice-session-page .practice-question-card.practice-question-card--reading,
+  .member-practice-session-page .practice-question-card.practice-question-card--translation,
+  .member-practice-page .practice-question-card.practice-question-card--fill_blank,
+  .member-practice-page .practice-question-card.practice-question-card--reading,
+  .member-practice-page .practice-question-card.practice-question-card--translation {
+    border-width: 46px 54px 68px; border-image-width: 46px 54px 68px;
+  }
+  .member-practice-session-page .practice-article-panel,
+  .member-practice-page .practice-article-panel {
+    border-width: 58px 74px 28px !important; border-image-width: 58px 74px 28px !important;
+  }
 }
 
-.personal-workspace .practice-question-card--rune .practice-option.is-selected,
-.personal-workspace .practice-question-card--rune .practice-option:has(input:checked) {
-  border-image-source: var(--rune-chip-on) !important;
-  filter: none;
-}
+.practice-article-panel .practice-article,
+.practice-article-panel .eyebrow { color: #3d2c18; }
 
-.personal-workspace .practice-question-card--rune .practice-option--correct {
-  border-image-source: var(--rune-chip-on) !important;
-}
+/* ---------- night ---------- */
+@media (prefers-color-scheme: dark) {
+  /* Doubled class so the night slab outranks the scoped day rule. */
+  .personal-workspace .study-card.study-card--choice,
+  .personal-workspace .study-card.study-card--spelling {
+    background: #2a2148;
+    border-image-source: url('./assets/halloween/card/rune-slab.png');
+    color: #f3e9d2;
+  }
 
-.personal-workspace .practice-question-card--rune .option-badge,
-.personal-workspace .practice-question-card--rune .practice-option .option-badge {
-  background: rgb(124 240 196 / 16%);
-  border-color: #4a7a6a;
-  color: #7cf0c4;
+  .personal-workspace .study-card--choice .choice-option,
+  .personal-workspace .study-card--spelling .spelling-cell {
+    background: #2a2148;
+    border-image-source: url('./assets/halloween/card/rune-chip.png');
+    color: #f3e9d2;
+  }
+
+  .personal-workspace .study-card--choice .choice-option:has(input:checked) {
+    border-image-source: url('./assets/halloween/card/rune-chip-on.png');
+  }
+
+  .study-card--choice .choice-option__label { color: #f3e9d2; }
+
+  .study-card--spelling .spelling-cell--prefilled {
+    background: #241c3d;
+    color: #b9a6e6;
+  }
+
+  .study-card--spelling .spelling-cell--active {
+    background: #7cf0c4;
+    color: #1a1330;
+  }
+
+  .study-card--spelling .spell-head__prompt,
+  .study-card--spelling .spell-head__eyebrow,
+  .study-card--spelling .spell-head__phonetic,
+  .study-card--spelling .spell-head__hint { color: #f3e9d2; }
+
+  .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
+  .member-practice-session-page .practice-question-card.practice-question-card--reading,
+  .member-practice-session-page .practice-question-card.practice-question-card--translation,
+  .member-practice-page .practice-question-card.practice-question-card--fill_blank,
+  .member-practice-page .practice-question-card.practice-question-card--reading,
+  .member-practice-page .practice-question-card.practice-question-card--translation {
+    background: #4a4034;
+    border-image-source: url('./assets/halloween/card/scroll-night.png');
+  }
+
+  .member-practice-session-page .practice-article-panel,
+  .member-practice-page .practice-article-panel {
+    background: #4a4034 !important;
+    border-image-source: url('./assets/halloween/card/scroll-wide-night.png') !important;
+  }
+
+  .member-practice-session-page .practice-question-card--writing .practice-writing,
+  .member-practice-page .practice-question-card--writing .practice-writing {
+    background: #2a2148;
+    border-image-source: url('./assets/halloween/card/rune-chip.png');
+    color: #f3e9d2;
+  }
+
+  .member-practice-session-page .practice-question-card--writing .field,
+  .member-practice-page .practice-question-card--writing .field {
+    background: #4a4034;
+    border-image-source: url('./assets/halloween/card/scroll-night.png');
+  }
+
+  .member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
+  .member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
+  .member-practice-page .practice-question-card--writing .practice-answer-textarea,
+  .member-practice-page .practice-question-card--translation .practice-answer-textarea {
+    color: #f0e4cc;
+    border-color: rgb(240 228 204 / 32%);
+  }
+
+  .practice-question-card--fill_blank .practice-sentence,
+  .practice-question-card--translation .practice-prompt-text,
+  .practice-question-card--writing .practice-prompt-text,
+  .practice-question-card--reading .practice-article,
+  .practice-question-card--reading .practice-reading h3,
+  .practice-question-card--fill_blank .practice-option__text,
+  .practice-question-card--reading .practice-option__text,
+  .practice-question-card--translation .practice-answer-textarea,
+  .practice-question-card--writing .practice-answer-textarea,
+  .practice-article-panel .practice-article { color: #f0e4cc; }
+
+  .practice-question-card--fill_blank .status-badge,
+  .practice-question-card--reading .status-badge,
+  .practice-question-card--translation .status-badge,
+  .practice-question-card--writing .status-badge {
+    background: #3f3560;
+    border-color: #6b5aa8;
+    color: #d9cff5;
+  }
 }

@@ -39,8 +39,15 @@ export const practiceBooks: PracticeArt = {
 }
 
 import runeSlab from './card/rune-slab.png'
+import runeSlabDay from './card/rune-slab-day.png'
 import runeChip from './card/rune-chip.png'
 import runeChipOn from './card/rune-chip-on.png'
+import runeChipDay from './card/rune-chip-day.png'
+import runeChipOnDay from './card/rune-chip-on-day.png'
+import scrollDay from './card/scroll-day.png'
+import scrollNight from './card/scroll-night.png'
+import scrollWideDay from './card/scroll-wide-day.png'
+import scrollWideNight from './card/scroll-wide-night.png'
 import wordbookCoverDay from './card/wordbook-cover-day.png'
 import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
@@ -58,10 +65,22 @@ export const questionCard = {
  * chipped edge and the groove sit in the border band, the flat middle stretches.
  */
 export const runeStone = {
-  slab: runeSlab,
-  chip: runeChip,
-  chipOn: runeChipOn,
+  slab: { day: runeSlabDay, night: runeSlab },
+  chip: { day: runeChipDay, night: runeChip },
+  chipOn: { day: runeChipOnDay, night: runeChipOn },
 } as const
+
+/** The question surface for the AI exercise types: one sheet, text lives on it. */
+export const parchment: ThemeMode = {
+  day: scrollDay,
+  night: scrollNight,
+}
+
+/** The same sheet on its side, for a passage that runs wide. */
+export const parchmentWide: ThemeMode = {
+  day: scrollWideDay,
+  night: scrollWideNight,
+}
 
 /** A wordbook cover with nothing printed on it; the title and badges sit on top. */
 export const wordbookCover: ThemeMode = {

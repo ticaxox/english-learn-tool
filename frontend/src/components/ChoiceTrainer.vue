@@ -111,13 +111,29 @@ function choose(optionId: string): void {
 <style scoped>
 .study-card--choice {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.2rem;
   max-width: 720px;
   margin: 0 auto;
-  padding: 0;
+  padding: 30px 26px;
+  /* The slab is generated artwork used as a 9-slice source: the chipped edge
+     and the carved groove sit in the border band, only the flat middle
+     stretches. The filled colour is the stone under the image, so a slow load
+     never flashes the page background. */
   border: 0;
-  background: none;
+  border-style: solid;
+  border-width: 46px;
+  border-color: transparent;
+  border-image-source: url('../assets/halloween/card/rune-slab-day.png');
+  border-image-slice: 12% fill;
+  border-image-width: 46px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  /* The colour is the stone under the image. Clipped to the padding box so it
+     cannot show as a rectangle through the chipped edge. */
+  background: #d9c7a4;
+  background-clip: padding-box;
   box-shadow: none;
+  color: #3a2819;
 }
 
 .choice-head {
@@ -132,7 +148,7 @@ function choose(optionId: string): void {
   font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #a08a6a;
+  color: #7a6647;
 }
 
 .choice-head__prompt {
@@ -142,14 +158,14 @@ function choose(optionId: string): void {
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: #2f2013;
+  color: #3a2819;
 }
 
 .choice-head__phonetic {
   margin: 0;
   font-family: ui-monospace, Consolas, monospace;
   font-size: 0.94rem;
-  color: #7a6448;
+  color: #6c573a;
 }
 
 /* Options are answer tiles on the table, not a vertical form list. */
@@ -178,33 +194,52 @@ function choose(optionId: string): void {
   pointer-events: none;
 }
 
+/* Each option is its own stone chip. The parent selector is here for
+   specificity: game-ui.css sets the same properties on .choice-option and wins
+   on load order otherwise. */
+.study-card--choice .choice-option {
+  border-style: solid;
+  border-width: 14px 20px;
+  border-color: transparent;
+  border-image-source: url('../assets/halloween/card/rune-chip-day.png');
+  /* `fill` so the chip's own stone face shows through: the artwork is the
+     whole object, not a frame around a colour. */
+  border-image-slice: 10% 5% fill;
+  border-image-width: 14px 20px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: none;
+  /* A real drop-shadow follows the chipped silhouette, which a box-shadow
+     cannot — it would print a pale rectangle through the gaps. */
+  filter: drop-shadow(0 2px 0 rgb(122 92 48 / 45%));
+  box-shadow: none;
+}
+
+.study-card--choice .choice-option:has(input:checked) {
+  border-image-source: url('../assets/halloween/card/rune-chip-on-day.png');
+  filter: drop-shadow(0 3px 6px rgb(122 92 48 / 55%));
+}
+
 .choice-option__face {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.85rem;
   align-items: center;
-  padding: 1.05rem 1.15rem;
-  border: 2px solid #3b2a1a;
-  border-radius: 14px;
-  background: #fffdf6;
-  box-shadow: 0 5px 0 #d8c3a0;
-  transition: transform 120ms ease, box-shadow 120ms ease, background 160ms ease;
+  padding: 0.9rem 0.8rem;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  transition: filter 140ms ease;
 }
 
-.choice-option:hover .choice-option__face {
-  transform: translateY(-2px);
-  box-shadow: 0 7px 0 #d8c3a0;
-}
-
-.choice-option:active .choice-option__face {
-  transform: translateY(3px);
-  box-shadow: 0 2px 0 #d8c3a0;
-}
+.study-card--choice .choice-option:hover { filter: brightness(1.08) drop-shadow(0 3px 6px rgb(122 92 48 / 50%)); }
+.study-card--choice .choice-option:active { filter: brightness(0.96); }
 
 .choice-option__label {
   font-size: 1.06rem;
   font-weight: 700;
-  color: #2f2013;
+  color: #3a2819;
   line-height: 1.4;
 }
 
@@ -214,8 +249,8 @@ function choose(optionId: string): void {
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  background: #ddf7e1;
-  color: #1f8a30;
+  background: #c98a2e;
+  color: #fff8e8;
   opacity: 0;
   transform: scale(0.5);
   transition: opacity 160ms ease, transform 200ms cubic-bezier(0.2, 0.9, 0.25, 1.4);
@@ -223,11 +258,7 @@ function choose(optionId: string): void {
 
 .choice-option__tick svg { width: 14px; height: 14px; }
 
-.choice-option--selected .choice-option__face {
-  border-color: #1f8a30;
-  background: #f0fdf2;
-  box-shadow: 0 5px 0 #9ed4a8;
-}
+.choice-option--selected .choice-option__face { filter: none; }
 
 .choice-option--selected .choice-option__tick {
   opacity: 1;

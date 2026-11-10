@@ -295,7 +295,9 @@
 
 /* ------------------------------------------------------------------ forms */
 
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]),
+/* The spelling cell is carved stone, so it opts out: this `border` shorthand
+   would reset its border-image. */
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell),
 .personal-workspace textarea,
 .personal-workspace select {
   border: 2px solid var(--ui-line);
@@ -624,8 +626,11 @@
 
 /* The card owns its own faces, so this plate is gone: a card inside a rounded
    panel read as a box in a box. Only the padding reset stays. */
-.personal-workspace .study-card,
-.personal-workspace .memory-main-card .study-card {
+/* The card face is gone everywhere except the two materials that draw their
+   own: the stone slab under choice and spelling. Those opt out here, because a
+   zero border-width would leave the slab's band nowhere to paint. */
+.personal-workspace .study-card:not(.study-card--choice):not(.study-card--spelling),
+.personal-workspace .memory-main-card .study-card:not(.study-card--choice):not(.study-card--spelling) {
   padding: 0;
   border: 0 !important;
   border-radius: 0 !important;
@@ -659,12 +664,17 @@
 .personal-workspace .choice-option,
 .personal-workspace .practice-option {
   min-height: 58px;
-  border: 2px solid var(--ui-line) !important;
-  border-radius: 16px !important;
-  background: var(--ui-surface) !important;
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--ui-line);
+  border-radius: 16px;
+  background: var(--ui-surface);
   box-shadow: 0 3px 0 var(--ui-line);
   transition: transform 90ms ease, box-shadow 90ms ease, border-color 120ms ease;
 }
+
+/* Longhands above on purpose: the old `border` shorthand here reset
+   border-image, which silently removed the stone chip from every option. */
 
 /* Inside the carved-stone question the option is the chip artwork, so this
    plate must let go of its radius and fill. Longhands only: the `border`
@@ -682,14 +692,14 @@
 
 .personal-workspace .choice-option:hover,
 .personal-workspace .practice-option:hover {
-  border-color: #d9c19c !important;
-  background: var(--ui-surface-subtle) !important;
+  border-color: #d9c19c;
+  background: var(--ui-surface-subtle);
 }
 
 .personal-workspace .choice-option--selected,
 .personal-workspace .practice-option:has(input:checked) {
-  border-color: var(--g-blue-edge) !important;
-  background: var(--g-blue-soft) !important;
+  border-color: var(--g-blue-edge);
+  background: var(--g-blue-soft);
   box-shadow: inset 0 0 0 1px var(--g-blue-edge), 0 3px 0 var(--g-blue-edge);
 }
 
@@ -1660,22 +1670,35 @@
 
 /* The spelling trainer uses one input per letter; the shared text-field width
    rule must not stretch them. */
+/* The letter cell is a stone chip. Longhands, because a `border` shorthand any
+   later in the cascade would reset border-image and blank the chip. */
 .personal-workspace .spelling-grid input.spelling-cell {
-  width: 2.4rem;
-  min-width: 2.4rem;
-  height: 2.9rem;
+  width: 3.1rem;
+  min-width: 3.1rem;
+  height: 3.6rem;
   min-height: 0;
   padding: 0;
-  border-radius: 10px;
+  border-style: solid;
+  border-width: 7px 9px;
+  border-color: transparent;
+  border-image-source: url('./assets/halloween/card/rune-chip-day.png');
+  border-image-slice: 10% 5%;
+  border-image-width: 7px 9px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: #cbb68c;
+  background-clip: padding-box;
+  box-shadow: none;
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.32rem;
   font-weight: 700;
+  color: #3a2819;
 }
 
 .personal-workspace .spelling-cell--prefilled {
   display: grid;
-  width: 2.4rem;
-  height: 2.9rem;
+  width: 3.1rem;
+  height: 3.6rem;
   place-items: center;
 }
 
@@ -3012,8 +3035,9 @@
   margin-inline: auto;
 }
 
-/* The trainer card already lives inside the memory card: no second frame. */
-.personal-workspace .memory-page .memory-main-card .study-card {
+/* The trainer card already lives inside the memory card: no second frame.
+   The two material cards draw their own stone, so they opt out. */
+.personal-workspace .memory-page .memory-main-card .study-card:not(.study-card--choice):not(.study-card--spelling) {
   min-height: 0;
   padding: 0;
   border: 0 !important;
@@ -4287,7 +4311,7 @@
 /* The trainer draws its own card face; this layer only centres it on the page.
    It used to add a second plate, which put a rounded card inside a rounded
    panel — two boxes for one object. */
-.personal-workspace .memory-page .memory-main-card .study-card {
+.personal-workspace .memory-page .memory-main-card .study-card:not(.study-card--choice):not(.study-card--spelling) {
   display: grid;
   width: 100%;
   margin-inline: auto;

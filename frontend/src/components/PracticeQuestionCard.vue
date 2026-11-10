@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import { PRACTICE_TYPE_LABELS, type PracticeOption, type PracticeQuestion } from '../api/practice'
 import OptionBadge from './OptionBadge.vue'
 import SpokenText from './SpokenText.vue'
-import { runeStone } from '../assets/halloween'
 
 const props = defineProps<{
   question: PracticeQuestion
@@ -32,19 +31,6 @@ const optionLayout = computed<'four' | 'two' | 'one'>(() => {
   if (longest <= 32) return 'two'
   return 'one'
 })
-
-const isRune = computed(() => props.question.questionType === 'fill_blank')
-
-/** Loaded as CSS variables so the border-image slices are set from the import. */
-const runeVars = computed(() =>
-  isRune.value
-    ? {
-        '--rune-slab': `url(${runeStone.slab})`,
-        '--rune-chip': `url(${runeStone.chip})`,
-        '--rune-chip-on': `url(${runeStone.chipOn})`,
-      }
-    : {},
-)
 
 const correctId = computed(() => props.review?.correct ?? null)
 const selectedId = computed(() => props.review?.selected ?? props.modelValue)
@@ -76,8 +62,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
 <template>
   <section
     class="practice-question-card"
-    :class="{ panel: !isRune, 'practice-question-card--rune': isRune }"
-    :style="runeVars"
+    :class="[`practice-question-card--${question.questionType}`]"
     :aria-labelledby="promptId"
   >
     <header class="practice-question-card__header">

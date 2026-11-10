@@ -156,7 +156,7 @@ function submit(): void {
 <template>
   <section class="study-card study-card--spelling" aria-labelledby="spelling-definition">
     <div class="spell-head">
-      <span class="spell-head__eyebrow">按提示拼写</span>
+      <span class="spell-head__eyebrow">拼写</span>
       <h2 id="spelling-definition" class="spell-head__prompt" tabindex="-1">{{ props.question.definition }}</h2>
       <p v-if="props.question.phonetic" class="spell-head__phonetic">{{ props.question.phonetic }}</p>
       <p class="spell-head__hint">{{ blankLabel }}</p>
@@ -197,13 +197,24 @@ function submit(): void {
 <style scoped>
 .study-card--spelling {
   display: grid;
-  gap: 1.6rem;
+  gap: 1.2rem;
   max-width: 720px;
   margin: 0 auto;
-  padding: 0;
+  padding: 30px 26px;
+  /* Same carved stone as the choice card: 9-slice artwork, flat middle. */
   border: 0;
-  background: none;
+  border-style: solid;
+  border-width: 46px;
+  border-color: transparent;
+  border-image-source: url('../assets/halloween/card/rune-slab-day.png');
+  border-image-slice: 12% fill;
+  border-image-width: 46px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: #d9c7a4;
+  background-clip: padding-box;
   box-shadow: none;
+  color: #3a2819;
 }
 
 .spell-head {
@@ -218,7 +229,7 @@ function submit(): void {
   font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #a08a6a;
+  color: #7a6647;
 }
 
 .spell-head__prompt {
@@ -227,7 +238,7 @@ function submit(): void {
   font-size: clamp(1.4rem, 3.6vw, 2rem);
   font-weight: 700;
   line-height: 1.3;
-  color: #2f2013;
+  color: #3a2819;
   max-width: 34ch;
 }
 
@@ -235,14 +246,14 @@ function submit(): void {
   margin: 0;
   font-family: ui-monospace, Consolas, monospace;
   font-size: 0.94rem;
-  color: #7a6448;
+  color: #6c573a;
 }
 
 .spell-head__hint {
   margin: 0;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #9d8663;
+  color: #6c573a;
 }
 
 /* Letter slots sit on the table like tiles, so each one reads as a cell to fill. */
@@ -256,41 +267,44 @@ function submit(): void {
 .spelling-cell {
   display: grid;
   place-items: center;
-  width: clamp(2.4rem, 6vw, 3.1rem);
-  height: clamp(2.9rem, 7vw, 3.7rem);
+  width: clamp(2.6rem, 6.4vw, 3.3rem);
+  height: clamp(3rem, 7.2vw, 3.8rem);
   padding: 0;
-  border: 2px solid #3b2a1a;
-  border-radius: 10px;
-  background: #fffdf6;
-  box-shadow: 0 4px 0 #d8c3a0;
+  /* Each letter sits in its own stone chip. */
+  border-style: solid;
+  border-width: 10px 12px;
+  border-color: transparent;
+  border-image-source: url('../assets/halloween/card/rune-chip-day.png');
+  border-image-slice: 10% 5%;
+  border-image-width: 10px 12px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: #cbb68c;
+  background-clip: padding-box;
+  box-shadow: none;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(1.2rem, 3vw, 1.55rem);
   font-weight: 700;
-  color: #2f2013;
+  color: #3a2819;
   text-align: center;
   text-transform: lowercase;
-  transition: transform 110ms ease, box-shadow 110ms ease, border-color 140ms ease;
+  transition: filter 120ms ease;
 }
 
 .spelling-cell--prefilled {
-  border-color: #c9b492;
-  border-style: dashed;
-  background: #f6ecd8;
-  color: #8a7457;
-  box-shadow: 0 4px 0 #e0d0b2;
+  background: #b8a273;
+  color: #4e3d24;
 }
 
 .spelling-cell--active {
-  border-color: #1f8a30;
-  background: #f0fdf2;
-  box-shadow: 0 4px 0 #9ed4a8, 0 0 0 3px rgb(31 138 48 / 18%);
-  transform: translateY(-2px);
+  background: #c98a2e;
+  color: #fff8e8;
+  box-shadow: inset 0 0 0 2px #8f5f18;
 }
 
 .spelling-cell:focus-visible {
-  outline: none;
-  border-color: #1cb0f6;
-  box-shadow: 0 4px 0 #8fd0ee, 0 0 0 3px rgb(28 176 246 / 22%);
+  outline: 2px solid #8f5f18;
+  outline-offset: 2px;
 }
 
 .spelling-cell:disabled { opacity: 0.6; }
