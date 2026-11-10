@@ -64,6 +64,8 @@ onUnmounted(() => {
 const map = computed(() => parseChallengeMapDsl(props.dsl))
 
 const isBoss = (node: ChallengeMapNode): boolean => node.typeLabel.includes('终点')
+/** Matches the server's award table: boss 50 XP, ordinary nodes 20. */
+const nodeReward = (node: ChallengeMapNode): number => (isBoss(node) ? 50 : 20)
 
 const depths = computed(() => {
   const byId = new Map(map.value.nodes.map((node) => [node.id, node]))
@@ -353,6 +355,14 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
           <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
           <span class="visually-hidden">{{ placed.node.title }}</span>
+          <span
+            v-if="nodeReward(placed.node) > 0"
+            class="challenge-dsl-reward"
+            :class="{ 'is-earned': placed.node.statusKey === 'completed' }"
+            aria-hidden="true"
+          >
+            +{{ nodeReward(placed.node) }}
+          </span>
           <span
             v-if="placed.node.statusKey === 'completed' && placed.node.stars > 0"
             class="challenge-dsl-stars"

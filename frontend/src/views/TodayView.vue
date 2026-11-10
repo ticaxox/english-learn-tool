@@ -16,7 +16,6 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
 import StudyStatsPanel from '../components/StudyStatsPanel.vue'
-import ProgressCard from '../components/ProgressCard.vue'
 import GameHud from '../components/GameHud.vue'
 import BadgeWall from '../components/BadgeWall.vue'
 import WeeklyReport from '../components/WeeklyReport.vue'
@@ -103,15 +102,14 @@ const todayTasks = computed(() => {
   }))
 })
 
-const newWordsTask = computed(() => todayTasks.value.find((task) => task.key === 'new-words') ?? null)
-
 const activeTaskIndex = computed(() => {
   const index = todayTasks.value.findIndex((task) => !task.done)
   return index === -1 ? todayTasks.value.length - 1 : index
 })
 
-
 const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? null)
+/** The ring tracks whichever quest the learner should do next. */
+const ringTask = computed(() => primaryTask.value ?? todayTasks.value[0] ?? null)
 const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
 
 async function load(createIfMissing = false): Promise<void> {
@@ -196,7 +194,12 @@ onMounted(() => {
             <li v-for="(task, index) in todayTasks" :key="task.key" :class="{ 'is-done': task.done }">
               <RouterLink :to="task.to" class="crumb-task-row">
                 <span class="crumb-task-state" aria-hidden="true">{{ task.done ? '✓' : index + 1 }}</span>
-                <span class="crumb-task-title">{{ task.title }}</span>
+                <span class="crumb-task-body">
+                  <span class="crumb-task-title">{{ task.title }}</span>
+                  <span class="crumb-task-bar" aria-hidden="true">
+                    <span :style="{ width: `${task.percent}%` }"></span>
+                  </span>
+                </span>
                 <span class="crumb-task-value">{{ task.completed }} / {{ task.target }} {{ task.unit }}</span>
               </RouterLink>
             </li>
@@ -204,15 +207,14 @@ onMounted(() => {
         </div>
 
         <aside class="crumb-merged-side crumb-today-side">
-          <ProgressCard />
           <div class="crumb-merged-ring">
             <GoalRing
-              v-if="newWordsTask"
-              :value="newWordsTask.completed"
-              :max="newWordsTask.target"
+              v-if="ringTask"
+              :value="ringTask.completed"
+              :max="ringTask.target"
               :size="128"
               :stroke="11"
-              caption="新词"
+              :caption="ringTask.label"
             />
             <div class="crumb-merged-stamp">
               <span>{{ plan.localDate }}</span>

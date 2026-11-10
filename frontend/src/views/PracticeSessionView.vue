@@ -19,6 +19,7 @@ import {
   type PracticeAnswerInput,
 } from '../api/practice'
 import PracticeTopBar from '../components/PracticeTopBar.vue'
+import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { fetchProgress } from '../api/progress'
 import { crumbBurst, popIn } from '../composables/useMotion'
 import '../practice.css'
@@ -126,6 +127,7 @@ function answerPayload(): PracticeAnswerInput[] {
 }
 
 const award = ref<{ xp: number; crumbs: number; from: number; to: number } | null>(null)
+const levelUp = ref<{ level: number; title: string } | null>(null)
 
 async function submit(): Promise<void> {
   award.value = null
@@ -161,6 +163,9 @@ async function submit(): Promise<void> {
         await nextTick()
         popIn(document.querySelector('.practice-award'), { y: 10, scale: 0.94 })
         if (xp > 0) crumbBurst(document.querySelector('.practice-award'))
+        if (after.level.level > before.level.level) {
+          levelUp.value = { level: after.level.level, title: after.level.title }
+        }
       }
     }
   }
@@ -249,6 +254,12 @@ void practice.load()
       </section>
 
       <template v-else-if="result">
+        <LevelUpOverlay
+          v-if="levelUp"
+          :level="levelUp.level"
+          :title="levelUp.title"
+          @close="levelUp = null"
+        />
         <p v-if="award" class="practice-award" :class="{ 'is-levelup': award.to > award.from }" role="status">
           <span v-if="award.to > award.from" class="practice-award__levelup">
             升级到 Lv.{{ award.to }}！
