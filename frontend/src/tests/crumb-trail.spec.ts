@@ -24,11 +24,12 @@ const book: Wordbook = {
 }
 
 describe('T-FE-018 CrumbTrail IP depth', () => {
-  it('renames the member brand and gives Crumbo a reusable vector mark', () => {
+  it('renames the member brand and gives Crumbo one reusable mark', () => {
     const shell = source('../components/MemberShell.vue')
     expect(shell).toContain('CrumbTrail')
     expect(shell).toContain('CrumboMark')
-    expect(source('../components/CrumboMark.vue')).toContain('<svg')
+    // The mascot is the drawn character (day/night), not a second vector sketch.
+    expect(source('../components/CrumboMark.vue')).toContain('illustration.crumbo')
   })
 
   it('uses a crumb trail, not the old generic Today workbench', () => {
