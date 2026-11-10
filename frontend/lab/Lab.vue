@@ -20,6 +20,7 @@ import { CHOICE_QUESTION, SHELF, SPELLING_QUESTION, mapDsl } from './data'
 
 const MODULES = ['flashcard', 'choice', 'spelling'] as const
 const BADGE_VARIANTS = ['seal', 'wax', 'iron'] as const
+const MAP_VARIANTS = ['coin', 'iron', 'lantern'] as const
 const LABELS = { flashcard: '翻卡', choice: '选择', spelling: '拼写' }
 
 const round = ref(0)
@@ -117,9 +118,9 @@ function toggleSlow(): void {
         </div>
       </section>
 
-      <section class="lab-block">
-        <p class="lab-caption">地图 · 当前节点脉冲 + 走一步</p>
-        <ChallengeDslMap :key="`map-${round}`" :dsl="mapDsl(cleared)" @select="() => {}" />
+      <section v-for="variant in MAP_VARIANTS" :key="variant" class="lab-block">
+        <p class="lab-caption">地图 · {{ variant }} 版</p>
+        <ChallengeDslMap :key="`map-${variant}-${round}`" :variant="variant" :dsl="mapDsl(cleared)" @select="() => {}" />
       </section>
 
       <section :key="`extras-${round}`" class="today-extras lab-extras">

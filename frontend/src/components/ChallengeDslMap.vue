@@ -12,7 +12,7 @@ import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
 import { bump, drawPaths, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
-const props = defineProps<{ dsl: string }>()
+const props = withDefaults(defineProps<{ dsl: string; variant?: 'coin' | 'iron' | 'lantern' }>(), { variant: 'lantern' })
 const emit = defineEmits<{ select: [id: string] }>()
 
 const NODE = 80
@@ -513,7 +513,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
 </script>
 
 <template>
-  <section class="challenge-dsl-map panel" aria-label="闯关地图">
+  <section class="challenge-dsl-map panel" :class="`challenge-dsl-map--${variant}`" aria-label="闯关地图">
     <header class="challenge-dsl-map__head">
       <div>
         <p class="challenge-dsl-summary">

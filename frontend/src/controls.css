@@ -2524,6 +2524,83 @@
   50% { transform: scale(1.08); }
 }
 
+/* ------------------------------------------------------- map node dies */
+
+/* `coin` is the flat arcade stop the map shipped with. The two dies below
+ * reuse the language of the badge discs so the trail and the wall agree. */
+
+/* iron: a riveted plate, its rim lit by how far the learner has got. */
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card {
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 50%, #34304a 0 62%, transparent 62%),
+    #232030;
+  box-shadow: inset 0 0 0 3px #4b4560, 0 6px 0 #16141f;
+  color: #b9aee0;
+}
+
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-completed {
+  background:
+    radial-gradient(circle at 50% 50%, #3b3218 0 62%, transparent 62%),
+    #232030;
+  box-shadow: inset 0 0 0 3px #ffd166, 0 6px 0 #16141f, 0 0 16px rgb(255 209 102 / 45%);
+  color: #ffd166;
+}
+
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-in_progress,
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-unlocked {
+  background:
+    radial-gradient(circle at 50% 50%, #1d3a30 0 62%, transparent 62%),
+    #232030;
+  box-shadow: inset 0 0 0 3px #3ad183, 0 6px 0 #16141f, 0 0 16px rgb(58 209 131 / 40%);
+  color: #7cf0c4;
+}
+
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-failed {
+  box-shadow: inset 0 0 0 3px #ff6f6f, 0 6px 0 #16141f;
+  color: #ffb3ab;
+}
+
+/* Rivets, drawn as eight dots around the plate. */
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card::before {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle 2.4px at 50% 3%, #9d93b8 98%, transparent 100%),
+    radial-gradient(circle 2.4px at 97% 50%, #9d93b8 98%, transparent 100%),
+    radial-gradient(circle 2.4px at 50% 97%, #9d93b8 98%, transparent 100%),
+    radial-gradient(circle 2.4px at 3% 50%, #9d93b8 98%, transparent 100%);
+  content: "";
+  pointer-events: none;
+}
+
+/* lantern: a lit paper orb; the light is the status. */
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card {
+  border: 0;
+  background: radial-gradient(circle at 50% 38%, #3a3352, #241f36 78%);
+  box-shadow: inset 0 0 0 4px #4b4560, 0 6px 0 #16141f;
+  color: #b9aee0;
+}
+
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-completed {
+  background: radial-gradient(circle at 50% 40%, #ffe9a8, #ff9600 72%, #c96a12 100%);
+  box-shadow: inset 0 0 0 4px #ffd166, 0 6px 0 #8a4b0a, 0 0 22px rgb(255 150 0 / 55%);
+  color: #4a2a00;
+}
+
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-in_progress,
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-unlocked {
+  background: radial-gradient(circle at 50% 40%, #d6ffe6, #3ad183 72%, #1f9558 100%);
+  box-shadow: inset 0 0 0 4px #7cf0c4, 0 6px 0 #14603c, 0 0 22px rgb(58 209 131 / 50%);
+  color: #0f3a24;
+}
+
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-failed {
+  background: radial-gradient(circle at 50% 40%, #ffd9d4, #ff6f6f 72%, #b23333 100%);
+  color: #4a1010;
+}
+
 /* Crumbo perches on top of the stop it stands on, clear of the reward tag. */
 .challenge-dsl-guide {
   position: absolute;
