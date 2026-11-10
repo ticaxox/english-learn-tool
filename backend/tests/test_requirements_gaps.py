@@ -187,3 +187,57 @@ async def test_badges_unlock_from_real_activity(client, app, member_user) -> Non
     badges = {item["key"]: item for item in listed}
     assert badges["first_lesson"]["unlocked"] is True
     assert badges["streak_3"]["unlocked"] is False
+
+
+async def test_direction_request_skips_the_pre_generated_pool(client, app, member_user) -> None:
+    from uuid import UUID
+
+    from app.models.practice import PracticePoolItem, PracticeSession
+
+    headers = await login(client, member_user.username)
+    wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
+    await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)
+
+    # Seed a claimable pool row directly; the generation job is not the subject here.
+    async with app.state.session_factory() as session:
+        pool_session = PracticeSession(
+            user_id=member_user.id,
+            practice_type="translation",
+            source="whole_book",
+            wordbook_id=UUID(wordbook_id),
+            question_count=3,
+            status="ready",
+            generation_number=1,
+            source_context={"practice_type": "translation", "count": 3, "pre_generated": True},
+            idempotency_key=f"pool-seed-{uuid4().hex}",
+            request_hash="0" * 64,
+            is_pool=True,
+        )
+        session.add(pool_session)
+        await session.flush()
+        session.add(
+            PracticePoolItem(
+                user_id=member_user.id,
+                practice_type="translation",
+                question_count=3,
+                session_id=pool_session.id,
+            )
+        )
+        await session.commit()
+        seeded_id = pool_session.id
+
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        created = await client.post(
+            "/api/v1/practice/sessions",
+            headers={**headers, "Idempotency-Key": f"pool-skip-{uuid4().hex}"},
+            json={
+                "practice_type": "translation",
+                "source": "whole_book",
+                "count": 3,
+                "translation_direction": "zh_to_en",
+            },
+        )
+    assert created.status_code == 202, created.text
+    assert created.json()["id"] != str(seeded_id)
+    assert created.json()["translation_direction"] == "zh_to_en"

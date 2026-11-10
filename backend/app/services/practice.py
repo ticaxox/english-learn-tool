@@ -371,9 +371,16 @@ async def create_practice_session(
             )
         return await _session_response(session, existing)
 
-    claimed = await claim_pool_session(
-        session, user, payload, idempotency_key=idempotency_key, request_hash=request_hash
+    # A pre-generated set never carried the new direction/length options, so it
+    # is only reused when the learner did not ask for them.
+    wants_custom_shape = (
+        payload.translation_direction is not None or payload.writing_target_words is not None
     )
+    claimed = None
+    if not wants_custom_shape:
+        claimed = await claim_pool_session(
+            session, user, payload, idempotency_key=idempotency_key, request_hash=request_hash
+        )
     if claimed is not None:
         # Refill the pool in the background; claiming must not wait for it.
         try:
