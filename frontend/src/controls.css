@@ -4661,6 +4661,19 @@ html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { col
 
 .personal-workspace .emblem--seal:not(.is-earned) .emblem__glyph { stroke: #9d9078; }
 
+/* At night an unearned seal is cold iron too, not bright stone. */
+html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .emblem__disc {
+  fill: #3b3054;
+  stroke: #4f4270;
+}
+
+html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .emblem__plate {
+  fill: #332a4b;
+  stroke: #473a66;
+}
+
+html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .emblem__glyph { stroke: #8c7dad; }
+
 /* Wax: pressed, slightly uneven, with a runnel down one side. */
 .personal-workspace .emblem--wax .emblem__disc {
   fill: var(--badge-accent, #d63c3c);
