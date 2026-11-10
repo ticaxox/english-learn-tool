@@ -211,51 +211,21 @@ async def test_coach_receives_matching_snippets(client, app, admin_user, member_
     assert "夜市" in job.input_context["knowledge_snippets"][0]
 
 
-async def test_private_uploads_stay_private(client, admin_user, member_user, user_factory) -> None:
-    member_headers = await login(client, member_user.username)
-    other = await user_factory(role="member")
-    other_headers = await login(client, other.username)
+async def test_only_exam_papers_enter_the_corpus(client, admin_user, member_user) -> None:
+    """A wordbook or a learner's note is rejected, not stored under another type."""
+    admin_headers = await login(client, admin_user.username)
+    for rejected in ("wordbook", "upload"):
+        response = await client.post(
+            "/api/v1/admin/knowledge",
+            headers=admin_headers,
+            json={"source_type": rejected, "title": "不该入库", "content": "正文"},
+        )
+        assert response.status_code == 422, response.text
 
-    uploaded = await client.post(
+    member_headers = await login(client, member_user.username)
+    closed = await client.post(
         "/api/v1/me/knowledge",
         headers=member_headers,
-        json={"title": "我的笔记", "content": "夜市的 harbor 用法笔记", "source_type": "upload"},
+        json={"title": "我的笔记", "content": "不该入库", "source_type": "upload"},
     )
-    assert uploaded.status_code == 201, uploaded.text
-    document = uploaded.json()
-    assert document["owner_scoped"] is True
-
-    mine = await client.get(
-        "/api/v1/knowledge/search", headers=member_headers, params={"query": "harbor 笔记"}
-    )
-    assert any(item["document_id"] == document["id"] for item in mine.json()["items"])
-
-    theirs = await client.get(
-        "/api/v1/knowledge/search", headers=other_headers, params={"query": "harbor 笔记"}
-    )
-    assert all(item["document_id"] != document["id"] for item in theirs.json()["items"])
-
-    listed = await client.get("/api/v1/me/knowledge", headers=member_headers)
-    assert [item["id"] for item in listed.json()["items"]] == [document["id"]]
-
-    removed = await client.delete(f"/api/v1/me/knowledge/{document['id']}", headers=member_headers)
-    assert removed.status_code == 204
-    after = await client.get(
-        "/api/v1/knowledge/search", headers=member_headers, params={"query": "harbor 笔记"}
-    )
-    assert all(item["document_id"] != document["id"] for item in after.json()["items"])
-
-
-async def test_another_member_cannot_delete_my_upload(client, member_user, user_factory) -> None:
-    member_headers = await login(client, member_user.username)
-    other = await user_factory(role="member")
-    other_headers = await login(client, other.username)
-    uploaded = await client.post(
-        "/api/v1/me/knowledge",
-        headers=member_headers,
-        json={"title": "私有", "content": "只有我能看", "source_type": "upload"},
-    )
-    denied = await client.delete(
-        f"/api/v1/me/knowledge/{uploaded.json()['id']}", headers=other_headers
-    )
-    assert denied.status_code == 404
+    assert closed.status_code == 404, closed.text

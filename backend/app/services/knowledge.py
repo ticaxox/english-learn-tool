@@ -13,7 +13,7 @@ import re
 from dataclasses import dataclass
 from uuid import UUID
 
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
@@ -43,7 +43,6 @@ _QUESTION_SPLIT = re.compile(r"\n\s*(?=\d{1,3}[.、．])")
 def _document_response(row: KnowledgeDocument) -> KnowledgeDocumentResponse:
     return KnowledgeDocumentResponse(
         id=row.id,
-        owner_scoped=row.owner_id is not None,
         source_type=row.source_type,
         title=row.title,
         metadata=row.metadata_json,
@@ -134,18 +133,14 @@ async def import_document(
     settings: Settings,
     admin: User,
     payload: KnowledgeImportRequest,
-    *,
-    owner_id: UUID | None = None,
 ) -> KnowledgeDocumentResponse:
-    if owner_id is None:
-        require_admin(admin)
+    require_admin(admin)
     chunks = split_text(payload.content)
     if not chunks:
         raise AppError(
             status_code=422, code="KNOWLEDGE_EMPTY", message="The document has no text."
         )
     document = KnowledgeDocument(
-        owner_id=owner_id,
         source_type=payload.source_type,
         title=payload.title,
         metadata_json=payload.metadata,
@@ -286,19 +281,9 @@ async def search(
     query: str,
     limit: int = 6,
     min_score: float = 0.12,
-    viewer: User | None = None,
 ) -> list[RetrievedChunk]:
+    # The corpus is exam papers only, so every ready document is fair game.
     filters = [KnowledgeDocument.status == "ready"]
-    if viewer is not None:
-        # Private uploads stay private: the SQL layer decides, not the caller.
-        filters.append(
-            or_(
-                KnowledgeDocument.owner_id.is_(None),
-                KnowledgeDocument.owner_id == viewer.id,
-            )
-        )
-    else:
-        filters.append(KnowledgeDocument.owner_id.is_(None))
     rows = (
         await session.execute(
             select(KnowledgeChunk, KnowledgeDocument.title)
@@ -334,7 +319,7 @@ async def search(
 async def search_response(
     session: AsyncSession, settings: Settings, user: User, query: str, limit: int = 6
 ) -> KnowledgeSearchResponse:
-    hits = await search(session, settings, query=query, limit=limit, viewer=user)
+    hits = await search(session, settings, query=query, limit=limit)
     return KnowledgeSearchResponse(
         items=[
             KnowledgeSearchHit(
@@ -346,42 +331,3 @@ async def search_response(
             for hit in hits
         ]
     )
-
-
-async def import_upload(
-    session: AsyncSession, settings: Settings, user: User, payload: KnowledgeImportRequest
-) -> KnowledgeDocumentResponse:
-    """One learner's own notes; only that learner can search or delete them."""
-    return await import_document(
-        session, settings, user, payload, owner_id=user.id
-    )
-
-
-async def list_uploads(session: AsyncSession, user: User) -> list[KnowledgeDocumentResponse]:
-    rows = list(
-        (
-            await session.scalars(
-                select(KnowledgeDocument)
-                .where(
-                    KnowledgeDocument.owner_id == user.id,
-                    KnowledgeDocument.status != "archived",
-                )
-                .order_by(KnowledgeDocument.created_at.desc())
-            )
-        ).all()
-    )
-    return [_document_response(row) for row in rows]
-
-
-async def archive_upload(session: AsyncSession, user: User, document_id: UUID) -> None:
-    document = await session.get(KnowledgeDocument, document_id)
-    if document is None or document.owner_id != user.id:
-        raise AppError(
-            status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document."
-        )
-    document.status = "archived"
-    await session.execute(
-        KnowledgeChunk.__table__.delete().where(KnowledgeChunk.document_id == document.id)
-    )
-    document.chunk_count = 0
-    await session.commit()

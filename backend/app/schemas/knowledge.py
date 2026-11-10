@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-KnowledgeSourceType = Literal["exam", "wordbook", "upload"]
+KnowledgeSourceType = Literal["exam"]
 KnowledgeStatus = Literal["draft", "indexing", "ready", "failed", "archived"]
 
 
@@ -15,6 +15,7 @@ class _StrictModel(BaseModel):
 
 
 class KnowledgeImportRequest(_StrictModel):
+    # Only exam papers are indexed; anything else is rejected, not stored.
     source_type: KnowledgeSourceType = "exam"
     title: str = Field(min_length=1, max_length=200)
     content: str = Field(min_length=1, max_length=400_000)
@@ -30,7 +31,6 @@ class KnowledgeDocumentUpdate(_StrictModel):
 
 class KnowledgeDocumentResponse(BaseModel):
     id: UUID
-    owner_scoped: bool = False
     source_type: KnowledgeSourceType
     title: str
     metadata: dict[str, Any] = Field(default_factory=dict)

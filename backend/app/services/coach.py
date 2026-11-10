@@ -575,7 +575,7 @@ async def create_coach_message(
     # Reference material is fetched only when the question looks like it needs it.
     snippets: list[str] = []
     if len(content) >= 4:
-        hits = await search_knowledge(session, settings, query=content, limit=3, viewer=user)
+        hits = await search_knowledge(session, settings, query=content, limit=3)
         snippets = [
             f"[{index + 1}] {hit.title}\n{hit.content}" for index, hit in enumerate(hits)
         ]

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import AiMemoryPanel from '../components/AiMemoryPanel.vue'
-import PersonalKnowledge from '../components/PersonalKnowledge.vue'
 import AiQuotaPanel from '../components/AiQuotaPanel.vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
 import AppIcon from '../components/AppIcon.vue'
@@ -260,7 +259,6 @@ onMounted(() => {
 
       <AiMemoryPanel />
 
-      <PersonalKnowledge />
 
       <AiQuotaPanel :providers="providers" @saved="load" />
 
