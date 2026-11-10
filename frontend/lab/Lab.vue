@@ -12,9 +12,11 @@ import ThemeSwitch from '../src/components/ThemeSwitch.vue'
 import WordbookShelfCard from '../src/components/WordbookShelfCard.vue'
 import ArtImage from '../src/components/ArtImage.vue'
 import WordbookDetailDialog from '../src/components/WordbookDetailDialog.vue'
+import ChoiceTrainer from '../src/components/ChoiceTrainer.vue'
+import SpellingTrainer from '../src/components/SpellingTrainer.vue'
 import { illustration } from '../src/assets/halloween'
 import { gsap } from '../src/composables/useMotion'
-import { SHELF, mapDsl } from './data'
+import { CHOICE_QUESTION, SHELF, SPELLING_QUESTION, mapDsl } from './data'
 
 const MODULES = ['flashcard', 'choice', 'spelling'] as const
 const LABELS = { flashcard: '翻卡', choice: '选择', spelling: '拼写' }
@@ -93,6 +95,14 @@ function toggleSlow(): void {
         :activating="false"
         @close="detailId = null"
       />
+
+      <section class="lab-block">
+        <p class="lab-caption">记忆训练 · 选词与拼写共用一块石板</p>
+        <div class="lab-drills">
+          <ChoiceTrainer :question="CHOICE_QUESTION" @answer="() => {}" />
+          <SpellingTrainer :question="SPELLING_QUESTION" @answer="() => {}" />
+        </div>
+      </section>
 
       <section class="lab-block">
         <p class="lab-caption">插画 · 同一构图的两次生成，切换时交叉淡出</p>
@@ -201,6 +211,13 @@ function toggleSlow(): void {
 
 .lab-extras {
   margin-top: 0;
+}
+
+.lab-drills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 18px;
+  max-width: 1200px;
 }
 
 .lab-shelf-books {

@@ -5,6 +5,7 @@
  * is interaction only: auto-advance, backspace, left/right arrows.
  */
 import { computed, nextTick, ref, watch } from 'vue'
+import { runeStone } from '../assets/halloween'
 import { useSpellingGrid } from '../composables/useSpellingGrid'
 import { SPELLING_BLANK_LABELS, type SpellingQuestion } from '../types/learning'
 
@@ -154,7 +155,7 @@ function submit(): void {
 </script>
 
 <template>
-  <section class="study-card study-card--spelling" aria-labelledby="spelling-definition">
+  <section class="study-card study-card--spelling rune-surface" :style="{ '--rune-slab': `url(${runeStone.slab})`, '--rune-chip': `url(${runeStone.chip})`, '--rune-chip-on': `url(${runeStone.chipOn})`, '--rune-slab-url': `url(${runeStone.slab})` }" aria-labelledby="spelling-definition">
     <div class="spell-head">
       <span class="spell-head__eyebrow">按提示拼写</span>
       <h2 id="spelling-definition" class="spell-head__prompt" tabindex="-1">{{ props.question.definition }}</h2>

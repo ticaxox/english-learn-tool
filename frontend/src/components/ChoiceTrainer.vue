@@ -5,6 +5,7 @@
  * answer. Submitting only sends the chosen option id; the server grades.
  */
 import { computed, nextTick, ref, watch } from 'vue'
+import { runeStone } from '../assets/halloween'
 import type { ChoiceQuestion } from '../types/learning'
 import OptionBadge from './OptionBadge.vue'
 
@@ -62,7 +63,7 @@ function choose(optionId: string): void {
 </script>
 
 <template>
-  <section class="study-card study-card--choice" aria-labelledby="choice-prompt">
+  <section class="study-card study-card--choice rune-surface" :style="{ '--rune-slab': `url(${runeStone.slab})`, '--rune-chip': `url(${runeStone.chip})`, '--rune-chip-on': `url(${runeStone.chipOn})`, '--rune-slab-url': `url(${runeStone.slab})` }" aria-labelledby="choice-prompt">
     <div class="choice-head">
       <span class="choice-head__eyebrow">选出正确释义</span>
       <h2 id="choice-prompt" ref="promptHeading" class="choice-head__prompt" tabindex="-1">{{ props.question.prompt }}</h2>

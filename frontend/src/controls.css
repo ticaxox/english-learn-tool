@@ -4622,6 +4622,107 @@ html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { col
 .mistakes-empty__art { width: min(180px, 52%); height: auto; margin-bottom: 0.4rem; }
 
 /* ============================================================
+   A stone surface any question can be written on.
+   Same slab as the fill-blank question, but with no opinion about what sits
+   inside it — the memory drills and the practice questions share one stone.
+   ============================================================ */
+.personal-workspace .rune-surface {
+  position: relative;
+  /* Fill the slot: the drill card used to hug its content, which leaves a
+   * narrow stone with options squeezed into strips. */
+  width: 100%;
+  margin-inline: 0;
+  padding: 0 !important;
+  border-style: solid !important;
+  border-width: 40px !important;
+  border-image-source: var(--rune-slab) !important;
+  border-image-slice: 14% fill !important;
+  border-image-width: 40px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0 !important;
+  background: #2a2148 !important;
+  box-shadow: none !important;
+  color: #f3e9d2;
+}
+
+.personal-workspace .rune-surface > * {
+  position: relative;
+}
+
+.personal-workspace .rune-surface .choice-head__eyebrow,
+.personal-workspace .rune-surface .spell-head__eyebrow {
+  color: #7cf0c4;
+}
+
+.personal-workspace .rune-surface .choice-head__prompt,
+.personal-workspace .rune-surface .spell-head__prompt {
+  color: #f3e9d2;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* The drill's option stays a light chip on the stone. Its own three-track
+ * grid collapses once the radio is out of the flow, so the face is laid out
+ * here in one row: letter, label, tick. */
+.personal-workspace .rune-surface .choice-option {
+  display: block;
+  padding: 10px 14px;
+  border: 2px solid #6b5f8f !important;
+  border-radius: 12px !important;
+  background: #fffdf6 !important;
+  color: #35240f;
+  box-shadow: 0 3px 0 rgb(12 6 28 / 45%) !important;
+}
+
+.personal-workspace .rune-surface .choice-option:hover {
+  border-color: #9a8ac4 !important;
+}
+
+.personal-workspace .rune-surface .choice-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.personal-workspace .rune-surface .choice-option__face {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.personal-workspace .rune-surface .choice-option__label {
+  color: #35240f;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.personal-workspace .rune-surface .practice-option {
+  border-style: solid !important;
+  border-width: 12px 16px !important;
+  border-color: transparent !important;
+  border-image-source: var(--rune-chip) !important;
+  border-image-slice: 20% fill !important;
+  border-image-width: 12px 16px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0 !important;
+  background: #2a2148 !important;
+  color: #f3e9d2;
+  box-shadow: none !important;
+}
+
+.personal-workspace .rune-surface .choice-option:hover,
+.personal-workspace .rune-surface .practice-option:hover {
+  filter: brightness(1.12);
+}
+
+.personal-workspace .rune-surface :is(.choice-option.is-correct, .practice-option--correct) {
+  border-image-source: var(--rune-chip-on) !important;
+}
+
+/* ============================================================
    Fill-blank question as a carved stone slab.
    The slab and the option chips are generated artwork used as 9-slice
    sources: the chipped edge and the groove live in the border band, so

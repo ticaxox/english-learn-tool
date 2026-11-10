@@ -125,3 +125,32 @@ export function bookDetail(id: string): unknown {
     limit: 50,
   }
 }
+
+/** One choice question and one spelling question, for the drill surfaces. */
+export const CHOICE_QUESTION = {
+  kind: 'choice',
+  questionId: 'choice-demo',
+  prompt: 'harbor',
+  phonetic: '/ˈhɑːbə/',
+  partOfSpeech: 'v.',
+  optionCount: 4,
+  remaining: 12,
+  options: [
+    { optionId: 'a', label: '港口' },
+    { optionId: 'b', label: '怀有（想法、感情）' },
+    { optionId: 'c', label: '藏匿' },
+    { optionId: 'd', label: '停泊' },
+  ],
+} as never
+
+export const SPELLING_QUESTION = {
+  kind: 'spelling',
+  questionId: 'spelling-demo',
+  definition: '怀有（想法、感情）',
+  phonetic: '/ˈhɑːbə/',
+  partOfSpeech: 'v.',
+  blankType: null,
+  cloze: 'She harbor s a deep love for the city.',
+  remaining: 8,
+  blanks: [{ index: 4, prefilled: false, character: null }],
+} as never
