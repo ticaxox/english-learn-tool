@@ -715,6 +715,20 @@ html[data-theme='night'] .personal-workspace {
   transition: transform 90ms ease, box-shadow 90ms ease, border-color 120ms ease;
 }
 
+/* Inside the carved-stone question the option is the chip artwork, so this
+   plate must let go of its radius and fill. Longhands only: the `border`
+   shorthand would reset border-image and take the chip with it. */
+.personal-workspace .practice-question-card--rune .practice-option,
+.personal-workspace .practice-question-card--rune .practice-option:hover,
+.personal-workspace .practice-question-card--rune .practice-option:has(input:checked),
+.personal-workspace .practice-question-card--rune .practice-option:active {
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  transform: none;
+  min-height: 0;
+}
+
 .personal-workspace .choice-option:hover,
 .personal-workspace .practice-option:hover {
   border-color: #d9c19c !important;
