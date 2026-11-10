@@ -54,10 +54,14 @@ describe('T-FE-017 workspace depth', () => {
   })
 
   it('shows all three memory styles with enabled and disabled states', () => {
+    const shelf = source('../components/ShelfPicker.vue')
+    expect(shelf).toContain('`shelf-book--${module}`')
+    expect(shelf).toContain('is-locked')
+    expect(shelf).toContain(":disabled=\"!enabled.includes(module)\"")
+    // The view hands the shelf the server config, so a disabled mode stays on
+    // the shelf but cannot be picked.
     const memory = source('../views/MemoryPracticeView.vue')
-    expect(memory).toContain('`memory-action-card--${module}`')
-    expect(memory).toContain('is-disabled')
-    expect(memory).toContain(':disabled="!activeModules.includes(module)"')
+    expect(memory).toContain(':enabled="activeModules"')
   })
 
   it('gives the four AI practice types distinct icons and generation feedback', () => {

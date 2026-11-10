@@ -16,6 +16,7 @@ import SpeakButton from '../components/SpeakButton.vue'
 import FlashcardTrainer from '../components/FlashcardTrainer.vue'
 import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
+import ShelfPicker from '../components/ShelfPicker.vue'
 import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
 import { isApiError } from '../api/errors'
@@ -31,7 +32,6 @@ import {
   type TodayPlan,
 } from '../types/learning'
 import '../learning.css'
-import { practiceBooks } from '../assets/halloween'
 
 const route = useRoute()
 const router = useRouter()
@@ -376,28 +376,12 @@ watch(challengeModule, async (module, previous) => {
             <span>还没有启用训练方式。</span>
             <RouterLink to="/settings">去设置开启</RouterLink>
           </div>
-          <div class="module-grid memory-action-grid">
-            <DivButton
-              v-for="module in MEMORY_MODULES"
-              :key="module"
-              class="module-card memory-action-card"
-              :class="[
-                `memory-action-card--${module}`,
-                { 'is-disabled': !activeModules.includes(module) },
-              ]"
-              type="button"
-              :disabled="!activeModules.includes(module)"
-              @click="begin(module)"
-            >
-              <span class="memory-action-icon">
-                <img class="memory-action-art" :src="practiceBooks[module].day" alt="" />
-              </span>
-              <span class="memory-action-copy">
-                <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
-              </span>
-              <AppIcon :name="activeModules.includes(module) ? 'arrow' : 'lock'" />
-            </DivButton>
-          </div>
+          <ShelfPicker
+            :modules="MEMORY_MODULES"
+            :enabled="activeModules"
+            :labels="MEMORY_MODULE_LABELS"
+            @pick="begin"
+          />
         </template>
 
         <section v-if="session.lastError.value" class="memory-session-error">

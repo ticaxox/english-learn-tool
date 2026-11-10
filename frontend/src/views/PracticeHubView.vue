@@ -14,6 +14,7 @@ import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryMod
 import PracticeTaskList from '../components/PracticeTaskList.vue'
 
 import '../practice.css'
+import ShelfPicker from '../components/ShelfPicker.vue'
 import { practiceBooks } from '../assets/halloween'
 
 const router = useRouter()
@@ -37,6 +38,9 @@ async function loadMemoryConfig(): Promise<void> {
 function memoryEnabled(module: MemoryModule): boolean {
   return memoryConfig.value ? memoryConfig.value[module].enabled : true
 }
+
+/** The shelf needs the list, not a predicate; default open until config lands. */
+const enabledMemoryModules = computed(() => MEMORY_MODULES.filter(memoryEnabled))
 
 function startMemory(module: MemoryModule): void {
   void router.push({ name: 'practice', query: { module } })
@@ -201,25 +205,12 @@ onMounted(() => {
     <PracticeSessionView v-else-if="activeSessionId" embedded :session-id="activeSessionId" />
 
     <template v-else>
-      <div class="module-grid memory-action-grid practice-memory-grid">
-        <DivButton
-          v-for="module in MEMORY_MODULES"
-          :key="module"
-          class="module-card memory-action-card"
-          :class="[`memory-action-card--${module}`, { 'is-disabled': !memoryEnabled(module) }]"
-          type="button"
-          :disabled="!memoryEnabled(module)"
-          @click="startMemory(module)"
-        >
-          <span class="memory-action-icon">
-            <img class="memory-action-art" :src="practiceBooks[module].day" alt="" />
-          </span>
-          <span class="memory-action-copy">
-            <strong class="module-card__title">{{ MEMORY_MODULE_LABELS[module] }}</strong>
-          </span>
-          <AppIcon :name="memoryEnabled(module) ? 'arrow' : 'lock'" />
-        </DivButton>
-      </div>
+      <ShelfPicker
+        :modules="MEMORY_MODULES"
+        :enabled="enabledMemoryModules"
+        :labels="MEMORY_MODULE_LABELS"
+        @pick="startMemory"
+      />
 
       <div class="practice-hub-layout">
       <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">
