@@ -15,7 +15,12 @@ from app.models.coach import (
     CoachStreamEvent,
 )
 from app.models.coach_memory import CoachMemory
-from app.models.gamification import DailyQuest, UserGameStats, XpEvent
+from app.models.gamification import (
+    DailyQuest,
+    UserAchievement,
+    UserGameStats,
+    XpEvent,
+)
 from app.models.identity import AuditLog, ImportPreview, RefreshToken, User, UserProfile
 from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
 from app.models.learning import (
@@ -95,6 +100,7 @@ __all__ = [
     "RefreshToken",
     "SystemMetadata",
     "User",
+    "UserAchievement",
     "UserGameStats",
     "UserProfile",
     "UserWordState",

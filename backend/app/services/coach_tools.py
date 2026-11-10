@@ -20,7 +20,7 @@ from app.services.practice_authoring import AuthoredPracticeRequest, create_auth
 
 PRACTICE_TYPES = ["fill_blank", "reading", "translation", "writing"]
 PRACTICE_SOURCES = ["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
-DIFFICULTIES = ["CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
+DIFFICULTIES = ["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
 
 TOOL_SPECS: dict[str, dict[str, Any]] = {
     "adjust_daily_plan": {

@@ -17,15 +17,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.models.challenge import DailyChallengePlan
-from app.models.gamification import DailyQuest, UserGameStats, XpEvent
+from app.models.gamification import (
+    DailyQuest,
+    UserAchievement,
+    UserGameStats,
+    XpEvent,
+)
 from app.models.identity import User
 from app.models.learning import DailyPlan, DailyPlanWord
 from app.models.practice import PracticeSession
 from app.schemas.gamification import (
+    BadgeResponse,
     DailyQuestResponse,
     GamificationProgressResponse,
     GamificationWeeklyResponse,
     LevelProgress,
+    WeeklyGoal,
 )
 from app.services.auth import utcnow
 from app.services.learning import local_date_for
@@ -104,10 +111,27 @@ async def _paid_today(session: AsyncSession, user_id: UUID, day: date) -> tuple[
     return int(row[0]), int(row[1])
 
 
+def _month_key(day: date) -> str:
+    return f"{day.year:04d}-{day.month:02d}"
+
+
+def _grant_freeze(stats: UserGameStats, day: date) -> None:
+    """One 护身符 per calendar month, topped up the first time the learner shows up."""
+    if stats.freeze_granted_month != _month_key(day):
+        stats.freeze_tokens = 1
+        stats.freeze_granted_month = _month_key(day)
+
+
 def _touch_streak(stats: UserGameStats, day: date) -> None:
     if stats.last_active_day == day:
         return
-    if stats.last_active_day is not None and (day - stats.last_active_day).days == 1:
+    _grant_freeze(stats, day)
+    gap = (day - stats.last_active_day).days if stats.last_active_day else None
+    if gap == 1:
+        stats.streak += 1
+    elif gap == 2 and stats.freeze_tokens > 0:
+        # One missed day is forgiven; the token is spent and the streak continues.
+        stats.freeze_tokens -= 1
         stats.streak += 1
     else:
         stats.streak = 1
@@ -266,12 +290,141 @@ async def refresh_quests(
     ]
 
 
+BADGES: dict[str, tuple[str, str]] = {
+    "first_lesson": ("初次拾屑", "完成第一次学习"),
+    "streak_3": ("三日不辍", "连续学习 3 天"),
+    "streak_7": ("七日连胜", "连续学习 7 天"),
+    "streak_30": ("月度坚持", "连续学习 30 天"),
+    "level_5": ("探路者", "达到 5 级"),
+    "level_10": ("收藏家", "达到 10 级"),
+    "practice_10": ("练习成瘾", "累计提交 10 组练习"),
+    "practice_50": ("题海老手", "累计提交 50 组练习"),
+    "perfect_5": ("全对五连", "五组练习全部答对"),
+    "boss_1": ("首胜首领", "首次通过闯关终点"),
+    "review_100": ("百词成诵", "累计复习 100 张卡片"),
+    "quest_all": ("今日全勤", "一天内完成三条每日任务"),
+}
+
+
+async def _counts(session: AsyncSession, user_id: UUID) -> dict[str, int]:
+    practices = int(
+        await session.scalar(
+            select(func.count(PracticeSession.id)).where(
+                PracticeSession.user_id == user_id,
+                PracticeSession.status == "submitted",
+            )
+        )
+        or 0
+    )
+    perfect = int(
+        await session.scalar(
+            select(func.count(PracticeSession.id)).where(
+                PracticeSession.user_id == user_id,
+                PracticeSession.status == "submitted",
+                PracticeSession.wrong_count == 0,
+                PracticeSession.score.is_not(None),
+            )
+        )
+        or 0
+    )
+    reviews = int(
+        await session.scalar(
+            select(func.count(XpEvent.id)).where(
+                XpEvent.user_id == user_id, XpEvent.source_type == "review"
+            )
+        )
+        or 0
+    )
+    bosses = int(
+        await session.scalar(
+            select(func.count(XpEvent.id)).where(
+                XpEvent.user_id == user_id, XpEvent.source_type == "boss"
+            )
+        )
+        or 0
+    )
+    return {"practices": practices, "perfect": perfect, "reviews": reviews, "bosses": bosses}
+
+
+async def evaluate_badges(
+    session: AsyncSession, settings: Settings, user: User
+) -> list[str]:
+    """Unlock any badge whose condition now holds; returns the new keys."""
+    stats = await _stats(session, user.id)
+    counts = await _counts(session, user.id)
+    earned = set(
+        (
+            await session.scalars(
+                select(UserAchievement.badge_key).where(UserAchievement.user_id == user.id)
+            )
+        ).all()
+    )
+    day = local_date_for(settings, user)
+    quests = {
+        row.quest_key: row
+        for row in (
+            await session.scalars(
+                select(DailyQuest).where(DailyQuest.user_id == user.id, DailyQuest.day == day)
+            )
+        ).all()
+    }
+    all_quests = len(QUEST_KEYS) == len(quests) and all(
+        quests[key].completed_at is not None for key in QUEST_KEYS
+    )
+    conditions = {
+        "first_lesson": stats.xp > 0,
+        "streak_3": stats.streak_best >= 3,
+        "streak_7": stats.streak_best >= 7,
+        "streak_30": stats.streak_best >= 30,
+        "level_5": stats.level >= 5,
+        "level_10": stats.level >= 10,
+        "practice_10": counts["practices"] >= 10,
+        "practice_50": counts["practices"] >= 50,
+        "perfect_5": counts["perfect"] >= 5,
+        "boss_1": counts["bosses"] >= 1,
+        "review_100": counts["reviews"] >= 100,
+        "quest_all": all_quests,
+    }
+    unlocked: list[str] = []
+    for key, ready in conditions.items():
+        if ready and key not in earned:
+            session.add(UserAchievement(user_id=user.id, badge_key=key))
+            unlocked.append(key)
+    if unlocked:
+        await session.flush()
+    return unlocked
+
+
+async def list_badges(
+    session: AsyncSession, user: User
+) -> list[BadgeResponse]:
+    earned = {
+        row.badge_key: row.unlocked_at
+        for row in (
+            await session.scalars(
+                select(UserAchievement).where(UserAchievement.user_id == user.id)
+            )
+        ).all()
+    }
+    return [
+        BadgeResponse(
+            key=key,
+            name=name,
+            description=description,
+            unlocked=key in earned,
+            unlocked_at=earned.get(key),
+        )
+        for key, (name, description) in BADGES.items()
+    ]
+
+
 async def progress(
     session: AsyncSession, settings: Settings, user: User
 ) -> GamificationProgressResponse:
     day = local_date_for(settings, user)
     stats = await _stats(session, user.id)
     quests = await refresh_quests(session, settings, user)
+    await evaluate_badges(session, settings, user)
     current_floor = xp_for_level(stats.level)
     next_floor = xp_for_level(stats.level + 1)
     return GamificationProgressResponse(
@@ -285,6 +438,7 @@ async def progress(
         ),
         streak=stats.streak,
         streak_best=stats.streak_best,
+        freeze_tokens=stats.freeze_tokens,
         active_today=stats.last_active_day == day,
         quests=quests,
         local_date=day.isoformat(),
@@ -317,9 +471,41 @@ async def weekly(
             }
         )
     stats = await _stats(session, user.id)
+    active_days = sum(1 for entry in days if entry["active"])
+    practices = int(
+        await session.scalar(
+            select(func.count(PracticeSession.id)).where(
+                PracticeSession.user_id == user.id,
+                PracticeSession.status == "submitted",
+                PracticeSession.submitted_at >= datetime.combine(start, time.min),
+            )
+        )
+        or 0
+    )
+    challenges = int(
+        await session.scalar(
+            select(func.count(DailyChallengePlan.id)).where(
+                DailyChallengePlan.user_id == user.id,
+                DailyChallengePlan.local_date >= start,
+                DailyChallengePlan.status == "completed",
+            )
+        )
+        or 0
+    )
+    def _goal(key: str, label: str, progress: int) -> WeeklyGoal:
+        return WeeklyGoal(
+            key=key, label=label, progress=progress, target=5, completed=progress >= 5
+        )
+
+    goals = [
+        _goal("active_days", "本周学习 5 天", active_days),
+        _goal("practices", "本周完成 5 组练习", practices),
+        _goal("challenges", "本周通关 5 次", challenges),
+    ]
     return GamificationWeeklyResponse(
         days=days,
         xp=sum(entry["xp"] for entry in days),
-        active_days=sum(1 for entry in days if entry["active"]),
+        active_days=active_days,
         streak=stats.streak,
+        goals=goals,
     )

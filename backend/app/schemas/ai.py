@@ -41,6 +41,8 @@ class ProviderCreateRequest(_StrictModel):
     timeout_seconds: int = Field(default=60, ge=1, le=300)
     enabled: bool = True
     custom_headers: dict[str, str] = Field(default_factory=dict)
+    # Optional: the model used for /embeddings on this provider.
+    embedding_model: str | None = Field(default=None, max_length=120)
 
     @field_validator("name", "model_id")
     @classmethod
@@ -102,6 +104,7 @@ class ProviderPatchRequest(_StrictModel):
     timeout_seconds: int | None = Field(default=None, ge=1, le=300)
     enabled: bool | None = None
     custom_headers: dict[str, str] | None = None
+    embedding_model: str | None = Field(default=None, max_length=120)
 
     @field_validator("name", "model_id")
     @classmethod
@@ -184,6 +187,7 @@ class ProviderResponse(BaseModel):
     timeout_seconds: int
     enabled: bool
     custom_headers: dict[str, str]
+    embedding_model: str | None = None
     last_test_status: AiProviderTestStatus
     last_test_error_code: str | None = None
     last_test_at: datetime | None = None

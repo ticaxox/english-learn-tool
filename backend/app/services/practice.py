@@ -168,6 +168,8 @@ async def _session_response(
         source=practice.source,
         difficulty=practice.difficulty,
         wordbook_id=practice.wordbook_id,
+        translation_direction=practice.source_context.get("translation_direction"),
+        writing_target_words=practice.source_context.get("writing_target_words"),
         status=practice.status,
         question_count=practice.question_count,
         generation_number=practice.generation_number,
@@ -395,6 +397,8 @@ async def create_practice_session(
         "difficulty": payload.difficulty,
         "wordbook_id": str(wordbook_id) if wordbook_id else None,
         "target_entry_ids": [str(entry_id) for entry_id in target_entry_ids],
+        "translation_direction": payload.translation_direction,
+        "writing_target_words": payload.writing_target_words,
     }
     practice = PracticeSession(
         id=session_id,
@@ -443,6 +447,8 @@ async def create_practice_session(
             practice_session_id=session_id,
             article_min_words=article_min_words,
             article_max_words=article_max_words,
+            translation_direction=payload.translation_direction,
+            writing_target_words=payload.writing_target_words,
         ),
     )
     job, _ = await create_ai_job(
@@ -782,6 +788,9 @@ async def regenerate_practice_session(
             difficulty=practice.difficulty,
             wordbook_id=practice.wordbook_id,
             target_entry_ids=[UUID(value) for value in context.get("target_entry_ids", [])],
+            target_words=context.get("target_words", []),
+            translation_direction=context.get("translation_direction"),
+            writing_target_words=context.get("writing_target_words"),
             practice_session_id=practice.id,
         ),
     )
@@ -1678,6 +1687,8 @@ async def create_practice_for_challenge(
             difficulty=payload.difficulty,
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
+            translation_direction=payload.translation_direction,
+            writing_target_words=payload.writing_target_words,
             practice_session_id=session_id,
         ),
     )

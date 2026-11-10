@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-ExamType = Literal["CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
+ExamType = Literal["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
 PracticeType = Literal["fill_blank", "reading", "translation", "writing", "mixed"]
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 ChallengeNodeType = Literal[
@@ -46,6 +46,10 @@ class PracticeGenerationContext(StrictModel):
     # Reading only: how long the single passage should be for this question count.
     article_min_words: int | None = Field(default=None, ge=60, le=2_000)
     article_max_words: int | None = Field(default=None, ge=60, le=2_000)
+    # Translation only: en_to_zh | zh_to_en | mixed.
+    translation_direction: Literal["en_to_zh", "zh_to_en", "mixed"] | None = None
+    # Writing only: the essay length the prompt must be sized for.
+    writing_target_words: int | None = Field(default=None, ge=50, le=300)
 
     @model_validator(mode="after")
     def validate_count_and_source(self) -> PracticeGenerationContext:

@@ -10,11 +10,14 @@ PracticeType = Literal["fill_blank", "reading", "translation", "writing", "mixed
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 PracticeSessionStatus = Literal["generating", "ready", "submitted", "failed", "cancelled"]
 PracticeSubmissionStatus = Literal["scoring", "completed", "failed"]
-Difficulty = Literal["CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
+Difficulty = Literal["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
 
 
 class _StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+TranslationDirection = Literal["en_to_zh", "zh_to_en", "mixed"]
 
 
 class PracticeCreateRequest(_StrictModel):
@@ -23,6 +26,10 @@ class PracticeCreateRequest(_StrictModel):
     count: int = Field(ge=1, le=20)
     difficulty: Difficulty | None = None
     wordbook_id: UUID | None = None
+    # Translation only: which way the sentences run.
+    translation_direction: TranslationDirection | None = None
+    # Writing only: the essay length the prompt should ask for.
+    writing_target_words: int | None = Field(default=None, ge=50, le=300)
 
     @model_validator(mode="after")
     def validate_request(self) -> PracticeCreateRequest:
@@ -31,9 +38,10 @@ class PracticeCreateRequest(_StrictModel):
             raise ValueError("count does not match the selected practice type")
         if self.source == "difficulty" and self.difficulty is None:
             raise ValueError("difficulty is required for difficulty-based practice")
-        if self.source != "difficulty" and self.wordbook_id is None:
-            # The service resolves the active wordbook when omitted.
-            return self
+        if self.translation_direction is not None and self.practice_type != "translation":
+            raise ValueError("translation_direction only applies to translation practice")
+        if self.writing_target_words is not None and self.practice_type != "writing":
+            raise ValueError("writing_target_words only applies to writing practice")
         return self
 
 
@@ -68,6 +76,8 @@ class PracticeSessionResponse(BaseModel):
     source: PracticeSource
     difficulty: Difficulty | None = None
     wordbook_id: UUID | None = None
+    translation_direction: TranslationDirection | None = None
+    writing_target_words: int | None = None
     status: PracticeSessionStatus
     question_count: int
     generation_number: int

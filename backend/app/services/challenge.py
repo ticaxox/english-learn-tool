@@ -206,6 +206,7 @@ async def _sync_plan(
         if row.status != "completed" and await _node_complete(session, plan, node, row, words):
             row.status = "completed"
             row.completed_at = row.completed_at or utcnow()
+            row.stars = await _node_stars(session, node, row)
             changed = True
             await award(
                 session,
@@ -245,6 +246,20 @@ async def _sync_plan(
         await session.commit()
 
 
+async def _node_stars(
+    session: AsyncSession, node: ChallengeNode, progress: ChallengeNodeProgress
+) -> int:
+    """3 for a flawless finish, 2 when a linked set was answered well, 1 otherwise."""
+    if progress.practice_session_id is None:
+        return 1
+    practice = await session.get(PracticeSession, progress.practice_session_id)
+    if practice is None:
+        return 1
+    if practice.wrong_count == 0:
+        return 3 if node.node_type == "BOSS" else 2
+    return 1
+
+
 async def _node_response(
     session: AsyncSession,
     plan: DailyChallengePlan,
@@ -278,6 +293,7 @@ async def _node_response(
         resource_id=resource_id,
         started_at=progress.started_at if progress else None,
         completed_at=progress.completed_at if progress else None,
+        stars=progress.stars if progress else 0,
         error_code=progress.error_code if progress else None,
         error_message=progress.error_message if progress else None,
     )

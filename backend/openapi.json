@@ -834,11 +834,68 @@
         "title": "BackgroundTaskResponse",
         "type": "object"
       },
+      "BadgeListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BadgeResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "BadgeListResponse",
+        "type": "object"
+      },
+      "BadgeResponse": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "unlocked": {
+            "title": "Unlocked",
+            "type": "boolean"
+          },
+          "unlocked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unlocked At"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "description",
+          "unlocked"
+        ],
+        "title": "BadgeResponse",
+        "type": "object"
+      },
       "BatchGradingItemContext": {
         "additionalProperties": false,
         "properties": {
           "exam_type": {
             "enum": [
+              "GAOKAO",
               "CET4",
               "CET6",
               "POSTGRAD",
@@ -1435,6 +1492,11 @@
               }
             ],
             "title": "Resource Type"
+          },
+          "stars": {
+            "default": 0,
+            "title": "Stars",
+            "type": "integer"
           },
           "started_at": {
             "anyOf": [
@@ -2626,6 +2688,14 @@
             "title": "History",
             "type": "array"
           },
+          "knowledge_snippets": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "title": "Knowledge Snippets",
+            "type": "array"
+          },
           "learning_snapshot": {
             "anyOf": [
               {
@@ -3612,6 +3682,11 @@
             "title": "Crumbs",
             "type": "integer"
           },
+          "freeze_tokens": {
+            "default": 0,
+            "title": "Freeze Tokens",
+            "type": "integer"
+          },
           "level": {
             "$ref": "#/components/schemas/LevelProgress"
           },
@@ -3663,6 +3738,14 @@
               "$ref": "#/components/schemas/WeeklyDay"
             },
             "title": "Days",
+            "type": "array"
+          },
+          "goals": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/WeeklyGoal"
+            },
+            "title": "Goals",
             "type": "array"
           },
           "streak": {
@@ -5578,6 +5661,7 @@
             "anyOf": [
               {
                 "enum": [
+                  "GAOKAO",
                   "CET4",
                   "CET6",
                   "POSTGRAD",
@@ -5614,6 +5698,22 @@
             "title": "Source",
             "type": "string"
           },
+          "translation_direction": {
+            "anyOf": [
+              {
+                "enum": [
+                  "en_to_zh",
+                  "zh_to_en",
+                  "mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Translation Direction"
+          },
           "wordbook_id": {
             "anyOf": [
               {
@@ -5625,6 +5725,19 @@
               }
             ],
             "title": "Wordbook Id"
+          },
+          "writing_target_words": {
+            "anyOf": [
+              {
+                "maximum": 300.0,
+                "minimum": 50.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Writing Target Words"
           }
         },
         "required": [
@@ -5845,6 +5958,7 @@
             "anyOf": [
               {
                 "enum": [
+                  "GAOKAO",
                   "CET4",
                   "CET6",
                   "POSTGRAD",
@@ -5910,6 +6024,22 @@
             "title": "Target Words",
             "type": "array"
           },
+          "translation_direction": {
+            "anyOf": [
+              {
+                "enum": [
+                  "en_to_zh",
+                  "zh_to_en",
+                  "mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Translation Direction"
+          },
           "wordbook_id": {
             "anyOf": [
               {
@@ -5921,6 +6051,19 @@
               }
             ],
             "title": "Wordbook Id"
+          },
+          "writing_target_words": {
+            "anyOf": [
+              {
+                "maximum": 300.0,
+                "minimum": 50.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Writing Target Words"
           }
         },
         "required": [
@@ -6296,6 +6439,7 @@
             "anyOf": [
               {
                 "enum": [
+                  "GAOKAO",
                   "CET4",
                   "CET6",
                   "POSTGRAD",
@@ -6455,6 +6599,7 @@
             "anyOf": [
               {
                 "enum": [
+                  "GAOKAO",
                   "CET4",
                   "CET6",
                   "POSTGRAD",
@@ -6699,6 +6844,7 @@
             "anyOf": [
               {
                 "enum": [
+                  "GAOKAO",
                   "CET4",
                   "CET6",
                   "POSTGRAD",
@@ -6810,6 +6956,22 @@
             "title": "Status",
             "type": "string"
           },
+          "translation_direction": {
+            "anyOf": [
+              {
+                "enum": [
+                  "en_to_zh",
+                  "zh_to_en",
+                  "mixed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Translation Direction"
+          },
           "updated_at": {
             "format": "date-time",
             "title": "Updated At",
@@ -6826,6 +6988,17 @@
               }
             ],
             "title": "Wordbook Id"
+          },
+          "writing_target_words": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Writing Target Words"
           }
         },
         "required": [
@@ -7174,6 +7347,18 @@
             "title": "Custom Headers",
             "type": "object"
           },
+          "embedding_model": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model"
+          },
           "enabled": {
             "default": true,
             "title": "Enabled",
@@ -7320,6 +7505,18 @@
               }
             ],
             "title": "Custom Headers"
+          },
+          "embedding_model": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model"
           },
           "enabled": {
             "anyOf": [
@@ -7476,6 +7673,17 @@
             },
             "title": "Custom Headers",
             "type": "object"
+          },
+          "embedding_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model"
           },
           "enabled": {
             "title": "Enabled",
@@ -7656,6 +7864,28 @@
           "components"
         ],
         "title": "ReadinessResponse",
+        "type": "object"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "password": {
+            "maxLength": 128,
+            "minLength": 12,
+            "title": "Password",
+            "type": "string"
+          },
+          "username": {
+            "maxLength": 32,
+            "minLength": 3,
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "RegisterRequest",
         "type": "object"
       },
       "ServiceInfo": {
@@ -8158,6 +8388,7 @@
         "properties": {
           "exam_type": {
             "enum": [
+              "GAOKAO",
               "CET4",
               "CET6",
               "POSTGRAD",
@@ -8763,6 +8994,39 @@
           "active"
         ],
         "title": "WeeklyDay",
+        "type": "object"
+      },
+      "WeeklyGoal": {
+        "properties": {
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "progress": {
+            "title": "Progress",
+            "type": "integer"
+          },
+          "target": {
+            "title": "Target",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "progress",
+          "target",
+          "completed"
+        ],
+        "title": "WeeklyGoal",
         "type": "object"
       },
       "WordStateResponse": {
@@ -12695,6 +12959,68 @@
           }
         },
         "summary": "Rotate the refresh token and issue a new access token",
+        "tags": [
+          "system",
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "register_endpoint_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication throttled."
+          }
+        },
+        "summary": "Register a member account and start a session",
         "tags": [
           "system",
           "auth"
@@ -17125,6 +17451,43 @@
           }
         ],
         "summary": "Read the caller's level, streak and today's quests",
+        "tags": [
+          "system",
+          "progress"
+        ]
+      }
+    },
+    "/api/v1/me/progress/badges": {
+      "get": {
+        "operationId": "list_badges_endpoint_api_v1_me_progress_badges_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication failed or session expired."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List the badges and which ones are unlocked",
         "tags": [
           "system",
           "progress"

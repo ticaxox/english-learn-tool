@@ -17,6 +17,24 @@ class LoginRequest(BaseModel):
         return validate_username(value)
 
 
+class RegisterRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=32)
+    password: str = Field(min_length=12, max_length=128)
+
+    @field_validator("username")
+    @classmethod
+    def username_is_valid(cls, value: str) -> str:
+        return validate_username(value)
+
+    @field_validator("password")
+    @classmethod
+    def password_is_valid(cls, value: str) -> str:
+        error = password_policy_error(value)
+        if error:
+            raise ValueError(error)
+        return value
+
+
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(min_length=1, max_length=128)
     new_password: str = Field(min_length=12, max_length=128)

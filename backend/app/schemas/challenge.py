@@ -35,6 +35,8 @@ class ChallengeNodeResponse(BaseModel):
     resource_id: UUID | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    # 1 completed, 2 no wrong answers, 3 a flawless boss node.
+    stars: int = 0
     error_code: str | None = None
     error_message: str | None = None
 
