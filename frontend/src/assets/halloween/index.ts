@@ -38,6 +38,9 @@ export const practiceBooks: PracticeArt = {
   writing: { day: writingDay, night: writingNight },
 }
 
+import runeSlab from './card/rune-slab.png'
+import runeChip from './card/rune-chip.png'
+import runeChipOn from './card/rune-chip-on.png'
 import wordbookCoverDay from './card/wordbook-cover-day.png'
 import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
@@ -48,6 +51,16 @@ import cardBack from './card/card-back.png'
 export const questionCard = {
   frame: { day: cardFrameDay, night: cardFrameNight },
   back: cardBack,
+} as const
+
+/**
+ * Carved stone for the fill-blank question. Both are 9-slice sources: the
+ * chipped edge and the groove sit in the border band, the flat middle stretches.
+ */
+export const runeStone = {
+  slab: runeSlab,
+  chip: runeChip,
+  chipOn: runeChipOn,
 } as const
 
 /** A wordbook cover with nothing printed on it; the title and badges sit on top. */

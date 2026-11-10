@@ -4088,3 +4088,114 @@
 
 .mistakes-empty { display: grid; justify-items: center; gap: 0.4rem; text-align: center; }
 .mistakes-empty__art { width: min(180px, 52%); height: auto; margin-bottom: 0.4rem; }
+
+/* ============================================================
+   Fill-blank question as a carved stone slab.
+   The slab and the option chips are generated artwork used as 9-slice
+   sources: the chipped edge and the groove live in the border band, so
+   only the flat middle stretches to fit the sentence and the options.
+   ============================================================ */
+.personal-workspace .practice-question-card--rune {
+  border: 0;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.personal-workspace .practice-question-card--rune::before { content: none; }
+
+.personal-workspace .practice-question-card--rune > * {
+  position: relative;
+}
+
+/* The slab itself: 44px band, flat middle fills with the stone colour. */
+.personal-workspace .practice-question-card--rune {
+  border-style: solid;
+  border-width: 40px;
+  border-image-source: var(--rune-slab);
+  border-image-slice: 14% fill;
+  border-image-width: 40px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  color: #f3e9d2;
+}
+
+.personal-workspace .practice-question-card--rune .practice-question-card__header,
+.personal-workspace .practice-question-card--rune .practice-fill-blank,
+.personal-workspace .practice-question-card--rune .practice-options {
+  color: #f3e9d2;
+}
+
+.personal-workspace .practice-question-card--rune .practice-question-number {
+  color: #7cf0c4;
+  background: none;
+  border-color: #4a4270;
+}
+
+.personal-workspace .practice-question-card--rune .status-badge {
+  background: rgb(124 240 196 / 14%);
+  border-color: #4a7a6a;
+  color: #7cf0c4;
+}
+
+.personal-workspace .practice-question-card--rune .practice-sentence {
+  color: #f3e9d2;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.personal-workspace .practice-question-card--rune .practice-sentence mark,
+.personal-workspace .practice-question-card--rune .practice-sentence b {
+  color: #ffc93c;
+  background: none;
+  border-bottom: 2px solid #ffc93c;
+  padding-bottom: 1px;
+}
+
+.personal-workspace .practice-question-card--rune .practice-translation-note {
+  color: #d9cff5;
+  border-color: #4a4270;
+}
+
+/* Each option is the stone chip. */
+.personal-workspace .practice-question-card--rune .practice-option {
+  padding: 0;
+  border-style: solid !important;
+  border-width: 12px 16px !important;
+  border-color: transparent !important;
+  border-image-source: var(--rune-chip) !important;
+  border-image-slice: 22% 8% fill !important;
+  border-image-width: 12px 16px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  color: #f3e9d2;
+  transition: filter 140ms ease;
+}
+
+.personal-workspace .practice-question-card--rune .practice-option:hover { filter: brightness(1.25); }
+
+.personal-workspace .practice-question-card--rune .practice-option__body { padding: 8px 4px; }
+
+.personal-workspace .practice-question-card--rune .practice-option__text { color: #f3e9d2; }
+
+.personal-workspace .practice-question-card--rune .practice-option__input:checked ~ * ,
+.personal-workspace .practice-question-card--rune .practice-option.is-selected {
+  border-image-source: var(--rune-chip-on);
+}
+
+.personal-workspace .practice-question-card--rune .practice-option.is-selected,
+.personal-workspace .practice-question-card--rune .practice-option:has(input:checked) {
+  border-image-source: var(--rune-chip-on) !important;
+  filter: none;
+}
+
+.personal-workspace .practice-question-card--rune .practice-option--correct {
+  border-image-source: var(--rune-chip-on) !important;
+}
+
+.personal-workspace .practice-question-card--rune .option-badge,
+.personal-workspace .practice-question-card--rune .practice-option .option-badge {
+  background: rgb(124 240 196 / 16%);
+  border-color: #4a7a6a;
+  color: #7cf0c4;
+}
