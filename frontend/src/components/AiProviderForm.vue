@@ -17,6 +17,7 @@ interface ValidatedProviderFields {
   timeoutSeconds: number
   enabled: boolean
   customHeaders: Record<string, string>
+  embeddingModel: string | null
 }
 
 const props = defineProps<{
@@ -45,6 +46,7 @@ const emit = defineEmits<{
 const name = ref('')
 const baseUrl = ref('')
 const modelId = ref('')
+const embeddingModel = ref('')
 const priority = ref(100)
 const timeoutSeconds = ref(120)
 const enabled = ref(true)
@@ -78,6 +80,7 @@ function reset(): void {
   name.value = provider?.name ?? ''
   baseUrl.value = provider?.baseUrl ?? ''
   modelId.value = provider?.modelId ?? ''
+  embeddingModel.value = provider?.embeddingModel ?? ''
   priority.value = provider?.priority ?? 100
   timeoutSeconds.value = provider?.timeoutSeconds ?? 120
   enabled.value = provider?.enabled ?? true
@@ -176,6 +179,7 @@ function validate(): ValidatedProviderFields | null {
     timeoutSeconds: timeoutSeconds.value,
     enabled: enabled.value,
     customHeaders: headers,
+    embeddingModel: embeddingModel.value.trim() || null,
   }
 }
 
@@ -327,6 +331,18 @@ function cancel(): void {
         </p>
         <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
         <p v-else-if="modelsFetched && !modelLoading && modelOptions && modelOptions.length === 0" class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
+
+        <div class="field">
+          <label for="provider-embedding-model">向量模型（可选）</label>
+          <input
+            id="provider-embedding-model"
+            v-model="embeddingModel"
+            type="text"
+            maxlength="120"
+            placeholder="例如 text-embedding-3-small"
+          />
+          <p class="field-hint">填写后知识库会用这个模型做语义检索；留空则只用关键词检索。</p>
+        </div>
         <ErrorNotice v-if="modelError" :error="modelError" :show-retry="false" />
 
         <div v-if="canFetchModels && modelsOpen" class="ai-model-menu" role="listbox" aria-label="可用模型">

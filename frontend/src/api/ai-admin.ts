@@ -35,6 +35,8 @@ export interface AiProvider {
   timeoutSeconds: number
   enabled: boolean
   customHeaders: Record<string, string>
+  /** Optional: the model used for /embeddings, needed by the knowledge base. */
+  embeddingModel: string | null
   lastTestStatus: ProviderTestStatus
   lastTestErrorCode: string | null
   lastTestAt: string | null
@@ -53,6 +55,7 @@ export interface ProviderCreateInput {
   timeoutSeconds: number
   enabled: boolean
   customHeaders: Record<string, string>
+  embeddingModel?: string | null
 }
 
 /** Checks a configuration before it is saved; `apiKey` is omitted when the stored key applies. */
@@ -230,6 +233,8 @@ export function parseProvider(value: unknown, index = 0): AiProvider {
     timeoutSeconds: integerValue(body.timeout_seconds, context, 'timeout_seconds', 1),
     enabled: booleanValue(body.enabled, context, 'enabled'),
     customHeaders: stringRecord(body.custom_headers, context, 'custom_headers'),
+    embeddingModel:
+      typeof body.embedding_model === 'string' ? body.embedding_model : null,
     lastTestStatus: enumValue(body.last_test_status, TEST_STATUSES, context, 'last_test_status'),
     lastTestErrorCode: nullableString(body.last_test_error_code, context, 'last_test_error_code'),
     lastTestAt: nullableString(body.last_test_at, context, 'last_test_at'),
@@ -352,6 +357,7 @@ export function serializeProviderCreate(input: ProviderCreateInput): Record<stri
     timeout_seconds: input.timeoutSeconds,
     enabled: input.enabled,
     custom_headers: input.customHeaders,
+    embedding_model: input.embeddingModel || null,
   }
 }
 

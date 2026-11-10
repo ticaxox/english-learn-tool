@@ -37,6 +37,7 @@ const defaultProvider: AiProvider = {
   timeoutSeconds: 60,
   enabled: true,
   customHeaders: { 'X-Team': 'learning' },
+  embeddingModel: null,
   lastTestStatus: 'succeeded',
   lastTestErrorCode: null,
   lastTestAt: '2026-10-23T03:00:00Z',
