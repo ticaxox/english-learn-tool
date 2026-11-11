@@ -1489,10 +1489,12 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   display: block;
   min-height: 0;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
+  /* The shared card plate is declared further up the cascade; the shelf's
+   * book is an object on the page, so the plate is switched off here. */
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
   cursor: pointer;
   transition: transform 220ms cubic-bezier(0.2, 0.9, 0.25, 1.05);
 }
@@ -1513,16 +1515,22 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
  * colour sits under the artwork so the old per-type tints cannot show through
  * the painted smoke. */
 .personal-workspace .wordbook-grid .wordbook-cover {
-  background: #1f4535 !important;
+  /* The book is an object on the page now; nothing sits behind it. */
+  background: none !important;
 }
 
 .personal-workspace .wordbook-grid .wordbook-cover {
   position: relative;
   display: block;
   aspect-ratio: 2 / 3;
-  overflow: hidden;
-  border-radius: 4px 10px 10px 4px;
-  box-shadow: 6px 8px 0 rgb(59 42 26 / 16%);
+  overflow: visible;
+  border-radius: 0;
+  /* No plate and no offset board: the shadow follows the book's silhouette. */
+  box-shadow: none;
+}
+
+.personal-workspace .wordbook-cover__art {
+  filter: drop-shadow(0 10px 12px rgb(59 42 26 / 26%));
 }
 
 .personal-workspace .wordbook-cover__art {
@@ -1541,16 +1549,16 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 .personal-workspace .wordbook-cover__art .art-swap__frame {
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: contain;
 }
 
 /* The name is written on the cover, top and centre, with nothing behind it:
  * the shadow is what carries it over the leather. */
 .personal-workspace .wordbook-cover__name {
   position: absolute;
-  top: 17%;
-  right: 17%;
-  left: 11%;
+  top: 15%;
+  right: 13%;
+  left: 20%;
   z-index: 1;
   color: #fbf2da;
   font-size: clamp(0.95rem, 1.7vw, 1.12rem);

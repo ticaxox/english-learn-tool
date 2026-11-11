@@ -13,6 +13,8 @@ import ShelfPicker from '../src/components/ShelfPicker.vue'
 import ThemeSwitch from '../src/components/ThemeSwitch.vue'
 import WordbookShelfCard from '../src/components/WordbookShelfCard.vue'
 import ArtImage from '../src/components/ArtImage.vue'
+import Frame3 from '../src/components/Frame3.vue'
+import { parchmentFrame, scrollFrame, slabFrame } from '../src/assets/halloween'
 import WordbookDetailDialog from '../src/components/WordbookDetailDialog.vue'
 import ChoiceTrainer from '../src/components/ChoiceTrainer.vue'
 import SpellingTrainer from '../src/components/SpellingTrainer.vue'
@@ -110,6 +112,24 @@ function toggleSlow(): void {
       <section v-for="variant in BADGE_VARIANTS" :key="variant" class="lab-block">
         <p class="lab-caption">徽章 · {{ variant }} 版（左三枚已解锁，右三枚未解锁）</p>
         <BadgeWall :variant="variant" />
+      </section>
+
+      <section class="lab-block">
+        <p class="lab-caption">三件套框 · 两端保形，中间可任意延长（无背景）</p>
+        <div class="lab-frames">
+          <Frame3 :frame="scrollFrame" :ratio="131 / 1024">
+            <strong>羊皮卷</strong>
+            <p>两端是卷轴木杆，中间是一段可拉伸的纸面。写多长的字都不会把杆拉歪。</p>
+          </Frame3>
+          <Frame3 :frame="slabFrame" tone="stone">
+            <strong>碑文石板</strong>
+            <p>两端是崩裂的石边，中间是平的碑面。</p>
+          </Frame3>
+          <Frame3 :frame="parchmentFrame" :ratio="202 / 793">
+            <strong>羊皮纸</strong>
+            <p>两端是毛边，中间是平滑纸面。</p>
+          </Frame3>
+        </div>
       </section>
 
       <section class="lab-block">
@@ -234,6 +254,14 @@ function toggleSlow(): void {
 .lab-extras {
   margin-top: 0;
 }
+
+.lab-frames {
+  display: grid;
+  gap: 26px;
+}
+
+.lab-frames strong { display: block; margin-bottom: 4px; font-size: 1.05rem; }
+.lab-frames p { margin: 0; opacity: 0.85; }
 
 .lab-drills {
   display: grid;

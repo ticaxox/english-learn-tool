@@ -5238,3 +5238,54 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ------------------------------------------------------- three-piece frames */
+
+/* The painted ends hold their shape; only the plain middle stretches. */
+.personal-workspace .frame3 {
+  position: relative;
+  isolation: isolate;
+  display: block;
+}
+
+.personal-workspace .frame3__band {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--frame-mid) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.personal-workspace .frame3__cap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: auto;
+  aspect-ratio: var(--frame-cap-ratio, 0.19);
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.personal-workspace .frame3__cap--left {
+  left: 0;
+  background-image: var(--frame-left);
+}
+
+.personal-workspace .frame3__cap--right {
+  right: 0;
+  background-image: var(--frame-right);
+}
+
+.personal-workspace .frame3__body {
+  position: relative;
+  z-index: 2;
+  /* Sit inside the caps rather than over them. */
+  padding: 8% 12%;
+}
+
+/* Ink follows the surface: parchment takes dark ink, the stone takes cream. */
+.personal-workspace .frame3--paper { color: #3b2a1a; }
+.personal-workspace .frame3--stone { color: #f3e9d2; }

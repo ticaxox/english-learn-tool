@@ -117,3 +117,42 @@ export const brandIcon = appIcon
 export function forMode(set: ThemeMode, mode: Mode): string {
   return set[mode]
 }
+
+/* Three-piece frames: the two ends keep their painted detail, the middle is a
+ * plain strip that stretches, so a wide surface never distorts an edge. */
+import scrollCapLeft from './card/scroll-cap-left.png'
+import scrollMiddle from './card/scroll-middle.png'
+import scrollCapRight from './card/scroll-cap-right.png'
+import slabCapLeft from './card/slab-cap-left.png'
+import slabMiddle from './card/slab-middle.png'
+import slabCapRight from './card/slab-cap-right.png'
+import parchmentCapLeft from './card/parchment-cap-left.png'
+import parchmentMiddle from './card/parchment-middle.png'
+import parchmentCapRight from './card/parchment-cap-right.png'
+
+export type Frame3Part = { left: string; middle: string; right: string }
+
+/** A scroll with rolled rods at both ends. */
+export const scrollFrame: Frame3Part = {
+  left: scrollCapLeft,
+  middle: scrollMiddle,
+  right: scrollCapRight,
+}
+
+/** A carved stone slab with chipped ends. */
+export const slabFrame: Frame3Part = {
+  left: slabCapLeft,
+  middle: slabMiddle,
+  right: slabCapRight,
+}
+
+/** A plain sheet of parchment with torn edges. */
+export const parchmentFrame: Frame3Part = {
+  left: parchmentCapLeft,
+  middle: parchmentMiddle,
+  right: parchmentCapRight,
+}
+
+/** A closed spellbook as an object: spine, page block and clasp, no backdrop. */
+import bookObjectDay from './card/book-object-day.png'
+export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const

@@ -8,7 +8,7 @@
  * on them — lives in the dialog this opens.
  */
 import ArtImage from './ArtImage.vue'
-import { wordbookCover } from '../assets/halloween'
+import { bookObject } from '../assets/halloween'
 import type { Wordbook } from '../api/wordbooks'
 
 defineProps<{ book: Wordbook }>()
@@ -29,7 +29,7 @@ const emit = defineEmits<{ detail: [] }>()
     @keydown.space.prevent="emit('detail')"
   >
     <span class="wordbook-cover">
-      <ArtImage class="wordbook-cover__art" :set="wordbookCover" />
+      <ArtImage class="wordbook-cover__art" :set="bookObject" />
       <span v-if="book.is_active" class="wordbook-cover__bookmark" aria-hidden="true"></span>
       <span class="wordbook-cover__name">{{ book.name }}</span>
     </span>
