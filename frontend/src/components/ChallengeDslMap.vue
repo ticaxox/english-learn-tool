@@ -517,7 +517,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
   <section
     class="challenge-dsl-map panel"
     :class="`challenge-dsl-map--${variant}`"
-    :style="{ '--node-plate': `url(${nodeToken.plate})`, '--node-boss': `url(${nodeToken.boss})` }"
+    :style="{ '--node-plate': `url(${nodeToken.plate})`, '--node-boss': `url(${nodeToken.boss})`, '--node-lit': `url(${nodeToken.lit})`, '--node-moss': `url(${nodeToken.moss})` }"
     aria-label="闯关地图"
   >
     <header class="challenge-dsl-map__head">

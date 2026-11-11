@@ -2529,9 +2529,10 @@
 /* `coin` is the flat arcade stop the map shipped with. The two dies below
  * reuse the language of the badge discs so the trail and the wall agree. */
 
-/* iron: the painted token — a riveted octagon with a recessed face — lit by
- * how far the learner has got. The art carries the construction; CSS only
- * adds the status light. */
+/* iron: the painted token — a riveted octagon with a recessed face. The art
+ * carries the construction and the state: dark iron for a stop in progress,
+ * lit from inside once it is cleared, grown over with moss while it is out of
+ * reach. CSS only adds the halo. */
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card {
   border: 0;
   border-radius: 0;
@@ -2551,23 +2552,26 @@
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-completed {
+  background-image: var(--node-lit) !important;
   color: #ffd166;
-  filter: drop-shadow(0 0 10px rgb(255 209 102 / 55%));
+  filter: drop-shadow(0 0 10px rgb(255 209 102 / 45%));
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-in_progress,
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-unlocked {
   color: #7cf0c4;
-  filter: drop-shadow(0 0 10px rgb(58 209 131 / 50%));
+  filter: drop-shadow(0 0 10px rgb(58 209 131 / 45%));
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-failed {
   color: #ffb3ab;
-  filter: drop-shadow(0 0 10px rgb(255 111 111 / 45%));
+  filter: drop-shadow(0 0 10px rgb(255 111 111 / 40%));
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-locked {
-  filter: saturate(0.5) brightness(0.82);
+  background-image: var(--node-moss) !important;
+  color: #9be8ca;
+  filter: saturate(0.85) brightness(0.9);
 }
 
 /* lantern: a lit paper orb; the light is the status. */

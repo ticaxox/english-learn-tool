@@ -160,4 +160,13 @@ export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
 /* The trail's stop markers: a riveted iron token, and the boss's version. */
 import nodePlate from './card/node-plate.png'
 import nodePlateBoss from './card/node-plate-boss.png'
-export const nodeToken = { plate: nodePlate, boss: nodePlateBoss } as const
+import nodePlateLit from './card/node-plate-lit.png'
+import nodePlateMoss from './card/node-plate-moss.png'
+export const nodeToken = {
+  plate: nodePlate,
+  boss: nodePlateBoss,
+  /** The same iron, lit from inside — a cleared stop. */
+  lit: nodePlateLit,
+  /** The same iron, grown over — a stop nobody has reached yet. */
+  moss: nodePlateMoss,
+} as const
