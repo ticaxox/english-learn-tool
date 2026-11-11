@@ -186,6 +186,10 @@ async def test_badges_unlock_from_real_activity(client, app, member_user) -> Non
     listed = (await client.get(f"{PROGRESS_PATH}/badges", headers=headers)).json()["items"]
     badges = {item["key"]: item for item in listed}
     assert badges["first_lesson"]["unlocked"] is True
+    # Every badge in the catalogue is offered, and the wall only grows.
+    assert len(listed) >= 23
+    assert "streak_14" in badges
+    assert "night_owl" in badges
     assert badges["streak_3"]["unlocked"] is False
 
 
