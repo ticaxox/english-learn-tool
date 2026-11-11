@@ -25,12 +25,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 AI_TASK_TYPES = (
-    "'practice_generation', 'subjective_grading', 'coach_reply', 'challenge_plan', 'json_repair'"
+    "'practice_generation', 'subjective_grading', 'coach_reply', 'challenge_plan', "
+    "'json_repair', 'conversation_turn'"
 )
 AI_JOB_STATUSES = "'queued', 'running', 'succeeded', 'failed', 'cancelled', 'stale'"
 AI_QUOTA_KINDS = "'coach_messages', 'question_generation', 'subjective_grading'"
 AI_PROMPT_KEYS = (
-    "'practice_generation', 'subjective_grading', 'coach_reply', 'challenge_plan', 'json_repair'"
+    "'practice_generation', 'subjective_grading', 'coach_reply', 'challenge_plan', "
+    "'json_repair', 'conversation_turn'"
 )
 
 

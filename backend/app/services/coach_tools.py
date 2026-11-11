@@ -18,7 +18,13 @@ from app.models.identity import User
 from app.services.coach import apply_coach_tool
 from app.services.practice_authoring import AuthoredPracticeRequest, create_authored_practice
 
-PRACTICE_TYPES = ["fill_blank", "reading", "translation", "writing"]
+PRACTICE_TYPES = [
+    "fill_blank",
+    "reading",
+    "translation",
+    "writing",
+    "conversation",
+]
 PRACTICE_SOURCES = ["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 DIFFICULTIES = ["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
 
@@ -149,7 +155,7 @@ async def call_coach_tool(
                 message="A search query is required.",
             )
         limit = int((arguments or {}).get("limit") or 6)
-        hits = await search(session, settings, query=query, limit=min(limit, 10), viewer=user)
+        hits = await search(session, settings, query=query, limit=min(limit, 10))
         return {
             "items": [
                 {

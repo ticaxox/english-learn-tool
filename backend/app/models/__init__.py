@@ -37,6 +37,7 @@ from app.models.learning import (
 )
 from app.models.notifications import Notification, NotificationOutbox
 from app.models.practice import (
+    PracticeConversationTurn,
     PracticeDeletion,
     PracticeEvent,
     PracticeGeneration,
@@ -90,6 +91,7 @@ __all__ = [
     "MistakeFlag",
     "Notification",
     "NotificationOutbox",
+    "PracticeConversationTurn",
     "PracticeDeletion",
     "PracticeEvent",
     "PracticeGeneration",

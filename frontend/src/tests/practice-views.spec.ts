@@ -135,7 +135,7 @@ describe('practice views', () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=mixed')
     const labels = wrapper.findAll('.practice-type-pill').map((pill) => pill.text())
     expect(labels).toContain('随机')
-    expect(labels).toHaveLength(5)
+    expect(labels).toHaveLength(6)
     const active = wrapper.findAll('.practice-type-pill.is-active').map((pill) => pill.text())
     expect(active).toEqual(['随机'])
     await wrapper.get('form').trigger('submit')

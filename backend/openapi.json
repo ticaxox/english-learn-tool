@@ -4113,6 +4113,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/JsonRepairRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ConversationTurnRequest"
                   }
                 ],
                 "discriminator": {
@@ -4122,7 +4125,8 @@
                     "subjective_grading": "#/components/schemas/SubjectiveGradingRequest",
                     "coach_reply": "#/components/schemas/CoachReplyRequest",
                     "challenge_plan": "#/components/schemas/ChallengePlanRequest",
-                    "json_repair": "#/components/schemas/JsonRepairRequest"
+                    "json_repair": "#/components/schemas/JsonRepairRequest",
+                    "conversation_turn": "#/components/schemas/ConversationTurnRequest"
                   }
                 },
                 "title": "Payload"
@@ -6833,6 +6837,247 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PracticeSessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account may not use practice.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The practice resource was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The practice state conflicts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The AI quota or concurrency limit is exhausted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The AI provider or queue is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/practice/sessions/{session_id}/conversation/turns": {
+      "post": {
+        "tags": [
+          "system",
+          "practice"
+        ],
+        "summary": "Say something and let the guide answer",
+        "operationId": "post_conversation_turn_endpoint_api_v1_practice_sessions__session_id__conversation_turns_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeConversationTurnRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeConversationTurnResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account may not use practice.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The practice resource was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The practice state conflicts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The AI quota or concurrency limit is exhausted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The AI provider or queue is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "system",
+          "practice"
+        ],
+        "summary": "Read the dialogue of a conversation practice",
+        "operationId": "get_conversation_turns_endpoint_api_v1_practice_sessions__session_id__conversation_turns_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PracticeConversationTurnPublic"
+                  },
+                  "title": "Response Get Conversation Turns Endpoint Api V1 Practice Sessions  Session Id  Conversation Turns Get"
                 }
               }
             }
@@ -12287,7 +12532,8 @@
               "subjective_grading",
               "coach_reply",
               "challenge_plan",
-              "json_repair"
+              "json_repair",
+              "conversation_turn"
             ],
             "title": "Task Type"
           },
@@ -12531,7 +12777,8 @@
               "subjective_grading",
               "coach_reply",
               "challenge_plan",
-              "json_repair"
+              "json_repair",
+              "conversation_turn"
             ],
             "title": "Task Type"
           },
@@ -12807,6 +13054,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Practice Type"
@@ -13625,6 +13873,7 @@
                 "reading",
                 "translation",
                 "writing",
+                "conversation",
                 "mixed"
               ]
             },
@@ -14948,6 +15197,158 @@
         ],
         "title": "ConcurrencyUsage"
       },
+      "ConversationTurnContext": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Topic"
+          },
+          "topic_zh": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Zh"
+          },
+          "role": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Role"
+          },
+          "role_zh": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Zh"
+          },
+          "scenario": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario"
+          },
+          "history": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 40,
+            "title": "History"
+          },
+          "target_words": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Target Words"
+          },
+          "learner_line": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Learner Line"
+          },
+          "conversation_turn_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conversation Turn Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "topic",
+          "role",
+          "learner_line",
+          "conversation_turn_id"
+        ],
+        "title": "ConversationTurnContext",
+        "description": "What the guide knows when it answers the learner.\n\nThe topic, the character it is playing and the talk so far are the whole\nsituation: the guide has to sound like the same person it was a minute\nago, and it has to move the conversation forward rather than repeat\nitself."
+      },
+      "ConversationTurnPublic": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "line": {
+            "type": "string",
+            "title": "Line"
+          },
+          "line_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line Zh"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "line"
+        ],
+        "title": "ConversationTurnPublic",
+        "description": "One line the guide says, and what it is trying to get at.\n\nThese are the guide's opening lines, carried by the generated question.\nThe dialogue that follows is served by ``PracticeConversationTurnPublic``."
+      },
+      "ConversationTurnRequest": {
+        "properties": {
+          "task_type": {
+            "type": "string",
+            "const": "conversation_turn",
+            "title": "Task Type"
+          },
+          "context": {
+            "$ref": "#/components/schemas/ConversationTurnContext"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "task_type",
+          "context"
+        ],
+        "title": "ConversationTurnRequest"
+      },
       "DailyQuestResponse": {
         "properties": {
           "key": {
@@ -15793,6 +16194,14 @@
             },
             "type": "array",
             "title": "Goals",
+            "default": []
+          },
+          "radar": {
+            "items": {
+              "$ref": "#/components/schemas/RadarAxis"
+            },
+            "type": "array",
+            "title": "Radar",
             "default": []
           }
         },
@@ -17681,6 +18090,125 @@
         ],
         "title": "PracticeAnswerInput"
       },
+      "PracticeConversationTurnPublic": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "sequence": {
+            "type": "integer",
+            "title": "Sequence"
+          },
+          "speaker": {
+            "type": "string",
+            "enum": [
+              "guide",
+              "learner"
+            ],
+            "title": "Speaker"
+          },
+          "line": {
+            "type": "string",
+            "title": "Line"
+          },
+          "line_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line Zh"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "speaker",
+          "line"
+        ],
+        "title": "PracticeConversationTurnPublic",
+        "description": "One exchange of the dialogue, the guide's or the learner's."
+      },
+      "PracticeConversationTurnRequest": {
+        "properties": {
+          "line": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Line"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "line"
+        ],
+        "title": "PracticeConversationTurnRequest",
+        "description": "What the learner just said."
+      },
+      "PracticeConversationTurnResponse": {
+        "properties": {
+          "turn": {
+            "$ref": "#/components/schemas/PracticeConversationTurnPublic"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "completed"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "turn",
+          "status"
+        ],
+        "title": "PracticeConversationTurnResponse",
+        "description": "The guide's next line, once it has been written."
+      },
       "PracticeCreateRequest": {
         "properties": {
           "practice_type": {
@@ -17690,6 +18218,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Practice Type"
@@ -17961,6 +18490,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Practice Type"
@@ -18096,6 +18626,14 @@
               }
             ],
             "title": "Writing Target Words"
+          },
+          "knowledge_snippets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "Knowledge Snippets"
           }
         },
         "additionalProperties": false,
@@ -18196,6 +18734,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Question Type"
@@ -18323,6 +18862,90 @@
             },
             "type": "array",
             "title": "Target Words"
+          },
+          "source_citation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Citation"
+          },
+          "topic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic"
+          },
+          "topic_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Zh"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "role_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Zh"
+          },
+          "scenario": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario"
+          },
+          "scenario_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Zh"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationTurnPublic"
+            },
+            "type": "array",
+            "title": "Turns"
           }
         },
         "type": "object",
@@ -18346,6 +18969,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Question Type"
@@ -18469,6 +19093,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Practice Type"
@@ -18629,6 +19254,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Practice Type"
@@ -18880,6 +19506,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Practice Type"
@@ -19062,6 +19689,7 @@
               "reading",
               "translation",
               "writing",
+              "conversation",
               "mixed"
             ],
             "title": "Practice Type"
@@ -19244,7 +19872,8 @@
               "subjective_grading",
               "coach_reply",
               "challenge_plan",
-              "json_repair"
+              "json_repair",
+              "conversation_turn"
             ],
             "title": "Key"
           },
@@ -19301,7 +19930,8 @@
               "subjective_grading",
               "coach_reply",
               "challenge_plan",
-              "json_repair"
+              "json_repair",
+              "conversation_turn"
             ],
             "title": "Key"
           },
@@ -19877,6 +20507,35 @@
         ],
         "title": "ProviderTestResponse"
       },
+      "RadarAxis": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "studied": {
+            "type": "integer",
+            "title": "Studied"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "studied",
+          "total"
+        ],
+        "title": "RadarAxis",
+        "description": "One spoke of the weekly radar: a word kind and how much of it was studied."
+      },
       "ReadinessResponse": {
         "properties": {
           "status": {
@@ -20422,7 +21081,8 @@
             "type": "string",
             "enum": [
               "translation",
-              "writing"
+              "writing",
+              "conversation"
             ],
             "title": "Practice Type"
           },

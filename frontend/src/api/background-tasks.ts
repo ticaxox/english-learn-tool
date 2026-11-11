@@ -3,12 +3,13 @@
  * time. The learner can inspect, retry a failure, or delete a slot.
  */
 import { apiClient } from './client'
+import type { PracticeType } from './practice'
 
 export type BackgroundTaskStatus = 'generating' | 'ready' | 'failed'
 
 export interface BackgroundTask {
   id: string
-  practiceType: 'fill_blank' | 'reading' | 'translation' | 'writing'
+  practiceType: PracticeType
   questionCount: number
   status: BackgroundTaskStatus
   attempts: number

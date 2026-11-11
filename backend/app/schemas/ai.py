@@ -15,6 +15,7 @@ AiTaskType = Literal[
     "coach_reply",
     "challenge_plan",
     "json_repair",
+    "conversation_turn",
 ]
 AiJobStatus = Literal["queued", "running", "succeeded", "failed", "cancelled", "stale"]
 AiQuotaKind = Literal["coach_messages", "question_generation", "subjective_grading"]
@@ -24,6 +25,7 @@ AiPromptKey = Literal[
     "coach_reply",
     "challenge_plan",
     "json_repair",
+    "conversation_turn",
 ]
 
 

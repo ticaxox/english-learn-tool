@@ -26,7 +26,7 @@ try {
 const displayName = computed(() => auth?.displayName || '学')
 const initials = computed(() => displayName.value.trim().slice(0, 2).toUpperCase())
 
-type TabIcon = 'cards' | 'book' | 'star' | 'arrow' | 'spark'
+type TabIcon = 'cards' | 'book' | 'star' | 'arrow' | 'spark' | 'dialogue'
 const memoryIcons: Record<MemoryModule, TabIcon> = {
   flashcard: 'book',
   choice: 'cards',
@@ -37,13 +37,14 @@ const practiceIcons: Record<PracticeType, TabIcon> = {
   reading: 'cards',
   translation: 'arrow',
   writing: 'spark',
+  conversation: 'dialogue',
   mixed: 'star',
 }
 
 const tabs = computed<Array<{ id: string; label: string; icon: TabIcon }>>(() => (
   props.mode === 'memory'
     ? MEMORY_MODULES.map((module: MemoryModule) => ({ id: module, label: MEMORY_MODULE_LABELS[module], icon: memoryIcons[module] }))
-    : (['fill_blank', 'reading', 'translation', 'writing', 'mixed'] as PracticeType[])
+    : (['fill_blank', 'reading', 'translation', 'writing', 'conversation', 'mixed'] as PracticeType[])
       .map((type) => ({ id: type, label: PRACTICE_TYPE_LABELS[type], icon: practiceIcons[type] }))
 ))
 

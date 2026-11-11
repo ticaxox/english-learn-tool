@@ -7,6 +7,7 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import LoadingState from '../components/LoadingState.vue'
 import PracticeQuestionCard from '../components/PracticeQuestionCard.vue'
+import PracticeConversation from '../components/PracticeConversation.vue'
 import SpokenText from '../components/SpokenText.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
 import { usePracticeSession } from '../composables/usePracticeSession'
@@ -292,17 +293,24 @@ void practice.load()
             </section>
             <ErrorNotice v-else-if="practice.draftError.value" :error="practice.draftError.value" :show-retry="false" retry-label="重试" @retry="saveDraft" />
 
-            <PracticeQuestionCard
-              v-for="(question, index) in questions"
-              :key="question.id"
-              :question="question"
-              :index="index"
-              :total="questions.length"
-              :hide-article="hideArticle(question)"
-              :model-value="answers[question.id] ?? ''"
-              :disabled="practice.busy.value"
-              @update:model-value="answers[question.id] = $event"
-            />
+            <template v-for="(question, index) in questions" :key="question.id">
+              <PracticeConversation
+                v-if="question.questionType === 'conversation'"
+                :session-id="sessionId"
+                :question="question"
+                @answer="answers[question.id] = $event"
+              />
+              <PracticeQuestionCard
+                v-else
+                :question="question"
+                :index="index"
+                :total="questions.length"
+                :hide-article="hideArticle(question)"
+                :model-value="answers[question.id] ?? ''"
+                :disabled="practice.busy.value"
+                @update:model-value="answers[question.id] = $event"
+              />
+            </template>
 
           </div>
 

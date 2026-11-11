@@ -6,7 +6,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-PracticeType = Literal["fill_blank", "reading", "translation", "writing", "mixed"]
+PracticeType = Literal[
+    "fill_blank", "reading", "translation", "writing", "conversation", "mixed"
+]
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 PracticeSessionStatus = Literal["generating", "ready", "submitted", "failed", "cancelled"]
 PracticeSubmissionStatus = Literal["scoring", "completed", "failed"]
@@ -33,7 +35,12 @@ class PracticeCreateRequest(_StrictModel):
 
     @model_validator(mode="after")
     def validate_request(self) -> PracticeCreateRequest:
-        allowed = {1} if self.practice_type == "writing" else {3, 5, 10, 15, 20}
+        # A conversation is one dialogue, and writing is one essay.
+        allowed = (
+            {1}
+            if self.practice_type in {"writing", "conversation"}
+            else {3, 5, 10, 15, 20}
+        )
         if self.count not in allowed:
             raise ValueError("count does not match the selected practice type")
         if self.source == "difficulty" and self.difficulty is None:
@@ -49,6 +56,53 @@ class PracticeOptionPublic(BaseModel):
     id: str
     text: str
     text_zh: str | None = None
+
+
+class ConversationTurnPublic(BaseModel):
+    """One line the guide says, and what it is trying to get at.
+
+    These are the guide's opening lines, carried by the generated question.
+    The dialogue that follows is served by ``PracticeConversationTurnPublic``.
+    """
+
+    id: str
+    line: str
+    line_zh: str | None = None
+    intent: str | None = None
+
+
+class PracticeConversationTurnPublic(BaseModel):
+    """One exchange of the dialogue, the guide's or the learner's."""
+
+    id: UUID
+    sequence: int
+    speaker: Literal["guide", "learner"]
+    line: str
+    line_zh: str | None = None
+    intent: str | None = None
+    created_at: datetime | None = None
+
+
+class PracticeConversationTurnRequest(_StrictModel):
+    """What the learner just said."""
+
+    line: str = Field(min_length=1, max_length=2_000)
+
+    @field_validator("line")
+    @classmethod
+    def not_blank(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("line must not be blank")
+        return cleaned
+
+
+class PracticeConversationTurnResponse(BaseModel):
+    """The guide's next line, once it has been written."""
+
+    turn: PracticeConversationTurnPublic
+    job_id: UUID | None = None
+    status: Literal["queued", "completed"]
 
 
 class PracticeQuestionPublic(BaseModel):
@@ -71,6 +125,16 @@ class PracticeQuestionPublic(BaseModel):
     # The reference passage this question came from, as "[n] title". Null when the
     # model wrote it from scratch.
     source_citation: str | None = None
+    # Conversation only: the topic the learner will talk about.
+    topic: str | None = None
+    topic_zh: str | None = None
+    # Conversation only: the character the learner talks with.
+    role: str | None = None
+    role_zh: str | None = None
+    scenario: str | None = None
+    scenario_zh: str | None = None
+    # Conversation only: the guide's opening lines, each with the aim behind it.
+    turns: list[ConversationTurnPublic] = Field(default_factory=list)
 
 
 class PracticeSessionResponse(BaseModel):

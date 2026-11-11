@@ -1,9 +1,13 @@
 /**
- * Web Speech API dictation for the coach composer.
+ * Web Speech API dictation.
  *
  * Recognition stays in the browser; only the final transcript is handed back
  * to the caller as plain text. Chromium exposes it behind a webkit prefix, and
  * other browsers simply do not offer the button.
+ *
+ * The language defaults to the browser's, but a caller can pin it: a learner
+ * practising English wants the microphone to hear English even on a Chinese
+ * system.
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
@@ -41,15 +45,20 @@ function recognitionConstructor(): RecognitionConstructor | null {
   return scope.SpeechRecognition ?? scope.webkitSpeechRecognition ?? null
 }
 
-export function useSpeechRecognition(onTranscript: (text: string) => void) {
+export function useSpeechRecognition(
+  onTranscript: (text: string) => void,
+  options: { language?: string } = {},
+) {
   const supported = ref(false)
   const listening = ref(false)
   const error = ref<string | null>(null)
   let recognition: RecognitionLike | null = null
 
-  const language = typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('zh')
-    ? 'zh-CN'
-    : 'en-US'
+  const language =
+    options.language ??
+    (typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('zh')
+      ? 'zh-CN'
+      : 'en-US')
 
   onMounted(() => {
     supported.value = recognitionConstructor() !== null

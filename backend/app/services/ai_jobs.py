@@ -44,6 +44,8 @@ TASK_QUOTA_KIND = {
     "coach_reply": "coach_messages",
     "challenge_plan": None,
     "json_repair": None,
+    # A dialogue turn is a coach answer: same shape, same cost.
+    "conversation_turn": "coach_messages",
 }
 
 
@@ -725,6 +727,7 @@ async def generate_structured(
 
 
 async def _apply_practice_success(session: AsyncSession, job: AiJob) -> None:
+    from app.services.conversation import materialize_conversation_turn
     from app.services.practice import (
         materialize_practice_generation,
         materialize_practice_grading,
@@ -734,9 +737,12 @@ async def _apply_practice_success(session: AsyncSession, job: AiJob) -> None:
         await materialize_practice_generation(session, job)
     elif job.task_type == "subjective_grading" and job.input_context.get("practice_submission_id"):
         await materialize_practice_grading(session, job)
+    elif job.task_type == "conversation_turn":
+        await materialize_conversation_turn(session, job)
 
 
 async def _apply_practice_failure(session: AsyncSession, job: AiJob) -> None:
+    from app.services.conversation import mark_conversation_turn_failed
     from app.services.practice import (
         mark_practice_generation_failed,
         mark_practice_grading_failed,
@@ -746,6 +752,8 @@ async def _apply_practice_failure(session: AsyncSession, job: AiJob) -> None:
         await mark_practice_generation_failed(session, job)
     elif job.task_type == "subjective_grading" and job.input_context.get("practice_submission_id"):
         await mark_practice_grading_failed(session, job)
+    elif job.task_type == "conversation_turn":
+        await mark_conversation_turn_failed(session, job)
 
 
 async def _apply_coach_success(

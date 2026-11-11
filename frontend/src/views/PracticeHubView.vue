@@ -56,7 +56,7 @@ const enabledMemoryModules = computed(() => MEMORY_MODULES.filter(memoryEnabled)
 function startMemory(module: MemoryModule): void {
   void router.push({ name: 'practice', query: { module } })
 }
-const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
+const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'conversation']
 const practiceTypeOptions: PracticeType[] = [...practiceTypes, 'mixed']
 function queryType(value: unknown): PracticeType | null {
   return typeof value === 'string' && practiceTypeOptions.includes(value as PracticeType)
@@ -65,7 +65,9 @@ function queryType(value: unknown): PracticeType | null {
 }
 const practiceType = ref<PracticeType>(queryType(route.query.type) ?? 'fill_blank')
 const source = ref<PracticeSource>('today_new')
-const count = ref(practiceType.value === 'writing' ? 1 : 5)
+// A conversation is one dialogue and an essay one piece: neither counts in fives.
+const singlePieceTypes: PracticeType[] = ['writing', 'conversation']
+const count = ref(singlePieceTypes.includes(practiceType.value) ? 1 : 5)
 const difficulty = ref<PracticeDifficulty>('CET6')
 const translationDirection = ref<TranslationDirection>('en_to_zh')
 const writingTargetWords = ref<number>(150)
@@ -128,7 +130,7 @@ const difficulties: PracticeDifficulty[] = [
   'IELTS',
   'TOEFL',
 ]
-const counts = computed(() => (practiceType.value === 'writing' ? [1] : [3, 5, 10, 15, 20]))
+const counts = computed(() => (singlePieceTypes.includes(practiceType.value) ? [1] : [3, 5, 10, 15, 20]))
 const needsDifficulty = computed(() => source.value === 'difficulty')
 const needsWordbook = computed(() => source.value !== 'difficulty')
 onMounted(() => { void loadSpellingMode() })
@@ -149,14 +151,15 @@ function signature(input: PracticeCreateInput): string {
 
 function selectType(next: PracticeType): void {
   practiceType.value = next
-  count.value = next === 'writing' ? 1 : 5
+  count.value = singlePieceTypes.includes(next) ? 1 : 5
 }
 
-const typeIcons: Record<PracticeType, 'book' | 'cards' | 'arrow' | 'spark' | 'star'> = {
+const typeIcons: Record<PracticeType, 'book' | 'cards' | 'arrow' | 'spark' | 'star' | 'dialogue'> = {
   fill_blank: 'book',
   reading: 'cards',
   translation: 'arrow',
   writing: 'spark',
+  conversation: 'dialogue',
   mixed: 'star',
 }
 
@@ -270,6 +273,7 @@ onMounted(() => {
             </DivButton>
           </div>
           <p v-if="practiceType === 'mixed'" class="field-hint">同一组题里混合多种题型，按整组题量生成。</p>
+          <p v-else-if="practiceType === 'conversation'" class="field-hint">AI 会想出一个话题，由它扮演角色引导整段对话；可以用文字或语音作答。</p>
           <div class="practice-form-row">
             <div class="field">
               <label for="practice-source">来源</label>
@@ -283,7 +287,7 @@ onMounted(() => {
                 <option v-for="item in difficulties" :key="item" :value="item">{{ item }}</option>
               </select>
             </div>
-            <div v-if="practiceType !== 'writing'" class="field">
+            <div v-if="!singlePieceTypes.includes(practiceType)" class="field">
               <label for="practice-count">题量</label>
               <select id="practice-count" v-model.number="count">
                 <option v-for="item in counts" :key="item" :value="item">{{ item }} 题</option>

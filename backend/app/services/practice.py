@@ -17,6 +17,7 @@ from app.models.ai import AiJob
 from app.models.identity import User
 from app.models.learning import DailyPlan, DailyPlanWord, MistakeFlag
 from app.models.practice import (
+    PracticeConversationTurn,
     PracticeDeletion,
     PracticeEvent,
     PracticeGeneration,
@@ -28,6 +29,7 @@ from app.models.practice import (
 from app.models.wordbooks import Wordbook, WordbookActivation, WordbookEntry
 from app.schemas.ai_tasks import (
     BatchGradingItemContext,
+    ConversationItem,
     FillBlankItem,
     PracticeGenerationContext,
     PracticeGenerationOutput,
@@ -41,6 +43,9 @@ from app.schemas.ai_tasks import (
     WritingItem,
 )
 from app.schemas.practice import (
+    PracticeConversationTurnPublic,
+    PracticeConversationTurnRequest,
+    PracticeConversationTurnResponse,
     PracticeCreateRequest,
     PracticeDeleteRequest,
     PracticeDeleteResponse,
@@ -167,6 +172,13 @@ def _question_public(question: PracticeQuestion) -> PracticeQuestionPublic:
         target_entry_ids=question.target_entry_ids,
         target_words=payload.get("target_words", []),
         source_citation=payload.get("source_citation"),
+        topic=payload.get("topic"),
+        topic_zh=payload.get("topic_zh"),
+        role=payload.get("role"),
+        role_zh=payload.get("role_zh"),
+        scenario=payload.get("scenario"),
+        scenario_zh=payload.get("scenario_zh"),
+        turns=payload.get("turns", []),
     )
 
 
@@ -717,6 +729,58 @@ async def get_practice_session(
     return await _session_response(session, practice)
 
 
+async def get_conversation_turns(
+    session: AsyncSession, user: User, session_id: UUID
+) -> list[PracticeConversationTurnPublic]:
+    """The dialogue so far, guide and learner alike."""
+    from app.services.conversation import list_conversation_turns
+
+    practice = await _load_owned_session(session, user, session_id)
+    questions = await _current_questions(session, practice)
+    return await list_conversation_turns(session, user, practice, questions)
+
+
+async def post_conversation_turn(
+    session: AsyncSession,
+    pool: ArqRedis,
+    user: User,
+    settings: Settings,
+    session_id: UUID,
+    payload: PracticeConversationTurnRequest,
+    *,
+    idempotency_key: str,
+) -> PracticeConversationTurnResponse:
+    """The learner says something; the guide answers."""
+    from app.services.conversation import append_learner_turn, create_conversation_turn_job
+
+    practice = await _load_owned_session(session, user, session_id, lock=True)
+    if practice.practice_type != "conversation":
+        raise AppError(
+            status_code=409,
+            code="PRACTICE_NOT_CONVERSATION",
+            message="This practice session is not a conversation.",
+        )
+    questions = await _current_questions(session, practice)
+    # What the learner said is recorded first: the guide's answer is only
+    # meaningful next to the line it is answering.
+    await append_learner_turn(session, practice, questions, payload.line)
+    response = await create_conversation_turn_job(
+        session,
+        pool,
+        user,
+        settings,
+        practice,
+        questions,
+        payload.line,
+        idempotency_key=idempotency_key,
+    )
+    session.add(
+        _event(practice, "practice.conversation_turn", metadata={"line_length": len(payload.line)})
+    )
+    await session.commit()
+    return response
+
+
 async def start_practice_session(
     session: AsyncSession, user: User, session_id: UUID
 ) -> PracticeSessionResponse:
@@ -953,6 +1017,69 @@ async def _grade_objective(
     return result
 
 
+def _grading_source_text(question: PracticeQuestion) -> str:
+    """What the grader is shown as the question.
+
+    A conversation is judged on the whole talk: the topic, the character and
+    every line the guide said, so the grader knows what the learner was
+    asked to cover.
+    """
+    payload = question.public_payload
+    if question.question_type != "conversation":
+        return payload.get("source_text") or payload.get("prompt") or ""
+    lines = [
+        f"Topic: {payload.get('topic', '')}",
+        f"You are: {payload.get('role', '')}",
+        f"Setting: {payload.get('scenario', '')}",
+        "",
+        "The conversation so far:",
+    ]
+    for turn in payload.get("turns", []) or []:
+        lines.append(f"{turn.get('id', '')}: {turn.get('line', '')}")
+        if turn.get("intent"):
+            lines.append(f"   (aim: {turn['intent']})")
+    return "\n".join(lines)
+
+
+async def _conversation_grading_text(
+    session: AsyncSession, practice: PracticeSession, question: PracticeQuestion
+) -> tuple[str, str]:
+    """The dialogue and the learner's part of it.
+
+    A conversation is not one answer: the learner may have said several
+    things, and only the talk as a whole shows whether they answered what
+    the guide asked. So the grader gets the transcript and the learner's own
+    lines.
+    """
+    from app.services.conversation import conversation_transcript
+
+    transcript = await conversation_transcript(session, practice, [question])
+    learner_lines = [
+        turn.line
+        for turn in await _conversation_turn_rows(session, practice.id)
+        if turn.speaker == "learner" and turn.line.strip()
+    ]
+    if not learner_lines:
+        return transcript, ""
+    return transcript, "\n".join(learner_lines)
+
+
+async def _conversation_turn_rows(
+    session: AsyncSession, session_id: UUID
+) -> list[PracticeConversationTurn]:
+    from app.models.practice import PracticeConversationTurn
+
+    return list(
+        (
+            await session.scalars(
+                select(PracticeConversationTurn)
+                .where(PracticeConversationTurn.session_id == session_id)
+                .order_by(PracticeConversationTurn.sequence.asc())
+            )
+        ).all()
+    )
+
+
 async def _create_subjective_grading_job(
     session: AsyncSession,
     pool: ArqRedis,
@@ -964,18 +1091,27 @@ async def _create_subjective_grading_job(
     answers: dict[str, str],
 ) -> None:
     exam_type = _exam_type(user, practice.difficulty)
-    items = [
-        BatchGradingItemContext(
-            question_id=str(question.id),
-            source_text=question.public_payload.get("source_text")
-            or question.public_payload.get("prompt")
-            or "",
-            user_answer=answers[str(question.id)],
-            exam_type=exam_type,
-            target_entry_ids=[UUID(value) for value in question.target_entry_ids],
+    items: list[BatchGradingItemContext] = []
+    for question in questions:
+        if question.question_type == "conversation":
+            source_text, learner_lines = await _conversation_grading_text(
+                session, practice, question
+            )
+            # The learner's own words are the answer; the answer box on the
+            # page only holds a summary of them.
+            user_answer = learner_lines or answers.get(str(question.id), "")
+        else:
+            source_text = _grading_source_text(question)
+            user_answer = answers[str(question.id)]
+        items.append(
+            BatchGradingItemContext(
+                question_id=str(question.id),
+                source_text=source_text,
+                user_answer=user_answer,
+                exam_type=exam_type,
+                target_entry_ids=[UUID(value) for value in question.target_entry_ids],
+            )
         )
-        for question in questions
-    ]
     context = SubjectiveGradingContext(
         practice_type=practice.practice_type,
         source_text="batch grading",
@@ -1075,7 +1211,9 @@ async def submit_practice_session(
         _event(practice, "practice.submitted", metadata={"submission_id": str(submission.id)})
     )
     subjective_questions = [
-        question for question in questions if question.question_type in {"translation", "writing"}
+        question
+        for question in questions
+        if question.question_type in {"translation", "writing", "conversation"}
     ]
     graded_locally = practice.practice_type in {"fill_blank", "reading"} or (
         practice.practice_type == "mixed" and not subjective_questions
@@ -1332,8 +1470,7 @@ def _citation_text(citation: int | None, snippets: list[str]) -> str | None:
     if citation is None or citation < 1 or citation > len(snippets):
         return None
     snippet = snippets[citation - 1]
-    title = snippet.split("
-", 1)[0].strip()
+    title = snippet.split("\n", 1)[0].strip()
     return title or f"[{citation}]"
 
 
@@ -1430,6 +1567,29 @@ def question_rows(
                 )
             )
             position += 1
+        elif isinstance(item, ConversationItem):
+            public = {
+                "topic": item.topic,
+                "topic_zh": item.topic_zh,
+                "role": item.role,
+                "role_zh": item.role_zh,
+                "scenario": item.scenario,
+                "scenario_zh": item.scenario_zh,
+                "turns": [turn.model_dump(mode="json") for turn in item.turns],
+                "source_citation": _citation_text(item.source_citation, snippets),
+            }
+            private = {}
+            questions.append(
+                PracticeQuestion(
+                    generation_id=generation.id,
+                    position=position,
+                    question_type="conversation",
+                    public_payload=public,
+                    private_payload=private,
+                    target_entry_ids=[str(value) for value in item.target_entry_ids],
+                )
+            )
+            position += 1
     return questions
 
 
@@ -1457,6 +1617,37 @@ async def _attach_target_words(
         }
 
 
+async def _seed_conversation_turns(
+    session: AsyncSession,
+    practice: PracticeSession,
+    questions: list[PracticeQuestion],
+) -> None:
+    """Write the guide's opening lines into the dialogue.
+
+    The generated question carries the opening lines, but the dialogue is the
+    record of the talk. Storing them as turns from the start means the
+    transcript has one source of truth: the guide's first lines are part of
+    it, not a separate thing that has to be stitched on later.
+    """
+    for question in questions:
+        if question.question_type != "conversation":
+            continue
+        turns = question.public_payload.get("turns", []) or []
+        for index, turn in enumerate(turns):
+            session.add(
+                PracticeConversationTurn(
+                    session_id=practice.id,
+                    user_id=practice.user_id,
+                    speaker="guide",
+                    sequence=index,
+                    line=str(turn.get("line", "")),
+                    line_zh=turn.get("line_zh"),
+                    intent=turn.get("intent"),
+                )
+            )
+    await session.flush()
+
+
 async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> None:
     session_id = job.input_context.get("practice_session_id")
     if not session_id or job.result is None:
@@ -1478,6 +1669,7 @@ async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> 
     questions = question_rows(output.items, generation, snippets)
     await _attach_target_words(session, questions)
     session.add_all(questions)
+    await _seed_conversation_turns(session, practice, questions)
     generation.status = "ready"
     generation.question_count = len(questions)
     generation.ready_at = utcnow()

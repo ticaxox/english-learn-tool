@@ -101,6 +101,15 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
       </div>
     </div>
 
+    <div v-else-if="question.questionType === 'conversation'" class="practice-conversation-brief">
+      <p class="practice-prompt-note">话题</p>
+      <SpokenText v-if="question.topic" class="practice-prompt-text" :text="question.topic" />
+      <p v-if="question.topicZh" class="practice-translation-note">{{ question.topicZh }}</p>
+      <p class="practice-prompt-note">你的对话伙伴</p>
+      <p v-if="question.role" class="practice-translation-note">{{ question.role }}</p>
+      <p v-if="question.roleZh" class="practice-translation-note">{{ question.roleZh }}</p>
+    </div>
+
     <div v-else class="practice-writing">
       <p class="practice-prompt-note">题目</p>
       <SpokenText v-if="question.prompt" class="practice-prompt-text" :text="question.prompt" :highlight="question.targetWords" />

@@ -23,6 +23,7 @@ withDefaults(
       | 'paperclip'
       | 'moon'
       | 'sun'
+      | 'dialogue'
   }>(),
   { name: 'spark' },
 )
@@ -105,6 +106,10 @@ withDefaults(
     </template>
     <template v-else-if="name === 'paperclip'">
       <path d="M20 11.5 12.4 19a4.5 4.5 0 0 1-6.4-6.4l7.6-7.6a3 3 0 0 1 4.3 4.3l-7.6 7.6a1.5 1.5 0 0 1-2.1-2.1l7-7" />
+    </template>
+    <template v-else-if="name === 'dialogue'">
+      <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H9l-5 4v-13.5Z" />
+      <path d="M8.5 9.5h7M8.5 12.5h4" />
     </template>
   </svg>
 </template>

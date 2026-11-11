@@ -311,6 +311,7 @@ async def test_ai_prompts_are_seeded_and_overwrite_affects_future_jobs(
         "coach_reply",
         "challenge_plan",
         "json_repair",
+        "conversation_turn",
     }
 
     detail = await client.get(f"{PROMPTS_PATH}/practice_generation", headers=headers)

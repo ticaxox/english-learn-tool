@@ -12,6 +12,9 @@ from app.core.errors import AppError
 from app.db.session import get_db_session
 from app.schemas.common import ErrorResponse
 from app.schemas.practice import (
+    PracticeConversationTurnPublic,
+    PracticeConversationTurnRequest,
+    PracticeConversationTurnResponse,
     PracticeCreateRequest,
     PracticeDeleteRequest,
     PracticeDeleteResponse,
@@ -31,12 +34,14 @@ from app.services.practice import (
     create_practice_session,
     delete_practice_records,
     delete_session,
+    get_conversation_turns,
     get_practice_record,
     get_practice_result,
     get_practice_session,
     list_practice_events,
     list_practice_records,
     list_recent_sessions,
+    post_conversation_turn,
     regenerate_practice_session,
     save_practice_draft,
     start_practice_session,
@@ -188,6 +193,47 @@ async def regenerate_practice_session_endpoint(
         session_id,
         idempotency_key=idempotency_key,
     )
+
+
+@router.post(
+    "/sessions/{session_id}/conversation/turns",
+    response_model=PracticeConversationTurnResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses=_RESPONSES,
+    summary="Say something and let the guide answer",
+)
+async def post_conversation_turn_endpoint(
+    request: Request,
+    session_id: UUID,
+    payload: PracticeConversationTurnRequest,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    idempotency_key: Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=128)],
+) -> PracticeConversationTurnResponse:
+    settings: Settings = request.app.state.settings
+    return await post_conversation_turn(
+        session,
+        _pool(request),
+        context.user,
+        settings,
+        session_id,
+        payload,
+        idempotency_key=idempotency_key,
+    )
+
+
+@router.get(
+    "/sessions/{session_id}/conversation/turns",
+    response_model=list[PracticeConversationTurnPublic],
+    responses=_RESPONSES,
+    summary="Read the dialogue of a conversation practice",
+)
+async def get_conversation_turns_endpoint(
+    session_id: UUID,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> list[PracticeConversationTurnPublic]:
+    return await get_conversation_turns(session, context.user, session_id)
 
 
 @router.post(

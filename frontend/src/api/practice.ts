@@ -12,7 +12,7 @@
 import { apiClient } from './client'
 import { ContractError } from './errors'
 
-export type PracticeType = 'fill_blank' | 'reading' | 'translation' | 'writing' | 'mixed'
+export type PracticeType = 'fill_blank' | 'reading' | 'translation' | 'writing' | 'conversation' | 'mixed'
 export type PracticeSource = 'today_new' | 'today_review' | 'memory_mistakes' | 'whole_book' | 'difficulty'
 export type PracticeDifficulty = 'GAOKAO' | 'CET4' | 'CET6' | 'POSTGRAD' | 'IELTS' | 'TOEFL'
 export type TranslationDirection = 'en_to_zh' | 'zh_to_en' | 'mixed'
@@ -36,6 +36,40 @@ export interface PracticeOption {
   textZh: string | null
 }
 
+export interface PracticeConversationTurn {
+  id: string
+  line: string
+  lineZh: string | null
+  /** What the guide is trying to get the learner to say. */
+  intent: string | null
+}
+
+/** The guide's opening lines, as carried by a generated conversation question. */
+export interface PracticeOpeningTurn {
+  id: string
+  line: string
+  lineZh: string | null
+  /** What the guide is trying to get the learner to say. */
+  intent: string | null
+}
+
+export interface PracticeConversationTurn {
+  id: string
+  sequence: number
+  speaker: 'guide' | 'learner'
+  line: string
+  lineZh: string | null
+  /** What the guide is trying to get the learner to say. */
+  intent: string | null
+  createdAt: string | null
+}
+
+export interface PracticeConversationTurnResponse {
+  turn: PracticeConversationTurn
+  jobId: string | null
+  status: 'queued' | 'completed'
+}
+
 export interface PracticeQuestion {
   id: string
   position: number
@@ -55,6 +89,16 @@ export interface PracticeQuestion {
   targetWords: string[]
   /** The reference passage this question was built from, as "[n] title". */
   sourceCitation: string | null
+  /** Conversation only: the topic the learner talks about. */
+  topic: string | null
+  topicZh: string | null
+  /** Conversation only: the character the learner talks with. */
+  role: string | null
+  roleZh: string | null
+  scenario: string | null
+  scenarioZh: string | null
+  /** Conversation only: the guide's opening lines. */
+  turns: PracticeOpeningTurn[]
 }
 
 export interface PracticeSession {
@@ -207,7 +251,7 @@ export interface PracticeRecordQuery {
   limit?: number
 }
 
-const PRACTICE_TYPES: readonly PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'mixed']
+const PRACTICE_TYPES: readonly PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'conversation', 'mixed']
 const PRACTICE_SOURCES: readonly PracticeSource[] = [
   'today_new',
   'today_review',
@@ -321,6 +365,53 @@ function parseOption(value: unknown, context: string): PracticeOption {
   }
 }
 
+/** The guide's opening lines, as carried by a generated conversation question. */
+function parseOpeningTurn(value: unknown, context: string): PracticeOpeningTurn {
+  const body = record(value, context)
+  return {
+    id: stringValue(body.id, context, 'id'),
+    line: stringValue(body.line, context, 'line'),
+    lineZh: nullableString(body.line_zh, context, 'line_zh'),
+    intent: nullableString(body.intent, context, 'intent'),
+  }
+}
+
+function parseConversationTurn(value: unknown, context: string): PracticeConversationTurn {
+  const body = record(value, context)
+  const speaker = body.speaker
+  if (speaker !== 'guide' && speaker !== 'learner') {
+    fail(context, 'speaker 必须是 guide 或 learner 之一')
+  }
+  const line = typeof body.line === 'string' ? body.line : ''
+  return {
+    id: stringValue(body.id, context, 'id'),
+    sequence: integerValue(body.sequence, context, 'sequence'),
+    speaker,
+    // A guide turn that has not been written yet comes back empty: the job
+    // that fills it is still running.
+    line,
+    lineZh: nullableString(body.line_zh, context, 'line_zh'),
+    intent: nullableString(body.intent, context, 'intent'),
+    createdAt: nullableString(body.created_at, context, 'created_at'),
+  }
+}
+
+export function parseConversationTurnResponse(payload: unknown): PracticeConversationTurnResponse {
+  const context = '对话回合响应'
+  const body = record(payload, context)
+  return {
+    turn: parseConversationTurn(body.turn, `${context}.turn`),
+    jobId: nullableString(body.job_id, context, 'job_id'),
+    status: body.status === 'completed' ? 'completed' : 'queued',
+  }
+}
+
+export function parseConversationTurns(payload: unknown): PracticeConversationTurn[] {
+  const context = '对话记录响应'
+  if (!Array.isArray(payload)) fail(context, '响应应为数组')
+  return payload.map((item, index) => parseConversationTurn(item, `${context}[${index}]`))
+}
+
 function parseQuestion(value: unknown, index: number): PracticeQuestion {
   const context = `练习题目[${index}]`
   const body = record(value, context)
@@ -328,6 +419,10 @@ function parseQuestion(value: unknown, index: number): PracticeQuestion {
   if (!Array.isArray(body.options)) fail(context, 'options 应为数组')
   if (!Array.isArray(body.requirements)) fail(context, 'requirements 应为数组')
   if (!Array.isArray(body.target_entry_ids)) fail(context, 'target_entry_ids 应为数组')
+  const turns = body.turns
+  if (turns !== undefined && turns !== null && !Array.isArray(turns)) {
+    fail(context, 'turns 应为数组')
+  }
   return {
     id: stringValue(body.id, context, 'id'),
     position: integerValue(body.position, context, 'position'),
@@ -347,6 +442,15 @@ function parseQuestion(value: unknown, index: number): PracticeQuestion {
     sourceCitation: typeof body.source_citation === 'string' && body.source_citation.trim()
       ? body.source_citation.trim()
       : null,
+    topic: nullableString(body.topic, context, 'topic'),
+    topicZh: nullableString(body.topic_zh, context, 'topic_zh'),
+    role: nullableString(body.role, context, 'role'),
+    roleZh: nullableString(body.role_zh, context, 'role_zh'),
+    scenario: nullableString(body.scenario, context, 'scenario'),
+    scenarioZh: nullableString(body.scenario_zh, context, 'scenario_zh'),
+    turns: Array.isArray(body.turns)
+      ? body.turns.map((turn, turnIndex) => parseOpeningTurn(turn, `${context}.turns[${turnIndex}]`))
+      : [],
   }
 }
 
@@ -672,6 +776,27 @@ export async function getPracticeResult(sessionId: string): Promise<PracticeResu
   return parsePracticeResult(await apiClient.get(`/practice/sessions/${encodeURIComponent(sessionId)}/result`))
 }
 
+/** The dialogue of a conversation practice, guide and learner alike. */
+export async function listConversationTurns(sessionId: string): Promise<PracticeConversationTurn[]> {
+  return parseConversationTurns(
+    await apiClient.get(`/practice/sessions/${encodeURIComponent(sessionId)}/conversation/turns`),
+  )
+}
+
+/** Say something; the guide answers on the next line. */
+export async function postConversationTurn(
+  sessionId: string,
+  line: string,
+  idempotencyKey: string,
+): Promise<PracticeConversationTurnResponse> {
+  const payload = await apiClient.post(
+    `/practice/sessions/${encodeURIComponent(sessionId)}/conversation/turns`,
+    { line },
+    { retryCount: 0, headers: { 'Idempotency-Key': idempotencyKey } },
+  )
+  return parseConversationTurnResponse(payload)
+}
+
 export async function listPracticeRecords(query: PracticeRecordQuery = {}): Promise<PracticeRecordPage> {
   return parsePracticeRecordPage(await apiClient.get(`/practice/records${buildPracticeRecordQuery(query)}`))
 }
@@ -712,6 +837,7 @@ export const PRACTICE_TYPE_LABELS: Record<PracticeType, string> = {
   reading: '阅读',
   translation: '翻译',
   writing: '作文',
+  conversation: '对话',
   mixed: '随机',
 }
 

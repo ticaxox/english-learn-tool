@@ -7,7 +7,9 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 ExamType = Literal["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
-PracticeType = Literal["fill_blank", "reading", "translation", "writing", "mixed"]
+PracticeType = Literal[
+    "fill_blank", "reading", "translation", "writing", "conversation", "mixed"
+]
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 ChallengeNodeType = Literal[
     "REVIEW", "NEW_WORDS", "WORD_DRILL", "AI_PRACTICE", "BOSS", "OPTIONAL_SIDE"
@@ -56,7 +58,11 @@ class PracticeGenerationContext(StrictModel):
 
     @model_validator(mode="after")
     def validate_count_and_source(self) -> PracticeGenerationContext:
-        allowed = {1} if self.practice_type == "writing" else {3, 5, 10, 15, 20}
+        allowed = (
+            {1}
+            if self.practice_type in {"writing", "conversation"}
+            else {3, 5, 10, 15, 20}
+        )
         if self.count not in allowed:
             raise ValueError("count does not match the selected practice type")
         if self.source == "difficulty" and self.difficulty is None:
@@ -75,7 +81,7 @@ class BatchGradingItemContext(StrictModel):
 
 
 class SubjectiveGradingContext(StrictModel):
-    practice_type: Literal["translation", "writing"]
+    practice_type: Literal["translation", "writing", "conversation"]
     source_text: str = Field(min_length=1, max_length=20_000)
     user_answer: str = Field(min_length=1, max_length=20_000)
     exam_type: ExamType
@@ -126,6 +132,30 @@ class JsonRepairContext(StrictModel):
     validation_errors: list[str] = Field(min_length=1, max_length=50)
 
 
+class ConversationTurnContext(StrictModel):
+    """What the guide knows when it answers the learner.
+
+    The topic, the character it is playing and the talk so far are the whole
+    situation: the guide has to sound like the same person it was a minute
+    ago, and it has to move the conversation forward rather than repeat
+    itself.
+    """
+
+    topic: str = Field(min_length=1, max_length=500)
+    topic_zh: str | None = Field(default=None, max_length=500)
+    role: str = Field(min_length=1, max_length=1_000)
+    role_zh: str | None = Field(default=None, max_length=1_000)
+    scenario: str | None = Field(default=None, max_length=2_000)
+    # The talk so far, oldest first: {"speaker": "guide"|"learner", "line": "..."}.
+    history: list[dict[str, str]] = Field(default_factory=list, max_length=40)
+    # The words the learner was asked to reach for.
+    target_words: list[str] = Field(default_factory=list, max_length=12)
+    # The learner's latest line, the one being answered.
+    learner_line: str = Field(min_length=1, max_length=2_000)
+    # The row the answer will be written to.
+    conversation_turn_id: UUID
+
+
 class PracticeGenerationRequest(StrictModel):
     task_type: Literal["practice_generation"]
     context: PracticeGenerationContext
@@ -151,12 +181,18 @@ class JsonRepairRequest(StrictModel):
     context: JsonRepairContext
 
 
+class ConversationTurnRequest(StrictModel):
+    task_type: Literal["conversation_turn"]
+    context: ConversationTurnContext
+
+
 AiJobCreateRequest = Annotated[
     PracticeGenerationRequest
     | SubjectiveGradingRequest
     | CoachReplyRequest
     | ChallengePlanRequest
-    | JsonRepairRequest,
+    | JsonRepairRequest
+    | ConversationTurnRequest,
     Field(discriminator="task_type"),
 ]
 
@@ -260,7 +296,40 @@ class WritingItem(CitedMixin):
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
 
-PracticeItem = FillBlankItem | ReadingPassage | TranslationItem | WritingItem
+class ConversationTurn(StrictModel):
+    """One thing the guide says, and what it is trying to get at.
+
+    The guide leads; the learner answers. A turn carries the line itself plus
+    the aim behind it, so the coach can tell whether the learner answered it.
+    """
+
+    id: str = Field(min_length=1, max_length=64)
+    line: str = Field(min_length=1, max_length=2_000)
+    line_zh: str = Field(min_length=1, max_length=2_000)
+    # What this turn is trying to make the learner say.
+    intent: str = Field(min_length=1, max_length=500)
+
+
+class ConversationItem(CitedMixin):
+    """A whole conversation: the topic, the guide's role, and its turns."""
+
+    id: str = Field(min_length=1, max_length=64)
+    topic: str = Field(min_length=1, max_length=500)
+    topic_zh: str = Field(min_length=1, max_length=500)
+    # The guide's character and how it moves the conversation along.
+    role: str = Field(min_length=1, max_length=1_000)
+    role_zh: str = Field(min_length=1, max_length=1_000)
+    scenario: str = Field(min_length=1, max_length=2_000)
+    scenario_zh: str = Field(min_length=1, max_length=2_000)
+    # The words the learner should reach for during the talk.
+    target_words: list[str] = Field(default_factory=list, max_length=12)
+    turns: list[ConversationTurn] = Field(min_length=2, max_length=8)
+    target_entry_ids: list[UUID] = Field(default_factory=list, max_length=20)
+
+
+PracticeItem = (
+    FillBlankItem | ReadingPassage | TranslationItem | WritingItem | ConversationItem
+)
 
 
 class PracticeGenerationOutput(StrictModel):
@@ -284,11 +353,12 @@ class PracticeGenerationOutput(StrictModel):
             "reading": ReadingPassage,
             "translation": TranslationItem,
             "writing": WritingItem,
+            "conversation": ConversationItem,
         }[self.practice_type]
         if any(not isinstance(item, expected) for item in self.items):
             raise ValueError("items do not match practice_type")
-        if self.practice_type == "writing" and len(self.items) != 1:
-            raise ValueError("writing practice must contain exactly one item")
+        if self.practice_type in {"writing", "conversation"} and len(self.items) != 1:
+            raise ValueError("writing and conversation practice hold exactly one item")
         if self.practice_type in {"fill_blank", "translation"} and len(self.items) not in {
             3,
             5,
@@ -416,7 +486,11 @@ class ChallengeNodeOutput(StrictModel):
         elif self.drill_mode is not None:
             raise ValueError("drill_mode is only valid on WORD_DRILL nodes")
         if self.practice_type is not None and self.practice_count is not None:
-            allowed = {1} if self.practice_type == "writing" else {3, 5, 10, 15, 20}
+            allowed = (
+                {1}
+                if self.practice_type in {"writing", "conversation"}
+                else {3, 5, 10, 15, 20}
+            )
             if self.practice_count not in allowed:
                 raise ValueError("practice_count does not match practice_type")
         return self
@@ -472,10 +546,28 @@ class JsonRepairOutput(StrictModel):
     corrected: dict[str, Any]
 
 
+class ConversationTurnOutput(StrictModel):
+    """One line from the guide, plus what it was trying to get at."""
+
+    line: str = Field(min_length=1, max_length=2_000)
+    line_zh: str = Field(min_length=1, max_length=2_000)
+    # What this turn is trying to make the learner say next.
+    intent: str = Field(min_length=1, max_length=500)
+
+    @field_validator("line", "line_zh", "intent")
+    @classmethod
+    def clean_text(cls, value: str) -> str:
+        cleaned = plain_text(value)
+        if not cleaned:
+            raise ValueError("text must not be blank")
+        return cleaned
+
+
 TASK_OUTPUT_MODELS: dict[str, type[BaseModel]] = {
     "practice_generation": PracticeGenerationOutput,
     "subjective_grading": SubjectiveGradingOutput,
     "coach_reply": CoachReplyOutput,
     "challenge_plan": ChallengePlanOutput,
     "json_repair": JsonRepairOutput,
+    "conversation_turn": ConversationTurnOutput,
 }

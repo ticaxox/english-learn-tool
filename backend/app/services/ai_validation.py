@@ -76,6 +76,15 @@ def _item_text(item: Any) -> str:
         parts.append(question.prompt)
         parts.extend(option.text for option in question.options)
     parts.extend(getattr(item, "requirements", []) or [])
+    # A conversation's words live in the guide's lines and the scenario.
+    for turn in getattr(item, "turns", []) or []:
+        line = getattr(turn, "line", None)
+        if isinstance(line, str):
+            parts.append(line)
+    for field in ("topic", "scenario", "role"):
+        value = getattr(item, field, None)
+        if isinstance(value, str):
+            parts.append(value)
     return "\n".join(parts)
 
 
@@ -116,7 +125,8 @@ def _normalize_challenge_nodes(parsed: dict[str, Any], context: dict[str, Any]) 
     default_practice_type = (
         allowed_practice_types[0]
         if allowed_practice_types
-        and allowed_practice_types[0] in {"fill_blank", "reading", "translation", "writing"}
+        and allowed_practice_types[0]
+        in {"fill_blank", "reading", "translation", "writing", "conversation"}
         else "fill_blank"
     )
     for node in nodes:
@@ -133,11 +143,21 @@ def _normalize_challenge_nodes(parsed: dict[str, Any], context: dict[str, Any]) 
         else:
             node.pop("optional", None)
         if node_type == "AI_PRACTICE":
-            if node.get("practice_type") not in {"fill_blank", "reading", "translation", "writing"}:
+            if node.get("practice_type") not in {
+                "fill_blank",
+                "reading",
+                "translation",
+                "writing",
+                "conversation",
+            }:
                 node["practice_type"] = default_practice_type
             count = node.get("practice_count")
             if not isinstance(count, int) or count < 1 or count > 20:
-                node["practice_count"] = 1 if node["practice_type"] == "writing" else 5
+                # A conversation is one dialogue, an essay one piece: neither
+                # can be counted in fives.
+                node["practice_count"] = (
+                    1 if node["practice_type"] in {"writing", "conversation"} else 5
+                )
         if node_type == "BOSS":
             if node.get("practice_type") != "fill_blank":
                 node.pop("practice_type", None)

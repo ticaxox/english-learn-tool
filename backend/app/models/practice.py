@@ -13,6 +13,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     func,
     text,
@@ -23,12 +24,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-PRACTICE_TYPES = "'fill_blank', 'reading', 'translation', 'writing'"
+PRACTICE_TYPES = "'fill_blank', 'reading', 'translation', 'writing', 'conversation'"
 PRACTICE_SESSION_TYPES = PRACTICE_TYPES + ", 'mixed'"
 PRACTICE_SOURCES = "'today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty'"
 PRACTICE_SESSION_STATUSES = "'generating', 'ready', 'submitted', 'failed', 'cancelled'"
 PRACTICE_GENERATION_STATUSES = "'generating', 'ready', 'failed', 'superseded', 'cancelled'"
 PRACTICE_SUBMISSION_STATUSES = "'scoring', 'completed', 'failed'"
+PRACTICE_TURN_SPEAKERS = "'guide', 'learner'"
 
 
 class PracticeSession(Base):
@@ -173,6 +175,50 @@ class PracticeQuestion(Base):
     )
     target_entry_ids: Mapped[list[str]] = mapped_column(
         JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class PracticeConversationTurn(Base):
+    """One exchange in a conversation practice.
+
+    The guide leads and the learner answers; both sides are stored here so the
+    guide can pick up what was said three turns ago, and so the grader sees
+    the whole talk rather than one answer floating free of it.
+    """
+
+    __tablename__ = "practice_conversation_turns"
+    __table_args__ = (
+        CheckConstraint(f"speaker IN ({PRACTICE_TURN_SPEAKERS})", name="speaker_valid"),
+        CheckConstraint("sequence >= 0", name="sequence_nonnegative"),
+        UniqueConstraint(
+            "session_id", "sequence", name="uq_practice_conversation_turns_session_sequence"
+        ),
+        Index("ix_practice_conversation_turns_session_created", "session_id", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    session_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("practice_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    # Who spoke: the guide that leads, or the learner answering.
+    speaker: Mapped[str] = mapped_column(String(16), nullable=False)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    line: Mapped[str] = mapped_column(Text, nullable=False)
+    line_zh: Mapped[str | None] = mapped_column(Text)
+    # Only the guide's turns carry an aim: what it was trying to get at.
+    intent: Mapped[str | None] = mapped_column(String(500))
+    ai_job_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("ai_jobs.id", ondelete="SET NULL")
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
