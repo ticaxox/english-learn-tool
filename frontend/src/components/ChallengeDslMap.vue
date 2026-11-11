@@ -14,7 +14,7 @@ import { pumpkins } from '../assets/halloween'
 
 import { bump, drawPaths, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
-const props = withDefaults(defineProps<{ dsl: string; variant?: 'coin' | 'lantern' | 'pumpkin' }>(), { variant: 'lantern' })
+const props = withDefaults(defineProps<{ dsl: string; variant?: 'coin' | 'lantern' | 'pumpkin' }>(), { variant: 'pumpkin' })
 const emit = defineEmits<{ select: [id: string] }>()
 
 const NODE = 80
