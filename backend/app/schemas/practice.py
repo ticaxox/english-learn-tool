@@ -68,6 +68,9 @@ class PracticeQuestionPublic(BaseModel):
     target_entry_ids: list[str] = Field(default_factory=list)
     # Headwords of the words this question was built from, for on-page highlighting.
     target_words: list[str] = Field(default_factory=list)
+    # The reference passage this question came from, as "[n] title". Null when the
+    # model wrote it from scratch.
+    source_citation: str | None = None
 
 
 class PracticeSessionResponse(BaseModel):

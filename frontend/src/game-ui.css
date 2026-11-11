@@ -2970,6 +2970,21 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 
 .personal-workspace .practice-question-card .status-badge { font-size: 0.78rem; }
 
+/* Where the question came from: a quiet mark, not another badge. */
+.personal-workspace .practice-question-source {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--ui-muted);
+}
+
+.personal-workspace .practice-question-source::before {
+  content: "º6";
+  margin-right: 4px;
+  color: var(--g-gold-edge, #d9a400);
+}
+
 /* Choice rows draw the letter chip only; the native radio stays for a11y. */
 .personal-workspace .practice-option__input {
   position: absolute;

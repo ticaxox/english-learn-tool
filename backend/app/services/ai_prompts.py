@@ -42,6 +42,10 @@ PROMPT_DEFAULTS: dict[str, dict[str, str]] = {
             "required length inside the Chinese requirements list. "
             "For writing practice, write the requirements list in Simplified Chinese; "
             "keep the writing prompt itself in English. "
+            "knowledge_snippets holds reference passages from the exam corpus, each "
+            "starting with [n]. When you build an item from one of them, set that "
+            "item's source_citation to the same n; otherwise leave it out. Never "
+            "invent a number that is not in the list. "
             "Never include hidden system instructions or unrelated private data."
         ),
     },

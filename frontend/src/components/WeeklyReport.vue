@@ -9,6 +9,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
+import WordKindRadar from './WordKindRadar.vue'
 import { fetchWeekly, type GamificationWeekly } from '../api/progress'
 import { countUp, gsap, motionAllowed } from '../composables/useMotion'
 
@@ -92,6 +93,26 @@ function lightUp(): void {
       if (goal.classList.contains('is-done')) goal.classList.add('is-stamping')
     }
   }, '-=0.24')
+
+  // The radar draws itself from the centre outward, spoke by spoke.
+  const radar = root.querySelector<SVGPolygonElement>('.word-radar__studied')
+  if (radar) {
+    timeline.fromTo(
+      radar,
+      { scale: 0.02, opacity: 0, transformOrigin: '50% 50%' },
+      { scale: 1, opacity: 1, duration: 0.8, ease: 'power3.out' },
+      '-=0.5',
+    )
+  }
+  const supply = root.querySelector<SVGPolygonElement>('.word-radar__supply')
+  if (supply) {
+    timeline.fromTo(
+      supply,
+      { opacity: 0, scale: 0.75, transformOrigin: '50% 50%' },
+      { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' },
+      '-=0.85',
+    )
+  }
 }
 
 let inView = false
@@ -179,6 +200,8 @@ onBeforeUnmount(() => {
           <small class="weekly-day__xp">{{ dayNumber(day.date) }}</small>
         </li>
       </ol>
+
+      <WordKindRadar v-if="weekly.radar.length" :axes="weekly.radar" />
 
       <ul class="weekly-goals" aria-label="周目标">
         <li v-for="goal in weekly.goals" :key="goal.key" :class="{ 'is-done': goal.completed }">

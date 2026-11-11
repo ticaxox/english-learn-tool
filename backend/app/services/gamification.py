@@ -24,18 +24,25 @@ from app.models.gamification import (
     XpEvent,
 )
 from app.models.identity import User
-from app.models.learning import DailyPlan, DailyPlanWord
+from app.models.learning import DailyPlan, DailyPlanWord, UserWordState
 from app.models.practice import PracticeSession
+from app.models.wordbooks import (
+    WordbookActivation,
+    WordbookDefinition,
+    WordbookEntry,
+)
 from app.schemas.gamification import (
     BadgeResponse,
     DailyQuestResponse,
     GamificationProgressResponse,
     GamificationWeeklyResponse,
     LevelProgress,
+    RadarAxis,
     WeeklyGoal,
 )
 from app.services.auth import utcnow
 from app.services.learning import local_date_for
+from app.services.word_kinds import POS_AXES, normalize_part_of_speech
 
 # XP grows with use; crumbs are what the map spends.
 AWARDS = {
@@ -496,6 +503,60 @@ async def progress(
     )
 
 
+async def _word_kind_radar(
+    session: AsyncSession, user: User, start: date
+) -> list[RadarAxis]:
+    """The shape of the week's word kinds: studied against the book's supply.
+
+    A spoke counts the words of one part of speech the learner touched this
+    week, and how many of that kind the active wordbook holds in total. The
+    total is the outer edge, so a narrow spike means "you only worked on
+    verbs this week" without needing a second chart.
+    """
+    active = await session.scalar(
+        select(WordbookActivation.wordbook_id).where(
+            WordbookActivation.user_id == user.id
+        )
+    )
+    if active is None:
+        return [RadarAxis(key=key, label=label, studied=0, total=0) for key, label in POS_AXES]
+
+    supply_rows = (
+        await session.execute(
+            select(WordbookDefinition.part_of_speech, func.count(WordbookDefinition.id))
+            .join(WordbookEntry, WordbookEntry.id == WordbookDefinition.entry_id)
+            .where(WordbookEntry.wordbook_id == active)
+            .group_by(WordbookDefinition.part_of_speech)
+        )
+    ).all()
+    supply: dict[str, int] = {key: 0 for key, _ in POS_AXES}
+    for part_of_speech, count in supply_rows:
+        family = normalize_part_of_speech(part_of_speech)
+        supply[family] = supply.get(family, 0) + int(count or 0)
+
+    since = datetime.combine(start, time.min)
+    studied_rows = (
+        await session.execute(
+            select(WordbookDefinition.part_of_speech, func.count(UserWordState.id))
+            .join(UserWordState, UserWordState.entry_id == WordbookDefinition.entry_id)
+            .where(
+                UserWordState.user_id == user.id,
+                UserWordState.last_reviewed_at >= since,
+            )
+            .group_by(WordbookDefinition.part_of_speech)
+        )
+    ).all()
+    studied: dict[str, int] = {key: 0 for key, _ in POS_AXES}
+    for part_of_speech, count in studied_rows:
+        family = normalize_part_of_speech(part_of_speech)
+        studied[family] = studied.get(family, 0) + int(count or 0)
+
+    return [
+        RadarAxis(key=key, label=label, studied=studied.get(key, 0), total=supply.get(key, 0))
+        for key, label in POS_AXES
+    ]
+
+
 async def weekly(
     session: AsyncSession, settings: Settings, user: User
 ) -> GamificationWeeklyResponse:
@@ -557,6 +618,7 @@ async def weekly(
         days=days,
         xp=sum(entry["xp"] for entry in days),
         active_days=active_days,
+        radar=await _word_kind_radar(session, user, start),
         streak=stats.streak,
         goals=goals,
     )

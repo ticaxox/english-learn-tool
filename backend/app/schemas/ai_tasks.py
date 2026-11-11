@@ -50,6 +50,9 @@ class PracticeGenerationContext(StrictModel):
     translation_direction: Literal["en_to_zh", "zh_to_en", "mixed"] | None = None
     # Writing only: the essay length the prompt must be sized for.
     writing_target_words: int | None = Field(default=None, ge=50, le=300)
+    # Retrieved reference passages from the exam knowledge base. Each one is
+    # "[n] title\ncontent"; the model must cite [n] when it borrows from them.
+    knowledge_snippets: list[str] = Field(default_factory=list, max_length=6)
 
     @model_validator(mode="after")
     def validate_count_and_source(self) -> PracticeGenerationContext:
@@ -158,6 +161,17 @@ AiJobCreateRequest = Annotated[
 ]
 
 
+class CitedMixin(StrictModel):
+    """An item may point back at the reference passage it was built from.
+
+    The number is the index into the knowledge snippets the generator was
+    given, so `[2]` means the second passage. It is optional: an item the
+    model wrote from scratch cites nothing.
+    """
+
+    source_citation: int | None = Field(default=None, ge=1, le=6)
+
+
 class OptionOutput(StrictModel):
     id: str = Field(min_length=1, max_length=16)
     text: str = Field(min_length=1, max_length=1_000)
@@ -173,7 +187,7 @@ class OptionOutput(StrictModel):
         return cleaned
 
 
-class FillBlankItem(StrictModel):
+class FillBlankItem(CitedMixin):
     id: str = Field(min_length=1, max_length=64)
     sentence: str = Field(min_length=1, max_length=2_000)
     sentence_zh: str = Field(min_length=1, max_length=2_000)
@@ -194,7 +208,7 @@ class FillBlankItem(StrictModel):
         return self
 
 
-class ReadingQuestion(StrictModel):
+class ReadingQuestion(CitedMixin):
     id: str = Field(min_length=1, max_length=64)
     prompt: str = Field(min_length=1, max_length=2_000)
     options: list[OptionOutput] = Field(min_length=4, max_length=4)
@@ -211,7 +225,7 @@ class ReadingQuestion(StrictModel):
         return self
 
 
-class ReadingPassage(StrictModel):
+class ReadingPassage(CitedMixin):
     id: str = Field(min_length=1, max_length=64)
     article: str = Field(min_length=1, max_length=20_000)
     article_zh: str = Field(min_length=1, max_length=20_000)
@@ -229,7 +243,7 @@ class ReadingPassage(StrictModel):
         return cleaned
 
 
-class TranslationItem(StrictModel):
+class TranslationItem(CitedMixin):
     id: str = Field(min_length=1, max_length=64)
     source_text: str = Field(min_length=1, max_length=5_000)
     source_language: Literal["en", "zh"]
@@ -238,7 +252,7 @@ class TranslationItem(StrictModel):
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
 
-class WritingItem(StrictModel):
+class WritingItem(CitedMixin):
     id: str = Field(min_length=1, max_length=64)
     prompt: str = Field(min_length=1, max_length=5_000)
     requirements: list[str] = Field(min_length=1, max_length=20)

@@ -75,7 +75,7 @@ const wordbookPage: WordbookListPage = {
 const question: PracticeQuestion = {
   id: 'q-1', position: 0, questionType: 'fill_blank', prompt: 'Choose', sentence: 'The team remained ____.', sentenceZh: null,
   article: null, articleZh: null, options: [{ id: 'o-1', text: 'resilient', textZh: '有韧性的' }, { id: 'o-2', text: 'fragile', textZh: '脆弱的' }],
-  sourceText: null, sourceLanguage: null, targetLanguage: null, requirements: [], targetEntryIds: [], targetWords: [],
+  sourceText: null, sourceLanguage: null, targetLanguage: null, requirements: [], targetEntryIds: [], targetWords: [], sourceCitation: null,
 }
 const result: PracticeResult = {
   sessionId: 'session-1', submissionId: 'submission-1', status: 'completed', score: 100, correctCount: 1, totalQuestions: 1, wrongCount: 0,

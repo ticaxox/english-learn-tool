@@ -47,12 +47,24 @@ class WeeklyGoal(BaseModel):
     completed: bool
 
 
+class RadarAxis(BaseModel):
+    """One spoke of the weekly radar: a word kind and how much of it was studied."""
+
+    key: str
+    label: str
+    studied: int
+    total: int
+
+
 class GamificationWeeklyResponse(BaseModel):
     days: list[WeeklyDay]
     xp: int
     active_days: int
     streak: int
     goals: list[WeeklyGoal] = []
+    # The word-kind shape of the week: how many words of each part of speech
+    # the learner touched, against how many the wordbook holds.
+    radar: list[RadarAxis] = []
 
 
 class AwardResponse(BaseModel):

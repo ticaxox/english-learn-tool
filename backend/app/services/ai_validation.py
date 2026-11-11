@@ -84,6 +84,19 @@ def _collect_entry_ids(item: Any) -> set[str]:
     return _uuid_set(values)
 
 
+def _item_citations(item: Any) -> list[int]:
+    """Every reference number an item points at, including a reading passage's."""
+    citations: list[int] = []
+    own = getattr(item, "source_citation", None)
+    if isinstance(own, int):
+        citations.append(own)
+    for question in getattr(item, "questions", []) or []:
+        nested = getattr(question, "source_citation", None)
+        if isinstance(nested, int):
+            citations.append(nested)
+    return citations
+
+
 _CHALLENGE_PRACTICE_NODES = {"AI_PRACTICE", "BOSS"}
 _CHALLENGE_PRACTICE_COUNTS = {5, 10}
 
@@ -202,6 +215,10 @@ def validate_task_output(
                 words = [word_map[entry] for entry in item_entry_ids if entry in word_map]
                 if words and not any(_mentions(_item_text(item), word) for word in words):
                     raise ValueError("AI_TARGET_WORD_MISSING")
+            # A citation must point at a passage that was actually handed over.
+            for citation in _item_citations(item):
+                if citation > len(practice.knowledge_snippets):
+                    raise ValueError("AI_CITATION_OUT_OF_RANGE")
     elif task_type == "challenge_plan":
         challenge = ChallengePlanContext.model_validate(context)
         output = ChallengePlanOutput.model_validate(validated)

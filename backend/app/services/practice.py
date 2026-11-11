@@ -65,6 +65,7 @@ from app.services.ai_jobs import cancel_user_job, create_ai_job
 from app.services.audit import add_audit_event
 from app.services.auth import utcnow
 from app.services.gamification import award
+from app.services.knowledge import search as search_knowledge
 from app.services.learning import local_date_for
 from app.services.wordbook_queue import WORDBOOK_QUEUE_NAME
 
@@ -107,6 +108,36 @@ async def _entry_headwords(session: AsyncSession, entry_ids: list[UUID]) -> list
     return [by_id[entry_id] for entry_id in entry_ids if entry_id in by_id]
 
 
+async def _knowledge_snippets(
+    session: AsyncSession,
+    settings: Settings,
+    payload: PracticeCreateRequest,
+    target_words: list[str],
+) -> list[str]:
+    """Reference passages for the generator, drawn from the exam knowledge base.
+
+    The query is the learner's own words plus the exam level, so a CET4 set
+    retrieves CET4 material rather than whatever mentions the same headword.
+    A missing corpus is normal, not an error: the list is simply empty and the
+    generator writes from scratch.
+    """
+    query_parts: list[str] = []
+    if payload.difficulty:
+        query_parts.append(str(payload.difficulty))
+    query_parts.extend(target_words[:12])
+    query = " ".join(part for part in query_parts if part).strip()
+    if len(query) < 4:
+        return []
+    try:
+        hits = await search_knowledge(session, settings, query=query, limit=3)
+    except Exception:  # noqa: BLE001 - retrieval must never block generation
+        logger.warning("practice.knowledge_search_failed", exc_info=True)
+        return []
+    return [
+        f"[{index + 1}] {hit.title}\n{hit.content}" for index, hit in enumerate(hits)
+    ]
+
+
 def _article_range(
     settings: Settings, practice_type: str, count: int
 ) -> tuple[int | None, int | None]:
@@ -135,6 +166,7 @@ def _question_public(question: PracticeQuestion) -> PracticeQuestionPublic:
         requirements=payload.get("requirements", []),
         target_entry_ids=question.target_entry_ids,
         target_words=payload.get("target_words", []),
+        source_citation=payload.get("source_citation"),
     )
 
 
@@ -441,6 +473,9 @@ async def create_practice_session(
         settings, payload.practice_type, payload.count
     )
     target_words = await _entry_headwords(session, target_entry_ids)
+    knowledge_snippets = await _knowledge_snippets(
+        session, settings, payload, target_words
+    )
     generation_request = PracticeGenerationRequest(
         task_type="practice_generation",
         context=PracticeGenerationContext(
@@ -456,6 +491,7 @@ async def create_practice_session(
             article_max_words=article_max_words,
             translation_direction=payload.translation_direction,
             writing_target_words=payload.writing_target_words,
+            knowledge_snippets=knowledge_snippets,
         ),
     )
     job, _ = await create_ai_job(
@@ -539,6 +575,17 @@ async def create_pool_practice_session(
     )
     article_min_words, article_max_words = _article_range(settings, practice_type, count)
     target_words = await _entry_headwords(session, target_entry_ids)
+    pool_snippets = await _knowledge_snippets(
+        session,
+        settings,
+        PracticeCreateRequest(
+            practice_type=practice_type,  # type: ignore[arg-type]
+            source="whole_book",
+            count=count,
+            wordbook_id=wordbook_id,
+        ),
+        target_words,
+    )
     generation_request = PracticeGenerationRequest(
         task_type="practice_generation",
         context=PracticeGenerationContext(
@@ -552,6 +599,7 @@ async def create_pool_practice_session(
             practice_session_id=session_id,
             article_min_words=article_min_words,
             article_max_words=article_max_words,
+            knowledge_snippets=pool_snippets,
         ),
     )
     job, _ = await create_ai_job(
@@ -1279,9 +1327,22 @@ async def list_practice_events(
     )
 
 
+def _citation_text(citation: int | None, snippets: list[str]) -> str | None:
+    """The passage a citation points at, as "[n] title"."""
+    if citation is None or citation < 1 or citation > len(snippets):
+        return None
+    snippet = snippets[citation - 1]
+    title = snippet.split("
+", 1)[0].strip()
+    return title or f"[{citation}]"
+
+
 def question_rows(
-    items: list[PracticeItem], generation: PracticeGeneration
+    items: list[PracticeItem],
+    generation: PracticeGeneration,
+    snippets: list[str] | None = None,
 ) -> list[PracticeQuestion]:
+    snippets = snippets or []
     questions: list[PracticeQuestion] = []
     position = 0
     for item in items:
@@ -1290,6 +1351,7 @@ def question_rows(
                 "sentence": item.sentence,
                 "sentence_zh": item.sentence_zh,
                 "options": [option.model_dump(mode="json") for option in item.options],
+                "source_citation": _citation_text(item.source_citation, snippets),
             }
             private = {"correct_option_id": item.correct_option_id, "explanation": item.explanation}
             questions.append(
@@ -1312,6 +1374,9 @@ def question_rows(
                     "options": [
                         option.model_dump(mode="json") for option in reading_question.options
                     ],
+                    "source_citation": _citation_text(
+                        reading_question.source_citation or item.source_citation, snippets
+                    ),
                 }
                 private = {
                     "correct_option_id": reading_question.correct_option_id,
@@ -1333,6 +1398,7 @@ def question_rows(
                 "source_text": item.source_text,
                 "source_language": item.source_language,
                 "target_language": item.target_language,
+                "source_citation": _citation_text(item.source_citation, snippets),
             }
             private = {"reference_translation": item.reference_translation}
             questions.append(
@@ -1347,7 +1413,11 @@ def question_rows(
             )
             position += 1
         elif isinstance(item, WritingItem):
-            public = {"prompt": item.prompt, "requirements": item.requirements}
+            public = {
+                "prompt": item.prompt,
+                "requirements": item.requirements,
+                "source_citation": _citation_text(item.source_citation, snippets),
+            }
             private = {"reference_essay": item.reference_essay}
             questions.append(
                 PracticeQuestion(
@@ -1404,7 +1474,8 @@ async def materialize_practice_generation(session: AsyncSession, job: AiJob) -> 
     if generation is None or generation.status != "generating":
         return
     output = PracticeGenerationOutput.model_validate(job.result)
-    questions = question_rows(output.items, generation)
+    snippets = [str(value) for value in (job.input_context.get("knowledge_snippets") or [])]
+    questions = question_rows(output.items, generation, snippets)
     await _attach_target_words(session, questions)
     session.add_all(questions)
     generation.status = "ready"

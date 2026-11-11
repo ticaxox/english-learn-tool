@@ -36,12 +36,25 @@ export interface WeeklyDay {
   active: boolean
 }
 
+export interface RadarAxis {
+  /** The part-of-speech family key, e.g. "noun". */
+  key: string
+  /** The label to draw on the spoke. */
+  label: string
+  /** Words of this kind the learner touched this week. */
+  studied: number
+  /** Words of this kind the active wordbook holds. */
+  total: number
+}
+
 export interface GamificationWeekly {
   days: WeeklyDay[]
   xp: number
   activeDays: number
   streak: number
   goals: WeeklyGoal[]
+  /** One spoke per word kind; empty when the learner has no active wordbook. */
+  radar: RadarAxis[]
 }
 
 export const QUEST_LABELS: Record<string, string> = {
@@ -115,6 +128,17 @@ export function parseWeekly(value: unknown): GamificationWeekly {
             progress: num(goal.progress),
             target: Math.max(1, num(goal.target, 1)),
             completed: goal.completed === true,
+          }
+        })
+      : [],
+    radar: Array.isArray(body.radar)
+      ? body.radar.map((item) => {
+          const axis = record(item, '周报词性维度')
+          return {
+            key: String(axis.key ?? ''),
+            label: String(axis.label ?? ''),
+            studied: num(axis.studied),
+            total: num(axis.total),
           }
         })
       : [],

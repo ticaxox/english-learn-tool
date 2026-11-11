@@ -74,6 +74,9 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         <span class="practice-question-number">{{ String(index + 1).padStart(2, '0') }}</span>
         <div>
           <span class="status-badge">{{ questionLabel }}</span>
+          <span v-if="question.sourceCitation" class="practice-question-source">
+            出自真题 {{ question.sourceCitation }}
+          </span>
         </div>
       </div>
     </header>

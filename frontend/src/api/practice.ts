@@ -53,6 +53,8 @@ export interface PracticeQuestion {
   targetEntryIds: string[]
   /** Headwords to highlight inside the passage, sentence and options. */
   targetWords: string[]
+  /** The reference passage this question was built from, as "[n] title". */
+  sourceCitation: string | null
 }
 
 export interface PracticeSession {
@@ -342,6 +344,9 @@ function parseQuestion(value: unknown, index: number): PracticeQuestion {
     requirements: stringArray(body.requirements, context, 'requirements'),
     targetEntryIds: stringArray(body.target_entry_ids, context, 'target_entry_ids'),
     targetWords: Array.isArray(body.target_words) ? stringArray(body.target_words, context, 'target_words') : [],
+    sourceCitation: typeof body.source_citation === 'string' && body.source_citation.trim()
+      ? body.source_citation.trim()
+      : null,
   }
 }
 
