@@ -4124,10 +4124,10 @@
   background-clip: padding-box;
   box-shadow: none;
   border-style: solid;
-  border-width: 38px 92px 36px;
+  border-width: 34px 60px 32px;
   border-image-source: url('./assets/halloween/card/sheet-day.png');
-  border-image-slice: 14% 17% 14% 17% fill;
-  border-image-width: 38px 92px 36px;
+  border-image-slice: 14% 12% 14% 12% fill;
+  border-image-width: 34px 60px 32px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
@@ -4143,10 +4143,10 @@
   background-clip: padding-box;
   box-shadow: none !important;
   border-style: solid !important;
-  border-width: 44px 110px 42px !important;
-  border-image-source: url('./assets/halloween/card/sheet-day.png') !important;
-  border-image-slice: 14% 17% 14% 17% fill !important;
-  border-image-width: 44px 110px 42px !important;
+  border-width: 24px !important;
+  border-image-source: url('./assets/halloween/card/sheet-flat-day.png') !important;
+  border-image-slice: 5% fill !important;
+  border-image-width: 24px !important;
   border-image-repeat: stretch !important;
   border-color: transparent !important;
   border-radius: 0 !important;
@@ -4160,11 +4160,11 @@
   .member-practice-page .practice-question-card.practice-question-card--fill_blank,
   .member-practice-page .practice-question-card.practice-question-card--reading,
   .member-practice-page .practice-question-card.practice-question-card--translation {
-    border-width: 24px 56px 24px; border-image-width: 24px 56px 24px;
+    border-width: 22px 40px 22px; border-image-width: 22px 40px 22px;
   }
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
-    border-width: 26px 64px 26px !important; border-image-width: 26px 64px 26px !important;
+    border-width: 18px !important; border-image-width: 18px !important;
   }
 }
 
@@ -4188,18 +4188,18 @@
 
 .member-practice-session-page .practice-question-card--writing .practice-writing,
 .member-practice-page .practice-question-card--writing .practice-writing {
-  background: #d9c7a4;
+  background: #f6e7c8;
   background-clip: padding-box;
   border-style: solid;
-  border-width: 30px 40px;
-  border-image-source: url('./assets/halloween/card/rune-chip-day.png');
-  border-image-slice: 10% 5% fill;
-  border-image-width: 30px 40px;
+  border-width: 24px;
+  border-image-source: url('./assets/halloween/card/sheet-flat-day.png');
+  border-image-slice: 5% fill;
+  border-image-width: 24px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
-  padding: 6px 10px 10px;
-  color: #3a2819;
+  padding: 4px 10px 10px;
+  color: #3d2c18;
 }
 
 .member-practice-session-page .practice-question-card--writing .field,
@@ -4207,10 +4207,10 @@
   background: #f3e3c3;
   background-clip: padding-box;
   border-style: solid;
-  border-width: 34px 78px 32px;
+  border-width: 34px 60px 32px;
   border-image-source: url('./assets/halloween/card/sheet-day.png');
-  border-image-slice: 14% 17% 14% 17% fill;
-  border-image-width: 34px 78px 32px;
+  border-image-slice: 14% 12% 14% 12% fill;
+  border-image-width: 34px 60px 32px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
@@ -4231,38 +4231,45 @@
   color: #3d2c18;
 }
 
-/* An option on the sheet is a line of ink, not a white pill resting on paper:
-   no plate, no radius, no shadow — just a rule under each choice. */
+.member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
+.member-practice-page .practice-question-card--writing .practice-answer-textarea {
+  min-height: 260px;
+  line-height: 2;
+}
+
+/* An option on the sheet is a ruled answer box cut from the same paper — sharp
+   corners, a hairline rim and a dark ink letter — never a white pill floating
+   on top of the sheet. */
 .member-practice-session-page .practice-question-card--reading .practice-option,
 .member-practice-session-page .practice-question-card--fill_blank .practice-option,
 .member-practice-page .practice-question-card--reading .practice-option,
 .member-practice-page .practice-question-card--fill_blank .practice-option {
   min-height: 0;
-  padding: 14px 8px;
+  padding: 13px 14px;
   border-style: solid;
-  border-width: 0 0 1px;
-  border-color: rgb(122 92 48 / 34%);
+  border-width: 1px;
+  border-color: rgb(122 92 48 / 40%);
   border-radius: 0;
-  background: none;
-  box-shadow: none;
+  background: rgb(255 250 238 / 60%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%);
 }
 
 .member-practice-session-page .practice-question-card--reading .practice-option:hover,
 .member-practice-session-page .practice-question-card--fill_blank .practice-option:hover,
 .member-practice-page .practice-question-card--reading .practice-option:hover,
 .member-practice-page .practice-question-card--fill_blank .practice-option:hover {
-  background: rgb(122 92 48 / 8%);
-  border-color: rgb(122 92 48 / 55%);
+  background: rgb(255 250 238 / 92%);
+  border-color: rgb(122 92 48 / 70%);
 }
 
 .member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked),
 .member-practice-session-page .practice-question-card--fill_blank .practice-option:has(input:checked),
 .member-practice-page .practice-question-card--reading .practice-option:has(input:checked),
 .member-practice-page .practice-question-card--fill_blank .practice-option:has(input:checked) {
-  background: rgb(255 150 0 / 12%);
-  border-width: 0 0 2px;
-  border-color: #35240f;
-  box-shadow: none;
+  background: rgb(255 150 0 / 14%);
+  border-width: 2px;
+  border-color: #ff9600;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 60%);
 }
 
 .member-practice-session-page .practice-question-card--reading .practice-option:active,
@@ -4270,7 +4277,45 @@
 .member-practice-page .practice-question-card--reading .practice-option:active,
 .member-practice-page .practice-question-card--fill_blank .practice-option:active {
   transform: none;
-  box-shadow: none;
+  box-shadow: inset 0 2px 4px rgb(90 66 36 / 18%);
+}
+
+/* The letter is stamped in ink, so the row has a strong fixed anchor. */
+.member-practice-session-page .practice-question-card--reading .option-badge,
+.member-practice-session-page .practice-question-card--fill_blank .option-badge,
+.member-practice-page .practice-question-card--reading .option-badge,
+.member-practice-page .practice-question-card--fill_blank .option-badge {
+  background: #35240f;
+  border-color: #35240f;
+  color: #f6e7c8;
+}
+
+.member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked) .option-badge,
+.member-practice-session-page .practice-question-card--fill_blank .practice-option:has(input:checked) .option-badge,
+.member-practice-page .practice-question-card--reading .practice-option:has(input:checked) .option-badge,
+.member-practice-page .practice-question-card--fill_blank .practice-option:has(input:checked) .option-badge {
+  background: #ff9600;
+  border-color: #b35f00;
+  color: #35240f;
+}
+
+/* The translation answer is ruled paper, so it reads as somewhere to write. */
+.member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
+.member-practice-page .practice-question-card--translation .practice-answer-textarea {
+  min-height: 150px;
+  padding: 10px 12px;
+  border-width: 1px;
+  border-color: rgb(122 92 48 / 40%);
+  background-color: rgb(255 250 238 / 60%) !important;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    rgb(122 92 48 / 22%) 31px,
+    rgb(122 92 48 / 22%) 32px
+  ) !important;
+  background-size: 100% 32px;
+  line-height: 32px;
 }
 
 /* ---------- night ---------- */
@@ -4327,24 +4372,22 @@ html[data-mode='night'] {
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
     background: #4a4034 !important;
-    border-image-source: url('./assets/halloween/card/sheet-night.png') !important;
+    border-image-source: url('./assets/halloween/card/sheet-flat-night.png') !important;
   }
 
   @media (max-width: 760px) {
     .member-practice-session-page .practice-article-panel,
     .member-practice-page .practice-article-panel {
-      border-width: 26px 64px 26px !important;
-      border-image-width: 26px 64px 26px !important;
-      border-image-source: url('./assets/halloween/card/sheet-night.png') !important;
-      border-image-slice: 14% 17% 14% 17% fill !important;
+      border-width: 18px !important;
+      border-image-width: 18px !important;
     }
   }
 
   .member-practice-session-page .practice-question-card--writing .practice-writing,
   .member-practice-page .practice-question-card--writing .practice-writing {
-    background: #2a2148;
-    border-image-source: url('./assets/halloween/card/rune-chip.png');
-    color: #f3e9d2;
+    background: #4a4034;
+    border-image-source: url('./assets/halloween/card/sheet-flat-night.png');
+    color: #f0e4cc;
   }
 
   .member-practice-session-page .practice-question-card--writing .field,

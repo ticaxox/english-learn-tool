@@ -435,13 +435,6 @@ watch(challengeModule, async (module, previous) => {
     </section>
 
     <template v-else>
-      <p
-        v-if="session.hasSession.value || session.finished.value"
-        class="memory-session-kicker"
-      >
-        记忆练习
-      </p>
-
       <!-- In a run, the HUD replaces the page furniture: position, combo, way out. -->
       <LessonHud
         v-if="session.question.value"
@@ -451,6 +444,7 @@ watch(challengeModule, async (module, previous) => {
         :combo="combo"
         :hearts="hearts"
         :max-hearts="MAX_HEARTS"
+        :show-hearts="false"
         :label="session.module.value ? MEMORY_MODULE_LABELS[session.module.value] : '记忆练习'"
         @exit="endSession"
       />
@@ -585,6 +579,16 @@ watch(challengeModule, async (module, previous) => {
               <span :style="{ width: `${progressPercent}%` }"></span>
             </span>
           </div>
+        </div>
+
+        <div class="memory-rail-block memory-rail-hearts">
+          <span class="memory-rail-label">生命</span>
+          <span class="memory-rail-heartrow" :aria-label="`剩余 ${hearts} 颗心`">
+            <svg v-for="n in MAX_HEARTS" :key="n" viewBox="0 0 24 24" aria-hidden="true"
+                 :class="{ 'is-empty': n > hearts }">
+              <path d="M12 20s-7-4.4-7-9.1A4 4 0 0 1 12 8a4 4 0 0 1 7 2.9C19 15.6 12 20 12 20Z" />
+            </svg>
+          </span>
         </div>
 
         <div class="memory-rail-block">

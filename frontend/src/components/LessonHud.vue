@@ -9,7 +9,7 @@
  */
 import { computed } from 'vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   /** 1-based card number inside this run. */
   index: number
   total: number
@@ -19,7 +19,9 @@ const props = defineProps<{
   hearts: number
   maxHearts: number
   label: string
-}>()
+  /** The memory session draws the hearts in its side rail instead. */
+  showHearts?: boolean
+}>(), { showHearts: true })
 
 const emit = defineEmits<{ (event: 'exit'): void }>()
 
@@ -54,7 +56,7 @@ const percent = computed(() => {
         <b>{{ combo }}</b>
       </span>
 
-      <span class="lesson-hud__hearts" :aria-label="`剩余 ${hearts} 颗心`">
+      <span v-if="props.showHearts" class="lesson-hud__hearts" :aria-label="`剩余 ${hearts} 颗心`">
         <svg v-for="n in maxHearts" :key="n" viewBox="0 0 24 24" aria-hidden="true"
              :class="{ 'is-empty': n > hearts }">
           <path d="M12 20s-7-4.4-7-9.1A4 4 0 0 1 12 8a4 4 0 0 1 7 2.9C19 15.6 12 20 12 20Z" />

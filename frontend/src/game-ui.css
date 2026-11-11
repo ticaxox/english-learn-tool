@@ -3955,7 +3955,7 @@
 /* Two objects side by side: the question on the left, the controls on the
    right. The rail is a column of its own, not a strip under the card. */
 .personal-workspace .memory-workbench-grid.is-session {
-  grid-template-columns: minmax(0, 540px) 268px;
+  grid-template-columns: minmax(0, 700px) 268px;
   justify-content: center;
   align-items: start;
   gap: 18px 44px;
@@ -3965,7 +3965,7 @@
 
 .personal-workspace .memory-page .lesson-hud {
   margin: 26px auto 0;
-  width: min(100%, 852px);
+  width: min(100%, 1012px);
 }
 
 /* While a card is on screen it owns the column: centred, with the feedback
@@ -4002,6 +4002,10 @@
 
 .memory-rail-actions .div-button,
 .memory-rail-actions .button { width: 100%; }
+
+.memory-rail-heartrow { display: flex; gap: 5px; }
+.memory-rail-heartrow svg { width: 20px; height: 20px; fill: #d1453b; stroke: none; }
+.memory-rail-heartrow svg.is-empty { fill: none; stroke: rgb(122 92 48 / 45%); stroke-width: 1.6; }
 
 /* The run summary: art, four numbers, two ways forward. */
 .lesson-summary {
@@ -4925,6 +4929,13 @@
 .personal-workspace .memory-main-card .workspace-complete-state {
   max-width: 620px;
   margin-inline: auto;
+}
+
+/* The inscription lies long: the slab is a tablet, not a tile. */
+.personal-workspace .memory-main-card .study-card--choice,
+.personal-workspace .memory-main-card .study-card--spelling {
+  max-width: 700px;
+  width: 100%;
 }
 
 .personal-workspace .memory-page .memory-main-card .study-card--choice {
