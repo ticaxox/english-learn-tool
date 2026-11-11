@@ -2529,43 +2529,6 @@
 /* `coin` is the flat arcade stop the map shipped with. The two dies below
  * reuse the language of the badge discs so the trail and the wall agree. */
 
-/* ember: the stops are points of light, not plates. Each state is its own
- * painting, so the trail reads as fireflies on a dark board rather than
- * buttons on a form. */
-.personal-workspace .challenge-dsl-map--ember .challenge-dsl-card {
-  border: 0;
-  border-radius: 0;
-  background-color: transparent !important;
-  background-image: var(--ember-dim) !important;
-  background-position: center !important;
-  background-size: 100% 100% !important;
-  background-repeat: no-repeat !important;
-  box-shadow: none;
-  color: #b9aee0;
-}
-
-.personal-workspace .challenge-dsl-map--ember .challenge-dsl-card.is-completed {
-  background-image: var(--ember-lit) !important;
-  color: #fff3cf;
-}
-
-.personal-workspace .challenge-dsl-map--ember .challenge-dsl-card.is-in_progress,
-.personal-workspace .challenge-dsl-map--ember .challenge-dsl-card.is-unlocked {
-  background-image: var(--ember-green) !important;
-  color: #eafff4;
-}
-
-.personal-workspace .challenge-dsl-map--ember .challenge-dsl-card.is-failed {
-  background-image: var(--ember-dim) !important;
-  color: #ffb3ab;
-}
-
-/* The boss stop burns hotter. */
-.personal-workspace .challenge-dsl-map--ember .challenge-dsl-card.is-boss {
-  background-image: var(--ember-boss) !important;
-  color: #fff8e0;
-}
-
 /* lantern: a lit paper orb; the light is the status. */
 .personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card {
   border: 0;

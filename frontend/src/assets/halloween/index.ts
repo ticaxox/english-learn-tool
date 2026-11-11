@@ -157,28 +157,3 @@ export const parchmentFrame: Frame3Part = {
 import bookObjectDay from './card/book-object-day.png'
 export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
 
-/* The trail's stop markers: a riveted iron token, and the boss's version. */
-import nodePlate from './card/node-plate.png'
-import nodePlateBoss from './card/node-plate-boss.png'
-import nodePlateLit from './card/node-plate-lit.png'
-import nodePlateMoss from './card/node-plate-moss.png'
-import nodePlateCracked from './card/node-plate-cracked.png'
-/* The trail's stops are points of light, not plates: a lit ember for a stop
- * that was cleared, a green one for the stop you are on, a cold one for a stop
- * nobody has reached. */
-import emberLit from './char/ember-lit.png'
-import emberGreen from './char/ember-green.png'
-import emberDim from './char/ember-dim.png'
-import emberBoss from './char/ember-boss.png'
-export const ember = { lit: emberLit, green: emberGreen, dim: emberDim, boss: emberBoss } as const
-
-export const nodeToken = {
-  plate: nodePlate,
-  boss: nodePlateBoss,
-  /** The same iron, lit from inside — a cleared stop. */
-  lit: nodePlateLit,
-  /** The same iron, grown over — a stop nobody has reached yet. */
-  moss: nodePlateMoss,
-  /** The same iron, split open — a stop that was failed. */
-  cracked: nodePlateCracked,
-} as const
