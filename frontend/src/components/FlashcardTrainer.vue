@@ -88,7 +88,9 @@ function rate(rating: FlashcardRating): void {
 
         <!-- Back: the generated card back, contents only after the reveal. -->
         <div class="flipface flipface--back">
-          <img class="flipface__frame" :src="questionCard.frame.day" alt="" />
+          <!-- The back is its own drawing, not the front frame again: the
+               reveal is the moment, and it deserves its own face. -->
+          <img class="flipface__frame" :src="questionCard.back" alt="" />
           <div class="flipface__content">
             <template v-if="revealed">
               <div id="flashcard-back" ref="backRegion" class="flipface__body study-card__back" aria-live="polite" tabindex="-1">

@@ -228,11 +228,11 @@ onMounted(() => {
               type="button"
               @click="chooseType(option.key)"
             >
-              <img
+              <ModeArt
                 v-if="practiceBooks[option.key]"
                 class="practice-type-pill__art"
-                :src="practiceBooks[option.key].day"
-                alt=""
+                :day="practiceBooks[option.key].day"
+                :night="practiceBooks[option.key].night"
               />
               <AppIcon v-else :name="typeIcons[option.key]" />
               <span class="practice-type-pill__label">{{ option.label }}</span>

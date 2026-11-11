@@ -11,6 +11,7 @@
  */
 import { computed } from 'vue'
 import { practiceBooks } from '../assets/halloween'
+import ModeArt from './ModeArt.vue'
 
 export type ShelfModule = 'flashcard' | 'choice' | 'spelling'
 
@@ -49,7 +50,7 @@ function pick(module: ShelfModule): void {
       :disabled="!enabled.includes(module)"
       @click="pick(module)"
     >
-      <img class="shelf-book__art" :src="practiceBooks[module].day" alt="" />
+      <ModeArt class="shelf-book__art" :day="practiceBooks[module].day" :night="practiceBooks[module].night" />
       <span class="shelf-book__title">{{ titles[module] }}</span>
       <span class="shelf-book__hint">{{ hints[module] }}</span>
     </button>
@@ -99,6 +100,7 @@ function pick(module: ShelfModule): void {
   display: block;
   width: min(100%, 190px);
   height: auto;
+  aspect-ratio: 2 / 3;
   /* The book stands on the board: a soft contact shadow, no box behind it. */
   filter: drop-shadow(0 10px 10px rgb(40 24 8 / 26%));
   transition: transform 260ms cubic-bezier(0.2, 0.9, 0.25, 1.05), filter 260ms ease;

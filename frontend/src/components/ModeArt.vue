@@ -25,10 +25,15 @@ const { isNight } = useMode()
 </template>
 
 <style scoped>
+/* The wrapper is the picture's box: it takes the size, the images fill it.
+   An inline-block wrapper has no intrinsic height, so the images are taken
+   out of flow and pinned to it instead of being sized by it. */
 .mode-art {
   position: relative;
   display: inline-block;
   line-height: 0;
+  vertical-align: middle;
+  overflow: hidden;
 }
 
 .mode-art__img {
