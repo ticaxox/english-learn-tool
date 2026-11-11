@@ -1788,6 +1788,12 @@
 
 .practice-task-row:last-child { border-bottom: 0; }
 
+/* The book's spine stands for the type, so it comes before the name. */
+.practice-task-row .practice-task-mark {
+  margin-right: -4px;
+  filter: drop-shadow(0 1px 1px rgb(53 36 15 / 25%));
+}
+
 .practice-task-type { color: var(--ui-muted); font-size: 0.72rem; font-weight: 850; }
 .practice-task-row > strong { font-size: 0.9rem; }
 .practice-task-count { color: var(--ui-muted); font-size: 0.76rem; font-weight: 700; }
@@ -3886,33 +3892,42 @@
   align-items: center;
 }
 
-.personal-workspace .progress-card__ring {
-  display: grid;
+/* The level is a crest, not a pie chart: the number belongs on a badge the
+   learner earns, and the XP line below it already says how far along they are. */
+.personal-workspace .progress-card__crest {
   flex: 0 0 auto;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background:
-    conic-gradient(var(--ui-forest, #2f6e33) var(--fill, 0%), rgb(0 0 0 / 8%) 0);
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.personal-workspace .progress-card__ring span {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--ui-surface, #fffdf6);
+  filter: drop-shadow(0 3px 4px rgb(53 36 15 / 28%));
 }
 
 .personal-workspace .progress-card__meta { display: grid; flex: 1 1 auto; gap: 1px; min-width: 0; }
 .personal-workspace .progress-card__meta strong { font-size: 0.95rem; }
 .personal-workspace .progress-card__meta span { color: var(--ui-muted); font-size: 0.74rem; }
+
+/* The XP bar that used to be the ring's fill, now a line under the title. */
+.personal-workspace .progress-card__xp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.personal-workspace .progress-card__xptrack {
+  display: block;
+  flex: 1 1 auto;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(53 36 15 / 10%);
+}
+
+.personal-workspace .progress-card__xptrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ui-forest, #2f6e33);
+  transition: width 320ms ease;
+}
 .personal-workspace .progress-card__crumbs { display: inline-flex; gap: 4px; align-items: center; }
-.personal-workspace .progress-card__crumbs svg { width: 12px; height: 12px; }
+.personal-workspace .progress-card__crumbs svg { width: 15px; height: 15px; }
 
 .personal-workspace .progress-card__streak {
   display: grid;
@@ -3924,7 +3939,7 @@
 
 .personal-workspace .progress-card__streak.is-active { color: #c2410c; }
 .personal-workspace .progress-card__streak strong { font-size: 1.15rem; }
-.personal-workspace .progress-card__streak svg { width: 14px; height: 14px; }
+.personal-workspace .progress-card__streak svg { width: 17px; height: 17px; }
 
 .personal-workspace .progress-card__quests { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
 

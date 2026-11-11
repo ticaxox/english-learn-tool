@@ -310,6 +310,22 @@
 
 /* `.dialog-card` sets a 34rem default; keep these two classes more specific so the
    wordbook dialogs actually use the desktop width they were designed for. */
+/* The dialog opens on the book: cover at the left, title beside it. */
+.wordbook-detail-heading {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+}
+
+.wordbook-detail-cover {
+  display: block;
+  width: 84px;
+  aspect-ratio: 3 / 4;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgb(53 36 15 / 30%));
+}
+
 .dialog-card.wordbook-dialog {
   width: min(100%, 48rem);
 }

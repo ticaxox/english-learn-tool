@@ -1176,8 +1176,8 @@
 .wordbook-grid {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 1.2rem 1rem;
   padding-bottom: 0.6rem;
 }
 
@@ -1211,24 +1211,69 @@
   transform: translateY(-4px) rotate(-0.4deg);
 }
 
+/* The cover column is a spine: the artwork is the board, and the title is
+   printed on it in the book's own ink. */
+/* The cover column holds the drawn book. The board behind it is a shelf, so
+   it is darker than the cover itself and the two never merge. */
 .app-shell--member .member-wordbooks-page .wordbook-cover {
   position: relative;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 13rem;
   align-content: start;
-  padding: 0.85rem 0.9rem 0.85rem 1.2rem;
+  padding: 0;
   overflow: hidden;
   border-bottom: 1px solid var(--forest);
+  border-right: 1px solid var(--forest);
   border-radius: 3px 12px 0 3px;
-  background-color: var(--forest) !important;
-  background-image: radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem);
+  background-color: #1c3529 !important;
   color: var(--paper-white);
 }
 
-.app-shell--member .wordbook-card--private .member-wordbooks-page .wordbook-cover {
-  background:
-    radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem),
-    #244b64;
+.app-shell--member .member-wordbooks-page .wordbook-cover__art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The whole cover is the point: cropping it to a narrow strip would leave a
+     green rectangle, which is what the old CSS cover was. */
+  /* The cover keeps its 2:3 ratio and sits at the top of the column; the
+     book's own name is printed on it below, on the board colour. */
+  object-fit: contain;
+  object-position: center top;
+  filter: drop-shadow(0 6px 8px rgb(16 30 18 / 35%));
+}
+
+/* Everything above the artwork is printed on the cover, so it needs the
+   cover's own contrast rather than the page's. */
+.app-shell--member .member-wordbooks-page .wordbook-cover > *:not(.wordbook-cover__art) {
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell--member .member-wordbooks-page .wordbook-cover > .wordbook-spine,
+.app-shell--member .member-wordbooks-page .wordbook-cover > h3,
+.app-shell--member .member-wordbooks-page .wordbook-cover > .wordbook-cover-meta,
+.app-shell--member .member-wordbooks-page .wordbook-cover > .wordbook-cover-stamp {
+  margin-inline: 0.85rem;
+}
+
+.app-shell--member .member-wordbooks-page .wordbook-cover > .wordbook-cover-stamp {
+  align-self: end;
+  margin-bottom: 0.7rem;
+}
+
+.app-shell--member .member-wordbooks-page .wordbook-cover > h3 {
+  align-self: end;
+  margin-top: 0;
+  color: #fffaf0;
+  text-shadow: 0 1px 2px rgb(16 30 18 / 80%), 0 0 14px rgb(16 30 18 / 55%);
+}
+
+.app-shell--member .member-wordbooks-page .wordbook-cover > .wordbook-cover-meta {
+  color: rgb(255 250 240 / 88%);
+  text-shadow: 0 1px 2px rgb(16 30 18 / 70%);
 }
 
 .wordbook-cover::before {

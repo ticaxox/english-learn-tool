@@ -9,6 +9,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import AppIcon from './AppIcon.vue'
+import TypeMark from './TypeMark.vue'
 import ErrorNotice from './ErrorNotice.vue'
 import LoadingState from './LoadingState.vue'
 import {
@@ -247,6 +248,7 @@ onMounted(() => {
         :aria-label="`${PRACTICE_TYPE_LABELS[row.practiceType]}，${taskName(row)}，${statusLabel(row)}，${row.count} 题`"
         @click="openDialog(row)"
       >
+        <TypeMark class="practice-task-mark" :type="row.practiceType" :size="20" />
         <span class="practice-task-type">{{ PRACTICE_TYPE_LABELS[row.practiceType] }}</span>
         <strong>{{ taskName(row) }}</strong>
         <span class="practice-task-status" :class="`is-${row.status}`">{{ statusLabel(row) }}</span>

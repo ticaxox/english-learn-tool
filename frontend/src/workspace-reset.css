@@ -243,7 +243,9 @@
 .wordbook-group-heading h2 { margin: 0; font-size: 15px; }
 .count-pill { padding: 3px 8px; border-radius: 999px; background: var(--workspace-surface-muted); color: var(--workspace-muted); font-size: 11px; }
 .wordbook-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
-.workspace-shell .wordbook-card { display: grid; min-width: 0; min-height: 178px; grid-template-columns: 104px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--workspace-line); border-radius: 10px; background: var(--workspace-surface); box-shadow: none; }
+/* The cover column is a book, not a swatch: wide enough that the drawn
+   cover still reads as a bound book rather than a green rectangle. */
+.workspace-shell .wordbook-card { display: grid; min-width: 0; min-height: 232px; grid-template-columns: 178px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--workspace-line); border-radius: 10px; background: var(--workspace-surface); box-shadow: none; }
 .workspace-shell .wordbook-cover { position: relative; display: flex; min-width: 0; flex-direction: column; justify-content: space-between; padding: 13px 11px; border: 0 !important; border-radius: 0; background: var(--workspace-accent-strong) !important; background-image: none !important; color: #fff; box-shadow: none; transform: none; }
 .workspace-shell .wordbook-card--private .wordbook-cover { background: #31546c !important; }
 .workspace-shell .wordbook-spine, .workspace-shell .wordbook-cover-stamp { font-family: inherit; font-size: 8px; letter-spacing: 0.06em; }

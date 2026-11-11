@@ -5,7 +5,8 @@
  * Everything is read from the server; the card never computes rewards itself.
  */
 import { computed, onMounted, ref } from 'vue'
-import AppIcon from './AppIcon.vue'
+import LevelCrest from './LevelCrest.vue'
+import RewardMark from './RewardMark.vue'
 import ErrorNotice from './ErrorNotice.vue'
 import { fetchProgress, QUEST_LABELS, type GamificationProgress } from '../api/progress'
 
@@ -46,23 +47,27 @@ onMounted(() => {
 
     <template v-else-if="progress">
       <header class="progress-card__head">
-        <div
-          class="progress-card__ring"
+        <LevelCrest
+          class="progress-card__crest"
+          :level="progress.level.level"
+          :size="54"
           role="img"
           :aria-label="`等级 ${progress.level.level}，距离下一级 ${progress.level.xpForNextLevel - progress.level.xpIntoLevel} 经验`"
-          :style="{ '--fill': `${percent}%` }"
-        >
-          <span>Lv.{{ progress.level.level }}</span>
-        </div>
+        />
         <div class="progress-card__meta">
           <strong>{{ progress.level.title }}</strong>
-          <span>{{ progress.level.xpIntoLevel }} / {{ progress.level.xpForNextLevel }} XP</span>
+          <span class="progress-card__xp">
+            <span class="progress-card__xptrack" aria-hidden="true">
+              <span :style="{ width: `${percent}%` }"></span>
+            </span>
+            {{ progress.level.xpIntoLevel }} / {{ progress.level.xpForNextLevel }} XP
+          </span>
           <span class="progress-card__crumbs">
-            <AppIcon name="star" /> 碎屑 {{ progress.crumbs }}
+            <RewardMark mark="coin" :size="16" /> 碎屑 {{ progress.crumbs }}
           </span>
         </div>
         <div class="progress-card__streak" :class="{ 'is-active': progress.activeToday }">
-          <AppIcon name="spark" />
+          <RewardMark mark="candle" :size="18" />
           <strong>{{ progress.streak }}</strong>
           <span>天连续</span>
         </div>

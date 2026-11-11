@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppIcon from './AppIcon.vue'
+import ModeArt from './ModeArt.vue'
+import { wordbookCover } from '../assets/halloween'
 import type { Wordbook } from '../api/wordbooks'
 
 const props = withDefaults(defineProps<{
@@ -57,10 +59,16 @@ const coverTone = computed(() => {
     <div
       class="wordbook-cover"
       :class="`wordbook-cover--${coverTone}`"
-      :style="book.visibility === 'private'
-        ? 'background-color:#244b64; background-image:radial-gradient(circle at 100% 0%, rgb(211 204 255 / 40%), transparent 8rem)'
-        : 'background-color:var(--forest); background-image:radial-gradient(circle at 100% 0%, rgb(247 216 75 / 38%), transparent 8rem)'"
     >
+      <!-- The cover is a book, not a coloured rectangle: the artwork is the
+           cover board. A 48px list swatch has no room for it, so the list
+           keeps its letter and the full cover shows on the wide card. -->
+      <ModeArt
+        v-if="!compact"
+        class="wordbook-cover__art"
+        :day="wordbookCover.day"
+        :night="wordbookCover.night"
+      />
       <template v-if="!compact">
         <span class="wordbook-spine">WHISKER PRESS</span>
         <div class="wordbook-card-topline">
@@ -71,7 +79,7 @@ const coverTone = computed(() => {
           <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
         </div>
       </template>
-      <strong class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
+      <strong v-if="compact" class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
       <template v-if="!compact">
         <h3>{{ book.name }}</h3>
         <span class="wordbook-cover-meta">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>

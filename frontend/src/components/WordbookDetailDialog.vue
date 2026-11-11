@@ -10,6 +10,8 @@ import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
 import LoadingState from './LoadingState.vue'
 import SpeakButton from './SpeakButton.vue'
+import ModeArt from './ModeArt.vue'
+import { wordbookCover } from '../assets/halloween'
 
 const props = withDefaults(defineProps<{
   wordbookId: string
@@ -132,7 +134,13 @@ onMounted(() => {
       aria-modal="true"
       aria-labelledby="wordbook-detail-title"
     >
-      <header class="dialog-heading">
+      <header class="dialog-heading wordbook-detail-heading">
+        <!-- The book itself, at a size where the drawn cover still reads. -->
+        <ModeArt
+          class="wordbook-detail-cover"
+          :day="wordbookCover.day"
+          :night="wordbookCover.night"
+        />
         <div>
           <p class="eyebrow">只读词书详情</p>
           <h2 id="wordbook-detail-title">{{ detail?.wordbook.name ?? '词书详情' }}</h2>
