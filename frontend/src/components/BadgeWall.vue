@@ -10,7 +10,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
 import BadgeEmblem from './BadgeEmblem.vue'
 import { fetchBadges, type Badge } from '../api/progress'
-import { charge } from '../assets/halloween'
+import { charge, type ThemeMode } from '../assets/halloween'
 import { countUp, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
 withDefaults(defineProps<{ variant?: 'seal' | 'wax' | 'iron' | 'heraldry' | 'sticker' }>(), { variant: 'iron' })
@@ -104,7 +104,7 @@ function glyph(key: string): string[] {
 }
 
 /** Every achievement wears a painted charge, drawn for this set. */
-const CHARGES: Record<string, string> = {
+const CHARGES: Record<string, ThemeMode> = {
   first_lesson: charge.flame,
   streak_3: charge.flame,
   streak_7: charge.moon,
@@ -130,7 +130,7 @@ const CHARGES: Record<string, string> = {
   early_bird: charge.star,
 }
 
-function sticker(key: string): string | null {
+function sticker(key: string): ThemeMode | null {
   return CHARGES[key] ?? null
 }
 

@@ -155,47 +155,61 @@ export const parchmentFrame: Frame3Part = {
 
 /** A closed spellbook as an object: spine, page block and clasp, no backdrop. */
 import bookObjectDay from './card/book-object-day.png'
-export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
+import bookObjectNight from './card/book-object-night.png'
+export const bookObject = { day: bookObjectDay, night: bookObjectNight } as const
 
 /* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
  * spirit-green one for the stop you are on, a dark unlit one for a stop out
  * of reach. */
 import pumpkinGreen from './char/pumpkin-green.png'
+import pumpkinGreenNight from './char/pumpkin-green-night.png'
 import pumpkinUnlit from './char/pumpkin-unlit.png'
+import pumpkinUnlitNight from './char/pumpkin-unlit-night.png'
 import pumpkinMorning from './char/pumpkin-morning.png'
 import pumpkinDusk from './char/pumpkin-dusk.png'
 import pumpkinBoss from './char/pumpkin-boss.png'
+import pumpkinBossNight from './char/pumpkin-boss-night.png'
 import pumpkinBranch from './char/pumpkin-branch.png'
+import pumpkinBranchNight from './char/pumpkin-branch-night.png'
 export const pumpkins = {
   /** A cleared stop: bright by morning, a hot burn after dark. */
   lit: { day: pumpkinMorning, night: pumpkinDusk },
-  green: { day: pumpkinGreen, night: pumpkinGreen },
-  unlit: { day: pumpkinUnlit, night: pumpkinUnlit },
+  green: { day: pumpkinGreen, night: pumpkinGreenNight },
+  unlit: { day: pumpkinUnlit, night: pumpkinUnlitNight },
   /** The last stop wears a crown; a side path is a quiet one. */
-  boss: { day: pumpkinBoss, night: pumpkinBoss },
-  branch: { day: pumpkinBranch, night: pumpkinBranch },
+  boss: { day: pumpkinBoss, night: pumpkinBossNight },
+  branch: { day: pumpkinBranch, night: pumpkinBranchNight },
 } as const
 
 /* The charges painted onto the badges: one picture per family of feats. */
 import chargeFlame from './char/charge-flame.png'
+import chargeFlameNight from './char/charge-flame-night.png'
 import chargeMoon from './char/charge-moon.png'
+import chargeMoonNight from './char/charge-moon-night.png'
 import chargeBook from './char/charge-book.png'
+import chargeBookNight from './char/charge-book-night.png'
 import chargeCrown from './char/charge-crown.png'
+import chargeCrownNight from './char/charge-crown-night.png'
 import chargeSkull from './char/charge-skull.png'
+import chargeSkullNight from './char/charge-skull-night.png'
 import chargeStar from './char/charge-star.png'
+import chargeStarNight from './char/charge-star-night.png'
 import chargeOwl from './char/charge-owl.png'
+import chargeOwlNight from './char/charge-owl-night.png'
 import chargeHourglass from './char/charge-hourglass.png'
+import chargeHourglassNight from './char/charge-hourglass-night.png'
 import chargeKey from './char/charge-key.png'
+import chargeKeyNight from './char/charge-key-night.png'
 export const charge = {
-  flame: chargeFlame,
-  moon: chargeMoon,
-  book: chargeBook,
-  crown: chargeCrown,
-  skull: chargeSkull,
-  star: chargeStar,
-  owl: chargeOwl,
-  hourglass: chargeHourglass,
-  key: chargeKey,
+  flame: { day: chargeFlame, night: chargeFlameNight },
+  moon: { day: chargeMoon, night: chargeMoonNight },
+  book: { day: chargeBook, night: chargeBookNight },
+  crown: { day: chargeCrown, night: chargeCrownNight },
+  skull: { day: chargeSkull, night: chargeSkullNight },
+  star: { day: chargeStar, night: chargeStarNight },
+  owl: { day: chargeOwl, night: chargeOwlNight },
+  hourglass: { day: chargeHourglass, night: chargeHourglassNight },
+  key: { day: chargeKey, night: chargeKeyNight },
 } as const
 
 /* The week's candles: cream wax and an orange flame by day, violet wax and a

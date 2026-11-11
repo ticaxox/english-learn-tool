@@ -10,15 +10,19 @@
  * so a badge reads as the same achievement whichever die we settle on.
  */
 import { computed } from 'vue'
+import type { ThemeMode } from '../assets/halloween'
+import { themeMode } from '../composables/useTheme'
 
 const props = withDefaults(defineProps<{
   glyph: string[]
   accent: string
   earned: boolean
-  /** A painted charge drawn instead of the line glyph. */
-  sticker?: string | null
+  /** A painted charge drawn instead of the line glyph: one picture per theme. */
+  sticker?: ThemeMode | null
   variant?: 'seal' | 'wax' | 'iron' | 'heraldry' | 'sticker'
 }>(), { variant: 'seal' })
+
+const night = computed(() => themeMode.value === 'night')
 
 /** Scalloped disc: 18 petals, generated so every badge shares one die. */
 const seal = computed(() => {
@@ -130,7 +134,7 @@ const shape = computed(() => {
     <image
       v-if="sticker"
       class="emblem__sticker"
-      :href="sticker"
+      :href="night ? sticker.night : sticker.day"
       x="20"
       y="20"
       width="60"
