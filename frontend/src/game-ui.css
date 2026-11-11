@@ -1557,8 +1557,10 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 .personal-workspace .wordbook-cover__name {
   position: absolute;
   top: 26%;
-  right: 13%;
-  left: 20%;
+  /* The cover's inner rule line runs from 3% to 95% of the art, centred at
+   * 49%. The title band is centred on the cover too, so the two line up. */
+  right: 12%;
+  left: 12%;
   z-index: 1;
   color: #fbf2da;
   font-size: clamp(0.95rem, 1.7vw, 1.12rem);

@@ -2472,6 +2472,21 @@
 
 .personal-workspace .challenge-dsl-card svg { width: 24px; height: 24px; }
 .personal-workspace .challenge-dsl-card.is-boss svg { width: 34px; height: 34px; }
+
+/* A side path wears its own mark: a little flame, sitting low on the face.
+ * The last stop keeps its star, and the mark on a plain stop is its number. */
+.personal-workspace .challenge-dsl-card.is-branch svg {
+  width: 20px;
+  height: 20px;
+  margin-top: 14%;
+  fill: var(--g-orange);
+  stroke: none;
+}
+
+.personal-workspace .challenge-dsl-card.is-boss svg {
+  fill: var(--g-gold);
+  stroke: none;
+}
 .challenge-dsl-card__mark { font-size: 1.3rem; font-weight: 900; line-height: 1; }
 .personal-workspace .challenge-dsl-check {
   fill: none;

@@ -580,7 +580,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
               <path d="m5 12.5 4.5 4.5L19 7.5" />
             </svg>
             <AppIcon v-else-if="isBoss(placed.node)" name="star" />
-            <AppIcon v-else-if="placed.node.optional" name="spark" />
+            <AppIcon v-else-if="placed.node.optional" name="flame" />
             <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
             <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
           </span>
