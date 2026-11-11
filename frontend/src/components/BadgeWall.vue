@@ -51,10 +51,40 @@ const GLYPHS: Record<string, string[]> = {
   ],
   quest_all: ['M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8Z', 'M8.2 12.2l2.8 2.8 4.8-5.4'],
 }
+GLYPHS.streak_14 = [
+  'M12 3c3.2 4.2 6.2 6.6 6.2 10.4A6.2 6.2 0 0 1 12 20a6.2 6.2 0 0 1-6.2-6.6C5.8 9.6 8.8 7 12 3Z',
+]
+GLYPHS.streak_100 = [
+  'M12 3.2 14.4 9l6.2.6-4.7 4.1 1.4 6.1L12 16.8 6.7 19.8l1.4-6.1L3.4 9.6 9.6 9 12 3.2Z',
+]
+GLYPHS.level_3 = ['M4 19h16', 'M6 15l3-6 3 4 3-8 3 10']
+GLYPHS.level_20 = ['M12 2.6 15 9l6.4.6-4.8 4.2 1.4 6.4L12 16.8 6 20.2l1.4-6.4L2.6 9.6 9 9 3-6.4Z']
+GLYPHS.practice_100 = ['M5 4h11l3 3v13H5z', 'M8 9h8', 'M8 13h8', 'M8 17h5']
+GLYPHS.perfect_20 = ['M12 3.2 14.4 9l6.2.6-4.7 4.1 1.4 6.1L12 16.8 6.7 19.8l1.4-6.1L3.4 9.6 9.6 9 12 3.2Z']
+GLYPHS.boss_10 = ['M3.8 18.6h16.4', 'M4.6 8.4l4.2 3.4L12 5.4l3.2 6.4 4.2-3.4-1.3 8.2H5.9L4.6 8.4Z']
+GLYPHS.review_1000 = [
+  'M12 7.4C10.1 5.6 7.3 4.7 4.4 4.7V18c2.9 0 5.7.9 7.6 2.7 1.9-1.8 4.7-2.7 7.6-2.7V4.7c-2.9 0-5.7.9-7.6 2.7Z',
+  'M12 7.4v13.3',
+]
+GLYPHS.first_boss_win = ['M5 12.5 10 17l9-9.5', 'M4 20h16']
+GLYPHS.night_owl = ['M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z', 'M9 10h.01', 'M15 10h.01', 'M10 15q2 1.6 4 0']
+GLYPHS.early_bird = ['M4 14a8 8 0 1 1 16 0', 'M12 6v4', 'M4 14h16']
+
 const FALLBACK_GLYPH = GLYPHS.first_lesson
 
 /** One enamel colour per feat family, so the wall reads in clusters. */
 const ACCENTS: Record<string, string> = {
+  streak_14: '#f07a12',
+  streak_100: '#7d3cc0',
+  level_3: '#3a7bf5',
+  level_20: '#2b1d5e',
+  practice_100: '#177a3c',
+  perfect_20: '#e0a800',
+  boss_10: '#a82a2a',
+  review_1000: '#5b46a8',
+  first_boss_win: '#d63c3c',
+  night_owl: '#3b3f8f',
+  early_bird: '#ffb300',
   first_lesson: '#ffc800',
   streak_3: '#ff9600',
   streak_7: '#f07a12',
@@ -78,15 +108,26 @@ const STICKERS: Record<string, string> = {
   first_lesson: emblemSticker.flame,
   streak_3: emblemSticker.flame,
   streak_7: emblemSticker.moon,
-  streak_30: emblemSticker.moon,
-  level_5: emblemSticker.moon,
-  level_10: emblemSticker.moon,
+  streak_14: emblemSticker.moon,
+  streak_30: emblemSticker.owl,
+  streak_100: emblemSticker.crown,
+  level_3: emblemSticker.sparkle,
+  level_5: emblemSticker.sparkle,
+  level_10: emblemSticker.crown,
+  level_20: emblemSticker.owl,
   practice_10: emblemSticker.book,
   practice_50: emblemSticker.book,
-  perfect_5: emblemSticker.skull,
+  practice_100: emblemSticker.key,
+  perfect_5: emblemSticker.star,
+  perfect_20: emblemSticker.crown,
   boss_1: emblemSticker.skull,
+  boss_10: emblemSticker.crown,
+  first_boss_win: emblemSticker.key,
   review_100: emblemSticker.book,
-  quest_all: emblemSticker.flame,
+  review_1000: emblemSticker.book,
+  quest_all: emblemSticker.sparkle,
+  night_owl: emblemSticker.owl,
+  early_bird: emblemSticker.sparkle,
 }
 
 function sticker(key: string): string | null {

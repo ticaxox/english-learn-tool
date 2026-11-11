@@ -303,6 +303,17 @@ BADGES: dict[str, tuple[str, str]] = {
     "boss_1": ("首胜首领", "首次通过闯关终点"),
     "review_100": ("百词成诵", "累计复习 100 张卡片"),
     "quest_all": ("今日全勤", "一天内完成三条每日任务"),
+    "streak_14": ("半月不倒", "连续学习 14 天"),
+    "streak_100": ("百日长明", "连续学习 100 天"),
+    "level_3": ("初尝甜头", "达到 3 级"),
+    "level_20": ("夜行学者", "达到 20 级"),
+    "practice_100": ("百炼成钢", "累计提交 100 组练习"),
+    "perfect_20": ("全对二十连", "二十组练习全部答对"),
+    "boss_10": ("十度远征", "通过十次闯关终点"),
+    "review_1000": ("千词之海", "累计复习 1000 张卡片"),
+    "first_boss_win": ("破晓者", "首次击败终点守卫"),
+    "night_owl": ("夜猫子", "在深夜完成一次学习"),
+    "early_bird": ("早起的鸟", "在清晨完成一次学习"),
 }
 
 
@@ -343,7 +354,36 @@ async def _counts(session: AsyncSession, user_id: UUID) -> dict[str, int]:
         )
         or 0
     )
-    return {"practices": practices, "perfect": perfect, "reviews": reviews, "bosses": bosses}
+    # Two badges are about the hour of day: a night owl studies past midnight,
+    # an early bird studies before the school day starts.
+    night = int(
+        await session.scalar(
+            select(func.count(XpEvent.id))
+            .where(
+                XpEvent.user_id == user_id,
+                func.extract("hour", XpEvent.created_at).in_((0, 1, 2, 3, 4, 5)),
+            )
+        )
+        or 0
+    )
+    early = int(
+        await session.scalar(
+            select(func.count(XpEvent.id))
+            .where(
+                XpEvent.user_id == user_id,
+                func.extract("hour", XpEvent.created_at).in_((5, 6, 7, 8)),
+            )
+        )
+        or 0
+    )
+    return {
+        "practices": practices,
+        "perfect": perfect,
+        "reviews": reviews,
+        "bosses": bosses,
+        "night": night,
+        "early": early,
+    }
 
 
 async def evaluate_badges(
@@ -375,15 +415,26 @@ async def evaluate_badges(
         "first_lesson": stats.xp > 0,
         "streak_3": stats.streak_best >= 3,
         "streak_7": stats.streak_best >= 7,
+        "streak_14": stats.streak_best >= 14,
         "streak_30": stats.streak_best >= 30,
+        "streak_100": stats.streak_best >= 100,
+        "level_3": stats.level >= 3,
         "level_5": stats.level >= 5,
         "level_10": stats.level >= 10,
+        "level_20": stats.level >= 20,
         "practice_10": counts["practices"] >= 10,
         "practice_50": counts["practices"] >= 50,
+        "practice_100": counts["practices"] >= 100,
         "perfect_5": counts["perfect"] >= 5,
+        "perfect_20": counts["perfect"] >= 20,
         "boss_1": counts["bosses"] >= 1,
+        "first_boss_win": counts["bosses"] >= 1,
+        "boss_10": counts["bosses"] >= 10,
         "review_100": counts["reviews"] >= 100,
+        "review_1000": counts["reviews"] >= 1000,
         "quest_all": all_quests,
+        "night_owl": counts["night"] >= 1,
+        "early_bird": counts["early"] >= 1,
     }
     unlocked: list[str] = []
     for key, ready in conditions.items():

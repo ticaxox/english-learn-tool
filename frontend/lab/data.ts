@@ -38,6 +38,17 @@ export const BADGES = {
     { key: 'boss_1', name: '首胜首领', description: '首次通过闯关终点', unlocked: false, unlocked_at: null },
     { key: 'review_100', name: '百词成诵', description: '累计复习 100 张卡片', unlocked: true, unlocked_at: '2026-11-08T10:05:00' },
     { key: 'quest_all', name: '今日全勤', description: '一天内完成三条每日任务', unlocked: false, unlocked_at: null },
+    { key: 'streak_14', name: '半月不倒', description: '连续学习 14 天', unlocked: true, unlocked_at: '2026-10-30T08:10:00' },
+    { key: 'streak_100', name: '百日长明', description: '连续学习 100 天', unlocked: false, unlocked_at: null },
+    { key: 'level_3', name: '初尝甜头', description: '达到 3 级', unlocked: true, unlocked_at: '2026-10-25T12:00:00' },
+    { key: 'level_20', name: '夜行学者', description: '达到 20 级', unlocked: false, unlocked_at: null },
+    { key: 'practice_100', name: '百炼成钢', description: '累计提交 100 组练习', unlocked: true, unlocked_at: '2026-11-05T19:30:00' },
+    { key: 'perfect_20', name: '全对二十连', description: '二十组练习全部答对', unlocked: false, unlocked_at: null },
+    { key: 'boss_10', name: '十度远征', description: '通过十次闯关终点', unlocked: false, unlocked_at: null },
+    { key: 'review_1000', name: '千词之海', description: '累计复习 1000 张卡片', unlocked: true, unlocked_at: '2026-11-02T07:45:00' },
+    { key: 'first_boss_win', name: '破晓者', description: '首次击败终点守卫', unlocked: true, unlocked_at: '2026-10-24T21:15:00' },
+    { key: 'night_owl', name: '夜猫子', description: '在深夜完成一次学习', unlocked: false, unlocked_at: null },
+    { key: 'early_bird', name: '早起的鸟', description: '在清晨完成一次学习', unlocked: true, unlocked_at: '2026-11-09T06:20:00' },
   ],
 }
 

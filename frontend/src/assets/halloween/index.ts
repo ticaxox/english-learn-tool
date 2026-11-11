@@ -175,9 +175,21 @@ import emblemFlame from './char/emblem-flame.png'
 import emblemBook from './char/emblem-book.png'
 import emblemSkull from './char/emblem-skull.png'
 import emblemMoon from './char/emblem-moon.png'
+import emblemCrown from './char/emblem-crown.png'
+import emblemStar from './char/emblem-star.png'
+import emblemOwl from './char/emblem-owl.png'
+import emblemHourglass from './char/emblem-hourglass.png'
+import emblemSparkle from './char/emblem-sparkle.png'
+import emblemKey from './char/emblem-key.png'
 export const emblemSticker = {
   flame: emblemFlame,
   book: emblemBook,
   skull: emblemSkull,
   moon: emblemMoon,
+  crown: emblemCrown,
+  star: emblemStar,
+  owl: emblemOwl,
+  hourglass: emblemHourglass,
+  sparkle: emblemSparkle,
+  key: emblemKey,
 } as const
