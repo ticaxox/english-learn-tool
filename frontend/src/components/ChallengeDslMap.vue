@@ -11,6 +11,7 @@ import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
 import { pumpkins } from '../assets/halloween'
+import { themeMode } from '../composables/useTheme'
 
 import { bump, drawPaths, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
@@ -518,7 +519,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
   <section
     class="challenge-dsl-map panel"
     :class="`challenge-dsl-map--${variant}`"
-    :style="variant === 'pumpkin' ? { '--pumpkin-lit': `url(${pumpkins.lit})`, '--pumpkin-green': `url(${pumpkins.green})`, '--pumpkin-unlit': `url(${pumpkins.unlit})` } : undefined"
+    :style="variant === 'pumpkin' ? { '--pumpkin-lit': `url(${pumpkins.lit[themeMode]})`, '--pumpkin-green': `url(${pumpkins.green[themeMode]})`, '--pumpkin-unlit': `url(${pumpkins.unlit[themeMode]})` } : undefined"
     aria-label="闯关地图"
   >
     <header class="challenge-dsl-map__head">

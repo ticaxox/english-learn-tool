@@ -10,9 +10,10 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
 import BadgeEmblem from './BadgeEmblem.vue'
 import { fetchBadges, type Badge } from '../api/progress'
+import { emblemSticker } from '../assets/halloween'
 import { countUp, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
-withDefaults(defineProps<{ variant?: 'seal' | 'wax' | 'iron' }>(), { variant: 'iron' })
+withDefaults(defineProps<{ variant?: 'seal' | 'wax' | 'iron' | 'heraldry' | 'sticker' }>(), { variant: 'iron' })
 
 const badges = ref<Badge[]>([])
 const error = ref<unknown>(null)
@@ -70,6 +71,26 @@ const ACCENTS: Record<string, string> = {
 
 function glyph(key: string): string[] {
   return GLYPHS[key] ?? FALLBACK_GLYPH
+}
+
+/** Some achievements wear an emoji-style sticker instead of a drawn glyph. */
+const STICKERS: Record<string, string> = {
+  first_lesson: emblemSticker.flame,
+  streak_3: emblemSticker.flame,
+  streak_7: emblemSticker.moon,
+  streak_30: emblemSticker.moon,
+  level_5: emblemSticker.moon,
+  level_10: emblemSticker.moon,
+  practice_10: emblemSticker.book,
+  practice_50: emblemSticker.book,
+  perfect_5: emblemSticker.skull,
+  boss_1: emblemSticker.skull,
+  review_100: emblemSticker.book,
+  quest_all: emblemSticker.flame,
+}
+
+function sticker(key: string): string | null {
+  return STICKERS[key] ?? null
 }
 
 function accent(key: string): string {
@@ -194,10 +215,10 @@ onBeforeUnmount(() => {
         <span class="badge__medal">
           <span class="badge__turn">
             <span class="badge__face badge__face--stone">
-              <BadgeEmblem :glyph="glyph(badge.key)" :accent="accent(badge.key)" :earned="false" :variant="variant" />
+              <BadgeEmblem :glyph="glyph(badge.key)" :accent="accent(badge.key)" :earned="false" :variant="variant" :sticker="sticker(badge.key)" />
             </span>
             <span class="badge__face badge__face--enamel">
-              <BadgeEmblem :glyph="glyph(badge.key)" :accent="accent(badge.key)" :earned="true" :variant="variant" />
+              <BadgeEmblem :glyph="glyph(badge.key)" :accent="accent(badge.key)" :earned="true" :variant="variant" :sticker="sticker(badge.key)" />
               <span class="badge__shine" aria-hidden="true"></span>
             </span>
           </span>

@@ -23,7 +23,7 @@ import { gsap } from '../src/composables/useMotion'
 import { CHOICE_QUESTION, SHELF, SPELLING_QUESTION, mapDsl } from './data'
 
 const MODULES = ['flashcard', 'choice', 'spelling'] as const
-const BADGE_VARIANTS = ['seal', 'wax', 'iron'] as const
+const BADGE_VARIANTS = ['seal', 'wax', 'iron', 'heraldry', 'sticker'] as const
 const MAP_VARIANTS = ['pumpkin', 'lantern'] as const
 const LABELS = { flashcard: '翻卡', choice: '选择', spelling: '拼写' }
 

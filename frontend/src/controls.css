@@ -4718,6 +4718,67 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .personal-workspace .emblem--wax .emblem__drip { fill: var(--badge-accent, #d63c3c); }
 
+/* A sticker die: the emoji-style icon stands on the medallion itself, so the
+ * achievement reads as one picture rather than a symbol on a plate. */
+.personal-workspace .emblem--sticker .emblem__disc {
+  fill: var(--badge-accent, #ffc800);
+  stroke: rgb(53 36 15 / 22%);
+  stroke-width: 1.6;
+}
+
+.personal-workspace .emblem--sticker .emblem__plate {
+  fill: #fff8e8;
+  stroke: rgb(53 36 15 / 16%);
+  stroke-width: 1.4;
+}
+
+.personal-workspace .emblem--sticker .emblem__sticker {
+  filter: drop-shadow(0 2px 2px rgb(53 36 15 / 28%));
+}
+
+.personal-workspace .emblem--sticker:not(.is-earned) .emblem__disc {
+  fill: #ded7c8;
+  stroke: #c7bda9;
+}
+
+.personal-workspace .emblem--sticker:not(.is-earned) .emblem__plate {
+  fill: #ebe5d8;
+  stroke: #d3c9b6;
+}
+
+.personal-workspace .emblem--sticker:not(.is-earned) .emblem__sticker {
+  filter: saturate(0.2) brightness(0.94);
+}
+
+/* Heraldry: a flat shield with a chevron band. The achievement's own glyph
+ * sits on the field, and the accent colours the band. */
+.personal-workspace .emblem--heraldry .emblem__disc {
+  fill: #f6efdc;
+  stroke: #2b1d0f;
+  stroke-width: 3.2;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .emblem--heraldry .emblem__band {
+  fill: var(--badge-accent, #ffc800);
+  stroke: #2b1d0f;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .emblem--heraldry .emblem__glyph {
+  fill: none;
+  stroke: #2b1d0f;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Unearned: the shield is there, drained of colour. */
+.personal-workspace .emblem--heraldry:not(.is-earned) .emblem__disc { fill: #e3dbc9; }
+.personal-workspace .emblem--heraldry:not(.is-earned) .emblem__band { fill: #b3a88f; }
+.personal-workspace .emblem--heraldry:not(.is-earned) .emblem__glyph { stroke: #9d9078; }
+
 /* Iron, abstracted: a hexagon of flat plates with a rule line and three
  * chevrons. Nothing here pretends to be a photograph of metal. */
 .personal-workspace .emblem--iron .emblem__disc {

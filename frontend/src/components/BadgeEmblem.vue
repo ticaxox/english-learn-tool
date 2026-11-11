@@ -15,7 +15,9 @@ const props = withDefaults(defineProps<{
   glyph: string[]
   accent: string
   earned: boolean
-  variant?: 'seal' | 'wax' | 'iron'
+  /** An emoji-style sticker drawn instead of the line glyph. */
+  sticker?: string | null
+  variant?: 'seal' | 'wax' | 'iron' | 'heraldry' | 'sticker'
 }>(), { variant: 'seal' })
 
 /** Scalloped disc: 18 petals, generated so every badge shares one die. */
@@ -84,7 +86,27 @@ const chevrons = computed(() =>
   }),
 )
 
-const shape = computed(() => (props.variant === 'wax' ? wax.value : props.variant === 'iron' ? iron.value : seal.value))
+/** A heraldic shield: flat top, straight sides, a point at the bottom. */
+const heraldry = computed(() => {
+  const w = 34
+  const top = 20
+  const shoulder = 30
+  const bottom = 84
+  return `M ${50 - w} ${top} L ${50 + w} ${top} L ${50 + w} ${shoulder} L 50 ${bottom} L ${50 - w} ${shoulder} Z`
+})
+
+/** A chevron band across the shield — the plainest heraldic charge. */
+const heraldryBand = computed(() => {
+  const y = 46
+  return `M 24 ${y} L 50 ${y + 13} L 76 ${y} L 76 ${y + 9} L 50 ${y + 22} L 24 ${y + 9} Z`
+})
+
+const shape = computed(() => {
+  if (props.variant === 'wax') return wax.value
+  if (props.variant === 'iron') return iron.value
+  if (props.variant === 'heraldry') return heraldry.value
+  return seal.value
+})
 </script>
 
 <template>
@@ -97,14 +119,25 @@ const shape = computed(() => (props.variant === 'wax' ? wax.value : props.varian
   >
     <path class="emblem__disc" :d="shape" />
     <circle v-if="variant !== 'iron'" class="emblem__plate" cx="50" cy="50" r="33" />
-    <path v-else class="emblem__rule" :d="ironRule" />
+    <path v-else-if="variant === 'iron'" class="emblem__rule" :d="ironRule" />
+    <path v-else class="emblem__band" :d="heraldryBand" />
     <path
       v-for="(chevron, index) in variant === 'iron' ? chevrons : []"
       :key="index"
       class="emblem__chevron"
       :d="chevron"
     />
-    <g class="emblem__glyph" transform="translate(50 50) scale(1.72) translate(-12 -12)">
+    <image
+      v-if="sticker"
+      class="emblem__sticker"
+      :href="sticker"
+      x="22"
+      y="22"
+      width="56"
+      height="56"
+      preserveAspectRatio="xMidYMid meet"
+    />
+    <g v-else class="emblem__glyph" transform="translate(50 50) scale(1.72) translate(-12 -12)">
       <path v-for="(d, index) in glyph" :key="index" :d="d" />
     </g>
     <path v-if="variant === 'wax' && earned" class="emblem__drip" d="M 62 87 q 3 8 -1 11 q -4 -3 -1 -11 Z" />

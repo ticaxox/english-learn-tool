@@ -163,8 +163,21 @@ export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
 import pumpkinLit from './char/pumpkin-lit.png'
 import pumpkinGreen from './char/pumpkin-green.png'
 import pumpkinUnlit from './char/pumpkin-unlit.png'
+import pumpkinLitNight from './char/pumpkin-lit-night.png'
 export const pumpkins = {
-  lit: pumpkinLit,
-  green: pumpkinGreen,
-  unlit: pumpkinUnlit,
+  lit: { day: pumpkinLit, night: pumpkinLitNight },
+  green: { day: pumpkinGreen, night: pumpkinGreen },
+  unlit: { day: pumpkinUnlit, night: pumpkinUnlit },
+} as const
+
+/* The achievement marks, drawn as flat emoji-style stickers. */
+import emblemFlame from './char/emblem-flame.png'
+import emblemBook from './char/emblem-book.png'
+import emblemSkull from './char/emblem-skull.png'
+import emblemMoon from './char/emblem-moon.png'
+export const emblemSticker = {
+  flame: emblemFlame,
+  book: emblemBook,
+  skull: emblemSkull,
+  moon: emblemMoon,
 } as const
