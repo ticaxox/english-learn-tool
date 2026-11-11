@@ -2563,6 +2563,16 @@
   filter: saturate(0.7) brightness(0.85);
 }
 
+/* The last stop wears a crown; a side path is a quiet one. */
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-boss {
+  background-image: var(--pumpkin-boss) !important;
+  filter: drop-shadow(0 0 14px rgb(255 209 102 / 50%));
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-branch {
+  background-image: var(--pumpkin-branch) !important;
+}
+
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-locked {
   filter: saturate(0.55) brightness(0.8);
 }
@@ -4241,13 +4251,17 @@
   position: relative;
   display: block;
   width: 100%;
+  height: var(--candle-h, 40px);
   max-width: 56px;
 }
 
 .personal-workspace .weekly-day__art {
   display: block;
-  width: 100%;
-  height: auto;
+  /* The art is sized by the day's XP: a day with more of it stands taller. */
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  margin-inline: auto;
   /* An unlit day is the same candle with the flame drained out of it. */
   filter: grayscale(0.85) brightness(0.82);
   opacity: 0.55;

@@ -22,8 +22,8 @@ const xpRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 let lit = false
 
-const CANDLE_MIN = 10
-const CANDLE_MAX = 76
+const CANDLE_MIN = 26
+const CANDLE_MAX = 104
 
 const peak = computed(() => Math.max(1, ...(weekly.value?.days ?? []).map((day) => day.xp)))
 
@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
             <span
               class="weekly-day__candle"
               :class="{ 'is-lit': day.active }"
-              :style="{ height: `${candleHeight(day.xp)}px` }"
+              :style="{ '--candle-h': `${candleHeight(day.xp)}px` }"
             >
               <img
                 class="weekly-day__art"

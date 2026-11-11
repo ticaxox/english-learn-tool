@@ -164,11 +164,16 @@ import pumpkinGreen from './char/pumpkin-green.png'
 import pumpkinUnlit from './char/pumpkin-unlit.png'
 import pumpkinMorning from './char/pumpkin-morning.png'
 import pumpkinDusk from './char/pumpkin-dusk.png'
+import pumpkinBoss from './char/pumpkin-boss.png'
+import pumpkinBranch from './char/pumpkin-branch.png'
 export const pumpkins = {
   /** A cleared stop: bright by morning, a hot burn after dark. */
   lit: { day: pumpkinMorning, night: pumpkinDusk },
   green: { day: pumpkinGreen, night: pumpkinGreen },
   unlit: { day: pumpkinUnlit, night: pumpkinUnlit },
+  /** The last stop wears a crown; a side path is a quiet one. */
+  boss: { day: pumpkinBoss, night: pumpkinBoss },
+  branch: { day: pumpkinBranch, night: pumpkinBranch },
 } as const
 
 /* The charges painted onto the badges: one picture per family of feats. */
