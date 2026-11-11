@@ -157,3 +157,14 @@ export const parchmentFrame: Frame3Part = {
 import bookObjectDay from './card/book-object-day.png'
 export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
 
+/* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
+ * spirit-green one for the stop you are on, a dark unlit one for a stop out
+ * of reach. */
+import pumpkinLit from './char/pumpkin-lit.png'
+import pumpkinGreen from './char/pumpkin-green.png'
+import pumpkinUnlit from './char/pumpkin-unlit.png'
+export const pumpkins = {
+  lit: pumpkinLit,
+  green: pumpkinGreen,
+  unlit: pumpkinUnlit,
+} as const

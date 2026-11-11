@@ -24,7 +24,7 @@ import { CHOICE_QUESTION, SHELF, SPELLING_QUESTION, mapDsl } from './data'
 
 const MODULES = ['flashcard', 'choice', 'spelling'] as const
 const BADGE_VARIANTS = ['seal', 'wax', 'iron'] as const
-const MAP_VARIANTS = ['coin', 'lantern'] as const
+const MAP_VARIANTS = ['coin', 'lantern', 'pumpkin'] as const
 const LABELS = { flashcard: '翻卡', choice: '选择', spelling: '拼写' }
 
 const round = ref(0)
