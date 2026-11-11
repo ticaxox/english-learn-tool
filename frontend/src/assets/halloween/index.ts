@@ -156,3 +156,8 @@ export const parchmentFrame: Frame3Part = {
 /** A closed spellbook as an object: spine, page block and clasp, no backdrop. */
 import bookObjectDay from './card/book-object-day.png'
 export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
+
+/* The trail's stop markers: a riveted iron token, and the boss's version. */
+import nodePlate from './card/node-plate.png'
+import nodePlateBoss from './card/node-plate-boss.png'
+export const nodeToken = { plate: nodePlate, boss: nodePlateBoss } as const

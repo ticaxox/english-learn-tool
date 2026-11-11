@@ -2529,50 +2529,45 @@
 /* `coin` is the flat arcade stop the map shipped with. The two dies below
  * reuse the language of the badge discs so the trail and the wall agree. */
 
-/* iron: a riveted plate, its rim lit by how far the learner has got. */
+/* iron: the painted token — a riveted octagon with a recessed face — lit by
+ * how far the learner has got. The art carries the construction; CSS only
+ * adds the status light. */
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card {
   border: 0;
-  background:
-    radial-gradient(circle at 50% 50%, #34304a 0 62%, transparent 62%),
-    #232030;
-  box-shadow: inset 0 0 0 3px #4b4560, 0 6px 0 #16141f;
+  border-radius: 0;
+  /* Longhands, not the shorthand: a shorthand holding a var() is dropped at
+   * computed-value time, and the token never appears. */
+  background-color: transparent !important;
+  background-image: var(--node-plate) !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  box-shadow: none;
   color: #b9aee0;
 }
 
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-boss {
+  background-image: var(--node-boss) !important;
+}
+
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-completed {
-  background:
-    radial-gradient(circle at 50% 50%, #3b3218 0 62%, transparent 62%),
-    #232030;
-  box-shadow: inset 0 0 0 3px #ffd166, 0 6px 0 #16141f, 0 0 16px rgb(255 209 102 / 45%);
   color: #ffd166;
+  filter: drop-shadow(0 0 10px rgb(255 209 102 / 55%));
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-in_progress,
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-unlocked {
-  background:
-    radial-gradient(circle at 50% 50%, #1d3a30 0 62%, transparent 62%),
-    #232030;
-  box-shadow: inset 0 0 0 3px #3ad183, 0 6px 0 #16141f, 0 0 16px rgb(58 209 131 / 40%);
   color: #7cf0c4;
+  filter: drop-shadow(0 0 10px rgb(58 209 131 / 50%));
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-failed {
-  box-shadow: inset 0 0 0 3px #ff6f6f, 0 6px 0 #16141f;
   color: #ffb3ab;
+  filter: drop-shadow(0 0 10px rgb(255 111 111 / 45%));
 }
 
-/* Rivets, drawn as eight dots around the plate. */
-.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card::before {
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle 2.4px at 50% 3%, #9d93b8 98%, transparent 100%),
-    radial-gradient(circle 2.4px at 97% 50%, #9d93b8 98%, transparent 100%),
-    radial-gradient(circle 2.4px at 50% 97%, #9d93b8 98%, transparent 100%),
-    radial-gradient(circle 2.4px at 3% 50%, #9d93b8 98%, transparent 100%);
-  content: "";
-  pointer-events: none;
+.personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-locked {
+  filter: saturate(0.5) brightness(0.82);
 }
 
 /* lantern: a lit paper orb; the light is the status. */

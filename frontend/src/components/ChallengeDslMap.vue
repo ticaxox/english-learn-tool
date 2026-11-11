@@ -10,9 +10,10 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
+import { nodeToken } from '../assets/halloween'
 import { bump, drawPaths, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
-const props = withDefaults(defineProps<{ dsl: string; variant?: 'coin' | 'iron' | 'lantern' }>(), { variant: 'lantern' })
+const props = withDefaults(defineProps<{ dsl: string; variant?: 'coin' | 'iron' | 'lantern' }>(), { variant: 'iron' })
 const emit = defineEmits<{ select: [id: string] }>()
 
 const NODE = 80
@@ -513,7 +514,12 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
 </script>
 
 <template>
-  <section class="challenge-dsl-map panel" :class="`challenge-dsl-map--${variant}`" aria-label="闯关地图">
+  <section
+    class="challenge-dsl-map panel"
+    :class="`challenge-dsl-map--${variant}`"
+    :style="{ '--node-plate': `url(${nodeToken.plate})`, '--node-boss': `url(${nodeToken.boss})` }"
+    aria-label="闯关地图"
+  >
     <header class="challenge-dsl-map__head">
       <div>
         <p class="challenge-dsl-summary">
