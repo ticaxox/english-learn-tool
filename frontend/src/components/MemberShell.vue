@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import CoachView from '../views/CoachView.vue'
 import CrumboMark from './CrumboMark.vue'
+import { useMode } from '../composables/useMode'
 
 const props = defineProps<{
   displayName: string
@@ -11,6 +12,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ signout: [] }>()
+
+const { isNight, toggle } = useMode()
 const route = useRoute()
 const profileOpen = ref(false)
 const coachOpen = ref(false)
@@ -240,6 +243,17 @@ onBeforeUnmount(() => {
           <span>{{ currentDate }}</span>
         </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
+          <DivButton
+            class="workspace-mode-button ia-mode-toggle"
+            type="button"
+            :aria-label="isNight ? '切换到白天' : '切换到夜晚'"
+            :aria-pressed="isNight"
+            @click="toggle"
+          >
+            <AppIcon :name="isNight ? 'sun' : 'moon'" />
+            <span>{{ isNight ? '白天' : '夜晚' }}</span>
+          </DivButton>
+
           <DivButton
             class="workspace-coach-button member-concierge-button ia-coach-toggle"
             type="button"

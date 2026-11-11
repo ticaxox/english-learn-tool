@@ -18,6 +18,7 @@ import SpellingTrainer from '../components/SpellingTrainer.vue'
 import LessonHud from '../components/LessonHud.vue'
 import LessonFeedback from '../components/LessonFeedback.vue'
 import { illustration } from '../assets/halloween'
+import ModeArt from '../components/ModeArt.vue'
 import ShelfPicker from '../components/ShelfPicker.vue'
 import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
@@ -451,7 +452,7 @@ watch(challengeModule, async (module, previous) => {
 
       <!-- The payoff: what this run actually earned, then one way forward. -->
       <section v-if="showSummary" class="lesson-summary" aria-labelledby="lesson-summary-title">
-        <img class="lesson-summary__art" :src="illustration.result.day" alt="" />
+        <ModeArt class="lesson-summary__art" :day="illustration.result.day" :night="illustration.result.night" />
         <div class="lesson-summary__body">
           <p class="lesson-summary__kicker">本轮完成</p>
           <h2 id="lesson-summary-title">{{ bestCombo >= 5 ? '手感正热' : '又清掉一轮' }}</h2>

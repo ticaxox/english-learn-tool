@@ -23,6 +23,7 @@ import {
 import PracticeTopBar from '../components/PracticeTopBar.vue'
 import '../learning.css'
 import { illustration } from '../assets/halloween'
+import ModeArt from '../components/ModeArt.vue'
 
 const PAGE_SIZE = 50
 const STATUS_LABELS: Record<WordStateStatus, string> = {
@@ -145,7 +146,7 @@ onMounted(() => {
 
     <template v-else-if="data">
       <section v-if="data.items.length === 0" class="panel mistakes-empty">
-        <img class="mistakes-empty__art" :src="illustration.emptySearch.day" alt="" />
+        <ModeArt class="mistakes-empty__art" :day="illustration.emptySearch.day" :night="illustration.emptySearch.night" />
         <h2>暂时没有错词</h2>
         <p>继续练习后，答错的词会自动出现在这里。</p>
       </section>

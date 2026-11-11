@@ -49,6 +49,42 @@
   background-color: var(--ui-canvas);
 }
 
+/* Night is its own palette, not a filter over the day one: deep indigo canvas,
+   warmer parchment surfaces, pale ink. The artwork swaps with the same switch. */
+html[data-mode='night'] .personal-workspace {
+  --ui-canvas: #16112b;
+  --ui-sidebar: #1c1636;
+  --ui-surface: #241d44;
+  --ui-surface-subtle: #2b2352;
+  --ui-ink: #f0e4cc;
+  --ui-muted: #b9a6e6;
+  --ui-line: #3b3163;
+  --ui-line-strong: #6b5aa8;
+
+  --g-green: #6fcf72;
+  --g-green-edge: #4aa94d;
+  --g-green-soft: #1f3d2a;
+  --g-orange: #ffb340;
+  --g-orange-edge: #cf7400;
+  --g-orange-soft: #4a3413;
+  --g-blue: #6ecbff;
+  --g-blue-edge: #0d88c4;
+  --g-blue-soft: #16344a;
+  --g-purple: #c79bf5;
+  --g-purple-edge: #7d3cc0;
+  --g-purple-soft: #2e2151;
+  --g-red: #ff7a6e;
+  --g-red-edge: #a82e2e;
+  --g-red-soft: #46201d;
+  --g-gold: #ffd75e;
+  --g-gold-edge: #d9a400;
+  --g-gold-soft: #453410;
+
+  --crumb-forest: #6fcf72;
+  --crumb-pumpkin: #ffb340;
+  --crumb-gold: #ffd75e;
+}
+
 /* ------------------------------------------------------------------ shell */
 
 .personal-workspace {
@@ -970,6 +1006,46 @@
   background: var(--g-purple-soft);
   color: #4b1f78;
   box-shadow: 0 3px 0 var(--g-purple-edge);
+}
+
+/* The day/night switch: a small dial, not a pill in a row of pills. */
+.personal-workspace .workspace-mode-button.ia-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 999px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.personal-workspace .workspace-mode-button.ia-mode-toggle:hover {
+  background: var(--g-gold-soft);
+  transform: translateY(-1px);
+}
+
+.personal-workspace .workspace-mode-button.ia-mode-toggle:active { transform: translateY(1px); }
+
+.personal-workspace .workspace-mode-button.ia-mode-toggle svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .workspace-mode-button.ia-mode-toggle span { font-size: 0.82rem; }
+
+html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggle {
+  color: var(--g-gold);
+  border-color: var(--g-gold-edge);
 }
 
 /* --------------------------------------------------------------- book cards */

@@ -4353,7 +4353,9 @@
    system: the app has no dark theme, so an OS-level dark preference used to
    turn the parchment grey while the rest of the page stayed cream. */
 html[data-mode='night'] {
-  /* Doubled class so the night slab outranks the scoped day rule. */
+  /* The trainers draw their own day material in a scoped block, so the night
+     artwork has to be applied globally to reach them. Doubled class so the
+     night slab outranks that scoped day rule. */
   .personal-workspace .study-card.study-card--choice,
   .personal-workspace .study-card.study-card--spelling {
     background: #2a2148;
@@ -4362,7 +4364,8 @@ html[data-mode='night'] {
   }
 
   .personal-workspace .study-card--choice .choice-option,
-  .personal-workspace .study-card--spelling .spelling-cell {
+  .personal-workspace .study-card--spelling .spelling-cell,
+  .personal-workspace .study-card--spelling .spelling-grid input.spelling-cell {
     background: #2a2148;
     border-image-source: url('./assets/halloween/card/rune-chip.png');
     color: #f3e9d2;

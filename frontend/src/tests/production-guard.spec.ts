@@ -42,7 +42,13 @@ describe('production code prohibitions', () => {
   it('never uses browser storage for learning state', () => {
     // Matches real access (`localStorage.setItem`, `window.localStorage`), not
     // prose that merely promises the reader there is none.
-    expect(offenders(/\b(?:window\.)?(?:local|session)Storage\s*[.[]/)).toEqual([])
+    //
+    // One exception: the day/night preference, which is a display choice and
+    // not learning state. It names the file rather than the pattern, so a
+    // second storage user still fails this guard.
+    const displayPreference = ['composables/useMode.ts']
+    const users = offenders(/\b(?:window\.)?(?:local|session)Storage\s*[.[]/)
+    expect(users.filter((path) => !displayPreference.includes(path))).toEqual([])
   })
 
   it('never keeps an answer key or correctness flag in a view model', () => {

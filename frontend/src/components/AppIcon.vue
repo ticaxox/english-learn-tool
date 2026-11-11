@@ -21,6 +21,8 @@ withDefaults(
       | 'speaker'
       | 'image'
       | 'paperclip'
+      | 'moon'
+      | 'sun'
   }>(),
   { name: 'spark' },
 )
@@ -93,6 +95,13 @@ withDefaults(
       <rect x="3" y="4" width="18" height="16" rx="2" />
       <circle cx="9" cy="10" r="1.6" />
       <path d="m4 18 5-5 4 4 3-3 4 4" />
+    </template>
+    <template v-else-if="name === 'moon'">
+      <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" />
+    </template>
+    <template v-else-if="name === 'sun'">
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" />
     </template>
     <template v-else-if="name === 'paperclip'">
       <path d="M20 11.5 12.4 19a4.5 4.5 0 0 1-6.4-6.4l7.6-7.6a3 3 0 0 1 4.3 4.3l-7.6 7.6a1.5 1.5 0 0 1-2.1-2.1l7-7" />
