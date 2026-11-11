@@ -4262,7 +4262,7 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
 .personal-workspace .memory-main-card .study-card .button-row { justify-content: center; }
 .personal-workspace .memory-main-card .study-card__example { margin-inline: auto; }
 .personal-workspace .memory-main-card .spelling-grid { justify-content: center; }
-.personal-workspace .memory-main-card .choice-list { max-width: 660px; margin-inline: auto; }
+.personal-workspace .memory-main-card .choice-list { max-width: none; margin-inline: auto; }
 .personal-workspace .memory-main-card .choice-option { justify-content: center; }
 .personal-workspace .memory-main-card .choice-option__label { font-size: 1.06rem; }
 
@@ -4346,7 +4346,10 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
 }
 
 /* Word options: outrank the legacy 1rem rule in controls.css. */
-.personal-workspace .memory-main-card .choice-list--words .choice-option__label { font-size: 1.2rem; }
+.personal-workspace .memory-main-card .choice-list--words .choice-option__label {
+  font-size: 1.3rem;
+  font-weight: 850;
+}
 
 /* History modal rows need dark text on the gold active row. */
 .personal-workspace .coach-history-dialog .coach-conversation { padding: 10px 12px; }
@@ -4602,7 +4605,7 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
 
 .personal-workspace .memory-main-card .study-card--choice .choice-list {
   margin-top: 18px;
-  gap: 20px 32px;
+  gap: 14px;
 }
 
 /* Wrong answer: the learner's own input, with mismatched letters in red. */
@@ -5019,7 +5022,6 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
 .personal-workspace .memory-main-card .study-card--choice .choice-list .choice-option {
   width: 100%;
   min-height: 0;
-  padding-block: 20px;
 }
 
 .personal-workspace .memory-page .memory-main-card .study-card--choice {

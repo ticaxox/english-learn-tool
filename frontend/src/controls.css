@@ -620,10 +620,11 @@
   font-size: 0.82rem;
 }
 
-/* Memory choice: two by two, bold labels, selection shown by the tile. */
+/* Memory choice: one answer per row, because the answer is a long stone bar
+   and a bar cut in half stops reading as a sentence. */
 .personal-workspace .choice-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -737,14 +738,16 @@
   justify-items: stretch;
 }
 
+/* A long bar reads left to right: the letter sits at the front and the word
+   starts right after it, rather than being centred in a narrow tile. */
 .personal-workspace .choice-list--words .choice-option {
   width: 100%;
   max-width: none;
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-start;
+  text-align: left;
 }
 
-.personal-workspace .choice-list--words .choice-option__label { text-align: center; }
+.personal-workspace .choice-list--words .choice-option__label { text-align: left; }
 
 /* ----------------------------------------------------------------- option badge */
 
@@ -4372,7 +4375,11 @@ html[data-mode='night'] {
   }
 
   .personal-workspace .study-card--choice .choice-option:has(input:checked) {
-    border-image-source: url('./assets/halloween/card/rune-chip-on.png');
+    border-image-source: url('./assets/halloween/card/rune-bar-on-night.png');
+  }
+
+  .personal-workspace .study-card--choice .choice-option {
+    border-image-source: url('./assets/halloween/card/rune-bar-night.png');
   }
 
   .study-card--choice .choice-option__label { color: #f3e9d2; }

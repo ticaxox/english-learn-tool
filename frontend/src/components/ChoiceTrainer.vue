@@ -171,14 +171,18 @@ function choose(optionId: string): void {
 /* Options are answer tiles on the table, not a vertical form list. */
 .choice-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
   border: 0;
+  /* A fieldset's default min-inline-size is min-content, which in a grid
+     collapses it to the width of its shortest word. The bars need the row. */
+  min-inline-size: 0;
+  width: 100%;
 }
 
-.choice-list--words { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choice-list--words { grid-template-columns: minmax(0, 1fr); }
 
 .choice-option {
   position: relative;
@@ -194,18 +198,21 @@ function choose(optionId: string): void {
   pointer-events: none;
 }
 
-/* Each option is its own stone chip. The parent selector is here for
+/* Each option is its own stone bar. The parent selector is here for
    specificity: game-ui.css sets the same properties on .choice-option and wins
-   on load order otherwise. */
+   on load order otherwise.
+   The option is a block, not the workspace's three-column grid — that grid
+   would put the face in a 38px column instead of letting it fill the bar. */
 .study-card--choice .choice-option {
+  display: block;
   border-style: solid;
-  border-width: 14px 20px;
+  border-width: 12px 20px;
   border-color: transparent;
-  border-image-source: url('../assets/halloween/card/rune-chip-day.png');
-  /* `fill` so the chip's own stone face shows through: the artwork is the
+  border-image-source: url('../assets/halloween/card/rune-bar-day.png');
+  /* `fill` so the bar's own stone face shows through: the artwork is the
      whole object, not a frame around a colour. */
-  border-image-slice: 10% 5% fill;
-  border-image-width: 14px 20px;
+  border-image-slice: 8% 4% fill;
+  border-image-width: 12px 20px;
   border-image-repeat: stretch;
   border-radius: 0;
   background: none;
@@ -216,16 +223,17 @@ function choose(optionId: string): void {
 }
 
 .study-card--choice .choice-option:has(input:checked) {
-  border-image-source: url('../assets/halloween/card/rune-chip-on-day.png');
+  border-image-source: url('../assets/halloween/card/rune-bar-on-day.png');
   filter: drop-shadow(0 3px 6px rgb(122 92 48 / 55%));
 }
 
 .choice-option__face {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 0.85rem;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 1.1rem;
   align-items: center;
-  padding: 0.9rem 0.8rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
   border: 0;
   border-radius: 0;
   background: none;
@@ -237,15 +245,17 @@ function choose(optionId: string): void {
 .study-card--choice .choice-option:active { filter: brightness(0.96); }
 
 .choice-option__label {
-  font-size: 1.06rem;
-  font-weight: 700;
+  font-size: 1.24rem;
+  font-weight: 800;
   color: #3a2819;
-  line-height: 1.4;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
 }
 
 .choice-option__tick {
   display: grid;
   place-items: center;
+  justify-self: start;
   width: 22px;
   height: 22px;
   border-radius: 999px;
