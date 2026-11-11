@@ -4124,10 +4124,10 @@
   background-clip: padding-box;
   box-shadow: none;
   border-style: solid;
-  border-width: 68px 86px 64px;
-  border-image-source: url('./assets/halloween/card/parchment-day.png');
-  border-image-slice: 16% 10% 15% 11% fill;
-  border-image-width: 68px 86px 64px;
+  border-width: 38px 92px 36px;
+  border-image-source: url('./assets/halloween/card/sheet-day.png');
+  border-image-slice: 14% 17% 14% 17% fill;
+  border-image-width: 38px 92px 36px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
@@ -4143,10 +4143,10 @@
   background-clip: padding-box;
   box-shadow: none !important;
   border-style: solid !important;
-  border-width: 74px 96px 70px !important;
-  border-image-source: url('./assets/halloween/card/parchment-day.png') !important;
-  border-image-slice: 16% 10% 15% 11% fill !important;
-  border-image-width: 74px 96px 70px !important;
+  border-width: 44px 110px 42px !important;
+  border-image-source: url('./assets/halloween/card/sheet-day.png') !important;
+  border-image-slice: 14% 17% 14% 17% fill !important;
+  border-image-width: 44px 110px 42px !important;
   border-image-repeat: stretch !important;
   border-color: transparent !important;
   border-radius: 0 !important;
@@ -4160,11 +4160,11 @@
   .member-practice-page .practice-question-card.practice-question-card--fill_blank,
   .member-practice-page .practice-question-card.practice-question-card--reading,
   .member-practice-page .practice-question-card.practice-question-card--translation {
-    border-width: 40px 50px 38px; border-image-width: 40px 50px 38px;
+    border-width: 24px 56px 24px; border-image-width: 24px 56px 24px;
   }
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
-    border-width: 44px 56px 42px !important; border-image-width: 44px 56px 42px !important;
+    border-width: 26px 64px 26px !important; border-image-width: 26px 64px 26px !important;
   }
 }
 
@@ -4207,10 +4207,10 @@
   background: #f3e3c3;
   background-clip: padding-box;
   border-style: solid;
-  border-width: 56px 72px 54px;
-  border-image-source: url('./assets/halloween/card/parchment-day.png');
-  border-image-slice: 16% 10% 15% 11% fill;
-  border-image-width: 56px 72px 54px;
+  border-width: 34px 78px 32px;
+  border-image-source: url('./assets/halloween/card/sheet-day.png');
+  border-image-slice: 14% 17% 14% 17% fill;
+  border-image-width: 34px 78px 32px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
@@ -4276,22 +4276,22 @@
   .member-practice-page .practice-question-card.practice-question-card--reading,
   .member-practice-page .practice-question-card.practice-question-card--translation {
     background: #4a4034;
-    border-image-source: url('./assets/halloween/card/parchment-night.png');
+    border-image-source: url('./assets/halloween/card/sheet-night.png');
   }
 
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
     background: #4a4034 !important;
-    border-image-source: url('./assets/halloween/card/parchment-night.png') !important;
+    border-image-source: url('./assets/halloween/card/sheet-night.png') !important;
   }
 
   @media (max-width: 760px) {
     .member-practice-session-page .practice-article-panel,
     .member-practice-page .practice-article-panel {
-      border-width: 44px 56px 42px !important;
-      border-image-width: 44px 56px 42px !important;
-      border-image-source: url('./assets/halloween/card/parchment-night.png') !important;
-      border-image-slice: 16% 10% 15% 11% fill !important;
+      border-width: 26px 64px 26px !important;
+      border-image-width: 26px 64px 26px !important;
+      border-image-source: url('./assets/halloween/card/sheet-night.png') !important;
+      border-image-slice: 14% 17% 14% 17% fill !important;
     }
   }
 
@@ -4305,7 +4305,7 @@
   .member-practice-session-page .practice-question-card--writing .field,
   .member-practice-page .practice-question-card--writing .field {
     background: #4a4034;
-    border-image-source: url('./assets/halloween/card/parchment-night.png');
+    border-image-source: url('./assets/halloween/card/sheet-night.png');
   }
 
   .member-practice-session-page .practice-question-card--writing .practice-answer-textarea,

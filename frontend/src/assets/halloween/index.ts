@@ -44,8 +44,8 @@ import runeChip from './card/rune-chip.png'
 import runeChipOn from './card/rune-chip-on.png'
 import runeChipDay from './card/rune-chip-day.png'
 import runeChipOnDay from './card/rune-chip-on-day.png'
-import parchmentDay from './card/parchment-day.png'
-import parchmentNight from './card/parchment-night.png'
+import sheetDay from './card/sheet-day.png'
+import sheetNight from './card/sheet-night.png'
 import wordbookCoverDay from './card/wordbook-cover-day.png'
 import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
@@ -70,8 +70,8 @@ export const runeStone = {
 
 /** The question surface for the AI exercise types: one sheet, text lives on it. */
 export const parchment: ThemeMode = {
-  day: parchmentDay,
-  night: parchmentNight,
+  day: sheetDay,
+  night: sheetNight,
 }
 
 /** A wordbook cover with nothing printed on it; the title and badges sit on top. */
