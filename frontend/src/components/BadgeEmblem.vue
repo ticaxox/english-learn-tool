@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<{
   glyph: string[]
   accent: string
   earned: boolean
-  /** An emoji-style sticker drawn instead of the line glyph. */
+  /** A painted charge drawn instead of the line glyph. */
   sticker?: string | null
   variant?: 'seal' | 'wax' | 'iron' | 'heraldry' | 'sticker'
 }>(), { variant: 'seal' })
@@ -131,10 +131,10 @@ const shape = computed(() => {
       v-if="sticker"
       class="emblem__sticker"
       :href="sticker"
-      x="22"
-      y="22"
-      width="56"
-      height="56"
+      x="20"
+      y="20"
+      width="60"
+      height="60"
       preserveAspectRatio="xMidYMid meet"
     />
     <g v-else class="emblem__glyph" transform="translate(50 50) scale(1.72) translate(-12 -12)">

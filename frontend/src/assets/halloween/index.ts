@@ -160,36 +160,41 @@ export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
 /* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
  * spirit-green one for the stop you are on, a dark unlit one for a stop out
  * of reach. */
-import pumpkinLit from './char/pumpkin-lit.png'
 import pumpkinGreen from './char/pumpkin-green.png'
 import pumpkinUnlit from './char/pumpkin-unlit.png'
-import pumpkinLitNight from './char/pumpkin-lit-night.png'
+import pumpkinMorning from './char/pumpkin-morning.png'
+import pumpkinDusk from './char/pumpkin-dusk.png'
 export const pumpkins = {
-  lit: { day: pumpkinLit, night: pumpkinLitNight },
+  /** A cleared stop: bright by morning, a hot burn after dark. */
+  lit: { day: pumpkinMorning, night: pumpkinDusk },
   green: { day: pumpkinGreen, night: pumpkinGreen },
   unlit: { day: pumpkinUnlit, night: pumpkinUnlit },
 } as const
 
-/* The achievement marks, drawn as flat emoji-style stickers. */
-import emblemFlame from './char/emblem-flame.png'
-import emblemBook from './char/emblem-book.png'
-import emblemSkull from './char/emblem-skull.png'
-import emblemMoon from './char/emblem-moon.png'
-import emblemCrown from './char/emblem-crown.png'
-import emblemStar from './char/emblem-star.png'
-import emblemOwl from './char/emblem-owl.png'
-import emblemHourglass from './char/emblem-hourglass.png'
-import emblemSparkle from './char/emblem-sparkle.png'
-import emblemKey from './char/emblem-key.png'
-export const emblemSticker = {
-  flame: emblemFlame,
-  book: emblemBook,
-  skull: emblemSkull,
-  moon: emblemMoon,
-  crown: emblemCrown,
-  star: emblemStar,
-  owl: emblemOwl,
-  hourglass: emblemHourglass,
-  sparkle: emblemSparkle,
-  key: emblemKey,
+/* The charges painted onto the badges: one picture per family of feats. */
+import chargeFlame from './char/charge-flame.png'
+import chargeMoon from './char/charge-moon.png'
+import chargeBook from './char/charge-book.png'
+import chargeCrown from './char/charge-crown.png'
+import chargeSkull from './char/charge-skull.png'
+import chargeStar from './char/charge-star.png'
+import chargeOwl from './char/charge-owl.png'
+import chargeHourglass from './char/charge-hourglass.png'
+import chargeKey from './char/charge-key.png'
+export const charge = {
+  flame: chargeFlame,
+  moon: chargeMoon,
+  book: chargeBook,
+  crown: chargeCrown,
+  skull: chargeSkull,
+  star: chargeStar,
+  owl: chargeOwl,
+  hourglass: chargeHourglass,
+  key: chargeKey,
 } as const
+
+/* The week's candles: cream wax and an orange flame by day, violet wax and a
+ * teal flame after dark. */
+import candleDay from './char/candle-day.png'
+import candleNight from './char/candle-night.png'
+export const candles = { day: candleDay, night: candleNight } as const

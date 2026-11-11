@@ -11,6 +11,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
 import { fetchWeekly, type GamificationWeekly } from '../api/progress'
 import { countUp, gsap, motionAllowed } from '../composables/useMotion'
+import { candles } from '../assets/halloween'
+import { themeMode } from '../composables/useTheme'
 
 const weekly = ref<GamificationWeekly | null>(null)
 const error = ref<unknown>(null)
@@ -26,6 +28,7 @@ const CANDLE_MAX = 76
 const peak = computed(() => Math.max(1, ...(weekly.value?.days ?? []).map((day) => day.xp)))
 
 /** Every day gets a candle; height is its XP share of the best day. */
+/** The candle's height carries the day's XP; the art scales with it. */
 function candleHeight(xp: number): number {
   if (xp <= 0) return CANDLE_MIN
   return CANDLE_MIN + (xp / peak.value) * (CANDLE_MAX - CANDLE_MIN)
@@ -77,7 +80,7 @@ function lightUp(): void {
     { scaleY: 1, opacity: 1, duration: 0.62, ease: 'back.out(1.5)', stagger: 0.075 },
   )
   timeline.fromTo(
-    holders.map((holder) => holder.querySelector('.weekly-day__flame')).filter(Boolean),
+    holders.map((holder) => holder.querySelector('.weekly-day__art')).filter(Boolean),
     { scale: 0, opacity: 0, y: -6 },
     { scale: 1, opacity: 1, y: 0, duration: 0.42, ease: 'back.out(2.2)', stagger: 0.075 },
     '-=0.38',
@@ -170,9 +173,15 @@ onBeforeUnmount(() => {
           <span class="weekly-day__slot">
             <span
               class="weekly-day__candle"
+              :class="{ 'is-lit': day.active }"
               :style="{ height: `${candleHeight(day.xp)}px` }"
             >
-              <span v-if="day.active" class="weekly-day__flame" aria-hidden="true"></span>
+              <img
+                class="weekly-day__art"
+                :src="candles[themeMode]"
+                alt=""
+                aria-hidden="true"
+              />
             </span>
           </span>
           <span class="weekly-day__lamp">{{ weekday(day.date) }}</span>

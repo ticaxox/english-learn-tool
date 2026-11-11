@@ -1556,7 +1556,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
  * the shadow is what carries it over the leather. */
 .personal-workspace .wordbook-cover__name {
   position: absolute;
-  top: 15%;
+  top: 26%;
   right: 13%;
   left: 20%;
   z-index: 1;
