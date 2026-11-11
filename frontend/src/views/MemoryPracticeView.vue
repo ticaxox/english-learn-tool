@@ -93,6 +93,11 @@ const dueRemaining = computed(() => {
 const sessionTotal = computed(() => session.total.value ?? 0)
 const cardsDone = computed(() => Math.max(0, sessionTotal.value - (session.question.value?.remaining ?? 0)))
 const cardIndex = computed(() => Math.min(sessionTotal.value, cardsDone.value + 1))
+watch(
+  () => session.question.value?.questionId,
+  () => { flashRevealed.value = false },
+)
+
 const progressPercent = computed(() => {
   if (sessionTotal.value <= 0) return 0
   return Math.round((cardsDone.value / sessionTotal.value) * 100)
@@ -152,6 +157,13 @@ async function resume(): Promise<void> {
   }
 }
 
+/** The flip happens inside the card; the rail needs to hear about it. */
+function onFlashReveal(): void {
+  flashRevealed.value = true
+  const current = session.question.value
+  if (current) void session.recordReveal(current.questionId)
+}
+
 async function rateFlashcard(questionId: string, rating: 'again' | 'good'): Promise<void> {
   await session.rateFlashcard(questionId, rating)
   heartbeat.markInteraction()
@@ -177,6 +189,8 @@ const hearts = ref(MAX_HEARTS)
 const runCorrect = ref(0)
 const runWrong = ref(0)
 const showSummary = ref(false)
+/** Mirrors the flashcard's own flip so the rail can offer ratings for it. */
+const flashRevealed = ref(false)
 
 const runAccuracy = computed(() => {
   const graded = runCorrect.value + runWrong.value
@@ -519,7 +533,8 @@ watch(challengeModule, async (module, previous) => {
           v-if="session.question.value?.kind === 'flashcard'"
           :question="session.question.value"
           :disabled="session.busy.value || Boolean(verdict)"
-          @reveal="() => session.recordReveal(session.question.value!.questionId)"
+          :show-rating="false"
+          @reveal="onFlashReveal"
           @rate="(rating) => rateFlashcard(session.question.value!.questionId, rating)"
           @master="() => master(session.question.value!.questionId)"
         />
@@ -577,6 +592,28 @@ watch(challengeModule, async (module, previous) => {
           <span class="workspace-status memory-rail-clock" :class="`memory-timer--${heartbeat.state.value}`">
             {{ timer.running.value ? `${timerLimit > 0 ? '倒计时' : '正计时'} ${timer.label.value}` : '已暂停' }}
           </span>
+        </div>
+
+        <div
+          v-if="session.question.value?.kind === 'flashcard' && !session.finished.value"
+          class="memory-rail-block memory-rail-answer"
+        >
+          <span class="memory-rail-label">这张记住了吗</span>
+          <div v-if="flashRevealed" class="memory-rail-actions">
+            <DivButton class="button-secondary" type="button" :disabled="session.busy.value || Boolean(verdict)"
+                       @click="rateFlashcard(session.question.value!.questionId, 'again')">
+              无印象
+            </DivButton>
+            <DivButton class="button-secondary" type="button" :disabled="session.busy.value || Boolean(verdict)"
+                       @click="rateFlashcard(session.question.value!.questionId, 'good')">
+              有印象
+            </DivButton>
+            <DivButton class="button-secondary" type="button" :disabled="session.busy.value || Boolean(verdict)"
+                       @click="master(session.question.value!.questionId)">
+              已记住
+            </DivButton>
+          </div>
+          <p v-else class="memory-rail-state">翻开卡片，再选记得多牢。</p>
         </div>
 
         <DivButton

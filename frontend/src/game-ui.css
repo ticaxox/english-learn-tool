@@ -3952,18 +3952,20 @@
 }
 
 /* ------------------------------------------------ memory: one card, one run */
-/* The HUD carries position, combo, hearts and exit; the rail is only a
-   footnote strip under the card, so the card owns the screen. */
+/* Two objects side by side: the question on the left, the controls on the
+   right. The rail is a column of its own, not a strip under the card. */
 .personal-workspace .memory-workbench-grid.is-session {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 540px) 268px;
+  justify-content: center;
+  align-items: start;
+  gap: 18px 44px;
 }
 
 .personal-workspace .memory-workbench-grid.is-session .memory-context-card { display: none; }
 
 .personal-workspace .memory-page .lesson-hud {
   margin: 26px auto 0;
-  width: min(100%, 720px);
+  width: min(100%, 852px);
 }
 
 /* While a card is on screen it owns the column: centred, with the feedback
@@ -3976,19 +3978,30 @@
 }
 
 .personal-workspace .memory-workbench-grid.is-session .memory-session-rail {
-  position: static;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  padding: 12px 18px;
-  width: min(100%, 720px);
-  margin-inline: auto;
+  position: sticky;
+  top: 24px;
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 22px 20px;
+  width: 100%;
+  margin: 0;
   border-radius: 16px;
 }
 
-.personal-workspace .memory-workbench-grid.is-session .memory-rail-block { display: flex; align-items: baseline; gap: 8px; }
-.personal-workspace .memory-workbench-grid.is-session .memory-rail-end { margin-left: auto; }
+.personal-workspace .memory-workbench-grid.is-session .memory-rail-block { display: grid; gap: 6px; }
+.personal-workspace .memory-workbench-grid.is-session .memory-rail-end { margin-left: 0; width: 100%; }
+
+/* The answers live on the right, so the card itself stays bare. */
+.memory-rail-answer .memory-rail-label { margin-bottom: 2px; }
+
+.memory-rail-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.memory-rail-actions .div-button,
+.memory-rail-actions .button { width: 100%; }
 
 /* The run summary: art, four numbers, two ways forward. */
 .lesson-summary {
@@ -4046,12 +4059,14 @@
   letter-spacing: 0.08em;
 }
 
-/* The right rail carries the session headline, clock and the end action. */
+/* The right rail carries the session headline, clock, the answer buttons and
+   the end action. */
 .personal-workspace .memory-session-rail {
   position: sticky;
   top: 18px;
   display: grid;
   gap: 18px;
+  align-content: start;
   padding: 24px 22px;
 }
 
@@ -4154,6 +4169,13 @@
   }
 
   .memory-rail-state { margin: 0; font-size: 0.74rem; }
+
+  /* The answer buttons ride in the strip as a row of three. */
+  .memory-session-rail { flex-wrap: wrap; }
+  .memory-rail-answer { flex: 1 1 100%; }
+  .memory-rail-actions { grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+  .memory-rail-actions .div-button,
+  .memory-rail-actions .button { width: auto; min-height: 32px; padding: 4px 10px; font-size: 0.76rem; }
 }
 
 .personal-workspace .memory-main-card .study-card { text-align: center; }
@@ -4893,9 +4915,9 @@
   .personal-workspace .memory-wrong-detail__side { justify-items: center; text-align: center; }
 }
 
-/* More air between the study card and its rail; the card itself stays narrow. */
+/* Air between the study card and its rail; the card itself stays narrow. */
 .personal-workspace .memory-workbench-grid.is-session {
-  gap: 48px;
+  gap: 18px 44px;
 }
 
 .personal-workspace .memory-main-card .study-card,

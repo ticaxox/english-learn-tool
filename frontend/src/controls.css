@@ -4106,9 +4106,10 @@
    ========================================================================= */
 
 /* ---------- parchment: an AI practice question on a sheet ---------- */
-/* One question is one unrolled scroll: portrait, so the wooden rolls at the top
-   and bottom keep their shape. Band widths are the measured slice of the art
-   (743x760: 11% top, 13% sides, 16% bottom) scaled to the card width.
+/* The AI question is one long sheet of parchment: rolls at the left and right,
+   a dead-flat middle where the question sits. Band sizes are the measured
+   slices of the art (1024x512: 16% top, 10%/11% sides, 15% bottom) scaled to
+   the card width, so the rolls keep their round ends.
    The doubled class outranks the session-page card shell, whose border
    shorthand would otherwise reset the border image. */
 .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
@@ -4117,27 +4118,64 @@
 .member-practice-page .practice-question-card.practice-question-card--fill_blank,
 .member-practice-page .practice-question-card.practice-question-card--reading,
 .member-practice-page .practice-question-card.practice-question-card--translation {
-  width: min(100%, 720px);
+  width: min(100%, 860px);
   margin-inline: auto;
   background: #f3e3c3;
   background-clip: padding-box;
   box-shadow: none;
   border-style: solid;
-  border-width: 80px 92px 116px;
-  border-image-source: url('./assets/halloween/card/scroll-day.png');
-  border-image-slice: 11% 13% 16% 13% fill;
-  border-image-width: 80px 92px 116px;
+  border-width: 68px 86px 64px;
+  border-image-source: url('./assets/halloween/card/parchment-day.png');
+  border-image-slice: 16% 10% 15% 11% fill;
+  border-image-width: 68px 86px 64px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
-  padding: 0 4px;
+  padding: 0 16px;
 }
 
+/* The reading passage gets its own sheet, same stock, laid out wide.
+   The workspace panel rule paints a 2px border !important, and a border
+   shorthand takes the border image with it, so this has to answer in kind. */
+.member-practice-session-page .practice-article-panel,
+.member-practice-page .practice-article-panel {
+  background: #f3e3c3 !important;
+  background-clip: padding-box;
+  box-shadow: none !important;
+  border-style: solid !important;
+  border-width: 74px 96px 70px !important;
+  border-image-source: url('./assets/halloween/card/parchment-day.png') !important;
+  border-image-slice: 16% 10% 15% 11% fill !important;
+  border-image-width: 74px 96px 70px !important;
+  border-image-repeat: stretch !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  padding-inline: 20px;
+}
+
+@media (max-width: 760px) {
+  .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
+  .member-practice-session-page .practice-question-card.practice-question-card--reading,
+  .member-practice-session-page .practice-question-card.practice-question-card--translation,
+  .member-practice-page .practice-question-card.practice-question-card--fill_blank,
+  .member-practice-page .practice-question-card.practice-question-card--reading,
+  .member-practice-page .practice-question-card.practice-question-card--translation {
+    border-width: 40px 50px 38px; border-image-width: 40px 50px 38px;
+  }
+  .member-practice-session-page .practice-article-panel,
+  .member-practice-page .practice-article-panel {
+    border-width: 44px 56px 42px !important; border-image-width: 44px 56px 42px !important;
+  }
+}
+
+.practice-article-panel .practice-article,
+.practice-article-panel .eyebrow { color: #3d2c18; }
+
 /* Writing: the prompt is cut into a stone plaque, the answer is written on a
-   scroll below it. Two objects, not one frame around both. */
+   sheet below it. Two objects, not one frame around both. */
 .member-practice-session-page .practice-question-card.practice-question-card--writing,
 .member-practice-page .practice-question-card.practice-question-card--writing {
-  width: min(100%, 720px);
+  width: min(100%, 760px);
   margin-inline: auto;
   gap: 1.1rem;
   background: none;
@@ -4153,14 +4191,14 @@
   background: #d9c7a4;
   background-clip: padding-box;
   border-style: solid;
-  border-width: 22px 30px;
+  border-width: 30px 40px;
   border-image-source: url('./assets/halloween/card/rune-chip-day.png');
   border-image-slice: 10% 5% fill;
-  border-image-width: 22px 30px;
+  border-image-width: 30px 40px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
-  padding: 4px 6px 8px;
+  padding: 6px 10px 10px;
   color: #3a2819;
 }
 
@@ -4169,14 +4207,14 @@
   background: #f3e3c3;
   background-clip: padding-box;
   border-style: solid;
-  border-width: 46px 54px 68px;
-  border-image-source: url('./assets/halloween/card/scroll-day.png');
-  border-image-slice: 11% 13% 16% 13% fill;
-  border-image-width: 46px 54px 68px;
+  border-width: 56px 72px 54px;
+  border-image-source: url('./assets/halloween/card/parchment-day.png');
+  border-image-slice: 16% 10% 15% 11% fill;
+  border-image-width: 56px 72px 54px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
-  padding: 0 4px;
+  padding: 0 14px;
 }
 
 /* Ink straight on the sheet, never a white box floating on it. */
@@ -4184,55 +4222,14 @@
 .member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
 .member-practice-page .practice-question-card--writing .practice-answer-textarea,
 .member-practice-page .practice-question-card--translation .practice-answer-textarea {
-  background: transparent;
+  background: transparent !important;
   border-style: solid;
   border-width: 0 0 1px;
   border-color: rgb(122 92 48 / 45%);
   border-radius: 0;
-  box-shadow: none;
+  box-shadow: none !important;
   color: #3d2c18;
 }
-
-/* The reading passage gets its own sheet, same stock, laid out wide.
-   The workspace panel rule paints a 2px border !important, and a border
-   shorthand takes the border image with it, so this has to answer in kind. */
-.member-practice-session-page .practice-article-panel,
-.member-practice-page .practice-article-panel {
-  background: #f3e3c3 !important;
-  background-clip: padding-box;
-  box-shadow: none !important;
-  border-style: solid !important;
-  border-width: 92px 120px 44px !important;
-  border-image-source: url('./assets/halloween/card/scroll-wide-day.png') !important;
-  border-image-slice: 13% 10% 6% 10% fill !important;
-  border-image-width: 92px 120px 44px !important;
-  border-image-repeat: stretch !important;
-  border-color: transparent !important;
-  border-radius: 0 !important;
-}
-
-@media (max-width: 760px) {
-  .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
-  .member-practice-session-page .practice-question-card.practice-question-card--reading,
-  .member-practice-session-page .practice-question-card.practice-question-card--translation,
-  .member-practice-page .practice-question-card.practice-question-card--fill_blank,
-  .member-practice-page .practice-question-card.practice-question-card--reading,
-  .member-practice-page .practice-question-card.practice-question-card--translation {
-    border-width: 46px 54px 68px; border-image-width: 46px 54px 68px;
-  }
-  /* Side rolls would eat forty percent of a phone's width, so the passage
-     turns upright and the rolls move to the top and bottom. */
-  .member-practice-session-page .practice-article-panel,
-  .member-practice-page .practice-article-panel {
-    border-width: 40px 44px 56px !important;
-    border-image-width: 40px 44px 56px !important;
-    border-image-source: url('./assets/halloween/card/scroll-day.png') !important;
-    border-image-slice: 11% 13% 16% 13% fill !important;
-  }
-}
-
-.practice-article-panel .practice-article,
-.practice-article-panel .eyebrow { color: #3d2c18; }
 
 /* ---------- night ---------- */
 @media (prefers-color-scheme: dark) {
@@ -4279,22 +4276,22 @@
   .member-practice-page .practice-question-card.practice-question-card--reading,
   .member-practice-page .practice-question-card.practice-question-card--translation {
     background: #4a4034;
-    border-image-source: url('./assets/halloween/card/scroll-night.png');
+    border-image-source: url('./assets/halloween/card/parchment-night.png');
   }
 
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
     background: #4a4034 !important;
-    border-image-source: url('./assets/halloween/card/scroll-wide-night.png') !important;
+    border-image-source: url('./assets/halloween/card/parchment-night.png') !important;
   }
 
   @media (max-width: 760px) {
     .member-practice-session-page .practice-article-panel,
     .member-practice-page .practice-article-panel {
-      border-width: 40px 44px 56px !important;
-      border-image-width: 40px 44px 56px !important;
-      border-image-source: url('./assets/halloween/card/scroll-night.png') !important;
-      border-image-slice: 11% 13% 16% 13% fill !important;
+      border-width: 44px 56px 42px !important;
+      border-image-width: 44px 56px 42px !important;
+      border-image-source: url('./assets/halloween/card/parchment-night.png') !important;
+      border-image-slice: 16% 10% 15% 11% fill !important;
     }
   }
 
@@ -4308,7 +4305,7 @@
   .member-practice-session-page .practice-question-card--writing .field,
   .member-practice-page .practice-question-card--writing .field {
     background: #4a4034;
-    border-image-source: url('./assets/halloween/card/scroll-night.png');
+    border-image-source: url('./assets/halloween/card/parchment-night.png');
   }
 
   .member-practice-session-page .practice-question-card--writing .practice-answer-textarea,

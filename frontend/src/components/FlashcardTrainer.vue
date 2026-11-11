@@ -14,10 +14,12 @@ import SpeakButton from './SpeakButton.vue'
 import { questionCard } from '../assets/halloween'
 import type { FlashcardQuestion, FlashcardRating } from '../types/learning'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   question: FlashcardQuestion
   disabled?: boolean
-}>()
+  /** The session rail draws the rating buttons; the card itself then stays bare. */
+  showRating?: boolean
+}>(), { showRating: true })
 
 const emit = defineEmits<{
   (event: 'rate', rating: FlashcardRating): void
@@ -103,7 +105,7 @@ function rate(rating: FlashcardRating): void {
     </div>
   </section>
 
-  <div v-if="revealed" class="button-row study-card__rating">
+  <div v-if="revealed && props.showRating !== false" class="button-row study-card__rating">
     <DivButton class="button-secondary" type="button" :disabled="!canRate" @click="rate('again')">
       无印象
     </DivButton>
