@@ -38,7 +38,8 @@ class PracticeSession(Base):
         CheckConstraint(f"source IN ({PRACTICE_SOURCES})", name="source_valid"),
         CheckConstraint(f"status IN ({PRACTICE_SESSION_STATUSES})", name="status_valid"),
         CheckConstraint(
-            "difficulty IS NULL OR difficulty IN ('CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL')",
+            "difficulty IS NULL OR difficulty IN ("
+            "'GAOKAO', 'CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL')",
             name="difficulty_valid",
         ),
         CheckConstraint(

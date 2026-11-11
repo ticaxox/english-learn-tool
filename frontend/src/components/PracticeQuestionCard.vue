@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { PRACTICE_TYPE_LABELS, type PracticeOption, type PracticeQuestion } from '../api/practice'
 import OptionBadge from './OptionBadge.vue'
 import SpokenText from './SpokenText.vue'
+import { useRuneSurface } from '../composables/useRuneSurface'
 
 const props = defineProps<{
   question: PracticeQuestion
@@ -31,6 +32,8 @@ const optionLayout = computed<'four' | 'two' | 'one'>(() => {
   if (longest <= 32) return 'two'
   return 'one'
 })
+
+const { surface } = useRuneSurface()
 
 const correctId = computed(() => props.review?.correct ?? null)
 const selectedId = computed(() => props.review?.selected ?? props.modelValue)
@@ -63,6 +66,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
   <section
     class="practice-question-card"
     :class="[`practice-question-card--${question.questionType}`]"
+    :style="surface"
     :aria-labelledby="promptId"
   >
     <header class="practice-question-card__header">

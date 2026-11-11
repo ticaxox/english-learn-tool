@@ -259,6 +259,7 @@ onMounted(() => {
 
       <AiMemoryPanel />
 
+
       <AiQuotaPanel :providers="providers" @saved="load" />
 
       <ErrorNotice v-if="operationError" :error="operationError" :show-retry="false" />

@@ -33,24 +33,14 @@ describe('T-FE-017 workspace depth', () => {
     expect(today).toContain('crumb-primary-action')
   })
 
-  it('keeps compact wordbook cards free of technical English metadata', () => {
-    const wrapper = mount(WordbookShelfCard, {
-      props: {
-        book: book(),
-        statusLabel: '可用',
-        statusDescription: '120 个词条',
-        formattedDate: '2026/10/22',
-        canActivate: false,
-        canExport: true,
-        canDelete: true,
-        activating: false,
-        compact: true,
-      },
-    })
+  it('keeps a wordbook card to its cover and name', () => {
+    const sample = book()
+    const wrapper = mount(WordbookShelfCard, { props: { book: sample } })
 
     expect(wrapper.find('.wordbook-description').exists()).toBe(false)
     expect(wrapper.find('.wordbook-card-meta').exists()).toBe(false)
-    expect(wrapper.get('.wordbook-entry-count').text()).toContain('120 词条')
+    expect(wrapper.find('.wordbook-entry-count').exists()).toBe(false)
+    expect(wrapper.get('.wordbook-cover__name').text()).toBe(sample.name)
   })
 
   it('shows all three memory styles with enabled and disabled states', () => {

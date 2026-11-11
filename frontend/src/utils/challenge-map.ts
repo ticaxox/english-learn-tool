@@ -14,6 +14,7 @@ export interface ChallengeMapNode {
   statusLabel: string
   statusKey: string
   minutes: number
+  stars: number
   description: string
   link: string
   previous: string[]
@@ -35,7 +36,9 @@ const STATUS_KEYS: Record<string, string> = {
   失败: 'failed',
 }
 
-const FIELD_ALIASES: Record<string, keyof Omit<ChallengeMapNode, 'id' | 'title' | 'previous' | 'next' | 'optional' | 'minutes'>> = {
+type TextField = 'typeLabel' | 'questionType' | 'statusLabel' | 'description' | 'link'
+
+const FIELD_ALIASES: Record<string, TextField> = {
   类型: 'typeLabel',
   题目类型: 'questionType',
   状态: 'statusLabel',
@@ -71,6 +74,7 @@ export function parseChallengeMapDsl(text: string): ChallengeMap {
         statusLabel: '',
         statusKey: 'locked',
         minutes: 0,
+        stars: 0,
         description: '',
         link: '',
         previous: [],
@@ -105,6 +109,10 @@ export function parseChallengeMapDsl(text: string): ChallengeMap {
     }
     if (key === '分支') {
       current.next = splitLinks(value)
+      continue
+    }
+    if (key === '星数') {
+      current.stars = Math.max(0, Math.min(3, Number.parseInt(value, 10) || 0))
       continue
     }
     if (key === '可选') {

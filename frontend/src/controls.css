@@ -110,9 +110,7 @@
 
 /* --------------------------------------------------------- inputs + selects */
 
-/* The spelling cell is a carved stone chip, so it is excluded here: this rule's
-   border shorthand would reset its border-image. */
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell),
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]),
 .personal-workspace textarea,
 .personal-workspace select {
   border: 1.5px solid var(--ui-line-strong);
@@ -122,11 +120,11 @@
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell):hover,
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):hover,
 .personal-workspace textarea:hover,
 .personal-workspace select:hover { border-color: #c9ab80; }
 
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell):focus,
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):focus,
 .personal-workspace textarea:focus,
 .personal-workspace select:focus {
   border-color: var(--g-orange-edge);
@@ -180,16 +178,7 @@
 .personal-workspace .workspace-secondary-button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 0 #d9c19c;
-}
-
-.personal-workspace .button:focus-visible,
-.personal-workspace .button-secondary:focus-visible,
-.personal-workspace .button-danger:focus-visible,
-.personal-workspace .workspace-primary-button:focus-visible,
-.personal-workspace .workspace-secondary-button:focus-visible,
-.personal-workspace .member-primary-button:focus-visible,
-.personal-workspace .practice-topbar__tab:focus-visible,
-.personal-workspace .practice-chooser__tab:focus-visible {
+}.personal-workspace .button:focus-visible, .personal-workspace .button-secondary:focus-visible, .personal-workspace .button-danger:focus-visible, .personal-workspace .workspace-primary-button:focus-visible, .personal-workspace .workspace-secondary-button:focus-visible, .personal-workspace .member-primary-button:focus-visible, .personal-workspace .practice-topbar__tab:focus-visible {
   outline: 3px solid rgb(255 150 0 / 45%);
   outline-offset: 2px;
 }
@@ -391,56 +380,6 @@
   color: var(--g-red-edge);
 }
 
-/* ------------------------------------------------------------ SVG stamp */
-
-.personal-workspace .svg-stamp {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 118px;
-  height: 34px;
-  padding: 0 22px;
-  transform: rotate(-2deg);
-  color: #3b2500;
-}
-
-.personal-workspace .svg-stamp__art {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.personal-workspace .svg-stamp__face {
-  fill: #ffd75e;
-  stroke: #3b2500;
-  stroke-width: 1.6;
-  vector-effect: non-scaling-stroke;
-}
-
-.personal-workspace .svg-stamp__dash {
-  fill: none;
-  stroke: rgb(59 37 0 / 35%);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-  vector-effect: non-scaling-stroke;
-}
-
-.personal-workspace .svg-stamp__hole {
-  fill: #fffaf0;
-  stroke: #3b2500;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-
-.personal-workspace .svg-stamp__label {
-  position: relative;
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-}
-
 
 /* Table row actions read as small buttons, not raw links. */
 .personal-workspace .practice-records-table .link-button {
@@ -587,14 +526,6 @@
   padding-inline: max(24px, calc((100vw - 1320px) / 2 + 28px));
 }
 
-/* Chooser aligns with the section title; rows carry their own config. */
-.personal-workspace .practice-chooser__tabs { padding-left: 0; }
-
-.personal-workspace .practice-chooser__row { position: relative; }
-
-.personal-workspace .practice-chooser__config { display: inline-flex; flex: 0 0 auto; }
-.personal-workspace .practice-chooser__config select { width: auto; min-width: 128px; min-height: 34px; padding: 4px 34px 4px 10px; font-size: 0.82rem; }
-
 /* Timer control + live clock in memory practice. */
 .personal-workspace .memory-picker-tools {
   display: flex;
@@ -620,8 +551,7 @@
   font-size: 0.82rem;
 }
 
-/* Memory choice: two answers per row, four answers in a square — a board of
-   answers rather than a list. */
+/* Memory choice: two by two, bold labels, selection shown by the tile. */
 .personal-workspace .choice-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -696,16 +626,6 @@
   font-size: 0.82rem;
 }
 
-.personal-workspace .practice-chooser__toolbar {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-bottom: 10px;
-}
-
-.personal-workspace .practice-chooser__footer .practice-timer-control { margin-right: auto; }
-
 .personal-workspace .personal-ai-provider__priority span { white-space: nowrap; }
 
 /* Word options: compact tiles, centred text, more breathing room. */
@@ -738,16 +658,14 @@
   justify-items: stretch;
 }
 
-/* A long bar reads left to right: the letter sits at the front and the word
-   starts right after it, rather than being centred in a narrow tile. */
 .personal-workspace .choice-list--words .choice-option {
   width: 100%;
   max-width: none;
-  justify-content: flex-start;
-  text-align: left;
+  justify-content: center;
+  text-align: center;
 }
 
-.personal-workspace .choice-list--words .choice-option__label { text-align: left; }
+.personal-workspace .choice-list--words .choice-option__label { text-align: center; }
 
 /* ----------------------------------------------------------------- option badge */
 
@@ -1788,12 +1706,6 @@
 
 .practice-task-row:last-child { border-bottom: 0; }
 
-/* The book's spine stands for the type, so it comes before the name. */
-.practice-task-row .practice-task-mark {
-  margin-right: -4px;
-  filter: drop-shadow(0 1px 1px rgb(53 36 15 / 25%));
-}
-
 .practice-task-type { color: var(--ui-muted); font-size: 0.72rem; font-weight: 850; }
 .practice-task-row > strong { font-size: 0.9rem; }
 .practice-task-count { color: var(--ui-muted); font-size: 0.76rem; font-weight: 700; }
@@ -2569,35 +2481,200 @@
   stroke-linejoin: round;
 }
 
-/* The current stop breathes once per cycle instead of carrying a label. */
+.personal-workspace .challenge-dsl-card__face {
+  display: grid;
+  place-items: center;
+}
+
+/* The current stop is alive: two rings lap it and the emblem breathes. */
+.challenge-dsl-card.is-focus::before,
 .challenge-dsl-card.is-focus::after {
   position: absolute;
-  inset: -8px;
-  border: 3px solid rgb(95 179 106 / 55%);
+  inset: -7px;
+  border: 3px solid rgb(95 179 106 / 60%);
   border-radius: 50%;
   content: "";
   pointer-events: none;
-  animation: challenge-focus-ring 2.4s ease-out infinite;
+  animation: challenge-focus-ring 2.6s ease-out infinite;
+}
+
+.challenge-dsl-card.is-focus::before { animation-delay: 1.3s; }
+
+.personal-workspace .challenge-dsl-card.is-focus {
+  animation: challenge-focus-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes challenge-focus-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgb(95 179 106 / 30%)); }
+  50% { filter: drop-shadow(0 0 10px rgb(95 179 106 / 60%)); }
+}
+
+.personal-workspace .challenge-dsl-card.is-focus .challenge-dsl-card__face {
+  animation: challenge-focus-breathe 2.6s ease-in-out infinite;
 }
 
 @keyframes challenge-focus-ring {
-  0% { transform: scale(0.92); opacity: 0.85; }
-  70% { transform: scale(1.14); opacity: 0; }
-  100% { opacity: 0; }
+  0% { transform: scale(0.88); opacity: 0.9; }
+  75% { transform: scale(1.26); opacity: 0; }
+  100% { transform: scale(1.26); opacity: 0; }
 }
 
+@keyframes challenge-focus-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ------------------------------------------------------- map node dies */
+
+/* `coin` is the flat arcade stop the map shipped with. The two dies below
+ * reuse the language of the badge discs so the trail and the wall agree. */
+
+/* pumpkin: the stops are jack-o'-lanterns. The art carries the state — a lit
+ * one for a stop you cleared, a spirit-green one for the stop you are on, a
+ * dark unlit one for a stop out of reach — and CSS only adds the halo. */
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card {
+  border: 0;
+  border-radius: 0;
+  background-color: transparent !important;
+  background-image: var(--pumpkin-unlit) !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  box-shadow: none;
+  color: #c8a06a;
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-completed {
+  background-image: var(--pumpkin-lit) !important;
+  color: #5a3208;
+  filter: drop-shadow(0 0 12px rgb(255 150 0 / 55%));
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-in_progress,
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-unlocked {
+  background-image: var(--pumpkin-green) !important;
+  color: #1d3a2a;
+  filter: drop-shadow(0 0 12px rgb(140 220 140 / 45%));
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-failed {
+  background-image: var(--pumpkin-unlit) !important;
+  color: #ff9a8a;
+  filter: saturate(0.7) brightness(0.85);
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-locked {
+  filter: saturate(0.55) brightness(0.8);
+}
+
+/* A pumpkin's face is carved in its lower half, so the mark sits there. */
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card__face {
+  align-items: end;
+  padding-bottom: 26%;
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-check {
+  margin-bottom: 26%;
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card__mark {
+  margin-bottom: 26%;
+}
+
+/* The carved face is dark; the mark on it needs its own light. */
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-completed .challenge-dsl-check {
+  stroke: #fff3cf;
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-in_progress .challenge-dsl-card__mark,
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-unlocked .challenge-dsl-card__mark {
+  color: #eafff4;
+}
+
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card__mark {
+  color: #ffe9a8;
+  text-shadow: 0 2px 3px rgb(60 20 0 / 70%);
+}
+
+/* lantern: a lit paper orb; the light is the status. */
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card {
+  border: 0;
+  background: radial-gradient(circle at 50% 38%, #3a3352, #241f36 78%);
+  box-shadow: inset 0 0 0 4px #4b4560, 0 6px 0 #16141f;
+  color: #b9aee0;
+}
+
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-completed {
+  background: radial-gradient(circle at 50% 40%, #ffe9a8, #ff9600 72%, #c96a12 100%);
+  box-shadow: inset 0 0 0 4px #ffd166, 0 6px 0 #8a4b0a, 0 0 22px rgb(255 150 0 / 55%);
+  color: #4a2a00;
+}
+
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-in_progress,
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-unlocked {
+  background: radial-gradient(circle at 50% 40%, #d6ffe6, #3ad183 72%, #1f9558 100%);
+  box-shadow: inset 0 0 0 4px #7cf0c4, 0 6px 0 #14603c, 0 0 22px rgb(58 209 131 / 50%);
+  color: #0f3a24;
+}
+
+.personal-workspace .challenge-dsl-map--lantern .challenge-dsl-card.is-failed {
+  background: radial-gradient(circle at 50% 40%, #ffd9d4, #ff6f6f 72%, #b23333 100%);
+  color: #4a1010;
+}
+
+/* Crumbo perches on top of the stop it stands on, clear of the reward tag. */
 .challenge-dsl-guide {
   position: absolute;
   z-index: 3;
+  display: grid;
   width: 42px;
   height: 42px;
+  place-items: center;
   pointer-events: none;
-  filter: drop-shadow(0 2px 0 rgb(59 42 26 / 12%));
+  /* Stands on the rim of the stop: bottom of the mascot meets the node's edge. */
+  transform: translate(-50%, calc(-100% - 28px));
+  filter: drop-shadow(0 3px 0 rgb(59 42 26 / 16%));
+}
+
+.challenge-dsl-guide .crumbo-mark { animation: challenge-guide-bob 2.4s ease-in-out infinite; }
+
+@keyframes challenge-guide-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-3px) rotate(2deg); }
+}
+
+/* Crumbs left behind by the walker, so the leg reads as just-walked. */
+.challenge-dsl-crumb {
+  position: absolute;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe9a8, #d9a400);
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 55%);
+  pointer-events: none;
+}
+
+/* Landing on a stop: the node takes the weight, the reward tag pops. */
+.personal-workspace .challenge-dsl-card.is-landed .challenge-dsl-reward {
+  animation: challenge-reward-pop 620ms cubic-bezier(0.2, 1.7, 0.4, 1) both;
+}
+
+@keyframes challenge-reward-pop {
+  0% { transform: scale(0.5); }
+  55% { transform: scale(1.28); }
+  100% { transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .personal-workspace .challenge-dsl-card { transition: none; }
+  .challenge-dsl-card.is-focus::before,
   .challenge-dsl-card.is-focus::after { animation: none; opacity: 0; }
+  .personal-workspace .challenge-dsl-card.is-focus,
+  .personal-workspace .challenge-dsl-card.is-focus .challenge-dsl-card__face,
+  .challenge-dsl-guide .crumbo-mark,
+  .personal-workspace .challenge-dsl-card.is-landed .challenge-dsl-reward { animation: none; }
 }
 
 @media (max-width: 720px) {
@@ -3268,14 +3345,6 @@
 }
 
 .personal-workspace .memory-main-card.is-picker .workspace-section-header { padding: 4px 2px 14px; }
-.personal-workspace .memory-main-card.is-picker .memory-action-grid { gap: 16px; }
-
-.personal-workspace .memory-main-card.is-picker .memory-action-card {
-  min-height: 168px;
-  border-left-width: 10px !important;
-  border-radius: 8px 16px 16px 8px !important;
-  box-shadow: 0 6px 0 rgb(59 42 26 / 10%) !important;
-}
 
 /* Attachment-only button sits at the start of the coach composer. */
 .personal-workspace .coach-composer__footer { align-items: center; }
@@ -3424,8 +3493,6 @@
 /* ------------------------------- practice hub: one-row filters, slimmer rail */
 
 .personal-workspace .practice-hub-layout { grid-template-columns: minmax(0, 1fr) 320px; }
-
-.personal-workspace .practice-memory-grid { margin-bottom: 18px; }
 
 /* Filters read as key–value pairs on one line, not a two-row grid. */
 .personal-workspace .practice-form-row {
@@ -3892,42 +3959,33 @@
   align-items: center;
 }
 
-/* The level is a crest, not a pie chart: the number belongs on a badge the
-   learner earns, and the XP line below it already says how far along they are. */
-.personal-workspace .progress-card__crest {
+.personal-workspace .progress-card__ring {
+  display: grid;
   flex: 0 0 auto;
-  filter: drop-shadow(0 3px 4px rgb(53 36 15 / 28%));
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--ui-forest, #2f6e33) var(--fill, 0%), rgb(0 0 0 / 8%) 0);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.personal-workspace .progress-card__ring span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ui-surface, #fffdf6);
 }
 
 .personal-workspace .progress-card__meta { display: grid; flex: 1 1 auto; gap: 1px; min-width: 0; }
 .personal-workspace .progress-card__meta strong { font-size: 0.95rem; }
 .personal-workspace .progress-card__meta span { color: var(--ui-muted); font-size: 0.74rem; }
-
-/* The XP bar that used to be the ring's fill, now a line under the title. */
-.personal-workspace .progress-card__xp {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.personal-workspace .progress-card__xptrack {
-  display: block;
-  flex: 1 1 auto;
-  height: 5px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgb(53 36 15 / 10%);
-}
-
-.personal-workspace .progress-card__xptrack span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--ui-forest, #2f6e33);
-  transition: width 320ms ease;
-}
 .personal-workspace .progress-card__crumbs { display: inline-flex; gap: 4px; align-items: center; }
-.personal-workspace .progress-card__crumbs svg { width: 15px; height: 15px; }
+.personal-workspace .progress-card__crumbs svg { width: 12px; height: 12px; }
 
 .personal-workspace .progress-card__streak {
   display: grid;
@@ -3939,7 +3997,7 @@
 
 .personal-workspace .progress-card__streak.is-active { color: #c2410c; }
 .personal-workspace .progress-card__streak strong { font-size: 1.15rem; }
-.personal-workspace .progress-card__streak svg { width: 17px; height: 17px; }
+.personal-workspace .progress-card__streak svg { width: 14px; height: 14px; }
 
 .personal-workspace .progress-card__quests { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
 
@@ -4077,12 +4135,749 @@
   .personal-workspace .knowledge-layout { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* Login / register switch sits under the form as plain text. */
+.auth-switch {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin: 14px 0 0;
+  color: var(--ui-muted);
+  font-size: 0.85rem;
+}
+
+.auth-switch__link.div-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ui-forest, #2f6e33);
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+/* ------------------------------------------- weekly report and badge wall */
+
+.personal-workspace .today-extras {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.personal-workspace .weekly-report,
+.personal-workspace .badge-wall {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  background: var(--ui-surface);
+}
+
+.personal-workspace .weekly-report__head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.personal-workspace .weekly-report__head strong { font-size: 1.05rem; }
+
+.personal-workspace .weekly-report__streak {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 9px 3px 6px;
+  border-radius: 999px;
+  background: var(--g-orange-soft);
+  color: #9a4a00;
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.personal-workspace .weekly-report__streak svg {
+  width: 15px;
+  height: 15px;
+  fill: var(--g-orange);
+  stroke: none;
+}
+
+/* Seven candles: height is the day's XP, a flame means the day was studied. */
+.personal-workspace .weekly-bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+  align-items: end;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.personal-workspace .weekly-day {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  min-width: 0;
+}
+
+.personal-workspace .weekly-day__slot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 100px;
+  position: relative;
+}
+
+.personal-workspace .weekly-day__candle {
+  position: relative;
+  width: 16px;
+  border-radius: 3px 3px 2px 2px;
+  background: linear-gradient(180deg, #ddd0b2, #c3b494);
+  box-shadow: inset -5px 0 0 rgb(53 36 15 / 9%), 0 0 0 1px rgb(104 82 52 / 18%);
+  transform: scaleY(1);
+  transform-origin: 50% 100%;
+}
+
+/* Cold wax still gets a wick, so an unlit day reads as "not yet". */
+.personal-workspace .weekly-day__candle::before {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 2px;
+  height: 5px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: #6d6152;
+  content: "";
+}
+
+/* A wax drip down one side, so the candles are not identical tubes. */
+.personal-workspace .weekly-day__candle::after {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 5px;
+  height: 9px;
+  border-radius: 0 0 4px 4px;
+  background: rgb(255 255 255 / 45%);
+  content: "";
+}
+
+.personal-workspace .weekly-day.is-active .weekly-day__candle {
+  background: linear-gradient(180deg, #ffeeb8, #eeb655);
+  box-shadow: inset -5px 0 0 rgb(160 100 10 / 12%), 0 0 0 1px rgb(168 112 20 / 26%);
+}
+
+.personal-workspace .weekly-day.is-active .weekly-day__slot::after {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 46px;
+  height: 56px;
+  margin-left: -23px;
+  background: radial-gradient(ellipse at 50% 82%, rgb(255 190 60 / 30%), transparent 70%);
+  content: "";
+  pointer-events: none;
+}
+
+.personal-workspace .weekly-day__flame {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 10px;
+  height: 15px;
+  margin: 0 0 3px -5px;
+  border-radius: 50% 50% 50% 50% / 66% 66% 34% 34%;
+  background: radial-gradient(ellipse at 50% 78%, #fffbe0 0 20%, #ffc800 46%, #ff8a00 78%, #ef5f00 100%);
+  box-shadow: 0 0 11px 3px rgb(255 150 0 / 50%);
+  transform-origin: 50% 100%;
+  animation: candle-flicker 1.9s ease-in-out infinite alternate;
+}
+
+@keyframes candle-flicker {
+  from { transform: scale(0.97, 1.03) rotate(-2deg); opacity: 0.94; }
+  to { transform: scale(1.04, 0.96) rotate(3deg); opacity: 1; }
+}
+
+.personal-workspace .weekly-day__lamp {
+  position: relative;
+  color: var(--ui-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.personal-workspace .weekly-day.is-today .weekly-day__lamp {
+  color: var(--ui-ink);
+  font-weight: 900;
+}
+
+/* Today's dot hangs outside the flow so every candle keeps the same floor. */
+.personal-workspace .weekly-day.is-today .weekly-day__lamp::after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin: 3px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--g-orange);
+  content: "";
+}
+
+.personal-workspace .weekly-day__xp {
+  color: #a4917a;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.personal-workspace .weekly-goals {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.personal-workspace .weekly-goals li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.personal-workspace .weekly-goals__label { min-width: 0; }
+
+.personal-workspace .weekly-goals__check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--ui-line);
+  border-radius: 50%;
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .weekly-goals__check svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--g-green-edge);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.4);
+}
+
+.personal-workspace .weekly-goals li.is-done .weekly-goals__check {
+  border-color: #2f9c47;
+  background: var(--g-green-soft);
+}
+
+.personal-workspace .weekly-goals li.is-done .weekly-goals__check svg {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms ease, transform 260ms cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+/* Completed goals land like a stamp once the candles are lit. */
+.personal-workspace .weekly-goals li.is-done.is-stamping .weekly-goals__check {
+  animation: goal-stamp 460ms cubic-bezier(0.2, 1.5, 0.35, 1) both;
+}
+
+@keyframes goal-stamp {
+  0% { transform: scale(1.75) rotate(-24deg); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.personal-workspace .weekly-goals small {
+  color: var(--ui-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cold wax at night: the unlit days should not read as brighter than the lit
+ * ones next to them. */
+html[data-theme='night'] .personal-workspace .weekly-day:not(.is-active) .weekly-day__candle {
+  background: linear-gradient(180deg, #6b5f80, #55496b);
+  box-shadow: inset -5px 0 0 rgb(0 0 0 / 22%), 0 0 0 1px rgb(150 130 190 / 22%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .weekly-day__flame { animation: none; }
+  .personal-workspace .weekly-goals li.is-done.is-stamping .weekly-goals__check { animation: none; }
+  .personal-workspace .weekly-goals li.is-done .weekly-goals__check svg { transition: none; }
+}
+
+.personal-workspace .badge-wall__head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.personal-workspace .badge-wall__head strong { font-size: 1.1rem; }
+
+/* A thin rail under the count, so "3 of 12" also reads as a distance. */
+.personal-workspace .badge-wall__rail {
+  flex: 1 1 60px;
+  max-width: 180px;
+  height: 8px;
+  border: 2px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-surface-subtle);
+  overflow: hidden;
+}
+
+.personal-workspace .badge-wall__rail span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--g-gold), var(--g-orange));
+  transition: width 700ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.personal-workspace .badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(106px, 1fr));
+  gap: 6px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Every badge is a struck medal; nothing is boxed in a card frame. */
+.personal-workspace .badge {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 4px 2px 6px;
+  text-align: center;
+}
+
+.personal-workspace .badge__medal {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  perspective: 760px;
+}
+
+.personal-workspace .badge__turn {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.personal-workspace .badge__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.personal-workspace .badge__face--enamel { transform: rotateY(180deg); }
+
+.personal-workspace .badge__face svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Unearned: the same die pressed in cold stone, emblem dimmed to a cut-out. */
+.personal-workspace .badge__face--stone .badge__seal {
+  fill: #ded7c8;
+  stroke: #c7bda9;
+  stroke-width: 1.6;
+}
+
+.personal-workspace .badge__face--stone .badge__plate {
+  fill: #ebe5d8;
+  stroke: #d3c9b6;
+  stroke-width: 1.4;
+}
+
+.personal-workspace .badge__face--stone .badge__glyph {
+  fill: none;
+  stroke: #9d9078;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Earned: enamel. One accent per feat family, cut with a cream plate. */
+.personal-workspace .badge__face--enamel .badge__seal {
+  fill: var(--badge-accent, var(--g-gold));
+  stroke: rgb(53 36 15 / 22%);
+  stroke-width: 1.6;
+}
+
+.personal-workspace .badge__face--enamel .badge__plate {
+  fill: #fff8e8;
+  stroke: rgb(53 36 15 / 16%);
+  stroke-width: 1.4;
+}
+
+.personal-workspace .badge__face--enamel .badge__glyph {
+  fill: none;
+  stroke: #35240f;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .badge__face--enamel .badge__rivet { fill: #fff8e8; opacity: 0.85; }
+
+.personal-workspace .badge__medal::after {
+  position: absolute;
+  inset: 30% 6% -8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, rgb(59 42 26 / 24%), transparent 72%);
+  content: "";
+  z-index: 0;
+}
+
+/* A single glint crosses the enamel as it lands face-up. */
+.personal-workspace .badge__shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(115deg, transparent 34%, rgb(255 255 255 / 78%) 48%, transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.personal-workspace .badge__lock {
+  position: absolute;
+  right: 4px;
+  bottom: 6px;
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 50%;
+  background: #6d6152;
+  box-shadow: 0 2px 0 rgb(53 36 15 / 22%);
+  fill: none;
+  stroke: #f6efe2;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .badge__name {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .badge__desc {
+  color: var(--ui-muted);
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.personal-workspace .badge__foot {
+  color: var(--badge-accent, var(--g-gold-edge));
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+/* Locked medals sit back: no colour, no shadow lift, no glint. */
+.personal-workspace .badge.is-locked .badge__foot { color: #9b8d77; }
+.personal-workspace .badge.is-locked .badge__name { color: #7d6f5b; }
+.personal-workspace .badge.is-locked .badge__medal { filter: saturate(0.25); }
+
+.personal-workspace .badge.is-unlocked .badge__medal {
+  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+.personal-workspace .badge.is-unlocked:hover .badge__medal { transform: translateY(-4px) rotate(-2deg); }
+
+/* The glint fires once the medal has finished turning over. */
+.personal-workspace .badge.is-unlocked.is-flipped .badge__shine {
+  animation: badge-glint 900ms 120ms ease-out both;
+}
+
+@keyframes badge-glint {
+  0% { opacity: 0; transform: translateX(-44%) scale(0.9); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(44%) scale(0.9); }
+}
+
+/* At night an unearned medal is cold iron, not pale stone, or it outshines the
+ * bright ones it is supposed to sit behind. */
+html[data-theme='night'] .personal-workspace .badge__face--stone .badge__seal {
+  fill: #3b3054;
+  stroke: #4f4270;
+}
+
+html[data-theme='night'] .personal-workspace .badge__face--stone .badge__plate {
+  fill: #332a4b;
+  stroke: #473a66;
+}
+
+html[data-theme='night'] .personal-workspace .badge__face--stone .badge__glyph { stroke: #8c7dad; }
+html[data-theme='night'] .personal-workspace .badge__lock { background: #4a3d6b; }
+html[data-theme='night'] .personal-workspace .badge.is-locked .badge__name { color: #9a8cb8; }
+html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { color: #8577a3; }
+
+/* ------------------------------------------------------------ badge dies */
+
+/* The emblem is the same drawing on three different discs: an enamel medal, a
+ * wax seal, or a riveted iron plate. */
+.personal-workspace .emblem {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.personal-workspace .emblem--seal .emblem__disc {
+  fill: var(--badge-accent, #ffc800);
+  stroke: rgb(53 36 15 / 22%);
+  stroke-width: 1.6;
+}
+
+.personal-workspace .emblem--seal .emblem__plate {
+  fill: #fff8e8;
+  stroke: rgb(53 36 15 / 16%);
+  stroke-width: 1.4;
+}
+
+.personal-workspace .emblem--seal .emblem__glyph {
+  fill: none;
+  stroke: #35240f;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The face that shows before the turn is always the silhouette, whatever the
+ * badge's state — that is what makes the flip mean something. */
+.personal-workspace .emblem--seal:not(.is-earned) .emblem__disc {
+  fill: #ded7c8;
+  stroke: #c7bda9;
+}
+
+.personal-workspace .emblem--seal:not(.is-earned) .emblem__plate {
+  fill: #ebe5d8;
+  stroke: #d3c9b6;
+}
+
+.personal-workspace .emblem--seal:not(.is-earned) .emblem__glyph { stroke: #9d9078; }
+
+/* At night an unearned seal is cold iron too, not bright stone. */
+html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .emblem__disc {
+  fill: #3b3054;
+  stroke: #4f4270;
+}
+
+html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .emblem__plate {
+  fill: #332a4b;
+  stroke: #473a66;
+}
+
+html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .emblem__glyph { stroke: #8c7dad; }
+
+/* Wax: pressed, slightly uneven, with a runnel down one side. */
+.personal-workspace .emblem--wax .emblem__disc {
+  fill: var(--badge-accent, #d63c3c);
+  fill-rule: evenodd;
+  filter: drop-shadow(0 3px 2px rgb(40 12 4 / 38%));
+}
+
+.personal-workspace .emblem--wax .emblem__plate {
+  fill: rgb(255 246 224 / 16%);
+  stroke: rgb(255 244 214 / 34%);
+  stroke-width: 1.2;
+}
+
+.personal-workspace .emblem--wax .emblem__glyph {
+  fill: none;
+  stroke: #fff3d6;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .emblem--wax .emblem__drip { fill: var(--badge-accent, #d63c3c); }
+
+/* A sticker die: the emoji-style icon stands on the medallion itself, so the
+ * achievement reads as one picture rather than a symbol on a plate. */
+.personal-workspace .emblem--sticker .emblem__disc {
+  fill: var(--badge-accent, #ffc800);
+  stroke: rgb(53 36 15 / 22%);
+  stroke-width: 1.6;
+}
+
+.personal-workspace .emblem--sticker .emblem__plate {
+  fill: #fff8e8;
+  stroke: rgb(53 36 15 / 16%);
+  stroke-width: 1.4;
+}
+
+.personal-workspace .emblem--sticker .emblem__sticker {
+  filter: drop-shadow(0 2px 2px rgb(53 36 15 / 28%));
+}
+
+.personal-workspace .emblem--sticker:not(.is-earned) .emblem__disc {
+  fill: #ded7c8;
+  stroke: #c7bda9;
+}
+
+.personal-workspace .emblem--sticker:not(.is-earned) .emblem__plate {
+  fill: #ebe5d8;
+  stroke: #d3c9b6;
+}
+
+.personal-workspace .emblem--sticker:not(.is-earned) .emblem__sticker {
+  filter: saturate(0.2) brightness(0.94);
+}
+
+/* Heraldry: a flat shield with a chevron band. The achievement's own glyph
+ * sits on the field, and the accent colours the band. */
+.personal-workspace .emblem--heraldry .emblem__disc {
+  fill: #f6efdc;
+  stroke: #2b1d0f;
+  stroke-width: 3.2;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .emblem--heraldry .emblem__band {
+  fill: var(--badge-accent, #ffc800);
+  stroke: #2b1d0f;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .emblem--heraldry .emblem__glyph {
+  fill: none;
+  stroke: #2b1d0f;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Unearned: the shield is there, drained of colour. */
+.personal-workspace .emblem--heraldry:not(.is-earned) .emblem__disc { fill: #e3dbc9; }
+.personal-workspace .emblem--heraldry:not(.is-earned) .emblem__band { fill: #b3a88f; }
+.personal-workspace .emblem--heraldry:not(.is-earned) .emblem__glyph { stroke: #9d9078; }
+
+/* Iron, abstracted: a hexagon of flat plates with a rule line and three
+ * chevrons. Nothing here pretends to be a photograph of metal. */
+.personal-workspace .emblem--iron .emblem__disc {
+  fill: #3d4a63;
+  stroke: #2b3446;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+
+.personal-workspace .emblem--iron .emblem__rule {
+  fill: none;
+  stroke: var(--badge-accent, #ffc800);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+
+.personal-workspace .emblem--iron .emblem__chevron {
+  fill: none;
+  stroke: var(--badge-accent, #ffc800);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+
+.personal-workspace .emblem--iron .emblem__glyph {
+  fill: none;
+  stroke: #f4ecdc;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Unearned: cold wax, unlit iron — still a shape, never a celebration. */
+.personal-workspace .emblem--wax:not(.is-earned) .emblem__disc { fill: #4a4453; filter: none; }
+.personal-workspace .emblem--wax:not(.is-earned) .emblem__plate { stroke: rgb(255 255 255 / 12%); }
+.personal-workspace .emblem--wax:not(.is-earned) .emblem__glyph { stroke: #8e8798; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__disc { fill: #2c3140; stroke: #23283a; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__rule { stroke: #5d5670; opacity: 0.5; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__chevron { stroke: #5d5670; opacity: 0.5; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__glyph { stroke: #6f6884; }
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .badge.is-unlocked .badge__turn .badge__shine { animation: none; opacity: 0; }
+  .personal-workspace .badge.is-unlocked .badge__medal,
+  .personal-workspace .badge-wall__rail span { transition: none; }
+}
+
+@media (max-width: 900px) {
+  .personal-workspace .today-extras { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* A level-up moment gets one animated line, no blocking modal. */
+.personal-workspace .practice-award.is-levelup {
+  border-style: solid;
+  border-width: 2px;
+  background: linear-gradient(135deg, #fff6d8, #e8f6e3);
+  animation: practice-award-pop 0.5s ease-out;
+}
+
+.personal-workspace .practice-award__levelup {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #b45309;
+}
+
+@keyframes practice-award-pop {
+  0% { transform: scale(0.96); opacity: 0; }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.personal-workspace .progress-card__freeze {
+  margin-top: 2px;
+  color: #b45309;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Personal knowledge: mirrors the memory manager's simple list. */
+.personal-workspace .personal-knowledge { display: grid; gap: 10px; padding: 18px; }
+.personal-workspace .personal-knowledge textarea { min-height: 120px; font-family: inherit; }
+.personal-workspace .personal-knowledge__actions { display: flex; gap: 10px; justify-content: flex-end; }
+.personal-workspace .personal-knowledge__list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+
+.personal-workspace .personal-knowledge__list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--ui-line);
+}
+
+.personal-workspace .personal-knowledge__list li:last-child { border-bottom: 0; }
+.personal-workspace .personal-knowledge__list small { color: var(--ui-muted); font-size: 0.74rem; }
 /* Halloween art: the covers carry their own colour, so no tinted tile behind them. */
-.personal-workspace .memory-action-icon,
-.memory-action-icon { display: grid; width: 56px; height: 56px; place-items: center; background: none; border-radius: 0; }
-.personal-workspace .memory-action-card .memory-action-icon { width: 56px; height: 56px; }
-.personal-workspace .memory-action-card { min-height: 132px; }
-.memory-action-art { width: 54px; height: 54px; object-fit: contain; display: block; }
 .coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0 auto 8px; }
 .practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
 .practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }
@@ -4112,22 +4907,20 @@
 /* ============================================================================
    Question surfaces, two materials.
 
-   Memory practice (choice, spelling) sits on carved stone. The slab and the
-   chip are generated artwork used as 9-slice sources: the chipped edge and the
-   carved groove live in the border band, so only the flat middle stretches.
+   Memory practice (choice, spelling) sits on carved stone — the `.rune-surface`
+   rules above, whose artwork arrives through `--rune-slab` and friends, so the
+   same class paints a biscuit by day and a stele by night.
 
    AI practice (fill-blank, reading, translation, writing) is a parchment
-   sheet. The rolls live in the border band for the same reason.
-
-   Both materials ship a day and a night render; the night one is used when the
-   operating system asks for a dark scheme.
+   sheet. Writing on a sheet and writing on a slab are different acts, and the
+   questions that ask you to write belong on paper.
    ========================================================================= */
 
 /* ---------- parchment: an AI practice question on a sheet ---------- */
-/* The AI question is one long sheet of parchment: rolls at the left and right,
-   a dead-flat middle where the question sits. Band sizes are the measured
-   slices of the art (1024x512: 16% top, 10%/11% sides, 15% bottom) scaled to
-   the card width, so the rolls keep their round ends.
+/* One long sheet: rolls at the left and right, a dead-flat middle where the
+   question sits. The band sizes are the measured slices of the art (1024x512:
+   16% top, 10%/11% sides, 15% bottom) scaled to the card width, so the rolls
+   keep their round ends.
    The doubled class outranks the session-page card shell, whose border
    shorthand would otherwise reset the border image. */
 .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
@@ -4143,7 +4936,7 @@
   box-shadow: none;
   border-style: solid;
   border-width: 34px 60px 32px;
-  border-image-source: url('./assets/halloween/card/sheet-day.png');
+  border-image-source: var(--rune-scroll);
   border-image-slice: 14% 12% 14% 12% fill;
   border-image-width: 34px 60px 32px;
   border-image-repeat: stretch;
@@ -4162,7 +4955,7 @@
   box-shadow: none !important;
   border-style: solid !important;
   border-width: 24px !important;
-  border-image-source: url('./assets/halloween/card/sheet-flat-day.png') !important;
+  border-image-source: var(--rune-parchment) !important;
   border-image-slice: 5% fill !important;
   border-image-width: 24px !important;
   border-image-repeat: stretch !important;
@@ -4189,8 +4982,8 @@
 .practice-article-panel .practice-article,
 .practice-article-panel .eyebrow { color: #3d2c18; }
 
-/* Writing: the prompt is cut into a stone plaque, the answer is written on a
-   sheet below it. Two objects, not one frame around both. */
+/* Writing: the prompt is a sheet of its own, the answer is written on another.
+   Two objects, not one frame around both. */
 .member-practice-session-page .practice-question-card.practice-question-card--writing,
 .member-practice-page .practice-question-card.practice-question-card--writing {
   width: min(100%, 760px);
@@ -4210,7 +5003,7 @@
   background-clip: padding-box;
   border-style: solid;
   border-width: 24px;
-  border-image-source: url('./assets/halloween/card/sheet-flat-day.png');
+  border-image-source: var(--rune-parchment);
   border-image-slice: 5% fill;
   border-image-width: 24px;
   border-image-repeat: stretch;
@@ -4226,7 +5019,7 @@
   background-clip: padding-box;
   border-style: solid;
   border-width: 34px 60px 32px;
-  border-image-source: url('./assets/halloween/card/sheet-day.png');
+  border-image-source: var(--rune-scroll);
   border-image-slice: 14% 12% 14% 12% fill;
   border-image-width: 34px 60px 32px;
   border-image-repeat: stretch;
@@ -4249,6 +5042,7 @@
   color: #3d2c18;
 }
 
+/* A writing area worth writing in. */
 .member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
 .member-practice-page .practice-question-card--writing .practice-answer-textarea {
   min-height: 260px;
@@ -4290,14 +5084,6 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 60%);
 }
 
-.member-practice-session-page .practice-question-card--reading .practice-option:active,
-.member-practice-session-page .practice-question-card--fill_blank .practice-option:active,
-.member-practice-page .practice-question-card--reading .practice-option:active,
-.member-practice-page .practice-question-card--fill_blank .practice-option:active {
-  transform: none;
-  box-shadow: inset 0 2px 4px rgb(90 66 36 / 18%);
-}
-
 /* The letter is stamped in ink, so the row has a strong fixed anchor. */
 .member-practice-session-page .practice-question-card--reading .option-badge,
 .member-practice-session-page .practice-question-card--fill_blank .option-badge,
@@ -4336,159 +5122,472 @@
   line-height: 32px;
 }
 
-/* Spelling cells carry four faces — waiting, given, right, wrong — cut from
-   the same chipped stone so only the face changes between them. */
-.personal-workspace .study-card--spelling .spelling-cell--prefilled {
-  box-sizing: border-box;
+/* ============================================================
+   A stone surface any question can be written on.
+   Same slab as the fill-blank question, but with no opinion about what sits
+   inside it — the memory drills and the practice questions share one stone.
+   ============================================================ */
+.personal-workspace .rune-surface {
+  position: relative;
+  /* Fill the slot: the drill card used to hug its content, which leaves a
+   * narrow stone with options squeezed into strips. */
+  width: 100%;
+  margin-inline: 0;
+  padding: 0 !important;
+  border-style: solid !important;
+  border-width: 40px !important;
+  border-image-source: var(--rune-slab) !important;
+  border-image-slice: 14% fill !important;
+  border-image-width: 40px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0 !important;
+  background: #2a2148 !important;
+  box-shadow: none !important;
+  color: #f3e9d2;
+}
+
+.personal-workspace .rune-surface > * {
+  position: relative;
+}
+
+.personal-workspace .rune-surface .choice-head__eyebrow,
+.personal-workspace .rune-surface .spell-head__eyebrow {
+  color: #7cf0c4;
+}
+
+.personal-workspace .rune-surface .choice-head__prompt,
+.personal-workspace .rune-surface .spell-head__prompt {
+  color: #f3e9d2;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* The drill's option stays a light chip on the stone. Its own three-track
+ * grid collapses once the radio is out of the flow, so the face is laid out
+ * here in one row: letter, label, tick. */
+.personal-workspace .rune-surface .choice-option {
+  display: block;
+  padding: 10px 14px;
+  border: 2px solid #6b5f8f !important;
+  border-radius: 12px !important;
+  background: #fffdf6 !important;
+  color: #35240f;
+  box-shadow: 0 3px 0 rgb(12 6 28 / 45%) !important;
+}
+
+.personal-workspace .rune-surface .choice-option:hover {
+  border-color: #9a8ac4 !important;
+}
+
+.personal-workspace .rune-surface .choice-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.personal-workspace .rune-surface .choice-option__face {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.personal-workspace .rune-surface .choice-option__label {
+  color: #35240f;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.personal-workspace .rune-surface .practice-option {
+  border-style: solid !important;
+  border-width: 12px 16px !important;
+  border-color: transparent !important;
+  border-image-source: var(--rune-chip) !important;
+  border-image-slice: 20% fill !important;
+  border-image-width: 12px 16px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0 !important;
+  background: #2a2148 !important;
+  color: #f3e9d2;
+  box-shadow: none !important;
+}
+
+.personal-workspace .rune-surface .choice-option:hover,
+.personal-workspace .rune-surface .practice-option:hover {
+  filter: brightness(1.12);
+}
+
+.personal-workspace .rune-surface :is(.choice-option.is-correct, .practice-option--correct) {
+  border-image-source: var(--rune-chip-on) !important;
+}
+
+/* ============================================================
+   Fill-blank question as a carved stone slab.
+   The slab and the option chips are generated artwork used as 9-slice
+   sources: the chipped edge and the groove live in the border band, so
+   only the flat middle stretches to fit the sentence and the options.
+   ============================================================ */
+.personal-workspace .practice-question-card--rune {
+  border: 0;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.personal-workspace .practice-question-card--rune::before { content: none; }
+
+.personal-workspace .practice-question-card--rune > * {
+  position: relative;
+}
+
+/* The slab itself: 44px band, flat middle fills with the stone colour. */
+.personal-workspace .practice-question-card--rune {
+  /* Matches the slab's stone centre: the fallback before the image lands, and
+     the surface a contrast check reads. */
+  background: #2a2148 !important;
   border-style: solid;
-  border-width: 7px 9px;
-  border-color: transparent;
-  border-image-source: url('./assets/halloween/card/cell-given-biscuit.png');
-  border-image-slice: 10% 5% fill;
-  border-image-width: 7px 9px;
+  border-width: 40px;
+  border-image-source: var(--rune-slab);
+  border-image-slice: 14% fill;
+  border-image-width: 40px;
   border-image-repeat: stretch;
   border-radius: 0;
-  background: #c98a2e;
-  background-clip: padding-box;
-  color: #3d2607;
-  font-weight: 850;
+  color: #f3e9d2;
 }
 
-.personal-workspace .study-card--spelling input.spelling-cell--right {
-  border-image-source: url('./assets/halloween/card/cell-right-biscuit.png');
-  background: #7fbf7a;
-  color: #10301a;
+.personal-workspace .practice-question-card--rune .practice-question-card__header,
+.personal-workspace .practice-question-card--rune .practice-fill-blank,
+.personal-workspace .practice-question-card--rune .practice-options {
+  color: #f3e9d2;
 }
 
-.personal-workspace .study-card--spelling input.spelling-cell--wrong {
-  border-image-source: url('./assets/halloween/card/cell-wrong-biscuit.png');
-  background: #c94a3b;
-  color: #fff;
+.personal-workspace .practice-question-card--rune .practice-question-number {
+  color: #7cf0c4;
+  background: none;
+  border-color: #4a4270;
 }
 
-/* ---------- night ---------- */
-/* Night artwork keys off the app's own switch, never the operating
-   system: the app has no dark theme, so an OS-level dark preference used to
-   turn the parchment grey while the rest of the page stayed cream. */
-html[data-mode='night'] {
-  /* The trainers draw their own day material in a scoped block, so the night
-     artwork has to be applied globally to reach them. Doubled class so the
-     night slab outranks that scoped day rule. */
-  .personal-workspace .study-card.study-card--choice,
-  .personal-workspace .study-card.study-card--spelling {
-    background: #3a3254;
-    border-image-source: url('./assets/halloween/card/slab-stele.png');
-    color: #f0e4cc;
+.personal-workspace .practice-question-card--rune .status-badge {
+  background: rgb(124 240 196 / 14%);
+  border-color: #4a7a6a;
+  color: #7cf0c4;
+}
+
+.personal-workspace .practice-question-card--rune .practice-sentence {
+  color: #f3e9d2;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.personal-workspace .practice-question-card--rune .practice-sentence mark,
+.personal-workspace .practice-question-card--rune .practice-sentence b {
+  color: #ffc93c;
+  background: none;
+  border-bottom: 2px solid #ffc93c;
+  padding-bottom: 1px;
+}
+
+.personal-workspace .practice-question-card--rune .practice-translation-note {
+  color: #d9cff5;
+  border-color: #4a4270;
+}
+
+/* Each option is the stone chip. */
+.personal-workspace .practice-question-card--rune .practice-option {
+  padding: 0;
+  border-style: solid !important;
+  border-width: 12px 16px !important;
+  border-color: transparent !important;
+  border-image-source: var(--rune-chip) !important;
+  border-image-slice: 22% 8% fill !important;
+  border-image-width: 12px 16px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  color: #f3e9d2;
+  transition: filter 140ms ease;
+}
+
+.personal-workspace .practice-question-card--rune .practice-option:hover { filter: brightness(1.25); }
+
+.personal-workspace .practice-question-card--rune .practice-option__body { padding: 8px 4px; }
+
+.personal-workspace .practice-question-card--rune .practice-option__text { color: #f3e9d2; }
+
+.personal-workspace .practice-question-card--rune .practice-option__input:checked ~ * ,
+.personal-workspace .practice-question-card--rune .practice-option.is-selected {
+  border-image-source: var(--rune-chip-on);
+}
+
+.personal-workspace .practice-question-card--rune .practice-option.is-selected,
+.personal-workspace .practice-question-card--rune .practice-option:has(input:checked) {
+  border-image-source: var(--rune-chip-on) !important;
+  filter: none;
+}
+
+.personal-workspace .practice-question-card--rune .practice-option--correct {
+  border-image-source: var(--rune-chip-on) !important;
+}
+
+.personal-workspace .practice-question-card--rune .option-badge,
+.personal-workspace .practice-question-card--rune .practice-option .option-badge {
+  background: rgb(124 240 196 / 16%);
+  border-color: #4a7a6a;
+  color: #7cf0c4;
+}
+
+/* ------------------------------------------------- wordbook detail dialog */
+
+/* The panel is a page about one book: a heading that names it, the actions,
+ * four figures, then the words. Everything is on one column with the entries
+ * scrolling, so the header never competes with the list. */
+.personal-workspace .wordbook-detail-dialog {
+  display: block;
+  width: min(760px, 94vw);
+  max-height: min(88vh, 820px);
+  padding: 0;
+  overflow-y: auto;
+  border-radius: 20px;
+}
+
+.personal-workspace .wordbook-detail-dialog .dialog-heading {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid var(--ui-line);
+  background: linear-gradient(180deg, var(--g-gold-soft), transparent 120%);
+}
+
+.personal-workspace .wordbook-detail-dialog .dialog-heading .eyebrow {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.personal-workspace .wordbook-detail-dialog .dialog-heading h2 {
+  margin: 0;
+  padding-right: 48px;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+/* The close control belongs in the corner, not in the flow beside the buttons. */
+.personal-workspace .wordbook-detail-dialog .dialog-heading .icon-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Four figures as a strip, not four stacked rows. */
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts > div {
+  display: grid;
+  gap: 2px;
+  padding: 9px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts dt {
+  color: var(--ui-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-facts dd {
+  margin: 0;
+  color: var(--ui-ink);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-detail-meta {
+  padding: 14px 24px 0;
+}
+
+.personal-workspace .wordbook-detail-dialog .lead {
+  margin: 8px 24px 0;
+  color: var(--ui-muted);
+  font-size: 0.9rem;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 18px 24px 8px;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-heading h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+/* Each word is a line, not a card: the headword on the left, the meaning on
+ * the right, a hairline between them. */
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-list {
+  display: grid;
+  padding: 0 24px;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-list > [role='listitem'] {
+  display: grid;
+  grid-template-columns: minmax(140px, 210px) minmax(0, 1fr);
+  gap: 8px 18px;
+  padding: 13px 0;
+  border-bottom: 1px dashed var(--ui-line);
+  /* The old list drew each word as a tinted card; a row with a hairline is
+   * quieter and lets the eye run down the words. */
+  border-radius: 0;
+  background: none;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-list > [role='listitem']:last-child {
+  border-bottom: 0;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-word {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+  align-self: start;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-word strong {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-word > span {
+  color: var(--ui-muted);
+  font-size: 0.78rem;
+}
+
+/* The folded form of the headword is bookkeeping, not part of the entry. */
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-normalized {
+  display: none;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-definition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  align-items: baseline;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-definition .part-of-speech {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--g-green-soft);
+  color: var(--g-green-edge);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-definition p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.personal-workspace .wordbook-detail-dialog .wordbook-entry-heading .count-pill {
+  flex: 0 0 auto;
+}
+
+.personal-workspace .wordbook-detail-dialog > .pagination {
+  padding: 12px 24px 20px;
+  border-top: 1px solid var(--ui-line);
+}
+
+@media (max-width: 640px) {
+  .personal-workspace .wordbook-detail-dialog .wordbook-detail-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .personal-workspace .study-card--choice .choice-option,
-  .personal-workspace .study-card--spelling .spelling-cell,
-  .personal-workspace .study-card--spelling .spelling-grid input.spelling-cell {
-    background: #3a3254;
-    border-image-source: url('./assets/halloween/card/chip-stele.png');
-    color: #f0e4cc;
-  }
-
-  .personal-workspace .study-card--choice .choice-option:has(input:checked) {
-    border-image-source: url('./assets/halloween/card/bar-stele-on.png');
-  }
-
-  .personal-workspace .study-card--choice .choice-option {
-    border-image-source: url('./assets/halloween/card/bar-stele.png');
-  }
-
-  .study-card--choice .choice-option__label { color: #f3e9d2; }
-
-  .personal-workspace .study-card--spelling .spelling-cell--prefilled {
-    background: #c98a2e;
-    border-image-source: url('./assets/halloween/card/cell-given-stele.png');
-    color: #1a1200;
-  }
-
-  .personal-workspace .study-card--spelling input.spelling-cell--right {
-    background: #7cf0c4;
-    border-image-source: url('./assets/halloween/card/cell-right-stele.png');
-    color: #10301a;
-  }
-
-  .personal-workspace .study-card--spelling input.spelling-cell--wrong {
-    background: #e0705f;
-    border-image-source: url('./assets/halloween/card/cell-wrong-stele.png');
-    color: #1a0b08;
-  }
-
-  .study-card--spelling .spelling-cell--active {
-    background: #7cf0c4;
-    color: #1a1330;
-  }
-
-  .study-card--spelling .spell-head__prompt,
-  .study-card--spelling .spell-head__eyebrow,
-  .study-card--spelling .spell-head__phonetic,
-  .study-card--spelling .spell-head__hint { color: #f3e9d2; }
-
-  .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
-  .member-practice-session-page .practice-question-card.practice-question-card--reading,
-  .member-practice-session-page .practice-question-card.practice-question-card--translation,
-  .member-practice-page .practice-question-card.practice-question-card--fill_blank,
-  .member-practice-page .practice-question-card.practice-question-card--reading,
-  .member-practice-page .practice-question-card.practice-question-card--translation {
-    background: #4a4034;
-    border-image-source: url('./assets/halloween/card/sheet-night.png');
-  }
-
-  .member-practice-session-page .practice-article-panel,
-  .member-practice-page .practice-article-panel {
-    background: #4a4034 !important;
-    border-image-source: url('./assets/halloween/card/sheet-flat-night.png') !important;
-  }
-
-  @media (max-width: 760px) {
-    .member-practice-session-page .practice-article-panel,
-    .member-practice-page .practice-article-panel {
-      border-width: 18px !important;
-      border-image-width: 18px !important;
-    }
-  }
-
-  .member-practice-session-page .practice-question-card--writing .practice-writing,
-  .member-practice-page .practice-question-card--writing .practice-writing {
-    background: #4a4034;
-    border-image-source: url('./assets/halloween/card/sheet-flat-night.png');
-    color: #f0e4cc;
-  }
-
-  .member-practice-session-page .practice-question-card--writing .field,
-  .member-practice-page .practice-question-card--writing .field {
-    background: #4a4034;
-    border-image-source: url('./assets/halloween/card/sheet-night.png');
-  }
-
-  .member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
-  .member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
-  .member-practice-page .practice-question-card--writing .practice-answer-textarea,
-  .member-practice-page .practice-question-card--translation .practice-answer-textarea {
-    color: #f0e4cc;
-    border-color: rgb(240 228 204 / 32%);
-  }
-
-  .practice-question-card--fill_blank .practice-sentence,
-  .practice-question-card--translation .practice-prompt-text,
-  .practice-question-card--writing .practice-prompt-text,
-  .practice-question-card--reading .practice-article,
-  .practice-question-card--reading .practice-reading h3,
-  .practice-question-card--fill_blank .practice-option__text,
-  .practice-question-card--reading .practice-option__text,
-  .practice-question-card--translation .practice-answer-textarea,
-  .practice-question-card--writing .practice-answer-textarea,
-  .practice-article-panel .practice-article { color: #f0e4cc; }
-
-  .practice-question-card--fill_blank .status-badge,
-  .practice-question-card--reading .status-badge,
-  .practice-question-card--translation .status-badge,
-  .practice-question-card--writing .status-badge {
-    background: #3f3560;
-    border-color: #6b5aa8;
-    color: #d9cff5;
+  .personal-workspace .wordbook-detail-dialog .wordbook-entry-list > [role='listitem'] {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ------------------------------------------------------- three-piece frames */
+
+/* The painted ends hold their shape; only the plain middle stretches. */
+.personal-workspace .frame3 {
+  position: relative;
+  isolation: isolate;
+  display: block;
+}
+
+.personal-workspace .frame3__band {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--frame-mid) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.personal-workspace .frame3__cap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: auto;
+  aspect-ratio: var(--frame-cap-ratio, 0.19);
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.personal-workspace .frame3__cap--left {
+  left: 0;
+  background-image: var(--frame-left);
+}
+
+.personal-workspace .frame3__cap--right {
+  right: 0;
+  background-image: var(--frame-right);
+}
+
+.personal-workspace .frame3__body {
+  position: relative;
+  z-index: 2;
+  /* Sit inside the caps rather than over them. */
+  padding: 8% 12%;
+}
+
+/* Ink follows the surface: parchment takes dark ink, the stone takes cream. */
+.personal-workspace .frame3--paper { color: #3b2a1a; }
+.personal-workspace .frame3--stone { color: #f3e9d2; }

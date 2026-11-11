@@ -7,6 +7,9 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useSpellingGrid } from '../composables/useSpellingGrid'
 import { SPELLING_BLANK_LABELS, type SpellingBlank, type SpellingQuestion } from '../types/learning'
+import { useRuneSurface } from '../composables/useRuneSurface'
+
+const { surface } = useRuneSurface()
 
 const props = defineProps<{
   question: SpellingQuestion
@@ -165,7 +168,7 @@ function submit(): void {
 </script>
 
 <template>
-  <section class="study-card study-card--spelling" aria-labelledby="spelling-definition">
+  <section class="study-card study-card--spelling rune-surface" :style="surface" aria-labelledby="spelling-definition">
     <div class="spell-head">
       <span class="spell-head__eyebrow">拼写</span>
       <h2 id="spelling-definition" class="spell-head__prompt" tabindex="-1">{{ props.question.definition }}</h2>
@@ -184,9 +187,11 @@ function submit(): void {
           class="spelling-cell"
           :class="{
             'spelling-cell--active': grid.activeIndex.value === blank.index,
+            'is-filled': Boolean(grid.values.value[blank.index]),
             'spelling-cell--right': letterState(blank) === 'right',
             'spelling-cell--wrong': letterState(blank) === 'wrong',
           }"
+
           type="text"
           inputmode="text"
           autocomplete="off"

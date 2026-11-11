@@ -11,7 +11,7 @@
  */
 import { computed } from 'vue'
 import { practiceBooks } from '../assets/halloween'
-import ModeArt from './ModeArt.vue'
+import ArtImage from './ArtImage.vue'
 
 export type ShelfModule = 'flashcard' | 'choice' | 'spelling'
 
@@ -50,7 +50,8 @@ function pick(module: ShelfModule): void {
       :disabled="!enabled.includes(module)"
       @click="pick(module)"
     >
-      <ModeArt class="shelf-book__art" :day="practiceBooks[module].day" :night="practiceBooks[module].night" />
+      <ArtImage class="shelf-book__art" :set="practiceBooks[module]" />
+
       <span class="shelf-book__title">{{ titles[module] }}</span>
       <span class="shelf-book__hint">{{ hints[module] }}</span>
     </button>

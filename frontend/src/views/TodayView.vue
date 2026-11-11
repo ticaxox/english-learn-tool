@@ -16,7 +16,10 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
 import StudyStatsPanel from '../components/StudyStatsPanel.vue'
-import ProgressCard from '../components/ProgressCard.vue'
+import GameHud from '../components/GameHud.vue'
+import BadgeWall from '../components/BadgeWall.vue'
+import WeeklyReport from '../components/WeeklyReport.vue'
+import { useGamification } from '../composables/useGamification'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
@@ -24,6 +27,8 @@ import { isContractFrozen } from '../api/contract-adapter'
 import { TODAY_STATUS_LABELS, type TodayPlan } from '../types/learning'
 import '../learning.css'
 
+const gamification = useGamification()
+const crumboMood = computed(() => gamification.crumboMood.value)
 const plan = ref<TodayPlan | null>(null)
 const loading = ref(false)
 const error = ref<unknown>(null)
@@ -97,16 +102,26 @@ const todayTasks = computed(() => {
   }))
 })
 
-const newWordsTask = computed(() => todayTasks.value.find((task) => task.key === 'new-words') ?? null)
-
 const activeTaskIndex = computed(() => {
   const index = todayTasks.value.findIndex((task) => !task.done)
   return index === -1 ? todayTasks.value.length - 1 : index
 })
 
-
 const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? null)
+/** The ring tracks whichever quest the learner should do next. */
+const ringTask = computed(() => primaryTask.value ?? todayTasks.value[0] ?? null)
 const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
+
+const crumboTip = computed(() => {
+  const remaining = todayTasks.value.filter((task) => !task.done)
+  if (remaining.length === 0) return '今天的任务都完成了，可以再走一圈，也可以明天再来。'
+  const next = remaining[0]
+  const left = Math.max(0, next.target - next.completed)
+  if (next.key === 'due-reviews') return `还差 ${left} 个到期复习，先清掉它们最划算。`
+  if (next.key === 'new-words') return `还有 ${left} 个新词没学，学完今天的词就齐了。`
+  if (next.key === 'learning-minutes') return `再学 ${left} 分钟就攒够今天的时间了。`
+  return `接下来做「${next.title}」。`
+})
 
 async function load(createIfMissing = false): Promise<void> {
   if (!frozen.value) return
@@ -138,6 +153,7 @@ async function load(createIfMissing = false): Promise<void> {
 
 onMounted(() => {
   void load()
+  void gamification.load()
 })
 </script>
 
@@ -152,7 +168,7 @@ onMounted(() => {
 
     <section v-else-if="error" class="crumb-state-panel" :class="needsActiveWordbook ? 'crumb-empty-state' : 'crumb-error-panel'">
       <div v-if="needsActiveWordbook" class="crumb-empty-note">
-        <CrumboMark size="medium" />
+        <CrumboMark size="medium" :mood="crumboMood" />
         <div>
           <strong>先选一本词书，路线才能开始。</strong>
           <p>选好词书后，今天的任务会自动出现。</p>
@@ -163,6 +179,8 @@ onMounted(() => {
     </section>
 
     <template v-else-if="plan">
+      <GameHud />
+
       <section class="crumb-today-board crumb-trail-board crumb-merged">
         <div class="crumb-merged-main">
           <span class="crumb-eyebrow">今日学习 · 今日任务</span>
@@ -187,23 +205,32 @@ onMounted(() => {
             <li v-for="(task, index) in todayTasks" :key="task.key" :class="{ 'is-done': task.done }">
               <RouterLink :to="task.to" class="crumb-task-row">
                 <span class="crumb-task-state" aria-hidden="true">{{ task.done ? '✓' : index + 1 }}</span>
-                <span class="crumb-task-title">{{ task.title }}</span>
+                <span class="crumb-task-body">
+                  <span class="crumb-task-title">{{ task.title }}</span>
+                  <span class="crumb-task-bar" aria-hidden="true">
+                    <span :style="{ width: `${task.percent}%` }"></span>
+                  </span>
+                </span>
                 <span class="crumb-task-value">{{ task.completed }} / {{ task.target }} {{ task.unit }}</span>
               </RouterLink>
             </li>
           </ul>
+
+          <div class="crumb-tip">
+            <CrumboMark size="small" :mood="crumboMood" />
+            <p>{{ crumboTip }}</p>
+          </div>
         </div>
 
         <aside class="crumb-merged-side crumb-today-side">
-          <ProgressCard />
           <div class="crumb-merged-ring">
             <GoalRing
-              v-if="newWordsTask"
-              :value="newWordsTask.completed"
-              :max="newWordsTask.target"
+              v-if="ringTask"
+              :value="ringTask.completed"
+              :max="ringTask.target"
               :size="128"
               :stroke="11"
-              caption="新词"
+              :caption="ringTask.label"
             />
             <div class="crumb-merged-stamp">
               <span>{{ plan.localDate }}</span>
@@ -224,6 +251,11 @@ onMounted(() => {
       </section>
 
       <ChallengeView embedded />
+
+      <section class="today-extras">
+        <WeeklyReport />
+        <BadgeWall />
+      </section>
     </template>
   </article>
 </template>

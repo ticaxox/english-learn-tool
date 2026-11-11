@@ -70,7 +70,8 @@ class UserProfile(Base):
     __tablename__ = "user_profiles"
     __table_args__ = (
         CheckConstraint(
-            "target_exam IS NULL OR target_exam IN ('CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL')",
+            "target_exam IS NULL OR target_exam IN ("
+            "'GAOKAO', 'CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL')",
             name="user_profile_target_exam_valid",
         ),
         CheckConstraint(

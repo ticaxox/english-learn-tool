@@ -22,12 +22,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-KNOWLEDGE_SOURCE_TYPES = "'exam', 'wordbook'"
+KNOWLEDGE_SOURCE_TYPES = "'exam'"
 KNOWLEDGE_STATUSES = "'draft', 'indexing', 'ready', 'failed', 'archived'"
 
 
 class KnowledgeDocument(Base):
-    """One imported reference document (an exam paper, a shared wordbook export)."""
+    """One imported exam paper — the only thing the retrieval base holds.
+
+    Wordbooks and coach attachments are deliberately not indexed: a wordbook is
+    a SQL record with its own scheduling, and an attachment stays an attachment.
+    """
 
     __tablename__ = "knowledge_documents"
     __table_args__ = (

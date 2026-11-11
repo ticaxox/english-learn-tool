@@ -48,6 +48,8 @@ import chipBiscuit from './card/chip-biscuit.png'
 import chipStele from './card/chip-stele.png'
 import sheetDay from './card/sheet-day.png'
 import sheetNight from './card/sheet-night.png'
+import sheetFlatDay from './card/sheet-flat-day.png'
+import sheetFlatNight from './card/sheet-flat-night.png'
 import wordbookCoverDay from './card/wordbook-cover-day.png'
 import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
@@ -70,6 +72,25 @@ export const material = {
   bar: { day: barBiscuit, night: barStele },
   barOn: { day: barBiscuitOn, night: barSteleOn },
   chip: { day: chipBiscuit, night: chipStele },
+} as const
+
+/**
+ * The stone the questions sit on, day and night.
+ *
+ * The surface rules read these as CSS variables, so the same class paints a
+ * biscuit by day and a stele by night without a second set of rules.
+ */
+export const runeStone = {
+  slab: { day: slabBiscuit, night: slabStele },
+  chip: { day: chipBiscuit, night: chipStele },
+  chipOn: { day: barBiscuitOn, night: barSteleOn },
+} as const
+
+/** The paper the AI practice questions are written on: a rolled sheet and a
+    plain torn one, day and night. */
+export const runePaper = {
+  scroll: { day: sheetDay, night: sheetNight },
+  parchment: { day: sheetFlatDay, night: sheetFlatNight },
 } as const
 
 /** The question surface for the AI exercise types: one sheet, text lives on it. */
@@ -132,3 +153,79 @@ export const brandIcon = appIcon
 export function forMode(set: ThemeMode, mode: Mode): string {
   return set[mode]
 }
+
+/* Three-piece frames: the two ends keep their painted detail, the middle is a
+ * plain strip that stretches, so a wide surface never distorts an edge. */
+import scrollCapLeft from './card/scroll-cap-left.png'
+import scrollMiddle from './card/scroll-middle.png'
+import scrollCapRight from './card/scroll-cap-right.png'
+import slabCapLeft from './card/slab-cap-left.png'
+import slabMiddle from './card/slab-middle.png'
+import slabCapRight from './card/slab-cap-right.png'
+import parchmentCapLeft from './card/parchment-cap-left.png'
+import parchmentMiddle from './card/parchment-middle.png'
+import parchmentCapRight from './card/parchment-cap-right.png'
+
+export type Frame3Part = { left: string; middle: string; right: string }
+
+/** A scroll with rolled rods at both ends. */
+export const scrollFrame: Frame3Part = {
+  left: scrollCapLeft,
+  middle: scrollMiddle,
+  right: scrollCapRight,
+}
+
+/** A carved stone slab with chipped ends. */
+export const slabFrame: Frame3Part = {
+  left: slabCapLeft,
+  middle: slabMiddle,
+  right: slabCapRight,
+}
+
+/** A plain sheet of parchment with torn edges. */
+export const parchmentFrame: Frame3Part = {
+  left: parchmentCapLeft,
+  middle: parchmentMiddle,
+  right: parchmentCapRight,
+}
+
+/** A closed spellbook as an object: spine, page block and clasp, no backdrop. */
+import bookObjectDay from './card/book-object-day.png'
+export const bookObject = { day: bookObjectDay, night: bookObjectDay } as const
+
+/* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
+ * spirit-green one for the stop you are on, a dark unlit one for a stop out
+ * of reach. */
+import pumpkinLit from './char/pumpkin-lit.png'
+import pumpkinGreen from './char/pumpkin-green.png'
+import pumpkinUnlit from './char/pumpkin-unlit.png'
+import pumpkinLitNight from './char/pumpkin-lit-night.png'
+export const pumpkins = {
+  lit: { day: pumpkinLit, night: pumpkinLitNight },
+  green: { day: pumpkinGreen, night: pumpkinGreen },
+  unlit: { day: pumpkinUnlit, night: pumpkinUnlit },
+} as const
+
+/* The achievement marks, drawn as flat emoji-style stickers. */
+import emblemFlame from './char/emblem-flame.png'
+import emblemBook from './char/emblem-book.png'
+import emblemSkull from './char/emblem-skull.png'
+import emblemMoon from './char/emblem-moon.png'
+import emblemCrown from './char/emblem-crown.png'
+import emblemStar from './char/emblem-star.png'
+import emblemOwl from './char/emblem-owl.png'
+import emblemHourglass from './char/emblem-hourglass.png'
+import emblemSparkle from './char/emblem-sparkle.png'
+import emblemKey from './char/emblem-key.png'
+export const emblemSticker = {
+  flame: emblemFlame,
+  book: emblemBook,
+  skull: emblemSkull,
+  moon: emblemMoon,
+  crown: emblemCrown,
+  star: emblemStar,
+  owl: emblemOwl,
+  hourglass: emblemHourglass,
+  sparkle: emblemSparkle,
+  key: emblemKey,
+} as const

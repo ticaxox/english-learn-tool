@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { type PracticeQuestion, type PracticeResult } from '../api/practice'
 import PracticeQuestionCard from './PracticeQuestionCard.vue'
+import { countUp } from '../composables/useMotion'
 import SpokenText from './SpokenText.vue'
 import { illustration } from '../assets/halloween'
-import ModeArt from './ModeArt.vue'
+import ArtImage from './ArtImage.vue'
 
 const props = defineProps<{
   result: PracticeResult
@@ -12,7 +13,13 @@ const props = defineProps<{
   questions?: PracticeQuestion[]
 }>()
 
-const scoreLabel = computed(() => (props.result.score === null ? '—' : `${props.result.score} 分`))
+const scoreRef = ref<HTMLElement | null>(null)
+const scoreLabel = computed(() => (props.result.score === null ? '—' : `${Math.round(props.result.score)} 分`))
+
+// The result reads as a score reveal: the number climbs instead of appearing.
+onMounted(() => {
+  if (props.result.score !== null) countUp(scoreRef.value, props.result.score, { suffix: ' 分' })
+})
 const questionMap = computed(() => new Map((props.questions ?? []).map((question) => [question.id, question])))
 const isChoiceType = (type: string): boolean => type === 'fill_blank' || type === 'reading'
 
@@ -58,11 +65,12 @@ const correctPercent = computed(() => {
 
     <div class="practice-result__layout">
     <aside class="practice-result__aside">
-    <ModeArt class="practice-result__art" :day="illustration.result.day" :night="illustration.result.night" />
+    <ArtImage class="practice-result__art" :set="illustration.result" />
+
     <section class="panel practice-result__card">
       <h2 id="practice-result-title" class="visually-hidden">本次练习得分</h2>
       <div class="practice-result__scoreline">
-        <span class="practice-result__score">{{ scoreLabel }}</span>
+        <span ref="scoreRef" class="practice-result__score">{{ scoreLabel }}</span>
         <span class="practice-result__tally">答对 {{ correctCount }} · 错题 {{ wrongCount }}</span>
       </div>
       <div

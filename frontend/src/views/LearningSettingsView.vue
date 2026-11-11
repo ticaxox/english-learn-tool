@@ -100,6 +100,27 @@ const form = reactive<LearningProfileUpdate>({
 
 const today = todayIsoDate()
 
+const PROMPT_SIDES = [
+  { key: 'headword', label: '英文' },
+  { key: 'definition', label: '中文' },
+  { key: 'phonetic', label: '读音' },
+] as const
+type PromptSide = (typeof PROMPT_SIDES)[number]['key']
+
+const promptSides = ref<{ flashcard: PromptSide[]; choice: PromptSide[] }>({
+  flashcard: ['definition'],
+  choice: ['definition'],
+})
+
+function toggleSide(module: 'flashcard' | 'choice', side: PromptSide): void {
+  const current = promptSides.value[module]
+  const next = current.includes(side)
+    ? current.filter((item) => item !== side)
+    : [...current, side]
+  // At least one side must stay selected or the card has no prompt.
+  promptSides.value[module] = next.length ? next : current
+}
+
 function applyProfile(value: LearningProfile): void {
   profile.value = value
   if (value.examTarget) {
@@ -122,6 +143,17 @@ function applyProfile(value: LearningProfile): void {
   }
   challengePrefs.practiceTypes = keep(stored.practiceTypes, PRACTICE_TYPE_OPTIONS.map((option) => option.key))
   challengePrefs.drillModes = keep(stored.drillModes, DRILL_MODE_OPTIONS.map((option) => option.key))
+  const sides = (value.memoryConfig.preferences ?? {}) as Record<string, unknown>
+  promptSides.value.flashcard = keepSides(sides.flashcard_prompt_types)
+  promptSides.value.choice = keepSides(sides.choice_prompt_types)
+}
+
+function keepSides(value: unknown): PromptSide[] {
+  const list = Array.isArray(value) ? value : []
+  const kept = list.filter((item): item is PromptSide =>
+    PROMPT_SIDES.some((side) => side.key === item),
+  )
+  return kept.length ? kept : ['definition']
 }
 
 function cloneConfig(config: MemoryConfig): MemoryConfig {
@@ -173,6 +205,8 @@ async function save(): Promise<void> {
   }
   form.memoryConfig.preferences = {
     ...form.memoryConfig.preferences,
+    flashcard_prompt_types: [...promptSides.value.flashcard],
+    choice_prompt_types: [...promptSides.value.choice],
     challenge: {
       practiceTypes: [...challengePrefs.practiceTypes],
       drillModes: [...challengePrefs.drillModes],
@@ -298,6 +332,44 @@ onMounted(() => {
                   @click="togglePref('practiceTypes', option.key)"
                 >
                   {{ option.label }}
+                </DivButton>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>记忆卡片题型</legend>
+          <div class="settings-choice-row">
+            <div class="settings-choice-block">
+              <p class="field-hint">翻卡正面</p>
+              <div class="settings-choice-grid">
+                <DivButton
+                  v-for="side in PROMPT_SIDES"
+                  :key="`flashcard-${side.key}`"
+                  class="settings-toggle"
+                  :class="{ 'is-active': promptSides.flashcard.includes(side.key) }"
+                  :aria-pressed="promptSides.flashcard.includes(side.key)"
+                  type="button"
+                  @click="toggleSide('flashcard', side.key)"
+                >
+                  {{ side.label }}
+                </DivButton>
+              </div>
+            </div>
+            <div class="settings-choice-block">
+              <p class="field-hint">选择题题干</p>
+              <div class="settings-choice-grid">
+                <DivButton
+                  v-for="side in PROMPT_SIDES"
+                  :key="`choice-${side.key}`"
+                  class="settings-toggle"
+                  :class="{ 'is-active': promptSides.choice.includes(side.key) }"
+                  :aria-pressed="promptSides.choice.includes(side.key)"
+                  type="button"
+                  @click="toggleSide('choice', side.key)"
+                >
+                  {{ side.label }}
                 </DivButton>
               </div>
             </div>

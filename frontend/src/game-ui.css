@@ -49,40 +49,48 @@
   background-color: var(--ui-canvas);
 }
 
-/* Night is its own palette, not a filter over the day one: deep indigo canvas,
-   warmer parchment surfaces, pale ink. The artwork swaps with the same switch. */
-html[data-mode='night'] .personal-workspace {
-  --ui-canvas: #16112b;
-  --ui-sidebar: #1c1636;
-  --ui-surface: #241d44;
-  --ui-surface-subtle: #2b2352;
-  --ui-ink: #f0e4cc;
-  --ui-muted: #b9a6e6;
-  --ui-line: #3b3163;
-  --ui-line-strong: #6b5aa8;
+/* Night is the same room after dark: deep purple paper, silvered brass, mint
+ * vines. Not a filter over the day look — the art has its own night version
+ * and these tokens only relight the surfaces around it. */
+html[data-theme='night'] {
+  color-scheme: dark;
+}
 
-  --g-green: #6fcf72;
-  --g-green-edge: #4aa94d;
-  --g-green-soft: #1f3d2a;
-  --g-orange: #ffb340;
-  --g-orange-edge: #cf7400;
-  --g-orange-soft: #4a3413;
-  --g-blue: #6ecbff;
-  --g-blue-edge: #0d88c4;
-  --g-blue-soft: #16344a;
-  --g-purple: #c79bf5;
-  --g-purple-edge: #7d3cc0;
-  --g-purple-soft: #2e2151;
-  --g-red: #ff7a6e;
-  --g-red-edge: #a82e2e;
-  --g-red-soft: #46201d;
-  --g-gold: #ffd75e;
-  --g-gold-edge: #d9a400;
-  --g-gold-soft: #453410;
+html[data-theme='night'] .personal-workspace {
+  --ui-canvas: #1a1030;
+  --ui-sidebar: #221541;
+  --ui-surface: #271a49;
+  --ui-surface-subtle: #2f2156;
+  --ui-ink: #f4ecdc;
+  --ui-muted: #b4a3cf;
+  --ui-line: #3d2c66;
+  --ui-line-strong: #d8cdf8;
 
-  --crumb-forest: #6fcf72;
-  --crumb-pumpkin: #ffb340;
-  --crumb-gold: #ffd75e;
+  --g-green: #3ad183;
+  --g-green-edge: #1f9558;
+  --g-green-soft: #1c3b33;
+  --g-orange: #ff9f45;
+  --g-orange-edge: #c76a10;
+  --g-orange-soft: #3e2617;
+  --g-blue: #56b9ff;
+  --g-blue-edge: #1d7fc0;
+  --g-blue-soft: #16314a;
+  --g-purple: #bd8cff;
+  --g-purple-edge: #7f46c4;
+  --g-purple-soft: #30204c;
+  --g-red: #ff6f6f;
+  --g-red-edge: #b23333;
+  --g-red-soft: #3d1d22;
+  --g-gold: #ffd166;
+  --g-gold-edge: #b8891a;
+  --g-gold-soft: #3a2e13;
+
+  --crumb-forest: #5fd39a;
+  --crumb-pumpkin: #ff9f45;
+  --crumb-gold: #ffd166;
+
+  background-color: var(--ui-canvas);
+  color: var(--ui-ink);
 }
 
 /* ------------------------------------------------------------------ shell */
@@ -90,6 +98,11 @@ html[data-mode='night'] .personal-workspace {
 .personal-workspace {
   background-image: radial-gradient(rgb(190 150 96 / 16%) 1px, transparent 1px);
   background-size: 22px 22px;
+}
+
+/* At night the dots become faint stars rather than paper grain. */
+html[data-theme='night'] .personal-workspace {
+  background-image: radial-gradient(rgb(190 170 255 / 22%) 1px, transparent 1px);
 }
 
 .personal-workspace .workspace-sidebar {
@@ -820,20 +833,11 @@ html[data-mode='night'] .personal-workspace {
 
 /* ------------------------------------------------------------------ coach */
 
-.personal-workspace .ia-coach-panel { animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1); }
-
-/* Stage cards lift on hover, press on click. */
-.personal-workspace .practice-type-card:hover,
-.personal-workspace .memory-action-card:hover,
-.personal-workspace .challenge-node--unlocked:hover,
-.personal-workspace .challenge-node--in_progress:hover {
+.personal-workspace .ia-coach-panel { animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1); }/* Stage cards lift on hover, press on click. */
+.personal-workspace .practice-type-card:hover, .personal-workspace .challenge-node--unlocked:hover, .personal-workspace .challenge-node--in_progress:hover {
   transform: translateY(-2px);
   filter: brightness(1.02);
-}
-
-.personal-workspace .practice-type-card,
-.personal-workspace .memory-action-card,
-.personal-workspace .challenge-node { transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; }
+}.personal-workspace .practice-type-card, .personal-workspace .challenge-node { transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; }
 
 .personal-workspace .ia-coach-panel {
   border-left: 0;
@@ -1008,44 +1012,600 @@ html[data-mode='night'] .personal-workspace {
   box-shadow: 0 3px 0 var(--g-purple-edge);
 }
 
-/* The day/night switch: a small dial, not a pill in a row of pills. */
-.personal-workspace .workspace-mode-button.ia-mode-toggle {
+html[data-theme='night'] .personal-workspace .workspace-coach-button.member-concierge-button {
+  color: #e6d7ff;
+}
+
+/* ------------------------------------------------------------- day / night */
+
+/* A brass plate that slides between a sun and a moon. */
+.personal-workspace .theme-switch {
   display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 34px;
-  padding: 0 12px;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 999px;
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  font-weight: 800;
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
-  transition: transform 120ms ease, background-color 160ms ease, border-color 160ms ease;
 }
 
-.personal-workspace .workspace-mode-button.ia-mode-toggle:hover {
-  background: var(--g-gold-soft);
-  transform: translateY(-1px);
+.personal-workspace .theme-switch__track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: 60px;
+  height: 30px;
+  padding: 2px;
+  border: 2px solid #d9a400;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffeab4, #f4cf82);
+  box-shadow: inset 0 -2px 0 rgb(120 80 10 / 20%);
+  transition: background 520ms ease, border-color 520ms ease;
 }
 
-.personal-workspace .workspace-mode-button.ia-mode-toggle:active { transform: translateY(1px); }
+.personal-workspace .theme-switch__knob {
+  position: absolute;
+  inset: 2px auto 2px 2px;
+  width: calc(50% - 2px);
+  border-radius: 999px;
+  background: #fff8e8;
+  box-shadow: 0 2px 0 #c99a1c, inset 0 1px 0 rgb(255 255 255 / 70%);
+  transition: transform 520ms cubic-bezier(0.3, 1.4, 0.5, 1), background 520ms ease, box-shadow 520ms ease;
+}
 
-.personal-workspace .workspace-mode-button.ia-mode-toggle svg {
-  width: 1.05rem;
-  height: 1.05rem;
+.personal-workspace .theme-switch__sun,
+.personal-workspace .theme-switch__moon {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 16px;
+  height: 16px;
   fill: none;
-  stroke: currentColor;
+  stroke: #a8790a;
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: stroke 520ms ease, opacity 520ms ease;
 }
 
-.personal-workspace .workspace-mode-button.ia-mode-toggle span { font-size: 0.82rem; }
+.personal-workspace .theme-switch__moon {
+  stroke: #c0ab86;
+  opacity: 0.65;
+}
 
-html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggle {
-  color: var(--g-gold);
-  border-color: var(--g-gold-edge);
+/* Night: the plate is silvered brass on deep purple, and it has slid over. */
+html[data-theme='night'] .personal-workspace .theme-switch__track {
+  border-color: #8f7ad0;
+  background: linear-gradient(180deg, #33225a, #1d1236);
+  box-shadow: inset 0 -2px 0 rgb(10 4 26 / 45%);
+}
+
+html[data-theme='night'] .personal-workspace .theme-switch__knob {
+  transform: translateX(100%);
+  background: radial-gradient(circle at 35% 30%, #f4ecdc, #c9bda8);
+  box-shadow: 0 2px 0 #6d5aa8, 0 0 10px rgb(190 170 255 / 45%);
+}
+
+html[data-theme='night'] .personal-workspace .theme-switch__sun {
+  stroke: #7b6a9e;
+  opacity: 0.6;
+}
+
+html[data-theme='night'] .personal-workspace .theme-switch__moon {
+  stroke: #2b1d12;
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------- illustration */
+
+/* Day and night art stacked in one cell, cross-fading over 520ms.
+ * The stack is the component's own element, so a per-use rule like
+ * `.coach-empty-art { display: block }` can size the outer wrapper without
+ * ever breaking the two paintings apart. */
+.art-swap {
+  display: block;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.art-swap__stack {
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+.art-swap__frame {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transition: opacity 520ms ease;
+}
+
+/* The question card's frame must fill the card, not size to the art. */
+.flipface__frame .art-swap__frame {
+  height: 100%;
+  object-fit: contain;
+}
+
+/* A book stands on the shelf board rather than floating in its slot. */
+.shelf-book__art .art-swap__frame { object-position: center bottom; }
+
+.art-swap__frame.is-shown { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .theme-switch__track,
+  .personal-workspace .theme-switch__knob,
+  .personal-workspace .theme-switch__sun,
+  .personal-workspace .theme-switch__moon,
+  .art-swap__frame { transition: none; }
+}
+
+/* Every remaining daylight plate from the older stylesheets. Near-white and
+ * near-grey surfaces become the night plate; tinted ones keep their hue so a
+ * success plate still reads green and a warning still reads amber. The
+ * hand-written rules below refine the ones that carry meaning. */
+html[data-theme='night'] .personal-workspace .challenge-progress { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-map__progress { background: #2c2716; color: #e1ce98; }
+html[data-theme='night'] .personal-workspace .challenge-node { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--unlocked { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--completed { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--failed { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--locked { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node--optional { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node__marker { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--unlocked { background: #172b1e; color: #98e1c5; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--in_progress { background: #2d2815; color: #e1ce98; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--completed { background: #172b1f; color: #98e1c4; }
+html[data-theme='night'] .personal-workspace .challenge-node__status--locked { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .challenge-node-detail { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-boss__result { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-history__empty { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-history__item { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .challenge-history__item:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-orbit::before,
+html[data-theme='night'] .personal-workspace .coach-orbit::after { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-create input,
+html[data-theme='night'] .personal-workspace .coach-rename input { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-conversation-list [role="listitem"] { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-message { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-message--user { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-streaming-chip { background: #2c2716; color: #e1ce98; }
+html[data-theme='night'] .personal-workspace .coach-action-notice { background: #2b1f17; color: #e1aa98; }
+html[data-theme='night'] .personal-workspace .coach-receipt { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-receipt__status--applied { background: #172b1e; color: #98e1c6; }
+html[data-theme='night'] .personal-workspace .coach-receipt__status--undone { background: #2d2149; color: #98c9e1; }
+html[data-theme='night'] .personal-workspace .coach-usage { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-composer { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .coach-composer textarea { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-orbit::before,
+html[data-theme='night'] .personal-workspace .notification-orbit::after { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-unread-pill,
+html[data-theme='night'] .personal-workspace .notification-channel-pill,
+html[data-theme='night'] .personal-workspace .notification-timezone { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-item { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-category-option { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-category-option:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-category-option--ai { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-switch { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-switch span { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .notification-quiet-hours input { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-quota-strip { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-type-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .record-mini-list a { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-article,
+html[data-theme='night'] .personal-workspace .practice-source-text { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-question-card textarea { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-result__summary > div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .status-badge--danger { background: #2b1817; }
+html[data-theme='night'] .personal-workspace .contract-gate__mark { background: #2d2149; color: #e1cb98; }
+html[data-theme='night'] .personal-workspace .today-hero__badge { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .today-tile { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .study-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .choice-option { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .choice-option:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .spelling-cell { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-active-mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-tabs { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-tabs [role="button"]:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-tabs .wordbook-tab--active { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-search input { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-pill--organization { background: #2d2149; color: #98b5e1; }
+html[data-theme='night'] .personal-workspace .wordbook-pill--private { background: #2d2149; color: #98e1be; }
+html[data-theme='night'] .personal-workspace .wordbook-status { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .wordbook-status--ready,
+html[data-theme='night'] .personal-workspace .wordbook-status--active { background: #172b1d; color: #98e1ba; }
+html[data-theme='night'] .personal-workspace .wordbook-status--importing { background: #2b2617; color: #e1cd98; }
+html[data-theme='night'] .personal-workspace .wordbook-status--failed { background: #2b1817; color: #e19898; }
+html[data-theme='night'] .personal-workspace .wordbook-status--deleting { background: #2d2149; color: #be98e1; }
+html[data-theme='night'] .personal-workspace .wordbook-empty-mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .icon-button { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .icon-button:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-choice { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-choice:has(input:checked) { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-task-card { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .progress-track { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-detail-facts div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-entry-list > [role="listitem"] { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .part-of-speech { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-examples { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-preview-summary div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-preview-meta { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-subpanel { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-error-list [role="listitem"] { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-check { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-filter-note { background: #2d2149; color: #e1ca98; }
+html[data-theme='night'] .personal-workspace .wordbook-status--deleted { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .wordbook-definition { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-summary-error { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-warning-list [role="listitem"] { background: #2b2617; color: #e1cc98; }
+html[data-theme='night'] .personal-workspace .wordbook-sample-row { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .wordbook-sample-definitions > div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace input[type="radio"]::after { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .ia-tabs,
+html[data-theme='night'] .personal-workspace .ia-settings-tabs { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .ia-tab--active { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .settings-form legend { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .inline-note { background: #2b2417; color: #e1be98; }
+html[data-theme='night'] .personal-workspace .practice-option__mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option--correct .practice-option__mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-option--wrong .practice-option__mark { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .practice-records-table .link-button { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .background-task__status.is-generating { background: #2b2417; color: #e1c698; }
+html[data-theme='night'] .personal-workspace .background-task__status.is-ready { background: #172b1b; color: #98e1a9; }
+html[data-theme='night'] .personal-workspace .background-task__status.is-failed { background: #2b1a17; color: #e19c98; }
+html[data-theme='night'] .personal-workspace .wordbook-card--compact.wordbook-card--active { background: #2b2617; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-generating { background: #2b2417; color: #e1c698; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-ready { background: #17222b; color: #98bfe1; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-submitted { background: #172b1b; color: #98e1a9; }
+html[data-theme='night'] .personal-workspace .practice-task-status.is-failed { background: #2b1a17; color: #e19c98; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-legend i { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-card { background: #2b2417; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-card.is-unlocked { background: #2d2149; color: #98e1b3; }
+html[data-theme='night'] .personal-workspace .challenge-dsl-card.is-failed { background: #2e1814; color: #e19d98; }
+html[data-theme='night'] .personal-workspace .memory-wrong-detail__word-letters > span.is-wrong { background: #2b1a17; color: #e19c98; }
+html[data-theme='night'] .personal-workspace .crumb-task-list .is-done .crumb-task-icon { background: #2d2149; color: #98e1b3; }
+html[data-theme='night'] .personal-workspace .member-table tbody tr:hover .member-actions-cell { background: #2b2617; }
+html[data-theme='night'] .personal-workspace .field input,
+html[data-theme='night'] .personal-workspace .field textarea,
+html[data-theme='night'] .personal-workspace .field select { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .field input:disabled { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .alert-success { background: #2d2149; color: #98e1c4; }
+html[data-theme='night'] .personal-workspace .inline-note { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .sidebar { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .nav-list a.router-link-active { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .count-pill { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .filter-bar { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .data-table th { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .data-table tbody tr:hover { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .mini-badge { background: #2b2617; color: #e1c898; }
+html[data-theme='night'] .personal-workspace .role-badge--admin { background: #2d2149; color: #98e1c6; }
+html[data-theme='night'] .personal-workspace .role-badge--member { background: #2d2149; color: #98b2e1; }
+html[data-theme='night'] .personal-workspace .status-badge { background: #2d2149; color: #b7a6cf; }
+html[data-theme='night'] .personal-workspace .status-badge--active { background: #172b1d; color: #98e1ba; }
+html[data-theme='night'] .personal-workspace .empty-state { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .summary-grid div { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .row-invalid { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .detail-list { background: #2d2149; }
+html[data-theme='night'] .personal-workspace .secret-list [role="listitem"] { background: #2b2517; }
+html[data-theme='night'] .personal-workspace .secret-value code { background: #2d2149; }/* ---------------------------------------------------------------------------
+ * Surfaces the older layers still paint in literal daylight colours.
+ *
+ * None of these read a token, so they would stay cream on a night page. Each
+ * keeps its own hue instead of turning flat purple — the error plates stay
+ * red, the challenge plates stay gold, the green ones stay green — and the few
+ * that carried their own dark ink get ink that reads on the dark plate.
+ * ------------------------------------------------------------------------- */
+
+/* Hover states and quiet plates. */
+html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link:hover, html[data-theme='night'] .personal-workspace .workspace-concierge-link.member-concierge-link:hover, html[data-theme='night'] .personal-workspace .workspace-profile:hover, html[data-theme='night'] .personal-workspace .workspace-signout:hover, html[data-theme='night'] .personal-workspace .wordbook-tabs [role='button']:hover, html[data-theme='night'] .personal-workspace .practice-type-card:hover, html[data-theme='night'] .personal-workspace .challenge-self-study__card:hover, html[data-theme='night'] .personal-workspace .choice-option:hover, html[data-theme='night'] .personal-workspace .practice-option:hover, html[data-theme='night'] .personal-workspace tbody tr:hover, html[data-theme='night'] .personal-workspace .data-table tbody tr:hover, html[data-theme='night'] .personal-workspace .mistake-table tbody tr:hover {
+  background: #33254f;
+}
+
+/* Rails. */
+html[data-theme='night'] .personal-workspace .workspace-progress,
+html[data-theme='night'] .personal-workspace .workspace-shell .progress,
+html[data-theme='night'] .personal-workspace .crumb-task-progress,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-progress {
+  background: #2b2049;
+}
+
+/* Panels and message plates. */
+html[data-theme='night'] .personal-workspace .today-task-row.is-current,
+html[data-theme='night'] .personal-workspace .today-task-footer,
+html[data-theme='night'] .personal-workspace .coach-message--assistant,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-summary,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-generate,
+html[data-theme='night'] .personal-workspace .wordbook-examples {
+  background: #2d2149;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-map {
+  background: #241a3d;
+}
+
+html[data-theme='night'] .personal-workspace .coach-message--user {
+  background: #26305a;
+}
+
+html[data-theme='night'] .personal-workspace .coach-message--user .coach-message-avatar {
+  background: #3a2f5e;
+}
+
+html[data-theme='night'] .personal-workspace .crumb-ai-note {
+  background: #24331f;
+}
+
+/* Forms. */
+html[data-theme='night'] .personal-workspace input:not([type='checkbox']):not([type='radio']),
+html[data-theme='night'] .personal-workspace textarea,
+html[data-theme='night'] .personal-workspace select {
+  background: #241a3d;
+  border-color: #4a3a70;
+}
+
+html[data-theme='night'] .personal-workspace .field input:disabled,
+html[data-theme='night'] .personal-workspace .field textarea:disabled,
+html[data-theme='night'] .personal-workspace .field select:disabled {
+  background: #2a2240;
+  color: #a496c0;
+}
+
+/* Challenge stops on the embedded map keep their status colour. */
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--completed,
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--completed {
+  background: #1d3a2f;
+}
+
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--unlocked {
+  background: #3a2d16;
+}
+
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--in_progress {
+  background: #3d2a1c;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--boss,
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--boss .challenge-node__status {
+  background: #3a2d16;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node--locked,
+html[data-theme='night'] .personal-workspace .challenge-node--locked,
+html[data-theme='night'] .personal-workspace .crumb-challenge .challenge-node--locked {
+  background: #2a2440;
+  color: #a99dbd;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-node--failed,
+html[data-theme='night'] .personal-workspace .challenge-node__status--failed {
+  background: #3a1f26;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node__status,
+html[data-theme='night'] .personal-workspace .status-badge--muted,
+html[data-theme='night'] .personal-workspace .wordbook-status--deleting,
+html[data-theme='night'] .personal-workspace .challenge-node__status--locked,
+html[data-theme='night'] .personal-workspace .coach-receipt__status--undone {
+  background: #2a2440;
+  color: #b4a3cf;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node__status--completed,
+html[data-theme='night'] .personal-workspace .wordbook-preview-meta .wordbook-pill {
+  background: #1d3a2f;
+  color: #7fe0b0;
+}
+
+html[data-theme='night'] .personal-workspace .challenge-preview-route span {
+  background: #3a2d16;
+  color: #ffd166;
+}
+
+/* Error plates. */
+html[data-theme='night'] .personal-workspace .button-danger,
+html[data-theme='night'] .personal-workspace .practice-generation-state.is-error,
+html[data-theme='night'] .personal-workspace .row-invalid,
+html[data-theme='night'] .personal-workspace .notification-category-option--ai {
+  background: #3a1e26;
+  color: #ffb3ab;
+}
+
+html[data-theme='night'] .personal-workspace .alert-error,
+html[data-theme='night'] .personal-workspace .workspace-shell .alert-error {
+  background: #3a1e26;
+  color: #ffb3ab;
+  border-color: #6d2c34;
+}
+
+html[data-theme='night'] .personal-workspace input[aria-invalid='true'],
+html[data-theme='night'] .personal-workspace textarea[aria-invalid='true'],
+html[data-theme='night'] .personal-workspace select[aria-invalid='true'] {
+  background: #3a1e26;
+}
+
+/* Receipts and notices. */
+html[data-theme='night'] .personal-workspace .coach-receipt {
+  background: #33264a;
+}
+
+html[data-theme='night'] .personal-workspace .coach-action-notice {
+  background: #3a2a1c;
+  color: #ffcf9a;
+}
+
+/* Dialogs keep a plate of their own at night; the ink is already cream, so a
+ * cream panel would swallow it. */
+html[data-theme='night'] .personal-workspace .dialog-card,
+html[data-theme='night'] .personal-workspace .dialog-panel {
+  background: var(--ui-surface);
+  border-color: var(--ui-line);
+  color: var(--ui-ink);
+}
+
+html[data-theme='night'] .personal-workspace .dialog-card :is(dt, dd, h2, h3, strong) {
+  color: var(--ui-ink);
+}
+
+/* Secondary copy that carried its own warm brown ink. */
+html[data-theme='night'] .personal-workspace :is(
+  .crumb-today-note,
+  .crumb-stop-label,
+  .crumb-book-note p,
+  .crumb-ai-note p,
+  .crumb-empty-note p,
+  .crumb-shelf-heading p:last-child,
+  .crumb-wordbooks .wordbook-active-copy p,
+  .crumb-wordbooks .wordbook-entry-count,
+  .crumb-challenge .challenge-page-header .workspace-page-lead,
+  .crumb-challenge .challenge-next-step__copy p,
+  .crumb-challenge .challenge-state-legend,
+  .crumb-challenge .challenge-node__body > p,
+  .challenge-next-step__copy p,
+  .error-notice details,
+  .ia-tab
+) {
+  color: #b7a6cf;
+}
+
+html[data-theme='night'] .personal-workspace :is(
+  .background-task__error,
+  .coach-dictate-error,
+  .coach-dictate.is-listening,
+  .practice-generation-state.is-error strong
+) {
+  color: #ffb3ab;
+}
+
+html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
+  color: #ffb066;
+}
+
+/* The shelf is a shelf of books. Every card keeps the portrait face — phones
+ * included — instead of collapsing to a spine, so the drawn cover has a shape
+ * to sit in and the title reads like a title on a cover. */
+/* Standing books need a shelf: the page fills across with as many books as
+ * fit, and the card itself is the book — no plate, no border, no body. */
+.personal-workspace .crumb-wordbooks .wordbook-grid,
+.personal-workspace .member-wordbooks-page .wordbook-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
+  gap: 24px 18px;
+}
+
+.personal-workspace .wordbook-grid .wordbook-card {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  /* The shared card plate is declared further up the cascade; the shelf's
+   * book is an object on the page, so the plate is switched off here. */
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.25, 1.05);
+}
+
+.personal-workspace .wordbook-grid .wordbook-card:hover { transform: translateY(-6px); }
+.personal-workspace .wordbook-grid .wordbook-card:active { transform: translateY(-2px); }
+
+.personal-workspace .wordbook-grid .wordbook-card:focus-visible { outline: none; }
+
+.personal-workspace .wordbook-grid .wordbook-card:focus-visible .wordbook-cover {
+  outline: 3px solid var(--g-blue, #1cb0f6);
+  outline-offset: 7px;
+}
+
+/* The cover is the object: the drawn binding, and nothing printed on it but
+ * the book's own name. */
+/* One binding for every book while the art set has only one: the cover's own
+ * colour sits under the artwork so the old per-type tints cannot show through
+ * the painted smoke. */
+.personal-workspace .wordbook-grid .wordbook-cover {
+  /* The book is an object on the page now; nothing sits behind it. */
+  background: none !important;
+}
+
+.personal-workspace .wordbook-grid .wordbook-cover {
+  position: relative;
+  display: block;
+  aspect-ratio: 2 / 3;
+  overflow: visible;
+  border-radius: 0;
+  /* No plate and no offset board: the shadow follows the book's silhouette. */
+  box-shadow: none;
+}
+
+.personal-workspace .wordbook-cover__art {
+  filter: drop-shadow(0 10px 12px rgb(59 42 26 / 26%));
+}
+
+.personal-workspace .wordbook-cover__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.personal-workspace .wordbook-cover__art .art-swap,
+.personal-workspace .wordbook-cover__art .art-swap__stack {
+  width: 100%;
+  height: 100%;
+}
+
+.personal-workspace .wordbook-cover__art .art-swap__frame {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* The name is written on the cover, top and centre, with nothing behind it:
+ * the shadow is what carries it over the leather. */
+.personal-workspace .wordbook-cover__name {
+  position: absolute;
+  top: 15%;
+  right: 13%;
+  left: 20%;
+  z-index: 1;
+  color: #fbf2da;
+  font-size: clamp(0.95rem, 1.7vw, 1.12rem);
+  font-weight: 900;
+  line-height: 1.32;
+  text-align: center;
+  text-shadow: 0 2px 3px rgb(0 0 0 / 60%), 0 0 12px rgb(0 0 0 / 40%);
+}
+
+/* The book in use is the one that glows, and the one with the bookmark in it. */
+.personal-workspace .wordbook-card--active .wordbook-cover {
+  box-shadow: 6px 8px 0 rgb(59 42 26 / 16%), 0 0 0 3px #ffd166, 0 0 30px 8px rgb(255 200 0 / 45%);
+  animation: wordbook-current 3s ease-in-out infinite;
+}
+
+/* A real element, not a pseudo: the older reset nulls `::after` content. */
+.personal-workspace .wordbook-cover__bookmark {
+  position: absolute;
+  top: 0;
+  right: 17%;
+  z-index: 2;
+  width: 18px;
+  height: 52px;
+  background: linear-gradient(180deg, #ffe08a, #e0a800);
+  box-shadow: 0 3px 4px rgb(0 0 0 / 28%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%);
+  pointer-events: none;
+}
+
+@keyframes wordbook-current {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .wordbook-card--active .wordbook-cover { animation: none; }
+  .personal-workspace .wordbook-grid .wordbook-card { transition: none; }
 }
 
 /* --------------------------------------------------------------- book cards */
@@ -1142,49 +1702,6 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
 }
 
 .personal-workspace .workspace-nav-link:active { transform: translateY(2px); }
-
-/* ------------------------------------------------- memory stage cards + nav */
-
-.personal-workspace .memory-action-card {
-  min-height: 84px;
-  border: 2px solid var(--ui-line) !important;
-  border-radius: 16px !important;
-  background: var(--ui-surface) !important;
-  box-shadow: 0 3px 0 var(--ui-line) !important;
-  transition: transform 90ms ease, box-shadow 90ms ease;
-}
-
-.personal-workspace .memory-action-card:nth-child(1) {
-  border-color: var(--g-blue-edge) !important;
-  box-shadow: 0 3px 0 var(--g-blue-edge) !important;
-}
-
-.personal-workspace .memory-action-card:nth-child(1) .memory-action-icon { color: var(--g-blue-edge); }
-
-.personal-workspace .memory-action-card:nth-child(2) {
-  border-color: var(--g-green-edge) !important;
-  box-shadow: 0 3px 0 var(--g-green-edge) !important;
-}
-
-.personal-workspace .memory-action-card:nth-child(2) .memory-action-icon { color: var(--g-green-edge); }
-
-.personal-workspace .memory-action-card:nth-child(3) {
-  border-color: var(--g-orange-edge) !important;
-  box-shadow: 0 3px 0 var(--g-orange-edge) !important;
-}
-
-.personal-workspace .memory-action-card:nth-child(3) .memory-action-icon { color: var(--g-orange-edge); }
-
-.personal-workspace .memory-action-card:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ui-line) !important; }
-
-.personal-workspace .memory-action-icon {
-  display: grid;
-  width: 26px;
-  height: 26px;
-  place-items: center;
-  border: 0;
-  background: transparent;
-}
 
 /* Mobile tab bar: the active stop lifts out of the bar. */
 .personal-workspace .workspace-mobile-nav {
@@ -2147,10 +2664,6 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
 .personal-workspace .practice-record-list strong { font-size: 0.95rem; }
 .personal-workspace .practice-record-list small { font-size: 0.8rem; }
 .personal-workspace .practice-record-type { font-size: 0.78rem; }
-
-.personal-workspace .memory-action-card .module-card__title { font-size: 1rem; }
-.personal-workspace .memory-action-card .module-card__hint { font-size: 0.84rem; }
-.personal-workspace .memory-action-card .memory-action-copy span { font-size: 0.84rem; }
 .personal-workspace .memory-main-card .workspace-section-header h2 { font-size: 1.15rem; }
 
 /* Badges read on the paper body, not on the dark cover. */
@@ -3230,124 +3743,6 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
 }
 
 .personal-workspace .practice-option__text { line-height: 1.45; }
-
-/* ------------------------------------- learning centre: table-style chooser */
-
-.personal-workspace .practice-chooser { display: grid; gap: 0; }
-
-.personal-workspace .practice-chooser__tabs {
-  display: flex;
-  gap: 4px;
-  padding-left: 0;
-  border-bottom: 2px solid var(--ui-line);
-}
-
-.personal-workspace .practice-chooser__tab {
-  padding: 9px 22px;
-  border: 2px solid transparent;
-  border-bottom: 0;
-  border-radius: 12px 12px 0 0;
-  background: transparent;
-  color: var(--ui-muted);
-  font-size: 0.95rem;
-  font-weight: 850;
-  cursor: pointer;
-}
-
-.personal-workspace .practice-chooser__tab.is-active {
-  margin-bottom: -2px;
-  border-color: var(--ui-line);
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  box-shadow: inset 0 -3px 0 var(--g-orange-edge);
-}
-
-.personal-workspace .practice-chooser__panel {
-  padding: 14px 0 0;
-  border: 2px solid var(--ui-line);
-  border-top: 0;
-  border-radius: 0 0 var(--ui-radius-md) var(--ui-radius-md);
-  background: var(--ui-surface);
-}
-
-.personal-workspace .practice-chooser__rows { display: grid; gap: 8px; }
-
-.personal-workspace .practice-chooser__row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px solid var(--ui-line);
-  border-radius: 12px;
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  text-align: left;
-  cursor: pointer;
-}
-
-.personal-workspace .practice-chooser__row:hover:not(:disabled) {
-  border-color: var(--ui-line-strong);
-  background: var(--ui-surface-subtle);
-}
-.personal-workspace .practice-chooser__row:disabled { opacity: 0.55; cursor: not-allowed; }
-
-.personal-workspace .practice-chooser__mark {
-  display: grid;
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1.5px solid var(--ui-line-strong);
-  border-radius: 10px;
-  background: #fffaf0;
-}
-
-.personal-workspace .practice-chooser__copy { display: grid; flex: 1 1 auto; gap: 1px; }
-.personal-workspace .practice-chooser__copy strong { font-size: 0.95rem; }
-.personal-workspace .practice-chooser__copy small { color: var(--ui-muted); font-size: 0.8rem; }
-.personal-workspace .practice-chooser__state { flex: 0 0 auto; color: var(--ui-muted); font-size: 0.8rem; font-weight: 800; }
-
-.personal-workspace .practice-chooser__types {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.personal-workspace .practice-chooser__type {
-  display: grid;
-  gap: 1px;
-  padding: 9px 12px;
-  border: 2px solid var(--ui-line);
-  border-radius: 12px;
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  text-align: left;
-  cursor: pointer;
-}
-
-.personal-workspace .practice-chooser__type strong { font-size: 0.95rem; }
-.personal-workspace .practice-chooser__type small { color: var(--ui-muted); font-size: 0.78rem; }
-.personal-workspace .practice-chooser__type.is-selected { border-color: var(--g-blue-edge); background: var(--g-blue-soft); }
-
-.personal-workspace .practice-chooser__footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: 12px;
-}
-
-.personal-workspace .practice-chooser__count {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-right: auto;
-  font-weight: 800;
-}
-
-.personal-workspace .practice-chooser__count select { width: auto; min-width: 110px; }
 
 @media (max-width: 860px) {
   .personal-workspace .practice-chooser__types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -4872,39 +5267,6 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
   .personal-workspace .memory-action-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
-  }
-
-  .personal-workspace .memory-action-card {
-    grid-template-columns: minmax(0, 1fr) 18px;
-    grid-template-areas:
-      "icon arrow"
-      "copy copy"
-      "status status";
-    align-content: start;
-    row-gap: 10px;
-    min-height: 176px;
-    padding: 16px;
-  }
-
-  .personal-workspace .memory-action-card .memory-action-icon {
-    grid-area: icon;
-    width: 36px;
-    height: 36px;
-  }
-
-  .personal-workspace .memory-action-card .memory-action-copy { grid-area: copy; }
-
-  .personal-workspace .memory-action-card .memory-action-status {
-    grid-area: status;
-    display: grid;
-    gap: 2px;
-    justify-items: start;
-    text-align: left;
-  }
-
-  .personal-workspace .memory-action-card > svg {
-    grid-area: arrow;
-    align-self: start;
   }
 }
 

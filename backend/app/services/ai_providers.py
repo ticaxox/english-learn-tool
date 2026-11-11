@@ -42,6 +42,7 @@ def _response(provider: AiProvider) -> ProviderResponse:
         timeout_seconds=provider.timeout_seconds,
         enabled=provider.enabled,
         custom_headers=provider.custom_headers,
+        embedding_model=provider.embedding_model,
         last_test_status=provider.last_test_status,
         last_test_error_code=provider.last_test_error_code,
         last_test_at=provider.last_test_at,
@@ -143,6 +144,7 @@ async def create_provider(
         timeout_seconds=payload.timeout_seconds,
         enabled=payload.enabled,
         custom_headers=payload.custom_headers,
+        embedding_model=payload.embedding_model,
         created_by=actor.id,
     )
     session.add(provider)
@@ -209,6 +211,8 @@ async def update_provider(
         provider.timeout_seconds = payload.timeout_seconds
     if payload.custom_headers is not None:
         provider.custom_headers = payload.custom_headers
+    if payload.embedding_model is not None:
+        provider.embedding_model = payload.embedding_model.strip() or None
     if payload.enabled is not None:
         provider.enabled = payload.enabled
     if payload.is_default is True:

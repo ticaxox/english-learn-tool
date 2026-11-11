@@ -20,7 +20,7 @@ from app.services.practice_authoring import AuthoredPracticeRequest, create_auth
 
 PRACTICE_TYPES = ["fill_blank", "reading", "translation", "writing"]
 PRACTICE_SOURCES = ["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
-DIFFICULTIES = ["CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
+DIFFICULTIES = ["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
 
 TOOL_SPECS: dict[str, dict[str, Any]] = {
     "adjust_daily_plan": {
@@ -149,7 +149,7 @@ async def call_coach_tool(
                 message="A search query is required.",
             )
         limit = int((arguments or {}).get("limit") or 6)
-        hits = await search(session, settings, query=query, limit=min(limit, 10))
+        hits = await search(session, settings, query=query, limit=min(limit, 10), viewer=user)
         return {
             "items": [
                 {

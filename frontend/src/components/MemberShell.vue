@@ -2,9 +2,11 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
+import ThemeSwitch from './ThemeSwitch.vue'
 import CoachView from '../views/CoachView.vue'
 import CrumboMark from './CrumboMark.vue'
-import { useMode } from '../composables/useMode'
+import { getActivePinia } from 'pinia'
+import { useAuthStore } from '../stores/auth'
 
 const props = defineProps<{
   displayName: string
@@ -13,8 +15,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{ signout: [] }>()
 
-const { isNight, toggle } = useMode()
 const route = useRoute()
+// Tests mount the shell without a Pinia; the admin link is simply absent there.
+const auth = getActivePinia() ? useAuthStore() : null
 const profileOpen = ref(false)
 const coachOpen = ref(false)
 const profileArea = ref<HTMLElement | null>(null)
@@ -243,16 +246,7 @@ onBeforeUnmount(() => {
           <span>{{ currentDate }}</span>
         </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
-          <DivButton
-            class="workspace-mode-button ia-mode-toggle"
-            type="button"
-            :aria-label="isNight ? '切换到白天' : '切换到夜晚'"
-            :aria-pressed="isNight"
-            @click="toggle"
-          >
-            <AppIcon :name="isNight ? 'sun' : 'moon'" />
-            <span>{{ isNight ? '白天' : '夜晚' }}</span>
-          </DivButton>
+          <ThemeSwitch />
 
           <DivButton
             class="workspace-coach-button member-concierge-button ia-coach-toggle"
@@ -285,6 +279,14 @@ onBeforeUnmount(() => {
                 <strong>{{ displayName }}</strong>
                 <span>@{{ username }}</span>
               </div>
+              <RouterLink
+                v-if="auth?.isAdmin"
+                role="menuitem"
+                to="/admin/users"
+                @click="closeProfile"
+              >
+                管理后台
+              </RouterLink>
               <RouterLink role="menuitem" to="/settings/learning" @click="closeProfile">学习设置</RouterLink>
               <RouterLink role="menuitem" to="/settings/security" @click="closeProfile">账户安全</RouterLink>
               <DivButton type="button" role="menuitem" class="ia-profile-signout" @click="emit('signout')">退出登录</DivButton>

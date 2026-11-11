@@ -9,7 +9,6 @@ import {
   canExportWordbook,
   listWordbooks,
   type Wordbook,
-  type WordbookStatus,
 } from '../api/wordbooks'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -19,6 +18,7 @@ import WordbookExportDialog from '../components/WordbookExportDialog.vue'
 import WordbookImportDialog from '../components/WordbookImportDialog.vue'
 import WordbookShelfCard from '../components/WordbookShelfCard.vue'
 import AppIcon from '../components/AppIcon.vue'
+import GameHud from '../components/GameHud.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 
 const PAGE_SIZE = 12
@@ -70,44 +70,11 @@ const pageSummary = computed(() => {
   return `${start}–${end} / 共 ${filteredBooks.value.length} 本`
 })
 
-const statusLabels: Record<WordbookStatus, string> = {
-  importing: '导入中',
-  ready: '可用',
-  failed: '导入失败',
-  deleting: '删除中',
-  deleted: '已删除',
-}
-
 function coverMark(name: string | undefined): string {
   if (!name) return 'W'
   const lastToken = name.trim().split(/\s+/).at(-1) ?? ''
   if (/^\d{2,}$/.test(lastToken)) return lastToken.slice(-2)
   return name.trim().slice(0, 1).toUpperCase() || 'W'
-}
-
-function statusLabel(status: WordbookStatus): string {
-  return statusLabels[status]
-}
-
-function statusDescription(book: Wordbook): string {
-  if (book.status === 'importing') {
-    return '后台正在导入，完成前不可激活'
-  }
-  if (book.status === 'failed') {
-    return '导入失败；请删除后重新创建'
-  }
-  if (book.status === 'deleting') {
-    return '后台正在清理，操作已暂停'
-  }
-  if (book.status === 'deleted') {
-    return '删除处理中'
-  }
-  return `${book.entry_count.toLocaleString('zh-CN')} 个词条`
-}
-
-function formatDate(value: string): string {
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('zh-CN')
 }
 
 function canExport(book: Wordbook): boolean {
@@ -223,6 +190,8 @@ onMounted(() => {
 
 <template>
   <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page crumb-wordbooks">
+    <GameHud />
+
     <header class="crumb-shelf-header">
       <div class="crumb-shelf-heading">
         <CrumboMark size="medium" />
@@ -294,22 +263,10 @@ onMounted(() => {
         <section v-if="filteredBooks.length" class="wordbook-group" aria-label="词书书架">
           <div class="wordbook-grid">
             <WordbookShelfCard
-              v-for="(book, index) in visibleBooks"
+              v-for="book in visibleBooks"
               :key="book.id"
               :book="book"
-              :status-label="statusLabel(book.status)"
-              :status-description="statusDescription(book)"
-              :formatted-date="formatDate(book.updated_at)"
-              :can-activate="canActivateWordbook(book)"
-              :can-export="canExport(book)"
-              :can-delete="canDelete(book)"
-              :activating="activatingId === book.id"
-              compact
-              :sequence="pageOffset + index + 1"
               @detail="detailId = book.id"
-              @activate="activate(book)"
-              @export="exportTarget = book"
-              @delete="deleteTarget = book"
             />
           </div>
         </section>

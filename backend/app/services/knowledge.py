@@ -129,7 +129,10 @@ async def _embed(
 
 
 async def import_document(
-    session: AsyncSession, settings: Settings, admin: User, payload: KnowledgeImportRequest
+    session: AsyncSession,
+    settings: Settings,
+    admin: User,
+    payload: KnowledgeImportRequest,
 ) -> KnowledgeDocumentResponse:
     require_admin(admin)
     chunks = split_text(payload.content)
@@ -279,11 +282,13 @@ async def search(
     limit: int = 6,
     min_score: float = 0.12,
 ) -> list[RetrievedChunk]:
+    # The corpus is exam papers only, so every ready document is fair game.
+    filters = [KnowledgeDocument.status == "ready"]
     rows = (
         await session.execute(
             select(KnowledgeChunk, KnowledgeDocument.title)
             .join(KnowledgeDocument, KnowledgeDocument.id == KnowledgeChunk.document_id)
-            .where(KnowledgeDocument.status == "ready")
+            .where(*filters)
         )
     ).all()
     if not rows:

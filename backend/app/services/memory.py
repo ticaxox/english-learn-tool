@@ -341,6 +341,22 @@ def _stable_options(correct: str, pool: list[str], entry_id: UUID) -> list[str]:
     return options
 
 
+PROMPT_SIDES = ("headword", "definition", "phonetic")
+
+
+def _pick_prompt_type(value: object) -> str:
+    """Choose one of the enabled prompt sides; unknown values fall back to a word prompt."""
+    if isinstance(value, str):
+        candidates = [item for item in value.split(",") if item in PROMPT_SIDES]
+    elif isinstance(value, list):
+        candidates = [str(item) for item in value if str(item) in PROMPT_SIDES]
+    else:
+        candidates = []
+    if not candidates:
+        candidates = ["definition"]
+    return random.choice(candidates)
+
+
 async def _card_prompt(
     session: AsyncSession,
     item: MemorySessionItem,
@@ -354,10 +370,18 @@ async def _card_prompt(
     definition_zh = definition.definition_zh if definition else None
     part_of_speech = definition.part_of_speech if definition else None
     if module == "flashcard":
+        # The learner picks which sides may be shown; unset means every side.
+        front = _pick_prompt_type(preferences.get("flashcard_prompt_types"))
+        if front == "definition" and definition_zh:
+            prompt, label = definition_zh, "definition"
+        elif front == "phonetic" and entry.phonetic:
+            prompt, label = entry.phonetic, "phonetic"
+        else:
+            prompt, label = entry.headword, "headword"
         return SessionCardPrompt(
             module="flashcard",
-            prompt=entry.headword,
-            prompt_label="headword",
+            prompt=prompt,
+            prompt_label=label,
             phonetic=entry.phonetic,
             part_of_speech=part_of_speech,
         )
@@ -376,10 +400,29 @@ async def _card_prompt(
             phonetic=entry.phonetic,
             part_of_speech=part_of_speech,
         )
-    prompt_type = preferences.get("choice_prompt", "definition")
-    if prompt_type not in {"headword", "definition"}:
+    prompt_type = _pick_prompt_type(
+        preferences.get("choice_prompt_types") or preferences.get("choice_prompt")
+    )
+    if prompt_type not in {"headword", "definition", "phonetic"}:
         prompt_type = "definition"
-    if prompt_type == "headword" or definition_zh is None:
+    if prompt_type == "phonetic" and entry.phonetic:
+        pool = list(
+            (
+                await session.scalars(
+                    select(WordbookEntry.headword)
+                    .where(
+                        WordbookEntry.wordbook_id == book.id,
+                        WordbookEntry.id != entry.id,
+                    )
+                    .order_by(WordbookEntry.sequence)
+                    .limit(MAX_OPTIONS * 3)
+                )
+            ).all()
+        )
+        correct = entry.headword
+        prompt = entry.phonetic
+        prompt_label = "phonetic"
+    elif prompt_type == "headword" or definition_zh is None:
         pool = list(
             (
                 await session.scalars(

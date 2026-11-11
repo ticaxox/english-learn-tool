@@ -1,0 +1,497 @@
+/* ============================================================
+   Game shell: the HUD, the crumb economy and the reward motion.
+   Loaded after the legacy layers so it only adds, never fights.
+   ============================================================ */
+
+.personal-workspace {
+  --game-ink: #2b1d0f;
+  --game-paper: #fffaf0;
+  --game-line: #e8d7bb;
+  --game-gold: #e9b43b;
+  --game-gold-deep: #b4770a;
+  --game-forest: #2f6e33;
+  --game-forest-soft: #e3f0e1;
+  --game-flame: #e8590c;
+  --game-shadow: 0 6px 0 rgb(59 42 26 / 12%);
+}
+
+/* --------------------------------------------------------------- HUD */
+
+/* The HUD's own tokens follow the theme, so the bar relights with the page. */
+html[data-theme='night'] .personal-workspace {
+  --game-ink: #e8dcf5;
+  --game-paper: #251a44;
+  --game-shadow: 0 6px 0 rgb(8 3 20 / 55%);
+}
+
+html[data-theme='night'] .personal-workspace .game-hud {
+  border-color: #4d3f70;
+  background:
+    radial-gradient(circle at 92% -20%, rgb(255 200 0 / 16%), transparent 12rem),
+    linear-gradient(180deg, #2b1e4d, #211639);
+}
+
+.personal-workspace .game-hud {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 14px 20px;
+  border: 2px solid var(--game-ink);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 92% -20%, rgb(233 180 59 / 30%), transparent 12rem),
+    linear-gradient(180deg, #fffdf6, #fdf3e0);
+  box-shadow: var(--game-shadow);
+}
+
+.personal-workspace .hud-player {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+.personal-workspace .hud-level {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--game-gold-deep) var(--fill, 0%), rgb(43 29 15 / 12%) 0);
+  box-shadow: inset 0 0 0 2px rgb(43 29 15 / 10%);
+}
+
+.personal-workspace .hud-level__inner {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--game-paper);
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 80%);
+  line-height: 1;
+}
+
+.personal-workspace .hud-level__inner small {
+  color: var(--game-gold-deep);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.personal-workspace .hud-level__inner strong { font-size: 20px; font-weight: 900; }
+
+.personal-workspace .hud-ident { display: grid; gap: 4px; min-width: 0; }
+.personal-workspace .hud-title { font-size: 15px; font-weight: 900; letter-spacing: -0.01em; }
+
+.personal-workspace .hud-xp {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: center;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.personal-workspace .hud-xp__track {
+  position: relative;
+  flex: 0 0 clamp(120px, 18vw, 240px);
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(43 29 15 / 10%);
+  box-shadow: inset 0 1px 2px rgb(43 29 15 / 12%);
+}
+
+.personal-workspace .hud-xp__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--game-gold), #f6d47a);
+  box-shadow: 0 0 8px rgb(233 180 59 / 60%);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.personal-workspace .hud-xp em { color: var(--game-ink); font-style: normal; font-weight: 900; }
+.personal-workspace .hud-xp i { font-style: normal; }
+
+.personal-workspace .hud-stats {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.personal-workspace .hud-stat {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  min-width: 66px;
+  padding: 6px 10px;
+  border: 1.5px dashed var(--game-line);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 70%);
+  line-height: 1.1;
+}
+
+.personal-workspace .hud-stat strong { font-size: 17px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.personal-workspace .hud-stat span:last-child { color: var(--ui-muted); font-size: 10px; }
+.personal-workspace .hud-stat svg { width: 15px; height: 15px; color: var(--game-gold-deep); }
+.personal-workspace .hud-stat--streak.is-hot { border-color: rgb(232 89 12 / 45%); background: rgb(255 243 235 / 90%); }
+/* The stat chips are white plates by day; on the night plate they turn to
+ * glass, or their cream ink would disappear into them. */
+html[data-theme='night'] .personal-workspace .hud-stat {
+  border-color: #4d3f70;
+  background: rgb(255 255 255 / 8%);
+}
+
+html[data-theme='night'] .personal-workspace .hud-stat strong { color: var(--ui-ink); }
+
+html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
+  border-color: rgb(255 150 60 / 55%);
+  background: rgb(255 150 60 / 14%);
+}
+
+.personal-workspace .hud-flame { font-size: 14px; line-height: 1; }
+.personal-workspace .hud-stat--streak.is-hot .hud-flame { animation: hud-flicker 1.8s ease-in-out infinite; }
+
+@keyframes hud-flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); filter: saturate(1); }
+  50% { transform: scale(1.12) rotate(2deg); filter: saturate(1.3); }
+}
+
+.personal-workspace .hud-crumbo { display: block; opacity: 0.95; }
+
+@media (max-width: 1100px) {
+  .personal-workspace .game-hud { grid-template-columns: minmax(0, 1fr) auto; }
+  .personal-workspace .hud-crumbo { display: none; }
+}
+
+@media (max-width: 760px) {
+  .personal-workspace .game-hud { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .personal-workspace .hud-stats { justify-content: space-between; }
+  .personal-workspace .hud-stat { flex: 1 1 0; min-width: 0; }
+}
+
+/* --------------------------------------------------- reward burst dots */
+
+.game-burst-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+
+.game-burst-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--game-gold, #e9b43b);
+  box-shadow: 0 0 6px rgb(233 180 59 / 80%);
+}
+
+/* ------------------------------------------------------- task rows */
+
+.personal-workspace .crumb-merged .crumb-task-row {
+  position: relative;
+  border-radius: 10px;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.personal-workspace .crumb-merged .crumb-task-row:hover {
+  background: rgb(233 180 59 / 10%);
+  transform: translateX(2px);
+}
+
+.personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-title {
+  color: var(--ui-muted);
+  text-decoration: line-through;
+  text-decoration-color: rgb(47 110 51 / 45%);
+}
+
+/* A finished task pops its checkmark once. */
+.personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-state {
+  animation: task-check-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes task-check-pop {
+  0% { transform: scale(0.4); }
+  70% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* ---------------------------------------------------- memory feedback */
+
+/* The wrong-answer card slides in instead of appearing abruptly. */
+.personal-workspace .memory-wrong-detail__card {
+  animation: wrong-card-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes wrong-card-in {
+  0% { transform: translateY(14px) scale(0.97); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+/* A correct choice flashes green for a beat before the next card. */
+.personal-workspace .choice-option.is-correct,
+.personal-workspace .practice-option--correct {
+  animation: correct-flash 0.5s ease-out;
+}
+
+@keyframes correct-flash {
+  0% { box-shadow: 0 0 0 0 rgb(47 110 51 / 55%); }
+  100% { box-shadow: 0 0 0 12px rgb(47 110 51 / 0%); }
+}
+
+/* Spelling cells pop after each accepted letter. */
+.personal-workspace .spelling-cell.is-filled {
+  animation: cell-pop 0.22s ease-out;
+}
+
+@keyframes cell-pop {
+  0% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+
+/* ------------------------------------------------- page + control motion */
+
+/* The router transition already exists; give it a springier curve. */
+.crumb-page-enter-active { transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+.crumb-page-leave-active { transition: opacity 0.16s ease; }
+.crumb-page-enter-from { opacity: 0; transform: translateY(10px); }
+.crumb-page-leave-to { opacity: 0; }
+
+/* Every primary action compresses a little when pressed. */
+.personal-workspace :where(.button, .button-secondary, .member-primary-button, .div-button) {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
+}
+
+.personal-workspace :where(.button, .member-primary-button):active {
+  transform: translateY(2px) scale(0.985);
+}
+
+/* The goal ring fills rather than jumping. */
+.personal-workspace .goal-ring circle {
+  transition: stroke-dasharray 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace *,
+  .personal-workspace *::before,
+  .personal-workspace *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ----------------------------------------------------- quest board */
+
+/* Each quest is a row with a progress rail, not a bare text line. */
+.personal-workspace .crumb-merged .crumb-task-row {
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 12px 8px;
+}
+
+.personal-workspace .crumb-merged .crumb-task-body { display: grid; gap: 5px; min-width: 0; }
+.personal-workspace .crumb-merged .crumb-task-title { font-size: 14px; font-weight: 700; }
+
+.personal-workspace .crumb-merged .crumb-task-bar {
+  position: relative;
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(43 29 15 / 8%);
+}
+
+.personal-workspace .crumb-merged .crumb-task-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--game-forest, #2f6e33), #6fbf73);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-bar > span {
+  background: linear-gradient(90deg, var(--game-gold, #e9b43b), #f6d47a);
+}
+
+.personal-workspace .crumb-merged .crumb-task-state {
+  width: 26px;
+  height: 26px;
+  font-size: 12px;
+  font-weight: 900;
+  border-width: 2px;
+}
+
+/* The board keeps a comfortable minimum so the right rail is not a stub. */
+.personal-workspace .crumb-today-board.crumb-merged { min-height: 340px; }
+.personal-workspace .crumb-merged-side { align-self: stretch; }
+
+/* Reward tag above a node, so the map reads as a level select. */
+.personal-workspace .challenge-dsl-reward {
+  position: absolute;
+  top: -14px;
+  right: -6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--game-gold, #e9b43b);
+  box-shadow: 0 2px 0 var(--game-gold-deep, #b4770a);
+  color: #3b2a0a;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.personal-workspace .challenge-dsl-reward.is-earned {
+  background: var(--game-forest, #2f6e33);
+  box-shadow: 0 2px 0 #1d4a21;
+  color: #f3fbf3;
+}
+
+/* ------------------------------------------------------ level-up moment */
+
+.levelup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgb(43 29 15 / 45%);
+  backdrop-filter: blur(2px);
+}
+
+.levelup-card {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 32px 44px 24px;
+  border: 3px solid var(--game-gold, #e9b43b);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 50% 0%, rgb(233 180 59 / 35%), transparent 12rem),
+    var(--game-paper, #fffaf0);
+  box-shadow: 0 12px 0 rgb(43 29 15 / 25%);
+  text-align: center;
+}
+
+.levelup-kicker {
+  margin: 6px 0 0;
+  color: var(--game-gold-deep, #b4770a);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+}
+
+.levelup-card h2 {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.levelup-title { margin: 2px 0 0; font-size: 16px; font-weight: 800; }
+.levelup-hint { margin: 10px 0 0; color: var(--ui-muted); font-size: 11px; }
+
+/* ------------------------------------------------------- sidebar + nav */
+
+/* The active destination gets a small level-plate look instead of a flat tint. */
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active {
+  border-color: var(--game-ink, #2b1d0f);
+  background: linear-gradient(180deg, #fffdf6, #f7ebd6);
+  box-shadow: 0 4px 0 rgb(43 29 15 / 14%);
+  color: var(--game-ink, #2b1d0f);
+  font-weight: 900;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link svg { color: currentColor; }
+
+/* Mobile bottom nav reads as four chunky buttons. */
+.personal-workspace .member-mobile-nav a {
+  border-radius: 14px;
+  transition: transform 0.12s ease, background 0.18s ease;
+}
+
+.personal-workspace .member-mobile-nav a:active { transform: scale(0.94); }
+
+/* The brand mark is the game's crest: a soft glow behind the cat. */
+.personal-workspace .workspace-brand-mark {
+  filter: drop-shadow(0 2px 0 rgb(43 29 15 / 12%));
+}
+
+/* ------------------------------------------------------------ empty states */
+
+.personal-workspace .crumb-empty-note {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 22px 24px;
+  border: 2px dashed var(--game-line, #e8d7bb);
+  border-radius: 18px;
+  background: var(--game-paper, #fffaf0);
+}
+
+.personal-workspace .crumb-empty-note strong { font-size: 16px; font-weight: 900; }
+
+/* ------------------------------------------------- practice type pills */
+
+/* Each exercise type is a small tile: icon plate, label, colour per type. */
+.personal-workspace .practice-type-pill {
+  border-radius: 16px;
+  box-shadow: 0 3px 0 rgb(43 29 15 / 8%);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.15s ease;
+}
+
+.personal-workspace .practice-type-pill:hover { transform: translateY(-2px); }
+
+.personal-workspace .practice-type-pill.is-active {
+  box-shadow: 0 4px 0 rgb(43 29 15 / 18%);
+  transform: translateY(-1px);
+}
+
+.personal-workspace .practice-type-pill:active { transform: translateY(1px); box-shadow: none; }
+
+/* ---------------------------------------------------------- submit plate */
+
+.personal-workspace .practice-submit-button {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.personal-workspace .practice-submit-button:active { transform: translateY(3px); box-shadow: none; }
+
+/* Crumbo's line fills the board's lower left with something worth reading. */
+.personal-workspace .crumb-tip {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: auto;
+  padding: 12px 14px;
+  border: 1.5px dashed var(--game-line, #e8d7bb);
+  border-radius: 14px;
+  background: rgb(255 250 240 / 85%);
+}
+
+.personal-workspace .crumb-tip p { margin: 0; color: var(--ui-muted); font-size: 13px; line-height: 1.5; }
+
+.personal-workspace .hud-flame {
+  width: 15px;
+  height: 15px;
+  fill: var(--g-orange);
+  flex: 0 0 auto;
+}

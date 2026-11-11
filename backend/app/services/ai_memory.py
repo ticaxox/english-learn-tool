@@ -29,6 +29,7 @@ PREFERENCE_PREFIX = "习惯偏好："
 APPEND_PREFIXES = ("做题：", "对话：", "用户要求：")
 
 EXAM_LABELS = {
+    "GAOKAO": "高考",
     "CET4": "四级",
     "CET6": "六级",
     "POSTGRAD": "考研",

@@ -64,6 +64,30 @@ export const useAuthStore = defineStore('auth', () => {
     return currentUser
   }
 
+  /** Create a member account and use the returned session straight away. */
+  async function register(credentials: LoginCredentials): Promise<CurrentUser> {
+    status.value = 'loading'
+    lastError.value = null
+    try {
+      const payload = await apiClient.post<unknown>(
+        '/auth/register',
+        credentials,
+        { skipAuthRefresh: true, retryCount: 0 },
+      )
+      applyTokenResponse(payload)
+      const currentUser = await loadCurrentUser()
+      status.value = 'authenticated'
+      initialized.value = true
+      return currentUser
+    } catch (error) {
+      user.value = null
+      apiClient.clearCredentials()
+      status.value = isApiError(error) && error.status === 409 ? 'anonymous' : 'error'
+      lastError.value = error
+      throw error
+    }
+  }
+
   async function login(credentials: LoginCredentials): Promise<CurrentUser> {
     status.value = 'loading'
     lastError.value = null
@@ -239,6 +263,7 @@ export const useAuthStore = defineStore('auth', () => {
     mustChangePassword,
     displayName,
     login,
+    register,
     logout,
     restoreSession,
     ensureInitialized,

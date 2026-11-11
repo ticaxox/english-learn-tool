@@ -33,6 +33,7 @@ class UserGameStats(Base):
         CheckConstraint("level >= 1", name="level_positive"),
         CheckConstraint("streak >= 0", name="streak_nonnegative"),
         CheckConstraint("streak_best >= 0", name="streak_best_nonnegative"),
+        CheckConstraint("freeze_tokens >= 0", name="freeze_tokens_nonnegative"),
     )
 
     user_id: Mapped[UUID] = mapped_column(
@@ -51,6 +52,11 @@ class UserGameStats(Base):
     streak_best: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")
     )
+    # One "护身符" per month lets a missed day keep the streak alive.
+    freeze_tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1, server_default=text("1")
+    )
+    freeze_granted_month: Mapped[str | None] = mapped_column(String(7))
     last_active_day: Mapped[date | None] = mapped_column(Date)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
@@ -104,3 +110,20 @@ class DailyQuest(Base):
         Integer, nullable=False, default=1, server_default=text("1")
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class UserAchievement(Base):
+    """A badge that was earned once and stays earned."""
+
+    __tablename__ = "user_achievements"
+    __table_args__ = (Index("ix_user_achievements_user", "user_id", "unlocked_at"),)
+
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    badge_key: Mapped[str] = mapped_column(String(32), primary_key=True)
+    unlocked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

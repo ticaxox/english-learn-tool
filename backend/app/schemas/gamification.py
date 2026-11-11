@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -24,6 +26,7 @@ class GamificationProgressResponse(BaseModel):
     level: LevelProgress
     streak: int
     streak_best: int
+    freeze_tokens: int = 0
     active_today: bool
     quests: list[DailyQuestResponse]
     local_date: str
@@ -36,11 +39,20 @@ class WeeklyDay(BaseModel):
     active: bool
 
 
+class WeeklyGoal(BaseModel):
+    key: str
+    label: str
+    progress: int
+    target: int
+    completed: bool
+
+
 class GamificationWeeklyResponse(BaseModel):
     days: list[WeeklyDay]
     xp: int
     active_days: int
     streak: int
+    goals: list[WeeklyGoal] = []
 
 
 class AwardResponse(BaseModel):
@@ -52,3 +64,15 @@ class AwardResponse(BaseModel):
     level_after: int
     streak: int
     leveled_up: bool
+
+
+class BadgeResponse(BaseModel):
+    key: str
+    name: str
+    description: str
+    unlocked: bool
+    unlocked_at: datetime | None = None
+
+
+class BadgeListResponse(BaseModel):
+    items: list[BadgeResponse]

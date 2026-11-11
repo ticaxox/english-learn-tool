@@ -13,6 +13,8 @@ const router = useRouter()
 const username = ref('')
 const password = ref('')
 const submitting = ref(false)
+const mode = ref<'login' | 'register'>('login')
+const passwordConfirm = ref('')
 const error = ref<unknown>(null)
 const statusNote = ref('')
 
@@ -60,6 +62,29 @@ async function submit(): Promise<void> {
   }
 }
 
+async function register(): Promise<void> {
+  error.value = null
+  statusNote.value = ''
+  const usernameError = validateUsername(username.value.trim())
+  if (usernameError) {
+    error.value = new Error(usernameError)
+    return
+  }
+  if (password.value !== passwordConfirm.value) {
+    error.value = new Error('两次输入的密码不一致。')
+    return
+  }
+  submitting.value = true
+  try {
+    await auth.register({ username: username.value.trim(), password: password.value })
+    await router.replace({ name: 'overview' })
+  } catch (registerError) {
+    error.value = registerError
+  } finally {
+    submitting.value = false
+  }
+}
+
 async function retryConnection(): Promise<void> {
   error.value = null
   statusNote.value = ''
@@ -81,9 +106,9 @@ async function retryConnection(): Promise<void> {
         <span class="auth-card__seal">CURIOUS ENGLISH CLUB</span>
       </div>
       <p class="eyebrow">个人英语学习空间</p>
-      <h1 id="login-title">登录学习空间</h1>
+      <h1 id="login-title">{{ mode === 'login' ? '登录学习空间' : '创建学习账号' }}</h1>
       <p class="lead">
-        使用你的账号继续学习。首次登录需要先设置新密码。
+        {{ mode === 'login' ? '使用你的账号继续学习。' : '用户名唯一，密码至少 12 位且包含三类字符。' }}
       </p>
 
       <div v-if="route.query.reason === 'session-expired'" class="alert alert-warning" role="status">
@@ -105,7 +130,7 @@ async function retryConnection(): Promise<void> {
         @retry="retryConnection"
       />
 
-      <form class="form-stack" @submit.prevent="submit">
+      <form class="form-stack" @submit.prevent="mode === 'login' ? submit() : register()">
         <div class="field">
           <label for="username">用户名</label>
           <input
@@ -129,16 +154,40 @@ async function retryConnection(): Promise<void> {
             v-model="password"
             name="password"
             type="password"
-            autocomplete="current-password"
+            :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
+            required
+            :disabled="submitting"
+          />
+        </div>
+
+        <div v-if="mode === 'register'" class="field">
+          <label for="password-confirm">再次输入密码</label>
+          <input
+            id="password-confirm"
+            v-model="passwordConfirm"
+            name="password-confirm"
+            type="password"
+            autocomplete="new-password"
             required
             :disabled="submitting"
           />
         </div>
 
         <DivButton type="submit" :disabled="submitting">
-          {{ submitting ? '正在验证真实账号…' : '登录' }}
+          {{ submitting ? '请稍候…' : mode === 'login' ? '登录' : '注册并进入' }}
         </DivButton>
       </form>
+
+      <p class="auth-switch">
+        {{ mode === 'login' ? '还没有账号？' : '已经有账号？' }}
+        <DivButton
+          type="button"
+          class="auth-switch__link"
+          @click="mode = mode === 'login' ? 'register' : 'login'; passwordConfirm = ''"
+        >
+          {{ mode === 'login' ? '注册一个' : '去登录' }}
+        </DivButton>
+      </p>
 
     </section>
   </main>

@@ -59,19 +59,27 @@ describe('personal route guards', () => {
     }
   })
 
-  it.each(['member', 'admin'] as const)('removes legacy administration and notification routes for %s accounts', async (role) => {
-    const { router } = authenticatedRouter(role)
-    for (const path of [
-      '/admin',
-      '/admin/users',
-      '/admin/dashboard',
-      '/admin/ai/providers',
-      '/notifications',
-      '/notifications/preferences',
-      '/settings/notifications',
-    ]) {
-      await router.push(path)
-      expect(router.currentRoute.value.name).toBe('not-found')
+  it('keeps administration behind the guard and drops notification routes', async () => {
+    const admin = authenticatedRouter('admin').router
+    for (const [path, name] of [
+      ['/admin/users', 'admin-users'],
+      ['/admin/dashboard', 'admin-dashboard'],
+      ['/admin/ai/providers', 'admin-ai-providers'],
+      ['/admin/knowledge', 'admin-knowledge'],
+    ] as const) {
+      await admin.push(path)
+      expect(admin.currentRoute.value.name).toBe(name)
+    }
+
+    const member = authenticatedRouter('member').router
+    for (const path of ['/admin', '/admin/users', '/admin/dashboard', '/admin/knowledge']) {
+      await member.push(path)
+      expect(member.currentRoute.value.name).toBe('overview')
+    }
+
+    for (const path of ['/notifications', '/notifications/preferences', '/settings/notifications']) {
+      await member.push(path)
+      expect(member.currentRoute.value.name).toBe('not-found')
     }
   })
 

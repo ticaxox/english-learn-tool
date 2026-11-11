@@ -1,7 +1,7 @@
 /** Admin-maintained reference knowledge (exam papers) and read-only search. */
 import { apiClient } from './client'
 
-export type KnowledgeSourceType = 'exam' | 'wordbook'
+export type KnowledgeSourceType = 'exam'
 export type KnowledgeStatus = 'draft' | 'indexing' | 'ready' | 'failed' | 'archived'
 
 export interface KnowledgeDocument {
@@ -35,7 +35,7 @@ function parseDocument(value: unknown): KnowledgeDocument {
   const body = record(value, '知识库文档')
   return {
     id: String(body.id ?? ''),
-    sourceType: (body.source_type === 'wordbook' ? 'wordbook' : 'exam') as KnowledgeSourceType,
+    sourceType: 'exam' as KnowledgeSourceType,
     title: String(body.title ?? ''),
     metadata: (body.metadata as Record<string, unknown>) ?? {},
     status: String(body.status ?? 'draft') as KnowledgeStatus,
@@ -56,7 +56,6 @@ export async function listKnowledgeDocuments(): Promise<KnowledgeDocument[]> {
 export async function importKnowledgeDocument(input: {
   title: string
   content: string
-  sourceType?: KnowledgeSourceType
   metadata?: Record<string, unknown>
 }): Promise<KnowledgeDocument> {
   const payload = await apiClient.post(
@@ -64,7 +63,8 @@ export async function importKnowledgeDocument(input: {
     {
       title: input.title,
       content: input.content,
-      source_type: input.sourceType ?? 'exam',
+      // Only exam papers are indexed; the server rejects anything else.
+      source_type: 'exam',
       metadata: input.metadata ?? {},
     },
     { retryCount: 0 },

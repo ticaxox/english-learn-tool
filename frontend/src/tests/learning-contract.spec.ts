@@ -300,7 +300,14 @@ describe('contract helpers', () => {
   })
 
   it('publishes the exact enums used by the frozen contract', () => {
-    expect(contractHelpers.EXAM_TARGETS).toEqual(['CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL'])
+    expect(contractHelpers.EXAM_TARGETS).toEqual([
+      'GAOKAO',
+      'CET4',
+      'CET6',
+      'POSTGRAD',
+      'IELTS',
+      'TOEFL',
+    ])
     expect(contractHelpers.MEMORY_MODULES).toEqual(['flashcard', 'choice', 'spelling'])
     expect(contractHelpers.BLANK_TYPES).toEqual(['full', 'partial', 'first_letter', 'middle'])
   })

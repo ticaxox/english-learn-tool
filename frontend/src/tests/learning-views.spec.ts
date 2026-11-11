@@ -140,7 +140,8 @@ describe('learning surfaces with the frozen contract', () => {
     expect(wrapper.find('#practice-pool-target').exists()).toBe(true)
     expect(wrapper.find('#challenge-generation-time').exists()).toBe(true)
     const toggles = wrapper.findAll('.settings-toggle')
-    expect(toggles).toHaveLength(7)
+    // 3 drill modes + 4 practice types + 3 flashcard sides + 3 choice sides.
+    expect(toggles).toHaveLength(13)
     expect(toggles[0].attributes('aria-pressed')).toBe('true')
     await toggles[0].trigger('click')
     expect(toggles[0].attributes('aria-pressed')).toBe('false')

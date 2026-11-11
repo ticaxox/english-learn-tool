@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
@@ -19,7 +19,9 @@ import {
   type PracticeAnswerInput,
 } from '../api/practice'
 import PracticeTopBar from '../components/PracticeTopBar.vue'
+import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { fetchProgress } from '../api/progress'
+import { crumbBurst, popIn } from '../composables/useMotion'
 import '../practice.css'
 
 const props = withDefaults(defineProps<{ sessionId?: string; embedded?: boolean }>(), { embedded: false })
@@ -125,6 +127,7 @@ function answerPayload(): PracticeAnswerInput[] {
 }
 
 const award = ref<{ xp: number; crumbs: number; from: number; to: number } | null>(null)
+const levelUp = ref<{ level: number; title: string } | null>(null)
 
 async function submit(): Promise<void> {
   award.value = null
@@ -155,6 +158,13 @@ async function submit(): Promise<void> {
           crumbs,
           from: before.level.level,
           to: after.level.level,
+        }
+        // Let the result render, then pop the line and throw a crumb burst.
+        await nextTick()
+        popIn(document.querySelector('.practice-award'), { y: 10, scale: 0.94 })
+        if (xp > 0) crumbBurst(document.querySelector('.practice-award'))
+        if (after.level.level > before.level.level) {
+          levelUp.value = { level: after.level.level, title: after.level.title }
         }
       }
     }
@@ -244,8 +254,16 @@ void practice.load()
       </section>
 
       <template v-else-if="result">
-        <p v-if="award" class="practice-award" role="status">
-          <span v-if="award.to > award.from">升级到 Lv.{{ award.to }}！</span>
+        <LevelUpOverlay
+          v-if="levelUp"
+          :level="levelUp.level"
+          :title="levelUp.title"
+          @close="levelUp = null"
+        />
+        <p v-if="award" class="practice-award" :class="{ 'is-levelup': award.to > award.from }" role="status">
+          <span v-if="award.to > award.from" class="practice-award__levelup">
+            升级到 Lv.{{ award.to }}！
+          </span>
           <span>+{{ award.xp }} XP · +{{ award.crumbs }} 碎屑</span>
         </p>
         <PracticeResultView :result="result" :questions="questions" />

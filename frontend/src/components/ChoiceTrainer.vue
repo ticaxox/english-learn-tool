@@ -7,6 +7,9 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import type { ChoiceQuestion } from '../types/learning'
 import OptionBadge from './OptionBadge.vue'
+import { useRuneSurface } from '../composables/useRuneSurface'
+
+const { surface } = useRuneSurface()
 
 const props = defineProps<{
   question: ChoiceQuestion
@@ -62,7 +65,7 @@ function choose(optionId: string): void {
 </script>
 
 <template>
-  <section class="study-card study-card--choice" aria-labelledby="choice-prompt">
+  <section class="study-card study-card--choice rune-surface" :style="surface" aria-labelledby="choice-prompt">
     <div class="choice-head">
       <span class="choice-head__eyebrow">选出正确释义</span>
       <h2 id="choice-prompt" ref="promptHeading" class="choice-head__prompt" tabindex="-1">{{ props.question.prompt }}</h2>

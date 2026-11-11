@@ -35,6 +35,7 @@ LEARNING_WINDOW_DAYS = 7
 
 # Labels reused by the snapshot text so the coach reads the same words the UI uses.
 EXAM_LABELS = {
+    "GAOKAO": "高考",
     "CET4": "四级",
     "CET6": "六级",
     "POSTGRAD": "考研",

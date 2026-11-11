@@ -13,6 +13,7 @@ from app.schemas.auth import (
     AuthSessionResponse,
     ChangePasswordRequest,
     LoginRequest,
+    RegisterRequest,
     UsernameChangeRequest,
     UserSelf,
 )
@@ -26,6 +27,7 @@ from app.services.auth import (
     logout,
     refresh_session,
 )
+from app.services.registration import register_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -181,6 +183,40 @@ async def refresh_endpoint(
         expires_in=issued.expires_in,
         csrf_token=issued.csrf_token,
         user=_user_response(issued.user),
+    )
+
+
+@router.post(
+    "/register",
+    response_model=AuthSessionResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={**_THROTTLED_RESPONSE, 409: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
+    summary="Register a member account and start a session",
+)
+async def register_endpoint(
+    payload: RegisterRequest,
+    request: Request,
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> AuthSessionResponse:
+    settings: Settings = request.app.state.settings
+    user = await register_user(
+        session, username=payload.username, password=payload.password
+    )
+    issued = await login(
+        session,
+        request.app.state.redis,
+        settings,
+        request=request,
+        username=payload.username,
+        password=payload.password,
+    )
+    _set_session_cookies(response, settings, issued)
+    return AuthSessionResponse(
+        access_token=issued.access_token,
+        expires_in=issued.expires_in,
+        csrf_token=issued.csrf_token,
+        user=_user_response(user),
     )
 
 

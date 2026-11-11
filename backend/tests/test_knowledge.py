@@ -209,3 +209,23 @@ async def test_coach_receives_matching_snippets(client, app, admin_user, member_
 
     assert job.input_context["knowledge_snippets"], job.input_context
     assert "夜市" in job.input_context["knowledge_snippets"][0]
+
+
+async def test_only_exam_papers_enter_the_corpus(client, admin_user, member_user) -> None:
+    """A wordbook or a learner's note is rejected, not stored under another type."""
+    admin_headers = await login(client, admin_user.username)
+    for rejected in ("wordbook", "upload"):
+        response = await client.post(
+            "/api/v1/admin/knowledge",
+            headers=admin_headers,
+            json={"source_type": rejected, "title": "不该入库", "content": "正文"},
+        )
+        assert response.status_code == 422, response.text
+
+    member_headers = await login(client, member_user.username)
+    closed = await client.post(
+        "/api/v1/me/knowledge",
+        headers=member_headers,
+        json={"title": "我的笔记", "content": "不该入库", "source_type": "upload"},
+    )
+    assert closed.status_code == 404, closed.text

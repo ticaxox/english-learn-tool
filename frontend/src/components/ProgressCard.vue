@@ -70,6 +70,9 @@ onMounted(() => {
           <RewardMark mark="candle" :size="18" />
           <strong>{{ progress.streak }}</strong>
           <span>天连续</span>
+          <small v-if="progress.freezeTokens > 0" class="progress-card__freeze" title="本月还有护身符，断一天也能保住连续">
+            护身符 ×{{ progress.freezeTokens }}
+          </small>
         </div>
       </header>
 

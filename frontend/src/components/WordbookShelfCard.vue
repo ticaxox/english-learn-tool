@@ -1,130 +1,37 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import AppIcon from './AppIcon.vue'
-import ModeArt from './ModeArt.vue'
-import { wordbookCover } from '../assets/halloween'
+/**
+ * One wordbook, as a book on the shelf.
+ *
+ * The card carries no buttons and no badges: the name is written straight on
+ * the cover, top and centre. One binding stands in for every book until the
+ * art set grows more of them. Everything else — the entries, and the actions
+ * on them — lives in the dialog this opens.
+ */
+import ArtImage from './ArtImage.vue'
+import { bookObject } from '../assets/halloween'
 import type { Wordbook } from '../api/wordbooks'
 
-const props = withDefaults(defineProps<{
-  book: Wordbook
-  statusLabel: string
-  statusDescription: string
-  formattedDate: string
-  canActivate: boolean
-  canExport: boolean
-  canDelete: boolean
-  activating: boolean
-  compact?: boolean
-  sequence?: number
-}>(), {
-  compact: false,
-  sequence: 0,
-})
+defineProps<{ book: Wordbook }>()
+const emit = defineEmits<{ detail: [] }>()
 
-const emit = defineEmits<{
-  detail: []
-  activate: []
-  export: []
-  delete: []
-}>()
 
-const coverLetter = computed(() => {
-  const name = props.book.name.trim()
-  const lastToken = name.split(/\s+/).at(-1) ?? ''
-  // Demo shelves often share a long prefix; the trailing number distinguishes them.
-  if (/^\d{2,}$/.test(lastToken)) return lastToken.slice(-2)
-  return name.slice(0, 1).toUpperCase() || 'W'
-})
-const coverTone = computed(() => {
-  if (props.sequence > 0) return ['sage', 'ocean', 'clay', 'slate'][(props.sequence - 1) % 4]
-
-  const total = Array.from(props.book.id).reduce((sum, char) => sum + char.charCodeAt(0), 0)
-  return ['sage', 'ocean', 'clay', 'slate'][total % 4]
-})
 </script>
 
 <template>
   <article
     class="wordbook-card"
-    :class="[
-      `wordbook-card--${book.visibility}`,
-      { 'wordbook-card--compact': compact, 'wordbook-card--active': book.is_active },
-    ]"
-    :role="compact ? 'button' : undefined"
-    :tabindex="compact ? 0 : undefined"
-    @click="compact ? emit('detail') : undefined"
-    @keydown.enter="compact ? emit('detail') : undefined"
-    @keydown.space.prevent="compact ? emit('detail') : undefined"
+    :class="[`wordbook-card--${book.visibility}`, { 'wordbook-card--active': book.is_active }]"
+    role="button"
+    tabindex="0"
+    :aria-label="`${book.name}${book.is_active ? '，使用中' : ''}，打开查看词条`"
+    @click="emit('detail')"
+    @keydown.enter="emit('detail')"
+    @keydown.space.prevent="emit('detail')"
   >
-    <div
-      class="wordbook-cover"
-      :class="`wordbook-cover--${coverTone}`"
-    >
-      <!-- The cover is a book, not a coloured rectangle: the artwork is the
-           cover board. A 48px list swatch has no room for it, so the list
-           keeps its letter and the full cover shows on the wide card. -->
-      <ModeArt
-        v-if="!compact"
-        class="wordbook-cover__art"
-        :day="wordbookCover.day"
-        :night="wordbookCover.night"
-      />
-      <template v-if="!compact">
-        <span class="wordbook-spine">WHISKER PRESS</span>
-        <div class="wordbook-card-topline">
-          <span class="wordbook-pill" :class="`wordbook-pill--${book.visibility}`">
-            {{ book.visibility === 'organization' ? '组织' : '私有' }}
-          </span>
-          <span class="wordbook-status" :class="`wordbook-status--${book.status}`">{{ statusLabel }}</span>
-          <span v-if="book.is_active" class="wordbook-status wordbook-status--active">当前主词书</span>
-        </div>
-      </template>
-      <strong v-if="compact" class="wordbook-cover-letter" aria-hidden="true">{{ coverLetter }}</strong>
-      <template v-if="!compact">
-        <h3>{{ book.name }}</h3>
-        <span class="wordbook-cover-meta">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
-        <span class="wordbook-cover-stamp">{{ book.is_active ? '使用中' : '书架中' }}</span>
-      </template>
-    </div>
-
-    <div class="wordbook-card-body">
-      <template v-if="compact">
-        <h3>{{ book.name }}</h3>
-        <span class="wordbook-entry-count">{{ book.entry_count.toLocaleString('zh-CN') }} 词条 · v{{ book.version }}</span>
-      </template>
-      <template v-if="!compact">
-        <p class="wordbook-description">{{ book.description || '暂无描述' }}</p>
-        <p class="wordbook-card-meta">
-          {{ statusDescription }}<span>·</span>{{ formattedDate }}
-        </p>
-      </template>
-      <div v-if="!compact" class="wordbook-card-actions">
-        <DivButton class="button-secondary button-small" type="button" :aria-label="`查看 ${book.name} 的词条`" @click="emit('detail')">查看词条</DivButton>
-        <DivButton
-          v-if="canActivate"
-          type="button"
-          class="button-small"
-          :aria-label="`将 ${book.name} 设为当前主词书`"
-          :disabled="activating"
-          @click="emit('activate')"
-        >{{ activating ? '激活中…' : '设为主词书' }}</DivButton>
-        <DivButton v-else class="button-secondary button-small" type="button" disabled>已在使用</DivButton>
-        <DivButton
-          v-if="canExport"
-          class="button-secondary button-small"
-          type="button"
-          :aria-label="`导出 ${book.name}`"
-          @click="emit('export')"
-        >导出</DivButton>
-        <DivButton
-          v-if="canDelete"
-          class="button-danger button-small"
-          type="button"
-          :aria-label="`删除 ${book.name}`"
-          @click="emit('delete')"
-        >删除</DivButton>
-      </div>
-    </div>
-    <AppIcon v-if="compact" name="arrow" class="wordbook-row-arrow" />
+    <span class="wordbook-cover">
+      <ArtImage class="wordbook-cover__art" :set="bookObject" />
+      <span v-if="book.is_active" class="wordbook-cover__bookmark" aria-hidden="true"></span>
+      <span class="wordbook-cover__name">{{ book.name }}</span>
+    </span>
   </article>
 </template>

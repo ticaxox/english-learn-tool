@@ -269,14 +269,6 @@
 .memory-workbench-grid { display: grid; grid-template-columns: minmax(0, 1fr) 276px; gap: 18px; align-items: start; }
 .memory-main-card { min-height: 340px; }
 .memory-action-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 18px; }
-.workspace-shell .memory-action-card { display: grid; min-height: 74px; grid-template-columns: 38px minmax(0, 1fr) 18px; gap: 12px; align-items: center; padding: 13px 14px; border: 1px solid var(--workspace-line); border-radius: 9px; background: var(--workspace-surface); color: var(--workspace-ink); text-align: left; }
-.workspace-shell .memory-action-card:hover { border-color: #b9cec3; background: #f8fbf9; color: var(--workspace-ink); }
-.memory-action-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 8px; background: var(--workspace-accent-soft); color: var(--workspace-accent); }
-.memory-action-icon svg { width: 17px; height: 17px; }
-.memory-action-copy { display: grid; gap: 2px; }
-.memory-action-copy .module-card__title { color: var(--workspace-ink); font-size: 14px; font-weight: 650; }
-.memory-action-copy .module-card__hint { color: var(--workspace-muted); font-size: 11px; }
-.memory-action-card > svg { width: 16px; height: 16px; color: var(--workspace-muted); }
 .memory-context-card { display: grid; gap: 18px; }
 .memory-context-card > div:first-child { display: grid; gap: 4px; }
 .memory-context-card > div:first-child strong { color: var(--workspace-ink); font-size: 15px; }
@@ -625,33 +617,6 @@
   border-color: #bfcec5;
   transform: translateY(-1px);
 }
-
-/* Memory module states */
-.workspace-shell .memory-action-card {
-  grid-template-columns: 38px minmax(0, 1fr) auto 18px;
-}
-.workspace-shell .memory-action-card--flashcard { --module-accent: #176b57; --module-soft: #e8f2ee; }
-.workspace-shell .memory-action-card--choice { --module-accent: #315f9d; --module-soft: #edf3fb; }
-.workspace-shell .memory-action-card--spelling { --module-accent: #9a6a10; --module-soft: #fff4d8; }
-.workspace-shell .memory-action-card .memory-action-icon {
-  background: var(--module-soft);
-  color: var(--module-accent);
-}
-.workspace-shell .memory-action-card:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--module-accent) 40%, var(--workspace-line));
-}
-.workspace-shell .memory-action-card:disabled,
-.workspace-shell .memory-action-card.is-disabled {
-  border-color: var(--workspace-line);
-  background: #f8faf8;
-  color: var(--workspace-muted);
-  cursor: not-allowed;
-  opacity: 1;
-}
-.memory-action-card.is-disabled .memory-action-icon {
-  background: #f1f4f2;
-  color: #8a958f;
-}
 .memory-action-status {
   display: grid;
   justify-items: end;
@@ -880,7 +845,6 @@
 }
 @media (max-width: 860px) {
   .today-progress-ring { width: 62px; height: 62px; }
-  .workspace-shell .memory-action-card { grid-template-columns: 36px minmax(0, 1fr) auto 18px; }
   .challenge-next-step { grid-template-columns: 1fr; align-items: start; }
   .challenge-next-step > .button { grid-column: auto; grid-row: auto; justify-self: start; }
   .workspace-shell .coach-message { max-width: 94%; }
@@ -888,7 +852,6 @@
 @media (max-width: 620px) {
   .workspace-shell .memory-action-card { grid-template-columns: 34px minmax(0, 1fr) 18px; }
   .memory-action-status { grid-column: 2; justify-items: start; text-align: left; }
-  .workspace-shell .memory-action-card > svg { grid-column: 3; grid-row: 1 / span 2; }
   .workspace-shell .practice-type-card { grid-template-columns: 32px minmax(0, 1fr); }
   .challenge-map__tools { justify-content: flex-start; }
   .workspace-shell .coach-message--user { grid-template-columns: minmax(0, 1fr) 28px; }

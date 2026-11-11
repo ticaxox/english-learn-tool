@@ -6,7 +6,7 @@
  * only renders what the server returned and forwards learner actions with
  * idempotency keys. Heartbeats run while a session is open.
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -17,15 +17,17 @@ import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
 import LessonHud from '../components/LessonHud.vue'
 import LessonFeedback from '../components/LessonFeedback.vue'
+import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { illustration } from '../assets/halloween'
-import ModeArt from '../components/ModeArt.vue'
 import ShelfPicker from '../components/ShelfPicker.vue'
 import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
 import { isApiError } from '../api/errors'
 import { useMemorySession } from '../composables/useMemorySession'
+import { useGamification } from '../composables/useGamification'
 import { useStudyHeartbeat } from '../composables/useStudyHeartbeat'
 import { useToast } from '../composables/useToast'
+import { crumbBurst, shake } from '../composables/useMotion'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import {
   MEMORY_MODULES,
@@ -35,6 +37,7 @@ import {
   type TodayPlan,
 } from '../types/learning'
 import '../learning.css'
+import ArtImage from '../components/ArtImage.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -56,6 +59,7 @@ const loadingConfig = ref(false)
 const selectedModule = ref<MemoryModule | null>(null)
 
 const session = useMemorySession()
+
 const timer = useSessionTimer()
 const toast = useToast()
 const resetting = ref(false)
@@ -168,6 +172,7 @@ function onFlashReveal(): void {
 async function rateFlashcard(questionId: string, rating: 'again' | 'good'): Promise<void> {
   await session.rateFlashcard(questionId, rating)
   heartbeat.markInteraction()
+  if (rating === 'good') crumbBurst(document.querySelector('.memory-main-card'), 8)
 }
 
 interface Verdict {
@@ -238,6 +243,8 @@ async function answerChoice(questionId: string, optionId: string): Promise<void>
   if (correct) {
     reveal.value = null
   } else {
+    // The card takes the hit before the correction lands.
+    void nextTick(() => shake(document.querySelector('.choice-list') ?? document.querySelector('.study-card')))
     rememberForReview({
       word: feedback.correctAnswer,
       phonetic: question?.kind === 'choice' ? question.phonetic : null,
@@ -260,6 +267,7 @@ async function answerSpelling(questionId: string, answer: string): Promise<void>
   if (correct) {
     reveal.value = null
   } else {
+    void nextTick(() => shake(document.querySelector('.study-card')))
     rememberForReview({
       word: feedback.correctAnswer,
       phonetic: question?.kind === 'spelling' ? question.phonetic : null,
@@ -381,7 +389,26 @@ watch(
   },
 )
 
+/** A finished run is worth the same celebration a submitted practice gets. */
+const gamification = useGamification()
+const levelUp = ref<{ level: number; title: string } | null>(null)
+let levelBefore = 0
+
+watch(showSummary, async (open) => {
+  if (!open) return
+  await gamification.load()
+  const now = gamification.progress.value
+  if (!now) return
+  if (levelBefore > 0 && now.level.level > levelBefore) {
+    levelUp.value = { level: now.level.level, title: now.level.title }
+  }
+  levelBefore = now.level.level
+})
+
 onMounted(async () => {
+  void gamification.load().then(() => {
+    levelBefore = gamification.progress.value?.level.level ?? 0
+  })
   await Promise.all([loadConfig(), loadTodayPlan()])
   if (challengeSessionId.value && challengeModule.value) {
     await begin(challengeModule.value, challengeSessionId.value)
@@ -452,7 +479,7 @@ watch(challengeModule, async (module, previous) => {
 
       <!-- The payoff: what this run actually earned, then one way forward. -->
       <section v-if="showSummary" class="lesson-summary" aria-labelledby="lesson-summary-title">
-        <ModeArt class="lesson-summary__art" :day="illustration.result.day" :night="illustration.result.night" />
+        <ArtImage class="lesson-summary__art" :set="illustration.result" />
         <div class="lesson-summary__body">
           <p class="lesson-summary__kicker">本轮完成</p>
           <h2 id="lesson-summary-title">{{ bestCombo >= 5 ? '手感正热' : '又清掉一轮' }}</h2>
@@ -506,7 +533,13 @@ watch(challengeModule, async (module, previous) => {
             :labels="MEMORY_MODULE_LABELS"
             @pick="begin"
           />
-        </template>
+          <LevelUpOverlay
+    v-if="levelUp"
+    :level="levelUp.level"
+    :title="levelUp.title"
+    @close="levelUp = null"
+  />
+</template>
 
         <section v-if="session.lastError.value" class="memory-session-error">
           <ErrorNotice

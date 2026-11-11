@@ -7,7 +7,7 @@
  */
 import { computed } from 'vue'
 import { practiceBooks } from '../assets/halloween'
-import ModeArt from './ModeArt.vue'
+import ArtImage from './ArtImage.vue'
 
 const props = defineProps<{
   type: string
@@ -18,13 +18,7 @@ const book = computed(() => practiceBooks[props.type as keyof typeof practiceBoo
 </script>
 
 <template>
-  <ModeArt
-    v-if="book"
-    class="type-mark"
-    :day="book.day"
-    :night="book.night"
-    :style="{ width: `${size ?? 22}px` }"
-  />
+  <ArtImage v-if="book" class="type-mark" :style="{ width: `${size ?? 22}px` }" :set="book" />
 </template>
 
 <style scoped>

@@ -206,6 +206,7 @@ async def _sync_plan(
         if row.status != "completed" and await _node_complete(session, plan, node, row, words):
             row.status = "completed"
             row.completed_at = row.completed_at or utcnow()
+            row.stars = await _node_stars(session, node, row)
             changed = True
             await award(
                 session,
@@ -245,6 +246,20 @@ async def _sync_plan(
         await session.commit()
 
 
+async def _node_stars(
+    session: AsyncSession, node: ChallengeNode, progress: ChallengeNodeProgress
+) -> int:
+    """3 for a flawless finish, 2 when a linked set was answered well, 1 otherwise."""
+    if progress.practice_session_id is None:
+        return 1
+    practice = await session.get(PracticeSession, progress.practice_session_id)
+    if practice is None:
+        return 1
+    if practice.wrong_count == 0:
+        return 3 if node.node_type == "BOSS" else 2
+    return 1
+
+
 async def _node_response(
     session: AsyncSession,
     plan: DailyChallengePlan,
@@ -278,6 +293,7 @@ async def _node_response(
         resource_id=resource_id,
         started_at=progress.started_at if progress else None,
         completed_at=progress.completed_at if progress else None,
+        stars=progress.stars if progress else 0,
         error_code=progress.error_code if progress else None,
         error_message=progress.error_message if progress else None,
     )
@@ -385,6 +401,7 @@ def build_challenge_map_dsl(
                 f"- 类型: {NODE_TYPE_LABELS.get(node.node_type, node.node_type)}",
                 f"- 题目类型: {_node_question_type(node)}",
                 f"- 状态: {STATUS_LABELS.get(status, status)}",
+                f"- 星数: {response.stars if response is not None else 0}",
                 f"- 时长: {node.estimated_minutes} 分钟",
                 f"- 说明: {node.description.replace(chr(10), ' ').strip()}",
                 f"- 链接: {link}",

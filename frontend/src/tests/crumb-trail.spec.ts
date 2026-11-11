@@ -24,11 +24,12 @@ const book: Wordbook = {
 }
 
 describe('T-FE-018 CrumbTrail IP depth', () => {
-  it('renames the member brand and gives Crumbo a reusable vector mark', () => {
+  it('renames the member brand and gives Crumbo one reusable mark', () => {
     const shell = source('../components/MemberShell.vue')
     expect(shell).toContain('CrumbTrail')
     expect(shell).toContain('CrumboMark')
-    expect(source('../components/CrumboMark.vue')).toContain('<svg')
+    // The mascot is the drawn character (day/night), not a second vector sketch.
+    expect(source('../components/CrumboMark.vue')).toContain('illustration.crumbo')
   })
 
   it('uses a crumb trail, not the old generic Today workbench', () => {
@@ -42,40 +43,36 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(today).not.toContain('member-hero')
   })
 
-  it('turns wordbooks into lettered CrumbTrail covers with badges below', () => {
+  it('turns wordbooks into CrumbTrail books, not rows', () => {
     const wordbooks = source('../views/WordbooksView.vue')
     expect(wordbooks).toContain('crumb-bookshelf')
     expect(wordbooks).toContain('crumb-shelf-header')
     expect(wordbooks).toContain('crumb-current-book')
-    expect(source('../components/WordbookShelfCard.vue')).toContain('wordbook-row-arrow')
+    // The card is the book itself: no row arrow and no action strip.
+    expect(source('../components/WordbookShelfCard.vue')).not.toContain('wordbook-row-arrow')
   })
 
-  it('renders numbered book covers with structural bite marks', async () => {
-    const wrapper = mount(WordbookShelfCard, {
-      props: {
-        book,
-        statusLabel: '可用',
-        statusDescription: '88 个词条',
-        formattedDate: '2026/10/22',
-        canActivate: false,
-        canExport: true,
-        canDelete: true,
-        activating: false,
-        compact: true,
-        sequence: 3,
-      },
-    })
+  it('shows a wordbook as a bare cover carrying only its name', async () => {
+    const wrapper = mount(WordbookShelfCard, { props: { book } })
 
-    expect(wrapper.find('.crumb-book-number').exists()).toBe(false)
+    // No letter, no badges, no body: the cover and the name are the card.
     expect(wrapper.find('.wordbook-card-badges').exists()).toBe(false)
+    expect(wrapper.find('.wordbook-cover-letter').exists()).toBe(false)
+    expect(wrapper.find('.wordbook-card-body').exists()).toBe(false)
+    expect(wrapper.get('.wordbook-cover__name').text()).toBe('Campus English')
+
     await wrapper.get('.wordbook-card').trigger('click')
     expect(wrapper.emitted('detail')).toHaveLength(1)
-    expect(wrapper.get('.wordbook-cover').classes()).toContain('wordbook-cover--clay')
-    expect(wrapper.get('.wordbook-cover-letter').text()).toBe('C')
+
     await wrapper.setProps({ book: { ...book, name: 'Harbor Reader' } })
-    expect(wrapper.get('.wordbook-cover-letter').text()).toBe('H')
-    await wrapper.setProps({ book: { ...book, name: '  journey workbook' } })
-    expect(wrapper.get('.wordbook-cover-letter').text()).toBe('J')
+    expect(wrapper.get('.wordbook-cover__name').text()).toBe('Harbor Reader')
+  })
+
+  it('marks the wordbook in use with a bookmark, not a label', () => {
+    const active = mount(WordbookShelfCard, { props: { book } })
+    const idle = mount(WordbookShelfCard, { props: { book: { ...book, is_active: false } } })
+    expect(active.find('.wordbook-cover__bookmark').exists()).toBe(true)
+    expect(idle.find('.wordbook-cover__bookmark').exists()).toBe(false)
   })
 
   it('renders the daily map from the DSL instead of a station strip', () => {

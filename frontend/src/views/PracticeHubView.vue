@@ -2,9 +2,19 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import ArtImage from '../components/ArtImage.vue'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import { createPracticeSession, PRACTICE_SOURCE_LABELS, PRACTICE_TYPE_LABELS, type PracticeCreateInput, type PracticeDifficulty, type PracticeSource, type PracticeType } from '../api/practice'
+import {
+  createPracticeSession,
+  PRACTICE_SOURCE_LABELS,
+  PRACTICE_TYPE_LABELS,
+  type PracticeCreateInput,
+  type PracticeDifficulty,
+  type PracticeSource,
+  type PracticeType,
+  type TranslationDirection,
+} from '../api/practice'
 import { listWordbooks, type Wordbook } from '../api/wordbooks'
 import { fetchLearningProfile, fetchMemoryConfig, saveMemoryConfig } from '../api/learning'
 import { useToast } from '../composables/useToast'
@@ -12,11 +22,11 @@ import PracticeSessionView from './PracticeSessionView.vue'
 import MemoryPracticeView from './MemoryPracticeView.vue'
 import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryModule } from '../types/learning'
 import PracticeTaskList from '../components/PracticeTaskList.vue'
+import GameHud from '../components/GameHud.vue'
 
 import '../practice.css'
 import ShelfPicker from '../components/ShelfPicker.vue'
 import { illustration, practiceBooks } from '../assets/halloween'
-import ModeArt from '../components/ModeArt.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -57,6 +67,15 @@ const practiceType = ref<PracticeType>(queryType(route.query.type) ?? 'fill_blan
 const source = ref<PracticeSource>('today_new')
 const count = ref(practiceType.value === 'writing' ? 1 : 5)
 const difficulty = ref<PracticeDifficulty>('CET6')
+const translationDirection = ref<TranslationDirection>('en_to_zh')
+const writingTargetWords = ref<number>(150)
+const DIRECTIONS: TranslationDirection[] = ['en_to_zh', 'zh_to_en', 'mixed']
+const DIRECTION_LABELS: Record<TranslationDirection, string> = {
+  en_to_zh: '英译中',
+  zh_to_en: '中译英',
+  mixed: '混合',
+}
+const WRITING_LENGTHS = [50, 100, 150, 200, 250, 300]
 const wordbookId = ref('')
 const creating = ref(false)
 const createError = ref<unknown>(null)
@@ -101,7 +120,14 @@ let pendingKey: string | null = null
 let pendingSignature = ''
 
 const sources: PracticeSource[] = ['today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty']
-const difficulties: PracticeDifficulty[] = ['CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL']
+const difficulties: PracticeDifficulty[] = [
+  'GAOKAO',
+  'CET4',
+  'CET6',
+  'POSTGRAD',
+  'IELTS',
+  'TOEFL',
+]
 const counts = computed(() => (practiceType.value === 'writing' ? [1] : [3, 5, 10, 15, 20]))
 const needsDifficulty = computed(() => source.value === 'difficulty')
 const needsWordbook = computed(() => source.value !== 'difficulty')
@@ -158,6 +184,10 @@ async function create(): Promise<void> {
     count: count.value,
     difficulty: needsDifficulty.value ? difficulty.value : null,
     wordbookId: needsWordbook.value && wordbookId.value ? wordbookId.value : null,
+    translationDirection:
+      practiceType.value === 'translation' ? translationDirection.value : null,
+    writingTargetWords:
+      practiceType.value === 'writing' ? writingTargetWords.value : null,
   }
   const sig = signature(input)
   if (!pendingKey || pendingSignature !== sig) {
@@ -206,6 +236,8 @@ onMounted(() => {
     <PracticeSessionView v-else-if="activeSessionId" embedded :session-id="activeSessionId" />
 
     <template v-else>
+      <GameHud />
+
       <ShelfPicker
         :modules="MEMORY_MODULES"
         :enabled="enabledMemoryModules"
@@ -228,11 +260,10 @@ onMounted(() => {
               type="button"
               @click="chooseType(option.key)"
             >
-              <ModeArt
+              <ArtImage
                 v-if="practiceBooks[option.key]"
                 class="practice-type-pill__art"
-                :day="practiceBooks[option.key].day"
-                :night="practiceBooks[option.key].night"
+                :set="practiceBooks[option.key]"
               />
               <AppIcon v-else :name="typeIcons[option.key]" />
               <span class="practice-type-pill__label">{{ option.label }}</span>
@@ -252,7 +283,7 @@ onMounted(() => {
                 <option v-for="item in difficulties" :key="item" :value="item">{{ item }}</option>
               </select>
             </div>
-            <div class="field">
+            <div v-if="practiceType !== 'writing'" class="field">
               <label for="practice-count">题量</label>
               <select id="practice-count" v-model.number="count">
                 <option v-for="item in counts" :key="item" :value="item">{{ item }} 题</option>
@@ -266,6 +297,20 @@ onMounted(() => {
                 <option value="partial">部分字母</option>
                 <option value="first_letter">只留首字母</option>
                 <option value="middle">中间挖空</option>
+              </select>
+            </div>
+            <div v-if="practiceType === 'translation'" class="field">
+              <label for="practice-direction">翻译方向</label>
+              <select id="practice-direction" v-model="translationDirection">
+                <option v-for="item in DIRECTIONS" :key="item" :value="item">
+                  {{ DIRECTION_LABELS[item] }}
+                </option>
+              </select>
+            </div>
+            <div v-if="practiceType === 'writing'" class="field">
+              <label for="practice-writing-length">词数</label>
+              <select id="practice-writing-length" v-model.number="writingTargetWords">
+                <option v-for="item in WRITING_LENGTHS" :key="item" :value="item">{{ item }} 词</option>
               </select>
             </div>
             <div v-if="needsWordbook" class="field">
@@ -291,7 +336,7 @@ onMounted(() => {
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
           <div v-if="creating" class="practice-generation-state is-loading" role="status" aria-live="polite">
-            <ModeArt class="practice-generation-art" :day="illustration.brewing.day" :night="illustration.brewing.night" />
+            <ArtImage class="practice-generation-art" :set="illustration.brewing" />
             <div><strong>正在生成练习</strong><span>正在读取素材并准备题目，请稍候。</span></div>
           </div>
           <div v-else-if="createError" class="practice-generation-state is-error" role="status">

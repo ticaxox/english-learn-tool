@@ -11,8 +11,8 @@
  */
 import { computed, nextTick, ref, watch } from 'vue'
 import SpeakButton from './SpeakButton.vue'
+import ArtImage from './ArtImage.vue'
 import { questionCard } from '../assets/halloween'
-import ModeArt from './ModeArt.vue'
 import type { FlashcardQuestion, FlashcardRating } from '../types/learning'
 
 const props = withDefaults(defineProps<{
@@ -73,7 +73,8 @@ function rate(rating: FlashcardRating): void {
       <div class="flipcard" :class="{ 'is-flipped': revealed }">
         <!-- Front: the generated card frame IS the card. -->
         <div class="flipface flipface--front">
-          <ModeArt class="flipface__frame" :day="questionCard.frame.day" :night="questionCard.frame.night" />
+          <ArtImage class="flipface__frame" :set="questionCard.frame" />
+
           <div class="flipface__content">
             <h2 id="flashcard-front" ref="frontHeading" class="flipface__word" tabindex="-1">
               {{ props.question.front }}
@@ -91,6 +92,7 @@ function rate(rating: FlashcardRating): void {
           <!-- The back is its own drawing, not the front frame again: the
                reveal is the moment, and it deserves its own face. -->
           <img class="flipface__frame" :src="questionCard.back" alt="" />
+
           <div class="flipface__content">
             <template v-if="revealed">
               <div id="flashcard-back" ref="backRegion" class="flipface__body study-card__back" aria-live="polite" tabindex="-1">

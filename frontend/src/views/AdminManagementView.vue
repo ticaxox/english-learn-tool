@@ -7,9 +7,11 @@ const tabs = [
   { label: '成员管理', to: '/admin/users', key: 'members' },
   { label: '组织看板', to: '/admin/dashboard', key: 'dashboard' },
   { label: 'AI 配置', to: '/admin/ai/providers', key: 'ai' },
+  { label: '知识库', to: '/admin/knowledge', key: 'knowledge' },
 ]
 
 const activeTab = computed(() => {
+  if (route.path.startsWith('/admin/knowledge')) return 'knowledge'
   if (route.path.startsWith('/admin/ai')) return 'ai'
   if (route.path.startsWith('/admin/dashboard')) return 'dashboard'
   return 'members'
