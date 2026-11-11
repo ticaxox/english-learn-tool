@@ -620,11 +620,11 @@
   font-size: 0.82rem;
 }
 
-/* Memory choice: one answer per row, because the answer is a long stone bar
-   and a bar cut in half stops reading as a sentence. */
+/* Memory choice: two answers per row, four answers in a square — a board of
+   answers rather than a list. */
 .personal-workspace .choice-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -4328,7 +4328,7 @@
   border-style: solid;
   border-width: 7px 9px;
   border-color: transparent;
-  border-image-source: url('./assets/halloween/card/cell-given-day.png');
+  border-image-source: url('./assets/halloween/card/cell-given-biscuit.png');
   border-image-slice: 10% 5% fill;
   border-image-width: 7px 9px;
   border-image-repeat: stretch;
@@ -4340,13 +4340,13 @@
 }
 
 .personal-workspace .study-card--spelling input.spelling-cell--right {
-  border-image-source: url('./assets/halloween/card/cell-right-day.png');
+  border-image-source: url('./assets/halloween/card/cell-right-biscuit.png');
   background: #7fbf7a;
   color: #10301a;
 }
 
 .personal-workspace .study-card--spelling input.spelling-cell--wrong {
-  border-image-source: url('./assets/halloween/card/cell-wrong-day.png');
+  border-image-source: url('./assets/halloween/card/cell-wrong-biscuit.png');
   background: #c94a3b;
   color: #fff;
 }
@@ -4361,44 +4361,44 @@ html[data-mode='night'] {
      night slab outranks that scoped day rule. */
   .personal-workspace .study-card.study-card--choice,
   .personal-workspace .study-card.study-card--spelling {
-    background: #2a2148;
-    border-image-source: url('./assets/halloween/card/rune-slab.png');
-    color: #f3e9d2;
+    background: #3a3254;
+    border-image-source: url('./assets/halloween/card/slab-stele.png');
+    color: #f0e4cc;
   }
 
   .personal-workspace .study-card--choice .choice-option,
   .personal-workspace .study-card--spelling .spelling-cell,
   .personal-workspace .study-card--spelling .spelling-grid input.spelling-cell {
-    background: #2a2148;
-    border-image-source: url('./assets/halloween/card/rune-chip.png');
-    color: #f3e9d2;
+    background: #3a3254;
+    border-image-source: url('./assets/halloween/card/chip-stele.png');
+    color: #f0e4cc;
   }
 
   .personal-workspace .study-card--choice .choice-option:has(input:checked) {
-    border-image-source: url('./assets/halloween/card/rune-bar-on-night.png');
+    border-image-source: url('./assets/halloween/card/bar-stele-on.png');
   }
 
   .personal-workspace .study-card--choice .choice-option {
-    border-image-source: url('./assets/halloween/card/rune-bar-night.png');
+    border-image-source: url('./assets/halloween/card/bar-stele.png');
   }
 
   .study-card--choice .choice-option__label { color: #f3e9d2; }
 
   .personal-workspace .study-card--spelling .spelling-cell--prefilled {
     background: #c98a2e;
-    border-image-source: url('./assets/halloween/card/cell-given-night.png');
+    border-image-source: url('./assets/halloween/card/cell-given-stele.png');
     color: #1a1200;
   }
 
   .personal-workspace .study-card--spelling input.spelling-cell--right {
     background: #7cf0c4;
-    border-image-source: url('./assets/halloween/card/cell-right-night.png');
+    border-image-source: url('./assets/halloween/card/cell-right-stele.png');
     color: #10301a;
   }
 
   .personal-workspace .study-card--spelling input.spelling-cell--wrong {
     background: #e0705f;
-    border-image-source: url('./assets/halloween/card/cell-wrong-night.png');
+    border-image-source: url('./assets/halloween/card/cell-wrong-stele.png');
     color: #1a0b08;
   }
 

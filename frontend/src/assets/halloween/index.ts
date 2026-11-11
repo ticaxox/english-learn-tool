@@ -38,12 +38,14 @@ export const practiceBooks: PracticeArt = {
   writing: { day: writingDay, night: writingNight },
 }
 
-import runeSlab from './card/rune-slab.png'
-import runeSlabDay from './card/rune-slab-day.png'
-import runeChip from './card/rune-chip.png'
-import runeChipOn from './card/rune-chip-on.png'
-import runeChipDay from './card/rune-chip-day.png'
-import runeChipOnDay from './card/rune-chip-on-day.png'
+import slabBiscuit from './card/slab-biscuit.png'
+import slabStele from './card/slab-stele.png'
+import barBiscuit from './card/bar-biscuit.png'
+import barBiscuitOn from './card/bar-biscuit-on.png'
+import barStele from './card/bar-stele.png'
+import barSteleOn from './card/bar-stele-on.png'
+import chipBiscuit from './card/chip-biscuit.png'
+import chipStele from './card/chip-stele.png'
 import sheetDay from './card/sheet-day.png'
 import sheetNight from './card/sheet-night.png'
 import wordbookCoverDay from './card/wordbook-cover-day.png'
@@ -59,13 +61,15 @@ export const questionCard = {
 } as const
 
 /**
- * Carved stone for the fill-blank question. Both are 9-slice sources: the
- * chipped edge and the groove sit in the border band, the flat middle stretches.
+ * The two materials of the app. Day is baked (a biscuit), night is cut (a
+ * stele). Every one of these is a 9-slice source: the rim and the chipped edge
+ * sit in the border band, the flat middle stretches.
  */
-export const runeStone = {
-  slab: { day: runeSlabDay, night: runeSlab },
-  chip: { day: runeChipDay, night: runeChip },
-  chipOn: { day: runeChipOnDay, night: runeChipOn },
+export const material = {
+  slab: { day: slabBiscuit, night: slabStele },
+  bar: { day: barBiscuit, night: barStele },
+  barOn: { day: barBiscuitOn, night: barSteleOn },
+  chip: { day: chipBiscuit, night: chipStele },
 } as const
 
 /** The question surface for the AI exercise types: one sheet, text lives on it. */

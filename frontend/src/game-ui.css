@@ -1757,18 +1757,18 @@ html[data-mode='night'] .personal-workspace .workspace-mode-button.ia-mode-toggl
   border-style: solid;
   border-width: 7px 9px;
   border-color: transparent;
-  border-image-source: url('./assets/halloween/card/rune-chip-day.png');
+  border-image-source: url('./assets/halloween/card/chip-biscuit.png');
   border-image-slice: 10% 5% fill;
   border-image-width: 7px 9px;
   border-image-repeat: stretch;
   border-radius: 0;
-  background: #cbb68c;
+  background: #d9c08a;
   background-clip: padding-box;
   box-shadow: none;
   text-align: center;
   font-size: 1.32rem;
   font-weight: 700;
-  color: #3a2819;
+  color: #5a3a16;
 }
 
 .personal-workspace .spelling-cell--prefilled {

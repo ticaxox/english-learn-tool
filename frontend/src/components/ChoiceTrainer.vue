@@ -123,17 +123,17 @@ function choose(optionId: string): void {
   border-style: solid;
   border-width: 46px;
   border-color: transparent;
-  border-image-source: url('../assets/halloween/card/rune-slab-day.png');
+  border-image-source: url('../assets/halloween/card/slab-biscuit.png');
   border-image-slice: 12% fill;
   border-image-width: 46px;
   border-image-repeat: stretch;
   border-radius: 0;
   /* The colour is the stone under the image. Clipped to the padding box so it
      cannot show as a rectangle through the chipped edge. */
-  background: #d9c7a4;
+  background: #e8c58a;
   background-clip: padding-box;
   box-shadow: none;
-  color: #3a2819;
+  color: #5a3a16;
 }
 
 .choice-head {
@@ -158,7 +158,7 @@ function choose(optionId: string): void {
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: #3a2819;
+  color: #5a3a16;
 }
 
 .choice-head__phonetic {
@@ -171,8 +171,8 @@ function choose(optionId: string): void {
 /* Options are answer tiles on the table, not a vertical form list. */
 .choice-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
   margin: 0;
   padding: 0;
   border: 0;
@@ -182,7 +182,7 @@ function choose(optionId: string): void {
   width: 100%;
 }
 
-.choice-list--words { grid-template-columns: minmax(0, 1fr); }
+.choice-list--words { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .choice-option {
   position: relative;
@@ -208,7 +208,7 @@ function choose(optionId: string): void {
   border-style: solid;
   border-width: 12px 20px;
   border-color: transparent;
-  border-image-source: url('../assets/halloween/card/rune-bar-day.png');
+  border-image-source: url('../assets/halloween/card/bar-biscuit.png');
   /* `fill` so the bar's own stone face shows through: the artwork is the
      whole object, not a frame around a colour. */
   border-image-slice: 8% 4% fill;
@@ -223,7 +223,7 @@ function choose(optionId: string): void {
 }
 
 .study-card--choice .choice-option:has(input:checked) {
-  border-image-source: url('../assets/halloween/card/rune-bar-on-day.png');
+  border-image-source: url('../assets/halloween/card/bar-biscuit-on.png');
   filter: drop-shadow(0 3px 6px rgb(122 92 48 / 55%));
 }
 
@@ -247,7 +247,7 @@ function choose(optionId: string): void {
 .choice-option__label {
   font-size: 1.24rem;
   font-weight: 800;
-  color: #3a2819;
+  color: #5a3a16;
   line-height: 1.35;
   letter-spacing: 0.01em;
 }

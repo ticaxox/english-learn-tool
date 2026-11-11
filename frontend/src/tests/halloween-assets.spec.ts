@@ -7,6 +7,7 @@ import {
   forMode,
   iconSheet,
   illustration,
+  material,
   practiceBooks,
   questionCard,
 } from '../assets/halloween'
@@ -41,7 +42,7 @@ describe('halloween art set', () => {
   })
 
   it('ships a day and a night file for every themed set', () => {
-    const themed = { ...practiceBooks, ...illustration, ...iconSheet, frame: questionCard.frame }
+    const themed = { ...practiceBooks, ...illustration, ...iconSheet, ...material, frame: questionCard.frame }
     for (const [name, set] of Object.entries(themed)) {
       expect(forMode(set, 'day'), `${name} day`).not.toBe(forMode(set, 'night'))
     }
@@ -50,7 +51,7 @@ describe('halloween art set', () => {
   })
 
   it('points every import at a file that exists', () => {
-    const themed = { ...practiceBooks, ...illustration, ...iconSheet, frame: questionCard.frame }
+    const themed = { ...practiceBooks, ...illustration, ...iconSheet, ...material, frame: questionCard.frame }
     const urls = [
       ...Object.values(themed).flatMap((set) => [set.day, set.night]),
       questionCard.back,

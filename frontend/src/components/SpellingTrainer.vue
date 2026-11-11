@@ -221,15 +221,15 @@ function submit(): void {
   border-style: solid;
   border-width: 46px;
   border-color: transparent;
-  border-image-source: url('../assets/halloween/card/rune-slab-day.png');
+  border-image-source: url('../assets/halloween/card/slab-biscuit.png');
   border-image-slice: 12% fill;
   border-image-width: 46px;
   border-image-repeat: stretch;
   border-radius: 0;
-  background: #d9c7a4;
+  background: #e8c58a;
   background-clip: padding-box;
   box-shadow: none;
-  color: #3a2819;
+  color: #5a3a16;
 }
 
 .spell-head {
@@ -253,7 +253,7 @@ function submit(): void {
   font-size: clamp(1.4rem, 3.6vw, 2rem);
   font-weight: 700;
   line-height: 1.3;
-  color: #3a2819;
+  color: #5a3a16;
   max-width: 34ch;
 }
 
@@ -289,18 +289,18 @@ function submit(): void {
   border-style: solid;
   border-width: 10px 12px;
   border-color: transparent;
-  border-image-source: url('../assets/halloween/card/rune-chip-day.png');
+  border-image-source: url('../assets/halloween/card/chip-biscuit.png');
   border-image-slice: 10% 5%;
   border-image-width: 10px 12px;
   border-image-repeat: stretch;
   border-radius: 0;
-  background: #cbb68c;
+  background: #d9c08a;
   background-clip: padding-box;
   box-shadow: none;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(1.2rem, 3vw, 1.55rem);
   font-weight: 700;
-  color: #3a2819;
+  color: #5a3a16;
   text-align: center;
   text-transform: lowercase;
   transition: filter 120ms ease;
