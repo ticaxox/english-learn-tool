@@ -2564,8 +2564,9 @@
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-failed {
+  background-image: var(--node-cracked) !important;
   color: #ffb3ab;
-  filter: drop-shadow(0 0 10px rgb(255 111 111 / 40%));
+  filter: drop-shadow(0 0 10px rgb(159 216 255 / 40%));
 }
 
 .personal-workspace .challenge-dsl-map--iron .challenge-dsl-card.is-locked {

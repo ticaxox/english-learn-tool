@@ -162,6 +162,7 @@ import nodePlate from './card/node-plate.png'
 import nodePlateBoss from './card/node-plate-boss.png'
 import nodePlateLit from './card/node-plate-lit.png'
 import nodePlateMoss from './card/node-plate-moss.png'
+import nodePlateCracked from './card/node-plate-cracked.png'
 export const nodeToken = {
   plate: nodePlate,
   boss: nodePlateBoss,
@@ -169,4 +170,6 @@ export const nodeToken = {
   lit: nodePlateLit,
   /** The same iron, grown over — a stop nobody has reached yet. */
   moss: nodePlateMoss,
+  /** The same iron, split open — a stop that was failed. */
+  cracked: nodePlateCracked,
 } as const
