@@ -4231,8 +4231,53 @@
   color: #3d2c18;
 }
 
+/* An option on the sheet is a line of ink, not a white pill resting on paper:
+   no plate, no radius, no shadow — just a rule under each choice. */
+.member-practice-session-page .practice-question-card--reading .practice-option,
+.member-practice-session-page .practice-question-card--fill_blank .practice-option,
+.member-practice-page .practice-question-card--reading .practice-option,
+.member-practice-page .practice-question-card--fill_blank .practice-option {
+  min-height: 0;
+  padding: 14px 8px;
+  border-style: solid;
+  border-width: 0 0 1px;
+  border-color: rgb(122 92 48 / 34%);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.member-practice-session-page .practice-question-card--reading .practice-option:hover,
+.member-practice-session-page .practice-question-card--fill_blank .practice-option:hover,
+.member-practice-page .practice-question-card--reading .practice-option:hover,
+.member-practice-page .practice-question-card--fill_blank .practice-option:hover {
+  background: rgb(122 92 48 / 8%);
+  border-color: rgb(122 92 48 / 55%);
+}
+
+.member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked),
+.member-practice-session-page .practice-question-card--fill_blank .practice-option:has(input:checked),
+.member-practice-page .practice-question-card--reading .practice-option:has(input:checked),
+.member-practice-page .practice-question-card--fill_blank .practice-option:has(input:checked) {
+  background: rgb(255 150 0 / 12%);
+  border-width: 0 0 2px;
+  border-color: #35240f;
+  box-shadow: none;
+}
+
+.member-practice-session-page .practice-question-card--reading .practice-option:active,
+.member-practice-session-page .practice-question-card--fill_blank .practice-option:active,
+.member-practice-page .practice-question-card--reading .practice-option:active,
+.member-practice-page .practice-question-card--fill_blank .practice-option:active {
+  transform: none;
+  box-shadow: none;
+}
+
 /* ---------- night ---------- */
-@media (prefers-color-scheme: dark) {
+/* Night artwork keys off the app's own switch, never the operating
+   system: the app has no dark theme, so an OS-level dark preference used to
+   turn the parchment grey while the rest of the page stayed cream. */
+html[data-mode='night'] {
   /* Doubled class so the night slab outranks the scoped day rule. */
   .personal-workspace .study-card.study-card--choice,
   .personal-workspace .study-card.study-card--spelling {
