@@ -52,20 +52,35 @@ const wax = computed(() => {
   return `${d} Z`
 })
 
-/** Iron: an octagonal plate, corners cut back. */
+/**
+ * Iron, abstracted: a hexagon of flat plates, a rule line inset from the
+ * edge, and three chevrons in the middle. Nothing here is a photograph of
+ * metal — it is a symbol drawn with the same bold rules as the rest of the art.
+ */
 const iron = computed(() => {
   const points: string[] = []
-  for (let i = 0; i < 8; i += 1) {
-    const angle = (Math.PI * 2 * i) / 8 + Math.PI / 8
-    points.push(`${(50 + Math.cos(angle) * 45).toFixed(2)} ${(50 + Math.sin(angle) * 45).toFixed(2)}`)
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2
+    points.push(`${(50 + Math.cos(angle) * 46).toFixed(2)} ${(50 + Math.sin(angle) * 46).toFixed(2)}`)
   }
   return `M ${points.join(' L ')} Z`
 })
 
-const rivets = computed(() =>
-  Array.from({ length: 8 }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / 8 + Math.PI / 8
-    return { cx: 50 + Math.cos(angle) * 38, cy: 50 + Math.sin(angle) * 38 }
+/** The inset rule line, the same hexagon one step in. */
+const ironRule = computed(() => {
+  const points: string[] = []
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2
+    points.push(`${(50 + Math.cos(angle) * 39).toFixed(2)} ${(50 + Math.sin(angle) * 39).toFixed(2)}`)
+  }
+  return `M ${points.join(' L ')} Z`
+})
+
+/** Three chevrons, stacked, the way a trail marker counts stops. */
+const chevrons = computed(() =>
+  [0, 1, 2].map((index) => {
+    const y = 38 + index * 11
+    return `M 39 ${y} L 50 ${y + 7} L 61 ${y}`
   }),
 )
 
@@ -81,9 +96,14 @@ const shape = computed(() => (props.variant === 'wax' ? wax.value : props.varian
     aria-hidden="true"
   >
     <path class="emblem__disc" :d="shape" />
-    <circle class="emblem__plate" cx="50" cy="50" r="33" />
-    <circle v-if="variant === 'iron'" class="emblem__rim" cx="50" cy="50" r="42" />
-    <circle v-for="(rivet, index) in variant === 'iron' ? rivets : []" :key="index" class="emblem__rivet" :cx="rivet.cx" :cy="rivet.cy" r="2.6" />
+    <circle v-if="variant !== 'iron'" class="emblem__plate" cx="50" cy="50" r="33" />
+    <path v-else class="emblem__rule" :d="ironRule" />
+    <path
+      v-for="(chevron, index) in variant === 'iron' ? chevrons : []"
+      :key="index"
+      class="emblem__chevron"
+      :d="chevron"
+    />
     <g class="emblem__glyph" transform="translate(50 50) scale(1.72) translate(-12 -12)">
       <path v-for="(d, index) in glyph" :key="index" :d="d" />
     </g>

@@ -4718,46 +4718,48 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .personal-workspace .emblem--wax .emblem__drip { fill: var(--badge-accent, #d63c3c); }
 
-/* Iron: a riveted plate, rim lit by the badge's own colour. */
+/* Iron, abstracted: a hexagon of flat plates with a rule line and three
+ * chevrons. Nothing here pretends to be a photograph of metal. */
 .personal-workspace .emblem--iron .emblem__disc {
-  fill: #3a3648;
-  stroke: #575069;
-  stroke-width: 2;
+  fill: #3d4a63;
+  stroke: #2b3446;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
 }
 
-.personal-workspace .emblem--iron .emblem__rim {
+.personal-workspace .emblem--iron .emblem__rule {
   fill: none;
   stroke: var(--badge-accent, #ffc800);
-  stroke-width: 2;
-  opacity: 0.85;
-  filter: drop-shadow(0 0 6px var(--badge-accent, #ffc800));
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  opacity: 0.9;
 }
 
-.personal-workspace .emblem--iron .emblem__plate {
-  fill: #2b2738;
-  stroke: #4b4560;
-  stroke-width: 1.2;
+.personal-workspace .emblem--iron .emblem__chevron {
+  fill: none;
+  stroke: var(--badge-accent, #ffc800);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
 }
-
-.personal-workspace .emblem--iron .emblem__rivet { fill: #9d93b8; }
 
 .personal-workspace .emblem--iron .emblem__glyph {
   fill: none;
-  stroke: var(--badge-accent, #ffc800);
+  stroke: #f4ecdc;
   stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 4px var(--badge-accent, #ffc800));
 }
 
 /* Unearned: cold wax, unlit iron — still a shape, never a celebration. */
 .personal-workspace .emblem--wax:not(.is-earned) .emblem__disc { fill: #4a4453; filter: none; }
 .personal-workspace .emblem--wax:not(.is-earned) .emblem__plate { stroke: rgb(255 255 255 / 12%); }
 .personal-workspace .emblem--wax:not(.is-earned) .emblem__glyph { stroke: #8e8798; }
-.personal-workspace .emblem--iron:not(.is-earned) .emblem__disc { fill: #2f2b3c; }
-.personal-workspace .emblem--iron:not(.is-earned) .emblem__rim { stroke: #5d5670; opacity: 0.45; filter: none; }
-.personal-workspace .emblem--iron:not(.is-earned) .emblem__glyph { stroke: #6f6884; filter: none; }
-.personal-workspace .emblem--iron:not(.is-earned) .emblem__rivet { fill: #6b6480; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__disc { fill: #2c3140; stroke: #23283a; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__rule { stroke: #5d5670; opacity: 0.5; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__chevron { stroke: #5d5670; opacity: 0.5; }
+.personal-workspace .emblem--iron:not(.is-earned) .emblem__glyph { stroke: #6f6884; }
 
 @media (prefers-reduced-motion: reduce) {
   .personal-workspace .badge.is-unlocked .badge__turn .badge__shine { animation: none; opacity: 0; }
