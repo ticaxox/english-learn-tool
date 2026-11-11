@@ -544,6 +544,7 @@ watch(challengeModule, async (module, previous) => {
           v-else-if="session.question.value?.kind === 'spelling'"
           :question="session.question.value"
           :disabled="session.busy.value || Boolean(verdict)"
+          :result="verdict ? reveal?.word ?? null : null"
           @answer="(value) => answerSpelling(session.question.value!.questionId, value)"
         />
 

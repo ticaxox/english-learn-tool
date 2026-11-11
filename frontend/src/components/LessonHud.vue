@@ -7,13 +7,12 @@
  * position comes from the server's `remaining`, the combo is counted locally
  * because it is a run of correct answers within this run, not a stored stat.
  */
-import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
   /** 1-based card number inside this run. */
   index: number
   total: number
-  /** Cards finished, for the bar. */
+  /** Cards finished; kept for the count, the bar itself is gone. */
   done: number
   combo: number
   hearts: number
@@ -25,10 +24,6 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{ (event: 'exit'): void }>()
 
-const percent = computed(() => {
-  if (props.total <= 0) return 0
-  return Math.max(0, Math.min(100, Math.round((props.done / props.total) * 100)))
-})
 </script>
 
 <template>
@@ -39,11 +34,6 @@ const percent = computed(() => {
         <path d="M17.2 6.8 L6.8 17.2" />
       </svg>
     </button>
-
-    <div class="lesson-hud__bar" role="progressbar" :aria-valuenow="percent" aria-valuemin="0" aria-valuemax="100"
-         :aria-label="`本轮进度 ${percent}%`">
-      <span class="lesson-hud__fill" :style="{ width: `${percent}%` }"></span>
-    </div>
 
     <div class="lesson-hud__meta">
       <span class="lesson-hud__count">{{ index }} / {{ total || '—' }}</span>
@@ -71,7 +61,7 @@ const percent = computed(() => {
    the page like a game's top bar, not a card among cards. */
 .lesson-hud {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 0.85rem;
   padding: 0.4rem 0 0.7rem;
@@ -93,22 +83,6 @@ const percent = computed(() => {
 .lesson-hud__exit:hover { background: rgb(53 36 15 / 8%); color: var(--ui-ink, #35240f); }
 .lesson-hud__exit:focus-visible { outline: 2.5px solid var(--g-orange, #ff9600); outline-offset: 2px; }
 .lesson-hud__exit svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
-
-.lesson-hud__bar {
-  position: relative;
-  height: 0.85rem;
-  border-radius: 999px;
-  background: rgb(53 36 15 / 10%);
-  overflow: hidden;
-}
-
-.lesson-hud__fill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--g-orange, #ff9600), var(--g-gold, #ffc800));
-  transition: width 420ms cubic-bezier(0.3, 1.1, 0.4, 1);
-}
 
 .lesson-hud__meta { display: flex; align-items: center; gap: 0.7rem; }
 

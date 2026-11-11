@@ -4318,6 +4318,36 @@
   line-height: 32px;
 }
 
+/* Spelling cells carry four faces — waiting, given, right, wrong — cut from
+   the same chipped stone so only the face changes between them. */
+.personal-workspace .study-card--spelling .spelling-cell--prefilled {
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 7px 9px;
+  border-color: transparent;
+  border-image-source: url('./assets/halloween/card/cell-given-day.png');
+  border-image-slice: 10% 5% fill;
+  border-image-width: 7px 9px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: #c98a2e;
+  background-clip: padding-box;
+  color: #3d2607;
+  font-weight: 850;
+}
+
+.personal-workspace .study-card--spelling input.spelling-cell--right {
+  border-image-source: url('./assets/halloween/card/cell-right-day.png');
+  background: #7fbf7a;
+  color: #10301a;
+}
+
+.personal-workspace .study-card--spelling input.spelling-cell--wrong {
+  border-image-source: url('./assets/halloween/card/cell-wrong-day.png');
+  background: #c94a3b;
+  color: #fff;
+}
+
 /* ---------- night ---------- */
 /* Night artwork keys off the app's own switch, never the operating
    system: the app has no dark theme, so an OS-level dark preference used to
@@ -4344,9 +4374,22 @@ html[data-mode='night'] {
 
   .study-card--choice .choice-option__label { color: #f3e9d2; }
 
-  .study-card--spelling .spelling-cell--prefilled {
-    background: #241c3d;
-    color: #b9a6e6;
+  .personal-workspace .study-card--spelling .spelling-cell--prefilled {
+    background: #c98a2e;
+    border-image-source: url('./assets/halloween/card/cell-given-night.png');
+    color: #1a1200;
+  }
+
+  .personal-workspace .study-card--spelling input.spelling-cell--right {
+    background: #7cf0c4;
+    border-image-source: url('./assets/halloween/card/cell-right-night.png');
+    color: #10301a;
+  }
+
+  .personal-workspace .study-card--spelling input.spelling-cell--wrong {
+    background: #e0705f;
+    border-image-source: url('./assets/halloween/card/cell-wrong-night.png');
+    color: #1a0b08;
   }
 
   .study-card--spelling .spelling-cell--active {

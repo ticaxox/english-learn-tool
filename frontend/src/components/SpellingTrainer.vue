@@ -6,12 +6,23 @@
  */
 import { computed, nextTick, ref, watch } from 'vue'
 import { useSpellingGrid } from '../composables/useSpellingGrid'
-import { SPELLING_BLANK_LABELS, type SpellingQuestion } from '../types/learning'
+import { SPELLING_BLANK_LABELS, type SpellingBlank, type SpellingQuestion } from '../types/learning'
 
 const props = defineProps<{
   question: SpellingQuestion
   disabled?: boolean
+  /** The graded word once the server has answered; null while still answering. */
+  result?: string | null
 }>()
+
+/** Per-letter mark, only ever after grading — the word is never sent earlier. */
+function letterState(blank: SpellingBlank): 'right' | 'wrong' | null {
+  if (!props.result) return null
+  const expected = props.result[blank.index]
+  if (expected === undefined) return null
+  const entered = (blank.prefilled ? blank.character : grid.values.value[blank.index]) ?? ''
+  return entered.toLowerCase() === expected.toLowerCase() ? 'right' : 'wrong'
+}
 
 const emit = defineEmits<{
   (event: 'answer', value: string): void
@@ -171,7 +182,11 @@ function submit(): void {
           v-else
           :ref="(element) => setInputRef(element as Element | null, blank.index)"
           class="spelling-cell"
-          :class="{ 'spelling-cell--active': grid.activeIndex.value === blank.index }"
+          :class="{
+            'spelling-cell--active': grid.activeIndex.value === blank.index,
+            'spelling-cell--right': letterState(blank) === 'right',
+            'spelling-cell--wrong': letterState(blank) === 'wrong',
+          }"
           type="text"
           inputmode="text"
           autocomplete="off"

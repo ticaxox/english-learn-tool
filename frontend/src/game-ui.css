@@ -1682,7 +1682,7 @@
   border-width: 7px 9px;
   border-color: transparent;
   border-image-source: url('./assets/halloween/card/rune-chip-day.png');
-  border-image-slice: 10% 5%;
+  border-image-slice: 10% 5% fill;
   border-image-width: 7px 9px;
   border-image-repeat: stretch;
   border-radius: 0;
@@ -3955,7 +3955,7 @@
 /* Two objects side by side: the question on the left, the controls on the
    right. The rail is a column of its own, not a strip under the card. */
 .personal-workspace .memory-workbench-grid.is-session {
-  grid-template-columns: minmax(0, 700px) 268px;
+  grid-template-columns: minmax(0, 820px) 268px;
   justify-content: center;
   align-items: start;
   gap: 18px 44px;
@@ -3965,7 +3965,7 @@
 
 .personal-workspace .memory-page .lesson-hud {
   margin: 26px auto 0;
-  width: min(100%, 1012px);
+  width: min(100%, 1132px);
 }
 
 /* While a card is on screen it owns the column: centred, with the feedback
@@ -4211,7 +4211,7 @@
 }
 
 .personal-workspace .memory-main-card .choice-list {
-  max-width: 720px;
+  max-width: none;
   gap: 16px 20px;
 }
 
@@ -4934,8 +4934,16 @@
 /* The inscription lies long: the slab is a tablet, not a tile. */
 .personal-workspace .memory-main-card .study-card--choice,
 .personal-workspace .memory-main-card .study-card--spelling {
-  max-width: 700px;
+  max-width: 820px;
   width: 100%;
+}
+
+/* ...and its options run the full width of the slab instead of sitting as
+   small tiles in the middle of a lot of stone. */
+.personal-workspace .memory-main-card .study-card--choice .choice-list .choice-option {
+  width: 100%;
+  min-height: 0;
+  padding-block: 20px;
 }
 
 .personal-workspace .memory-page .memory-main-card .study-card--choice {
