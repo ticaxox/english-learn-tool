@@ -321,7 +321,8 @@
 .coach-privacy-stamp { display: inline-flex; gap: 5px; align-items: center; padding: 5px 9px; border: 1px solid var(--workspace-line); border-radius: 999px; color: var(--workspace-muted); font-size: 10px; white-space: nowrap; }
 .coach-privacy-stamp svg { width: 13px; height: 13px; }
 .workspace-shell .coach-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 14px; min-height: calc(100vh - 190px); align-items: stretch; }
-.workspace-shell .coach-sidebar, .workspace-shell .coach-main { border: 1px solid var(--workspace-line); border-radius: var(--workspace-radius); background: var(--workspace-surface); box-shadow: none; }
+/* The coach is one sheet of writing, not two rounded panels side by side. */
+.workspace-shell .coach-sidebar, .workspace-shell .coach-main { border: 0; border-radius: 0; background: none; box-shadow: none; }
 .workspace-shell .coach-sidebar { display: flex; min-width: 0; flex-direction: column; gap: 14px; padding: 14px; overflow: hidden; }
 .workspace-shell .coach-sidebar__heading { display: flex; align-items: flex-start; justify-content: space-between; }
 .workspace-shell .coach-sidebar__heading h2 { margin: 0; font-size: 15px; }
@@ -334,25 +335,34 @@
 .coach-conversation__actions { display: flex; gap: 8px; padding: 0 10px 6px; }
 .workspace-shell .coach-conversation__actions .link-button { min-height: 0; padding: 0; border: 0; background: transparent; color: var(--workspace-muted); font-size: 9px; }
 .workspace-shell .coach-main { display: flex; min-width: 0; flex-direction: column; padding: 0; overflow: hidden; }
-.workspace-shell .coach-main-empty { display: grid; max-width: 480px; align-content: center; justify-items: start; gap: 10px; min-height: 100%; margin: 0 auto; padding: 40px 24px; }
+/* The coach's first screen opens at the top margin of the sheet and runs as
+   wide as a letter, not centred in a 480px column. */
+.workspace-shell .coach-main-empty { display: grid; max-width: 52rem; align-content: start; justify-items: start; gap: 10px; min-height: 0; margin: 0; padding: 2.6rem 0 1.6rem 1.2rem; }
 .coach-empty-mark { display: grid; width: 46px; height: 46px; place-items: center; border: 1px solid #bdd3c8; border-radius: 11px; background: var(--workspace-accent-soft); }
 .coach-empty-mark .whisker-crumb-mark { width: 34px; height: 34px; }
 .workspace-shell .coach-main-empty h2 { margin: 0; font-size: 21px; }
 .workspace-shell .coach-main-empty p { margin: 0; color: var(--workspace-muted); font-size: 13px; }
 .workspace-shell .coach-suggested-prompts { display: grid; gap: 6px; width: 100%; margin: 8px 0; }
 .workspace-shell .coach-suggested-prompts [role="button"] { min-height: 34px; justify-content: flex-start; border: 1px solid var(--workspace-line); background: var(--workspace-surface-muted); color: var(--workspace-ink); font-size: 12px; font-weight: 500; text-align: left; }
-.workspace-shell .coach-main-header { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--workspace-line); }
+/* The heading sits on the sheet at the same left edge as the writing below it,
+   closed by the heavy rule that marks where the correspondence starts. */
+.workspace-shell .coach-main-header { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; padding: 0 0 12px; border-bottom: 2px solid rgb(53 36 15 / 55%); }
 .workspace-shell .coach-main-header h2 { margin: 0 0 3px; font-size: 16px; }
-.workspace-shell .coach-messages { display: grid; min-height: 0; gap: 10px; flex: 1; padding: 16px 18px 220px; overflow-y: auto; }
-.workspace-shell .coach-message { max-width: min(78%, 720px); padding: 10px 12px; border-radius: 10px; background: var(--workspace-surface-muted); }
-.workspace-shell .coach-message--user { justify-self: end; background: var(--workspace-accent-soft); }
-.workspace-shell .coach-message__meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--workspace-muted); font-size: 9px; }
-.workspace-shell .coach-message__meta strong { color: var(--workspace-ink); font-size: 10px; }
-.workspace-shell .coach-message__text { margin: 5px 0 0; color: var(--workspace-ink); font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
+/* A turn is writing on the sheet: a stamp in the margin, a body in the
+   measure, a hairline between turns. No bubble, no fill, no radius. */
+.workspace-shell .coach-messages { display: grid; min-height: 0; gap: 0; flex: 1; padding: 8px 0 0; }
+.workspace-shell .coach-message { max-width: none; padding: 18px 0; border-radius: 0; background: none; border-top: 1px solid rgb(53 36 15 / 12%); }
+.workspace-shell .coach-message:first-of-type { border-top: 0; padding-top: 6px; }
+.workspace-shell .coach-message--user { justify-self: stretch; background: none; }
+.workspace-shell .coach-message__meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--ui-muted); font-size: 11px; }
+.workspace-shell .coach-message__meta strong { color: var(--ui-ink); font-size: 12px; }
+.workspace-shell .coach-message__text { margin: 6px 0 0; color: var(--ui-ink); font-size: 15px; line-height: 1.85; white-space: pre-wrap; }
 .workspace-shell .coach-actions { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--workspace-line); }
 .workspace-shell .coach-actions h3 { margin: 0 0 5px; font-size: 11px; }
-.workspace-shell .coach-receipt { padding: 8px; border: 1px solid var(--workspace-line); border-radius: 7px; background: var(--workspace-surface); }
-.workspace-shell .coach-composer { position: sticky; z-index: 5; bottom: 0; display: grid; gap: 8px; margin-top: auto; padding: 12px 18px 16px; border-top: 1px solid var(--workspace-line); background: var(--workspace-surface); }
+.workspace-shell .coach-receipt { padding: 6px 0 6px 12px; border: 0; border-left: 2px solid rgb(227 110 82 / 55%); border-radius: 0; background: none; }
+/* The writing line stays with you at the foot of the sheet, but it is not a
+   bar: no surface, no box — just the heavy rule you write under. */
+.workspace-shell .coach-composer { position: sticky; z-index: 5; bottom: 0; display: grid; gap: 8px; margin-top: auto; padding: 10px 0 12px; border-top: 2px solid rgb(53 36 15 / 55%); background: none; }
 .workspace-shell .coach-composer label { color: var(--workspace-ink); font-size: 11px; font-weight: 600; }
 .workspace-shell .coach-composer textarea { min-height: 74px; resize: vertical; }
 .workspace-shell .coach-composer__footer { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
@@ -693,49 +703,54 @@
 }
 .practice-generation-state.is-error strong { color: #7d2d26; }
 /* Coach message hierarchy */
+/* The two columns are the margin and the measure. The stamp sits in the
+   margin on every turn — including the learner's, so the eye reads down one
+   line instead of jumping left and right. */
 .workspace-shell .coach-message {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
-  gap: 9px;
+  grid-template-columns: 5.6rem minmax(0, 1fr);
+  gap: 1.4rem;
   align-items: start;
-  max-width: min(84%, 760px);
-  padding: 11px 12px;
-  border: 1px solid var(--workspace-line);
-  background: var(--workspace-surface);
+  max-width: none;
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid rgb(53 36 15 / 12%);
+  background: none;
 }
 .workspace-shell .coach-message--assistant {
-  justify-self: start;
-  background: #fbfcfb;
+  justify-self: stretch;
+  background: none;
 }
 .workspace-shell .coach-message--user {
-  grid-template-columns: minmax(0, 1fr) 30px;
-  justify-self: end;
-  border-color: #cfe0d7;
-  background: var(--workspace-accent-soft);
+  grid-template-columns: 5.6rem minmax(0, 1fr);
+  justify-self: stretch;
+  background: none;
 }
 .coach-message-avatar {
   display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border: 1px solid var(--workspace-line);
-  border-radius: 8px;
-  background: var(--workspace-surface);
-  color: var(--workspace-muted);
-  font-size: 9px;
-  font-weight: 700;
+  width: auto;
+  height: auto;
+  place-items: start center;
+  padding-top: 2px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
 }
 .coach-message-avatar--assistant {
-  border-color: #bdd3c8;
-  background: var(--workspace-accent-soft);
+  border: 0;
+  background: none;
 }
 .coach-message-avatar .whisker-crumb-mark {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
 }
-.coach-message--user .coach-message-avatar { order: 2; background: #fff; }
-.coach-message--user .coach-message-body { order: 1; }
-.coach-message-body { display: grid; min-width: 0; gap: 5px; }
+.coach-message--user .coach-message-avatar { order: 1; background: none; }
+.coach-message--user .coach-message-body { order: 2; }
+.coach-message-body { display: grid; min-width: 0; gap: 0; }
 .workspace-shell .coach-message__meta { color: var(--workspace-muted); }
 .coach-thinking {
   display: flex;

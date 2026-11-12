@@ -956,7 +956,6 @@ fieldset + fieldset {
 .challenge-history__empty,
 .coach-sidebar-empty,
 .coach-messages-empty,
-.coach-main-empty,
 .dashboard-empty,
 .dashboard-inline-empty {
   border: 1.5px dashed var(--cookie-500);
@@ -1591,8 +1590,9 @@ fieldset + fieldset {
   font-family: var(--font-display);
 }
 
-.practice-question-card textarea,
-.coach-composer textarea {
+/* The coach's field is a line to write on, so the paper skin does not paint
+   a white box behind it. */
+.practice-question-card textarea {
   border-color: var(--cocoa-700);
   background: var(--paper-white);
 }
@@ -1734,24 +1734,24 @@ fieldset + fieldset {
   transform: rotate(-5deg);
 }
 
+/* The coach's turns are written on one sheet: no box, no radius, no shadow. */
 .coach-message {
-  border: 1.3px solid #d2b58c;
-  border-radius: 15px 9px 15px 7px;
-  background: var(--paper-white);
-  box-shadow: 0 3px 0 var(--cookie-200);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .coach-message--user {
-  border-color: var(--ink-blue);
-  border-bottom-right-radius: 4px;
-  background: var(--ink-blue-soft);
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .coach-message--assistant {
-  border-left: 0.45rem solid var(--jam-500);
-  background:
-    radial-gradient(circle at 100% 0%, rgb(243 200 91 / 18%), transparent 8rem),
-    var(--cookie-50);
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .coach-message__meta strong {
@@ -1781,9 +1781,10 @@ fieldset + fieldset {
 }
 
 .coach-composer {
-  border: 1.5px solid var(--cocoa-700);
-  border-radius: 14px 8px 14px 7px;
-  background: var(--cookie-50);
+  border: 0;
+  border-top: 2px solid rgb(53 36 15 / 55%);
+  border-radius: 0;
+  background: none;
 }
 
 /* Daily challenge */

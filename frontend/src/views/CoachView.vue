@@ -323,9 +323,17 @@ onBeforeUnmount(() => {
             >
               加载更早消息
             </DivButton>
+            <!-- An empty conversation is the same moment as no conversation:
+                 the blank page, with the same invitation and the same lines. -->
             <div v-if="coach.messages.value.length === 0 && !coach.messagesLoading.value" class="coach-messages-empty">
-              <strong>和 Mr. Whisker 聊聊</strong>
-              <p>学习计划、复习顺序，或者一句想改得更自然的英文。</p>
+              <ArtImage class="coach-empty-art" :set="illustration.empty" />
+              <div class="coach-messages-empty__copy">
+                <strong>和 Mr. Whisker 聊聊</strong>
+                <p>学习计划、复习顺序，或者一句想改得更自然的英文。</p>
+                <div class="coach-suggested-prompts" aria-label="建议提问">
+                  <DivButton v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</DivButton>
+                </div>
+              </div>
             </div>
 
             <article

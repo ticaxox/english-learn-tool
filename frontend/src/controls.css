@@ -3947,11 +3947,12 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 
 .personal-workspace .coach-page .coach-messages > * { flex: 0 0 auto; }
 
-.personal-workspace .coach-page .coach-messages > *:first-child { margin-top: auto; }
+/* A correspondence is read from the top down, so the thread does not get
+   pushed against the composer the way a chat log is. */
 
 .personal-workspace .coach-page .coach-composer {
-  padding-top: 14px;
-  border-top: 1px dashed var(--ui-line);
+  padding-top: 10px;
+  border-top: 2px solid rgb(53 36 15 / 55%);
 }
 
 /* Coach: full-width rows so the user bubble keeps its right alignment, and a
@@ -3963,15 +3964,12 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 /* Flex column ignores justify-self, so align the bubbles explicitly. */
 .personal-workspace .coach-page .coach-messages > * { width: auto; }
 
-.personal-workspace .coach-page .coach-message--user {
-  align-self: flex-end;
-  width: max-content;
-  max-width: 78%;
-}
-
+/* Every turn starts at the same left margin; the stamp says who is speaking. */
+.personal-workspace .coach-page .coach-message--user,
 .personal-workspace .coach-page .coach-message--assistant {
-  align-self: flex-start;
-  max-width: 88%;
+  align-self: stretch;
+  width: auto;
+  max-width: none;
 }
 
 /* AI quota: three equal-sized boxes and a compact timeout field. */
@@ -4007,23 +4005,41 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 /* Coach without a page header: the chat fills the screen. */
 .personal-workspace .coach-page .coach-layout--with-history { height: calc(100vh - 170px); }
 
-/* Empty conversation shows the intro as a quiet backdrop. */
+/* An empty conversation opens exactly like a blank page: a drawing in the
+   margin, the invitation beside it, the suggested lines under it. */
 .personal-workspace .coach-page .coach-messages-empty {
   display: grid;
-  gap: 6px;
-  margin: auto;
-  padding: 28px 24px;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 0.5rem 1.6rem;
+  align-items: start;
+  margin: 0;
+  padding: 1.4rem 0 0;
   color: var(--ui-muted);
-  text-align: center;
+  text-align: left;
+}
+
+.personal-workspace .coach-page .coach-messages-empty .coach-empty-art {
+  grid-row: 1 / span 4;
+  grid-column: 1;
+  width: 100%;
+  margin: 0;
+}
+
+.personal-workspace .coach-page .coach-messages-empty__copy {
+  grid-column: 2;
+  display: grid;
+  gap: 0.4rem;
 }
 
 .personal-workspace .coach-page .coach-messages-empty strong {
   color: var(--ui-ink);
-  font-size: 1.4rem;
-  font-weight: 900;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-.personal-workspace .coach-page .coach-messages-empty p { margin: 0; font-size: 0.95rem; }
+.personal-workspace .coach-page .coach-messages-empty p { margin: 0; font-size: 0.98rem; }
 
 /* Token rows keep their two actions side by side, and key-value inputs share one width. */
 .personal-workspace .mcp-token-list li > div.mcp-token-actions {
@@ -5108,7 +5124,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 .personal-workspace .personal-knowledge__list li:last-child { border-bottom: 0; }
 .personal-workspace .personal-knowledge__list small { color: var(--ui-muted); font-size: 0.74rem; }
 /* Halloween art: the covers carry their own colour, so no tinted tile behind them. */
-.coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0 auto 8px; }
+.coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0; }
 .practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
 .practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }
 
