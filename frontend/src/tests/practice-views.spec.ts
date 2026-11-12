@@ -97,8 +97,8 @@ describe('practice views', () => {
 
   it('surfaces 429 on practice creation with request id', async () => {
     practiceMocks.createPracticeSession.mockRejectedValueOnce(new ApiError(429, 'AI_QUOTA_EXHAUSTED', 'Daily quota exhausted.', null, 'quota-request', true))
-    const { wrapper } = await mountRoute(PracticeHubView, '/practice')
-    await wrapper.get('form').trigger('submit')
+    const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=fill_blank')
+    await wrapper.get('.practice-config-dialog form').trigger('submit')
     await flushPromises()
     expect(wrapper.text()).toContain('今天的 AI 次数已用完')
     expect(wrapper.text()).toContain('quota-request')
@@ -111,12 +111,12 @@ describe('practice views', () => {
     expect(wrapper.text()).toContain('forbidden-practice')
   })
 
-  it('offers all four practice types and creates a writing session with one question', async () => {
+  it('creates a writing session with one question from its book', async () => {
     const { wrapper, router } = await mountRoute(PracticeHubView, '/practice?type=writing')
     // Writing has no question-count choice; it always creates one essay.
     expect(wrapper.find('#practice-count').exists()).toBe(false)
     expect((wrapper.get('#practice-writing-length').element as HTMLSelectElement).value).toBe('150')
-    await wrapper.get('form').trigger('submit')
+    await wrapper.get('.practice-config-dialog form').trigger('submit')
     await flushPromises()
     expect(practiceMocks.createPracticeSession).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -131,14 +131,37 @@ describe('practice views', () => {
     expect(router.currentRoute.value.query.session).toBeTruthy()
   })
 
-  it('offers a mixed type that keeps several question types in one set', async () => {
-    const { wrapper } = await mountRoute(PracticeHubView, '/practice?type=mixed')
-    const labels = wrapper.findAll('.practice-type-pill').map((pill) => pill.text())
-    expect(labels).toContain('随机')
-    expect(labels).toHaveLength(6)
-    const active = wrapper.findAll('.practice-type-pill.is-active').map((pill) => pill.text())
-    expect(active).toEqual(['随机'])
-    await wrapper.get('form').trigger('submit')
+  it('offers the five exercise types as books on the shelf', async () => {
+    const { wrapper } = await mountRoute(PracticeHubView, '/practice')
+    const books = wrapper.findAll('.practice-shelf .shelf-book')
+    expect(books.map((book) => book.text())).toHaveLength(5)
+    const labels = books.map((book) => book.text())
+    expect(labels.some((text) => text.includes('填空'))).toBe(true)
+    expect(labels.some((text) => text.includes('对话'))).toBe(true)
+    // The form is not on the page until a book is picked.
+    expect(wrapper.find('.practice-config-dialog').exists()).toBe(false)
+  })
+
+  it('opens the settings dialog when a book is picked', async () => {
+    const { wrapper } = await mountRoute(PracticeHubView, '/practice')
+    const reading = wrapper.findAll('.practice-shelf .shelf-book').find((book) => book.text().includes('阅读'))
+    expect(reading).toBeTruthy()
+    await reading!.trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.practice-config-dialog').exists()).toBe(true)
+    expect(wrapper.get('.practice-config-dialog h2').text()).toContain('阅读')
+    await wrapper.get('.practice-config-dialog form').trigger('submit')
+    await flushPromises()
+    const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!
+    expect(input.practiceType).toBe('reading')
+  })
+
+  it('keeps a mixed set reachable without a book of its own', async () => {
+    const { wrapper } = await mountRoute(PracticeHubView, '/practice')
+    await wrapper.get('.practice-shelf__mixed-link').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.practice-config-dialog').exists()).toBe(true)
+    await wrapper.get('.practice-config-dialog form').trigger('submit')
     await flushPromises()
     const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!
     expect(input.practiceType).toBe('mixed')

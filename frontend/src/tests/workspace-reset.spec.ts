@@ -40,7 +40,10 @@ describe('T-FE-016 member workspace reset', () => {
     expect(source('wordbooks')).not.toContain('member-page-heading')
     expect(source('memory')).toContain('memory-workbench')
     expect(source('memory')).not.toContain('memory-hero')
-    expect(source('practice')).toContain('practice-create-panel')
+    // The exercise types are books on a shelf now; the settings for one open
+    // in a dialog, so the page itself is the shelf plus the task list.
+    expect(source('practice')).toContain('PracticeShelf')
+    expect(source('practice')).toContain('practice-config-dialog')
     expect(source('practice')).toContain('PracticeTaskList')
     expect(source('practice')).not.toContain('practice-room-mascot')
     expect(source('coach')).toContain('coach-workspace')

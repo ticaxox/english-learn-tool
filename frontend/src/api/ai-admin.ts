@@ -24,9 +24,13 @@ export type QuotaKind = 'coach_messages' | 'question_generation' | 'subjective_g
 export type AiTaskType = PromptKey
 export type AiJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled' | 'stale'
 
+export type AiProviderKind = 'chat' | 'embedding'
+
 export interface AiProvider {
   id: string
   name: string
+  /** Whether this provider writes text or turns text into vectors. */
+  kind: AiProviderKind
   baseUrl: string
   apiKeyMasked: string
   modelId: string
@@ -47,6 +51,7 @@ export interface AiProvider {
 
 export interface ProviderCreateInput {
   name: string
+  kind?: AiProviderKind
   baseUrl: string
   apiKey: string
   modelId: string
@@ -63,12 +68,15 @@ export interface ProviderProbeInput {
   baseUrl: string
   apiKey?: string | null
   providerId?: string | null
+  kind?: AiProviderKind
+  modelId?: string | null
   timeoutSeconds: number
   customHeaders: Record<string, string>
 }
 
 export interface ProviderPatchInput {
   name?: string
+  kind?: AiProviderKind
   baseUrl?: string
   apiKey?: string | null
   modelId?: string
@@ -225,6 +233,8 @@ export function parseProvider(value: unknown, index = 0): AiProvider {
   return {
     id: stringValue(body.id, context, 'id'),
     name: stringValue(body.name, context, 'name'),
+    // A response from before this field existed is a chat provider.
+    kind: body.kind === 'embedding' ? 'embedding' : 'chat',
     baseUrl: stringValue(body.base_url, context, 'base_url'),
     apiKeyMasked: stringValue(body.api_key_masked, context, 'api_key_masked'),
     modelId: stringValue(body.model_id, context, 'model_id'),
@@ -352,6 +362,7 @@ export function serializeProviderCreate(input: ProviderCreateInput): Record<stri
     base_url: input.baseUrl,
     api_key: input.apiKey,
     model_id: input.modelId,
+    kind: input.kind ?? 'chat',
     priority: input.priority,
     is_default: input.isDefault,
     timeout_seconds: input.timeoutSeconds,
@@ -367,6 +378,7 @@ export function serializeProviderPatch(input: ProviderPatchInput): Record<string
   if (input.baseUrl !== undefined) payload.base_url = input.baseUrl
   if (input.apiKey !== undefined) payload.api_key = input.apiKey
   if (input.modelId !== undefined) payload.model_id = input.modelId
+  if (input.kind !== undefined) payload.kind = input.kind
   if (input.priority !== undefined) payload.priority = input.priority
   if (input.isDefault !== undefined) payload.is_default = input.isDefault
   if (input.timeoutSeconds !== undefined) payload.timeout_seconds = input.timeoutSeconds

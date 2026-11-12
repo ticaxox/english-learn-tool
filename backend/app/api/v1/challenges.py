@@ -29,6 +29,7 @@ from app.services.challenge import (
     get_history,
     get_node_detail,
     get_today,
+    regenerate_today,
     start_node,
     submit_boss,
 )
@@ -86,6 +87,22 @@ async def generate_today_endpoint(
 ) -> ChallengeGenerateResponse:
     settings: Settings = request.app.state.settings
     return await generate_today(session, _pool(request), context.user, settings)
+
+
+@router.post(
+    "/today/regenerate",
+    response_model=ChallengeGenerateResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses=_RESPONSES,
+    summary="Throw today's unfinished map away and build it again",
+)
+async def regenerate_today_endpoint(
+    request: Request,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> ChallengeGenerateResponse:
+    settings: Settings = request.app.state.settings
+    return await regenerate_today(session, _pool(request), context.user, settings)
 
 
 @router.get(

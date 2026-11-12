@@ -19,6 +19,9 @@ AiTaskType = Literal[
 ]
 AiJobStatus = Literal["queued", "running", "succeeded", "failed", "cancelled", "stale"]
 AiQuotaKind = Literal["coach_messages", "question_generation", "subjective_grading"]
+# A chat provider writes text; an embedding provider turns text into vectors.
+# They are separate services and are configured separately.
+AiProviderKind = Literal["chat", "embedding"]
 AiPromptKey = Literal[
     "practice_generation",
     "subjective_grading",
@@ -37,13 +40,17 @@ class ProviderCreateRequest(_StrictModel):
     name: str = Field(min_length=1, max_length=100)
     base_url: str = Field(min_length=8, max_length=500)
     api_key: str = Field(min_length=8, max_length=4_096, repr=False)
+    # For a chat provider this is the model that writes; for an embedding
+    # provider it is the model that turns text into vectors.
     model_id: str = Field(min_length=1, max_length=200)
+    kind: AiProviderKind = "chat"
     priority: int = Field(default=100, ge=0, le=10_000)
     is_default: bool = False
     timeout_seconds: int = Field(default=60, ge=1, le=300)
     enabled: bool = True
     custom_headers: dict[str, str] = Field(default_factory=dict)
-    # Optional: the model used for /embeddings on this provider.
+    # Legacy: an embedding model named on a chat provider. New configurations
+    # add an embedding provider instead.
     embedding_model: str | None = Field(default=None, max_length=120)
 
     @field_validator("name", "model_id")
@@ -101,6 +108,7 @@ class ProviderPatchRequest(_StrictModel):
     base_url: str | None = Field(default=None, min_length=8, max_length=500)
     api_key: str | None = Field(default=None, min_length=8, max_length=4_096, repr=False)
     model_id: str | None = Field(default=None, min_length=1, max_length=200)
+    kind: AiProviderKind | None = None
     priority: int | None = Field(default=None, ge=0, le=10_000)
     is_default: bool | None = None
     timeout_seconds: int | None = Field(default=None, ge=1, le=300)
@@ -157,6 +165,10 @@ class ProviderProbeRequest(_StrictModel):
     base_url: str = Field(min_length=8, max_length=500)
     api_key: str | None = Field(default=None, min_length=8, max_length=4_096, repr=False)
     provider_id: UUID | None = None
+    # An embedding provider has no model list to read; it is tested with an
+    # actual /embeddings call instead.
+    kind: AiProviderKind = "chat"
+    model_id: str | None = Field(default=None, min_length=1, max_length=200)
     timeout_seconds: int = Field(default=60, ge=1, le=300)
     custom_headers: dict[str, str] = Field(default_factory=dict)
 
@@ -181,6 +193,7 @@ class ProviderProbeRequest(_StrictModel):
 class ProviderResponse(BaseModel):
     id: UUID
     name: str
+    kind: AiProviderKind
     base_url: str
     api_key_masked: str
     model_id: str

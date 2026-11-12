@@ -374,6 +374,15 @@ export async function generateTodayChallenge(options: { signal?: AbortSignal } =
   return parseChallengeGenerate(payload)
 }
 
+/** Throw today's unfinished map away and build it again. */
+export async function regenerateTodayChallenge(options: { signal?: AbortSignal } = {}): Promise<ChallengeGenerateResult> {
+  const payload = await apiClient.post('/challenges/today/regenerate', undefined, {
+    ...options,
+    retryCount: 0,
+  })
+  return parseChallengeGenerate(payload)
+}
+
 export async function getChallengeJob(
   jobId: string,
   options: { signal?: AbortSignal } = {},

@@ -35,6 +35,13 @@
   --g-gold-edge: #d9a400;
   --g-gold-soft: #fff2b8;
 
+  /* What sits on a saturated face. Night redefines these for its lighter
+   * greens and oranges. */
+  --g-on-green: #fff;
+  --g-on-green-soft: #1f8a30;
+  --g-on-orange: #3a2410;
+  --g-on-gold: #3a2410;
+
   --crumb-forest: #2f8a4c;
   --crumb-pumpkin: #ff9600;
   --crumb-gold: #ffc800;
@@ -85,9 +92,61 @@ html[data-theme='night'] .personal-workspace {
   --g-gold-edge: #b8891a;
   --g-gold-soft: #3a2e13;
 
+  /* These four are the ones the day theme uses as *ink*: cocoa titles, moss
+   * labels, forest links. Only three of the nine crumb tokens had a night
+   * value, so every line set in cocoa stayed #4d2a20 on a #271a49 surface -
+   * 1.25:1, effectively invisible. These are the same hues relit for night. */
   --crumb-forest: #5fd39a;
+  --crumb-forest-deep: #3fae78;
   --crumb-pumpkin: #ff9f45;
+  --crumb-pumpkin-deep: #c76a10;
   --crumb-gold: #ffd166;
+  --crumb-cocoa: #f2d9b8;
+  --crumb-moss: #b6d17a;
+  /* Parchment and cream are surfaces, not ink: at night they become the
+   * raised paper the night surfaces already use, so a cream chip does not
+   * glare out of a violet room. */
+  --crumb-parchment: #2f2156;
+  --crumb-parchment-deep: #3d2c66;
+  --crumb-cream: #271a49;
+
+  /* The older workspace token family is defined once on :root and never had a
+   * night counterpart either, so 100-odd rules that read --workspace-ink or
+   * --workspace-muted kept pointing at the daylight greens. Same room, relit. */
+  --workspace-canvas: #1a1030;
+  --workspace-surface: #271a49;
+  --workspace-surface-muted: #2f2156;
+  --workspace-sidebar: #221541;
+  --workspace-ink: #f4ecdc;
+  --workspace-muted: #b4a3cf;
+  --workspace-subtle: #9a8cb8;
+  --workspace-line: #3d2c66;
+  --workspace-line-strong: #d8cdf8;
+  --workspace-accent: #5fd39a;
+  --workspace-accent-strong: #8fe6bc;
+  --workspace-accent-soft: #1c3b33;
+  --workspace-warm: #ffd166;
+  --workspace-warm-soft: #3a2e13;
+  --workspace-danger: #ff8a80;
+  --workspace-focus: #7fc7ff;
+
+  /* A green this light takes dark ink, not white: white on the night green is
+   * 1.98:1, dark ink is 8.2:1. */
+  --g-on-green: #14240f;
+  --g-on-green-soft: #8fe6bc;
+  --g-on-orange: #2a1405;
+  --g-on-gold: #2a2005;
+
+  /* personal-ui.css derives these from --crumb-* on :root, so they resolve to
+   * the DAY crumb values before .personal-workspace is ever reached - custom
+   * properties substitute where they are computed, not where they are used.
+   * Re-derive them here so the night crumb values actually land. */
+  --ui-forest: #5fd39a;
+  --ui-forest-soft: #1c3b33;
+  --ui-pumpkin: #ff9f45;
+  --ui-pumpkin-soft: #3e2617;
+  --ui-gold: #ffd166;
+  --ui-gold-soft: #3a2e13;
 
   background-color: var(--ui-canvas);
   color: var(--ui-ink);
@@ -163,7 +222,10 @@ html[data-theme='night'] .personal-workspace {
 .personal-workspace .workspace-topbar {
   min-height: 72px;
   border-bottom: 2px solid var(--ui-line);
-  background: rgb(255 250 240 / 94%);
+  /* Follows the theme: --ui-sidebar is the same cream by day and the deep
+   * violet by night. The literal cream this used to be left the bar in
+   * daylight while the rest of the room went dark. */
+  background: color-mix(in srgb, var(--ui-sidebar) 94%, transparent);
   backdrop-filter: blur(6px);
 }
 
@@ -221,7 +283,7 @@ html[data-theme='night'] .personal-workspace {
   border: 0;
   border-radius: 14px;
   background: var(--g-green);
-  color: #fff;
+  color: var(--g-on-green);
   font-weight: 900;
   font-size: 0.95rem;
   letter-spacing: 0.01em;
@@ -307,7 +369,7 @@ html[data-theme='night'] .personal-workspace {
 .personal-workspace .ia-profile-trigger {
   border: 2px solid var(--g-green-edge);
   background: var(--g-green-soft);
-  color: #14431f;
+  color: var(--g-on-green-soft);
   font-weight: 900;
   box-shadow: 0 3px 0 var(--g-green-edge);
 }
@@ -1248,7 +1310,9 @@ html[data-theme='night'] .personal-workspace input[type="radio"]::after { backgr
 html[data-theme='night'] .personal-workspace .ia-tabs,
 html[data-theme='night'] .personal-workspace .ia-settings-tabs { background: #2b2417; }
 html[data-theme='night'] .personal-workspace .ia-tab--active { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .settings-form legend { background: #2b2417; }
+/* The legend chip resets to transparent further down, so night must not paint
+ * it brown: on the violet surface that reads as a stray block. */
+html[data-theme='night'] .personal-workspace .settings-form legend { background: transparent; }
 html[data-theme='night'] .personal-workspace .inline-note { background: #2b2417; color: #e1be98; }
 html[data-theme='night'] .personal-workspace .practice-option__mark { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .practice-option--correct .practice-option__mark { background: #2d2149; }
@@ -1307,7 +1371,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 
 /* Rails. */
 html[data-theme='night'] .personal-workspace .workspace-progress,
-html[data-theme='night'] .personal-workspace .workspace-shell .progress,
+html[data-theme='night'] .personal-workspace.workspace-shell .progress,
 html[data-theme='night'] .personal-workspace .crumb-task-progress,
 html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-progress {
   background: #2b2049;
@@ -1415,10 +1479,19 @@ html[data-theme='night'] .personal-workspace .notification-category-option--ai {
 }
 
 html[data-theme='night'] .personal-workspace .alert-error,
-html[data-theme='night'] .personal-workspace .workspace-shell .alert-error {
+html[data-theme='night'] .personal-workspace.workspace-shell .alert-error {
   background: #3a1e26;
   color: #ffb3ab;
   border-color: #6d2c34;
+}
+
+/* A warning is its own temperature: amber ink on a dark ember ground, the
+ * night counterpart of the day theme's cream-and-gold notice. */
+html[data-theme='night'] .personal-workspace .alert-warning,
+html[data-theme='night'] .personal-workspace.workspace-shell .alert-warning {
+  background: #3a2f16;
+  color: #f0cf8a;
+  border-color: #6d5726;
 }
 
 html[data-theme='night'] .personal-workspace input[aria-invalid='true'],
@@ -1686,7 +1759,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 .personal-workspace .member-stamp-row span.is-filled {
   border-color: var(--g-green-edge);
   background: var(--g-green);
-  color: #fff;
+  color: var(--g-on-green);
   box-shadow: 0 2px 0 var(--g-green-edge);
 }
 
@@ -2036,7 +2109,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   border: 0;
   border-radius: 14px;
   background: var(--g-green);
-  color: #fff;
+  color: var(--g-on-green);
   font-weight: 900;
   font-size: 0.95rem;
   box-shadow: 0 4px 0 var(--g-green-edge);
@@ -2723,7 +2796,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   border: 0;
   border-radius: 14px;
   background: var(--g-green);
-  color: #fff;
+  color: var(--g-on-green);
   font-weight: 900;
   box-shadow: 0 4px 0 var(--g-green-edge);
 }
@@ -3147,7 +3220,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   border: 0;
   border-top: 1px dashed var(--ui-line-strong);
   border-radius: 0;
-  background: rgb(255 250 240 / 70%);
+  background: color-mix(in srgb, var(--ui-sidebar) 70%, transparent);
   box-shadow: none;
 }
 
@@ -3690,7 +3763,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   text-decoration: none;
 }
 
-.personal-workspace .immersive-back:hover { background: #fffaf0; }
+.personal-workspace .immersive-back:hover { background: var(--ui-surface-subtle); }
 
 @media (max-width: 860px) {
   .personal-workspace.is-immersive .workspace-content { padding: 14px 14px 40px; }
@@ -3793,7 +3866,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   text-decoration: none;
 }
 
-.personal-workspace .practice-topbar__back:hover { background: #fffaf0; }
+.personal-workspace .practice-topbar__back:hover { background: var(--ui-surface-subtle); }
 
 .personal-workspace .practice-topbar__tabs {
   display: flex;
@@ -3815,7 +3888,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   cursor: pointer;
 }
 
-.personal-workspace .practice-topbar__tab:hover { background: #fffaf0; color: var(--ui-ink); }
+.personal-workspace .practice-topbar__tab:hover { background: var(--ui-surface-subtle); color: var(--ui-ink); }
 
 .personal-workspace .practice-topbar__tab.is-active {
   border-color: var(--ui-line-strong);
@@ -3981,7 +4054,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 .personal-workspace .settings-toggle.is-active {
   border-color: var(--g-green-edge);
   background: var(--g-green-soft);
-  color: var(--g-green-edge);
+  color: var(--g-on-green-soft);
   box-shadow: inset 0 -3px 0 var(--g-green-edge);
 }
 
@@ -4029,7 +4102,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   white-space: nowrap;
 }
 
-.personal-workspace .workspace-topbar-tab:hover { background: #fffaf0; color: var(--ui-ink); }
+.personal-workspace .workspace-topbar-tab:hover { background: var(--ui-surface-subtle); color: var(--ui-ink); }
 
 .personal-workspace .workspace-topbar-tab.is-active {
   background: var(--ui-surface);
@@ -5504,4 +5577,74 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 .personal-workspace .practice-writing .practice-requirements {
   padding-left: 0;
   list-style: none;
+}
+
+/* -------------------------------------------------- AI provider: chat or embedding */
+
+/* Two providers, two jobs. The switch says which one this is, so the form can
+   ask for the right model: a chat model or a vector model. */
+.personal-workspace .ai-kind-field__label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--ui-muted);
+}
+
+.personal-workspace .ai-kind-switch {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .ai-kind-switch__option {
+  min-height: 30px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ui-muted);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.personal-workspace .ai-kind-switch__option:hover {
+  color: var(--ui-ink);
+}
+
+.personal-workspace .ai-kind-switch__option.is-active {
+  background: var(--g-orange);
+  color: #35240f;
+  box-shadow: 0 2px 0 var(--g-orange-edge);
+}
+
+/* Two provider sections: writing, then vectors. */
+.personal-workspace .personal-ai-group {
+  display: grid;
+  gap: 10px;
+}
+
+.personal-workspace .personal-ai-group__head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.personal-workspace .personal-ai-group__head h3 {
+  margin: 0 0 2px;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.personal-workspace .personal-ai-empty--inline {
+  padding: 14px;
 }

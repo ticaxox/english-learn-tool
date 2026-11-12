@@ -22,11 +22,12 @@ import PracticeSessionView from './PracticeSessionView.vue'
 import MemoryPracticeView from './MemoryPracticeView.vue'
 import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryModule } from '../types/learning'
 import PracticeTaskList from '../components/PracticeTaskList.vue'
+import PracticeShelf from '../components/PracticeShelf.vue'
 import GameHud from '../components/GameHud.vue'
 
 import '../practice.css'
 import ShelfPicker from '../components/ShelfPicker.vue'
-import { illustration, practiceBooks } from '../assets/halloween'
+import { illustration } from '../assets/halloween'
 
 const router = useRouter()
 const route = useRoute()
@@ -135,10 +136,16 @@ const needsDifficulty = computed(() => source.value === 'difficulty')
 const needsWordbook = computed(() => source.value !== 'difficulty')
 onMounted(() => { void loadSpellingMode() })
 
-watch(() => route.query.type, (value) => {
+// The URL names the exercise, so arriving with ?type=writing opens its
+// settings rather than leaving the learner to pick the same thing again.
+function openFromQuery(value: unknown): void {
   const next = queryType(value)
-  if (next && next !== practiceType.value) selectType(next)
-})
+  if (!next) return
+  if (next !== practiceType.value) selectType(next)
+  configOpen.value = true
+}
+
+watch(() => route.query.type, openFromQuery)
 
 function newKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
@@ -154,22 +161,19 @@ function selectType(next: PracticeType): void {
   count.value = singlePieceTypes.includes(next) ? 1 : 5
 }
 
-const typeIcons: Record<PracticeType, 'book' | 'cards' | 'arrow' | 'spark' | 'star' | 'dialogue'> = {
-  fill_blank: 'book',
-  reading: 'cards',
-  translation: 'arrow',
-  writing: 'spark',
-  conversation: 'dialogue',
-  mixed: 'star',
+// The form is a dialog now: picking a book opens it for that exercise.
+const configOpen = ref(false)
+
+function openConfig(next: PracticeType): void {
+  selectType(next)
+  formError.value = null
+  configOpen.value = true
+  void router.replace({ query: { ...route.query, type: next } })
 }
 
-const typeOptions = computed(() =>
-  practiceTypeOptions.map((type) => ({ key: type, label: PRACTICE_TYPE_LABELS[type] })),
-)
-
-function chooseType(next: PracticeType): void {
-  selectType(next)
-  void router.replace({ query: { ...route.query, type: next } })
+function closeConfig(): void {
+  configOpen.value = false
+  formError.value = null
 }
 
 function validate(): string | null {
@@ -230,6 +234,7 @@ async function loadWordbooks(): Promise<void> {
 
 onMounted(() => {
   void Promise.all([loadWordbooks(), loadMemoryConfig()])
+  openFromQuery(route.query.type)
 })
 </script>
 
@@ -248,32 +253,46 @@ onMounted(() => {
         @pick="startMemory"
       />
 
-      <div class="practice-hub-layout">
-      <section class="workspace-card practice-create-panel" aria-labelledby="practice-create-title">
-        <h2 id="practice-create-title" class="visually-hidden">新建练习</h2>
+      <!-- A memory-training setting, so it sits with the memory books rather
+           than inside an AI exercise's dialog. -->
+      <p class="practice-spelling-setting">
+        <label for="practice-spelling-mode">拼写挖空方式</label>
+        <select id="practice-spelling-mode" v-model="spellingBlankMode" @change="saveSpellingMode">
+          <option value="">随机（推荐）</option>
+          <option value="full">整词挖空</option>
+          <option value="partial">部分字母</option>
+          <option value="first_letter">只留首字母</option>
+          <option value="middle">中间挖空</option>
+        </select>
+      </p>
+
+      <PracticeShelf :types="practiceTypes" :labels="PRACTICE_TYPE_LABELS" @pick="openConfig" />
+
+      <!-- No book of its own: a mixed set is the same books drawn at random. -->
+      <p class="practice-shelf__mixed">
+        <DivButton class="practice-shelf__mixed-link" type="button" @click="openConfig('mixed')">
+          来一组随机混合的题
+        </DivButton>
+      </p>
+
+      <div class="practice-hub-layout practice-hub-layout--solo">
+        <PracticeTaskList :limit="5" show-tabs />
+      </div>
+
+      <div v-if="configOpen" class="dialog-backdrop" @click.self="closeConfig">
+      <section class="dialog-card practice-config-dialog" role="dialog" aria-modal="true" aria-labelledby="practice-create-title">
+        <header class="practice-config-dialog__head">
+          <div>
+            <h2 id="practice-create-title">{{ PRACTICE_TYPE_LABELS[practiceType] }}练习</h2>
+            <p v-if="practiceType === 'mixed'" class="field-hint">同一组题里混合多种题型，按整组题量生成。</p>
+            <p v-else-if="practiceType === 'conversation'" class="field-hint">AI 会想出一个话题，由它扮演角色引导整段对话；可以用文字或语音作答。</p>
+          </div>
+          <DivButton class="icon-button practice-config-dialog__close" type="button" aria-label="关闭" @click="closeConfig">
+            <AppIcon name="close" />
+          </DivButton>
+        </header>
 
         <form class="practice-form" novalidate @submit.prevent="create">
-          <div class="practice-type-picker" role="group" aria-label="题型">
-            <DivButton
-              v-for="option in typeOptions"
-              :key="option.key"
-              class="practice-type-pill"
-              :class="[`practice-type-pill--${option.key}`, { 'is-active': practiceType === option.key }]"
-              :aria-pressed="practiceType === option.key"
-              type="button"
-              @click="chooseType(option.key)"
-            >
-              <ArtImage
-                v-if="practiceBooks[option.key]"
-                class="practice-type-pill__art"
-                :set="practiceBooks[option.key]"
-              />
-              <AppIcon v-else :name="typeIcons[option.key]" />
-              <span class="practice-type-pill__label">{{ option.label }}</span>
-            </DivButton>
-          </div>
-          <p v-if="practiceType === 'mixed'" class="field-hint">同一组题里混合多种题型，按整组题量生成。</p>
-          <p v-else-if="practiceType === 'conversation'" class="field-hint">AI 会想出一个话题，由它扮演角色引导整段对话；可以用文字或语音作答。</p>
           <div class="practice-form-row">
             <div class="field">
               <label for="practice-source">来源</label>
@@ -291,16 +310,6 @@ onMounted(() => {
               <label for="practice-count">题量</label>
               <select id="practice-count" v-model.number="count">
                 <option v-for="item in counts" :key="item" :value="item">{{ item }} 题</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="practice-spelling-mode">拼写挖空方式</label>
-              <select id="practice-spelling-mode" v-model="spellingBlankMode" @change="saveSpellingMode">
-                <option value="">随机（推荐）</option>
-                <option value="full">整词挖空</option>
-                <option value="partial">部分字母</option>
-                <option value="first_letter">只留首字母</option>
-                <option value="middle">中间挖空</option>
               </select>
             </div>
             <div v-if="practiceType === 'translation'" class="field">
@@ -355,8 +364,6 @@ onMounted(() => {
           </div>
         </form>
       </section>
-
-      <PracticeTaskList :limit="5" show-tabs />
       </div>
     </template>
   </article>
