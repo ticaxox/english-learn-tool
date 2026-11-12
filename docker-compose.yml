@@ -19,6 +19,9 @@ x-backend-environment: &backend-environment
   ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-15}
   REFRESH_TOKEN_DAYS: ${REFRESH_TOKEN_DAYS:-30}
   CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+  # Off unless a local box needs a provider whose host resolves into a private
+  # range. Production must keep this false.
+  AI_ALLOW_PRIVATE_PROVIDER_URLS: ${AI_ALLOW_PRIVATE_PROVIDER_URLS:-false}
   LOG_LEVEL: ${LOG_LEVEL:-INFO}
   HEALTH_CHECK_TIMEOUT_SECONDS: ${HEALTH_CHECK_TIMEOUT_SECONDS:-2.0}
   DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
