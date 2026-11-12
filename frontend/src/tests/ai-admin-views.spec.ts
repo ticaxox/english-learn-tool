@@ -29,6 +29,7 @@ vi.mock('../api/ai-admin', async (importOriginal) => {
 const defaultProvider: AiProvider = {
   id: 'provider-default',
   name: 'Default Provider',
+  kind: 'chat',
   baseUrl: 'https://default.example/v1',
   apiKeyMasked: 'sk-••••1234',
   modelId: 'model-a',

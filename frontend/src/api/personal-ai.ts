@@ -22,6 +22,7 @@ import {
 
 export type {
   AiProvider,
+  AiProviderKind,
   ProviderCreateInput,
   ProviderModelsResult,
   ProviderPatchInput,
