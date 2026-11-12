@@ -4,11 +4,14 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import {
   brandIcon,
+  bookObject,
+  charge,
   forMode,
   iconSheet,
   illustration,
   material,
   practiceBooks,
+  pumpkins,
   questionCard,
 } from '../assets/halloween'
 
@@ -50,6 +53,15 @@ describe('halloween art set', () => {
     expect(brandIcon).toBeTruthy()
   })
 
+  it('gives the trail, the book and the badges a night painting of their own', () => {
+    const themed = { ...pumpkins, ...charge, book: bookObject }
+    for (const [name, set] of Object.entries(themed)) {
+      expect(forMode(set, 'day'), `${name} day`).toBeTruthy()
+      expect(forMode(set, 'night'), `${name} night`).toBeTruthy()
+      expect(forMode(set, 'day'), `${name} day differs from night`).not.toBe(forMode(set, 'night'))
+    }
+  })
+
   it('points every import at a file that exists', () => {
     const themed = { ...practiceBooks, ...illustration, ...iconSheet, ...material, frame: questionCard.frame }
     const urls = [
@@ -57,6 +69,13 @@ describe('halloween art set', () => {
       questionCard.back,
       brandIcon,
     ]
+    const missing = urls.filter((url) => !existsSync(fileOnDisk(url)))
+    expect(missing).toEqual([])
+  })
+
+  it('points every night painting at a file that exists', () => {
+    const themed = { ...pumpkins, ...charge, book: bookObject }
+    const urls = Object.values(themed).map((set) => set.night)
     const missing = urls.filter((url) => !existsSync(fileOnDisk(url)))
     expect(missing).toEqual([])
   })

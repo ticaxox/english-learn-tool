@@ -15,6 +15,7 @@ withDefaults(
       | 'close'
       | 'star'
       | 'spark'
+      | 'flame'
       | 'lock'
       | 'plus'
       | 'send'
@@ -77,6 +78,9 @@ withDefaults(
     </template>
     <template v-else-if="name === 'spark'">
       <path d="m12 2 2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2L12 2Z" />
+    </template>
+    <template v-else-if="name === 'flame'">
+      <path d="M12 2.4c.9 3.3 2.2 4.4 4.2 5.4-1 .8-1.6 1.8-1.8 3 .4-.9.9-1.6 1.7-2.2 1.5 1.2 2.6 2.8 2.9 4.9.4-1 .6-2 .6-3 1 1.2 1.5 2.4 1.5 3.8a6.1 6.1 0 1 1-12.2 0c0-2.6 1.4-4.6 3.3-6.6-.2 1.4 0 2.4.6 3.3.4-3.2 2.2-5.3 4.6-7.2Z" />
     </template>
     <template v-else-if="name === 'lock'">
       <rect x="5" y="10" width="14" height="11" rx="2" />

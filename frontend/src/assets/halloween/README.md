@@ -45,12 +45,19 @@
 | `cell-{given,right,wrong}-{biscuit,stele}.png` | 字母格的四种状态：给定 / 正确 / 错误 |
 | `sheet-{day,night}.png` | AI 练习的横向卷轴，两端各一根木轴 |
 | `sheet-flat-{day,night}.png` | 无轴的撕边纸片：阅读正文、作文题目 |
+| `book-object-{day,night}.png` | 词书封面本体（书架上的立起来的那本） |
+| `wordbook-cover-{day,night}.png` | 词书封面平面版（旧的用法） |
+| `scroll-{cap-left,middle,cap-right}.png` | 卷轴三件套框 |
+| `slab-{cap-left,middle,cap-right}.png` | 石板三件套框 |
+| `parchment-{cap-left,middle,cap-right}.png` | 羊皮纸三件套框 |
 
 **两种材质**：白天是**饼干**（烘焙色 `#E8C58A`，压花边、扎孔、掰角），黑夜是**石碑**（深紫 `#3A3254`，凿槽、刻线、符文）。这两套是同一构图的两次独立绘制，不是滤镜。
 
 **卡框用法**：整张作为背景（`z-index: 0`），内容用 CSS 排在 `padding: 11% 13% 12%` 的内区。**比例锁死 2:3**，拉伸到其他比例会变形。卡面文字必须是真 HTML 文字，不要烘焙进图。
 
 **九宫格素材**（`slab-*`、`bar-*`、`chip-*`、`sheet-*`）都是 `border-image` 源：外沿不规则、中间死平。切片值按图上量出来：板 `12%`、条 `8% 4%`、格 `10% 5%`、卷轴 `14% 12%`。
+
+**三件套框**：两端保留画好的细节，中间是一段可以任意拉长的素面。装在 `Frame3.vue` 里，宽面永远不会被拉变形。
 
 ### `char/` — 角色与插画
 
@@ -59,8 +66,27 @@
 | `crumbo-{day,night}.png` | Crumbo 主角立绘。教练页 NPC、引导页、奖励页 |
 | `empty-{day,night}.png` | 空状态插画。Crumbo 趴在空白书页上，四处空状态共用 |
 | `result-{day,night}.png` | 练习结算页顶部插画。奖杯 + Crumbo |
+| `brewing-{day,night}.png` | Crumbo 在坩埚边，题目生成中 |
+| `empty-search-{day,night}.png` | Crumbo 拿放大镜，错题本为空 |
 
 Crumbo 配色取自 `frontend/src/components/CrumboMark.vue`：金身 `#e9b43b`、苔绿叶帽 `#66753a`、可可眼 `#573022`。
+
+### `char/` — 游戏化层（第二期补齐）
+
+这一批是游戏化功能自己的素材，之前只有白天的画；夜版是后来按同一构图重新生成的。
+
+| 文件 | 用途 |
+|---|---|
+| `pumpkin-morning.png` / `pumpkin-dusk.png` | 关卡节点：已通关的白昼版与黄昏版 |
+| `pumpkin-green.png` / `pumpkin-green-night.png` | 当前所在节点。白天苔绿，夜间深紫 + 薄荷刻脸 |
+| `pumpkin-unlit.png` / `pumpkin-unlit-night.png` | 未解锁节点。无刻脸、无光 |
+| `pumpkin-boss.png` / `pumpkin-boss-night.png` | 最终关。白天金冠，夜间失光银冠 |
+| `pumpkin-branch.png` / `pumpkin-branch-night.png` | 分支关。白天藤蔓，夜间薄荷刻脸 |
+| `candle-{day,night}.png` | 周报蜡烛。白天奶白蜡 + 橙焰，夜间紫蜡 + 薄荷焰 |
+| `charge-{flame,moon,book,crown,skull,star,owl,hourglass,key}.png` | 徽章中心的徽记（AI 绘制，非 emoji）。夜间为 `-night` 版 |
+| `card/book-object-{day,night}.png` | 词书封面本体。白天绿皮卡 + 黄铜，夜间紫皮卡 + 薄荷扣 |
+
+关卡节点在 `ChallengeDslMap.vue` 里按 `--pumpkin-lit / --pumpkin-green / --pumpkin-unlit / --pumpkin-boss / --pumpkin-branch` 五个变量切换，随主题整体换图。
 
 ### `icon/` — 图标拼版
 
@@ -113,6 +139,7 @@ icon-512.png         512×512
 - `card/card-back.png` 南瓜灯的光晕是柔的，与其余硬边素材不齐。要彻底干净需手绘或描成 SVG
 - 夜间版书比白天版略瘦，因为两版是独立生成的。肉眼可辨但不影响使用
 - `icon/` 下三张拼版的元素间距每次生成会有差异，不能当雪碧图切
+- 游戏化层这一批（南瓜、蜡烛、徽记、词书封面）的夜间版是同一构图重新生成的，形状大体一致，但与白天版不是逐像素对齐——同一枚徽记在两种主题下的轮廓会有细微差别
 
 ## 来源
 

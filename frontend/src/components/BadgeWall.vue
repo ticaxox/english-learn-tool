@@ -10,7 +10,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
 import BadgeEmblem from './BadgeEmblem.vue'
 import { fetchBadges, type Badge } from '../api/progress'
-import { emblemSticker } from '../assets/halloween'
+import { charge, type ThemeMode } from '../assets/halloween'
 import { countUp, gsap, motionAllowed, popIn } from '../composables/useMotion'
 
 withDefaults(defineProps<{ variant?: 'seal' | 'wax' | 'iron' | 'heraldry' | 'sticker' }>(), { variant: 'iron' })
@@ -103,35 +103,35 @@ function glyph(key: string): string[] {
   return GLYPHS[key] ?? FALLBACK_GLYPH
 }
 
-/** Some achievements wear an emoji-style sticker instead of a drawn glyph. */
-const STICKERS: Record<string, string> = {
-  first_lesson: emblemSticker.flame,
-  streak_3: emblemSticker.flame,
-  streak_7: emblemSticker.moon,
-  streak_14: emblemSticker.moon,
-  streak_30: emblemSticker.owl,
-  streak_100: emblemSticker.crown,
-  level_3: emblemSticker.sparkle,
-  level_5: emblemSticker.sparkle,
-  level_10: emblemSticker.crown,
-  level_20: emblemSticker.owl,
-  practice_10: emblemSticker.book,
-  practice_50: emblemSticker.book,
-  practice_100: emblemSticker.key,
-  perfect_5: emblemSticker.star,
-  perfect_20: emblemSticker.crown,
-  boss_1: emblemSticker.skull,
-  boss_10: emblemSticker.crown,
-  first_boss_win: emblemSticker.key,
-  review_100: emblemSticker.book,
-  review_1000: emblemSticker.book,
-  quest_all: emblemSticker.sparkle,
-  night_owl: emblemSticker.owl,
-  early_bird: emblemSticker.sparkle,
+/** Every achievement wears a painted charge, drawn for this set. */
+const CHARGES: Record<string, ThemeMode> = {
+  first_lesson: charge.flame,
+  streak_3: charge.flame,
+  streak_7: charge.moon,
+  streak_14: charge.moon,
+  streak_30: charge.owl,
+  streak_100: charge.crown,
+  level_3: charge.star,
+  level_5: charge.star,
+  level_10: charge.crown,
+  level_20: charge.owl,
+  practice_10: charge.book,
+  practice_50: charge.book,
+  practice_100: charge.key,
+  perfect_5: charge.star,
+  perfect_20: charge.crown,
+  boss_1: charge.skull,
+  boss_10: charge.crown,
+  first_boss_win: charge.key,
+  review_100: charge.book,
+  review_1000: charge.book,
+  quest_all: charge.star,
+  night_owl: charge.owl,
+  early_bird: charge.star,
 }
 
-function sticker(key: string): string | null {
-  return STICKERS[key] ?? null
+function sticker(key: string): ThemeMode | null {
+  return CHARGES[key] ?? null
 }
 
 function accent(key: string): string {

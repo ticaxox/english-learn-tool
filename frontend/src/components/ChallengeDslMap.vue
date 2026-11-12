@@ -519,7 +519,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
   <section
     class="challenge-dsl-map panel"
     :class="`challenge-dsl-map--${variant}`"
-    :style="variant === 'pumpkin' ? { '--pumpkin-lit': `url(${pumpkins.lit[themeMode]})`, '--pumpkin-green': `url(${pumpkins.green[themeMode]})`, '--pumpkin-unlit': `url(${pumpkins.unlit[themeMode]})` } : undefined"
+    :style="variant === 'pumpkin' ? { '--pumpkin-lit': `url(${pumpkins.lit[themeMode]})`, '--pumpkin-green': `url(${pumpkins.green[themeMode]})`, '--pumpkin-unlit': `url(${pumpkins.unlit[themeMode]})`, '--pumpkin-boss': `url(${pumpkins.boss[themeMode]})`, '--pumpkin-branch': `url(${pumpkins.branch[themeMode]})` } : undefined"
     aria-label="闯关地图"
   >
     <header class="challenge-dsl-map__head">
@@ -580,7 +580,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
               <path d="m5 12.5 4.5 4.5L19 7.5" />
             </svg>
             <AppIcon v-else-if="isBoss(placed.node)" name="star" />
-            <AppIcon v-else-if="placed.node.optional" name="spark" />
+            <AppIcon v-else-if="placed.node.optional" name="flame" />
             <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
             <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
           </span>
