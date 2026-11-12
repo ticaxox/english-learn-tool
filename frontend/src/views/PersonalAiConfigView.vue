@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import AiMemoryPanel from '../components/AiMemoryPanel.vue'
+import CrumbNumber from '../components/ui/CrumbNumber.vue'
 import AiQuotaPanel from '../components/AiQuotaPanel.vue'
 import AiProviderForm from '../components/AiProviderForm.vue'
 import AppIcon from '../components/AppIcon.vue'
@@ -173,8 +174,7 @@ function toggleEnabled(provider: AiProvider): void {
   void patchProvider(provider.id, { enabled: !provider.enabled }, `enabled:${provider.id}`)
 }
 
-function updatePriority(provider: AiProvider, event: Event): void {
-  const value = Number((event.target as HTMLInputElement).value)
+function updatePriority(provider: AiProvider, value: number): void {
   if (!Number.isInteger(value) || value < 0 || value > 10000 || value === provider.priority) return
   void patchProvider(provider.id, { priority: value }, `priority:${provider.id}`)
 }
@@ -237,14 +237,14 @@ onMounted(() => {
           </div>
           <label class="personal-ai-provider__priority">
             <span>优先级</span>
-            <input
-              type="number"
-              min="0"
-              max="10000"
-              step="1"
-              :value="provider.priority"
+            <CrumbNumber
+              :model-value="provider.priority"
+              :min="0"
+              :max="10000"
+              :step="1"
               :disabled="Boolean(actionKey)"
-              @change="updatePriority(provider, $event)"
+              label="优先级"
+              @update:model-value="updatePriority(provider, $event)"
             />
           </label>
           <div class="personal-ai-provider__actions">

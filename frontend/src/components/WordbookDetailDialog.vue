@@ -8,6 +8,7 @@ import {
 } from '../api/wordbooks'
 import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
+import CrumbIcon from './ui/CrumbIcon.vue'
 import LoadingState from './LoadingState.vue'
 import SpeakButton from './SpeakButton.vue'
 import ArtImage from './ArtImage.vue'
@@ -149,7 +150,7 @@ onMounted(() => {
           <DivButton v-if="canExport" class="button-secondary button-small" type="button" @click="emit('export')">导出</DivButton>
           <DivButton v-if="canDelete" class="button-danger button-small" type="button" @click="emit('delete')">删除</DivButton>
         </div>
-        <DivButton class="icon-button" type="button" aria-label="关闭词书详情" @click="close">×</DivButton>
+        <DivButton class="icon-button" type="button" aria-label="关闭词书详情" @click="close"><CrumbIcon name="close" :size="18" /></DivButton>
       </header>
 
       <LoadingState v-if="loading && !detail" label="正在读取词书与词条…" />

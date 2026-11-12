@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppIcon from '../components/AppIcon.vue'
+import CrumbIcon from '../components/ui/CrumbIcon.vue'
 import CoachImage from '../components/CoachImage.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
@@ -270,7 +271,7 @@ onBeforeUnmount(() => {
               type="button"
               :aria-label="`删除 ${conversation.title}`"
               @click="removeConversation(conversation.id)"
-            >×</DivButton>
+            ><CrumbIcon name="remove" :size="18" /></DivButton>
           </li>
         </ul>
         <DivButton
@@ -322,9 +323,17 @@ onBeforeUnmount(() => {
             >
               加载更早消息
             </DivButton>
+            <!-- An empty conversation is the same moment as no conversation:
+                 the blank page, with the same invitation and the same lines. -->
             <div v-if="coach.messages.value.length === 0 && !coach.messagesLoading.value" class="coach-messages-empty">
-              <strong>和 Mr. Whisker 聊聊</strong>
-              <p>学习计划、复习顺序，或者一句想改得更自然的英文。</p>
+              <ArtImage class="coach-empty-art" :set="illustration.empty" />
+              <div class="coach-messages-empty__copy">
+                <strong>和 Mr. Whisker 聊聊</strong>
+                <p>学习计划、复习顺序，或者一句想改得更自然的英文。</p>
+                <div class="coach-suggested-prompts" aria-label="建议提问">
+                  <DivButton v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">{{ prompt }}</DivButton>
+                </div>
+              </div>
             </div>
 
             <article
@@ -431,7 +440,7 @@ onBeforeUnmount(() => {
                   type="button"
                   :aria-label="`移除 ${item.filename}`"
                   @click="removeAttachment(index)"
-                >×</DivButton>
+                ><CrumbIcon name="remove" :size="16" /></DivButton>
               </figure>
             </div>
             <div class="coach-composer__footer">

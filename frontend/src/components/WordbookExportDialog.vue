@@ -11,6 +11,8 @@ import {
 } from '../api/wordbooks'
 import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
+import CrumbNumber from './ui/CrumbNumber.vue'
+import CrumbIcon from './ui/CrumbIcon.vue'
 
 const props = defineProps<{
   wordbook: Wordbook
@@ -225,7 +227,7 @@ onUnmounted(() => {
           <p class="eyebrow">异步导出 · 授权下载</p>
           <h2 id="wordbook-export-title">导出「{{ props.wordbook.name }}」</h2>
         </div>
-        <DivButton class="icon-button" type="button" aria-label="关闭导出窗口" :disabled="submitting" @click="close">×</DivButton>
+        <DivButton class="icon-button" type="button" aria-label="关闭导出窗口" :disabled="submitting" @click="close"><CrumbIcon name="close" :size="18" /></DivButton>
       </header>
 
       <div class="alert alert-info">
@@ -252,11 +254,11 @@ onUnmounted(() => {
       <div v-if="form.format === 'pdf'" class="wordbook-form-grid">
         <label class="field">
           <span>每页行数</span>
-          <input v-model.number="form.page_rows" type="number" min="1" max="100" step="1" :disabled="submitting" />
+          <CrumbNumber v-model="form.page_rows" :min="1" :max="100" :step="1" :disabled="submitting" label="每页行数" />
         </label>
         <label class="field">
           <span>每行列数</span>
-          <input v-model.number="form.columns" type="number" min="1" max="4" step="1" :disabled="submitting" />
+          <CrumbNumber v-model="form.columns" :min="1" :max="4" :step="1" :disabled="submitting" label="每行列数" />
         </label>
       </div>
 

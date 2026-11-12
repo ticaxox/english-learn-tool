@@ -48,6 +48,7 @@ const pageTitles: Record<string, string> = {
   'settings-learning': '设置',
   'settings-ai': '设置',
   'settings-security': '设置',
+  'settings-knowledge': '设置',
 }
 
 const currentPageTitle = computed(() => pageTitles[String(route.name ?? '')] ?? '学习工作台')
@@ -74,12 +75,22 @@ function isGroupActive(key: string): boolean {
 const sectionTabs = computed(() => {
   const path = route.path
   if (path.startsWith('/settings')) {
-    return [
+    const tabs = [
       { label: '词书', to: '/settings/wordbooks', active: path.startsWith('/settings/wordbooks') },
       { label: '学习设置', to: '/settings/learning', active: path.startsWith('/settings/learning') },
       { label: 'AI 配置', to: '/settings/ai', active: path.startsWith('/settings/ai') },
       { label: '我的账户', to: '/settings/security', active: path.startsWith('/settings/security') },
     ]
+    // The knowledge base is the exam corpus every learner's questions come
+    // from, so only an administrator may change it.
+    if (auth?.isAdmin) {
+      tabs.push({
+        label: '知识库',
+        to: '/settings/knowledge',
+        active: path.startsWith('/settings/knowledge'),
+      })
+    }
+    return tabs
   }
   return []
 })

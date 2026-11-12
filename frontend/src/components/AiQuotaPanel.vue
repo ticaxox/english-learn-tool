@@ -7,6 +7,7 @@
  */
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
+import CrumbNumber from './ui/CrumbNumber.vue'
 import LoadingState from './LoadingState.vue'
 import { fetchLearningProfile, updateAiQuotaLimits } from '../api/learning'
 import { fetchPracticeUsage, type PracticeUsage } from '../api/practice'
@@ -128,15 +129,14 @@ onMounted(() => {
             不限
           </label>
           <span v-if="unlimited[kind.key]" class="ai-quota-unlimited">不限</span>
-          <input
+          <CrumbNumber
             v-else
-            v-model.number="values[kind.key]"
+            v-model="values[kind.key]"
             class="ai-quota-row__input"
-            type="number"
-            min="0"
-            max="10000"
-            step="1"
-            :aria-label="`${kind.label}每日上限`"
+            :min="0"
+            :max="10000"
+            :step="1"
+            :label="`${kind.label}每日上限`"
           />
         </div>
         <small class="ai-quota-row__used">已用 {{ usageByKind[kind.key]?.used ?? 0 }} 次</small>
@@ -145,7 +145,7 @@ onMounted(() => {
 
     <div class="ai-quota-global">
       <label for="global-timeout">生成超时（秒，1–300）</label>
-      <input id="global-timeout" v-model.number="timeout" type="number" min="1" max="300" step="1" />
+      <CrumbNumber id="global-timeout" v-model="timeout" :min="1" :max="300" :step="1" label="生成超时（秒）" />
     </div>
 
     <ErrorNotice v-if="saveError" :error="saveError" :show-retry="false" retry-label="重试" @retry="save" />

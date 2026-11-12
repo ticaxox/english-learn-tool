@@ -56,11 +56,16 @@ describe('production code prohibitions', () => {
   })
 
   it('never derives study minutes from a client-side accumulator', () => {
-    // Exactly two timers are legitimate: the learning heartbeat, and the
-    // wordbook import preview's expiry countdown (which only displays when a
-    // server-issued preview token dies — it never counts study time).
+    // Three timers are legitimate and every one is a UI repeat, not a clock:
+    //   - the learning heartbeat (the only thing that ever reports study time),
+    //   - the wordbook import preview's expiry countdown (it only displays when
+    //     a server-issued preview token dies),
+    //   - CrumbNumber's press-and-hold repeat (a stepper firing while a button
+    //     is held down; it counts clicks, not seconds).
+    // Anything else here means someone started accumulating study time by hand.
     expect(offenders(/setInterval/)).toEqual([
       'components/WordbookImportDialog.vue',
+      'components/ui/CrumbNumber.vue',
       'composables/useStudyHeartbeat.ts',
     ])
   })

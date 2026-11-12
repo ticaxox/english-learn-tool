@@ -1768,12 +1768,31 @@
   box-shadow: 6px 7px 0 var(--mint);
 }
 
+/* The first screen uses the same two columns as a written turn: a drawing in
+   the margin, the invitation in the body. The blank page starts where a letter
+   starts — at the margin — instead of floating a badge in the middle. */
 .member-coach-page .coach-main-empty {
   display: grid;
-  min-height: 32rem;
-  place-content: center;
-  justify-items: center;
-  text-align: center;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  align-items: start;
+  align-content: start;
+  gap: 0.5rem 1.6rem;
+  min-height: 0;
+  max-width: 52rem;
+  padding: 2.6rem 0 1.6rem 1.2rem;
+  text-align: left;
+}
+
+.member-coach-page .coach-main-empty > :not(.coach-empty-art) {
+  grid-column: 2;
+}
+
+.member-coach-page .coach-main-empty .coach-empty-art {
+  grid-row: 1 / span 6;
+  grid-column: 1;
+  width: 100%;
+  margin: 0;
+  align-self: start;
 }
 
 .coach-empty-mark {
@@ -1799,57 +1818,73 @@
   font-weight: 400;
 }
 
+/* The suggestions are lines you could write, set one under the other on the
+   blank page — not a row of pills waiting to be pressed. */
 .coach-suggested-prompts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  justify-content: center;
-  max-width: 38rem;
-  margin: 0.7rem 0 1rem;
+  display: grid;
+  gap: 0;
+  justify-items: stretch;
+  width: min(100%, 34rem);
+  margin: 0.9rem 0 1.2rem;
 }
 
 .coach-suggested-prompts [role="button"] {
-  padding: 0.38rem 0.55rem;
-  border: 1px dashed var(--line-strong);
-  border-radius: 999px;
-  background: var(--paper-white);
-  color: var(--cocoa-900);
-  font-size: 0.64rem;
+  justify-content: flex-start;
+  padding: 0.7rem 0.2rem;
+  border: 0;
+  border-bottom: 1px dashed rgb(53 36 15 / 20%);
+  border-radius: 0;
+  background: none;
+  color: var(--cocoa-700, #6b4a22);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.98rem;
+  text-align: left;
 }
 
 .coach-suggested-prompts [role="button"]:hover {
-  border-style: solid;
-  border-color: var(--forest);
-  background: var(--mint-soft);
+  border-bottom-color: var(--forest);
+  background: none;
+  color: var(--cocoa-900);
 }
 
+/* The conversation is one sheet of writing: a turn is separated by a hairline
+   and a stamp in the margin, never by a box. No fill, no radius, no shadow. */
 .member-coach-page .coach-message {
-  border: 1.2px solid var(--line);
-  border-radius: 14px 9px 13px 7px;
-  background: var(--paper-white);
-  box-shadow: 0 2px 0 var(--cookie-200);
+  border: 0;
+  border-top: 1px solid rgb(53 36 15 / 12%);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
-.coach-message--user {
-  border-color: #9eb1cc;
-  background: #edf2fa;
+.member-coach-page .coach-message:first-of-type {
+  border-top: 0;
 }
 
-.coach-message--assistant {
-  border-left: 0.4rem solid var(--coral);
-  background: var(--paper-warm);
+/* Who is speaking is the margin's job; the ink carries the difference. */
+/* The learner's turn is a shade lighter than the coach's, and both inks come
+   from the token that flips with the theme. */
+.coach-message--user .coach-message__text {
+  color: color-mix(in srgb, var(--ui-ink) 80%, transparent);
+}
+
+.coach-message--assistant .coach-message__text {
+  color: var(--ui-ink);
 }
 
 .member-coach-page .coach-composer {
-  border: 1.4px solid var(--forest);
-  border-radius: 12px 15px 10px 14px;
-  background: var(--paper-warm);
-  box-shadow: 0 3px 0 var(--line);
+  border: 0;
+  border-top: 2px solid rgb(53 36 15 / 55%);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .coach-composer textarea {
-  border-color: var(--line);
-  background: var(--paper-white);
+  border: 0;
+  border-bottom: 1px solid rgb(53 36 15 / 22%);
+  border-radius: 0;
+  background: none;
 }
 
 /* Member drawer */

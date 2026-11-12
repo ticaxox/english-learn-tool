@@ -136,6 +136,14 @@
 .personal-workspace input::placeholder,
 .personal-workspace textarea::placeholder { color: #9b8467; }
 
+/* The dropdown is the one control the browser still paints for itself: a white
+ * system list, squared corners, the OS highlight. `appearance: base-select`
+ * hands that panel to us while the element stays a real <select> - keyboard
+ * type-ahead, screen-reader roles and form submission all keep working, which
+ * a hand-written listbox does not.
+ *
+ * Browsers without base-select fall back to the bordered native select below:
+ * it looks like this page, and it works. */
 .personal-workspace select {
   padding-right: 44px;
   appearance: none;
@@ -150,6 +158,200 @@
 .personal-workspace select:hover {
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a82e2e' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+@supports (appearance: base-select) {
+  .personal-workspace select,
+  .personal-workspace select::picker(select) {
+    appearance: base-select;
+  }
+
+  /* The arrow becomes a drawn child, so the background icon goes away. */
+  .personal-workspace select {
+    background-image: none;
+    padding-right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .personal-workspace select::picker-icon {
+    margin-left: auto;
+    width: 15px;
+    height: 15px;
+    background: center / 15px 15px no-repeat
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2335240f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    transition: rotate 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .personal-workspace select:open::picker-icon { rotate: 180deg; }
+
+  .personal-workspace select::picker(select) {
+    margin-block: 8px;
+    padding: 6px;
+    min-width: anchor-size(width);
+    background: var(--ui-surface);
+    border: 2px solid var(--ui-line-strong);
+    border-radius: 16px;
+    box-shadow: 7px 7px 0 rgb(59 42 26 / 14%);
+    transform-origin: 50% 0;
+    opacity: 0;
+    translate: 0 -6px;
+    scale: 0.97;
+    transition:
+      opacity 160ms ease,
+      translate 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      scale 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      display 200ms allow-discrete,
+      overlay 200ms allow-discrete;
+  }
+
+  .personal-workspace select:open::picker(select) {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+
+  @starting-style {
+    .personal-workspace select:open::picker(select) {
+      opacity: 0;
+      translate: 0 -6px;
+      scale: 0.97;
+    }
+  }
+
+  .personal-workspace select option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: var(--ui-ink);
+    transition: background 120ms ease;
+  }
+
+  .personal-workspace select option::checkmark {
+    order: -1;
+    color: var(--g-green-edge);
+    font-weight: 900;
+  }
+
+  .personal-workspace select option:hover { background: var(--ui-surface-subtle); }
+
+  .personal-workspace select option:focus {
+    background: var(--ui-surface-subtle);
+    outline: 2px solid var(--g-orange-edge);
+    outline-offset: -2px;
+  }
+
+  .personal-workspace select option:checked {
+    background: var(--g-green-soft);
+    font-weight: 800;
+  }
+
+  /* Each row rises in turn, so a long list reads as stacked paper rather than
+   * appearing all at once. */
+  @keyframes crumb-opt-rise {
+    from { opacity: 0; translate: 0 5px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  .personal-workspace select:open option {
+    animation: crumb-opt-rise 240ms both cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .personal-workspace select:open option:nth-child(2) { animation-delay: 25ms; }
+  .personal-workspace select:open option:nth-child(3) { animation-delay: 50ms; }
+  .personal-workspace select:open option:nth-child(4) { animation-delay: 75ms; }
+  .personal-workspace select:open option:nth-child(5) { animation-delay: 100ms; }
+  .personal-workspace select:open option:nth-child(6) { animation-delay: 125ms; }
+  .personal-workspace select:open option:nth-child(n + 7) { animation-delay: 150ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace select::picker-icon,
+  .personal-workspace select::picker(select) { transition: none; }
+  .personal-workspace select:open option { animation: none; }
+}
+
+/* Number fields: the spinners are the tidiest thing the browser draws and the
+ * clumsiest thing to click. The arrows go; CrumbNumber puts a 44px hit area on
+ * either side of the same input instead. */
+.personal-workspace input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.personal-workspace input[type="number"]::-webkit-outer-spin-button,
+.personal-workspace input[type="number"]::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+/* The calendar and clock icons are the OS's. Swap the drawing, keep the picker. */
+.personal-workspace input[type="date"]::-webkit-calendar-picker-indicator,
+.personal-workspace input[type="time"]::-webkit-calendar-picker-indicator {
+  width: 17px;
+  height: 17px;
+  background: center / 17px 17px no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2335240f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15' rx='3'/%3E%3Cpath d='M3.5 10h17M8 3.5v3M16 3.5v3'/%3E%3C/svg%3E");
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 140ms ease;
+}
+
+.personal-workspace input[type="time"]::-webkit-calendar-picker-indicator {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2335240f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5V12l3.2 2'/%3E%3C/svg%3E");
+}
+
+.personal-workspace input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.personal-workspace input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Search: the browser's own clear cross is small, grey and sits outside the
+ * field's rhythm. Hide it; the clear button is drawn by the field's wrapper. */
+.personal-workspace input[type="search"]::-webkit-search-cancel-button,
+.personal-workspace input[type="search"]::-webkit-search-decoration {
+  appearance: none;
+  display: none;
+}
+
+/* File: the native control is a grey system button. It becomes the drop zone
+ * owned by CrumbFile, which still wraps a real <input type="file">. */
+.personal-workspace input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.personal-workspace input[type="file"]::file-selector-button { display: none; }
+
+/* Native text selection and the caret follow the room, not the browser. */
+html[data-theme='night'] .personal-workspace select::picker(select) {
+  box-shadow: 7px 7px 0 rgb(8 3 20 / 55%);
+}
+
+html[data-theme='night'] .personal-workspace select::picker-icon {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4ecdc' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* Night redraws the indicator rather than filtering the day one: the same path,
+ * repainted in ink, which is how the rest of this room does night. */
+html[data-theme='night'] .personal-workspace input[type="date"]::-webkit-calendar-picker-indicator {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4ecdc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15' rx='3'/%3E%3Cpath d='M3.5 10h17M8 3.5v3M16 3.5v3'/%3E%3C/svg%3E");
+}
+
+html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calendar-picker-indicator {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4ecdc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5V12l3.2 2'/%3E%3C/svg%3E");
 }
 
 /* ---------------------------------------------------------------- buttons */
@@ -1949,17 +2151,33 @@
   white-space: nowrap;
 }
 
-.personal-workspace .settings-goal-grid .field > input,
-.personal-workspace .settings-goal-grid .field-inline-note {
+.personal-workspace .settings-goal-grid .field > input {
   flex: 1 1 200px;
   width: 220px;
   max-width: 220px;
 }
 
+/* The stepper and the estimate badge share one line; 220px was sized for a bare
+ * input and cannot hold 148px of stepper plus the badge. */
+.personal-workspace .settings-goal-grid .field-inline-note {
+  flex: 1 1 240px;
+  width: auto;
+  max-width: 300px;
+}
+
 .personal-workspace .settings-goal-grid .field-inline-note {
   display: flex;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   align-items: center;
+}
+
+/* The stepper keeps the width its own +/- targets need; the badge wraps to the
+ * next line rather than squeezing the field until its + button falls outside. */
+.personal-workspace .settings-goal-grid .field-inline-note .crumb-stepper {
+  flex: 0 0 148px;
+  width: 148px;
+  min-width: 148px;
 }
 
 .personal-workspace .settings-goal-grid .field-error { flex-basis: 100%; }
@@ -2992,10 +3210,17 @@
   align-items: center;
 }
 
+.personal-workspace .settings-goal-grid .field-inline-note .crumb-stepper {
+  flex: 0 0 148px;
+  width: 148px;
+  max-width: 148px;
+}
+
 .personal-workspace .settings-goal-grid .field-inline-note input {
-  flex: 0 0 200px;
-  width: 200px;
-  max-width: 200px;
+  flex: 1 1 0;
+  width: auto;
+  max-width: none;
+  min-width: 0;
 }
 
 .personal-workspace .settings-goal-grid .field-error { flex-basis: 100%; }
@@ -3205,9 +3430,14 @@
     justify-self: end;
   }
 
+  .personal-workspace .settings-goal-grid .field-inline-note .crumb-stepper {
+    width: 148px;
+    max-width: 148px;
+  }
+
   .personal-workspace .settings-goal-grid .field-inline-note input {
-    width: 200px;
-    max-width: 200px;
+    width: auto;
+    max-width: none;
   }
 }
 
@@ -3718,8 +3948,8 @@
 }
 
 .personal-workspace .coach-page .coach-main-empty {
-  margin: auto;
-  max-width: 520px;
+  margin: 0;
+  max-width: 46rem;
 }
 
 @media (max-width: 980px) {
@@ -3742,11 +3972,12 @@
 
 .personal-workspace .coach-page .coach-messages > * { flex: 0 0 auto; }
 
-.personal-workspace .coach-page .coach-messages > *:first-child { margin-top: auto; }
+/* A correspondence is read from the top down, so the thread does not get
+   pushed against the composer the way a chat log is. */
 
 .personal-workspace .coach-page .coach-composer {
-  padding-top: 14px;
-  border-top: 1px dashed var(--ui-line);
+  padding-top: 10px;
+  border-top: 2px solid rgb(53 36 15 / 55%);
 }
 
 /* Coach: full-width rows so the user bubble keeps its right alignment, and a
@@ -3758,15 +3989,12 @@
 /* Flex column ignores justify-self, so align the bubbles explicitly. */
 .personal-workspace .coach-page .coach-messages > * { width: auto; }
 
-.personal-workspace .coach-page .coach-message--user {
-  align-self: flex-end;
-  width: max-content;
-  max-width: 78%;
-}
-
+/* Every turn starts at the same left margin; the stamp says who is speaking. */
+.personal-workspace .coach-page .coach-message--user,
 .personal-workspace .coach-page .coach-message--assistant {
-  align-self: flex-start;
-  max-width: 88%;
+  align-self: stretch;
+  width: auto;
+  max-width: none;
 }
 
 /* AI quota: three equal-sized boxes and a compact timeout field. */
@@ -3802,23 +4030,41 @@
 /* Coach without a page header: the chat fills the screen. */
 .personal-workspace .coach-page .coach-layout--with-history { height: calc(100vh - 170px); }
 
-/* Empty conversation shows the intro as a quiet backdrop. */
+/* An empty conversation opens exactly like a blank page: a drawing in the
+   margin, the invitation beside it, the suggested lines under it. */
 .personal-workspace .coach-page .coach-messages-empty {
   display: grid;
-  gap: 6px;
-  margin: auto;
-  padding: 28px 24px;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 0.5rem 1.6rem;
+  align-items: start;
+  margin: 0;
+  padding: 1.4rem 0 0;
   color: var(--ui-muted);
-  text-align: center;
+  text-align: left;
+}
+
+.personal-workspace .coach-page .coach-messages-empty .coach-empty-art {
+  grid-row: 1 / span 4;
+  grid-column: 1;
+  width: 100%;
+  margin: 0;
+}
+
+.personal-workspace .coach-page .coach-messages-empty__copy {
+  grid-column: 2;
+  display: grid;
+  gap: 0.4rem;
 }
 
 .personal-workspace .coach-page .coach-messages-empty strong {
   color: var(--ui-ink);
-  font-size: 1.4rem;
-  font-weight: 900;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-.personal-workspace .coach-page .coach-messages-empty p { margin: 0; font-size: 0.95rem; }
+.personal-workspace .coach-page .coach-messages-empty p { margin: 0; font-size: 0.98rem; }
 
 /* Token rows keep their two actions side by side, and key-value inputs share one width. */
 .personal-workspace .mcp-token-list li > div.mcp-token-actions {
@@ -4861,7 +5107,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 .personal-workspace .personal-knowledge__list li:last-child { border-bottom: 0; }
 .personal-workspace .personal-knowledge__list small { color: var(--ui-muted); font-size: 0.74rem; }
 /* Halloween art: the covers carry their own colour, so no tinted tile behind them. */
-.coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0 auto 8px; }
+.coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0; }
 .practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
 .practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }
 
@@ -5574,3 +5820,336 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 /* Ink follows the surface: parchment takes dark ink, the stone takes cream. */
 .personal-workspace .frame3--paper { color: #3b2a1a; }
 .personal-workspace .frame3--stone { color: #f3e9d2; }
+
+/* ============================================================================
+ * Control kit: the pieces the browser draws for itself
+ *
+ * Every control above this line was already ours except where a native widget
+ * paints its own chrome: the dropdown panel, the number spinners, the calendar
+ * indicator, the search cross, the file button. These four components take
+ * those back. Each still wraps the real element, so keyboard, screen reader and
+ * form submission keep working.
+ * ========================================================================= */
+
+/* ------------------------------------------------------------- icon buttons */
+
+.personal-workspace .icon-button .crumb-icon,
+.personal-workspace .workspace-icon-button .crumb-icon,
+.personal-workspace [class*="icon-button"] .crumb-icon {
+  display: block;
+}
+
+/* The x was a character: it sat a pixel low and thickened as the font-size
+ * grew. These give the drawing a consistent optical centre instead. */
+.personal-workspace .icon-button,
+.personal-workspace .workspace-icon-button {
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+}
+
+/* Hover reads as a nudge, not a jump: 12deg on the close cross, a drawn-out
+ * shaft on the arrows. Only transform and opacity animate. */
+.personal-workspace .icon-button:hover .crumb-icon--close,
+.personal-workspace .dialog-card .icon-button:hover .crumb-icon--close {
+  rotate: -12deg;
+  scale: 1.1;
+}
+
+.personal-workspace .icon-button .crumb-icon--close {
+  transition: rotate 260ms cubic-bezier(0.34, 1.56, 0.64, 1), scale 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.personal-workspace .icon-button:hover .crumb-icon__shaft,
+.personal-workspace .workspace-icon-button:hover .crumb-icon__shaft {
+  opacity: 1;
+}
+
+.personal-workspace .crumb-icon__shaft {
+  transition: opacity 200ms ease;
+}
+
+.personal-workspace .icon-button:hover .crumb-icon__ring {
+  opacity: 1;
+}
+
+.personal-workspace .crumb-icon__ring {
+  transition: opacity 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .icon-button .crumb-icon--close,
+  .personal-workspace .crumb-icon__shaft,
+  .personal-workspace .crumb-icon__ring { transition: none; }
+  .personal-workspace .icon-button:hover .crumb-icon--close { rotate: none; scale: 1; }
+}
+
+/* ------------------------------------------------------------------ stepper */
+
+.personal-workspace .crumb-stepper {
+  display: flex;
+  align-items: center;
+  /* A number field is as wide as its digits plus two targets, not as wide as
+   * the column it sits in. */
+  width: min(100%, 148px);
+  height: var(--ui-control);
+  padding: 0 4px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  box-shadow: inset 0 -2px 0 rgb(59 42 26 / 6%);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.personal-workspace .crumb-stepper:hover { border-color: #c9ab80; }
+
+.personal-workspace .crumb-stepper:focus-within {
+  border-color: var(--g-orange-edge);
+  outline: 3px solid rgb(255 150 0 / 25%);
+  outline-offset: 0;
+}
+
+.personal-workspace .crumb-stepper.is-invalid { border-color: var(--g-red); }
+
+.personal-workspace .crumb-stepper.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* The wrapper draws the field, so the input itself loses its frame. */
+.personal-workspace .crumb-stepper input.crumb-stepper__input[type="number"] {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-stepper input.crumb-stepper__input[type="number"]:focus,
+.personal-workspace .crumb-stepper input.crumb-stepper__input[type="number"]:hover {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
+
+.personal-workspace .crumb-stepper__step {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ui-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, scale 100ms ease;
+}
+
+/* Visual 36px; the target is 44px. */
+.personal-workspace .crumb-stepper__step::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.personal-workspace .crumb-stepper__step:hover:not(:disabled) {
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-stepper__step:active:not(:disabled) { scale: 0.9; }
+
+.personal-workspace .crumb-stepper__step:focus-visible {
+  outline: 2px solid var(--g-orange-edge);
+  outline-offset: 1px;
+}
+
+.personal-workspace .crumb-stepper__step:disabled {
+  color: #cfc5b4;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------- search */
+
+.personal-workspace .crumb-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--ui-control);
+  padding: 0 10px 0 13px;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  box-shadow: inset 0 -2px 0 rgb(59 42 26 / 6%);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.personal-workspace .crumb-search:hover { border-color: #c9ab80; }
+
+.personal-workspace .crumb-search:focus-within {
+  border-color: var(--g-orange-edge);
+  outline: 3px solid rgb(255 150 0 / 25%);
+  outline-offset: 0;
+}
+
+.personal-workspace .crumb-search__lens {
+  flex: none;
+  color: var(--ui-muted);
+  transition: color 120ms ease;
+}
+
+.personal-workspace .crumb-search:focus-within .crumb-search__lens { color: var(--g-orange-edge); }
+
+.personal-workspace .crumb-search input.crumb-search__input[type="search"] {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-search input.crumb-search__input[type="search"]:focus,
+.personal-workspace .crumb-search input.crumb-search__input[type="search"]:hover {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
+
+.personal-workspace .crumb-search__clear {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-muted);
+  cursor: pointer;
+  opacity: 0;
+  scale: 0.6;
+  pointer-events: none;
+  transition: opacity 140ms ease, scale 200ms cubic-bezier(0.34, 1.56, 0.64, 1), background 120ms ease;
+}
+
+.personal-workspace .crumb-search.has-value .crumb-search__clear {
+  opacity: 1;
+  scale: 1;
+  pointer-events: auto;
+}
+
+.personal-workspace .crumb-search__clear::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.personal-workspace .crumb-search__clear:hover {
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-search__clear:focus-visible {
+  outline: 2px solid var(--g-orange-edge);
+  outline-offset: 1px;
+}
+
+/* --------------------------------------------------------------------- file */
+
+.personal-workspace .crumb-file {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 26px 20px;
+  border: 2px dashed #b8a992;
+  border-radius: 16px;
+  background: var(--ui-surface);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, scale 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.personal-workspace .crumb-file__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.personal-workspace .crumb-file:hover {
+  border-color: var(--ui-line-strong);
+  background: var(--ui-surface-subtle);
+}
+
+.personal-workspace .crumb-file.is-over {
+  border-color: var(--g-green-edge);
+  background: var(--g-green-soft);
+  scale: 1.01;
+}
+
+.personal-workspace .crumb-file.has-file {
+  border-style: solid;
+  border-color: var(--g-green-edge);
+  background: var(--g-green-soft);
+}
+
+.personal-workspace .crumb-file:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 30%);
+  outline-offset: 2px;
+}
+
+.personal-workspace .crumb-file.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.personal-workspace .crumb-file__icon {
+  color: var(--ui-muted);
+  transition: color 160ms ease;
+}
+
+.personal-workspace .crumb-file.is-over .crumb-file__icon,
+.personal-workspace .crumb-file.has-file .crumb-file__icon { color: var(--g-green-edge); }
+
+.personal-workspace .crumb-file__title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-file__hint {
+  font-size: 0.78rem;
+  color: var(--ui-muted);
+}
+
+/* Night redraws the controls rather than dimming the day ones. */
+html[data-theme='night'] .personal-workspace .crumb-stepper,
+html[data-theme='night'] .personal-workspace .crumb-search,
+html[data-theme='night'] .personal-workspace .crumb-file {
+  box-shadow: inset 0 -2px 0 rgb(8 3 20 / 45%);
+}
+
+html[data-theme='night'] .personal-workspace .crumb-stepper:hover,
+html[data-theme='night'] .personal-workspace .crumb-search:hover { border-color: var(--ui-line-strong); }
+
+html[data-theme='night'] .personal-workspace .crumb-file { border-color: #4a3d6b; }
+
+html[data-theme='night'] .personal-workspace .crumb-stepper__step:disabled { color: #5b4f7a; }

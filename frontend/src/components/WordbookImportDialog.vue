@@ -17,6 +17,8 @@ import {
 } from '../api/wordbooks'
 import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
+import CrumbFile from './ui/CrumbFile.vue'
+import CrumbIcon from './ui/CrumbIcon.vue'
 
 const props = defineProps<{
   isAdmin: boolean
@@ -131,9 +133,7 @@ function formatDate(value: string): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN')
 }
 
-function chooseFile(event: Event): void {
-  const input = event.target as HTMLInputElement
-  const selected = input.files?.[0] ?? null
+function chooseFile(selected: File | null): void {
   file.value = selected
   preview.value = null
   previewError.value = null
@@ -340,7 +340,7 @@ onUnmounted(() => {
           <p class="eyebrow">预览 · 映射 · 异步导入</p>
           <h2 id="wordbook-import-title">导入词书</h2>
         </div>
-        <DivButton class="icon-button" type="button" aria-label="关闭导入窗口" :disabled="taskRunning" @click="close">×</DivButton>
+        <DivButton class="icon-button" type="button" aria-label="关闭导入窗口" :disabled="taskRunning" @click="close"><CrumbIcon name="close" :size="18" /></DivButton>
       </header>
 
       <template v-if="!preview">
@@ -368,11 +368,18 @@ onUnmounted(() => {
             <textarea v-model="form.description" rows="3" maxlength="4000" :disabled="previewLoading"></textarea>
           </label>
 
-          <label class="field wordbook-form-full">
+          <div class="field wordbook-form-full">
             <span>词书文件</span>
-            <input type="file" accept=".csv,.json,.txt,text/csv,application/json,text/plain" :disabled="previewLoading" @change="chooseFile" />
+            <CrumbFile
+              :file-name="file?.name ?? null"
+              accept=".csv,.json,.txt,text/csv,application/json,text/plain"
+              :disabled="previewLoading"
+              label="选择要导入的词书文件"
+              hint="CSV / JSON / TXT，单文件不超过 10 MiB"
+              @change="chooseFile"
+            />
             <span class="field-hint">单文件不超过 10 MiB；导入结果会在确认前再次检查。</span>
-          </label>
+          </div>
         </form>
 
         <p v-if="fileError" class="field-error" role="alert">{{ fileError }}</p>

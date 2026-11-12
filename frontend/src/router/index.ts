@@ -154,6 +154,12 @@ const routes: RouteRecordRaw[] = [
             name: 'settings-wordbooks',
             component: WordbooksView,
           },
+          {
+            path: 'knowledge',
+            name: 'settings-knowledge',
+            component: AdminKnowledgeView,
+            meta: { adminOnly: true },
+          },
         ],
       },
       {

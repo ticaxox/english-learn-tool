@@ -13,12 +13,17 @@ const http = require('http'), fs = require('fs'), path = require('path')
 const root = path.resolve('dist')
 const port = Number(process.argv[2] || 5190)
 const API = process.argv[3] || 'http://127.0.0.1:9280'
+// The backend validates Origin on /auth/refresh against CORS_ORIGINS, which
+// lists the deployed host - not the address this proxy happens to dial. Those
+// are two different things: the socket goes to $API, the header must be the
+// allow-listed value or every token refresh comes back 403.
+const ORIGIN = process.env.PREVIEW_ORIGIN || 'http://127.0.0.1:9280'
 const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.css':'text/css',
   '.png':'image/png', '.svg':'image/svg+xml', '.woff2':'font/woff2', '.ico':'image/x-icon' }
 http.createServer((req, res) => {
   if (req.url.startsWith('/api/')) {
     // Backend checks Origin against CORS_ORIGINS; rewrite so the preview is accepted.
-    const headers = { ...req.headers, host: '127.0.0.1:9280', origin: API }
+    const headers = { ...req.headers, host: '127.0.0.1:9280', origin: ORIGIN }
     const p = http.request(API + req.url, { method: req.method, headers },
       (up) => { res.writeHead(up.statusCode, up.headers); up.pipe(res) })
     p.on('error', () => { res.writeHead(502); res.end('api down') })

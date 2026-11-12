@@ -9,6 +9,7 @@
  */
 import { computed, onMounted, reactive, ref } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import CrumbNumber from '../components/ui/CrumbNumber.vue'
 import LoadingState from '../components/LoadingState.vue'
 import { useToast } from '../composables/useToast'
 import ContractGate from '../components/ContractGate.vue'
@@ -266,15 +267,14 @@ onMounted(() => {
           <legend>每日目标</legend>
           <div class="field">
             <label for="daily-new-words">每日新词量</label>
-            <input
+            <CrumbNumber
               id="daily-new-words"
-              v-model.number="form.dailyNewWords"
-              type="number"
+              v-model="form.dailyNewWords"
               :min="DAILY_NEW_WORDS_MIN"
               :max="DAILY_NEW_WORDS_MAX"
-              step="1"
-              :aria-invalid="Boolean(fieldErrors.dailyNewWords)"
-              :aria-describedby="fieldErrors.dailyNewWords ? 'daily-new-words-error' : undefined"
+              :step="1"
+              label="每日新词量"
+              :invalid="Boolean(fieldErrors.dailyNewWords)"
             />
             <p v-if="fieldErrors.dailyNewWords" id="daily-new-words-error" class="field-error" role="alert">
               {{ fieldErrors.dailyNewWords }}
@@ -284,15 +284,14 @@ onMounted(() => {
           <div class="field">
             <label for="daily-minutes">每日学习时长</label>
             <div class="field-inline-note">
-              <input
+              <CrumbNumber
                 id="daily-minutes"
-                v-model.number="form.dailyMinutes"
-                type="number"
+                v-model="form.dailyMinutes"
                 :min="DAILY_MINUTES_MIN"
                 :max="DAILY_MINUTES_MAX"
-                step="1"
-                :aria-invalid="Boolean(fieldErrors.dailyMinutes)"
-                :aria-describedby="fieldErrors.dailyMinutes ? 'daily-minutes-error' : undefined"
+                :step="1"
+                label="每日学习时长（分钟）"
+                :invalid="Boolean(fieldErrors.dailyMinutes)"
               />
               <span v-if="completionDays !== null" class="field-badge" :title="`预计 ${completionDays} 天学完`">≈ {{ completionDays }} 天</span>
             </div>
