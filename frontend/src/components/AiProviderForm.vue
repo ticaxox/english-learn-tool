@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import ErrorNotice from './ErrorNotice.vue'
 import type {
   AiProvider,
+  AiProviderKind,
   ProviderCreateInput,
   ProviderPatchInput,
   ProviderProbeInput,
@@ -11,6 +12,7 @@ import type {
 
 interface ValidatedProviderFields {
   name: string
+  kind: AiProviderKind
   baseUrl: string
   modelId: string
   priority: number
@@ -22,6 +24,8 @@ interface ValidatedProviderFields {
 
 const props = defineProps<{
   provider?: AiProvider | null
+  /** Which list the form was opened from; a new provider starts as that kind. */
+  defaultKind?: AiProviderKind
   saving?: boolean
   error?: unknown
   /** The personal settings dialog: no title, actions in the header row. */
@@ -44,6 +48,8 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
+// What this provider is for: writing text, or turning it into vectors.
+const kind = ref<AiProviderKind>('chat')
 const baseUrl = ref('')
 const modelId = ref('')
 const embeddingModel = ref('')
@@ -78,6 +84,7 @@ const forbiddenHeaders = new Set([
 function reset(): void {
   const provider = props.provider
   name.value = provider?.name ?? ''
+  kind.value = provider?.kind ?? props.defaultKind ?? 'chat'
   baseUrl.value = provider?.baseUrl ?? ''
   modelId.value = provider?.modelId ?? ''
   embeddingModel.value = provider?.embeddingModel ?? ''
@@ -173,6 +180,7 @@ function validate(): ValidatedProviderFields | null {
   if (Object.keys(errors).length > 0 || headers === null) return null
   return {
     name: normalizedName,
+    kind: kind.value,
     baseUrl: normalizedUrl,
     modelId: normalizedModel,
     priority: priority.value,
@@ -226,6 +234,8 @@ function probeInput(): ProviderProbeInput | null {
     baseUrl: normalizedUrl,
     apiKey: key || null,
     providerId: props.provider?.id ?? null,
+    kind: kind.value,
+    modelId: modelId.value.trim() || null,
     timeoutSeconds: timeoutSeconds.value,
     customHeaders: headers,
   }
@@ -291,8 +301,33 @@ function cancel(): void {
         </div>
       </div>
 
+      <div class="field ai-kind-field">
+        <span class="ai-kind-field__label">用途</span>
+        <div class="ai-kind-switch" role="group" aria-label="提供商用途">
+          <DivButton
+            class="ai-kind-switch__option"
+            :class="{ 'is-active': kind === 'chat' }"
+            type="button"
+            :aria-pressed="kind === 'chat'"
+            @click="kind = 'chat'"
+          >对话模型</DivButton>
+          <DivButton
+            class="ai-kind-switch__option"
+            :class="{ 'is-active': kind === 'embedding' }"
+            type="button"
+            :aria-pressed="kind === 'embedding'"
+            @click="kind = 'embedding'"
+          >向量模型</DivButton>
+        </div>
+        <p class="field-hint">
+          {{ kind === 'embedding'
+            ? '知识库用它把真题变成向量，语义检索才有效。'
+            : 'AI 教练、出题和评分用它写文字。' }}
+        </p>
+      </div>
+
       <div class="field ai-model-field">
-        <label for="provider-model">模型 ID</label>
+        <label for="provider-model">{{ kind === 'embedding' ? '向量模型 ID' : '模型 ID' }}</label>
         <div class="ai-model-row">
           <div class="ai-model-input">
             <input id="provider-model" v-model="modelId" type="text" maxlength="200" :aria-invalid="Boolean(errors.modelId)" />
@@ -332,17 +367,6 @@ function cancel(): void {
         <p v-if="errors.modelId" class="field-error" role="alert">{{ errors.modelId }}</p>
         <p v-else-if="modelsFetched && !modelLoading && modelOptions && modelOptions.length === 0" class="field-hint">这个接口没有返回模型列表，直接手填模型 ID 即可。</p>
 
-        <div class="field">
-          <label for="provider-embedding-model">向量模型（可选）</label>
-          <input
-            id="provider-embedding-model"
-            v-model="embeddingModel"
-            type="text"
-            maxlength="120"
-            placeholder="例如 text-embedding-3-small"
-          />
-          <p class="field-hint">填写后知识库会用这个模型做语义检索；留空则只用关键词检索。</p>
-        </div>
         <ErrorNotice v-if="modelError" :error="modelError" :show-retry="false" />
 
         <div v-if="canFetchModels && modelsOpen" class="ai-model-menu" role="listbox" aria-label="可用模型">

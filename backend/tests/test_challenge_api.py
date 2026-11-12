@@ -280,3 +280,49 @@ async def test_challenge_cross_day_is_read_only(client, app, member_user):
         )
         assert blocked.status_code == 409
         assert blocked.json()["code"] in {"CHALLENGE_READ_ONLY", "CHALLENGE_NOT_STARTABLE"}
+
+
+async def test_an_empty_map_can_be_regenerated(client, app, member_user):
+    """A plan that exists but holds no nodes is a dead end without this.
+
+    The plan is only ever replayed while it exists, so a generation that
+    produced nothing leaves the learner staring at an empty map forever.
+    """
+    _, entry_ids, _ = await _seed_plan(app, member_user)
+    headers = await login(client, member_user.username)
+    with fake_provider_server() as server:
+        await create_provider(client, headers, base_url=server.base_url)
+        server.queue_json(200, challenge_output(entry_ids))
+        first = await client.post("/api/v1/challenges/today/generate", headers=headers)
+        assert first.status_code == 202, first.text
+        assert (await _run_job(app, UUID(first.json()["job_id"])))["status"] == "succeeded"
+
+        # What a model that answered with nothing usable leaves behind: the
+        # plan is ready, and there is not a node to walk.
+        from sqlalchemy import delete
+
+        from app.models.challenge import ChallengeNode, ChallengeNodeProgress
+
+        async with app.state.session_factory() as session:
+            plan = await session.scalar(
+                select(DailyChallengePlan).where(DailyChallengePlan.user_id == member_user.id)
+            )
+            assert plan is not None
+            await session.execute(
+                delete(ChallengeNodeProgress).where(ChallengeNodeProgress.plan_id == plan.id)
+            )
+            await session.execute(delete(ChallengeNode).where(ChallengeNode.plan_id == plan.id))
+            await session.commit()
+
+        empty = await client.get("/api/v1/challenges/today", headers=headers)
+        assert empty.status_code == 200
+        assert empty.json()["nodes"] == []
+
+        server.queue_json(200, challenge_output(entry_ids))
+        regenerated = await client.post("/api/v1/challenges/today/regenerate", headers=headers)
+        assert regenerated.status_code == 202, regenerated.text
+        assert (await _run_job(app, UUID(regenerated.json()["job_id"])))["status"] == "succeeded"
+
+        filled = await client.get("/api/v1/challenges/today", headers=headers)
+        assert filled.status_code == 200
+        assert len(filled.json()["nodes"]) >= 3

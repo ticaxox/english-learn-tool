@@ -9914,6 +9914,103 @@
         ]
       }
     },
+    "/api/v1/challenges/today/regenerate": {
+      "post": {
+        "tags": [
+          "system",
+          "challenges"
+        ],
+        "summary": "Throw today's unfinished map away and build it again",
+        "operationId": "regenerate_today_endpoint_api_v1_challenges_today_regenerate_post",
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeGenerateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account may not use challenges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The challenge resource was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The challenge state conflicts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The AI quota or concurrency limit is exhausted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The AI provider or queue is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/challenges/history": {
       "get": {
         "tags": [
@@ -20014,6 +20111,15 @@
             "minLength": 1,
             "title": "Model Id"
           },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "chat",
+              "embedding"
+            ],
+            "title": "Kind",
+            "default": "chat"
+          },
           "priority": {
             "type": "integer",
             "maximum": 10000.0,
@@ -20180,6 +20286,21 @@
             ],
             "title": "Model Id"
           },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "chat",
+                  "embedding"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
           "priority": {
             "anyOf": [
               {
@@ -20292,6 +20413,28 @@
             ],
             "title": "Provider Id"
           },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "chat",
+              "embedding"
+            ],
+            "title": "Kind",
+            "default": "chat"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
           "timeout_seconds": {
             "type": "integer",
             "maximum": 300.0,
@@ -20325,6 +20468,14 @@
           "name": {
             "type": "string",
             "title": "Name"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "chat",
+              "embedding"
+            ],
+            "title": "Kind"
           },
           "base_url": {
             "type": "string",
@@ -20430,6 +20581,7 @@
         "required": [
           "id",
           "name",
+          "kind",
           "base_url",
           "api_key_masked",
           "model_id",

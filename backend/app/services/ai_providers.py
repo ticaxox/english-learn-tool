@@ -34,6 +34,7 @@ def _response(provider: AiProvider) -> ProviderResponse:
     return ProviderResponse(
         id=provider.id,
         name=provider.name,
+        kind=provider.kind,
         base_url=provider.base_url,
         api_key_masked=provider.api_key_mask,
         model_id=provider.model_id,
@@ -139,6 +140,7 @@ async def create_provider(
         api_key_ciphertext=_cipher(settings).encrypt(payload.api_key),
         api_key_mask=mask_api_key(payload.api_key),
         model_id=payload.model_id,
+        kind=payload.kind,
         priority=payload.priority,
         is_default=payload.is_default,
         timeout_seconds=payload.timeout_seconds,
@@ -205,6 +207,8 @@ async def update_provider(
         provider.api_key_mask = mask_api_key(payload.api_key)
     if payload.model_id is not None:
         provider.model_id = payload.model_id
+    if payload.kind is not None:
+        provider.kind = payload.kind
     if payload.priority is not None:
         provider.priority = payload.priority
     if payload.timeout_seconds is not None:
@@ -303,13 +307,27 @@ async def test_provider(
         )
     started = time.perf_counter()
     client = ProviderHttpClient(settings)
+    api_key = _cipher(settings).decrypt(provider.api_key_ciphertext)
     try:
-        models = await client.list_models(
-            base_url=provider.base_url,
-            api_key=_cipher(settings).decrypt(provider.api_key_ciphertext),
-            custom_headers=provider.custom_headers,
-            timeout_seconds=provider.timeout_seconds,
-        )
+        if provider.kind == "embedding":
+            # An embedding service has no model list worth reading; the honest
+            # test is to ask it for a vector.
+            await client.embeddings(
+                base_url=provider.base_url,
+                api_key=api_key,
+                custom_headers=provider.custom_headers,
+                model_id=provider.model_id,
+                timeout_seconds=provider.timeout_seconds,
+                texts=["ping"],
+            )
+            models = [provider.model_id]
+        else:
+            models = await client.list_models(
+                base_url=provider.base_url,
+                api_key=api_key,
+                custom_headers=provider.custom_headers,
+                timeout_seconds=provider.timeout_seconds,
+            )
     except ProviderRequestError as exc:
         latency = int((time.perf_counter() - started) * 1000)
         provider.last_test_status = "failed"
@@ -416,12 +434,23 @@ async def probe_provider(
     api_key = await _probe_api_key(session, actor, settings, payload)
     started = time.perf_counter()
     try:
-        models = await ProviderHttpClient(settings).list_models(
-            base_url=payload.base_url,
-            api_key=api_key,
-            custom_headers=payload.custom_headers,
-            timeout_seconds=payload.timeout_seconds,
-        )
+        if payload.kind == "embedding":
+            await ProviderHttpClient(settings).embeddings(
+                base_url=payload.base_url,
+                api_key=api_key,
+                custom_headers=payload.custom_headers,
+                model_id=payload.model_id or "text-embedding-3-small",
+                timeout_seconds=payload.timeout_seconds,
+                texts=["ping"],
+            )
+            models = [payload.model_id] if payload.model_id else []
+        else:
+            models = await ProviderHttpClient(settings).list_models(
+                base_url=payload.base_url,
+                api_key=api_key,
+                custom_headers=payload.custom_headers,
+                timeout_seconds=payload.timeout_seconds,
+            )
     except ProviderRequestError as exc:
         latency = int((time.perf_counter() - started) * 1000)
         return ProviderTestResponse(

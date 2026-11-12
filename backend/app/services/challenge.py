@@ -8,7 +8,7 @@ from uuid import UUID
 from zoneinfo import ZoneInfo
 
 from arq.connections import ArqRedis
-from sqlalchemy import delete, select, text
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
@@ -1224,3 +1224,66 @@ async def expire_and_cleanup_challenges(
     if plans:
         await session.commit()
     return {"expired": len(plans), "contexts": int(contexts.rowcount or 0)}
+
+
+async def regenerate_today(
+    session: AsyncSession,
+    pool: ArqRedis,
+    user: User,
+    settings: Settings,
+) -> ChallengeGenerateResponse:
+    """Throw today's map away and build it again.
+
+    A map the model failed to fill leaves an empty plan behind: the plan exists,
+    so asking for today's map only ever replays it. This is the way out — but
+    only while nothing has been done, because a map someone has already started
+    is not a draft, and losing their progress would be worse than an empty map.
+    """
+    local_date = local_date_for(settings, user)
+    plan = await session.scalar(
+        select(DailyChallengePlan)
+        .where(
+            DailyChallengePlan.user_id == user.id,
+            DailyChallengePlan.local_date == local_date,
+        )
+        .with_for_update()
+    )
+    if plan is None:
+        raise AppError(
+            status_code=404,
+            code="CHALLENGE_NOT_GENERATED",
+            message="Today's challenge has not been generated.",
+        )
+    if plan.status == "completed":
+        raise AppError(
+            status_code=409,
+            code="CHALLENGE_ALREADY_COMPLETED",
+            message="Today's challenge is already finished.",
+        )
+    # "unlocked" only means a node is available to open; the learner has not
+    # spent anything on it yet. Anything further means real work.
+    started = await session.scalar(
+        select(func.count(ChallengeNodeProgress.id)).where(
+            ChallengeNodeProgress.plan_id == plan.id,
+            ChallengeNodeProgress.status.in_(("in_progress", "completed", "failed")),
+        )
+    )
+    if started:
+        raise AppError(
+            status_code=409,
+            code="CHALLENGE_ALREADY_STARTED",
+            message="This map has already been started, so it cannot be rebuilt.",
+        )
+
+    await session.execute(
+        delete(ChallengeNodeProgress).where(ChallengeNodeProgress.plan_id == plan.id)
+    )
+    await session.execute(delete(ChallengeNode).where(ChallengeNode.plan_id == plan.id))
+    # Marking it failed is what lets generate_today build a new one instead of
+    # replaying the empty map it would otherwise find.
+    plan.status = "failed"
+    plan.error_code = None
+    plan.error_message = None
+    await session.commit()
+
+    return await generate_today(session, pool, user, settings)

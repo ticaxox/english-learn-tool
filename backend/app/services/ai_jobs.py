@@ -128,6 +128,8 @@ async def _providers_for_job(
                 .where(
                     AiProvider.owner_id == owner_id,
                     AiProvider.enabled.is_(True),
+                    # A job writes text, so only a chat provider can serve it.
+                    AiProvider.kind == "chat",
                 )
                 .order_by(
                     # Priority decides the order; "default" only breaks ties.

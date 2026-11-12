@@ -85,19 +85,42 @@ def split_text(text: str) -> list[str]:
 async def _embedding_provider(
     session: AsyncSession, settings: Settings, owner_id: UUID | None
 ) -> tuple[str, str, dict[str, str], str] | None:
-    """(base_url, api_key, headers, model) of the first usable provider."""
-    query = select(AiProvider).where(AiProvider.enabled.is_(True))
+    """(base_url, api_key, headers, model) of the provider that makes vectors.
+
+    Embeddings are configured on their own provider: the service that writes
+    text is often not the service that turns it into vectors. A chat provider
+    that still names an embedding_model is the older shape and is used only
+    when no dedicated one exists, so an upgrade does not silently stop
+    indexing.
+    """
+    query = select(AiProvider).where(
+        AiProvider.enabled.is_(True), AiProvider.kind == "embedding"
+    )
     if owner_id is not None:
         query = query.where(AiProvider.owner_id == owner_id)
     provider = await session.scalar(query.order_by(AiProvider.priority.asc()).limit(1))
-    if provider is None or not provider.embedding_model:
+
+    model: str | None = None
+    if provider is not None:
+        model = provider.model_id
+    else:
+        legacy = select(AiProvider).where(
+            AiProvider.enabled.is_(True), AiProvider.embedding_model.is_not(None)
+        )
+        if owner_id is not None:
+            legacy = legacy.where(AiProvider.owner_id == owner_id)
+        provider = await session.scalar(legacy.order_by(AiProvider.priority.asc()).limit(1))
+        if provider is not None:
+            model = provider.embedding_model
+
+    if provider is None or not model:
         return None
     cipher = ApiKeyCipher(settings.secret_encryption_key.get_secret_value())
     try:
         api_key = cipher.decrypt(provider.api_key_ciphertext)
     except ValueError:
         return None
-    return provider.base_url, api_key, provider.custom_headers or {}, provider.embedding_model
+    return provider.base_url, api_key, provider.custom_headers or {}, model
 
 
 async def _embed(

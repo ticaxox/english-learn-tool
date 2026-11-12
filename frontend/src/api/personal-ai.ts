@@ -85,6 +85,10 @@ function serializeProbe(input: ProviderProbeInput) {
     base_url: input.baseUrl,
     api_key: input.apiKey ? input.apiKey : null,
     provider_id: input.providerId ?? null,
+    // An embedding provider is tested with an /embeddings call, so it needs
+    // to say which model to ask for.
+    kind: input.kind ?? 'chat',
+    model_id: input.modelId ?? null,
     timeout_seconds: input.timeoutSeconds,
     custom_headers: input.customHeaders,
   }

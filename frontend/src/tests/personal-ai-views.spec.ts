@@ -25,7 +25,7 @@ describe('PersonalAiConfigView', () => {
     const wrapper = mount(PersonalAiConfigView)
     await flushPromises()
 
-    expect(wrapper.text()).toContain('还没有 AI 提供商')
+    expect(wrapper.text()).toContain('还没有对话模型')
     await wrapper.get('.personal-ai-empty [role="button"]').trigger('click')
     expect(wrapper.find('.ai-form-panel').exists()).toBe(true)
     expect(wrapper.get('#provider-name').element).toHaveProperty('value', '')

@@ -34,6 +34,9 @@ AI_PROMPT_KEYS = (
     "'practice_generation', 'subjective_grading', 'coach_reply', 'challenge_plan', "
     "'json_repair', 'conversation_turn'"
 )
+# A provider either writes text or turns text into vectors. They are different
+# services, often from different vendors, so they are configured apart.
+AI_PROVIDER_KINDS = "'chat', 'embedding'"
 
 
 class AiProvider(Base):
@@ -43,6 +46,7 @@ class AiProvider(Base):
         CheckConstraint("btrim(name_normalized) <> ''", name="name_normalized_not_blank"),
         CheckConstraint("priority >= 0", name="priority_nonnegative"),
         CheckConstraint("timeout_seconds >= 1 AND timeout_seconds <= 300", name="timeout_range"),
+        CheckConstraint(f"kind IN ({AI_PROVIDER_KINDS})", name="kind_valid"),
         CheckConstraint(
             "last_test_status IN ('untested', 'succeeded', 'failed')",
             name="last_test_status_valid",
@@ -72,6 +76,11 @@ class AiProvider(Base):
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     name_normalized: Mapped[str] = mapped_column(String(100), nullable=False)
+    # What the provider is for: writing text, or turning text into vectors.
+    # A chat provider is never asked for embeddings and vice versa.
+    kind: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="chat", server_default=text("'chat'")
+    )
     base_url: Mapped[str] = mapped_column(String(500), nullable=False)
     api_key_ciphertext: Mapped[str] = mapped_column(Text, nullable=False)
     api_key_mask: Mapped[str] = mapped_column(String(32), nullable=False)

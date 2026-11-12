@@ -19,6 +19,7 @@ import {
   getChallengeJob,
   getChallengeNodeDetail,
   getTodayChallenge,
+  regenerateTodayChallenge,
   startChallengeNode,
   type ChallengeBossResult,
   type ChallengeHistoryItem,
@@ -50,6 +51,21 @@ const generationStatus = ref('')
 const cancelGenerationWait = ref(false)
 
 const selectedNode = ref<ChallengeNodeDetail | null>(null)
+const regenerating = ref(false)
+
+/**
+ * A map the model could not fill exists but holds nothing, and the plan is
+ * replayed rather than rebuilt whenever it is asked for. This is the way out;
+ * it is offered whenever nothing has been started, because an empty map is not
+ * a draft worth protecting.
+ */
+const canRegenerate = computed(() => {
+  const current = plan.value
+  if (!current) return false
+  if (current.status === 'completed') return false
+  if (current.status === 'generating') return false
+  return current.nodes.length === 0 || current.status === 'failed'
+})
 
 const nodeLoading = ref(false)
 const nodeError = ref<unknown>(null)
@@ -135,6 +151,27 @@ async function refreshPlanSilently(): Promise<void> {
 function stopWaitingForMap(): void {
   cancelGenerationWait.value = true
   generationStatus.value = '已停止等待；地图仍可能在后台生成，稍后点“刷新地图”查看。'
+}
+
+async function regenerateMap(): Promise<void> {
+  if (regenerating.value || generating.value) return
+  const confirmed = window.confirm('这会丢掉今天还没有开始的地图，重新生成一张。继续吗？')
+  if (!confirmed) return
+  regenerating.value = true
+  generationError.value = null
+  try {
+    const accepted = await regenerateTodayChallenge()
+    if (accepted.jobId) {
+      // Generation is queued; the ordinary wait loop picks it up.
+      generationStatus.value = '正在重新生成…'
+      plan.value = await getTodayChallenge()
+    }
+    await loadPlan()
+  } catch (requestError) {
+    generationError.value = requestError
+  } finally {
+    regenerating.value = false
+  }
 }
 
 async function generateMap(): Promise<void> {
@@ -332,6 +369,26 @@ onMounted(() => {
     </section>
 
     <template v-else-if="plan">
+      <!-- A plan that exists but holds nothing is a dead end: asking for the
+           map again only replays it. Say so, and offer the way out. -->
+      <section v-if="canRegenerate" class="panel challenge-generate" aria-labelledby="challenge-empty-title">
+        <div class="challenge-generate__mark" aria-hidden="true"><AppIcon name="spark" /></div>
+        <div>
+          <p class="eyebrow">今日路线</p>
+          <h2 id="challenge-empty-title">
+            {{ plan.status === 'failed' ? '这次没能生成地图' : '这张地图是空的' }}
+          </h2>
+          <p>生成没有产出可用的节点。可以重新生成一张，已开始的地图不会被覆盖。</p>
+          <ErrorNotice v-if="generationError" :error="generationError" :show-retry="false" />
+          <div class="button-row">
+            <DivButton class="button" type="button" :disabled="regenerating" @click="regenerateMap">
+              {{ regenerating ? '正在重新生成…' : '重新生成地图' }}
+            </DivButton>
+            <DivButton class="button-secondary" type="button" :disabled="regenerating" @click="loadPlan">刷新地图</DivButton>
+          </div>
+        </div>
+      </section>
+
       <header v-if="embedded" class="challenge-embedded-header">
         <div>
           <p class="eyebrow">今日学习 · 学习地图</p>
@@ -339,7 +396,7 @@ onMounted(() => {
         </div>
       </header>
 
-      <section v-if="!embedded" class="panel challenge-summary" aria-label="今日闯关摘要">
+      <section v-if="!embedded && !canRegenerate" class="panel challenge-summary" aria-label="今日闯关摘要">
         <div class="challenge-summary__copy">
           <p class="eyebrow">{{ plan.localDate }} · {{ PLAN_STATUS_LABELS[plan.status] }}</p>
           <h2>{{ plan.summary || '按顺序完成，最后挑战终点。' }}</h2>
@@ -387,7 +444,7 @@ onMounted(() => {
       </div>
 
       <ChallengeDslMap
-        v-if="plan.mapDsl"
+        v-if="plan.mapDsl && !canRegenerate"
         :dsl="plan.mapDsl"
         @select="selectMapNode"
       />

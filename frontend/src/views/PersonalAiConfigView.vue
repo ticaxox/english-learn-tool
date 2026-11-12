@@ -15,6 +15,7 @@ import {
   probePersonalProviderModels,
   updatePersonalProvider,
   type AiProvider,
+  type AiProviderKind,
   type ProviderCreateInput,
   type ProviderPatchInput,
   type ProviderProbeInput,
@@ -40,10 +41,19 @@ const formModelError = ref<unknown>(null)
 const formTestLoading = ref(false)
 const formTestResult = ref<ProviderTestResult | null>(null)
 
-const sortedProviders = computed(() => [...providers.value].sort((left, right) => {
-  if (left.priority !== right.priority) return left.priority - right.priority
-  return left.name.localeCompare(right.name, 'zh-CN')
-}))
+function byPriority(list: AiProvider[]): AiProvider[] {
+  return [...list].sort((left, right) => {
+    if (left.priority !== right.priority) return left.priority - right.priority
+    return left.name.localeCompare(right.name, 'zh-CN')
+  })
+}
+
+/** Writing text and making vectors are separate services, listed apart. */
+const chatProviders = computed(() => byPriority(providers.value.filter((p) => p.kind !== 'embedding')))
+const embeddingProviders = computed(() => byPriority(providers.value.filter((p) => p.kind === 'embedding')))
+
+/** Which list the open form belongs to. */
+const formKind = ref<AiProviderKind>('chat')
 
 async function load(): Promise<void> {
   loading.value = true
@@ -66,8 +76,9 @@ function resetFormSideState(): void {
   formTestResult.value = null
 }
 
-function openCreate(): void {
+function openCreate(kind: AiProviderKind = 'chat'): void {
   editingProvider.value = null
+  formKind.value = kind
   saveError.value = null
   resetFormSideState()
   formOpen.value = true
@@ -75,6 +86,7 @@ function openCreate(): void {
 
 function openEdit(provider: AiProvider): void {
   editingProvider.value = provider
+  formKind.value = provider.kind
   saveError.value = null
   resetFormSideState()
   formOpen.value = true
@@ -206,56 +218,122 @@ onMounted(() => {
       <div class="personal-ai-toolbar">
         <div>
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
+          <p class="field-hint">写作和向量是两种服务，分开配置；用哪一家都行。</p>
         </div>
-        <DivButton v-if="providers.length > 0" class="button" type="button" @click="openCreate">添加 AI 提供商</DivButton>
       </div>
 
       <LoadingState v-if="loading && providers.length === 0" label="正在读取 AI 配置…" />
       <ErrorNotice v-else-if="loadError" :error="loadError" retry-label="重新读取 AI 配置" @retry="load" />
 
-      <div v-else-if="providers.length === 0" class="personal-ai-empty">
-        <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
-        <div>
-          <h3>还没有 AI 提供商</h3>
-          <p>添加一个 OpenAI 兼容服务，AI 教练、练习生成和评分才能开始工作。</p>
-        </div>
-        <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate">添加第一个提供商</DivButton>
-      </div>
+      <template v-else>
+        <section class="personal-ai-group" aria-labelledby="chatProviders-title">
+          <div class="personal-ai-group__head">
+            <div>
+              <h3 id="chatProviders-title">对话模型</h3>
+              <p class="field-hint">AI 教练、出题和评分用它写文字。至少要有一个。</p>
+            </div>
+            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('chat')">添加对话模型</DivButton>
+          </div>
 
-      <div v-else class="personal-ai-list">
-        <article v-for="provider in sortedProviders" :key="provider.id" class="personal-ai-provider">
-          <div class="personal-ai-provider__main">
-            <span
-              class="ai-status-dot"
-              :class="{ 'is-on': provider.enabled }"
-              :title="provider.enabled ? '已启用' : '已停用'"
-              aria-hidden="true"
-            ></span>
-            <h3>{{ provider.name }}</h3>
-            <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
-            <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
+          <div v-if="chatProviders.length === 0" class="personal-ai-empty personal-ai-empty--inline">
+            <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
+            <div>
+              <h4>还没有对话模型</h4>
+              <p>添加一个 OpenAI 兼容服务，AI 教练、出题和评分才能开始工作。</p>
+            </div>
+            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加对话模型</DivButton>
           </div>
-          <label class="personal-ai-provider__priority">
-            <span>优先级</span>
-            <CrumbNumber
-              :model-value="provider.priority"
-              :min="0"
-              :max="10000"
-              :step="1"
-              :disabled="Boolean(actionKey)"
-              label="优先级"
-              @update:model-value="updatePriority(provider, $event)"
-            />
-          </label>
-          <div class="personal-ai-provider__actions">
-            <DivButton class="button-secondary" type="button" @click="openEdit(provider)">编辑</DivButton>
-            <DivButton class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
-              {{ provider.enabled ? '停用' : '启用' }}
-            </DivButton>
-            <DivButton class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</DivButton>
+
+          <div v-else class="personal-ai-list">
+            <article v-for="provider in chatProviders" :key="provider.id" class="personal-ai-provider">
+              <div class="personal-ai-provider__main">
+                <span
+                  class="ai-status-dot"
+                  :class="{ 'is-on': provider.enabled }"
+                  :title="provider.enabled ? '已启用' : '已停用'"
+                  aria-hidden="true"
+                ></span>
+                <h3>{{ provider.name }}</h3>
+                <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
+                <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
+              </div>
+              <label class="personal-ai-provider__priority">
+                <span>优先级</span>
+                <CrumbNumber
+                  :model-value="provider.priority"
+                  :min="0"
+                  :max="10000"
+                  :step="1"
+                  :disabled="Boolean(actionKey)"
+                  label="优先级"
+                  @update:model-value="updatePriority(provider, $event)"
+                />
+              </label>
+              <div class="personal-ai-provider__actions">
+                <DivButton class="button-secondary" type="button" @click="openEdit(provider)">编辑</DivButton>
+                <DivButton class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
+                  {{ provider.enabled ? '停用' : '启用' }}
+                </DivButton>
+                <DivButton class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</DivButton>
+              </div>
+            </article>
           </div>
-        </article>
-      </div>
+        </section>
+
+        <section class="personal-ai-group" aria-labelledby="embeddingProviders-title">
+          <div class="personal-ai-group__head">
+            <div>
+              <h3 id="embeddingProviders-title">向量模型</h3>
+              <p class="field-hint">知识库用它把真题变成向量，语义检索才有效。不配就只用关键词检索。</p>
+            </div>
+            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('embedding')">添加向量模型</DivButton>
+          </div>
+
+          <div v-if="embeddingProviders.length === 0" class="personal-ai-empty personal-ai-empty--inline">
+            <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
+            <div>
+              <h4>还没有向量模型</h4>
+              <p>填一个支持 /embeddings 的服务，比如 text-embedding-3-small；不填则知识库只按关键词匹配。</p>
+            </div>
+            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('embedding')">添加向量模型</DivButton>
+          </div>
+
+          <div v-else class="personal-ai-list">
+            <article v-for="provider in embeddingProviders" :key="provider.id" class="personal-ai-provider">
+              <div class="personal-ai-provider__main">
+                <span
+                  class="ai-status-dot"
+                  :class="{ 'is-on': provider.enabled }"
+                  :title="provider.enabled ? '已启用' : '已停用'"
+                  aria-hidden="true"
+                ></span>
+                <h3>{{ provider.name }}</h3>
+                <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
+                <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
+              </div>
+              <label class="personal-ai-provider__priority">
+                <span>优先级</span>
+                <CrumbNumber
+                  :model-value="provider.priority"
+                  :min="0"
+                  :max="10000"
+                  :step="1"
+                  :disabled="Boolean(actionKey)"
+                  label="优先级"
+                  @update:model-value="updatePriority(provider, $event)"
+                />
+              </label>
+              <div class="personal-ai-provider__actions">
+                <DivButton class="button-secondary" type="button" @click="openEdit(provider)">编辑</DivButton>
+                <DivButton class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
+                  {{ provider.enabled ? '停用' : '启用' }}
+                </DivButton>
+                <DivButton class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</DivButton>
+              </div>
+            </article>
+          </div>
+        </section>
+      </template>
 
       <AiMemoryPanel />
 
@@ -282,6 +360,7 @@ onMounted(() => {
         <AiProviderForm
           compact
           :provider="editingProvider"
+          :default-kind="formKind"
           :saving="saving"
           :error="saveError"
           :can-fetch-models="true"
