@@ -40,11 +40,6 @@ const scroller = ref<HTMLElement | null>(null)
 /** Whether the talk is long enough to scroll; only then does it fade. */
 const scrollable = ref(false)
 
-/** The line the learner is writing right now, and the one they said before. */
-const learnerLines = computed(() =>
-  turns.value.filter((turn) => turn.speaker === 'learner').map((turn) => turn.line),
-)
-
 const topic = computed(() => props.question.topic ?? '')
 const topicZh = computed(() => props.question.topicZh ?? '')
 const roleName = computed(() => props.question.role ?? '对话伙伴')
