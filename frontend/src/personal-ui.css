@@ -310,9 +310,9 @@ body {
   font-weight: 750;
   line-height: 1.3;
 }
-.personal-workspace [role="button"] { background: var(--ui-forest); color: #fff; }
+.personal-workspace [role="button"] { background: var(--ui-forest); color: var(--g-on-green); }
 .personal-workspace [role="button"]:hover,
-.personal-workspace .button:hover { background: #103d31; }
+.personal-workspace .button:hover { background: var(--g-green-edge); }
 .personal-workspace .button-secondary,
 .personal-workspace [role="button"].button-secondary {
   border: 1px solid var(--ui-line);
@@ -620,7 +620,7 @@ body {
   border-top: 1px solid var(--ui-line);
 }
 .personal-workspace .challenge-self-study h2 { font-size: 1.15rem; }
-.personal-workspace .workspace-shell .challenge-self-study__card {
+.personal-workspace.workspace-shell .challenge-self-study__card {
   min-height: 72px;
   padding: var(--ui-space-3) var(--ui-space-4);
   border: 1px solid var(--ui-line);
@@ -659,7 +659,7 @@ body {
   border-radius: 12px;
   background: var(--ui-surface);
 }
-.personal-workspace .workspace-shell .ia-tab {
+.personal-workspace.workspace-shell .ia-tab {
   min-height: var(--ui-control);
   padding: 10px 14px;
   border: 1px solid transparent;
@@ -668,7 +668,7 @@ body {
   font-size: 0.88rem;
   white-space: nowrap;
 }
-.personal-workspace .workspace-shell .ia-tab--active {
+.personal-workspace.workspace-shell .ia-tab--active {
   border-color: var(--ui-line-strong);
   background: var(--ui-gold-soft);
   color: var(--ui-ink);

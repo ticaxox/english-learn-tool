@@ -22,6 +22,13 @@ html[data-theme='night'] .personal-workspace {
   --game-ink: #e8dcf5;
   --game-paper: #251a44;
   --game-shadow: 0 6px 0 rgb(8 3 20 / 55%);
+  /* The deep gold is an ink on the warm day paper; on the violet night paper it
+   * lands at 4.26:1 on an 11px kicker. Night lifts it to the gold the rest of
+   * the night surface uses. */
+  --game-gold-deep: #ffd166;
+  --game-forest: #5fd39a;
+  --game-forest-soft: #1c3b33;
+  --game-line: #3d2c66;
 }
 
 html[data-theme='night'] .personal-workspace .game-hud {
@@ -484,7 +491,7 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   padding: 12px 14px;
   border: 1.5px dashed var(--game-line, #e8d7bb);
   border-radius: 14px;
-  background: rgb(255 250 240 / 85%);
+  background: color-mix(in srgb, var(--ui-surface-subtle) 85%, transparent);
 }
 
 .personal-workspace .crumb-tip p { margin: 0; color: var(--ui-muted); font-size: 13px; line-height: 1.5; }

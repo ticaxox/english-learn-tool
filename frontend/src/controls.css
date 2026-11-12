@@ -3075,7 +3075,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   font: 800 26px/1.28 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
-.personal-workspace .crumb-merged-title b { color: var(--ui-accent-ink, #2f6e33); }
+.personal-workspace .crumb-merged-title b { color: var(--ui-forest); }
 .personal-workspace .crumb-merged-actions { display: flex; align-items: center; gap: 14px; margin: 12px 0 10px; }
 .personal-workspace .crumb-merged-count { font-size: 12px; color: var(--ui-muted); }
 .personal-workspace .crumb-merged-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
@@ -4464,7 +4464,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   padding: 3px 9px 3px 6px;
   border-radius: 999px;
   background: var(--g-orange-soft);
-  color: #9a4a00;
+  color: var(--g-on-orange-soft);
   font-size: 0.72rem;
   font-weight: 900;
   white-space: nowrap;
@@ -4815,7 +4815,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 }
 
 .personal-workspace .badge__foot {
-  color: var(--badge-accent, var(--g-gold-edge));
+  color: var(--badge-accent, var(--g-on-gold-soft));
   font-size: 0.64rem;
   font-weight: 900;
   letter-spacing: 0.02em;
@@ -4858,7 +4858,7 @@ html[data-theme='night'] .personal-workspace .badge__face--stone .badge__plate {
 html[data-theme='night'] .personal-workspace .badge__face--stone .badge__glyph { stroke: #8c7dad; }
 html[data-theme='night'] .personal-workspace .badge__lock { background: #4a3d6b; }
 html[data-theme='night'] .personal-workspace .badge.is-locked .badge__name { color: #9a8cb8; }
-html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { color: #8577a3; }
+html[data-theme='night'] .personal-workspace .badge.is-locked .badge__foot { color: var(--ui-muted); }
 
 /* ------------------------------------------------------------ badge dies */
 
