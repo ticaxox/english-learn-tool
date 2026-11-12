@@ -9,7 +9,7 @@
 export type Mode = 'day' | 'night'
 export type ThemeMode = Readonly<Record<Mode, string>>
 
-/** The seven practice types. Keys match PRACTICE_TYPE_LABELS plus the three memory modules. */
+/** Every practice type that has a painted cover: five AI exercise types plus the three memory modules. */
 export type PracticeArt = Readonly<Record<string, ThemeMode>>
 
 import flashcardDay from './book/book-flashcard-day.png'
@@ -26,6 +26,8 @@ import translationDay from './book/book-translation-day.png'
 import translationNight from './book/book-translation-night.png'
 import writingDay from './book/book-writing-day.png'
 import writingNight from './book/book-writing-night.png'
+import conversationDay from './book/book-conversation-day.png'
+import conversationNight from './book/book-conversation-night.png'
 
 /** Keyed by the product's own type names; `cloze` is the file name for fill-blank. */
 export const practiceBooks: PracticeArt = {
@@ -36,6 +38,7 @@ export const practiceBooks: PracticeArt = {
   reading: { day: readingDay, night: readingNight },
   translation: { day: translationDay, night: translationNight },
   writing: { day: writingDay, night: writingNight },
+  conversation: { day: conversationDay, night: conversationNight },
 }
 
 import slabBiscuit from './card/slab-biscuit.png'
