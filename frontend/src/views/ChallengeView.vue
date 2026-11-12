@@ -5,6 +5,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 const props = defineProps<{ embedded?: boolean }>()
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import CrumbIcon from '../components/ui/CrumbIcon.vue'
 import GameHud from '../components/GameHud.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -368,7 +369,7 @@ onMounted(() => {
         <section class="dialog-card challenge-node-dialog" role="dialog" aria-modal="true" aria-labelledby="challenge-node-dialog-title">
         <div class="challenge-node-detail__heading">
           <div><p class="eyebrow">{{ CHALLENGE_NODE_LABELS[selectedNode.node.nodeType] }}</p><h2 id="challenge-node-dialog-title">{{ selectedNode.node.title }}</h2></div>
-          <DivButton class="icon-button" type="button" aria-label="关闭" @click="selectedNode = null">×</DivButton>
+          <DivButton class="icon-button" type="button" aria-label="关闭" @click="selectedNode = null"><CrumbIcon name="close" :size="18" /></DivButton>
         </div>
         <p>{{ selectedNode.node.description }}</p>
         <p v-if="selectedNode.node.status === 'locked'" class="inline-note">完成前一个节点后解锁。</p>

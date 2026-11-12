@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import CrumbNumber from '../components/ui/CrumbNumber.vue'
 import NotificationStatePanel from '../components/NotificationStatePanel.vue'
 import {
   fetchNotificationPreferences,
@@ -196,14 +197,13 @@ onMounted(() => {
 
         <div class="field notification-daily-limit">
           <label for="notification-daily-limit">每日非 AI 通知上限</label>
-          <input
+          <CrumbNumber
             id="notification-daily-limit"
-            v-model.number="draft.dailyLimit"
-            type="number"
-            min="0"
-            max="20"
-            step="1"
-            required
+            v-model="draft.dailyLimit"
+            :min="0"
+            :max="20"
+            :step="1"
+            label="每日非 AI 通知上限"
           />
           <p class="field-hint">0 表示当天不发送非 AI 通知。</p>
         </div>

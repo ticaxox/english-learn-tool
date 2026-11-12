@@ -11,6 +11,7 @@ import {
   type Wordbook,
 } from '../api/wordbooks'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import CrumbSearch from '../components/ui/CrumbSearch.vue'
 import LoadingState from '../components/LoadingState.vue'
 import WordbookDeleteDialog from '../components/WordbookDeleteDialog.vue'
 import WordbookDetailDialog from '../components/WordbookDetailDialog.vue'
@@ -222,15 +223,13 @@ onMounted(() => {
       <div class="wordbook-toolbar">
         <h2 class="wordbook-toolbar-heading">{{ filterActive ? '搜索结果' : '词书书架' }}</h2>
 
-        <label class="wordbook-search">
-          <span class="sr-only">搜索全部个人词书</span>
-          <input
-            v-model="filters.search"
-            type="search"
-            placeholder="搜索词书"
-            autocomplete="off"
-          />
-        </label>
+        <CrumbSearch
+          v-model="filters.search"
+          class="wordbook-search"
+          label="搜索全部个人词书"
+          placeholder="搜索词书"
+        />
+        <span class="sr-only">个人词书</span>
 
         <span class="count-pill">{{ filterActive ? `${filteredBooks.length} 个结果` : `${personalBookCount} 本` }}</span>
 

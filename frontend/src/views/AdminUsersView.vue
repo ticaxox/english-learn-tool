@@ -21,6 +21,8 @@ import {
 } from '../api/admin-users'
 import { isApiError } from '../api/errors'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import CrumbSearch from '../components/ui/CrumbSearch.vue'
+import CrumbFile from '../components/ui/CrumbFile.vue'
 import LoadingState from '../components/LoadingState.vue'
 import { validateStrongPassword, validateUsername } from '../lib/validation'
 
@@ -75,7 +77,7 @@ const actionError = ref<unknown>(null)
 const deleteConfirmation = ref('')
 const selectedRole = ref<AdminUserRole>('member')
 
-const fileInput = ref<HTMLInputElement | null>(null)
+const importFile = ref<InstanceType<typeof CrumbFile> | null>(null)
 const selectedFile = ref<File | null>(null)
 const fileError = ref<unknown>(null)
 const previewLoading = ref(false)
@@ -423,9 +425,7 @@ async function confirmAction(): Promise<void> {
   }
 }
 
-function onFileChange(event: Event): void {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0] ?? null
+function onFileChange(file: File | null): void {
   selectedFile.value = file
   preview.value = null
   importResult.value = null
@@ -439,13 +439,13 @@ function onFileChange(event: Event): void {
   if (!file.name.toLowerCase().endsWith('.csv')) {
     fileError.value = new Error('请选择 CSV 文件。')
     selectedFile.value = null
-    input.value = ''
+    importFile.value?.reset()
     return
   }
   if (file.size > 1_000_000) {
     fileError.value = new Error('CSV 文件不能超过 1 MB。')
     selectedFile.value = null
-    input.value = ''
+    importFile.value?.reset()
   }
 }
 
@@ -500,9 +500,7 @@ async function confirmImport(): Promise<void> {
     }
     preview.value = null
     selectedFile.value = null
-    if (fileInput.value) {
-      fileInput.value.value = ''
-    }
+    importFile.value?.reset()
     await loadUsers()
 
     try {
@@ -731,11 +729,10 @@ onMounted(() => loadUsers(null))
       <form class="filter-bar" role="search" @submit.prevent="applyFilters">
         <div class="field filter-bar__search">
           <label for="member-search">搜索</label>
-          <input
+          <CrumbSearch
             id="member-search"
             v-model="filters.search"
-            type="search"
-            autocomplete="off"
+            label="搜索用户"
             placeholder="用户名或显示名称"
           />
         </div>
@@ -857,15 +854,16 @@ onMounted(() => loadUsers(null))
       <div class="import-picker">
         <label class="field">
           <span>选择 CSV 文件</span>
-          <input
-            ref="fileInput"
-            type="file"
+          <CrumbFile
+            ref="importFile"
+            :file-name="selectedFile?.name ?? null"
             accept=".csv,text/csv"
             :disabled="previewLoading || importConfirming"
+            label="选择要导入的成员 CSV"
+            hint="CSV，表头见上方说明"
             @change="onFileChange"
           />
         </label>
-        <span v-if="selectedFile" class="file-chip">{{ selectedFile.name }}</span>
         <DivButton type="button" :disabled="!selectedFile || previewLoading" @click="requestPreview">
           {{ previewLoading ? '正在预览…' : '上传并预览' }}
         </DivButton>

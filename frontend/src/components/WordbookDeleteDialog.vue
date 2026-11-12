@@ -9,6 +9,7 @@ import {
 } from '../api/wordbooks'
 import { useDialogA11y } from '../composables/useDialogA11y'
 import ErrorNotice from './ErrorNotice.vue'
+import CrumbIcon from './ui/CrumbIcon.vue'
 
 const props = defineProps<{
   wordbook: Wordbook
@@ -156,7 +157,7 @@ onUnmounted(() => {
           <p class="eyebrow">危险操作 · 后台清理</p>
           <h2 id="wordbook-delete-title">删除「{{ props.wordbook.name }}」</h2>
         </div>
-        <DivButton class="icon-button" type="button" aria-label="关闭删除窗口" :disabled="submitting" @click="close">×</DivButton>
+        <DivButton class="icon-button" type="button" aria-label="关闭删除窗口" :disabled="submitting" @click="close"><CrumbIcon name="close" :size="18" /></DivButton>
       </header>
 
       <div class="alert alert-warning">

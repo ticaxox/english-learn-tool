@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppIcon from '../components/AppIcon.vue'
+import CrumbIcon from '../components/ui/CrumbIcon.vue'
 import CoachImage from '../components/CoachImage.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
@@ -270,7 +271,7 @@ onBeforeUnmount(() => {
               type="button"
               :aria-label="`删除 ${conversation.title}`"
               @click="removeConversation(conversation.id)"
-            >×</DivButton>
+            ><CrumbIcon name="remove" :size="18" /></DivButton>
           </li>
         </ul>
         <DivButton
@@ -431,7 +432,7 @@ onBeforeUnmount(() => {
                   type="button"
                   :aria-label="`移除 ${item.filename}`"
                   @click="removeAttachment(index)"
-                >×</DivButton>
+                ><CrumbIcon name="remove" :size="16" /></DivButton>
               </figure>
             </div>
             <div class="coach-composer__footer">
