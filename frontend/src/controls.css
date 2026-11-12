@@ -114,8 +114,10 @@
  * matches the specificity of the rule in game-ui.css that this one replaces,
  * and without it that older rule keeps winning for inputs (whose selector
  * carries the extra clause) while losing for selects — which is how the
- * dropdown ended up with a different border from the time field beside it. */
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell),
+ * dropdown ended up with a different border from the time field beside it.
+ * The stepper's own input is excluded for the same reason: the wrapper draws
+ * that field, and a box painted inside it reads as a control inside a control. */
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell):not(.crumb-stepper__input),
 .personal-workspace textarea,
 .personal-workspace select {
   border: 2px solid var(--ui-line-strong);
