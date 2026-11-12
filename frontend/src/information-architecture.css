@@ -39,7 +39,7 @@
   padding: 7px;
   border: 2px solid var(--crumb-cocoa);
   border-radius: 10px 16px 8px 14px;
-  background: var(--crumb-cream);
+  background: var(--crumb-paper);
   box-shadow: 4px 4px 0 var(--crumb-parchment-deep);
 }
 .ia-profile-summary {
@@ -102,7 +102,7 @@
   gap: 14px;
   padding: 10px 16px;
   border-bottom: 2px solid var(--crumb-forest);
-  background: var(--crumb-cream);
+  background: var(--crumb-paper);
 }
 .ia-coach-panel-header p { margin: 0; color: #7a5a49; font-size: 10px; font-weight: 750; letter-spacing: 0.08em; }
 .ia-coach-panel-header h2 { margin: 0; color: var(--crumb-cocoa); font-size: 18px; }
@@ -211,7 +211,7 @@
   padding: 18px;
   border: 2px solid var(--crumb-forest);
   border-radius: 9px 20px 8px 17px;
-  background: var(--crumb-cream);
+  background: var(--crumb-paper);
 }
 .challenge-self-study > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
 .challenge-self-study h2 { margin: 0; color: var(--crumb-cocoa); font-size: 20px; }

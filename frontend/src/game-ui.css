@@ -38,9 +38,11 @@
   /* What sits on a saturated face. Night redefines these for its lighter
    * greens and oranges. */
   --g-on-green: #fff;
-  --g-on-green-soft: #1f8a30;
+  --g-on-green-soft: #14431f;
   --g-on-orange: #3a2410;
+  --g-on-orange-soft: #9a4a00;
   --g-on-gold: #3a2410;
+  --g-on-gold-soft: #8a6a12;
 
   --crumb-forest: #2f8a4c;
   --crumb-pumpkin: #ff9600;
@@ -108,7 +110,11 @@ html[data-theme='night'] .personal-workspace {
    * glare out of a violet room. */
   --crumb-parchment: #2f2156;
   --crumb-parchment-deep: #3d2c66;
-  --crumb-cream: #271a49;
+  /* Cream stays light: it is the ink on dark-green chips far more often than
+   * it is a ground. The panels that paint with it use --crumb-paper instead,
+   * which is the one that follows the room. */
+  --crumb-cream: #fff8e8;
+  --crumb-paper: #271a49;
 
   /* The older workspace token family is defined once on :root and never had a
    * night counterpart either, so 100-odd rules that read --workspace-ink or
@@ -135,7 +141,9 @@ html[data-theme='night'] .personal-workspace {
   --g-on-green: #14240f;
   --g-on-green-soft: #8fe6bc;
   --g-on-orange: #2a1405;
+  --g-on-orange-soft: #ffb26b;
   --g-on-gold: #2a2005;
+  --g-on-gold-soft: #ffd166;
 
   /* personal-ui.css derives these from --crumb-* on :root, so they resolve to
    * the DAY crumb values before .personal-workspace is ever reached - custom
