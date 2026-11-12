@@ -1344,6 +1344,13 @@ html[data-theme='night'] .personal-workspace .member-table tbody tr:hover .membe
 html[data-theme='night'] .personal-workspace .field input,
 html[data-theme='night'] .personal-workspace .field textarea,
 html[data-theme='night'] .personal-workspace .field select { background: #2d2149; }
+
+/* The settings form draws one field surface: a dropdown sat on #2d2149 while
+ * the stepper and the time field beside it sat on the page surface. */
+html[data-theme='night'] .personal-workspace .settings-form .field input,
+html[data-theme='night'] .personal-workspace .settings-form .field textarea,
+html[data-theme='night'] .personal-workspace .settings-form .field select,
+html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper { background: var(--ui-surface); }
 html[data-theme='night'] .personal-workspace .field input:disabled { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .alert-success { background: #2d2149; color: #98e1c4; }
 html[data-theme='night'] .personal-workspace .inline-note { background: #2d2149; color: #b7a6cf; }
@@ -1411,12 +1418,15 @@ html[data-theme='night'] .personal-workspace .crumb-ai-note {
   background: #24331f;
 }
 
-/* Forms. */
-html[data-theme='night'] .personal-workspace input:not([type='checkbox']):not([type='radio']),
+/* Forms. The border stays on the shared token so a field, the stepper that
+ * wraps one, and the dropdown beside it all draw the same line at night. */
+html[data-theme='night'] .personal-workspace input:not([type='checkbox']):not([type='radio']):not(.spelling-cell),
 html[data-theme='night'] .personal-workspace textarea,
 html[data-theme='night'] .personal-workspace select {
-  background: #241a3d;
-  border-color: #4a3a70;
+  /* The same surface as the stepper: two fields in one row used to sit on
+   * #241a3d, #2d2149 and #271a49 at once. */
+  background: var(--ui-surface);
+  border-color: var(--ui-line-strong);
 }
 
 html[data-theme='night'] .personal-workspace .field input:disabled,

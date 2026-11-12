@@ -110,10 +110,15 @@
 
 /* --------------------------------------------------------- inputs + selects */
 
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]),
+/* One border for every field. The `:not(.spelling-cell)` is not decoration: it
+ * matches the specificity of the rule in game-ui.css that this one replaces,
+ * and without it that older rule keeps winning for inputs (whose selector
+ * carries the extra clause) while losing for selects — which is how the
+ * dropdown ended up with a different border from the time field beside it. */
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell),
 .personal-workspace textarea,
 .personal-workspace select {
-  border: 1.5px solid var(--ui-line-strong);
+  border: 2px solid var(--ui-line-strong);
   border-radius: 12px;
   background-color: var(--ui-surface);
   box-shadow: inset 0 2px 0 rgb(59 42 26 / 5%);
@@ -287,6 +292,14 @@
 .personal-workspace input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
   appearance: none;
+}
+
+/* The date and time fields are the one input the browser insists on sizing
+ * itself: its clock button sits inside the line box and makes the field a
+ * pixel taller than the select beside it. Pin the height to the control token. */
+.personal-workspace input[type="date"],
+.personal-workspace input[type="time"] {
+  height: var(--ui-control);
 }
 
 /* The calendar and clock icons are the OS's. Swap the drawing, keep the picker. */
@@ -2475,9 +2488,12 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   border-top-right-radius: 0 !important;
 }
 
-/* Settings: tighter goal columns, bolder estimate, one-line keys. */
+/* Settings: tighter goal columns, bolder estimate, one-line keys.
+ * The columns are fractional rather than `max-content`: the second field
+ * carries a stepper and an estimate chip, and sized to its own content it
+ * pushed both past the panel's right edge. */
 .personal-workspace .settings-form fieldset.settings-goal-grid {
-  grid-template-columns: repeat(2, max-content);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px 20px;
 }
 
@@ -3171,10 +3187,13 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   box-shadow: inset 0 0 0 2px #b3261e;
 }
 
-/* Learning settings: both rows share one column grid, so the boxes line up. */
+/* Learning settings: both rows share one column grid, so the boxes line up.
+ * The second column is fractional, not `max-content`: sized to its own content
+ * it is wider than the panel, and both the stepper's estimate chip and the
+ * time field were drawn hanging past the card's right edge. */
 .personal-workspace .settings-form fieldset.settings-goal-grid,
 .personal-workspace .settings-pair {
-  grid-template-columns: 344px max-content;
+  grid-template-columns: 344px minmax(0, 1fr);
   gap: 18px 32px;
   justify-content: start;
 }
@@ -3184,6 +3203,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 .personal-workspace .settings-goal-grid .field,
 .personal-workspace .settings-pair > .field--inline {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
 }
