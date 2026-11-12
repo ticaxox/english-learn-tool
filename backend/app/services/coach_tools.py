@@ -18,6 +18,7 @@ from app.models.identity import User
 from app.services.coach import apply_coach_tool
 from app.services.practice_authoring import AuthoredPracticeRequest, create_authored_practice
 
+# What the AI generator can be asked for.
 PRACTICE_TYPES = [
     "fill_blank",
     "reading",
@@ -25,6 +26,10 @@ PRACTICE_TYPES = [
     "writing",
     "conversation",
 ]
+# What a caller can write out by hand. A conversation is a whole dialogue with
+# a topic and a character; the authoring path has no shape for it yet, so it is
+# not offered there — offering it would only fail on the way in.
+AUTHORABLE_PRACTICE_TYPES = ["fill_blank", "reading", "translation", "writing"]
 PRACTICE_SOURCES = ["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 DIFFICULTIES = ["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
 
@@ -88,7 +93,7 @@ TOOL_SPECS: dict[str, dict[str, Any]] = {
         "inputSchema": {
             "type": "object",
             "properties": {
-                "practice_type": {"type": "string", "enum": PRACTICE_TYPES},
+                "practice_type": {"type": "string", "enum": AUTHORABLE_PRACTICE_TYPES},
                 "items": {
                     "type": "array",
                     "minItems": 1,

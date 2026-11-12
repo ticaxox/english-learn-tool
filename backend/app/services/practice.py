@@ -1465,9 +1465,13 @@ async def list_practice_events(
     )
 
 
-def _citation_text(citation: int | None, snippets: list[str]) -> str | None:
-    """The passage a citation points at, as "[n] title"."""
-    if citation is None or citation < 1 or citation > len(snippets):
+def _citation_text(citation: int | None, snippets: list[str] | None) -> str | None:
+    """The passage a citation points at, as "[n] title".
+
+    Hand-written practice carries no retrieved passages, so a citation there
+    has nothing to point at and is dropped rather than crashing the caller.
+    """
+    if citation is None or not snippets or citation < 1 or citation > len(snippets):
         return None
     snippet = snippets[citation - 1]
     title = snippet.split("\n", 1)[0].strip()

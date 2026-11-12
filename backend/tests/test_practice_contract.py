@@ -60,3 +60,15 @@ def test_difficulty_practice_allows_empty_target_entry_ids() -> None:
     )
     assert result["practice_type"] == "fill_blank"
     assert summary["item_count"] == 3
+
+
+def test_a_citation_without_passages_is_dropped_not_crashed() -> None:
+    # Hand-written practice carries no retrieved passages, so the citation
+    # helper must survive having none.
+    from app.services.practice import _citation_text
+
+    assert _citation_text(1, None) is None
+    assert _citation_text(1, []) is None
+    assert _citation_text(None, ["[1] A passage"]) is None
+    assert _citation_text(2, ["[1] A passage"]) is None
+    assert _citation_text(1, ["[1] A passage\nbody"]) == "[1] A passage"
