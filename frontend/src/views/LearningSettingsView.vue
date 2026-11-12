@@ -10,6 +10,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import CrumbNumber from '../components/ui/CrumbNumber.vue'
+import CrumbTime from '../components/ui/CrumbTime.vue'
 import LoadingState from '../components/LoadingState.vue'
 import { useToast } from '../composables/useToast'
 import ContractGate from '../components/ContractGate.vue'
@@ -77,8 +78,8 @@ function togglePref(key: 'drillModes' | 'practiceTypes', value: string): void {
 }
 
 const challengeTime = computed({
-  get: () => form.challengeGenerationTime ?? '',
-  set: (value: string) => {
+  get: () => form.challengeGenerationTime ?? null,
+  set: (value: string | null) => {
     form.challengeGenerationTime = value || null
   },
 })
@@ -387,7 +388,11 @@ onMounted(() => {
 
           <div class="field field--inline">
             <label for="challenge-generation-time">学习地图生成时间</label>
-            <input id="challenge-generation-time" v-model="challengeTime" type="time" />
+            <CrumbTime
+              id="challenge-generation-time"
+              v-model="challengeTime"
+              label="学习地图生成时间"
+            />
           </div>
         </div>
 
