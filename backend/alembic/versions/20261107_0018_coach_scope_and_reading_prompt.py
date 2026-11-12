@@ -8,6 +8,7 @@ Create Date: 2026-11-07
 from collections.abc import Sequence
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "20261107_0018"
@@ -26,13 +27,9 @@ _SUFFIX = (
 def upgrade() -> None:
     op.add_column(
         "coach_conversations",
-        sa.Column(
-            "scope", sa.String(length=16), nullable=False, server_default=sa.text("'panel'")
-        ),
+        sa.Column("scope", sa.String(length=16), nullable=False, server_default=sa.text("'panel'")),
     )
-    op.create_check_constraint(
-        "scope_valid", "coach_conversations", "scope IN ('panel', 'page')"
-    )
+    op.create_check_constraint("scope_valid", "coach_conversations", "scope IN ('panel', 'page')")
     op.execute(
         "UPDATE ai_prompts SET template = template || '"
         + _SUFFIX

@@ -117,9 +117,7 @@ async def _handle(
                 arguments if isinstance(arguments, dict) else None,
             )
         except AppError as exc:
-            detail = json.dumps(
-                {"code": exc.code, "message": exc.message}, ensure_ascii=False
-            )
+            detail = json.dumps({"code": exc.code, "message": exc.message}, ensure_ascii=False)
             return _result(
                 identifier,
                 {"content": [{"type": "text", "text": detail}], "isError": True},
@@ -161,9 +159,7 @@ async def mcp_endpoint(
     if isinstance(payload, list):
         replies = [
             reply
-            for reply in [
-                await _handle(item, request, session, user) for item in payload
-            ]
+            for reply in [await _handle(item, request, session, user) for item in payload]
             if reply is not None
         ]
         if not replies:

@@ -127,9 +127,7 @@ async def list_conversations_endpoint(
     cursor: str | None = None,
     scope: Annotated[Literal["panel", "page"], Query()] = "panel",
 ) -> CoachConversationListResponse:
-    return await list_conversations(
-        session, context.user, limit=limit, cursor=cursor, scope=scope
-    )
+    return await list_conversations(session, context.user, limit=limit, cursor=cursor, scope=scope)
 
 
 @router.post(
@@ -200,9 +198,7 @@ async def upload_attachment_endpoint(
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> CoachAttachmentResponse:
     settings: Settings = request.app.state.settings
-    return await add_coach_attachment(
-        session, settings, context.user, conversation_id, file
-    )
+    return await add_coach_attachment(session, settings, context.user, conversation_id, file)
 
 
 @router.get(

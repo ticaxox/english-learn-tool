@@ -174,10 +174,12 @@ async def call_coach_tool(
         }
     if spec.get("handler") == "authoring":
         try:
-            output = AuthoredPracticeRequest.model_validate({
-                "practice_type": (arguments or {}).get("practice_type"),
-                "items": (arguments or {}).get("items"),
-            })
+            output = AuthoredPracticeRequest.model_validate(
+                {
+                    "practice_type": (arguments or {}).get("practice_type"),
+                    "items": (arguments or {}).get("items"),
+                }
+            )
         except ValidationError as exc:
             raise AppError(
                 status_code=422,

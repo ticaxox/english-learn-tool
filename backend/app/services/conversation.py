@@ -53,9 +53,7 @@ def _conversation_question(questions: list[PracticeQuestion]) -> PracticeQuestio
     return None
 
 
-async def _turns(
-    session: AsyncSession, session_id: UUID
-) -> list[PracticeConversationTurn]:
+async def _turns(session: AsyncSession, session_id: UUID) -> list[PracticeConversationTurn]:
     return list(
         (
             await session.scalars(
@@ -83,10 +81,7 @@ def _history_for_guide(
     turns: list[PracticeConversationTurn],
 ) -> list[dict[str, str]]:
     """The talk so far, oldest first, in the shape the guide reads it."""
-    return [
-        {"speaker": turn.speaker, "line": turn.line}
-        for turn in turns[-HISTORY_WINDOW:]
-    ]
+    return [{"speaker": turn.speaker, "line": turn.line} for turn in turns[-HISTORY_WINDOW:]]
 
 
 async def list_conversation_turns(

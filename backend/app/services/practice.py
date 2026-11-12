@@ -104,9 +104,7 @@ async def _entry_headwords(session: AsyncSession, entry_ids: list[UUID]) -> list
         return []
     rows = (
         await session.execute(
-            select(WordbookEntry.id, WordbookEntry.headword).where(
-                WordbookEntry.id.in_(entry_ids)
-            )
+            select(WordbookEntry.id, WordbookEntry.headword).where(WordbookEntry.id.in_(entry_ids))
         )
     ).all()
     by_id = {entry_id: headword for entry_id, headword in rows}
@@ -138,9 +136,7 @@ async def _knowledge_snippets(
     except Exception:  # noqa: BLE001 - retrieval must never block generation
         logger.warning("practice.knowledge_search_failed", exc_info=True)
         return []
-    return [
-        f"[{index + 1}] {hit.title}\n{hit.content}" for index, hit in enumerate(hits)
-    ]
+    return [f"[{index + 1}] {hit.title}\n{hit.content}" for index, hit in enumerate(hits)]
 
 
 def _article_range(
@@ -485,9 +481,7 @@ async def create_practice_session(
         settings, payload.practice_type, payload.count
     )
     target_words = await _entry_headwords(session, target_entry_ids)
-    knowledge_snippets = await _knowledge_snippets(
-        session, settings, payload, target_words
-    )
+    knowledge_snippets = await _knowledge_snippets(session, settings, payload, target_words)
     generation_request = PracticeGenerationRequest(
         task_type="practice_generation",
         context=PracticeGenerationContext(
@@ -1597,9 +1591,7 @@ def question_rows(
     return questions
 
 
-async def _attach_target_words(
-    session: AsyncSession, questions: list[PracticeQuestion]
-) -> None:
+async def _attach_target_words(session: AsyncSession, questions: list[PracticeQuestion]) -> None:
     """Copy the headwords behind each question's target entries into its public payload."""
     wanted = {entry for question in questions for entry in question.target_entry_ids}
     if not wanted:

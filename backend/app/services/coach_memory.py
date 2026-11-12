@@ -267,8 +267,7 @@ async def profile_snapshot(session: AsyncSession, user: User) -> str:
     if config is not None:
         challenge = (config.preferences or {}).get("challenge") or {}
         types = [
-            CHALLENGE_TYPE_LABELS.get(item, item)
-            for item in challenge.get("practiceTypes", [])
+            CHALLENGE_TYPE_LABELS.get(item, item) for item in challenge.get("practiceTypes", [])
         ]
         drills = [DRILL_LABELS.get(item, item) for item in challenge.get("drillModes", [])]
         enabled = [

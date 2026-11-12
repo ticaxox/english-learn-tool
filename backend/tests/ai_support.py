@@ -74,9 +74,7 @@ def practice_context(*, count: int = 3) -> tuple[dict[str, Any], list[str]]:
     )
 
 
-def practice_output(
-    entry_ids: list[str], words: list[str] | None = None
-) -> dict[str, Any]:
+def practice_output(entry_ids: list[str], words: list[str] | None = None) -> dict[str, Any]:
     words = words or ["word"] * len(entry_ids)
     items = []
     for index, entry_id in enumerate(entry_ids):

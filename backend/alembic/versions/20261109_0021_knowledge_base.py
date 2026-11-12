@@ -8,8 +8,9 @@ Create Date: 2026-11-09
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision: str = "20261109_0021"
 down_revision: str | Sequence[str] | None = "20261109_0020"
@@ -23,7 +24,9 @@ def upgrade() -> None:
     op.create_table(
         "knowledge_documents",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column("source_type", sa.String(length=16), nullable=False, server_default=sa.text("'exam'")),
+        sa.Column(
+            "source_type", sa.String(length=16), nullable=False, server_default=sa.text("'exam'")
+        ),
         sa.Column("title", sa.String(length=200), nullable=False),
         sa.Column(
             "metadata_json",
@@ -31,12 +34,18 @@ def upgrade() -> None:
             nullable=False,
             server_default=sa.text("'{}'::jsonb"),
         ),
-        sa.Column("status", sa.String(length=16), nullable=False, server_default=sa.text("'draft'")),
+        sa.Column(
+            "status", sa.String(length=16), nullable=False, server_default=sa.text("'draft'")
+        ),
         sa.Column("chunk_count", sa.Integer(), nullable=False, server_default=sa.text("0")),
         sa.Column("embedding_model", sa.String(length=120)),
         sa.Column("error_message", sa.String(length=500)),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.CheckConstraint("source_type IN ('exam', 'wordbook')", name="source_type_valid"),
         sa.CheckConstraint(
             "status IN ('draft', 'indexing', 'ready', 'failed', 'archived')", name="status_valid"
@@ -59,11 +68,11 @@ def upgrade() -> None:
         sa.Column("ordinal", sa.Integer(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("embedding", postgresql.ARRAY(sa.Float())),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
     )
-    op.create_index(
-        "ix_knowledge_chunks_document", "knowledge_chunks", ["document_id", "ordinal"]
-    )
+    op.create_index("ix_knowledge_chunks_document", "knowledge_chunks", ["document_id", "ordinal"])
 
 
 def downgrade() -> None:

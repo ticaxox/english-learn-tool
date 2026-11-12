@@ -146,9 +146,7 @@ class ChallengeNodeProgress(Base):
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # 1 completed, 2 completed without a wrong answer, 3 a flawless boss.
-    stars: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default=text("0")
-    )
+    stars: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default=text("0"))
     memory_session_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("memory_sessions.id", ondelete="SET NULL")
     )

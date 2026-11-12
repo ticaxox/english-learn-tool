@@ -16,8 +16,9 @@ from collections.abc import Sequence
 from uuid import UUID
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision: str = "20261112_0028"
 down_revision: str | Sequence[str] | None = "20261110_0027"
@@ -25,9 +26,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 # A session may be mixed; a stored question never is.
-_SESSION_TYPES = (
-    "'fill_blank', 'reading', 'translation', 'writing', 'conversation', 'mixed'"
-)
+_SESSION_TYPES = "'fill_blank', 'reading', 'translation', 'writing', 'conversation', 'mixed'"
 _OLD_SESSION_TYPES = "'fill_blank', 'reading', 'translation', 'writing', 'mixed'"
 _QUESTION_TYPES = "'fill_blank', 'reading', 'translation', 'writing', 'conversation'"
 _OLD_QUESTION_TYPES = "'fill_blank', 'reading', 'translation', 'writing'"
@@ -76,8 +75,7 @@ _TURN_SUMMARY = "Say the next line as the guide in an English conversation pract
 
 def upgrade() -> None:
     op.execute(
-        "ALTER TABLE practice_sessions "
-        "DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
+        "ALTER TABLE practice_sessions DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
     )
     op.execute(
         "ALTER TABLE practice_sessions ADD CONSTRAINT "
@@ -85,8 +83,7 @@ def upgrade() -> None:
         f"CHECK (practice_type IN ({_SESSION_TYPES}))"
     )
     op.execute(
-        "ALTER TABLE practice_questions "
-        "DROP CONSTRAINT ck_practice_questions_question_type_valid"
+        "ALTER TABLE practice_questions DROP CONSTRAINT ck_practice_questions_question_type_valid"
     )
     op.execute(
         "ALTER TABLE practice_questions ADD CONSTRAINT "
@@ -111,13 +108,16 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(
-            ["session_id"], ["practice_sessions.id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["session_id"], ["practice_sessions.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["ai_job_id"], ["ai_jobs.id"], ondelete="SET NULL"),
-        sa.CheckConstraint("speaker IN ('guide', 'learner')", name=op.f("ck_practice_conversation_turns_speaker_valid")),
-        sa.CheckConstraint("sequence >= 0", name=op.f("ck_practice_conversation_turns_sequence_nonnegative")),
+        sa.CheckConstraint(
+            "speaker IN ('guide', 'learner')",
+            name=op.f("ck_practice_conversation_turns_speaker_valid"),
+        ),
+        sa.CheckConstraint(
+            "sequence >= 0", name=op.f("ck_practice_conversation_turns_sequence_nonnegative")
+        ),
         sa.UniqueConstraint(
             "session_id",
             "sequence",
@@ -130,9 +130,7 @@ def upgrade() -> None:
         ["session_id", "created_at"],
     )
 
-    op.execute(
-        "ALTER TABLE ai_jobs DROP CONSTRAINT ck_ai_jobs_task_type_valid"
-    )
+    op.execute("ALTER TABLE ai_jobs DROP CONSTRAINT ck_ai_jobs_task_type_valid")
     op.execute(
         "ALTER TABLE ai_jobs ADD CONSTRAINT ck_ai_jobs_task_type_valid "
         "CHECK (task_type IN ('practice_generation', 'subjective_grading', "
@@ -215,8 +213,7 @@ def downgrade() -> None:
     )
     op.drop_table("practice_conversation_turns")
     op.execute(
-        "ALTER TABLE practice_questions "
-        "DROP CONSTRAINT ck_practice_questions_question_type_valid"
+        "ALTER TABLE practice_questions DROP CONSTRAINT ck_practice_questions_question_type_valid"
     )
     op.execute(
         "ALTER TABLE practice_questions ADD CONSTRAINT "
@@ -224,8 +221,7 @@ def downgrade() -> None:
         f"CHECK (question_type IN ({_OLD_QUESTION_TYPES}))"
     )
     op.execute(
-        "ALTER TABLE practice_sessions "
-        "DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
+        "ALTER TABLE practice_sessions DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
     )
     op.execute(
         "ALTER TABLE practice_sessions ADD CONSTRAINT "

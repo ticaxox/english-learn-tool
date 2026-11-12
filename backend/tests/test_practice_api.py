@@ -52,9 +52,7 @@ def _reading_output(entry_ids: list[str], words: list[str] | None = None) -> dic
     }
 
 
-def _translation_output(
-    entry_ids: list[str], words: list[str] | None = None
-) -> dict:
+def _translation_output(entry_ids: list[str], words: list[str] | None = None) -> dict:
     words = words or ["word"] * len(entry_ids)
     return {
         "practice_type": "translation",
@@ -94,9 +92,14 @@ def _mixed_output(entry_ids: list[str], words: list[str] | None = None) -> dict:
     reading = _reading_output(entry_ids, words)
     return {
         "practice_type": "mixed",
-        "items": [*fill["items"], {"id": "rp1", **{
-            key: value for key, value in reading["items"][0].items() if key != "questions"
-        }, "questions": reading["items"][0]["questions"][:1]}],
+        "items": [
+            *fill["items"],
+            {
+                "id": "rp1",
+                **{key: value for key, value in reading["items"][0].items() if key != "questions"},
+                "questions": reading["items"][0]["questions"][:1],
+            },
+        ],
     }
 
 
@@ -481,9 +484,7 @@ async def test_recent_sessions_are_listed_and_can_be_deleted(client, app, member
     assert all(item["id"] != fill["id"] for item in after.json()["items"])
 
 
-async def test_mixed_practice_grades_choice_questions_locally(
-    client, app, member_user
-) -> None:
+async def test_mixed_practice_grades_choice_questions_locally(client, app, member_user) -> None:
     headers = await login(client, member_user.username)
     wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=8)
     await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)

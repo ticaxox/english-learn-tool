@@ -201,9 +201,7 @@ async def award(
     )
 
 
-async def _quest_rows(
-    session: AsyncSession, user: User, day: date
-) -> dict[str, DailyQuest]:
+async def _quest_rows(session: AsyncSession, user: User, day: date) -> dict[str, DailyQuest]:
     targets = _quest_targets(user)
     rows = {
         row.quest_key: row
@@ -365,8 +363,7 @@ async def _counts(session: AsyncSession, user_id: UUID) -> dict[str, int]:
     # an early bird studies before the school day starts.
     night = int(
         await session.scalar(
-            select(func.count(XpEvent.id))
-            .where(
+            select(func.count(XpEvent.id)).where(
                 XpEvent.user_id == user_id,
                 func.extract("hour", XpEvent.created_at).in_((0, 1, 2, 3, 4, 5)),
             )
@@ -375,8 +372,7 @@ async def _counts(session: AsyncSession, user_id: UUID) -> dict[str, int]:
     )
     early = int(
         await session.scalar(
-            select(func.count(XpEvent.id))
-            .where(
+            select(func.count(XpEvent.id)).where(
                 XpEvent.user_id == user_id,
                 func.extract("hour", XpEvent.created_at).in_((5, 6, 7, 8)),
             )
@@ -393,9 +389,7 @@ async def _counts(session: AsyncSession, user_id: UUID) -> dict[str, int]:
     }
 
 
-async def evaluate_badges(
-    session: AsyncSession, settings: Settings, user: User
-) -> list[str]:
+async def evaluate_badges(session: AsyncSession, settings: Settings, user: User) -> list[str]:
     """Unlock any badge whose condition now holds; returns the new keys."""
     stats = await _stats(session, user.id)
     counts = await _counts(session, user.id)
@@ -453,15 +447,11 @@ async def evaluate_badges(
     return unlocked
 
 
-async def list_badges(
-    session: AsyncSession, user: User
-) -> list[BadgeResponse]:
+async def list_badges(session: AsyncSession, user: User) -> list[BadgeResponse]:
     earned = {
         row.badge_key: row.unlocked_at
         for row in (
-            await session.scalars(
-                select(UserAchievement).where(UserAchievement.user_id == user.id)
-            )
+            await session.scalars(select(UserAchievement).where(UserAchievement.user_id == user.id))
         ).all()
     }
     return [
@@ -503,9 +493,7 @@ async def progress(
     )
 
 
-async def _word_kind_radar(
-    session: AsyncSession, user: User, start: date
-) -> list[RadarAxis]:
+async def _word_kind_radar(session: AsyncSession, user: User, start: date) -> list[RadarAxis]:
     """The shape of the week's word kinds: studied against the book's supply.
 
     A spoke counts the words of one part of speech the learner touched this
@@ -514,9 +502,7 @@ async def _word_kind_radar(
     verbs this week" without needing a second chart.
     """
     active = await session.scalar(
-        select(WordbookActivation.wordbook_id).where(
-            WordbookActivation.user_id == user.id
-        )
+        select(WordbookActivation.wordbook_id).where(WordbookActivation.user_id == user.id)
     )
     if active is None:
         return [RadarAxis(key=key, label=label, studied=0, total=0) for key, label in POS_AXES]
@@ -604,6 +590,7 @@ async def weekly(
         )
         or 0
     )
+
     def _goal(key: str, label: str, progress: int) -> WeeklyGoal:
         return WeeklyGoal(
             key=key, label=label, progress=progress, target=5, completed=progress >= 5

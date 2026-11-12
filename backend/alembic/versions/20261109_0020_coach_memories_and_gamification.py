@@ -8,8 +8,9 @@ Create Date: 2026-11-09
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision: str = "20261109_0020"
 down_revision: str | Sequence[str] | None = "20261107_0019"
@@ -32,18 +33,27 @@ def upgrade() -> None:
         sa.Column("kind", sa.String(length=16), nullable=False),
         sa.Column("subject_key", sa.String(length=64)),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("source", sa.String(length=16), nullable=False, server_default=sa.text("'user_explicit'")),
-        sa.Column("status", sa.String(length=16), nullable=False, server_default=sa.text("'active'")),
+        sa.Column(
+            "source",
+            sa.String(length=16),
+            nullable=False,
+            server_default=sa.text("'user_explicit'"),
+        ),
+        sa.Column(
+            "status", sa.String(length=16), nullable=False, server_default=sa.text("'active'")
+        ),
         sa.Column("importance", sa.Integer(), nullable=False, server_default=sa.text("3")),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.Column("last_used_at", sa.DateTime(timezone=True)),
         sa.CheckConstraint(
             "kind IN ('preference', 'goal', 'constraint', 'fact', 'note')", name="kind_valid"
         ),
-        sa.CheckConstraint(
-            "status IN ('active', 'superseded', 'archived')", name="status_valid"
-        ),
+        sa.CheckConstraint("status IN ('active', 'superseded', 'archived')", name="status_valid"),
         sa.CheckConstraint(
             "source IN ('user_explicit', 'coach_inferred', 'imported')", name="source_valid"
         ),
@@ -71,7 +81,9 @@ def upgrade() -> None:
         sa.Column("streak", sa.Integer(), nullable=False, server_default=sa.text("0")),
         sa.Column("streak_best", sa.Integer(), nullable=False, server_default=sa.text("0")),
         sa.Column("last_active_day", sa.Date()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.CheckConstraint("xp >= 0", name="xp_nonnegative"),
         sa.CheckConstraint("crumbs >= 0", name="crumbs_nonnegative"),
         sa.CheckConstraint("level >= 1", name="level_positive"),
@@ -93,9 +105,13 @@ def upgrade() -> None:
         sa.Column("xp", sa.Integer(), nullable=False),
         sa.Column("crumbs", sa.Integer(), nullable=False),
         sa.Column("day", sa.Date(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.CheckConstraint(
-            "source_type IN ('review', 'practice', 'challenge_node', 'boss', 'quest', 'daily_first')",
+            "source_type IN ("
+            "'review', 'practice', 'challenge_node', 'boss', 'quest', 'daily_first'"
+            ")",
             name="source_type_valid",
         ),
         sa.UniqueConstraint("user_id", "source_type", "source_id", name="uq_xp_events_user_source"),

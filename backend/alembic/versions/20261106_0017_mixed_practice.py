@@ -24,8 +24,7 @@ _SUFFIX = (
 
 def upgrade() -> None:
     op.execute(
-        "ALTER TABLE practice_sessions "
-        "DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
+        "ALTER TABLE practice_sessions DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
     )
     op.execute(
         "ALTER TABLE practice_sessions ADD CONSTRAINT "
@@ -35,7 +34,8 @@ def upgrade() -> None:
     op.execute(
         "UPDATE ai_prompts SET template = template || '"
         + _SUFFIX
-        + "' WHERE prompt_key = 'practice_generation' AND template NOT LIKE '%practice_type is mixed%'"
+        + "' WHERE prompt_key = 'practice_generation'"
+        + " AND template NOT LIKE '%practice_type is mixed%'"
     )
 
 
@@ -46,8 +46,7 @@ def downgrade() -> None:
         + "', '') WHERE prompt_key = 'practice_generation'"
     )
     op.execute(
-        "ALTER TABLE practice_sessions "
-        "DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
+        "ALTER TABLE practice_sessions DROP CONSTRAINT ck_practice_sessions_practice_type_valid"
     )
     op.execute(
         "ALTER TABLE practice_sessions ADD CONSTRAINT "

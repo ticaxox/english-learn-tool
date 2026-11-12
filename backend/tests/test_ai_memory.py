@@ -79,9 +79,7 @@ async def test_a_new_memory_with_the_same_subject_supersedes_the_old_one(
     assert first.json()["id"] != second.json()["id"]
 
 
-async def test_coach_context_uses_snapshots_and_recalled_memories(
-    client, app, member_user
-) -> None:
+async def test_coach_context_uses_snapshots_and_recalled_memories(client, app, member_user) -> None:
     headers = await login(client, member_user.username)
     await client.patch(
         PROFILE_PATH,

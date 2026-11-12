@@ -576,9 +576,7 @@ async def create_coach_message(
     snippets: list[str] = []
     if len(content) >= 4:
         hits = await search_knowledge(session, settings, query=content, limit=3)
-        snippets = [
-            f"[{index + 1}] {hit.title}\n{hit.content}" for index, hit in enumerate(hits)
-        ]
+        snippets = [f"[{index + 1}] {hit.title}\n{hit.content}" for index, hit in enumerate(hits)]
 
     last_sequence = int(
         await session.scalar(

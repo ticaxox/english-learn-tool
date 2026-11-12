@@ -225,9 +225,7 @@ async def test_background_tasks_can_be_listed_deleted_and_retried(app, client, m
         assert all(entry["id"] != task["id"] for entry in remaining.json()["items"])
 
 
-async def test_stale_generating_pool_task_is_reported_failed(
-    app, client, member_user
-) -> None:
+async def test_stale_generating_pool_task_is_reported_failed(app, client, member_user) -> None:
     from datetime import timedelta
 
     from app.services.auth import utcnow

@@ -29,8 +29,7 @@ _ADD_EXAM = (
     "CHECK (target_exam IS NULL OR target_exam IN (%s))"
 )
 _DROP_DIFFICULTY = (
-    "ALTER TABLE practice_sessions DROP CONSTRAINT IF EXISTS "
-    "ck_practice_sessions_difficulty_valid"
+    "ALTER TABLE practice_sessions DROP CONSTRAINT IF EXISTS ck_practice_sessions_difficulty_valid"
 )
 _ADD_DIFFICULTY = (
     "ALTER TABLE practice_sessions ADD CONSTRAINT "

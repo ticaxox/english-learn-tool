@@ -14,9 +14,7 @@ down_revision: str | Sequence[str] | None = "20261107_0018"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
-_OLD = (
-    "Make sure each supplied target word appears in its sentence, passage or options."
-)
+_OLD = "Make sure each supplied target word appears in its sentence, passage or options."
 _NEW = (
     "The headwords behind target_entry_ids are listed in target_words; every item "
     "must use at least one of its own target words verbatim in its text."

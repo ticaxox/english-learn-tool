@@ -149,9 +149,7 @@ async def _create_conversation(app, client, headers, server) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_conversation_guide_answers_what_the_learner_said(
-    client, app, member_user
-) -> None:
+async def test_conversation_guide_answers_what_the_learner_said(client, app, member_user) -> None:
     headers = await login(client, member_user.username)
     wordbook_id = await seed_wordbook(app, owner_id=member_user.id, entries=4)
     await activate(app, user_id=member_user.id, wordbook_id=wordbook_id)

@@ -217,9 +217,7 @@ def validate_task_output(
                         f"{words} not in {practice.article_min_words}-{practice.article_max_words}"
                     )
         elif practice.practice_type == "mixed":
-            question_count = sum(
-                len(getattr(item, "questions", [])) or 1 for item in output.items
-            )
+            question_count = sum(len(getattr(item, "questions", [])) or 1 for item in output.items)
             if question_count != practice.count:
                 raise ValueError("AI_QUESTION_COUNT_MISMATCH")
         elif len(output.items) != practice.count:

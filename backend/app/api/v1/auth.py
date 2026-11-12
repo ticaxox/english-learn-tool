@@ -200,9 +200,7 @@ async def register_endpoint(
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> AuthSessionResponse:
     settings: Settings = request.app.state.settings
-    user = await register_user(
-        session, username=payload.username, password=payload.password
-    )
+    user = await register_user(session, username=payload.username, password=payload.password)
     issued = await login(
         session,
         request.app.state.redis,

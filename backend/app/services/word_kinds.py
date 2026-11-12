@@ -25,10 +25,27 @@ _MARKERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "connector",
         (
-            "preposition", "conjunction", "pronoun", "preposition/conjunction",
-            "介词", "连词", "代词", "冠词", "介词连词", "介词/连词",
-            "prep", "conj", "pron", "art", "article", "num", "numeral",
-            "int", "interjection", "aux", "modal",
+            "preposition",
+            "conjunction",
+            "pronoun",
+            "preposition/conjunction",
+            "介词",
+            "连词",
+            "代词",
+            "冠词",
+            "介词连词",
+            "介词/连词",
+            "prep",
+            "conj",
+            "pron",
+            "art",
+            "article",
+            "num",
+            "numeral",
+            "int",
+            "interjection",
+            "aux",
+            "modal",
         ),
     ),
     ("adverb", ("adverb", "副词", "adv")),
@@ -56,10 +73,7 @@ def normalize_part_of_speech(raw: str | None) -> str:
         for marker in markers:
             if len(marker) == 1:
                 # Single letters must match the whole token.
-                tokens = {
-                    token.strip(".;,()[]")
-                    for token in value.replace("/", " ").split()
-                }
+                tokens = {token.strip(".;,()[]") for token in value.replace("/", " ").split()}
                 if marker in tokens:
                     return family
                 continue

@@ -26,7 +26,6 @@ def docx_bytes(text: str) -> bytes:
     return buffer.getvalue()
 
 
-
 async def _conversation(client, headers) -> str:
     created = await client.post(
         "/api/v1/coach/conversations",
@@ -64,14 +63,10 @@ async def test_upload_message_and_read_back_an_image(client, member_user):
         f"/api/v1/coach/conversations/{conversation_id}/messages", headers=headers
     )
     assert messages.status_code == 200, messages.text
-    user_message = next(
-        item for item in messages.json()["items"] if item["role"] == "user"
-    )
+    user_message = next(item for item in messages.json()["items"] if item["role"] == "user")
     assert [item["id"] for item in user_message["attachments"]] == [attachment["id"]]
 
-    fetched = await client.get(
-        f"/api/v1/coach/attachments/{attachment['id']}", headers=headers
-    )
+    fetched = await client.get(f"/api/v1/coach/attachments/{attachment['id']}", headers=headers)
     assert fetched.status_code == 200
     assert fetched.headers["content-type"] == "image/png"
     assert fetched.content == PNG_BYTES

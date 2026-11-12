@@ -91,9 +91,7 @@ async def test_archiving_removes_the_document_from_search(client, admin_user, me
     removed = await client.delete(f"{ADMIN_PATH}/{document_id}", headers=admin_headers)
     assert removed.status_code == 204
 
-    after = await client.get(
-        SEARCH_PATH, headers=member_headers, params={"query": "night market"}
-    )
+    after = await client.get(SEARCH_PATH, headers=member_headers, params={"query": "night market"})
     assert after.json()["items"] == []
 
 

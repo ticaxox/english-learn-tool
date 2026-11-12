@@ -137,9 +137,7 @@ async def import_document(
     require_admin(admin)
     chunks = split_text(payload.content)
     if not chunks:
-        raise AppError(
-            status_code=422, code="KNOWLEDGE_EMPTY", message="The document has no text."
-        )
+        raise AppError(status_code=422, code="KNOWLEDGE_EMPTY", message="The document has no text.")
     document = KnowledgeDocument(
         source_type=payload.source_type,
         title=payload.title,
@@ -191,9 +189,7 @@ async def update_document(
     require_admin(admin)
     document = await session.get(KnowledgeDocument, document_id)
     if document is None or document.status == "archived":
-        raise AppError(
-            status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document."
-        )
+        raise AppError(status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document.")
     if payload.title is not None:
         document.title = payload.title
     if payload.metadata is not None:
@@ -227,15 +223,11 @@ async def update_document(
     return _document_response(document)
 
 
-async def archive_document(
-    session: AsyncSession, admin: User, document_id: UUID
-) -> None:
+async def archive_document(session: AsyncSession, admin: User, document_id: UUID) -> None:
     require_admin(admin)
     document = await session.get(KnowledgeDocument, document_id)
     if document is None:
-        raise AppError(
-            status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document."
-        )
+        raise AppError(status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document.")
     # Chunks cascade on delete; archive keeps the row for audit.
     document.status = "archived"
     await session.execute(

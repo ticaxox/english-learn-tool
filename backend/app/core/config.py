@@ -201,9 +201,7 @@ class Settings(BaseSettings):
         if not (
             PurePosixPath(normalized).is_absolute() or PureWindowsPath(normalized).is_absolute()
         ):
-            raise ValueError(
-                "COACH_UPLOAD_DIR must be an absolute path shared by API and workers"
-            )
+            raise ValueError("COACH_UPLOAD_DIR must be an absolute path shared by API and workers")
         return normalized
 
     @field_validator("log_level")

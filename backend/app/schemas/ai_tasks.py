@@ -7,9 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 ExamType = Literal["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
-PracticeType = Literal[
-    "fill_blank", "reading", "translation", "writing", "conversation", "mixed"
-]
+PracticeType = Literal["fill_blank", "reading", "translation", "writing", "conversation", "mixed"]
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 ChallengeNodeType = Literal[
     "REVIEW", "NEW_WORDS", "WORD_DRILL", "AI_PRACTICE", "BOSS", "OPTIONAL_SIDE"
@@ -58,11 +56,7 @@ class PracticeGenerationContext(StrictModel):
 
     @model_validator(mode="after")
     def validate_count_and_source(self) -> PracticeGenerationContext:
-        allowed = (
-            {1}
-            if self.practice_type in {"writing", "conversation"}
-            else {3, 5, 10, 15, 20}
-        )
+        allowed = {1} if self.practice_type in {"writing", "conversation"} else {3, 5, 10, 15, 20}
         if self.count not in allowed:
             raise ValueError("count does not match the selected practice type")
         if self.source == "difficulty" and self.difficulty is None:
@@ -327,9 +321,7 @@ class ConversationItem(CitedMixin):
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
 
-PracticeItem = (
-    FillBlankItem | ReadingPassage | TranslationItem | WritingItem | ConversationItem
-)
+PracticeItem = FillBlankItem | ReadingPassage | TranslationItem | WritingItem | ConversationItem
 
 
 class PracticeGenerationOutput(StrictModel):
@@ -487,9 +479,7 @@ class ChallengeNodeOutput(StrictModel):
             raise ValueError("drill_mode is only valid on WORD_DRILL nodes")
         if self.practice_type is not None and self.practice_count is not None:
             allowed = (
-                {1}
-                if self.practice_type in {"writing", "conversation"}
-                else {3, 5, 10, 15, 20}
+                {1} if self.practice_type in {"writing", "conversation"} else {3, 5, 10, 15, 20}
             )
             if self.practice_count not in allowed:
                 raise ValueError("practice_count does not match practice_type")

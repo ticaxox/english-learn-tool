@@ -334,8 +334,7 @@ class ProviderHttpClient:
                         "type": "image_url",
                         "image_url": {
                             "url": (
-                                f"data:{content_type};base64,"
-                                f"{base64.b64encode(payload).decode()}"
+                                f"data:{content_type};base64,{base64.b64encode(payload).decode()}"
                             )
                         },
                     }

@@ -6,9 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-PracticeType = Literal[
-    "fill_blank", "reading", "translation", "writing", "conversation", "mixed"
-]
+PracticeType = Literal["fill_blank", "reading", "translation", "writing", "conversation", "mixed"]
 PracticeSource = Literal["today_new", "today_review", "memory_mistakes", "whole_book", "difficulty"]
 PracticeSessionStatus = Literal["generating", "ready", "submitted", "failed", "cancelled"]
 PracticeSubmissionStatus = Literal["scoring", "completed", "failed"]
@@ -36,11 +34,7 @@ class PracticeCreateRequest(_StrictModel):
     @model_validator(mode="after")
     def validate_request(self) -> PracticeCreateRequest:
         # A conversation is one dialogue, and writing is one essay.
-        allowed = (
-            {1}
-            if self.practice_type in {"writing", "conversation"}
-            else {3, 5, 10, 15, 20}
-        )
+        allowed = {1} if self.practice_type in {"writing", "conversation"} else {3, 5, 10, 15, 20}
         if self.count not in allowed:
             raise ValueError("count does not match the selected practice type")
         if self.source == "difficulty" and self.difficulty is None:

@@ -16,8 +16,7 @@ depends_on: str | Sequence[str] | None = None
 
 _OLD = "item must use at least one of its own target words verbatim in its text. "
 _NEW = (
-    _OLD
-    + "For translation practice, follow translation_direction: en_to_zh means every "
+    _OLD + "For translation practice, follow translation_direction: en_to_zh means every "
     "source_text is English, zh_to_en means every source_text is Chinese, and mixed "
     "alternates the two. For writing practice, size the prompt for writing_target_words "
     "and say the required length inside the Chinese requirements list. "
@@ -30,7 +29,9 @@ def upgrade() -> None:
         + _OLD
         + "', '"
         + _NEW
-        + "') WHERE prompt_key = 'practice_generation' AND template LIKE '%" + _OLD + "%'"
+        + "') WHERE prompt_key = 'practice_generation' AND template LIKE '%"
+        + _OLD
+        + "%'"
     )
 
 
