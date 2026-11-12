@@ -61,7 +61,7 @@ const books = computed(() =>
 /* The shelf itself is drawn by ShelfPicker's rules; this row only needs its
    own column count on top of them. */
 .practice-shelf {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   padding-bottom: 2.2rem;
 }
 

@@ -132,15 +132,29 @@ describe('practice views', () => {
     expect(router.currentRoute.value.query.session).toBeTruthy()
   })
 
-  it('offers the five exercise types as books on the shelf', async () => {
+  it('offers the four generated exercise types as books', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice')
     const books = wrapper.findAll('.practice-shelf .shelf-book')
-    expect(books.map((book) => book.text())).toHaveLength(5)
+    expect(books.map((book) => book.text())).toHaveLength(4)
     const labels = books.map((book) => book.text())
     expect(labels.some((text) => text.includes('填空'))).toBe(true)
-    expect(labels.some((text) => text.includes('对话'))).toBe(true)
+    expect(labels.some((text) => text.includes('阅读'))).toBe(true)
+    // Conversation is one dialogue, so it stands on the card row instead.
+    expect(labels.some((text) => text.includes('对话'))).toBe(false)
     // The form is not on the page until a book is picked.
     expect(wrapper.find('.practice-config-dialog').exists()).toBe(false)
+  })
+
+  it('offers the memory drills as cards, with conversation among them', async () => {
+    const { wrapper } = await mountRoute(PracticeHubView, '/practice')
+    const cards = wrapper.findAll('.shelf--cards .shelf-book')
+    const labels = cards.map((card) => card.text())
+    expect(labels.some((text) => text.includes('翻卡'))).toBe(true)
+    expect(labels.some((text) => text.includes('选择'))).toBe(true)
+    expect(labels.some((text) => text.includes('拼写'))).toBe(true)
+    expect(labels.some((text) => text.includes('对话'))).toBe(true)
+    // A board under the books is the shelf; the card row stands on the page.
+    expect(wrapper.find('.shelf--cards .shelf-board').exists()).toBe(false)
   })
 
   it('opens the settings dialog when a book is picked', async () => {

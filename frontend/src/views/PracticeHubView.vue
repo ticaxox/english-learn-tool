@@ -57,8 +57,14 @@ const enabledMemoryModules = computed(() => MEMORY_MODULES.filter(memoryEnabled)
 function startMemory(module: MemoryModule): void {
   void router.push({ name: 'practice', query: { module } })
 }
-const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'conversation']
-const practiceTypeOptions: PracticeType[] = [...practiceTypes, 'mixed']
+const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
+const practiceTypeOptions: PracticeType[] = [...practiceTypes, 'conversation', 'mixed']
+
+/** The conversation drill is one dialogue, not a generated set, so it stands
+ *  with the card drills rather than with the exercise books. */
+const cardRowBooks = [
+  { type: 'conversation' as PracticeType, label: '对话', hint: '和 AI 角色对话' },
+]
 function queryType(value: unknown): PracticeType | null {
   return typeof value === 'string' && practiceTypeOptions.includes(value as PracticeType)
     ? (value as PracticeType)
@@ -250,7 +256,9 @@ onMounted(() => {
         :modules="MEMORY_MODULES"
         :enabled="enabledMemoryModules"
         :labels="MEMORY_MODULE_LABELS"
+        :books="cardRowBooks"
         @pick="startMemory"
+        @pick-book="openConfig"
       />
 
       <!-- A memory-training setting, so it sits with the memory books rather

@@ -535,9 +535,22 @@
 .shelf {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.2rem;
   padding: 1.4rem 1rem 2.4rem;
+}
+
+/* The card row stands on the page itself: no board under it. Its artwork is a
+ * little smaller than the books below, because four sit across and they are
+ * drills rather than the main event. */
+.shelf--cards {
+  padding-bottom: 0.6rem;
+}
+
+/* The card art leaves more margin inside its canvas than a book cover does,
+ * so the same width would read visibly smaller. */
+.shelf--cards .shelf-book__art {
+  width: min(100%, 140px);
 }
 
 /* The generated artwork IS the book. `.module-card` in learning.css still
@@ -625,8 +638,7 @@
   .shelf-book__hint { font-size: 0.72rem; }
 }
 
-/* Five across is a tighter row than three: the covers give a little so they
-   do not run into each other. */
+/* Four across: the covers give a little so they do not run into each other. */
 .practice-shelf .shelf-book__art {
   width: min(100%, 132px);
 }
