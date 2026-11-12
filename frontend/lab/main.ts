@@ -19,6 +19,8 @@ import '../src/controls.css'
 import '../src/game-shell.css'
 import '../src/learning.css'
 import '../src/challenge.css'
+// The shelf the three memory modes stand on is styled here, not in game-ui.
+import '../src/practice.css'
 
 function reply(payload: unknown): Promise<Response> {
   return Promise.resolve(new Response(JSON.stringify(payload), {
