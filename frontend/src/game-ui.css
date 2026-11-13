@@ -1238,16 +1238,9 @@ html[data-theme='night'] .personal-workspace .coach-orbit::after { background: #
 html[data-theme='night'] .personal-workspace .coach-create input,
 html[data-theme='night'] .personal-workspace .coach-rename input { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .coach-conversation-list [role="listitem"] { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .coach-message { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .coach-message--user { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .coach-streaming-chip { background: #2c2716; color: #e1ce98; }
 html[data-theme='night'] .personal-workspace .coach-action-notice { background: #2b1f17; color: #e1aa98; }
-html[data-theme='night'] .personal-workspace .coach-receipt { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .coach-receipt__status--applied { background: #172b1e; color: #98e1c6; }
-html[data-theme='night'] .personal-workspace .coach-receipt__status--undone { background: #2d2149; color: #98c9e1; }
 html[data-theme='night'] .personal-workspace .coach-usage { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .coach-composer { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .coach-composer textarea { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .notification-orbit::before,
 html[data-theme='night'] .personal-workspace .notification-orbit::after { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .notification-unread-pill,
@@ -1388,7 +1381,6 @@ html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-pr
 /* Panels and message plates. */
 html[data-theme='night'] .personal-workspace .today-task-row.is-current,
 html[data-theme='night'] .personal-workspace .today-task-footer,
-html[data-theme='night'] .personal-workspace .coach-message--assistant,
 html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-summary,
 html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-generate,
 html[data-theme='night'] .personal-workspace .wordbook-examples {
@@ -1397,14 +1389,6 @@ html[data-theme='night'] .personal-workspace .wordbook-examples {
 
 html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-map {
   background: #241a3d;
-}
-
-html[data-theme='night'] .personal-workspace .coach-message--user {
-  background: #26305a;
-}
-
-html[data-theme='night'] .personal-workspace .coach-message--user .coach-message-avatar {
-  background: #3a2f5e;
 }
 
 html[data-theme='night'] .personal-workspace .crumb-ai-note {
@@ -1461,10 +1445,7 @@ html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-no
 html[data-theme='night'] .personal-workspace .status-badge--muted,
 html[data-theme='night'] .personal-workspace .wordbook-status--deleting,
 html[data-theme='night'] .personal-workspace .challenge-node__status--locked,
-html[data-theme='night'] .personal-workspace .coach-receipt__status--undone {
-  background: #2a2440;
-  color: #b4a3cf;
-}
+
 
 html[data-theme='night'] .personal-workspace .challenge-game-stage .challenge-node__status--completed,
 html[data-theme='night'] .personal-workspace .wordbook-preview-meta .wordbook-pill {
@@ -1506,11 +1487,6 @@ html[data-theme='night'] .personal-workspace input[aria-invalid='true'],
 html[data-theme='night'] .personal-workspace textarea[aria-invalid='true'],
 html[data-theme='night'] .personal-workspace select[aria-invalid='true'] {
   background: #3a1e26;
-}
-
-/* Receipts and notices. */
-html[data-theme='night'] .personal-workspace .coach-receipt {
-  background: #33264a;
 }
 
 html[data-theme='night'] .personal-workspace .coach-action-notice {
@@ -2076,7 +2052,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   font-weight: 700;
 }
 
-
 /* Spark marks keep the app's own icon set at the size each slot needs. */
 .personal-workspace .challenge-generate__mark svg { width: 30px; height: 30px; }
 .personal-workspace .challenge-node__marker svg { width: 18px; height: 18px; }
@@ -2216,12 +2191,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 @keyframes coach-pop {
   from { transform: translateY(14px) scale(0.97); opacity: 0; }
   to { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-.personal-workspace .coach-main-topbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: var(--ui-space-2) var(--ui-space-3) 0;
 }
 
 /* ------------------------------------------------------- practice question UI */
@@ -4806,29 +4775,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   border: 0;
 }
 
-.personal-workspace .coach-history-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: rgb(31 17 11 / 38%);
-}
-
-.personal-workspace .coach-history-dialog {
-  display: grid;
-  gap: 12px;
-  width: min(560px, calc(100vw - 48px));
-  max-height: min(70vh, 640px);
-  overflow-y: auto;
-  padding: 20px 22px;
-  border-radius: 18px;
-  background: var(--ui-surface);
-}
-
-.personal-workspace .coach-history-dialog__actions { display: flex; gap: 8px; }
-
 /* The coach speaks in a bubble too, not bare text. */
 .personal-workspace .ia-coach-panel .coach-message--assistant {
   justify-self: start;
@@ -4904,7 +4850,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 }
 
 .personal-workspace .memory-main-card .choice-list { gap: 18px 32px; }
-
 
 /* The trainer draws its own card face; this layer only centres it on the page.
    It used to add a second plate, which put a rounded card inside a rounded
@@ -4998,7 +4943,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   font-size: 1.15rem;
   font-weight: 800;
 }
-
 
 .memory-main-card .study-card {
   min-height: 240px;
@@ -5565,7 +5509,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   font-weight: 700;
   line-height: 1.75;
 }
-
 
 /* Reading material: no right/bottom frame, larger article type. */
 .personal-workspace .practice-article-panel {

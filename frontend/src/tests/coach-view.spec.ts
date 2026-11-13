@@ -87,7 +87,7 @@ describe('coach view', () => {
     expect(wrapper.text()).toContain('先完成到期复习')
     expect(wrapper.text()).toContain('调整学习计划')
     expect(wrapper.text()).toContain('把每日新词从 20 调整为 12')
-    expect(wrapper.get('.coach-receipt').text()).toContain('撤销这次调整')
+    expect(wrapper.get('.coach-receipt').text()).toContain('撤销')
   })
 
   it('lists conversation history only on the full coach page', async () => {

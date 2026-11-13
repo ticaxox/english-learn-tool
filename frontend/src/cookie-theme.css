@@ -801,8 +801,7 @@ fieldset + fieldset {
 .wordbook-status--active,
 .wordbook-pill--private,
 .challenge-node__status--unlocked,
-.challenge-node__status--completed,
-.coach-receipt__status--applied {
+.challenge-node__status--completed {
   border-color: var(--pistachio-500);
   background: var(--pistachio-soft);
   color: var(--pistachio-strong);
@@ -1640,14 +1639,6 @@ fieldset + fieldset {
   font-family: var(--font-display);
 }
 
-/* Coach workspace */
-.coach-page {
-  --coach-butter: var(--butter-400);
-  --coach-coral: var(--jam-500);
-  --coach-mint: var(--cookie-100);
-  --coach-paper: var(--cookie-50);
-}
-
 .coach-orbit,
 .notification-orbit {
   border: 2px solid var(--cocoa-900);
@@ -1689,15 +1680,6 @@ fieldset + fieldset {
     var(--cookie-50);
 }
 
-.coach-main {
-  border: 2px solid var(--cocoa-900);
-  border-radius: 10px 22px 10px 22px;
-  background:
-    radial-gradient(circle at 100% 0%, rgb(243 200 91 / 12%), transparent 14rem),
-    var(--paper-white);
-  box-shadow: 0 5px 0 var(--cookie-200);
-}
-
 .coach-sidebar__heading,
 .coach-main-header {
   padding-bottom: 0.7rem;
@@ -1723,39 +1705,10 @@ fieldset + fieldset {
   color: var(--cocoa-900);
 }
 
-.coach-main-empty {
-  border: 0;
-  background: transparent;
-}
-
 .coach-empty-mark {
   border-radius: 48% 52% 44% 56%;
   font-family: var(--font-display);
   transform: rotate(-5deg);
-}
-
-/* The coach's turns are written on one sheet: no box, no radius, no shadow. */
-.coach-message {
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-
-.coach-message--user {
-  border: 0;
-  border-radius: 0;
-  background: none;
-}
-
-.coach-message--assistant {
-  border: 0;
-  border-radius: 0;
-  background: none;
-}
-
-.coach-message__meta strong {
-  color: var(--cocoa-900);
 }
 
 .coach-action-notice {
@@ -1764,27 +1717,10 @@ fieldset + fieldset {
   color: #6d3425;
 }
 
-.coach-actions {
-  border-top-color: var(--cookie-300);
-}
-
-.coach-receipt {
-  border: 1.3px solid #d7ae91;
-  border-radius: 10px 6px 10px 6px;
-  background: #fff5e9;
-}
-
 .coach-usage {
   border: 1px dashed var(--cookie-500);
   background: var(--cookie-50);
   color: var(--cocoa-700);
-}
-
-.coach-composer {
-  border: 0;
-  border-top: 2px solid rgb(53 36 15 / 55%);
-  border-radius: 0;
-  background: none;
 }
 
 /* Daily challenge */

@@ -1006,7 +1006,6 @@ body {
   background: var(--ui-surface-subtle);
   color: var(--ui-ink);
 }
-.personal-workspace .coach-layout { min-height: calc(100vh - 200px); }
 .personal-workspace .ia-coach-panel {
   border-left-width: 1px;
   background: var(--ui-surface);
