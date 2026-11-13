@@ -398,7 +398,7 @@ onMounted(() => {
 
         <div class="button-row">
           <DivButton class="button" type="submit" :disabled="saving">
-            {{ saving ? '正在保存…' : '保存设置' }}
+            {{ saving ? '正在保存…' : '保存' }}
           </DivButton>
         </div>
 

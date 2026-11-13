@@ -3590,7 +3590,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   display: flex;
   flex: 1 1 auto;
   flex-wrap: wrap;
-  gap: 6px 12px;
+  gap: 8px 16px;
   align-items: baseline;
   min-width: 0;
 }
@@ -5673,6 +5673,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   gap: 12px;
   align-items: flex-start;
   justify-content: space-between;
+  margin-bottom: 14px;
   padding-top: 8px;
   border-top: 1px solid var(--ui-line);
 }

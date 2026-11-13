@@ -127,7 +127,7 @@ describe('member-facing Chinese copy density', () => {
 
     const settings = source('../views/LearningSettingsView.vue')
     expect(settings).toContain('学习设置')
-    expect(settings).toContain('保存设置')
+    expect(settings).toContain("'保存'")
 
     const aiSettings = source('../views/PersonalAiConfigView.vue')
     expect(aiSettings).toContain('你的 AI 提供商')

@@ -232,7 +232,7 @@ onMounted(() => {
               <h3 id="chatProviders-title">对话模型</h3>
               <p class="field-hint">AI 教练、出题和评分用它写文字。至少要有一个。</p>
             </div>
-            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('chat')">添加</DivButton>
+            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
           </div>
 
           <div v-if="chatProviders.length === 0" class="personal-ai-empty personal-ai-empty--inline">
@@ -286,7 +286,7 @@ onMounted(() => {
               <h3 id="embeddingProviders-title">向量模型</h3>
               <p class="field-hint">知识库用它把真题变成向量，语义检索才有效。不配就只用关键词检索。</p>
             </div>
-            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('embedding')">添加</DivButton>
+            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('embedding')">添加</DivButton>
           </div>
 
           <div class="personal-ai-list">
