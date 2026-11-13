@@ -90,6 +90,9 @@ const dialogInput = ref<HTMLInputElement | null>(null)
 const dialogFile = ref<HTMLInputElement | null>(null)
 const preview = ref<KnowledgeDocumentDetail | null>(null)
 
+/** What the import API accepts: `content` is capped at 400,000 characters. */
+const MAX_CONTENT_CHARS = 400_000
+
 const byParent = computed(() => {
   const map = new Map<string | null, KnowledgeFolder[]>()
   for (const folder of folders.value) {
@@ -348,6 +351,12 @@ async function importDocument(folderId: string): Promise<void> {
     error.value = new Error('需要正文。')
     return
   }
+  if (result.content.length > MAX_CONTENT_CHARS) {
+    error.value = new Error(
+      `正文最多 ${MAX_CONTENT_CHARS.toLocaleString('zh-CN')} 字，现在有 ${result.content.length.toLocaleString('zh-CN')} 字。`,
+    )
+    return
+  }
   try {
     await importIntoFolder(folderId, { title: result.name, content: result.content })
     await loadTree()
@@ -360,11 +369,20 @@ async function importDocument(folderId: string): Promise<void> {
 async function readFile(file: File): Promise<void> {
   const state = dialog.value
   if (!state) return
-  if (file.size > 2 * 1024 * 1024) {
-    error.value = new Error('文件不能超过 2 MB。')
+  // A guard against loading something enormous into memory, not the import
+  // limit — that one is counted in characters, below.
+  if (file.size > 20 * 1024 * 1024) {
+    error.value = new Error('文件太大，浏览器读不下；请拆分后再导入。')
     return
   }
   const text = await file.text()
+  const overBy = text.length - MAX_CONTENT_CHARS
+  if (overBy > 0) {
+    error.value = new Error(
+      `正文最多 ${MAX_CONTENT_CHARS.toLocaleString('zh-CN')} 字，这个文件有 ${text.length.toLocaleString('zh-CN')} 字，请拆成几份导入。`,
+    )
+    return
+  }
   state.content = text
   if (!state.value.trim()) state.value = file.name.replace(/\.[^.]+$/, '')
 }
@@ -832,7 +850,7 @@ onBeforeUnmount(() => {
               @change="onFilePick"
             />
             <DivButton class="kb-btn ghost" type="button" @click="dialogFile?.click()">选择文件…</DivButton>
-            <span>支持 .txt / .md，2 MB 以内；也可以直接拖进来或粘贴</span>
+            <span>支持 .txt / .md，正文最多 40 万字；也可以直接拖进来或粘贴</span>
           </div>
           <textarea
             v-model="dialog.content"
