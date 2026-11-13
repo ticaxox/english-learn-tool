@@ -72,6 +72,9 @@ html[data-theme='night'] .coach-page {
 
 /* The coach page is the whole column, not a card inside its padding. */
 .personal-workspace .workspace-content:has(.coach-page) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
   padding: 0;
   min-height: 0;
   overflow: hidden;
@@ -311,7 +314,7 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   grid-column: 2;
   justify-self: start;
   width: fit-content;
-  max-width: min(100%, 72ch);
+  max-width: min(100%, 92ch);
   display: grid;
   row-gap: 7px;
 }
@@ -332,6 +335,37 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   border-color: color-mix(in srgb, var(--coach-mine) 55%, transparent);
   border-radius: 16px 4px 16px 16px;
   color: color-mix(in srgb, var(--coach-ink) 92%, transparent);
+}
+
+.coach-page.coach-page .coach-markdown {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.78;
+  text-wrap: pretty;
+}
+.coach-page.coach-page .coach-markdown > *:first-child { margin-top: 0; }
+.coach-page.coach-page .coach-markdown > *:last-child { margin-bottom: 0; }
+.coach-page.coach-page .coach-markdown p { margin: 0 0 0.55em; }
+.coach-page.coach-page .coach-markdown h4 {
+  margin: 0.9em 0 0.35em;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--coach-ink);
+}
+.coach-page.coach-page .coach-markdown ul,
+.coach-page.coach-page .coach-markdown ol {
+  margin: 0 0 0.6em;
+  padding-left: 1.25em;
+}
+.coach-page.coach-page .coach-markdown li { margin: 0.18em 0; }
+.coach-page.coach-page .coach-markdown strong { font-weight: 800; color: var(--coach-ink); }
+.coach-page.coach-page .coach-markdown em { font-style: italic; }
+.coach-page.coach-page .coach-markdown code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--coach-line-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
 }
 
 .coach-page.coach-page .coach-message__text {

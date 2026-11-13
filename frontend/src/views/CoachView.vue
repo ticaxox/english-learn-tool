@@ -5,7 +5,7 @@ import CrumbIcon from '../components/ui/CrumbIcon.vue'
 import CoachImage from '../components/CoachImage.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
-import SpokenText from '../components/SpokenText.vue'
+import CoachMarkdown from '../components/CoachMarkdown.vue'
 import {
   COACH_ACTION_LABELS,
   uploadCoachAttachment,
@@ -396,7 +396,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
                   >
                     <span></span><span></span><span></span>
                   </div>
-                  <SpokenText v-else class="coach-message__text" :text="coach.messageText(message)" />
+                  <CoachMarkdown v-else :text="coach.messageText(message)" />
 
                   <p v-if="message.role === 'assistant' && citedNumbers(message).length" class="coach-message__citations">
                     <span>引用了知识库：</span>
