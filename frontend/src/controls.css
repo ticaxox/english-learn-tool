@@ -2769,7 +2769,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   border: 0;
   border-radius: 0;
   background-color: transparent !important;
-  background-image: var(--pumpkin-unlit) !important;
+  background-image: var(--pumpkin-todo) !important;
   background-position: center !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
@@ -2777,23 +2777,25 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   color: #c8a06a;
 }
 
-/* The warm lantern is the one you are standing on: it is the only stop that
- * should smile at you. A stop you already cleared goes spirit-green. */
+/* A stop you finished keeps the same smiling face it had while you walked up
+ * to it - warm by day, the same smile re-lit violet after dark. */
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-completed {
-  background-image: var(--pumpkin-green) !important;
-  color: #1d3a2a;
-  filter: drop-shadow(0 0 12px rgb(140 220 140 / 45%));
-}
-
-.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-in_progress,
-.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-unlocked {
-  background-image: var(--pumpkin-lit) !important;
+  background-image: var(--pumpkin-done) !important;
   color: #5a3208;
   filter: drop-shadow(0 0 12px rgb(255 150 0 / 55%));
 }
 
+/* The stop ahead wears the waiting lantern; the one you are on is the same
+ * face with the light on it. */
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-in_progress,
+.personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-unlocked {
+  background-image: var(--pumpkin-todo) !important;
+  color: #5a3208;
+  filter: drop-shadow(0 0 14px rgb(255 170 60 / 70%));
+}
+
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-failed {
-  background-image: var(--pumpkin-unlit) !important;
+  background-image: var(--pumpkin-todo) !important;
   color: #ff9a8a;
   filter: saturate(0.7) brightness(0.85);
 }

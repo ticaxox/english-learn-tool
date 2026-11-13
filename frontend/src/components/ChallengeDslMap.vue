@@ -519,7 +519,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
   <section
     class="challenge-dsl-map panel"
     :class="`challenge-dsl-map--${variant}`"
-    :style="variant === 'pumpkin' ? { '--pumpkin-lit': `url(${pumpkins.lit[themeMode]})`, '--pumpkin-green': `url(${pumpkins.green[themeMode]})`, '--pumpkin-unlit': `url(${pumpkins.unlit[themeMode]})`, '--pumpkin-boss': `url(${pumpkins.boss[themeMode]})`, '--pumpkin-branch': `url(${pumpkins.branch[themeMode]})` } : undefined"
+    :style="variant === 'pumpkin' ? { '--pumpkin-done': `url(${pumpkins.done[themeMode]})`, '--pumpkin-todo': `url(${pumpkins.todo[themeMode]})`, '--pumpkin-boss': `url(${pumpkins.boss[themeMode]})`, '--pumpkin-branch': `url(${pumpkins.branch[themeMode]})` } : undefined"
     aria-label="闯关地图"
   >
     <header class="challenge-dsl-map__head">
