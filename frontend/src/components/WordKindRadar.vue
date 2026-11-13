@@ -2,10 +2,10 @@
 /**
  * The week as a shape: one spoke per part of speech.
  *
- * A spoke's outer edge is how many words of that kind the active wordbook
- * holds; the filled part is how many the learner actually touched this week.
- * A wide spoke means "you worked a lot of this kind"; a short one means the
- * week leaned elsewhere.
+ * The outer ring is the active wordbook's own total, so the furthest edge of
+ * the chart means "all of this kind, learned". The filled part is how many of
+ * them the learner actually touched this week; one shape read against the rim,
+ * no second outline to compare against.
  *
  * The chart is drawn as SVG so it scales with the panel and can be animated
  * by growing the polygon from its centre.
@@ -76,21 +76,9 @@ const studiedShape = computed(() =>
   }),
 )
 
-/**
- * The outline of the whole book.
- *
- * Each spoke reaches the share of that kind inside the book, so the dashed
- * shape is the book's real mix rather than a flat hexagon: a book heavy on
- * verbs shows a wide verb edge, and the studied shape is read against it.
- */
-const supplyShape = computed(() =>
-  polygonPoints((index) => {
-    const axis = spokes.value[index]
-    if (!axis.total) return 0
-    const largest = Math.max(...spokes.value.map((spoke) => spoke.total))
-    if (largest <= 0) return 0
-    return Math.max(0.08, axis.total / largest)
-  }),
+/** Three fainter rings and the rim: the scale the shape is read against. */
+const gridRings = computed(() =>
+  [0.25, 0.5, 0.75, 1].map((ratio) => polygonPoints(() => ratio)),
 )
 
 /** A spoke's label, pushed just outside the outer ring. */
@@ -107,21 +95,17 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
 
 <template>
   <figure v-if="axes.length" class="word-radar">
-    <figcaption class="word-radar__caption">
-      <span class="word-radar__title">本周词性分布</span>
-      <span class="word-radar__legend">
-        <i class="word-radar__key word-radar__key--studied" aria-hidden="true"></i>本周学过
-        <i class="word-radar__key word-radar__key--supply" aria-hidden="true"></i>词书总量
-      </span>
-    </figcaption>
-
     <svg
       class="word-radar__chart"
       :viewBox="`0 0 ${SIZE} ${SIZE}`"
       role="img"
       :aria-label="radarLabel"
     >
-      <!-- the spokes; the two shapes carry the scale on their own -->
+      <!-- the rings carry the scale: the rim is the whole wordbook -->
+      <g class="word-radar__grid">
+        <polygon v-for="(ring, index) in gridRings" :key="index" :points="ring" />
+      </g>
+
       <g class="word-radar__spokes">
         <line
           v-for="(spoke, index) in spokes"
@@ -133,8 +117,6 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
         />
       </g>
 
-      <!-- what the book holds, then what was studied -->
-      <polygon class="word-radar__supply" :points="supplyShape" />
       <polygon v-if="hasShape" class="word-radar__studied" :points="studiedShape" />
 
       <g class="word-radar__labels">
@@ -164,39 +146,6 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
   justify-items: center;
 }
 
-.word-radar__caption {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-}
-
-.word-radar__title {
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: var(--ui-ink);
-}
-
-.word-radar__legend {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.68rem;
-  color: var(--ui-muted);
-}
-
-.word-radar__key {
-  width: 9px;
-  height: 9px;
-  border-radius: 2px;
-  display: inline-block;
-}
-
-.word-radar__key--studied { background: var(--g-orange, #ff9600); }
-.word-radar__key--supply { background: transparent; border: 1.5px dashed var(--g-gold-edge, #d9a400); }
-
 .word-radar__chart {
   width: 100%;
   max-width: 260px;
@@ -204,16 +153,20 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
   overflow: visible;
 }
 
-.word-radar__spokes line {
+.word-radar__grid polygon {
+  fill: none;
   stroke: var(--ui-line, #ecd9bb);
   stroke-width: 1;
 }
 
-.word-radar__supply {
-  fill: none;
-  stroke: var(--g-gold-edge, #d9a400);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 3;
+.word-radar__grid polygon:last-child {
+  stroke: var(--ui-line-strong, #3b2a1a);
+  stroke-opacity: 0.22;
+}
+
+.word-radar__spokes line {
+  stroke: var(--ui-line, #ecd9bb);
+  stroke-width: 1;
 }
 
 .word-radar__studied {
