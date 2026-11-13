@@ -249,10 +249,12 @@ onMounted(() => {
                   :title="provider.enabled ? '已启用' : '已停用'"
                   aria-hidden="true"
                 ></span>
-                <h3>{{ provider.name }}</h3>
+                <div class="personal-ai-provider__name">
+                  <h3>{{ provider.name }}</h3>
+                  <span v-if="provider.kind === 'embedding'" class="personal-ai-provider__tag">向量</span>
+                </div>
                 <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
                 <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
-                <span v-if="provider.kind === 'embedding'" class="personal-ai-provider__tag">向量</span>
               </div>
               <label class="personal-ai-provider__priority">
                 <span>优先级</span>
