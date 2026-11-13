@@ -11,11 +11,12 @@ from app.db.session import get_db_session
 from app.schemas.common import ErrorResponse
 from app.schemas.gamification import (
     BadgeListResponse,
+    GamificationFootprintResponse,
     GamificationProgressResponse,
     GamificationWeeklyResponse,
 )
 from app.services.auth import AuthContext
-from app.services.gamification import list_badges, progress, weekly
+from app.services.gamification import footprint, list_badges, progress, weekly
 
 router = APIRouter(prefix="/me/progress", tags=["progress"])
 
@@ -56,6 +57,21 @@ async def get_weekly_endpoint(
     response = await weekly(session, settings, context.user)
     await session.commit()
     return response
+
+
+@router.get(
+    "/footprint",
+    response_model=GamificationFootprintResponse,
+    responses=_RESPONSES,
+    summary="Read the calendar month and the spread of the learner's words",
+)
+async def get_footprint_endpoint(
+    request: Request,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> GamificationFootprintResponse:
+    settings: Settings = request.app.state.settings
+    return await footprint(session, settings, context.user)
 
 
 @router.get(

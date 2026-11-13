@@ -5,25 +5,28 @@
  * Every number on this page comes from the server snapshot for local_date.
  * The member redesign changes the visual narrative and information hierarchy,
  * never the source of truth.
+ *
+ * The page reads top to bottom: the player bar, the day's tasks, one line of
+ * advice from Crumbo, the map, then the two charts that put today in context.
  */
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import AppIcon from '../components/AppIcon.vue'
 import ChallengeView from './ChallengeView.vue'
-import GoalRing from '../components/ui/GoalRing.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
-import StudyStatsPanel from '../components/StudyStatsPanel.vue'
+import GameHud from '../components/GameHud.vue'
 import BadgeWall from '../components/BadgeWall.vue'
-import WeeklyReport from '../components/WeeklyReport.vue'
+import TodayInsights from '../components/TodayInsights.vue'
 import { useGamification } from '../composables/useGamification'
+import { bookObject } from '../assets/halloween'
+import { themeMode } from '../composables/useTheme'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
 import { isApiError } from '../api/errors'
 import { isContractFrozen } from '../api/contract-adapter'
-import { TODAY_STATUS_LABELS, type TodayPlan } from '../types/learning'
+import type { TodayPlan } from '../types/learning'
 import '../learning.css'
 
 const gamification = useGamification()
@@ -37,18 +40,6 @@ const frozen = computed(() => isContractFrozen())
 const needsActiveWordbook = computed(
   () => isApiError(error.value) && error.value.code === 'ACTIVE_WORDBOOK_REQUIRED',
 )
-const statusLabel = computed(() =>
-  plan.value ? TODAY_STATUS_LABELS[plan.value.status] : null,
-)
-const todayTaskSentence = computed(() => {
-  const phrases = todayTasks.value.map((task) => {
-    if (task.key === 'new-words') return `学习 ${task.target} 个新词`
-    if (task.key === 'due-reviews') return `完成 ${task.target} 个到期复习`
-    if (task.key === 'learning-minutes') return `积累 ${task.target} 分钟学习时间`
-    return `${task.title} ${task.target} ${task.unit}`
-  })
-  return phrases.length ? `今天要${phrases.join('，')}。` : ''
-})
 
 function percent(completed: number, target: number): number {
   if (target <= 0) return 0
@@ -100,16 +91,6 @@ const todayTasks = computed(() => {
     done: task.target > 0 && task.completed >= task.target,
   }))
 })
-
-const activeTaskIndex = computed(() => {
-  const index = todayTasks.value.findIndex((task) => !task.done)
-  return index === -1 ? todayTasks.value.length - 1 : index
-})
-
-const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? null)
-/** The ring tracks whichever quest the learner should do next. */
-const ringTask = computed(() => primaryTask.value ?? todayTasks.value[0] ?? null)
-const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
 
 const crumboTip = computed(() => {
   const remaining = todayTasks.value.filter((task) => !task.done)
@@ -179,24 +160,10 @@ onMounted(() => {
 
     <template v-else-if="plan">
       <section class="crumb-today-board crumb-trail-board crumb-merged">
+        <GameHud />
+
         <div class="crumb-merged-main">
           <span class="crumb-eyebrow">今日学习 · 今日任务</span>
-          <h1 class="crumb-merged-title">
-            下一步：<b>{{ primaryTask ? primaryTask.title : '今天的任务已完成' }}</b>
-          </h1>
-          <p class="today-task-sentence">{{ todayTaskSentence }}</p>
-
-          <div class="crumb-merged-actions">
-            <RouterLink
-              v-if="primaryTask"
-              class="button crumb-primary-action crumb-board-cta"
-              :to="primaryTask.to"
-            >
-              {{ completedTaskCount === todayTasks.length ? '再走一圈' : '继续学习' }}
-              <AppIcon name="arrow" />
-            </RouterLink>
-            <span class="crumb-merged-count">{{ completedTaskCount }} / {{ todayTasks.length }} 完成</span>
-          </div>
 
           <ul class="crumb-task-list" aria-label="今日任务进度">
             <li v-for="(task, index) in todayTasks" :key="task.key" :class="{ 'is-done': task.done }">
@@ -204,7 +171,14 @@ onMounted(() => {
                 <span class="crumb-task-state" aria-hidden="true">{{ task.done ? '✓' : index + 1 }}</span>
                 <span class="crumb-task-body">
                   <span class="crumb-task-title">{{ task.title }}</span>
-                  <span class="crumb-task-bar" aria-hidden="true">
+                  <span
+                    class="crumb-task-bar"
+                    role="progressbar"
+                    :aria-label="`${task.title}进度`"
+                    :aria-valuenow="task.percent"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
                     <span :style="{ width: `${task.percent}%` }"></span>
                   </span>
                 </span>
@@ -212,45 +186,32 @@ onMounted(() => {
               </RouterLink>
             </li>
           </ul>
-
-          <div class="crumb-tip">
-            <CrumboMark size="small" :mood="crumboMood" />
-            <p>{{ crumboTip }}</p>
-          </div>
         </div>
 
         <aside class="crumb-merged-side crumb-today-side">
-          <div class="crumb-merged-ring">
-            <GoalRing
-              v-if="ringTask"
-              :value="ringTask.completed"
-              :max="ringTask.target"
-              :size="128"
-              :stroke="11"
-              :caption="ringTask.label"
-            />
-            <div class="crumb-merged-stamp">
-              <span>{{ plan.localDate }}</span>
-              <strong>{{ statusLabel }}</strong>
-            </div>
-          </div>
-
           <div class="crumb-merged-book">
+            <img class="crumb-merged-book__cover" :src="bookObject[themeMode]" alt="" aria-hidden="true" />
             <span class="crumb-eyebrow">当前词书</span>
             <strong>{{ plan.wordbook?.name ?? '尚未选择' }}</strong>
             <RouterLink class="crumb-inline-link" to="/wordbooks">
               {{ plan.wordbook ? '换一本' : '去选择' }}
             </RouterLink>
           </div>
-
-          <StudyStatsPanel compact />
         </aside>
       </section>
 
+      <div class="crumb-note-out">
+        <div class="crumb-tip">
+          <CrumboMark size="small" :mood="crumboMood" />
+          <p>{{ crumboTip }}</p>
+        </div>
+      </div>
+
       <ChallengeView embedded />
 
+      <TodayInsights />
+
       <section class="today-extras">
-        <WeeklyReport />
         <BadgeWall />
       </section>
     </template>

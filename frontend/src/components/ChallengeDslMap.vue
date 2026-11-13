@@ -7,7 +7,6 @@
  * so connectors stay attached without measuring the DOM.
  */
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
 import { pumpkins } from '../assets/halloween'
@@ -70,7 +69,6 @@ const map = computed(() => parseChallengeMapDsl(props.dsl))
 
 const isBoss = (node: ChallengeMapNode): boolean => node.typeLabel.includes('终点')
 /** Matches the server's award table: boss 50 XP, ordinary nodes 20. */
-const nodeReward = (node: ChallengeMapNode): number => (isBoss(node) ? 50 : 20)
 
 const depths = computed(() => {
   const byId = new Map(map.value.nodes.map((node) => [node.id, node]))
@@ -489,17 +487,6 @@ const edges = computed<Edge[]>(() => {
   return result
 })
 
-const orderById = computed(() => {
-  const result = new Map<string, number>()
-  let order = 0
-  for (const node of map.value.nodes) {
-    if (node.optional) continue
-    order += 1
-    result.set(node.id, order)
-  }
-  return result
-})
-
 const remaining = computed(() => map.value.nodes.filter((node) => node.statusKey !== 'completed').length)
 const minutesLeft = computed(() => map.value.nodes
   .filter((node) => node.statusKey !== 'completed')
@@ -519,7 +506,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
   <section
     class="challenge-dsl-map panel"
     :class="`challenge-dsl-map--${variant}`"
-    :style="variant === 'pumpkin' ? { '--pumpkin-lit': `url(${pumpkins.lit[themeMode]})`, '--pumpkin-green': `url(${pumpkins.green[themeMode]})`, '--pumpkin-unlit': `url(${pumpkins.unlit[themeMode]})`, '--pumpkin-boss': `url(${pumpkins.boss[themeMode]})`, '--pumpkin-branch': `url(${pumpkins.branch[themeMode]})` } : undefined"
+    :style="variant === 'pumpkin' ? { '--pumpkin-done': `url(${pumpkins.done[themeMode]})`, '--pumpkin-todo': `url(${pumpkins.todo[themeMode]})`, '--pumpkin-boss': `url(${pumpkins.boss[themeMode]})`, '--pumpkin-branch': `url(${pumpkins.branch[themeMode]})` } : undefined"
     aria-label="闯关地图"
   >
     <header class="challenge-dsl-map__head">
@@ -570,36 +557,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           :aria-label="`${placed.node.title}，${placed.node.typeLabel}，${placed.node.questionType}，${placed.node.statusLabel}，${placed.node.minutes} 分钟`"
           @click="emit('select', placed.node.id)"
         >
-          <span class="challenge-dsl-card__face">
-            <svg
-              v-if="placed.node.statusKey === 'completed'"
-              class="challenge-dsl-check"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path d="m5 12.5 4.5 4.5L19 7.5" />
-            </svg>
-            <AppIcon v-else-if="isBoss(placed.node)" name="star" />
-            <AppIcon v-else-if="placed.node.optional" name="flame" />
-            <AppIcon v-else-if="placed.node.statusKey === 'locked'" name="lock" />
-            <span v-else class="challenge-dsl-card__mark">{{ orderById.get(placed.node.id) }}</span>
-          </span>
           <span class="visually-hidden">{{ placed.node.title }}</span>
-          <span
-            v-if="nodeReward(placed.node) > 0"
-            class="challenge-dsl-reward"
-            :class="{ 'is-earned': placed.node.statusKey === 'completed' }"
-            aria-hidden="true"
-          >
-            +{{ nodeReward(placed.node) }}
-          </span>
-          <span
-            v-if="placed.node.statusKey === 'completed' && placed.node.stars > 0"
-            class="challenge-dsl-stars"
-            :aria-label="`获得 ${placed.node.stars} 颗星`"
-          >
-            {{ '★'.repeat(placed.node.stars) }}
-          </span>
         </DivButton>
 
         <CrumboMark

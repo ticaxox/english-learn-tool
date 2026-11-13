@@ -67,6 +67,36 @@ class GamificationWeeklyResponse(BaseModel):
     radar: list[RadarAxis] = []
 
 
+class FootprintDay(BaseModel):
+    date: str
+    xp: int
+    active: bool
+
+
+class WordStateCounts(BaseModel):
+    """Where the learner's words sit in the memory curve right now.
+
+    A mastered word has left the schedule on purpose, so it is reported with
+    the words under review rather than as a fifth bucket.
+    """
+
+    new: int = 0
+    learning: int = 0
+    review: int = 0
+    relearning: int = 0
+    total: int = 0
+
+
+class GamificationFootprintResponse(BaseModel):
+    """The calendar month so far, plus the shape of everything being learned."""
+
+    month: str
+    days: list[FootprintDay] = []
+    active_days: int = 0
+    streak: int = 0
+    states: WordStateCounts
+
+
 class AwardResponse(BaseModel):
     """Returned alongside the action that earned it, so the UI can animate."""
 

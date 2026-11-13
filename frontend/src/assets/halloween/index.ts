@@ -230,23 +230,29 @@ export const bookObject = { day: bookObjectDay, night: bookObjectNight } as cons
 /* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
  * spirit-green one for the stop you are on, a dark unlit one for a stop out
  * of reach. */
-import pumpkinGreen from './char/pumpkin-green.png'
 import pumpkinGreenNight from './char/pumpkin-green-night.png'
-import pumpkinUnlit from './char/pumpkin-unlit.png'
-import pumpkinUnlitNight from './char/pumpkin-unlit-night.png'
 import pumpkinMorning from './char/pumpkin-morning.png'
+import pumpkinMidnight from './char/pumpkin-midnight.png'
 import pumpkinDusk from './char/pumpkin-dusk.png'
 import pumpkinBoss from './char/pumpkin-boss.png'
 import pumpkinBossNight from './char/pumpkin-boss-night.png'
 import pumpkinBranch from './char/pumpkin-branch.png'
 import pumpkinBranchNight from './char/pumpkin-branch-night.png'
+
+/**
+ * Two lanterns carry the whole trail: the one that smiles because you are
+ * done with it, and the one still waiting for you.
+ *
+ * `done` is the same drawing at both ends of the day - a warm smile by
+ * daylight, the same smile re-lit violet after dark (`pumpkin-midnight`).
+ * `todo` is the stop ahead: a red-orange face in the sun, a cold one at night.
+ */
 export const pumpkins = {
-  /** A cleared stop: bright by morning, a hot burn after dark. */
-  lit: { day: pumpkinMorning, night: pumpkinDusk },
-  green: { day: pumpkinGreen, night: pumpkinGreenNight },
-  unlit: { day: pumpkinUnlit, night: pumpkinUnlitNight },
+  done: { day: pumpkinMorning, night: pumpkinMidnight },
+  todo: { day: pumpkinDusk, night: pumpkinGreenNight },
   /** The last stop wears a crown; a side path is a quiet one. */
-  boss: { day: pumpkinBoss, night: pumpkinBossNight },
+  boss: { day: pumpkinBossNight, night: pumpkinBoss },
+  /** The side stop keeps one face for the small hours and one for the sun. */
   branch: { day: pumpkinBranch, night: pumpkinBranchNight },
 } as const
 
