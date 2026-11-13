@@ -120,6 +120,35 @@ function renderList(items: ListItem[]): string {
   return out
 }
 
+
+/**
+ * Some replies arrive on one line: "…开始: 1. **甲** … 2. **乙** … 3. **丙**".
+ * A list needs to start a line, so markdown leaves that as a wall of text.
+ * When a single line carries two or more numbered or bulleted markers, split it
+ * and let the list renderer take over.
+ */
+function expandInlineList(line: string): { lead: string; items: string[]; ordered: boolean } | null {
+  const numbered = line.match(/\s\d{1,2}[.)]\s/g) ?? []
+  const bulleted = line.match(/\s[-•·]\s/g) ?? []
+  if (numbered.length < 2 && bulleted.length < 2) return null
+
+  const pattern = numbered.length >= bulleted.length ? /\s(?=\d{1,2}[.)]\s)/ : /\s(?=[-•·]\s)/
+  const parts = line.split(pattern).map((part) => part.trim()).filter(Boolean)
+  if (parts.length < 2) return null
+
+  const ordered = numbered.length >= bulleted.length
+  const marker = ordered ? /^\d{1,2}[.)]\s+/ : /^[-•·]\s+/
+  const first = parts[0]
+  // The lead-in stays prose unless the very first token is already a marker.
+  const lead = marker.test(first) ? '' : first
+  const items = parts
+    .slice(lead ? 1 : 0)
+    .map((part) => part.replace(marker, ''))
+    .filter(Boolean)
+  if (items.length < 2) return null
+  return { lead, items, ordered }
+}
+
 const html = computed(() => {
   const lines = props.text.replace(/\r\n/g, '\n').split('\n')
   const out: string[] = []
@@ -191,6 +220,17 @@ const html = computed(() => {
     }
 
     if (!trimmed) continue
+
+    const expanded = expandInlineList(trimmed)
+    if (expanded) {
+      if (expanded.lead) out.push(`<p>${inline(expanded.lead)}</p>`)
+      out.push(
+        renderList(
+          expanded.items.map((text) => ({ indent: 0, tag: expanded.ordered ? 'ol' : 'ul', text })),
+        ),
+      )
+      continue
+    }
 
     out.push(`<p>${inline(trimmed)}</p>`)
   }
