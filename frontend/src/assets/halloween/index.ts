@@ -242,7 +242,8 @@ export const pumpkins = {
   todo: { day: pumpkinDusk, night: pumpkinGreenNight },
   /** The last stop wears a crown; a side path is a quiet one. */
   boss: { day: pumpkinBossNight, night: pumpkinBoss },
-  branch: { day: pumpkinBranch, night: pumpkinBranchNight },
+  /** The side stop keeps one face for the small hours and one for the sun. */
+  branch: { day: pumpkinBranchNight, night: pumpkinBranch },
 } as const
 
 /* The charges painted onto the badges: one picture per family of feats. */
