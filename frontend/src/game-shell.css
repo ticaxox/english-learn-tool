@@ -711,7 +711,8 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   display: grid;
   gap: 10px;
   margin-top: auto;
-  padding: 12px;
+  /* Room at the foot for the fold knob to hang in. */
+  padding: 12px 12px 48px;
   border-top: 1px solid var(--rail-line);
 }
 
@@ -798,15 +799,18 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 
 /* The fold is a solid knob on the rail's edge, half on the panel and half over
  * the page. Fixed to the viewport so it rides the edge as the rail folds and
- * never scrolls away. Mid-height, where the rail is empty. */
+ * never scrolls away. It hangs at the foot, and the footer reserves the band. */
 .personal-workspace .rail-handle {
   position: fixed;
   z-index: 40;
   left: calc(var(--rail-width) - 17px);
-  top: calc(50% - 17px);
+  bottom: 14px;
   display: grid;
   width: 34px;
   height: 34px;
+  /* A generic control rule insists on 46px of height, which turned the knob
+   * into an egg. */
+  min-height: 34px;
   /* Without this the generic control padding squeezes the chevron to nothing. */
   padding: 0;
   place-items: center;
