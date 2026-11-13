@@ -6010,21 +6010,23 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 /* ----------------------------------------------------------------- crumb-time */
 
-/* One frame for two things: the digits and the clock that opens the picker.
- * Same shell as the stepper, because a time and a number sit in the same row
- * of the settings form. */
+/* One frame for two things: the digits and the clock that marks it. The whole
+ * frame is the target — a person aims at the time, not at an 18px icon — so
+ * the pointer that stands over it is the pointer, digits included. Same shell
+ * as the stepper, because a time and a number sit in the same row. */
 .personal-workspace .crumb-time {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   width: min(100%, 170px);
   height: var(--ui-control);
-  padding: 0 3px 0 0;
+  padding: 0 12px 0 0;
   border: 2px solid var(--ui-line-strong);
   border-radius: 12px;
   background: var(--ui-surface);
   box-shadow: inset 0 -2px 0 rgb(59 42 26 / 6%);
+  cursor: pointer;
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
@@ -6066,6 +6068,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--ui-ink);
+  cursor: pointer;
 }
 
 .personal-workspace .crumb-time input.crumb-time__input[type="text"]:focus,
@@ -6076,49 +6079,20 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background: transparent;
 }
 
-.personal-workspace .crumb-time__button {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--ui-muted);
-  cursor: pointer;
-  transition: background 120ms ease, color 120ms ease, scale 100ms ease;
-}
-
-/* Visual 38px; the target is 44px. */
-.personal-workspace .crumb-time__button::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-}
-
-.personal-workspace .crumb-time__button:hover:not(:disabled) {
-  background: var(--g-orange-soft);
-  color: var(--g-orange-edge);
-}
-
-.personal-workspace .crumb-time__button:active:not(:disabled) { scale: 0.92; }
-
-.personal-workspace .crumb-time__button:focus-visible {
-  outline: 2px solid var(--g-orange-edge);
-  outline-offset: 1px;
-}
-
-.personal-workspace .crumb-time__button:disabled {
-  color: #cfc5b4;
-  cursor: not-allowed;
-}
-
+/* The clock marks the field as a time and says what a click will do. It is
+ * drawn, not a second target: the frame around it already is one. */
 .personal-workspace .crumb-time__glyph {
   display: block;
+  flex: none;
   width: 18px;
   height: 18px;
+  color: var(--ui-muted);
+  transition: color 120ms ease;
+}
+
+.personal-workspace .crumb-time:hover .crumb-time__glyph,
+.personal-workspace .crumb-time.is-open .crumb-time__glyph {
+  color: var(--g-orange-edge);
 }
 
 /* The panel is a popover, so it lands in the top layer: no card's overflow
@@ -6407,8 +6381,9 @@ html[data-theme='night'] .personal-workspace .crumb-search:hover { border-color:
 
 html[data-theme='night'] .personal-workspace .crumb-file { border-color: #4a3d6b; }
 
-html[data-theme='night'] .personal-workspace .crumb-stepper__step:disabled,
-html[data-theme='night'] .personal-workspace .crumb-time__button:disabled { color: #5b4f7a; }
+html[data-theme='night'] .personal-workspace .crumb-stepper__step:disabled { color: #5b4f7a; }
+
+html[data-theme='night'] .personal-workspace .crumb-time.is-disabled .crumb-time__glyph { color: #5b4f7a; }
 
 /* The picker is a floating card, so its shadow is the room's hard offset, not
  * a soft drop — and at night that offset is nearly black. */

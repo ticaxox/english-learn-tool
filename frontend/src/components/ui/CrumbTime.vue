@@ -217,9 +217,15 @@ function onKeydownAtLarge(event: KeyboardEvent): void {
   inputEl.value?.focus()
 }
 
-function togglePicker(): void {
-  if (open.value) closePicker()
-  else openPicker()
+/** The whole field is the target, not just the clock at its end: the digits
+ *  are what a person aims at, and asking them to hit an 18px icon to change
+ *  the time is the kind of thing only the native control does.
+ *  A click inside the panel must not count — it is a child of this element,
+ *  so the event bubbles up here even though the panel sits in the top layer. */
+function onFieldClick(event: MouseEvent): void {
+  const target = event.target as Node | null
+  if (target && pickerEl.value?.contains(target)) return
+  openPicker()
 }
 
 function setHour(hour: number): void {
@@ -248,6 +254,7 @@ onBeforeUnmount(() => {
     ref="rootEl"
     class="crumb-time"
     :class="{ 'is-disabled': disabled, 'is-invalid': invalid, 'is-open': open }"
+    @click="onFieldClick"
   >
     <input
       :id="id"
@@ -262,34 +269,26 @@ onBeforeUnmount(() => {
       :disabled="disabled"
       :aria-label="label"
       :aria-invalid="invalid || undefined"
+      aria-haspopup="dialog"
+      :aria-expanded="open"
       @input="onInput"
       @keydown="onKeydown"
       @blur="onBlur"
     />
 
-    <button
-      class="crumb-time__button"
-      type="button"
-      :disabled="disabled"
-      :aria-label="`选择${label}`"
-      aria-haspopup="dialog"
-      :aria-expanded="open"
-      @click="togglePicker"
+    <svg
+      class="crumb-time__glyph"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
     >
-      <svg
-        class="crumb-time__glyph"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7.4V12l3.1 1.9" />
-      </svg>
-    </button>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7.4V12l3.1 1.9" />
+    </svg>
 
     <div ref="pickerEl" class="crumb-time__picker" popover="manual" role="dialog" :aria-label="`${label}选择`">
       <div class="crumb-time__wheel">
