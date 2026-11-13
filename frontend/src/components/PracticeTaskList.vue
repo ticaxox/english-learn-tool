@@ -252,6 +252,9 @@ onMounted(() => {
         <TypeMark class="practice-task-mark" :type="row.practiceType" :size="20" />
         <span class="practice-task-type">{{ PRACTICE_TYPE_LABELS[row.practiceType] }}</span>
         <strong>{{ taskName(row) }}</strong>
+        <span class="practice-task-count">
+          {{ row.count }} 题<template v-if="row.score !== null"> · {{ Math.round(row.score) }} 分</template>
+        </span>
         <span class="practice-task-status" :class="`is-${row.status}`">{{ statusLabel(row) }}</span>
         <AppIcon name="arrow" />
       </DivButton>

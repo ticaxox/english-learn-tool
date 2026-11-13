@@ -1108,3 +1108,21 @@ html[data-theme='night'] .personal-workspace .records-detail .practice-article-p
   .personal-workspace .records-filters__tail { justify-content: space-between; }
 }
 
+/* ------------------------------------------- 题目列表: the generated sets */
+
+/* The row gains its question count and score where the page has room for
+ * them; the hub's compact copy of the same list keeps its five columns. */
+.personal-workspace .practice-tasks-page .practice-task-row {
+  grid-template-columns: 4.2rem 7rem minmax(0, 1fr) auto auto auto;
+  gap: 12px;
+}
+.personal-workspace .practice-tasks-page .practice-task-row > svg { justify-self: end; }
+
+@media (max-width: 720px) {
+  .personal-workspace .practice-tasks-page .practice-task-row {
+    grid-template-columns: 3rem 5.5rem minmax(0, 1fr) auto auto;
+    gap: 8px;
+  }
+  .personal-workspace .practice-tasks-page .practice-task-count { display: none; }
+}
+
