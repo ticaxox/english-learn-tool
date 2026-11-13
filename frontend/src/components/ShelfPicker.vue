@@ -1,10 +1,14 @@
 <script setup lang="ts">
 /**
- * The three memory modes as books standing on a shelf.
+ * The three memory drills plus the conversation drill, with the AI exercise
+ * types on the row below.
  *
- * Each book is a real 3D object: a spine you see face-on at rest, and a cover
- * that swings out when you hover or focus it. Disabled modes stay on the shelf
- * as chained, dimmed books so the shelf never reflows when config changes.
+ * The drills are cards *inside* - the flashcard question is a physical card you
+ * turn over - but the shelf entry is still a book, the same object the exercise
+ * row uses. What this row changes is layout: the conversation drill belongs
+ * here (it is one dialogue, not a generated set), it stands on the page itself
+ * with no board under it, and its covers are a little smaller than the books
+ * below because four sit across instead of three.
  *
  * `.module-card` and `aria-disabled` are kept as the contract the view tests
  * and the screen reader both rely on.
@@ -12,16 +16,31 @@
 import { computed } from 'vue'
 import { practiceBooks } from '../assets/halloween'
 import ArtImage from './ArtImage.vue'
+import type { PracticeType } from '../api/practice'
 
 export type ShelfModule = 'flashcard' | 'choice' | 'spelling'
 
-const props = defineProps<{
+/** A book that sits on this row rather than the AI-exercise row below. */
+export interface ShelfBook {
+  type: PracticeType
+  label: string
+  hint: string
+}
+
+const props = withDefaults(defineProps<{
   modules: readonly ShelfModule[]
   enabled: readonly ShelfModule[]
   labels: Record<string, string>
-}>()
+  /** Extra entries drawn as books, after the cards. */
+  books?: readonly ShelfBook[]
+}>(), {
+  books: () => [],
+})
 
-const emit = defineEmits<{ (event: 'pick', module: ShelfModule): void }>()
+const emit = defineEmits<{
+  (event: 'pick', module: ShelfModule): void
+  (event: 'pick-book', type: PracticeType): void
+}>()
 
 /** Hints are fixed per mode, matching the copy the old cards carried. */
 const hints: Record<ShelfModule, string> = {
@@ -39,11 +58,11 @@ function pick(module: ShelfModule): void {
 </script>
 
 <template>
-  <div class="shelf" role="group" aria-label="选择一种复习方式">
+  <div class="shelf shelf--cards" role="group" aria-label="选择一种复习方式">
     <button
       v-for="module in modules"
       :key="module"
-      class="module-card shelf-book"
+      class="module-card shelf-book shelf-card"
       :class="[`shelf-book--${module}`, { 'is-locked': !enabled.includes(module) }]"
       type="button"
       :aria-disabled="enabled.includes(module) ? undefined : 'true'"
@@ -55,11 +74,24 @@ function pick(module: ShelfModule): void {
       <span class="shelf-book__title">{{ titles[module] }}</span>
       <span class="shelf-book__hint">{{ hints[module] }}</span>
     </button>
-    <span class="shelf-board" aria-hidden="true"></span>
+
+    <button
+      v-for="book in books"
+      :key="book.type"
+      class="module-card shelf-book shelf-card"
+      :class="`shelf-book--${book.type}`"
+      type="button"
+      @click="emit('pick-book', book.type)"
+    >
+      <ArtImage class="shelf-book__art" :set="practiceBooks[book.type]" />
+
+      <span class="shelf-book__title">{{ book.label }}</span>
+      <span class="shelf-book__hint">{{ book.hint }}</span>
+    </button>
   </div>
 </template>
 
 <style scoped>
-/* The shelf itself lives in practice.css: the AI exercise types stand on the
-   same board, so both components need the same rules. */
+/* The shelf rules live in practice.css: the AI exercise types below use the
+   same ones, so both rows stay one system. */
 </style>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import {
@@ -26,10 +26,18 @@ function fileOnDisk(url: string): string {
   return resolve(assetDir, dir, name)
 }
 
+function pngSize(url: string): { width: number; height: number } {
+  const buffer = readFileSync(fileOnDisk(url))
+  // PNG signature is 8 bytes, then the IHDR length + type are 8 more, so the
+  // width and height sit at offsets 16 and 20.
+  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) }
+}
+
 describe('halloween art set', () => {
   it('covers every practice type with both themes', () => {
     expect(Object.keys(practiceBooks).sort()).toEqual([
       'choice',
+      'conversation',
       'fill_blank',
       'flashcard',
       'reading',
@@ -71,6 +79,23 @@ describe('halloween art set', () => {
     ]
     const missing = urls.filter((url) => !existsSync(fileOnDisk(url)))
     expect(missing).toEqual([])
+  })
+
+  it('paints both halves of a pair on the same canvas', () => {
+    // Day and night are two generations of one composition. If they are drawn
+    // on canvases of different sizes, switching theme resizes and re-centres
+    // the picture - the bug this test exists to stop. Sizes below are the
+    // shipped canvas for each set; content inside it may differ.
+    const themed = { ...practiceBooks, ...illustration }
+    const mismatched = Object.entries(themed)
+      .map(([name, set]) => ({
+        name,
+        day: pngSize(set.day),
+        night: pngSize(set.night),
+      }))
+      .filter(({ day, night }) => day.width !== night.width || day.height !== night.height)
+      .map(({ name, day, night }) => `${name}: ${day.width}x${day.height} vs ${night.width}x${night.height}`)
+    expect(mismatched).toEqual([])
   })
 
   it('points every night painting at a file that exists', () => {

@@ -535,9 +535,22 @@
 .shelf {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.2rem;
   padding: 1.4rem 1rem 2.4rem;
+}
+
+/* The card row stands on the page itself: no board under it. Its artwork is a
+ * little smaller than the books below, because four sit across and they are
+ * drills rather than the main event. */
+.shelf--cards {
+  padding-bottom: 0.6rem;
+}
+
+/* The card art leaves more margin inside its canvas than a book cover does,
+ * so the same width would read visibly smaller. */
+.shelf--cards .shelf-book__art {
+  width: min(100%, 140px);
 }
 
 /* The generated artwork IS the book. `.module-card` in learning.css still
@@ -550,7 +563,7 @@
   display: grid;
   justify-items: center;
   align-content: end;
-  gap: 0.25rem;
+  gap: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -573,7 +586,10 @@
   display: block;
   width: min(100%, 190px);
   height: auto;
-  aspect-ratio: 2 / 3;
+  /* The book files are square canvases with the artwork centred in them, so the
+   * box is square too. Forcing 2:3 here left 66px of dead space between the
+   * book and its name, which is what pushed the label away from the cover. */
+  aspect-ratio: 1 / 1;
   /* The book stands on the board: a soft contact shadow, no box behind it. */
   filter: drop-shadow(0 10px 10px rgb(40 24 8 / 26%));
   transition: transform 260ms cubic-bezier(0.2, 0.9, 0.25, 1.05), filter 260ms ease;
@@ -625,8 +641,7 @@
   .shelf-book__hint { font-size: 0.72rem; }
 }
 
-/* Five across is a tighter row than three: the covers give a little so they
-   do not run into each other. */
+/* Four across: the covers give a little so they do not run into each other. */
 .practice-shelf .shelf-book__art {
   width: min(100%, 132px);
 }
@@ -721,25 +736,3 @@
   }
 }
 
-/* The spelling blanking mode belongs to memory training, not to an AI set. */
-.practice-spelling-setting {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-end;
-  margin: -0.6rem 0 0;
-  font-size: 0.82rem;
-  color: var(--ui-muted, #7a6448);
-}
-
-.practice-spelling-setting select {
-  min-width: 9rem;
-  max-width: 12rem;
-  padding: 4px 8px;
-  border: 1px solid var(--ui-line, #ecd9bb);
-  border-radius: 8px;
-  background: var(--ui-surface, #fffdf6);
-  color: var(--ui-ink, #35240f);
-  font: inherit;
-  font-size: 0.82rem;
-}
