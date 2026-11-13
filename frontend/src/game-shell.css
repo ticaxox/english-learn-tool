@@ -13,6 +13,21 @@
   --game-forest-soft: #e3f0e1;
   --game-flame: #e8590c;
   --game-shadow: 0 6px 0 rgb(59 42 26 / 12%);
+
+  /* The console rail. It is a dark readout on the paper page by day; the night
+   * set is the same object sunk deeper into the violet room, with the mint the
+   * night art uses where the day art uses pumpkin. Two drawings, not a filter. */
+  --rail-panel: #241733;
+  --rail-panel-hi: #2f2044;
+  --rail-line: #463366;
+  --rail-ink: #f3e9d8;
+  --rail-muted: #a894c4;
+  --rail-accent: #ff9600;
+  --rail-mark: #ffc800;
+  --rail-done: #5fd39a;
+  --coach-face: #ff9600;
+  --coach-face-hover: #e07f00;
+  --coach-ink: #2f1c05;
 }
 
 /* --------------------------------------------------------------- HUD */
@@ -29,6 +44,21 @@ html[data-theme='night'] .personal-workspace {
   --game-forest: #5fd39a;
   --game-forest-soft: #1c3b33;
   --game-line: #3d2c66;
+
+  /* Night rail: the panel is the deepest plum in the room, and the pumpkin
+   * marker becomes the mint the night artwork grows its vines in. */
+  --rail-panel: #120b23;
+  --rail-panel-hi: #1d1436;
+  --rail-line: #392a5e;
+  --rail-ink: #efe6f7;
+  --rail-muted: #9b8cb8;
+  --rail-accent: #5fd39a;
+  --rail-mark: #ffd166;
+  --rail-done: #ffd166;
+  /* Night orange is already light, so darkening it would eat the ink on it. */
+  --coach-face: #ff9f45;
+  --coach-face-hover: #ffb877;
+  --coach-ink: #2b1607;
 }
 
 html[data-theme='night'] .personal-workspace .game-hud {
@@ -416,18 +446,371 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 .levelup-title { margin: 2px 0 0; font-size: 16px; font-weight: 800; }
 .levelup-hint { margin: 10px 0 0; color: var(--ui-muted); font-size: 11px; }
 
-/* ------------------------------------------------------- sidebar + nav */
+/* --------------------------------------------------- sidebar: the console */
 
-/* The active destination gets a small level-plate look instead of a flat tint. */
-.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active {
-  border-color: var(--game-ink, #2b1d0f);
-  background: linear-gradient(180deg, #fffdf6, #f7ebd6);
-  box-shadow: 0 4px 0 rgb(43 29 15 / 14%);
-  color: var(--game-ink, #2b1d0f);
-  font-weight: 900;
+/* The rail is a readout, not a list. Its top-right corner is cut like a
+ * panel, the level sits in a boxed plate, and the row you are on is marked
+ * with a hard bar and a bracket — the cursor of a text-mode game. */
+.personal-workspace .workspace-sidebar {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  display: flex;
+  width: 236px;
+  height: 100vh;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--rail-line);
+  background-color: var(--rail-panel);
+  /* The cut corner is drawn, not implied: the hairline follows the diagonal
+   * so the notch reads as an edge of the panel. */
+  background-image: linear-gradient(
+    45deg,
+    transparent 48%,
+    var(--rail-line) 48%,
+    var(--rail-line) 57%,
+    transparent 57%
+  );
+  background-repeat: no-repeat;
+  background-position: top right;
+  background-size: 18px 18px;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+  color: var(--rail-ink);
 }
 
-.personal-workspace .workspace-nav-link.member-nav-link svg { color: currentColor; }
+/* --- the crest --- */
+
+.personal-workspace .workspace-brand {
+  display: flex;
+  min-height: 0;
+  gap: 10px;
+  align-items: center;
+  padding: 16px 14px 12px;
+  color: var(--rail-ink);
+}
+
+.personal-workspace .workspace-brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: var(--rail-mark);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+.personal-workspace .workspace-brand-mark .crumbo-mark,
+.personal-workspace .workspace-brand-mark .whisker-crumb-mark {
+  width: 27px;
+  height: 27px;
+}
+
+.personal-workspace .workspace-brand-copy { gap: 0; }
+
+.personal-workspace .workspace-brand-copy strong {
+  color: var(--rail-ink);
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.personal-workspace .workspace-brand-copy small {
+  color: var(--rail-muted);
+  font-size: 11px;
+}
+
+/* --- level plate --- */
+
+.personal-workspace .rail-plate {
+  display: grid;
+  gap: 8px;
+  margin: 0 12px 2px;
+  padding: 11px 11px 12px;
+  border: 1px solid var(--rail-line);
+  background: var(--rail-panel-hi);
+}
+
+.personal-workspace .rail-plate__lv {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.personal-workspace .rail-plate__lv strong {
+  color: var(--rail-accent);
+  font-family: var(--font-code);
+  font-size: 1.45rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.personal-workspace .rail-plate__lv span {
+  overflow: hidden;
+  color: var(--rail-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.personal-workspace .rail-plate__xp {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.personal-workspace .rail-plate__xp i {
+  height: 6px;
+  background: var(--rail-line);
+}
+
+.personal-workspace .rail-plate__xp i.is-on { background: var(--rail-accent); }
+
+.personal-workspace .rail-plate__num {
+  margin: 0;
+  color: var(--rail-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* --- nav --- */
+
+.personal-workspace .workspace-nav {
+  display: grid;
+  gap: 2px;
+  padding: 12px 12px;
+}
+
+.personal-workspace .rail-kicker {
+  margin: 0 0 6px;
+  padding-left: 14px;
+  color: var(--rail-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 42px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--rail-ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+  transform: none;
+  transition: background 130ms ease, color 130ms ease;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link svg {
+  width: 20px;
+  height: 20px;
+  color: var(--rail-muted);
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link:hover,
+.personal-workspace .workspace-nav-link.member-nav-link:focus-visible {
+  border: 0;
+  background: var(--rail-panel-hi);
+  color: var(--rail-ink);
+  box-shadow: none;
+  transform: none;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link:hover svg { color: var(--rail-ink); }
+
+/* The current row: a hard bar on the left, a bracket on the right. The legacy
+ * information-architecture layer paints this state with !important, so the two
+ * properties it owns have to answer in kind. */
+.personal-workspace .workspace-nav-link.member-nav-link.router-link-active,
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active {
+  border: 0;
+  background: var(--rail-panel-hi) !important;
+  color: var(--rail-ink) !important;
+  box-shadow: none;
+  font-weight: 900;
+  transform: none;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link.router-link-active svg,
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active svg {
+  color: var(--rail-accent) !important;
+}
+
+/* The night layer tints every nav hover with a page colour; the rail has its own. */
+html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link:hover,
+html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link.router-link-active:hover,
+html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active:hover {
+  border: 0;
+  background: var(--rail-panel-hi);
+  color: var(--rail-ink);
+  box-shadow: none;
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link.router-link-active::before,
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active::before {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 4px;
+  background: var(--rail-accent);
+  content: "";
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link.router-link-active::after,
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active::after {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  bottom: 9px;
+  width: 7px;
+  border-top: 2px solid var(--rail-accent);
+  border-right: 2px solid var(--rail-accent);
+  border-bottom: 2px solid var(--rail-accent);
+  content: "";
+}
+
+.personal-workspace .workspace-nav-link.member-nav-link.router-link-active svg,
+.personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active svg {
+  color: var(--rail-accent);
+}
+
+/* --- foot: today's quests and the two running meters --- */
+
+.personal-workspace .workspace-sidebar-footer {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--rail-line);
+}
+
+.personal-workspace .rail-quests {
+  display: grid;
+  gap: 8px;
+  padding: 11px 10px 12px;
+  border: 1px solid var(--rail-line);
+  background: var(--rail-panel-hi);
+}
+
+.personal-workspace .rail-quests__head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--rail-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.personal-workspace .rail-quests__head strong { color: var(--rail-accent); }
+
+.personal-workspace .rail-quests__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.personal-workspace .rail-quests__list li {
+  display: grid;
+  grid-template-columns: 11px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  color: var(--rail-muted);
+  font-size: 12px;
+}
+
+.personal-workspace .rail-quests__list li::before {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--rail-line);
+  content: "";
+}
+
+.personal-workspace .rail-quests__list li.is-done { color: var(--rail-ink); }
+.personal-workspace .rail-quests__list li.is-done::before {
+  border-color: var(--rail-done);
+  background: var(--rail-done);
+}
+
+.personal-workspace .rail-meters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.personal-workspace .rail-meter {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 5px 9px 6px;
+  border: 1px solid var(--rail-line);
+}
+
+.personal-workspace .rail-meter strong {
+  color: var(--rail-ink);
+  font-family: var(--font-code);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.personal-workspace .rail-meter span {
+  color: var(--rail-muted);
+  font-size: 11px;
+}
+
+.personal-workspace .sidebar-collapse {
+  display: flex;
+  width: 100%;
+  min-height: 30px;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rail-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--rail-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.personal-workspace .sidebar-collapse:hover {
+  border-color: var(--rail-muted);
+  color: var(--rail-ink);
+}
+
+.personal-workspace .sidebar-collapse svg { width: 13px; height: 13px; }
 
 /* Mobile bottom nav reads as four chunky buttons. */
 .personal-workspace .member-mobile-nav a {
@@ -437,9 +820,210 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 
 .personal-workspace .member-mobile-nav a:active { transform: scale(0.94); }
 
-/* The brand mark is the game's crest: a soft glow behind the cat. */
-.personal-workspace .workspace-brand-mark {
-  filter: drop-shadow(0 2px 0 rgb(43 29 15 / 12%));
+/* ---------------------------------------------------- top bar: the readout */
+
+/* One strip, three zones: where you are, the tabs of this section, what you
+ * can do. The bar is the page's paper, so the rail stays the only dark thing. */
+.personal-workspace .workspace-topbar {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  min-height: 66px;
+  gap: 18px;
+  align-items: center;
+  padding: 0 clamp(16px, 2.2vw, 26px);
+  border-bottom: 1px solid var(--ui-line);
+  background: var(--ui-canvas);
+}
+
+.personal-workspace .workspace-topbar-heading {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.personal-workspace .workspace-topbar-heading strong {
+  color: var(--ui-ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.personal-workspace .workspace-topbar-heading span {
+  color: var(--ui-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* The section's own tabs sit beside the title, parted from it by a hairline. */
+.personal-workspace .workspace-topbar-tabs {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  align-self: stretch;
+  min-width: 0;
+  padding-left: 16px;
+  overflow-x: auto;
+  border-left: 1px solid var(--ui-line);
+}
+
+.personal-workspace .workspace-topbar > .workspace-topbar-tabs {
+  position: static;
+  transform: none;
+}
+
+.personal-workspace .workspace-topbar-tab {
+  display: grid;
+  place-items: center;
+  padding: 0 12px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ui-muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.personal-workspace .workspace-topbar-tab:hover {
+  background: transparent;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .workspace-topbar-tab.is-active {
+  border-bottom-color: var(--g-orange-edge);
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .workspace-topbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* Today's quest count, the same figure the rail lists underneath it. */
+.personal-workspace .topbar-quest {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.personal-workspace .topbar-quest strong {
+  color: var(--ui-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The coach button keeps the panel's cut corners, in pumpkin. */
+.personal-workspace .workspace-coach-button.member-concierge-button {
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 0;
+  background: var(--coach-face);
+  box-shadow: none;
+  color: var(--coach-ink);
+  font-size: 0.84rem;
+  font-weight: 900;
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+}
+
+.personal-workspace .workspace-coach-button.member-concierge-button:hover {
+  background: var(--coach-face-hover);
+  color: var(--coach-ink);
+}
+
+.personal-workspace .workspace-coach-button.member-concierge-button svg { width: 16px; height: 16px; }
+
+.personal-workspace .workspace-avatar-button.ia-profile-trigger {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  border: 1px solid var(--ui-line);
+  border-radius: 50%;
+  background: var(--g-gold);
+  color: var(--g-on-gold);
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+/* --- the rail folded to icons --- */
+
+.personal-workspace.is-sidebar-collapsed .workspace-sidebar {
+  width: 84px;
+  padding: 0;
+}
+
+.personal-workspace.is-sidebar-collapsed .workspace-brand {
+  justify-content: center;
+  padding: 16px 0 10px;
+}
+
+.personal-workspace.is-sidebar-collapsed .workspace-brand-copy,
+.personal-workspace.is-sidebar-collapsed .member-nav-link span,
+.personal-workspace.is-sidebar-collapsed .sidebar-collapse span { display: none; }
+
+.personal-workspace.is-sidebar-collapsed .rail-plate {
+  justify-items: center;
+  margin: 0 10px 2px;
+  padding: 10px 0 11px;
+}
+
+.personal-workspace.is-sidebar-collapsed .rail-plate__lv { justify-content: center; }
+.personal-workspace.is-sidebar-collapsed .rail-plate__lv span,
+.personal-workspace.is-sidebar-collapsed .rail-plate__xp,
+.personal-workspace.is-sidebar-collapsed .rail-plate__num,
+.personal-workspace.is-sidebar-collapsed .rail-kicker,
+.personal-workspace.is-sidebar-collapsed .rail-quests,
+.personal-workspace.is-sidebar-collapsed .rail-meters { display: none; }
+
+.personal-workspace.is-sidebar-collapsed .workspace-nav { padding: 12px 10px; }
+
+.personal-workspace.is-sidebar-collapsed .workspace-nav-link.member-nav-link {
+  grid-template-columns: 20px;
+  justify-content: center;
+  padding: 0;
+}
+
+.personal-workspace.is-sidebar-collapsed .workspace-sidebar-footer { padding: 10px; }
+.personal-workspace.is-sidebar-collapsed .sidebar-collapse svg { transform: rotate(180deg); }
+
+@media (max-width: 960px) {
+  .personal-workspace .topbar-quest { display: none; }
+  .personal-workspace .workspace-topbar-heading span { display: none; }
+}
+
+@media (max-width: 860px) {
+  .personal-workspace .workspace-topbar { min-height: 60px; gap: 12px; }
+  .personal-workspace .workspace-topbar-tabs {
+    align-self: auto;
+    padding-left: 12px;
+    overflow-x: auto;
+  }
 }
 
 /* ------------------------------------------------------------ empty states */

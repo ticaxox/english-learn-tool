@@ -19,7 +19,6 @@ import WordbookExportDialog from '../components/WordbookExportDialog.vue'
 import WordbookImportDialog from '../components/WordbookImportDialog.vue'
 import WordbookShelfCard from '../components/WordbookShelfCard.vue'
 import AppIcon from '../components/AppIcon.vue'
-import GameHud from '../components/GameHud.vue'
 import CrumboMark from '../components/CrumboMark.vue'
 
 const PAGE_SIZE = 12
@@ -191,8 +190,6 @@ onMounted(() => {
 
 <template>
   <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page crumb-wordbooks">
-    <GameHud />
-
     <header class="crumb-shelf-header">
       <div class="crumb-shelf-heading">
         <CrumboMark size="medium" />

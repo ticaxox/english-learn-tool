@@ -23,7 +23,6 @@ import MemoryPracticeView from './MemoryPracticeView.vue'
 import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryModule } from '../types/learning'
 import PracticeTaskList from '../components/PracticeTaskList.vue'
 import PracticeShelf from '../components/PracticeShelf.vue'
-import GameHud from '../components/GameHud.vue'
 
 import '../practice.css'
 import ShelfPicker from '../components/ShelfPicker.vue'
@@ -262,8 +261,6 @@ onMounted(() => {
     <PracticeSessionView v-else-if="activeSessionId" embedded :session-id="activeSessionId" />
 
     <template v-else>
-      <GameHud />
-
       <ShelfPicker
         :modules="MEMORY_MODULES"
         :enabled="enabledMemoryModules"
