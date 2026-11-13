@@ -6,7 +6,6 @@ const props = defineProps<{ embedded?: boolean }>()
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import CrumbIcon from '../components/ui/CrumbIcon.vue'
-import GameHud from '../components/GameHud.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ChallengeBossPanel from '../components/ChallengeBossPanel.vue'
@@ -328,7 +327,6 @@ onMounted(() => {
 
 <template>
   <article class="challenge-page challenge-game-stage crumb-challenge workspace-page" :class="{ 'is-embedded': embedded }">
-    <GameHud v-if="!embedded" />
     <header v-if="!embedded" class="workspace-page-header challenge-page-header">
       <div>
         <p class="eyebrow">今日学习 · 学习地图</p>

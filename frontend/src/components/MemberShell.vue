@@ -7,6 +7,8 @@ import CoachView from '../views/CoachView.vue'
 import CrumboMark from './CrumboMark.vue'
 import { getActivePinia } from 'pinia'
 import { useAuthStore } from '../stores/auth'
+import { useGamification } from '../composables/useGamification'
+import { QUEST_LABELS } from '../api/progress'
 
 const props = defineProps<{
   displayName: string
@@ -50,6 +52,27 @@ const pageTitles: Record<string, string> = {
   'settings-security': '设置',
   'settings-knowledge': '设置',
 }
+
+// The rail is the player's status panel: the same numbers the HUD used to
+// repeat at the top of every page, kept in one place the page cannot scroll away.
+const gamification = useGamification()
+const progress = gamification.progress
+const level = computed(() => progress.value?.level ?? null)
+const xpIntoLevel = computed(() => level.value?.xpIntoLevel ?? 0)
+const xpForNextLevel = computed(() => level.value?.xpForNextLevel ?? 0)
+/** Ten segments, so the plate reads as a tally rather than a smooth bar. */
+const xpSegments = computed(() => {
+  if (!level.value || xpForNextLevel.value <= 0) return 0
+  return Math.round((xpIntoLevel.value / xpForNextLevel.value) * 10)
+})
+const quests = computed(() =>
+  (progress.value?.quests ?? []).map((quest) => ({
+    key: quest.key,
+    done: quest.completed,
+    label: QUEST_LABELS[quest.key] ?? quest.key,
+  })),
+)
+const questsDone = computed(() => quests.value.filter((quest) => quest.done).length)
 
 const currentPageTitle = computed(() => pageTitles[String(route.name ?? '')] ?? '学习工作台')
 // Practice and memory are their own screens: no app sidebar or top bar there.
@@ -180,6 +203,9 @@ watch(() => route.fullPath, () => {
 onMounted(() => {
   document.addEventListener('click', onDocumentClick)
   document.addEventListener('keydown', onKeydown)
+  // One load for the whole app: the composable keeps a module-level copy, so
+  // the first page that mounts the shell fills the plate for every other page.
+  if (!progress.value) void gamification.load()
 })
 
 onBeforeUnmount(() => {
@@ -204,7 +230,19 @@ onBeforeUnmount(() => {
         </span>
       </RouterLink>
 
+      <section class="rail-plate" aria-label="等级进度">
+        <p class="rail-plate__lv">
+          <strong>LV {{ level?.level ?? 1 }}</strong>
+          <span>{{ level?.title ?? '拾屑人' }}</span>
+        </p>
+        <div class="rail-plate__xp" aria-hidden="true">
+          <i v-for="segment in 10" :key="segment" :class="{ 'is-on': segment <= xpSegments }"></i>
+        </div>
+        <p class="rail-plate__num">{{ xpIntoLevel }} / {{ xpForNextLevel }} XP</p>
+      </section>
+
       <nav class="workspace-nav ia-nav" aria-label="主导航">
+        <p class="rail-kicker">菜单</p>
         <section
           v-for="link in primaryLinks"
           :key="link.key"
@@ -224,15 +262,46 @@ onBeforeUnmount(() => {
       </nav>
 
       <div class="workspace-sidebar-footer">
+        <section v-if="quests.length" class="rail-quests" aria-label="今日任务">
+          <p class="rail-quests__head">
+            <span>今日任务</span>
+            <strong>{{ questsDone }} / {{ quests.length }}</strong>
+          </p>
+          <ul class="rail-quests__list">
+            <li v-for="quest in quests" :key="quest.key" :class="{ 'is-done': quest.done }">
+              {{ quest.label }}
+            </li>
+          </ul>
+        </section>
+
+        <div class="rail-meters">
+          <p class="rail-meter">
+            <strong>{{ progress?.crumbs ?? 0 }}</strong>
+            <span>碎屑</span>
+          </p>
+          <p class="rail-meter">
+            <strong>{{ progress?.streak ?? 0 }}</strong>
+            <span>连续天</span>
+          </p>
+        </div>
+
         <DivButton
-          class="sidebar-collapse"
+          class="rail-handle"
           type="button"
           :aria-label="sidebarCollapsed ? '展开导航栏' : '折叠导航栏'"
           :aria-expanded="!sidebarCollapsed"
           @click="toggleSidebar"
         >
-          <AppIcon name="arrow-left" />
-          <span>折叠导航</span>
+          <svg class="rail-handle__chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M14.5 5.5 8 12l6.5 6.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
         </DivButton>
       </div>
     </aside>
@@ -240,6 +309,10 @@ onBeforeUnmount(() => {
     <div class="workspace-main">
       <header v-if="!immersive" class="workspace-topbar member-topbar ia-topbar">
         <span class="sr-only">今天也学一点</span>
+        <div class="workspace-topbar-heading">
+          <strong>{{ currentPageTitle }}</strong>
+          <span>{{ currentDate }}</span>
+        </div>
         <nav v-if="sectionTabs.length" class="workspace-topbar-tabs" aria-label="二级导航">
           <RouterLink
             v-for="tab in sectionTabs"
@@ -252,10 +325,6 @@ onBeforeUnmount(() => {
             {{ tab.label }}
           </RouterLink>
         </nav>
-        <div v-else class="workspace-topbar-heading">
-          <strong>{{ currentPageTitle }}</strong>
-          <span>{{ currentDate }}</span>
-        </div>
         <div class="workspace-topbar-actions ia-topbar-actions">
           <ThemeSwitch />
 
