@@ -796,23 +796,22 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   font-size: 11px;
 }
 
-/* The fold is a drawer handle, not a button in a row: a small solid pull that
- * straddles the rail's edge, half on the panel and half over the page. Fixed to
- * the viewport so it rides the edge as the rail folds and never scrolls away. */
+/* The fold is a solid knob on the rail's edge, half on the panel and half over
+ * the page. Fixed to the viewport so it rides the edge as the rail folds and
+ * never scrolls away. Mid-height, where the rail is empty. */
 .personal-workspace .rail-handle {
   position: fixed;
   z-index: 40;
-  left: calc(var(--rail-width) - 12px);
-  /* Mid-height: the rail's foot is full of the quest card and the meters. */
-  top: calc(50% - 23px);
+  left: calc(var(--rail-width) - 17px);
+  top: calc(50% - 17px);
   display: grid;
-  width: 24px;
-  height: 46px;
+  width: 34px;
+  height: 34px;
   /* Without this the generic control padding squeezes the chevron to nothing. */
   padding: 0;
   place-items: center;
   border: 0;
-  border-radius: 999px;
+  border-radius: 50%;
   background: var(--rail-handle-face);
   box-shadow: 0 2px 0 rgb(0 0 0 / 20%);
   color: var(--rail-handle-ink);
@@ -822,7 +821,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 .personal-workspace .rail-handle:hover { background: var(--rail-handle-hover); }
 .personal-workspace .rail-handle:active { transform: scale(0.94); }
 
-.personal-workspace .rail-handle__chevron { width: 13px; height: 13px; }
+.personal-workspace .rail-handle__chevron { width: 15px; height: 15px; }
 
 /* Mobile bottom nav reads as four chunky buttons. */
 .personal-workspace .member-mobile-nav a {
