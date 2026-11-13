@@ -289,13 +289,16 @@ html[data-theme='night'] .personal-workspace {
   font: inherit;
 }
 
-.personal-workspace .kb-body { padding: 4px 20px 28px; }
+/* The grid runs to the edges of the pane: only the labels keep an inset, so
+ * the shelves fill the space instead of sitting in a margin. */
+.personal-workspace .kb-body { padding: 0 0 0; }
 
 .personal-workspace .kb-section {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 14px 0 10px;
+  padding: 0 20px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -306,37 +309,40 @@ html[data-theme='night'] .personal-workspace {
 .personal-workspace .kb-section::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--ui-line); }
 
 /* ------------------------------------------------------------- folders */
+
+/* No cards. The pane is one field of cells with hairlines between them, so the
+ * shelves fill the width instead of floating in it as boxes. */
 .personal-workspace .kb-folders {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  border-top: 1px solid var(--ui-line);
 }
 
 .personal-workspace .kb-folder {
   position: relative;
-  border: 1px solid var(--ui-line);
-  border-radius: 9px;
   background: var(--ui-surface);
-  transition: background 130ms ease, border-color 130ms ease;
+  box-shadow: inset -1px -1px 0 var(--ui-line);
+  transition: background 130ms ease;
 }
 
-.personal-workspace .kb-folder:hover { background: var(--ui-surface-subtle); border-color: var(--ui-line-strong); }
+.personal-workspace .kb-folder:hover { background: var(--ui-surface-subtle); }
 
 .personal-workspace .kb-folder__hit {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 12px;
+  height: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
   border: 0;
-  border-radius: 9px;
   background: transparent;
   color: var(--ui-ink);
   text-align: left;
   cursor: pointer;
 }
 
-.personal-workspace .kb-folder__icon { width: 26px; height: 26px; flex: none; color: var(--g-orange); }
+.personal-workspace .kb-folder__icon { width: 24px; height: 24px; flex: none; color: var(--g-orange); }
 .personal-workspace .kb-folder__text { min-width: 0; flex: 1 1 auto; }
 
 .personal-workspace .kb-folder__name {
@@ -350,26 +356,22 @@ html[data-theme='night'] .personal-workspace {
 .personal-workspace .kb-folder__meta { display: block; margin-top: 2px; font-size: 11px; color: var(--ui-muted); }
 
 /* ----------------------------------------------------------- documents */
+
 .personal-workspace .kb-docs {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  border-top: 1px solid var(--ui-line);
 }
 
 .personal-workspace .kb-doc {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--ui-line);
-  border-radius: 9px;
   background: var(--ui-surface);
-  transition: background 130ms ease, border-color 130ms ease, transform 130ms ease;
+  box-shadow: inset -1px -1px 0 var(--ui-line);
+  transition: background 130ms ease;
 }
 
-.personal-workspace .kb-doc:hover {
-  background: var(--ui-surface-subtle);
-  border-color: var(--ui-line-strong);
-  transform: translateY(-1px);
-}
+.personal-workspace .kb-doc:hover { background: var(--ui-surface-subtle); }
 
 .personal-workspace .kb-doc::before {
   content: '';
@@ -384,10 +386,11 @@ html[data-theme='night'] .personal-workspace {
 .personal-workspace .kb-doc__hit {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  min-height: 128px;
-  padding: 14px 14px 12px;
+  height: 100%;
+  min-height: 108px;
+  padding: 14px 16px 12px 18px;
   border: 0;
   background: transparent;
   color: var(--ui-ink);
@@ -436,9 +439,8 @@ html[data-theme='night'] .personal-workspace {
   place-items: center;
   border: 0;
   border-radius: 6px;
-  background: var(--ui-surface);
+  background: var(--ui-surface-subtle);
   color: var(--ui-muted);
-  box-shadow: 0 0 0 1px var(--ui-line);
   cursor: pointer;
   opacity: 0;
   transition: opacity 120ms ease;
@@ -450,7 +452,7 @@ html[data-theme='night'] .personal-workspace {
 .personal-workspace .kb-more:hover { color: var(--ui-ink); }
 
 /* ------------------------------------------------------------ list view */
-.personal-workspace .kb-table { display: grid; border: 1px solid var(--ui-line); border-radius: 9px; overflow: hidden; }
+.personal-workspace .kb-table { display: grid; border-top: 1px solid var(--ui-line); }
 
 .personal-workspace .kb-trow,
 .personal-workspace .kb-thead {
