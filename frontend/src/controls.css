@@ -183,7 +183,11 @@
     appearance: base-select;
   }
 
-  /* The arrow becomes a drawn child, so the background icon goes away. */
+  /* The arrow becomes a drawn child, so the background icon goes away — on
+   * hover too. The hover rule below carries a `:hover` and therefore outranks
+   * the plain `select` rule above it, so it has to be answered at the same
+   * specificity or the fallback arrow returns the moment the pointer arrives
+   * and draws a second chevron beside the real one. */
   .personal-workspace select {
     background-image: none;
     padding-right: 14px;
@@ -191,6 +195,8 @@
     align-items: center;
     gap: 8px;
   }
+
+  .personal-workspace select:hover { background-image: none; }
 
   .personal-workspace select::picker-icon {
     /* `content: ''` is what removes the platform's own arrow. The icon box is
