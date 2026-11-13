@@ -6,6 +6,7 @@ import CoachImage from '../components/CoachImage.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import CoachMarkdown from '../components/CoachMarkdown.vue'
+import { speak } from '../composables/useSpeechSynthesis'
 import {
   COACH_ACTION_LABELS,
   uploadCoachAttachment,
@@ -261,6 +262,12 @@ async function copyMessage(message: CoachMessage): Promise<void> {
   }
 }
 
+/** Read the whole turn aloud, the same voice the word taps use. */
+function speakMessage(message: CoachMessage): void {
+  const text = coach.messageText(message)
+  if (text) speak(text)
+}
+
 /** Put a line back in play: an answer is re-asked, your own line returns to the box. */
 async function revertTo(message: CoachMessage): Promise<void> {
   if (message.role === 'assistant') {
@@ -425,6 +432,15 @@ async function revertTo(message: CoachMessage): Promise<void> {
                   <DivButton
                     class="coach-message__act"
                     type="button"
+                    aria-label="朗读这条"
+                    title="朗读"
+                    @click="speakMessage(message)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/></svg>
+                  </DivButton>
+                  <DivButton
+                    class="coach-message__act"
+                    type="button"
                     :aria-label="copiedMessageId === message.id ? '已复制' : '复制这条'"
                     :title="copiedMessageId === message.id ? '已复制' : '复制'"
                     @click="copyMessage(message)"
@@ -535,7 +551,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
                 :disabled="coach.sending.value || Boolean(coach.streamingMessageId.value)"
                 @click="dictation.toggle()"
               >
-                <AppIcon name="speaker" />
+                <AppIcon name="microphone" />
               </DivButton>
 
               <DivButton

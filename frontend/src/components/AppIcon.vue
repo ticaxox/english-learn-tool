@@ -20,6 +20,7 @@ withDefaults(
       | 'plus'
       | 'send'
       | 'speaker'
+      | 'microphone'
       | 'image'
       | 'paperclip'
       | 'moon'
@@ -95,6 +96,10 @@ withDefaults(
     <template v-else-if="name === 'speaker'">
       <path d="M11 5 6 9H3v6h3l5 4V5Z" />
       <path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12" />
+    </template>
+    <template v-else-if="name === 'microphone'">
+      <rect x="9" y="2.5" width="6" height="11" rx="3" />
+      <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
     </template>
     <template v-else-if="name === 'image'">
       <rect x="3" y="4" width="18" height="16" rx="2" />

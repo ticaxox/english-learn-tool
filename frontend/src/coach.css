@@ -146,7 +146,7 @@ html[data-theme='night'] .coach-page {
   justify-content: center;
   gap: 7px;
   height: 36px;
-  margin: 0 0 4px;
+  margin: 0 0 14px;
   background: var(--coach-accent);
   color: #35240f;
   font-size: 0.82rem;
@@ -288,7 +288,7 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
 .coach-page.coach-page .coach-message {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr) 52px;
-  column-gap: 14px;
+  column-gap: 9px;
   row-gap: 0;
   padding: 13px 0;
   border: 0;
@@ -710,7 +710,7 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   background: var(--coach-field);
   border: 1px solid var(--coach-line);
   border-radius: 11px;
-  box-shadow: inset 0 1px 2px rgb(53 36 15 / 7%);
+  box-shadow: none;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 .coach-page.coach-page .coach-composer__field:focus-within {
