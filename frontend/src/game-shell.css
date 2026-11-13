@@ -915,6 +915,10 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   border: 1px solid var(--rail-line);
 }
 
+/* A longer throw than the bar's: the rail has the width for it, and a 60px
+ * switch alone in a 216px plate looked undersized. */
+.personal-workspace .rail-daylight .theme-switch__track { width: 96px; }
+
 
 /* --- the rail folded to icons --- */
 
