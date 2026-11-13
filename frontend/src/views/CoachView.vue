@@ -7,6 +7,7 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import CoachMarkdown from '../components/CoachMarkdown.vue'
 import { speak } from '../composables/useSpeechSynthesis'
+import { motionAllowed } from '../composables/useMotion'
 import {
   COACH_ACTION_LABELS,
   uploadCoachAttachment,
@@ -166,7 +167,18 @@ async function scrollToBottom(): Promise<void> {
   if (messageArea.value) messageArea.value.scrollTop = messageArea.value.scrollHeight
 }
 
+const newBreaking = ref(false)
+let breakTimer = 0
+
 async function startConversation(): Promise<void> {
+  // The button is a biscuit; starting a conversation breaks a few crumbs off it.
+  if (motionAllowed()) {
+    // Clear for one frame so a second click restarts the crumbs from zero.
+    newBreaking.value = false
+    requestAnimationFrame(() => { newBreaking.value = true })
+    window.clearTimeout(breakTimer)
+    breakTimer = window.setTimeout(() => { newBreaking.value = false }, 700)
+  }
   const created = await coach.createConversation()
   if (created) await focusComposer()
 }
@@ -289,9 +301,15 @@ async function revertTo(message: CoachMessage): Promise<void> {
           <strong class="coach-history__name">AI 教练</strong>
         </header>
 
-        <DivButton class="coach-history__new" type="button" @click="startConversation">
+        <DivButton
+          class="coach-history__new"
+          :class="{ 'is-breaking': newBreaking }"
+          type="button"
+          @click="startConversation"
+        >
           <span class="coach-history__new-disc"><AppIcon name="plus" /></span>
           <span class="coach-history__new-label">新对话</span>
+          <span class="coach-history__new-crumbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
         </DivButton>
 
         <ErrorNotice v-if="coach.conversationsError.value" :error="coach.conversationsError.value" :show-retry="false" />
