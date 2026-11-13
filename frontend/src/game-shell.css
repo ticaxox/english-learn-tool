@@ -35,7 +35,7 @@
   --rail-handle-face: #a85708;
   --rail-handle-hover: #8c4706;
   --rail-handle-ink: #fff3dc;
-  --rail-width: 232px;
+  --rail-width: 248px;
   --coach-face: #ff9600;
   --coach-face-hover: #e07f00;
   --coach-edge: #b35f00;
@@ -481,8 +481,10 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   height: 100vh;
   flex-direction: column;
   gap: 0;
-  padding: 0;
-  overflow-y: auto;
+  /* A gutter on the right for the fold knob to hang over, and no clipping, or
+   * the knob would be cut off at the edge. The nav scrolls instead. */
+  padding: 0 8px 0 0;
+  overflow: visible;
   border-right: 2px solid var(--rail-edge);
   background-color: var(--rail-panel);
   color: var(--rail-ink);
@@ -597,8 +599,12 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 
 .personal-workspace .workspace-nav {
   display: grid;
+  flex: 1 1 auto;
+  align-content: start;
   gap: 2px;
+  min-height: 0;
   padding: 12px 12px;
+  overflow-y: auto;
 }
 
 .personal-workspace .rail-kicker {
@@ -708,11 +714,11 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 /* --- foot: today's quests and the two running meters --- */
 
 .personal-workspace .workspace-sidebar-footer {
+  position: relative;
   display: grid;
   gap: 10px;
   margin-top: auto;
-  /* Room at the foot for the fold knob to hang in. */
-  padding: 12px 12px 48px;
+  padding: 12px;
   border-top: 1px solid var(--rail-line);
 }
 
@@ -798,13 +804,15 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 }
 
 /* The fold is a solid knob on the rail's edge, half on the panel and half over
- * the page. Fixed to the viewport so it rides the edge as the rail folds and
- * never scrolls away. It hangs at the foot, and the footer reserves the band. */
+ * the page, hanging just above the footer's rule. It rides the edge as the
+ * rail folds. */
 .personal-workspace .rail-handle {
-  position: fixed;
+  position: absolute;
   z-index: 40;
-  left: calc(var(--rail-width) - 17px);
-  bottom: 14px;
+  /* Centred on the rail's edge: half a knob past the footer's box, which is
+   * itself inset by the rail's gutter. */
+  right: -25px;
+  top: -26px;
   display: grid;
   width: 34px;
   height: 34px;
@@ -861,6 +869,10 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   gap: 10px;
   align-items: baseline;
   min-width: 0;
+  /* The rule parts "where you are" from the rest of the bar, whether or not
+   * this section has tabs. */
+  padding-right: 16px;
+  border-right: 1px solid var(--rail-line);
 }
 
 .personal-workspace .workspace-topbar-heading strong {
@@ -886,9 +898,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   align-items: stretch;
   align-self: stretch;
   min-width: 0;
-  padding-left: 15px;
   overflow-x: auto;
-  border-left: 1px solid var(--rail-line);
 }
 
 .personal-workspace .workspace-topbar > .workspace-topbar-tabs {
@@ -1026,6 +1036,10 @@ html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__mo
   padding: 0;
 }
 
+.personal-workspace {
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+}
+
 .personal-workspace.is-sidebar-collapsed .workspace-brand {
   justify-content: center;
   padding: 16px 0 10px;
@@ -1060,7 +1074,7 @@ html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__mo
 .personal-workspace.is-sidebar-collapsed .rail-handle__chevron { transform: rotate(180deg); }
 
 @media (max-width: 1180px) {
-  .personal-workspace { --rail-width: 212px; }
+  .personal-workspace { --rail-width: 224px; }
 }
 
 @media (max-width: 960px) {

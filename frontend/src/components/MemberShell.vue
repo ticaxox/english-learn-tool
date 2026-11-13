@@ -285,28 +285,26 @@ onBeforeUnmount(() => {
           </p>
         </div>
 
+        <DivButton
+          class="rail-handle"
+          type="button"
+          :aria-label="sidebarCollapsed ? '展开导航栏' : '折叠导航栏'"
+          :aria-expanded="!sidebarCollapsed"
+          @click="toggleSidebar"
+        >
+          <svg class="rail-handle__chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M14.5 5.5 8 12l6.5 6.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </DivButton>
       </div>
     </aside>
-
-    <DivButton
-      v-if="!immersive"
-      class="rail-handle"
-      type="button"
-      :aria-label="sidebarCollapsed ? '展开导航栏' : '折叠导航栏'"
-      :aria-expanded="!sidebarCollapsed"
-      @click="toggleSidebar"
-    >
-      <svg class="rail-handle__chevron" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M14.5 5.5 8 12l6.5 6.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </DivButton>
 
     <div class="workspace-main">
       <header v-if="!immersive" class="workspace-topbar member-topbar ia-topbar">
