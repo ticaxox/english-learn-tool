@@ -14,17 +14,23 @@
   --game-flame: #e8590c;
   --game-shadow: 0 6px 0 rgb(59 42 26 / 12%);
 
-  /* The console rail. It is a dark readout on the paper page by day; the night
-   * set is the same object sunk deeper into the violet room, with the mint the
-   * night art uses where the day art uses pumpkin. Two drawings, not a filter. */
-  --rail-panel: #241733;
-  --rail-panel-hi: #2f2044;
-  --rail-line: #463366;
-  --rail-ink: #f3e9d8;
-  --rail-muted: #a894c4;
-  --rail-accent: #ff9600;
+  /* The console rail. By day it is a sheet of paper with a chocolate edge, and
+   * the row you are on is a solid block of ink; by night the same object is the
+   * plum panel. Two drawings, not one drawing and a filter. */
+  --rail-panel: #fffdf6;
+  --rail-panel-hi: #fff3dc;
+  --rail-line: #dcc59b;
+  --rail-ink: #35240f;
+  --rail-muted: #75593d;
+  --rail-accent: #cf7400;
+  /* The accent as ink: #cf7400 is a mark colour, and 11px numerals in it on
+   * this paper land at 3.1:1. Text takes the deeper burnt orange instead. */
+  --rail-accent-ink: #a85708;
   --rail-mark: #ffc800;
-  --rail-done: #5fd39a;
+  --rail-done: #2f8a4c;
+  --rail-active-bg: #35240f;
+  --rail-active-ink: #fff3dc;
+  --rail-edge: #35240f;
   --coach-face: #ff9600;
   --coach-face-hover: #e07f00;
   --coach-ink: #2f1c05;
@@ -53,8 +59,12 @@ html[data-theme='night'] .personal-workspace {
   --rail-ink: #efe6f7;
   --rail-muted: #9b8cb8;
   --rail-accent: #5fd39a;
+  --rail-accent-ink: #5fd39a;
   --rail-mark: #ffd166;
   --rail-done: #ffd166;
+  --rail-active-bg: #1d1436;
+  --rail-active-ink: #efe6f7;
+  --rail-edge: #392a5e;
   /* Night orange is already light, so darkening it would eat the ink on it. */
   --coach-face: #ff9f45;
   --coach-face-hover: #ffb877;
@@ -462,7 +472,7 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   gap: 0;
   padding: 0;
   overflow-y: auto;
-  border-right: 1px solid var(--rail-line);
+  border-right: 2px solid var(--rail-edge);
   background-color: var(--rail-panel);
   /* The cut corner is drawn, not implied: the hairline follows the diagonal
    * so the notch reads as an edge of the panel. */
@@ -545,7 +555,7 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 }
 
 .personal-workspace .rail-plate__lv strong {
-  color: var(--rail-accent);
+  color: var(--rail-accent-ink);
   font-family: var(--font-code);
   font-size: 1.45rem;
   font-weight: 700;
@@ -646,8 +656,8 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 .personal-workspace .workspace-nav-link.member-nav-link.router-link-active,
 .personal-workspace .workspace-nav-link.member-nav-link.ia-nav-primary--section-active {
   border: 0;
-  background: var(--rail-panel-hi) !important;
-  color: var(--rail-ink) !important;
+  background: var(--rail-active-bg) !important;
+  color: var(--rail-active-ink) !important;
   box-shadow: none;
   font-weight: 900;
   transform: none;
@@ -728,7 +738,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   letter-spacing: 0.1em;
 }
 
-.personal-workspace .rail-quests__head strong { color: var(--rail-accent); }
+.personal-workspace .rail-quests__head strong { color: var(--rail-accent-ink); }
 
 .personal-workspace .rail-quests__list {
   display: grid;
@@ -836,6 +846,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   padding: 0 22px;
   border-bottom: 0;
   background: var(--rail-panel);
+  box-shadow: inset 0 -2px 0 var(--rail-edge);
   color: var(--rail-ink);
 }
 
