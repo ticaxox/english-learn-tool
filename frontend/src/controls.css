@@ -118,8 +118,13 @@
  * The stepper's own input is excluded for the same reason: the wrapper draws
  * that field, and a box painted inside it reads as a control inside a control.
  * The time field is wrapped the same way — the digits and the clock share one
- * frame, so its inner input must not paint a second one. */
-.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell):not(.crumb-stepper__input):not(.crumb-time__input),
+ * frame, so its inner input must not paint a second one.
+ *
+ * Every control in the kit that draws its own frame has to be named here. This
+ * selector wins by counting `:not()` clauses, so it also wins over each
+ * wrapper's own reset; leaving one out paints that wrapper's input a second
+ * time, which is exactly what happened to the search box. */
+.personal-workspace input:not([type="checkbox"]):not([type="radio"]):not(.spelling-cell):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
 .personal-workspace textarea,
 .personal-workspace select {
   border: 2px solid var(--ui-line-strong);

@@ -1427,7 +1427,7 @@ html[data-theme='night'] .personal-workspace .crumb-ai-note {
 
 /* Forms. The border stays on the shared token so a field, the stepper that
  * wraps one, and the dropdown beside it all draw the same line at night. */
-html[data-theme='night'] .personal-workspace input:not([type='checkbox']):not([type='radio']):not(.spelling-cell):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input),
+html[data-theme='night'] .personal-workspace input:not([type='checkbox']):not([type='radio']):not(.spelling-cell):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
 html[data-theme='night'] .personal-workspace textarea,
 html[data-theme='night'] .personal-workspace select {
   /* The same surface as the stepper: two fields in one row used to sit on
