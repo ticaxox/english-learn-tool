@@ -21,13 +21,17 @@ html[data-theme='night'] .personal-workspace {
   --kb-ring: 0 0 0 3px rgb(255 160 74 / 40%);
 }
 
+/* Flush with the content area: no inset frame around the page, no rounding.
+ * The file manager is the page, not a card sitting on one. */
+.personal-workspace .workspace-content:has(.kb) { padding: 0; }
+
 .personal-workspace .kb {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  height: calc(100vh - 150px);
+  height: calc(100vh - 74px);
   min-height: 460px;
-  border: 1px solid var(--ui-line);
-  border-radius: 14px;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
   background: var(--ui-surface);
 }
