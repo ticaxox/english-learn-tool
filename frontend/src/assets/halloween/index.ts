@@ -243,7 +243,7 @@ export const pumpkins = {
   /** The last stop wears a crown; a side path is a quiet one. */
   boss: { day: pumpkinBossNight, night: pumpkinBoss },
   /** The side stop keeps one face for the small hours and one for the sun. */
-  branch: { day: pumpkinBranchNight, night: pumpkinBranch },
+  branch: { day: pumpkinBranch, night: pumpkinBranchNight },
 } as const
 
 /* The charges painted onto the badges: one picture per family of feats. */
