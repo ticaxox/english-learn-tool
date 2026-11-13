@@ -3590,7 +3590,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   display: flex;
   flex: 1 1 auto;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 10px 22px;
   align-items: baseline;
   min-width: 0;
 }
@@ -3636,6 +3636,15 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   display: flex;
   flex: 0 0 auto;
   gap: 8px;
+}
+
+.personal-workspace .personal-ai-group__head .button {
+  /* 46px is a page action's height; this one sits beside a 34px field. */
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 11px;
+  font-size: 0.8rem;
+  box-shadow: 0 3px 0 var(--g-green-edge);
 }
 
 /* The header row buttons line up with the name input, not the field margin. */
@@ -5673,8 +5682,8 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   gap: 12px;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
-  padding-top: 8px;
+  margin-bottom: 22px;
+  padding-top: 14px;
   border-top: 1px solid var(--ui-line);
 }
 

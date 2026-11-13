@@ -2179,8 +2179,9 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 
 /* Daily goals: each label and control share one line; the estimate reads larger. */
 .personal-workspace .settings-form fieldset.settings-goal-grid {
-  grid-template-columns: repeat(2, minmax(0, 380px));
-  gap: 18px 32px;
+  grid-template-columns: max-content max-content;
+  gap: 18px 44px;
+  justify-content: start;
 }
 
 .personal-workspace .settings-goal-grid .field {
@@ -3234,9 +3235,11 @@ than its row reads as a different kind of thing. */
 .personal-workspace .settings-goal-grid .field > input,
 .personal-workspace .settings-pair > .field--inline > select,
 .personal-workspace .settings-pair > .field--inline > input {
-  flex: 0 0 150px;
-  width: 150px;
-  max-width: 150px;
+  /* Sized to the longest option, so a two-character choice is not stranded
+   * in a 150px box. */
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 240px;
 }
 
 .personal-workspace .settings-goal-grid .field-inline-note {
@@ -6068,11 +6071,6 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 /* The clock marks the field as a time and says what a click will do. It is
  * drawn, not a second target: the frame around it already is one. */
 .personal-workspace .crumb-time__glyph,
-.personal-workspace .crumb-date input.crumb-date__input[type="text"] {
-  padding-left: 9px;
-  text-align: left;
-}
-
 .personal-workspace .crumb-date__glyph {
   display: block;
   flex: none;
@@ -6080,6 +6078,13 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   height: 18px;
   color: var(--ui-muted);
   transition: color 120ms ease;
+}
+
+/* A date is ten characters, so it keeps its left inset; the time is six and
+ * sits centred between the frame and the clock. */
+.personal-workspace .crumb-date input.crumb-date__input[type="text"] {
+  padding-left: 9px;
+  text-align: left;
 }
 
 .personal-workspace .crumb-time:hover .crumb-time__glyph,
