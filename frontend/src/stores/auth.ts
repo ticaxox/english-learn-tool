@@ -159,7 +159,9 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = null
         apiClient.clearCredentials()
 
-        if (isApiError(error) && error.status === 401) {
+        // No session and no refresh cookie: the API answers 403, not 401. That
+        // is a visitor who needs to log in, not a broken account.
+        if (isApiError(error) && (error.status === 401 || error.status === 403)) {
           status.value = 'anonymous'
         } else {
           status.value = 'error'
