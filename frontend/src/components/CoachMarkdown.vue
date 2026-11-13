@@ -2,13 +2,16 @@
 /**
  * The coach's reply, written the way the model writes it.
  *
- * Models answer in markdown — `**bold**`, `- lists`, `## headings`, `code` —
- * and a bubble that prints the asterisks is a bubble that looks broken. This
- * renders the small subset a chat answer actually uses, and keeps the word
- * tap that `SpokenText` provides: any English word still reads itself aloud.
+ * Models answer in markdown: bold, italics, inline code, fenced blocks, links,
+ * headings, quotes, rules, tables, nested lists. A bubble that prints the
+ * asterisks is a bubble that looks broken.
  *
- * Everything is escaped before a single tag is added, so model output can
- * never inject markup.
+ * Everything is escaped before a single tag is added, so model output can never
+ * inject markup, and link targets are limited to http(s), mailto and plain
+ * relative paths.
+ *
+ * The tap-a-word-to-hear-it behaviour of SpokenText survives: English words get
+ * a `data-word` span, except inside code, where a click would be nonsense.
  */
 import { computed } from 'vue'
 import { speak } from '../composables/useSpeechSynthesis'
@@ -21,68 +24,176 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>]/g, (char) => ESCAPES[char] ?? char)
 }
 
+/** Only these schemes may become a link; anything else stays as plain text. */
+function safeHref(raw: string): string | null {
+  const url = raw.trim().replace(/^<|>$/g, '')
+  if (/^(https?:|mailto:)/i.test(url)) return url
+  if (!url.includes(':')) return url
+  return null
+}
+
+const CODE_MARK = '\u0000'
+const PLACEHOLDER = /\u0000(\d+)\u0000/g
+
+function inline(value: string): string {
+  const codes: string[] = []
+
+  const out = escapeHtml(value)
+    // Inline code is lifted out first so markdown characters inside it survive.
+    .replace(/`([^`]+)`/g, (_match, code: string) => {
+      codes.push(`<code>${code}</code>`)
+      return `${CODE_MARK}${codes.length - 1}${CODE_MARK}`
+    })
+    // Links before emphasis, so their brackets are gone by then.
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, label: string, href: string) => {
+      const url = safeHref(href)
+      if (!url) return match
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`
+    })
+    .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__([\s\S]+?)__/g, '<strong>$1</strong>')
+    .replace(/~~([\s\S]+?)~~/g, '<del>$1</del>')
+    .replace(/(^|[^\w*\\])\*([^*\n]+?)\*/g, '$1<em>$2</em>')
+    .replace(/(^|[^\w_\\])_([^_\n]+?)_/g, '$1<em>$2</em>')
+
+  return out.replace(PLACEHOLDER, (_match, index: string) => codes[Number(index)] ?? '')
+}
+
+/* --------------------------------------------------------------- words */
+
 // `(?<!&)` keeps the scanner out of entity names such as `&amp;`.
 const EN_WORD = /(?<!&)[A-Za-z][A-Za-z'’-]*/g
 
-/** Wrap English words for the tap-to-hear handler, never inside a tag. */
-function wrapWords(html: string): string {
-  return html
-    .split(/(<[^>]+>)/g)
-    .map((segment) =>
-      segment.startsWith('<')
-        ? segment
-        : segment.replace(
-            EN_WORD,
-            (word) => `<span class="spoken-word" data-word="${word}" title="朗读 ${word}">${word}</span>`,
-          ),
-    )
+/** Wrap English words for the tap-to-hear handler; never inside a tag or code. */
+function wrapWords(source: string): string {
+  return source
+    .split(/(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>|<[^>]+>)/g)
+    .map((segment) => {
+      if (!segment || segment.startsWith('<')) return segment
+      return segment.replace(
+        EN_WORD,
+        (word) => `<span class="spoken-word" data-word="${word}" title="朗读 ${word}">${word}</span>`,
+      )
+    })
     .join('')
 }
 
-function inline(value: string): string {
-  return escapeHtml(value)
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/(^|[^\w*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+/* --------------------------------------------------------------- blocks */
+
+const TABLE_SEPARATOR = /^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$/
+const BULLET = /^(\s*)[-*+]\s+(.*)$/
+const ORDERED = /^(\s*)\d+[.)]\s+(.*)$/
+const FENCE = /^```/
+const indentOf = (raw: string): number => Math.floor(raw.replace(/\t/g, '  ').length / 2)
+
+function renderTable(rows: string[]): string {
+  const cells = (row: string): string[] =>
+    row.trim().replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim())
+
+  const head = cells(rows[0])
+  const body = rows.slice(1).map(cells)
+  const headHtml = head.map((cell) => `<th>${inline(cell)}</th>`).join('')
+  const bodyHtml = body
+    .map((row) => `<tr>${row.map((cell) => `<td>${inline(cell)}</td>`).join('')}</tr>`)
+    .join('')
+  return `<table><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`
+}
+
+type ListItem = { indent: number; tag: 'ul' | 'ol'; text: string }
+
+/** One pass over a run of list lines: a stack of open lists keeps the nesting. */
+function renderList(items: ListItem[]): string {
+  let out = ''
+  const stack: Array<{ indent: number; tag: 'ul' | 'ol' }> = []
+  for (const item of items) {
+    while (stack.length && item.indent < stack[stack.length - 1].indent) {
+      out += `</li></${stack.pop()!.tag}>`
+    }
+    if (!stack.length || item.indent > stack[stack.length - 1].indent) {
+      out += `<${item.tag}><li>${inline(item.text)}`
+      stack.push({ indent: item.indent, tag: item.tag })
+      continue
+    }
+    out += `</li><li>${inline(item.text)}`
+  }
+  while (stack.length) out += `</li></${stack.pop()!.tag}>`
+  return out
 }
 
 const html = computed(() => {
+  const lines = props.text.replace(/\r\n/g, '\n').split('\n')
   const out: string[] = []
-  let list: string[] | null = null
-  let listTag = 'ul'
 
-  const flush = (): void => {
-    if (!list) return
-    out.push(`<${listTag}>${list.join('')}</${listTag}>`)
-    list = null
-  }
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i]
+    const trimmed = line.trim()
 
-  for (const raw of props.text.replace(/\r\n/g, '\n').split('\n')) {
-    const line = raw.trim()
-    const heading = /^(#{1,6})\s+(.*)$/.exec(line)
-    const bullet = /^[-*+]\s+(.*)$/.exec(line)
-    const ordered = /^\d+[.)]\s+(.*)$/.exec(line)
+    // ---- fenced code
+    if (FENCE.test(trimmed)) {
+      const buffer: string[] = []
+      i += 1
+      while (i < lines.length && !FENCE.test(lines[i].trim())) {
+        buffer.push(lines[i])
+        i += 1
+      }
+      out.push(`<pre><code>${escapeHtml(buffer.join('\n'))}</code></pre>`)
+      continue
+    }
 
+    // ---- table: a row of pipes above a separator row
+    if (trimmed.includes('|') && i + 1 < lines.length && TABLE_SEPARATOR.test(lines[i + 1])) {
+      const rows: string[] = [lines[i]]
+      i += 2 // the separator row is markup, not content
+      while (i < lines.length && lines[i].trim().includes('|')) {
+        rows.push(lines[i])
+        i += 1
+      }
+      i -= 1
+      out.push(renderTable(rows))
+      continue
+    }
+
+    const heading = /^(#{1,6})\s+(.*)$/.exec(trimmed)
     if (heading) {
-      flush()
       out.push(`<h4>${inline(heading[2])}</h4>`)
       continue
     }
-    if (bullet) {
-      if (!list || listTag !== 'ul') { flush(); listTag = 'ul'; list = [] }
-      list.push(`<li>${inline(bullet[1])}</li>`)
+
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+      out.push('<hr />')
       continue
     }
-    if (ordered) {
-      if (!list || listTag !== 'ol') { flush(); listTag = 'ol'; list = [] }
-      list.push(`<li>${inline(ordered[1])}</li>`)
+
+    if (/^>\s?/.test(trimmed)) {
+      const quote: string[] = []
+      while (i < lines.length && /^>\s?/.test(lines[i].trim())) {
+        quote.push(lines[i].trim().replace(/^>\s?/, ''))
+        i += 1
+      }
+      i -= 1
+      out.push(`<blockquote>${inline(quote.join(' '))}</blockquote>`)
       continue
     }
-    if (!line) { flush(); continue }
-    flush()
-    out.push(`<p>${inline(line)}</p>`)
+
+    // ---- a run of list lines, rendered as one tree
+    if (BULLET.test(line) || ORDERED.test(line)) {
+      const items: ListItem[] = []
+      while (i < lines.length && (BULLET.test(lines[i]) || ORDERED.test(lines[i]))) {
+        const bullet = BULLET.exec(lines[i])
+        const ordered = ORDERED.exec(lines[i])
+        const match = (bullet ?? ordered)!
+        items.push({ indent: indentOf(match[1]), tag: bullet ? 'ul' : 'ol', text: match[2] })
+        i += 1
+      }
+      i -= 1
+      out.push(renderList(items))
+      continue
+    }
+
+    if (!trimmed) continue
+
+    out.push(`<p>${inline(trimmed)}</p>`)
   }
-  flush()
 
   return wrapWords(out.join(''))
 })

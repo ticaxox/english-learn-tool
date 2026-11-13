@@ -360,6 +360,63 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
 .coach-page.coach-page .coach-markdown li { margin: 0.18em 0; }
 .coach-page.coach-page .coach-markdown strong { font-weight: 800; color: var(--coach-ink); }
 .coach-page.coach-page .coach-markdown em { font-style: italic; }
+.coach-page.coach-page .coach-markdown del {
+  opacity: 0.72;
+  text-decoration: line-through;
+}
+.coach-page.coach-page .coach-markdown a {
+  color: var(--coach-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.coach-page.coach-page .coach-markdown blockquote {
+  margin: 0 0 0.6em;
+  padding: 2px 0 2px 12px;
+  border-left: 2px solid var(--coach-line);
+  color: var(--coach-muted);
+}
+.coach-page.coach-page .coach-markdown hr {
+  margin: 0.9em 0;
+  border: 0;
+  border-top: 1px solid var(--coach-line);
+}
+.coach-page.coach-page .coach-markdown pre {
+  margin: 0 0 0.6em;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: var(--coach-line-soft);
+  border: 1px solid var(--coach-line);
+  border-radius: 6px;
+}
+.coach-page.coach-page .coach-markdown pre code {
+  padding: 0;
+  background: none;
+  white-space: pre;
+}
+.coach-page.coach-page .coach-markdown table {
+  width: 100%;
+  margin: 0 0 0.7em;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+.coach-page.coach-page .coach-markdown th,
+.coach-page.coach-page .coach-markdown td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--coach-line);
+  vertical-align: top;
+}
+.coach-page.coach-page .coach-markdown th {
+  font-weight: 800;
+  color: var(--coach-ink);
+  border-bottom-width: 2px;
+}
+.coach-page.coach-page .coach-markdown ul ul { list-style: circle; }
+.coach-page.coach-page .coach-markdown ul ul,
+.coach-page.coach-page .coach-markdown ol ol,
+.coach-page.coach-page .coach-markdown ul ol,
+.coach-page.coach-page .coach-markdown ol ul { margin: 0.2em 0 0.2em; }
+
 .coach-page.coach-page .coach-markdown code {
   padding: 1px 5px;
   border-radius: 4px;
