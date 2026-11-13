@@ -158,19 +158,20 @@ async def test_conversation_guide_answers_what_the_learner_said(client, app, mem
         session = await _create_conversation(app, client, headers, server)
         question = session["questions"][0]
 
-        # The generated item carries the topic, the character and the guide's
-        # opening lines.
+        # The generated item carries the topic, the character and a script of
+        # turns. The script is a plan, not the dialogue.
         assert question["topic"] == "A weekend hike"
         assert question["role"] == "A guide at the trailhead"
         assert len(question["turns"]) == 2
         assert question["turns"][0]["intent"] == "greet the learner"
 
-        # The dialogue opens with the guide's lines.
+        # The dialogue opens with the guide's first line and stops there: the
+        # learner has to be able to get a word in before the second question.
         turns = await client.get(
             f"{PRACTICE_PATH}/sessions/{session['id']}/conversation/turns", headers=headers
         )
         assert turns.status_code == 200, turns.text
-        assert [turn["speaker"] for turn in turns.json()] == ["guide", "guide"]
+        assert [turn["speaker"] for turn in turns.json()] == ["guide"]
         assert turns.json()[0]["line"] == "Morning! Ready to head up the trail?"
 
         # The learner says something; the guide answers it.
@@ -190,10 +191,10 @@ async def test_conversation_guide_answers_what_the_learner_said(client, app, mem
         )
         assert after.status_code == 200, after.text
         speakers = [turn["speaker"] for turn in after.json()]
-        assert speakers == ["guide", "guide", "learner", "guide"]
-        assert after.json()[2]["line"] == "Yes, I brought plenty of water."
-        assert after.json()[3]["line"] == "Did you bring plenty of water?"
-        assert after.json()[3]["intent"] == "check on the learner"
+        assert speakers == ["guide", "learner", "guide"]
+        assert after.json()[1]["line"] == "Yes, I brought plenty of water."
+        assert after.json()[2]["line"] == "Did you bring plenty of water?"
+        assert after.json()[2]["intent"] == "check on the learner"
 
 
 @pytest.mark.asyncio
