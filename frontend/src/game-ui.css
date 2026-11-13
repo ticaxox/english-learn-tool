@@ -3606,7 +3606,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   display: flex;
   flex: 1 1 auto;
   flex-wrap: wrap;
-  gap: 10px 22px;
+  gap: 12px 28px;
   align-items: baseline;
   min-width: 0;
 }
@@ -5656,6 +5656,8 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 }
 
 .personal-workspace .ai-kind-switch {
+  /* A grid item stretches by default; this one is a chip, not a bar. */
+  justify-self: start;
   display: inline-flex;
   gap: 3px;
   padding: 3px;

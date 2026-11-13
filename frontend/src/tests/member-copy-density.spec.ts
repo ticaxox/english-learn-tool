@@ -133,7 +133,7 @@ describe('member-facing Chinese copy density', () => {
     expect(aiSettings).toContain('你的 AI 提供商')
     expect(aiSettings).toContain('对话模型')
     expect(aiSettings).toContain('向量模型')
-    expect(aiSettings.match(/>添加<\/DivButton>/g)?.length).toBeGreaterThanOrEqual(2)
+    expect(aiSettings.match(/>添加<\/DivButton>/g)?.length).toBeGreaterThanOrEqual(1)
   })
 
   it('keeps long explanatory paragraphs out of the member hero copy', () => {

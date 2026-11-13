@@ -26,7 +26,7 @@ describe('PersonalAiConfigView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('还没有配置模型')
-    await wrapper.get('.personal-ai-empty [role="button"]').trigger('click')
+    await wrapper.get('.personal-ai-toolbar [role="button"]').trigger('click')
     expect(wrapper.find('.ai-form-panel').exists()).toBe(true)
     expect(wrapper.get('#provider-name').element).toHaveProperty('value', '')
     expect(wrapper.get('#provider-api-key').element).toHaveProperty('value', '')
@@ -41,7 +41,7 @@ describe('PersonalAiConfigView', () => {
     expect(wrapper.find('.personal-ai-main').exists()).toBe(true)
     expect(wrapper.find('.personal-ai-aside').exists()).toBe(false)
 
-    await wrapper.get('.personal-ai-empty [role="button"]').trigger('click')
+    await wrapper.get('.personal-ai-toolbar [role="button"]').trigger('click')
     // The provider form opens as a floating dialog, not inside the column.
     expect(wrapper.find('.ai-provider-dialog .ai-form-panel').exists()).toBe(true)
     expect(wrapper.find('.personal-ai-aside').exists()).toBe(false)

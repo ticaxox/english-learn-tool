@@ -223,20 +223,14 @@ onMounted(() => {
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
           <p class="field-hint">写作和向量是两种服务，分开配置；用哪一家都行。</p>
         </div>
+        <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
       </div>
 
       <LoadingState v-if="loading && providers.length === 0" label="正在读取 AI 配置…" />
       <ErrorNotice v-else-if="loadError" :error="loadError" retry-label="重新读取 AI 配置" @retry="load" />
 
       <template v-else>
-        <section class="personal-ai-group" aria-labelledby="providers-title">
-          <div class="personal-ai-group__head">
-            <div>
-              <h3 id="providers-title">已配置的模型</h3>
-              <p class="field-hint">对话模型写文字，向量模型给知识库做语义检索；两个都配就都生效。</p>
-            </div>
-            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
-          </div>
+        <section class="personal-ai-group" aria-labelledby="personal-ai-title">
 
           <div v-if="providers.length === 0" class="personal-ai-empty personal-ai-empty--inline">
             <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
@@ -244,7 +238,6 @@ onMounted(() => {
               <h4>还没有配置模型</h4>
               <p>添加一个 OpenAI 兼容服务。对话模型让教练、出题和评分工作；向量模型让知识库能按语义检索。</p>
             </div>
-            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
           </div>
 
           <div v-else class="personal-ai-list">

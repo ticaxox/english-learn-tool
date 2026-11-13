@@ -319,11 +319,6 @@ function cancel(): void {
             @click="kind = 'embedding'"
           >向量模型</DivButton>
         </div>
-        <p class="field-hint">
-          {{ kind === 'embedding'
-            ? '知识库用它把真题变成向量，语义检索才有效。'
-            : 'AI 教练、出题和评分用它写文字。' }}
-        </p>
       </div>
 
       <div class="field ai-model-field">
