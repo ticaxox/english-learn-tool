@@ -5940,11 +5940,17 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   cursor: not-allowed;
 }
 
-/* The wrapper draws the field, so the input itself loses its frame. */
+/* The wrapper draws the field, so the input itself loses its frame.
+ *
+ * `min-height: 0` is the whole fix: the shared field rule sets
+ * `min-height: var(--ui-control)`, so the inner input stood 46px tall inside a
+ * 42px content box and painted its rounded background over the wrapper's top
+ * and bottom border — which is what read as a second box around the number. */
 .personal-workspace .crumb-stepper input.crumb-stepper__input[type="number"] {
   flex: 1 1 0;
   width: auto;
   min-width: 0;
+  min-height: 0;
   height: 100%;
   padding: 0;
   border: 0;
@@ -6043,11 +6049,15 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
  * `[type="text"]` is load-bearing: the older form rule in game-ui.css matches
  * every non-checkbox input through a four-deep `:not()` chain, which outranks
  * this one without it. With the attribute the two tie, and controls.css is
- * loaded last, which is the same tie the stepper's own input is broken by. */
+ * loaded last, which is the same tie the stepper's own input is broken by.
+ * `min-height: 0` is the same fix the stepper needs: without it the shared
+ * field rule makes this input taller than the wrapper's content box, and its
+ * rounded background paints over the wrapper's border. */
 .personal-workspace .crumb-time input.crumb-time__input[type="text"] {
   flex: 1 1 0;
   width: auto;
   min-width: 0;
+  min-height: 0;
   height: 100%;
   padding: 0 0 0 12px;
   border: 0;
@@ -6252,6 +6262,10 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   flex: 1 1 0;
   width: auto;
   min-width: 0;
+  /* Same reason as the stepper and the time field: the shared field rule's
+   * min-height would stand this input taller than the wrapper and paint over
+   * the wrapper's border. */
+  min-height: 0;
   height: 100%;
   padding: 0;
   border: 0;
