@@ -7,7 +7,6 @@
  * so connectors stay attached without measuring the DOM.
  */
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import AppIcon from './AppIcon.vue'
 import CrumboMark from './CrumboMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
 import { pumpkins } from '../assets/halloween'
@@ -558,9 +557,6 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           :aria-label="`${placed.node.title}，${placed.node.typeLabel}，${placed.node.questionType}，${placed.node.statusLabel}，${placed.node.minutes} 分钟`"
           @click="emit('select', placed.node.id)"
         >
-          <span class="challenge-dsl-card__face">
-            <AppIcon v-if="placed.node.statusKey === 'locked'" name="lock" />
-          </span>
           <span class="visually-hidden">{{ placed.node.title }}</span>
         </DivButton>
 
