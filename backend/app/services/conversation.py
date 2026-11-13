@@ -98,18 +98,23 @@ async def list_conversation_turns(
     if stored:
         return [_turn_public(turn) for turn in stored]
     # A conversation whose rows have not been written yet still has the guide's
-    # opening lines on the question itself.
+    # opening line on the question itself — the first one only, because the rest
+    # of the script is not the conversation, it is what the guide would have
+    # said if the learner had never replied.
+    opening = question.public_payload.get("turns", []) or []
+    if not opening:
+        return []
+    first = opening[0]
     return [
         PracticeConversationTurnPublic(
             id=uuid4(),
-            sequence=index,
+            sequence=0,
             speaker="guide",
-            line=turn.get("line", ""),
-            line_zh=turn.get("line_zh"),
-            intent=turn.get("intent"),
+            line=first.get("line", ""),
+            line_zh=first.get("line_zh"),
+            intent=first.get("intent"),
             created_at=practice.created_at,
         )
-        for index, turn in enumerate(question.public_payload.get("turns", []) or [])
     ]
 
 

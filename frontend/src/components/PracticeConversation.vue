@@ -181,17 +181,23 @@ function speakTurn(turn: PracticeConversationTurn): void {
 
 <template>
   <section class="practice-conversation">
+    <!-- The brief is a strip, not a page: who you are talking to, where, and
+         the words to reach for. Everything the learner needs to start and
+         nothing they have to read before they can. -->
     <header class="practice-conversation__brief">
-      <p class="practice-conversation__label">话题</p>
-      <h2 class="practice-conversation__topic">{{ topic }}</h2>
-      <p v-if="topicZh" class="practice-conversation__zh">{{ topicZh }}</p>
+      <div class="practice-conversation__headline">
+        <h2 class="practice-conversation__topic">{{ topic }}</h2>
+        <p v-if="topicZh" class="practice-conversation__zh">{{ topicZh }}</p>
+      </div>
       <p class="practice-conversation__role">
         <AppIcon name="coach" />
-        <span><strong>{{ roleName }}</strong><em v-if="roleZh">{{ roleZh }}</em></span>
+        <span class="practice-conversation__role-text">
+          <strong>{{ roleName }}</strong>
+          <em v-if="scenario">{{ scenario }}</em>
+          <em v-if="roleZh || scenarioZh">{{ scenarioZh || roleZh }}</em>
+        </span>
       </p>
-      <p v-if="scenario" class="practice-conversation__scenario">{{ scenario }}</p>
-      <p v-if="scenarioZh" class="practice-conversation__zh">{{ scenarioZh }}</p>
-      <ul v-if="targetWords.length" class="practice-conversation__words">
+      <ul v-if="targetWords.length" class="practice-conversation__words" aria-label="本轮要用到的词">
         <li v-for="word in targetWords" :key="word">{{ word }}</li>
       </ul>
     </header>
@@ -242,7 +248,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
       <textarea
         v-model="draft"
         class="practice-conversation__input"
-        rows="2"
+        rows="1"
         maxlength="2000"
         :placeholder="'回一句…'"
         aria-label="对对话伙伴说"
@@ -274,108 +280,121 @@ function speakTurn(turn: PracticeConversationTurn): void {
 </template>
 
 <style scoped>
+/* The talk is the page. Everything else — who you are talking to, the words to
+   reach for, the box you type in — is furniture around it, and stays out of the
+   way: one strip above, one bar below. */
 .practice-conversation {
-  display: grid;
-  gap: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 34rem;
 }
 
 .practice-conversation__brief {
-  display: grid;
-  gap: 0.3rem;
-  padding: 1rem 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  align-items: center;
+  padding: 0.7rem 1rem;
   border: 1px solid var(--ui-line, #ecd9bb);
   border-radius: 14px;
   background: var(--ui-surface-subtle, #fff4e2);
 }
 
-.practice-conversation__label {
-  margin: 0;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ui-muted, #7d6247);
+.practice-conversation__headline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  min-width: 0;
 }
 
 .practice-conversation__topic {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
+  line-height: 1.3;
   color: var(--ui-ink, #35240f);
 }
 
 .practice-conversation__zh {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--ui-muted, #7d6247);
 }
 
 .practice-conversation__role {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin: 0.35rem 0 0;
+  flex: 1 1 18rem;
+  gap: 0.45rem;
+  align-items: flex-start;
+  min-width: 0;
+  margin: 0;
   color: var(--ui-ink, #35240f);
 }
 
-.practice-conversation__role span {
-  display: grid;
+.practice-conversation__role :deep(svg) { flex: 0 0 auto; margin-top: 0.15rem; }
+
+.practice-conversation__role-text {
+  display: block;
+  min-width: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
-.practice-conversation__role em {
+.practice-conversation__role-text strong { font-weight: 700; }
+
+.practice-conversation__role-text em {
+  display: block;
   font-style: normal;
-  font-size: 0.78rem;
   color: var(--ui-muted, #7d6247);
-}
-
-.practice-conversation__scenario {
-  margin: 0.2rem 0 0;
-  font-size: 0.88rem;
-  line-height: 1.55;
-  color: var(--ui-ink, #35240f);
 }
 
 .practice-conversation__words {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  margin: 0.5rem 0 0;
+  gap: 0.3rem;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .practice-conversation__words li {
-  padding: 0.15rem 0.5rem;
+  padding: 0.1rem 0.5rem;
   border: 1px dashed var(--g-gold-edge, #d9a400);
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: var(--g-orange-edge, #cf7400);
   background: var(--g-gold-soft, #fff2b8);
 }
 
+/* The talk takes every pixel the page will give it, and what has been said
+   rests on the composer the way it does in every chat: `margin-top: auto` on
+   the first turn rather than `justify-content: flex-end`, which would strand
+   the first line of a long talk out of reach above the scroll box. */
+.practice-conversation__talk > :first-child { margin-top: auto; }
+
 .practice-conversation__talk {
-  display: grid;
-  gap: 0.7rem;
-  /* The talk is one column: the guide and the learner face each other across
-     it, so the two sides must not drift to the edges of a wide screen. */
-  max-width: 46rem;
-  /* The talk grows with the dialogue and only scrolls once it is long. */
-  max-height: 32rem;
-  padding: 0.35rem 0.15rem 0.6rem;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 0;
+  padding: 0.25rem 0.15rem;
   overflow-y: auto;
 }
 
-/* The fade only belongs on a scrollable talk: on a short one it would dim
-   the first line for no reason. */
 .practice-conversation__talk.is-scrollable {
   mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent 100%);
 }
 
+/* A turn is a column so the name sits above its own bubble, not beside it. */
 .practice-conversation__turn {
-  display: grid;
-  gap: 0.2rem;
-  justify-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+  max-width: 100%;
 }
 
 .practice-conversation__row {
@@ -385,15 +404,8 @@ function speakTurn(turn: PracticeConversationTurn): void {
   max-width: 100%;
 }
 
-.practice-conversation__speaker {
-  margin: 0;
-}
-
 .practice-conversation__who {
   display: inline-block;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  background: var(--ui-surface-subtle, #fff4e2);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -401,16 +413,15 @@ function speakTurn(turn: PracticeConversationTurn): void {
 }
 
 .practice-conversation__bubble {
-  max-width: min(34rem, 78%);
-  padding: 0.6rem 0.85rem;
+  max-width: min(38rem, 82%);
+  padding: 0.65rem 0.9rem;
   border: 1px solid var(--ui-line, #ecd9bb);
-  border-radius: 4px 14px 14px 14px;
+  border-radius: 4px 16px 16px 16px;
   background: var(--ui-surface, #fffdf6);
 }
 
-/* The learner talks from the other side, so the bubble leans the other way. */
 .practice-conversation__turn--learner {
-  justify-items: end;
+  align-items: flex-end;
 }
 
 .practice-conversation__turn--learner .practice-conversation__row {
@@ -419,16 +430,11 @@ function speakTurn(turn: PracticeConversationTurn): void {
 
 .practice-conversation__turn--learner .practice-conversation__bubble {
   border-color: var(--g-gold-edge, #d9a400);
-  border-radius: 14px 4px 14px 14px;
+  border-radius: 16px 4px 16px 16px;
   background: var(--g-gold-soft, #fff2b8);
 }
 
-.practice-conversation__turn--learner .practice-conversation__speaker {
-  text-align: right;
-}
-
 .practice-conversation__turn--learner .practice-conversation__who {
-  background: transparent;
   color: var(--g-orange-edge, #cf7400);
 }
 
@@ -440,10 +446,8 @@ function speakTurn(turn: PracticeConversationTurn): void {
 }
 
 .practice-conversation__zh {
-  margin: 0.3rem 0 0;
-  font-size: 0.82rem;
+  margin-top: 0.25rem;
   line-height: 1.5;
-  color: var(--ui-muted, #7d6247);
 }
 
 .practice-conversation__speak {
@@ -459,9 +463,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
   cursor: pointer;
 }
 
-.practice-conversation__speak:hover {
-  border-color: var(--g-orange, #ff9600);
-}
+.practice-conversation__speak:hover { border-color: var(--g-orange, #ff9600); }
 
 .practice-conversation__waiting {
   display: flex;
@@ -493,28 +495,30 @@ function speakTurn(turn: PracticeConversationTurn): void {
   to { opacity: 1; transform: translateY(-0.2rem); }
 }
 
+/* The composer is one bar: the line, and the two things you can do with it. */
 .practice-conversation__composer {
   display: grid;
-  gap: 0.5rem;
-  max-width: 46rem;
-  padding: 0.75rem;
-  border: 1px solid var(--ui-line, #ecd9bb);
-  border-radius: 14px;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 2px solid var(--ui-line-strong, #e0c9a4);
+  border-radius: 16px;
   background: var(--ui-surface-subtle, #fff4e2);
 }
 
 .practice-conversation__input {
   width: 100%;
   max-width: none;
-  min-height: 3.2rem;
-  padding: 0.6rem 0.75rem;
+  min-height: 2.9rem;
+  max-height: 8rem;
+  padding: 0.55rem 0.7rem;
   border: 1px solid var(--ui-line, #ecd9bb);
   border-radius: 10px;
   background: var(--ui-surface, #fffdf6);
   color: var(--ui-ink, #35240f);
   font: inherit;
   line-height: 1.55;
-  resize: vertical;
+  resize: none;
+  field-sizing: content;
 }
 
 .practice-conversation__controls {
@@ -561,5 +565,10 @@ function speakTurn(turn: PracticeConversationTurn): void {
   margin: 0;
   font-size: 0.8rem;
   color: var(--g-red, #d93025);
+}
+
+@media (max-width: 720px) {
+  .practice-conversation { min-height: 0; }
+  .practice-conversation__bubble { max-width: 92%; }
 }
 </style>

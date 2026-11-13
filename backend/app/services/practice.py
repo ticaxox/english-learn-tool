@@ -1618,29 +1618,32 @@ async def _seed_conversation_turns(
     practice: PracticeSession,
     questions: list[PracticeQuestion],
 ) -> None:
-    """Write the guide's opening lines into the dialogue.
+    """Write the guide's opening line into the dialogue.
 
-    The generated question carries the opening lines, but the dialogue is the
-    record of the talk. Storing them as turns from the start means the
-    transcript has one source of truth: the guide's first lines are part of
-    it, not a separate thing that has to be stitched on later.
+    The generated question carries a script of turns, but a conversation is not
+    a script: the learner gets the first line only, and everything after it is
+    the guide answering what they actually said. Seeding the whole script is
+    what turned the opening into a wall of questions fired off before the
+    learner could get a word in.
     """
     for question in questions:
         if question.question_type != "conversation":
             continue
         turns = question.public_payload.get("turns", []) or []
-        for index, turn in enumerate(turns):
-            session.add(
-                PracticeConversationTurn(
-                    session_id=practice.id,
-                    user_id=practice.user_id,
-                    speaker="guide",
-                    sequence=index,
-                    line=str(turn.get("line", "")),
-                    line_zh=turn.get("line_zh"),
-                    intent=turn.get("intent"),
-                )
+        if not turns:
+            continue
+        turn = turns[0]
+        session.add(
+            PracticeConversationTurn(
+                session_id=practice.id,
+                user_id=practice.user_id,
+                speaker="guide",
+                sequence=0,
+                line=str(turn.get("line", "")),
+                line_zh=turn.get("line_zh"),
+                intent=turn.get("intent"),
             )
+        )
     await session.flush()
 
 
