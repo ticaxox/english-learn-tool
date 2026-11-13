@@ -1193,6 +1193,13 @@ html[data-theme='night'] .personal-workspace .theme-switch__moon {
 }
 
 /* The question card's frame must fill the card, not size to the art. */
+/* The card's own ink follows the card: the day frame is cream parchment, the
+ * night frame is near-black. The word was fixed at the day brown, which left it
+ * at 1.3:1 on the night card. */
+html[data-theme='night'] .personal-workspace .flipface__word { color: #f3e9d2; }
+html[data-theme='night'] .personal-workspace .flipface__phonetic { color: #b9a8d8; }
+html[data-theme='night'] .personal-workspace .flipface__cue { color: #9c8bbd; }
+
 .flipface__frame .art-swap__frame {
   height: 100%;
   object-fit: contain;

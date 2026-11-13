@@ -1,21 +1,20 @@
 <script setup lang="ts">
 /**
- * The three memory drills as cards, plus the conversation drill as a book.
+ * The three memory drills plus the conversation drill, with the AI exercise
+ * types on the row below.
  *
- * A memory drill is a card drill - you look at a face, you turn it over - so it
- * is drawn as a card. The AI exercise types on the row below are generated
- * sets, which is what a book means here. The two rows then carry that
- * distinction instead of repeating one shape twice.
- *
- * This row stands on the page itself: no board under it, and the covers a
- * little smaller than the books below, because four sit across instead of
- * three.
+ * The drills are cards *inside* - the flashcard question is a physical card you
+ * turn over - but the shelf entry is still a book, the same object the exercise
+ * row uses. What this row changes is layout: the conversation drill belongs
+ * here (it is one dialogue, not a generated set), it stands on the page itself
+ * with no board under it, and its covers are a little smaller than the books
+ * below because four sit across instead of three.
  *
  * `.module-card` and `aria-disabled` are kept as the contract the view tests
  * and the screen reader both rely on.
  */
 import { computed } from 'vue'
-import { memoryCards, practiceBooks } from '../assets/halloween'
+import { practiceBooks } from '../assets/halloween'
 import ArtImage from './ArtImage.vue'
 import type { PracticeType } from '../api/practice'
 
@@ -70,7 +69,7 @@ function pick(module: ShelfModule): void {
       :disabled="!enabled.includes(module)"
       @click="pick(module)"
     >
-      <ArtImage class="shelf-book__art" :set="memoryCards[module]" />
+      <ArtImage class="shelf-book__art" :set="practiceBooks[module]" />
 
       <span class="shelf-book__title">{{ titles[module] }}</span>
       <span class="shelf-book__hint">{{ hints[module] }}</span>

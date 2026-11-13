@@ -58,26 +58,6 @@ import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
 import cardFrameNight from './card/card-frame-night.png'
 import cardBack from './card/card-back.png'
-import memoryFlipDay from './card/memory-card-flip-day.png'
-import memoryFlipNight from './card/memory-card-flip-night.png'
-import memoryChoiceDay from './card/memory-card-choice-day.png'
-import memoryChoiceNight from './card/memory-card-choice-night.png'
-import memorySpellingDay from './card/memory-card-spelling-day.png'
-import memorySpellingNight from './card/memory-card-spelling-night.png'
-
-/**
- * The three memory drills, as cards rather than books.
- *
- * A memory drill is a card drill - you look at a face, you turn it over - and
- * the AI exercise types below are generated sets, which is what a book means
- * here. The shelf's two rows then carry that distinction. Drawn in the same
- * language as `cardBack`, which is the drill's own card back.
- */
-export const memoryCards: PracticeArt = {
-  flashcard: { day: memoryFlipDay, night: memoryFlipNight },
-  choice: { day: memoryChoiceDay, night: memoryChoiceNight },
-  spelling: { day: memorySpellingDay, night: memorySpellingNight },
-}
 
 /** The question card. The frame is exactly 2:3; do not stretch it. */
 export const questionCard = {

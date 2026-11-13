@@ -5364,14 +5364,22 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   margin-inline: 0;
   padding: 0 !important;
   border-style: solid !important;
-  border-width: 40px !important;
-  border-image-source: var(--rune-slab) !important;
-  border-image-slice: 14% fill !important;
-  border-image-width: 40px !important;
+  /* The question card, not a biscuit slab: the pumpkin corners and the vines
+   * run down the border band, and the parchment middle is what stretches.
+   * 9% keeps the four corner pumpkins whole at every size. */
+  border-width: 54px !important;
+  border-image-source: var(--rune-card) !important;
+  border-image-slice: 9% fill !important;
+  border-image-width: 54px !important;
   border-image-repeat: stretch !important;
   border-radius: 0 !important;
-  background: #2a2148 !important;
+  background: transparent !important;
   box-shadow: none !important;
+  color: #3b2a1a;
+}
+
+/* Night is the same card after dark: near-black ground, cream ink. */
+html[data-theme='night'] .personal-workspace .rune-surface {
   color: #f3e9d2;
 }
 
@@ -5381,13 +5389,23 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .personal-workspace .rune-surface .choice-head__eyebrow,
 .personal-workspace .rune-surface .spell-head__eyebrow {
+  color: var(--g-green-edge, #1f8a30);
+}
+
+html[data-theme='night'] .personal-workspace .rune-surface .choice-head__eyebrow,
+html[data-theme='night'] .personal-workspace .rune-surface .spell-head__eyebrow {
   color: #7cf0c4;
 }
 
 .personal-workspace .rune-surface .choice-head__prompt,
 .personal-workspace .rune-surface .spell-head__prompt {
-  color: #f3e9d2;
+  color: #3b2a1a;
   font-family: Georgia, 'Times New Roman', serif;
+}
+
+html[data-theme='night'] .personal-workspace .rune-surface .choice-head__prompt,
+html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
+  color: #f3e9d2;
 }
 
 /* The drill's option stays a light chip on the stone. Its own three-track
@@ -5405,6 +5423,15 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .personal-workspace .rune-surface .choice-option:hover {
   border-color: #9a8ac4 !important;
+}
+
+/* The option face stays light paper in both themes, so the letter on it has to
+ * stay dark ink in both themes. Left to --ui-ink it turns cream at night and
+ * lands on cream at 1.04:1. */
+.personal-workspace .rune-surface .choice-option .option-badge {
+  --badge-fill: #fffdf8;
+  --badge-edge: #4a3524;
+  --badge-ink: #35240f;
 }
 
 .personal-workspace .rune-surface .choice-option input {

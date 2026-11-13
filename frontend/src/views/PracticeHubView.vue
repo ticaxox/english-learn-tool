@@ -54,8 +54,20 @@ function memoryEnabled(module: MemoryModule): boolean {
 /** The shelf needs the list, not a predicate; default open until config lands. */
 const enabledMemoryModules = computed(() => MEMORY_MODULES.filter(memoryEnabled))
 
+/** The spelling drill has one setting, so it asks before it starts. */
+const spellingOpen = ref(false)
+
 function startMemory(module: MemoryModule): void {
+  if (module === 'spelling') {
+    spellingOpen.value = true
+    return
+  }
   void router.push({ name: 'practice', query: { module } })
+}
+
+function startSpelling(): void {
+  spellingOpen.value = false
+  void router.push({ name: 'practice', query: { module: 'spelling' } })
 }
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
 const practiceTypeOptions: PracticeType[] = [...practiceTypes, 'conversation', 'mixed']
@@ -261,19 +273,6 @@ onMounted(() => {
         @pick-book="openConfig"
       />
 
-      <!-- A memory-training setting, so it sits with the memory books rather
-           than inside an AI exercise's dialog. -->
-      <p class="practice-spelling-setting">
-        <label for="practice-spelling-mode">拼写挖空方式</label>
-        <select id="practice-spelling-mode" v-model="spellingBlankMode" @change="saveSpellingMode">
-          <option value="">随机（推荐）</option>
-          <option value="full">整词挖空</option>
-          <option value="partial">部分字母</option>
-          <option value="first_letter">只留首字母</option>
-          <option value="middle">中间挖空</option>
-        </select>
-      </p>
-
       <PracticeShelf :types="practiceTypes" :labels="PRACTICE_TYPE_LABELS" @pick="openConfig" />
 
       <!-- No book of its own: a mixed set is the same books drawn at random. -->
@@ -285,6 +284,39 @@ onMounted(() => {
 
       <div class="practice-hub-layout practice-hub-layout--solo">
         <PracticeTaskList :limit="5" show-tabs />
+      </div>
+
+      <div v-if="spellingOpen" class="dialog-backdrop" @click.self="spellingOpen = false">
+        <section class="dialog-card practice-config-dialog" role="dialog" aria-modal="true" aria-labelledby="spelling-start-title">
+          <header class="practice-config-dialog__head">
+            <div>
+              <h2 id="spelling-start-title">拼写练习</h2>
+              <p class="field-hint">给出一个词的中文和读音，按字母把它拼回来。</p>
+            </div>
+            <DivButton class="icon-button practice-config-dialog__close" type="button" aria-label="关闭" @click="spellingOpen = false">
+              <AppIcon name="close" />
+            </DivButton>
+          </header>
+
+          <div class="practice-form">
+            <div class="practice-form-row">
+              <div class="field">
+                <label for="practice-spelling-mode">挖空方式</label>
+                <select id="practice-spelling-mode" v-model="spellingBlankMode" @change="saveSpellingMode">
+                  <option value="">随机（推荐）</option>
+                  <option value="full">整词挖空</option>
+                  <option value="partial">部分字母</option>
+                  <option value="first_letter">只留首字母</option>
+                  <option value="middle">中间挖空</option>
+                </select>
+                <p class="field-hint">决定题目里哪些字母先给你、哪些要自己填。</p>
+              </div>
+            </div>
+            <div class="practice-create-footer">
+              <SvgPlateButton type="button" @click="startSpelling">开始拼写 <AppIcon name="arrow" /></SvgPlateButton>
+            </div>
+          </div>
+        </section>
       </div>
 
       <div v-if="configOpen" class="dialog-backdrop" @click.self="closeConfig">

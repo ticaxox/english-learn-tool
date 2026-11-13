@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { runeStone, runePaper, forMode } from '../assets/halloween'
+import { runeStone, runePaper, questionCard, forMode } from '../assets/halloween'
 import { themeMode } from './useTheme'
 
 /**
@@ -19,6 +19,9 @@ export function useRuneSurface() {
       '--rune-slab-url': `url(${forMode(runeStone.slab, mode)})`,
       '--rune-scroll': `url(${forMode(runePaper.scroll, mode)})`,
       '--rune-parchment': `url(${forMode(runePaper.parchment, mode)})`,
+      // The question card is the drill's own frame: pumpkins in the corners,
+      // vines down the sides, blank parchment in the middle to write on.
+      '--rune-card': `url(${forMode(questionCard.frame, mode)})`,
     }
   })
 
