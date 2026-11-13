@@ -3610,13 +3610,28 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   padding: 12px 16px;
 }
 
+/* Fixed columns, not content-sized ones: three providers in a list are read
+ * down the page, so the name and the model have to start at the same x in
+ * every row. */
 .personal-workspace .personal-ai-provider__main {
-  display: flex;
+  display: grid;
+  grid-template-columns: 9px minmax(0, 220px) minmax(0, 1fr);
   flex: 1 1 auto;
-  flex-wrap: wrap;
-  gap: 12px 28px;
-  align-items: baseline;
+  column-gap: 18px;
+  align-items: center;
   min-width: 0;
+}
+
+.personal-workspace .personal-ai-provider__name h3 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.personal-workspace .personal-ai-provider__model { justify-self: start; }
+
+@media (max-width: 720px) {
+  .personal-workspace .personal-ai-provider__main {
+    grid-template-columns: 9px minmax(0, 1fr);
+    row-gap: 4px;
+  }
+  .personal-workspace .personal-ai-provider__model { grid-column: 2; }
 }
 
 .personal-workspace .personal-ai-provider__main h3 {
@@ -3634,15 +3649,6 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   background: var(--ui-surface-subtle);
   color: var(--ui-ink);
   font: 700 0.8rem/1.5 "Cascadia Code", Consolas, monospace;
-}
-
-.personal-workspace .personal-ai-provider__url {
-  overflow: hidden;
-  max-width: 40ch;
-  color: var(--ui-muted);
-  font-size: 0.78rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .personal-workspace .ai-status-dot {

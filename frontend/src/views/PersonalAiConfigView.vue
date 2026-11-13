@@ -254,7 +254,6 @@ onMounted(() => {
                   <span v-if="provider.kind === 'embedding'" class="personal-ai-provider__tag">向量</span>
                 </div>
                 <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
-                <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
               </div>
               <label class="personal-ai-provider__priority">
                 <span>优先级</span>
