@@ -545,6 +545,8 @@ function blanksFromCloze(cloze: string): SpellingBlank[] {
   }))
 }
 
+const FLASHCARD_SIDES = ['headword', 'definition', 'phonetic', 'cloze'] as const
+
 export function parseStudyQuestion(payload: unknown, module: MemoryModule): StudyQuestion | null {
   const endpoint = `GET /memory/sessions/{id} (${module})`
   const body = requireRecord(payload, endpoint, '响应体')
@@ -566,7 +568,15 @@ export function parseStudyQuestion(payload: unknown, module: MemoryModule): Stud
       wordbookId: requireString(body[CONTRACT.session.wordbookId], endpoint, 'wordbook_id'),
       entryId: requireString(item[CONTRACT.item.entryId], endpoint, 'next_item.entry_id'),
       front: requireString(card[CONTRACT.card.prompt], endpoint, 'card.prompt'),
+      frontLabel: requireEnum(
+        card[CONTRACT.card.promptLabel],
+        FLASHCARD_SIDES,
+        endpoint,
+        'card.prompt_label',
+      ),
       back: null,
+      // The resolver replaces this with whatever the front is not.
+      backLabel: 'definition',
       phonetic: optionalString(card[CONTRACT.card.phonetic], endpoint, 'card.phonetic'),
       partOfSpeech: optionalString(card[CONTRACT.card.partOfSpeech], endpoint, 'card.part_of_speech'),
       example: null,

@@ -151,13 +151,24 @@ export interface FlashcardQuestion {
   wordbookId: string
   entryId: string
   front: string
-  /** Server-backed definition, or null when the wordbook has no definition. */
+  /**
+   * What the front is: the word, or its meaning. Decides what the back shows.
+   * Absent means the card was built without a server label, and a flashcard
+   * asked by its word is the default shape.
+   */
+  frontLabel?: FlashcardSide
+  /** The side the front is not. */
   back: string | null
+  backLabel?: FlashcardSide
   phonetic: string | null
   partOfSpeech: string | null
   example: string | null
   remaining: number
 }
+
+/** Which face of a wordbook entry a card is showing. */
+export type FlashcardSide = 'headword' | 'definition' | 'phonetic' | 'cloze'
+
 
 export interface ChoiceOption {
   optionId: string

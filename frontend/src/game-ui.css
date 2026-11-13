@@ -1199,6 +1199,10 @@ html[data-theme='night'] .personal-workspace .theme-switch__moon {
 html[data-theme='night'] .personal-workspace .flipface__word { color: #f3e9d2; }
 html[data-theme='night'] .personal-workspace .flipface__phonetic { color: #b9a8d8; }
 html[data-theme='night'] .personal-workspace .flipface__cue { color: #9c8bbd; }
+html[data-theme='night'] .personal-workspace .flipface__definition { color: #f3e9d2; }
+html[data-theme='night'] .personal-workspace .flipface__eyebrow { color: #9c8bbd; }
+html[data-theme='night'] .personal-workspace .flipface__example { color: #cdbfe4; border-bottom-color: #4d3f6e; }
+html[data-theme='night'] .personal-workspace .flipface__pos { color: #7cf0c4; }
 
 .flipface__frame .art-swap__frame {
   height: 100%;

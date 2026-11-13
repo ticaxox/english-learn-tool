@@ -160,9 +160,15 @@ async function resolveFlashcardAnswer(question: FlashcardQuestion): Promise<Flas
       if (entry) {
         const definition = entry.definitions.find((item) => item.definition_zh || item.definition_en) ?? entry.definitions[0]
         const example = definition?.examples[0]
+        const meaning = definition?.definition_zh ?? definition?.definition_en ?? null
+        // The back is the side the front is not. A card that was asked its
+        // meaning already had the meaning: answering with the meaning again is
+        // the same card twice, which is what a flip must never be.
+        const askedTheMeaning = question.frontLabel === 'definition' || question.frontLabel === 'phonetic'
         return {
           ...question,
-          back: definition?.definition_zh ?? definition?.definition_en ?? null,
+          back: askedTheMeaning ? entry.headword : meaning,
+          backLabel: askedTheMeaning ? 'headword' : 'definition',
           partOfSpeech: question.partOfSpeech ?? definition?.part_of_speech ?? null,
           example: example?.example_en ?? null,
         }

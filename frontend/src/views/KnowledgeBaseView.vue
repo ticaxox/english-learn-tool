@@ -364,6 +364,17 @@ onMounted(() => {
               type="button"
               @click="selectFolder(row.folder)"
             >
+              <svg
+                class="kb-folder__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h4l2 2.5h7A2.5 2.5 0 0 1 21 10v7.5A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z" />
+              </svg>
               <span class="kb-folder__name">{{ row.folder.name }}</span>
               <span class="kb-folder__count">{{ row.folder.documentCount }}</span>
             </button>
@@ -410,6 +421,17 @@ onMounted(() => {
               type="button"
               @click="selectFolder(row.folder)"
             >
+              <svg
+                class="kb-folder__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h4l2 2.5h7A2.5 2.5 0 0 1 21 10v7.5A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z" />
+              </svg>
               <span class="kb-folder__name">{{ row.folder.name }}</span>
               <span class="kb-folder__count">{{ row.folder.documentCount }}</span>
             </button>

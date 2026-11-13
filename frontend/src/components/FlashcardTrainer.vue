@@ -44,6 +44,11 @@ watch(
 
 const canRate = computed(() => revealed.value && !props.disabled)
 
+/** Says which side the learner is now looking at. */
+const backEyebrow = computed(() =>
+  props.question.backLabel === 'headword' ? '这个词是' : '释义',
+)
+
 function flip(): void {
   if (revealed.value) return
   revealed.value = true
@@ -87,18 +92,20 @@ function rate(rating: FlashcardRating): void {
           </div>
         </div>
 
-        <!-- Back: the generated card back, contents only after the reveal. -->
+        <!-- Back: the same card turned over. A flashcard is one piece of card,
+             so both sides carry the same vine frame; what changes is the side
+             of the word you are looking at. It is the answer, so it is set
+             larger and marked, not a second card that happens to sit behind. -->
         <div class="flipface flipface--back">
-          <!-- The back is its own drawing, not the front frame again: the
-               reveal is the moment, and it deserves its own face. -->
-          <img class="flipface__frame" :src="questionCard.back" alt="" />
+          <ArtImage class="flipface__frame" :set="questionCard.frame" />
 
           <div class="flipface__content">
             <template v-if="revealed">
               <div id="flashcard-back" ref="backRegion" class="flipface__body study-card__back" aria-live="polite" tabindex="-1">
+                <p class="flipface__eyebrow">{{ backEyebrow }}</p>
                 <p class="flipface__meaning">
                   <span v-if="props.question.partOfSpeech" class="flipface__pos">{{ props.question.partOfSpeech }}</span>
-                  <span v-if="props.question.back" class="flipface__definition">{{ props.question.back }}</span>
+                  <span v-if="props.question.back" class="flipface__definition" :class="{ 'is-headword': props.question.backLabel === 'headword' }">{{ props.question.back }}</span>
                   <span v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</span>
                 </p>
                 <p v-if="props.question.example" class="flipface__example">{{ props.question.example }}</p>
@@ -208,8 +215,16 @@ function rate(rating: FlashcardRating): void {
 
 .flipface__body {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.55rem;
   outline: none;
+}
+
+.flipface__eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #b09a78;
 }
 
 .flipface__meaning {
@@ -226,10 +241,21 @@ function rate(rating: FlashcardRating): void {
 }
 
 .flipface__definition {
-  font-size: clamp(0.98rem, 2.2vw, 1.18rem);
-  line-height: 1.5;
+  font-size: clamp(1.1rem, 2.6vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.45;
   color: #2f2013;
   overflow-wrap: anywhere;
+}
+
+/* Revealed because the front asked for its meaning: the word comes back to
+   the middle of the card, at the size the front had it. */
+.flipface__definition.is-headword {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.7rem, 4.6vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 /* A phrasebook line, not a tinted box. */
