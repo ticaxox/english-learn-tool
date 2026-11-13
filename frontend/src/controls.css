@@ -621,7 +621,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   color: var(--g-red-edge);
 }
 
-
 /* Table row actions read as small buttons, not raw links. */
 .personal-workspace .practice-records-table .link-button {
   padding: 5px 12px;
@@ -1076,7 +1075,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 }
 
 .personal-workspace .practice-option-glossary__zh { color: var(--ui-muted); }
-
 
 @media (max-width: 720px) {
   .personal-workspace .practice-option-glossary { grid-template-columns: minmax(0, 1fr); }
@@ -1813,7 +1811,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   }
 }
 
-
 .personal-workspace .settings-form fieldset.settings-goal-grid {
   display: grid;
   /* Columns as wide as their own fields, not as wide as a guess: sized to
@@ -2116,7 +2113,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   max-width: 240px;
 }
 
-
 .personal-workspace .wordbook-row-arrow {
   width: 16px;
   height: 16px;
@@ -2197,7 +2193,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   gap: 10px;
   margin-top: 22px;
 }
-
 
 /* Daily goals: each label and control share one line; the estimate reads larger. */
 .personal-workspace .settings-form fieldset.settings-goal-grid {
@@ -3550,14 +3545,6 @@ than its row reads as a different kind of thing. */
 .personal-workspace .coach-dictate.is-listening { border-color: #b3261e; color: #b3261e; }
 .personal-workspace .coach-dictate-error { margin: 6px 0 0; color: #b3261e; }
 
-/* Coach images: message thumbnails and composer previews. */
-.personal-workspace .coach-message__attachments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
 .personal-workspace .coach-image { margin: 0; max-width: 240px; }
 .personal-workspace .coach-image img {
   display: block;
@@ -3567,40 +3554,6 @@ than its row reads as a different kind of thing. */
   border-radius: 12px;
   object-fit: cover;
 }
-
-.personal-workspace .coach-composer__attachments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 4px 0 8px;
-}
-
-.personal-workspace .coach-attachment { position: relative; margin: 0; }
-.personal-workspace .coach-attachment img {
-  width: 72px;
-  height: 72px;
-  border: 1px solid var(--ui-line-strong);
-  border-radius: 10px;
-  object-fit: cover;
-}
-
-.personal-workspace .coach-attachment__remove {
-  position: absolute;
-  top: -7px;
-  right: -7px;
-  width: 22px;
-  height: 22px;
-  min-height: 22px;
-  padding: 0;
-  border: 1px solid var(--ui-line-strong);
-  border-radius: 50%;
-  background: var(--ui-surface);
-  cursor: pointer;
-  font-size: 0.8rem;
-  line-height: 1;
-}
-
-.personal-workspace .coach-composer__footer { flex-wrap: wrap; }
 
 /* MCP access tokens: one reveal block and a compact list. */
 .personal-workspace .mcp-token-reveal {
@@ -3650,9 +3603,6 @@ than its row reads as a different kind of thing. */
 }
 
 .personal-workspace .memory-main-card.is-picker .workspace-section-header { padding: 4px 2px 14px; }
-
-/* Attachment-only button sits at the start of the coach composer. */
-.personal-workspace .coach-composer__footer { align-items: center; }
 .personal-workspace .coach-attach {
   flex: 0 0 auto;
   width: 32px;
@@ -3662,23 +3612,6 @@ than its row reads as a different kind of thing. */
   place-items: center;
 }
 .personal-workspace .coach-attach svg { width: 16px; height: 16px; }
-
-.personal-workspace .coach-attachment__file {
-  display: grid;
-  width: 72px;
-  height: 72px;
-  padding: 6px;
-  border: 1px dashed var(--ui-line-strong);
-  border-radius: 10px;
-  place-items: center;
-  overflow: hidden;
-  background: var(--ui-surface-subtle, #fbf7ee);
-  color: var(--ui-muted);
-  font-size: 0.66rem;
-  font-weight: 700;
-  text-align: center;
-  word-break: break-all;
-}
 
 .personal-workspace .coach-image__file {
   display: inline-flex;
@@ -3785,16 +3718,6 @@ than its row reads as a different kind of thing. */
   margin-inline: 0;
 }
 
-/* History delete stays a quiet icon button, not a filled chip. */
-.personal-workspace .coach-history__delete.div-button {
-  min-width: 0;
-  padding: 0.15rem 0.5rem;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--ui-muted);
-}
-
 /* ------------------------------- practice hub: one-row filters, slimmer rail */
 
 .personal-workspace .practice-hub-layout { grid-template-columns: minmax(0, 1fr) 320px; }
@@ -3887,18 +3810,6 @@ than its row reads as a different kind of thing. */
 .personal-workspace .mcp-token-main small { overflow: hidden; text-overflow: ellipsis; }
 .personal-workspace .mcp-token-actions { flex-wrap: nowrap; }
 
-/* -------------------------------------- full coach page: no card layout at all */
-
-.personal-workspace .coach-page .coach-main,
-.personal-workspace .coach-page .coach-history {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.personal-workspace .coach-page .coach-history { padding-right: 18px; }
-
 /* The slimmer task rail keeps every row on one line. */
 .personal-workspace .practice-task-row {
   flex-wrap: nowrap;
@@ -3959,49 +3870,6 @@ than its row reads as a different kind of thing. */
   border-top: 0;
 }
 
-/* ------------------------------------------ coach page: a real chat column */
-
-.personal-workspace .coach-page .coach-layout--with-history {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 26px;
-  align-items: stretch;
-  height: calc(100vh - 250px);
-  min-height: 460px;
-}
-
-.personal-workspace .coach-page .coach-history {
-  overflow: auto;
-}
-
-.personal-workspace .coach-page .coach-main {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-}
-
-.personal-workspace .coach-page .coach-main > .coach-main-header,
-.personal-workspace .coach-page .coach-main > .alert,
-.personal-workspace .coach-page .coach-main > .error-notice { flex: 0 0 auto; }
-
-.personal-workspace .coach-page .coach-messages {
-  flex: 1 1 auto;
-  min-height: 0;
-  padding: 14px 2px 18px;
-  overflow: auto;
-}
-
-.personal-workspace .coach-page .coach-composer {
-  flex: 0 0 auto;
-  margin-top: 10px;
-}
-
-.personal-workspace .coach-page .coach-main-empty {
-  margin: 0;
-  max-width: 46rem;
-}
-
 @media (max-width: 980px) {
   .personal-workspace .coach-page .coach-layout--with-history {
     grid-template-columns: minmax(0, 1fr);
@@ -4009,42 +3877,6 @@ than its row reads as a different kind of thing. */
     min-height: 0;
   }
   .personal-workspace .coach-page .coach-messages { max-height: 55vh; }
-}
-
-/* Coach chat: keep the thread next to the composer instead of floating at the top. */
-.personal-workspace .coach-page .coach-main { max-width: 900px; }
-
-.personal-workspace .coach-page .coach-messages {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.personal-workspace .coach-page .coach-messages > * { flex: 0 0 auto; }
-
-/* A correspondence is read from the top down, so the thread does not get
-   pushed against the composer the way a chat log is. */
-
-.personal-workspace .coach-page .coach-composer {
-  padding-top: 10px;
-  border-top: 2px solid rgb(53 36 15 / 55%);
-}
-
-/* Coach: full-width rows so the user bubble keeps its right alignment, and a
-   column height that leaves the composer fully visible. */
-.personal-workspace .coach-page .coach-layout--with-history { height: calc(100vh - 330px); }
-
-.personal-workspace .coach-page .coach-messages > * { width: 100%; }
-
-/* Flex column ignores justify-self, so align the bubbles explicitly. */
-.personal-workspace .coach-page .coach-messages > * { width: auto; }
-
-/* Every turn starts at the same left margin; the stamp says who is speaking. */
-.personal-workspace .coach-page .coach-message--user,
-.personal-workspace .coach-page .coach-message--assistant {
-  align-self: stretch;
-  width: auto;
-  max-width: none;
 }
 
 /* AI quota: three equal-sized boxes and a compact timeout field. */
@@ -4077,45 +3909,6 @@ than its row reads as a different kind of thing. */
   .personal-workspace .ia-kv-row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
 }
 
-/* Coach without a page header: the chat fills the screen. */
-.personal-workspace .coach-page .coach-layout--with-history { height: calc(100vh - 170px); }
-
-/* An empty conversation opens exactly like a blank page: a drawing in the
-   margin, the invitation beside it, the suggested lines under it. */
-.personal-workspace .coach-page .coach-messages-empty {
-  display: grid;
-  grid-template-columns: 9rem minmax(0, 1fr);
-  gap: 0.5rem 1.6rem;
-  align-items: start;
-  margin: 0;
-  padding: 1.4rem 0 0;
-  color: var(--ui-muted);
-  text-align: left;
-}
-
-.personal-workspace .coach-page .coach-messages-empty .coach-empty-art {
-  grid-row: 1 / span 4;
-  grid-column: 1;
-  width: 100%;
-  margin: 0;
-}
-
-.personal-workspace .coach-page .coach-messages-empty__copy {
-  grid-column: 2;
-  display: grid;
-  gap: 0.4rem;
-}
-
-.personal-workspace .coach-page .coach-messages-empty strong {
-  color: var(--ui-ink);
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.5rem, 2.6vw, 2rem);
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.personal-workspace .coach-page .coach-messages-empty p { margin: 0; font-size: 0.98rem; }
-
 /* Token rows keep their two actions side by side, and key-value inputs share one width. */
 .personal-workspace .mcp-token-list li > div.mcp-token-actions {
   display: flex;
@@ -4127,13 +3920,6 @@ than its row reads as a different kind of thing. */
 
 .personal-workspace .ia-kv-row > input { width: 100%; max-width: none; }
 
-/* The empty-conversation intro reads as backdrop text, not another box. */
-.personal-workspace .coach-page .coach-messages-empty {
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
 /* ---------------------------- round 51: rail fit, wider coach, flat settings */
 
 /* The task rail header wraps instead of spilling past the card edge. */
@@ -4142,16 +3928,6 @@ than its row reads as a different kind of thing. */
 .personal-workspace .practice-tasks-head h2 { font-size: 1.2rem; }
 .personal-workspace .practice-task-tabs { margin-left: 0; flex-wrap: wrap; }
 .personal-workspace .practice-task-tab { padding: 4px 10px; font-size: 0.78rem; }
-
-/* The coach page uses the whole content width and viewport height. */
-.personal-workspace .coach-page { width: 100%; max-width: none; }
-.personal-workspace .coach-page .coach-layout--with-history {
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: 22px;
-  height: calc(100vh - 130px);
-}
-.personal-workspace .coach-page .coach-main { max-width: none; }
-.personal-workspace .coach-page .coach-composer textarea { min-height: 64px; max-height: 140px; }
 
 /* Quota save sits at the bottom and applies the whole block. */
 .personal-workspace .ai-quota-actions {
@@ -4191,12 +3967,6 @@ than its row reads as a different kind of thing. */
 /* The rail header may not exceed the card's content box. */
 .personal-workspace .practice-tasks-card { overflow: hidden; }
 .personal-workspace .practice-tasks-head { width: auto; max-width: 100%; }
-
-/* The coach owns the whole content area, not the narrow page column. */
-.personal-workspace .workspace-content:has(.coach-page) {
-  width: 100%;
-  max-width: none;
-}
 
 /* The card is a grid: one shrunken track keeps its children inside the padding box. */
 .personal-workspace .practice-tasks-card { grid-template-columns: minmax(0, 1fr); }
@@ -5097,8 +4867,6 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .personal-workspace .personal-knowledge__list li:last-child { border-bottom: 0; }
 .personal-workspace .personal-knowledge__list small { color: var(--ui-muted); font-size: 0.74rem; }
-/* Halloween art: the covers carry their own colour, so no tinted tile behind them. */
-.coach-empty-art { display: block; width: min(220px, 60%); height: auto; margin: 0; }
 .practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
 .practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }
 
@@ -5112,7 +4880,6 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background: none;
   box-shadow: none;
 }
-
 
 .practice-generation-art {
   flex: none;
