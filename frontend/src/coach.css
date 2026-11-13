@@ -175,39 +175,6 @@ html[data-theme='night'] .coach-page {
 }
 /* The plus sits in a paper disc, so the bar reads as "start something" rather
    than as a coloured strip with a word on it. */
-/* A new conversation breaks a few crumbs off the biscuit. They fall away from
-   the disc toward the list, where the row is about to appear. */
-.coach-page.coach-page .coach-history__new { position: relative; }
-.coach-page.coach-page .coach-history__new-crumbs {
-  position: absolute;
-  top: 50%;
-  left: 23px;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-.coach-page.coach-page .coach-history__new-crumbs i {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 50%;
-  background: #b96f12;
-  opacity: 0;
-}
-.coach-page.coach-page .coach-history__new.is-breaking .coach-history__new-crumbs i {
-  animation: coach-crumb-break 620ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-.coach-page.coach-page .coach-history__new-crumbs i:nth-child(1) { --dx: -26px; --dy: 46px; animation-delay: 0ms; }
-.coach-page.coach-page .coach-history__new-crumbs i:nth-child(2) { --dx: 6px;  --dy: 58px; animation-delay: 40ms; width: 4px; height: 4px; }
-.coach-page.coach-page .coach-history__new-crumbs i:nth-child(3) { --dx: 32px; --dy: 40px; animation-delay: 20ms; }
-.coach-page.coach-page .coach-history__new-crumbs i:nth-child(4) { --dx: -8px; --dy: 34px; animation-delay: 70ms; width: 5px; height: 5px; }
-.coach-page.coach-page .coach-history__new-crumbs i:nth-child(5) { --dx: 20px; --dy: 62px; animation-delay: 60ms; width: 4px; height: 4px; }
-@keyframes coach-crumb-break {
-  0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
-  18% { opacity: 1; transform: translate(calc(var(--dx) * 0.25), calc(var(--dy) * 0.1)) scale(1); }
-  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.7); }
-}
 
 .coach-page.coach-page .coach-history__new-disc {
   flex: 0 0 auto;
@@ -230,17 +197,7 @@ html[data-theme='night'] .coach-page {
      reads as if it had risen off the paper. */
   box-shadow: 0 2px 0 var(--coach-accent-ink), inset 0 1px 0 rgb(255 255 255 / 38%);
 }
-/* Hover does not move anything: the paper disc is stamped with ink and the plus
-   flips to paper. A material swap, the way a seal changes the sheet. */
-.coach-page.coach-page .coach-history__new:hover .coach-history__new-disc {
-  background: #35240f;
-  color: var(--coach-page);
-  box-shadow: inset 0 0 0 1px transparent;
-}
-html[data-theme='night'] .coach-page.coach-page .coach-history__new:hover .coach-history__new-disc {
-  background: #f4ecd0;
-  color: #241d46;
-}
+
 .coach-page.coach-page .coach-history__new:active {
   transform: translateY(2px);
   box-shadow: 0 0 0 var(--coach-accent-ink), inset 0 1px 0 rgb(255 255 255 / 38%);
