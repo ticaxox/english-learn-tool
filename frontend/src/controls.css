@@ -2215,12 +2215,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 
 /* The stepper keeps the width its own +/- targets need; the badge wraps to the
  * next line rather than squeezing the field until its + button falls outside. */
-.personal-workspace .settings-goal-grid .field-inline-note .crumb-stepper {
-  flex: 0 0 148px;
-  width: 148px;
-  min-width: 148px;
-}
-
 .personal-workspace .settings-goal-grid .field-error { flex-basis: 100%; }
 
 .personal-workspace .settings-goal-grid .field-badge {
@@ -2516,8 +2510,11 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 }
 
 .personal-workspace .settings-goal-grid .field-badge {
-  padding: 9px 18px;
-  font-size: 1.02rem;
+  /* The same height as the field beside it: a chip floating a head taller 
+than its row reads as a different kind of thing. */
+  height: var(--ui-control);
+  padding: 0 12px;
+  font-size: 0.82rem;
   font-weight: 900;
 }
 
@@ -3247,12 +3244,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   align-items: center;
 }
 
-.personal-workspace .settings-goal-grid .field-inline-note .crumb-stepper {
-  flex: 0 0 148px;
-  width: 148px;
-  max-width: 148px;
-}
-
 .personal-workspace .settings-goal-grid .field-inline-note input {
   flex: 1 1 0;
   width: auto;
@@ -3465,11 +3456,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
     gap: 6px;
     width: 200px;
     justify-self: end;
-  }
-
-  .personal-workspace .settings-goal-grid .field-inline-note .crumb-stepper {
-    width: 148px;
-    max-width: 148px;
   }
 
   .personal-workspace .settings-goal-grid .field-inline-note input {
@@ -4383,63 +4369,6 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 
 .personal-workspace .crumb-merged-side .crumb-merged-book { padding-top: 12px; }
 .personal-workspace .crumb-merged-book .crumb-inline-link { margin-top: 4px; font-size: 0.8rem; }
-
-/* ------------------------------------------- admin knowledge: import + probe */
-
-.personal-workspace .knowledge-admin { display: grid; gap: 18px; }
-
-.personal-workspace .knowledge-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
-  gap: 18px;
-  align-items: start;
-}
-
-.personal-workspace .knowledge-import,
-.personal-workspace .knowledge-list,
-.personal-workspace .knowledge-probe { display: grid; gap: 10px; padding: 18px; }
-
-.personal-workspace .knowledge-import textarea { min-height: 200px; font-family: inherit; }
-
-.personal-workspace .knowledge-import__actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.personal-workspace .knowledge-list ul { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-
-.personal-workspace .knowledge-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px dashed var(--ui-line);
-}
-
-.personal-workspace .knowledge-row:last-child { border-bottom: 0; }
-.personal-workspace .knowledge-row__main { display: grid; gap: 2px; min-width: 0; }
-.personal-workspace .knowledge-row small { color: var(--ui-muted); font-size: 0.76rem; }
-
-.personal-workspace .knowledge-probe__form { display: flex; gap: 10px; }
-.personal-workspace .knowledge-probe__form > input { flex: 1 1 auto; }
-
-.personal-workspace .knowledge-hits { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
-
-.personal-workspace .knowledge-hits li {
-  padding: 10px 12px;
-  border: 1px solid var(--ui-line);
-  border-radius: 10px;
-  background: var(--ui-surface-subtle);
-}
-
-.personal-workspace .knowledge-hits small { margin-left: 8px; color: var(--ui-muted); font-size: 0.74rem; }
-.personal-workspace .knowledge-hits p { margin: 6px 0 0; font-size: 0.84rem; line-height: 1.6; }
-
-@media (max-width: 1100px) {
-  .personal-workspace .knowledge-layout { grid-template-columns: minmax(0, 1fr); }
-}
 
 /* Login / register switch sits under the form as plain text. */
 .auth-switch {
@@ -6061,9 +5990,9 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   gap: 6px;
   /* As wide as what it holds, not as wide as the column: a time is six
    * characters and a date is ten. Numbers are not prose. */
-  width: min(100%, 96px);
+  width: min(100%, 86px);
   height: var(--ui-control);
-  padding: 0 10px 0 0;
+  padding: 0 7px 0 0;
   border: 2px solid var(--ui-line-strong);
   border-radius: 10px;
   background: var(--ui-surface);
@@ -6112,7 +6041,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   min-width: 0;
   min-height: 0;
   height: 100%;
-  padding: 0 0 0 12px;
+  padding: 0 0 0 9px;
   border: 0;
   background: transparent;
   box-shadow: none;

@@ -232,7 +232,7 @@ onMounted(() => {
               <h3 id="chatProviders-title">对话模型</h3>
               <p class="field-hint">AI 教练、出题和评分用它写文字。至少要有一个。</p>
             </div>
-            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('chat')">添加对话模型</DivButton>
+            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('chat')">添加</DivButton>
           </div>
 
           <div v-if="chatProviders.length === 0" class="personal-ai-empty personal-ai-empty--inline">
@@ -241,7 +241,7 @@ onMounted(() => {
               <h4>还没有对话模型</h4>
               <p>添加一个 OpenAI 兼容服务，AI 教练、出题和评分才能开始工作。</p>
             </div>
-            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加对话模型</DivButton>
+            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
           </div>
 
           <div v-else class="personal-ai-list">
@@ -286,19 +286,10 @@ onMounted(() => {
               <h3 id="embeddingProviders-title">向量模型</h3>
               <p class="field-hint">知识库用它把真题变成向量，语义检索才有效。不配就只用关键词检索。</p>
             </div>
-            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('embedding')">添加向量模型</DivButton>
+            <DivButton v-if="!formOpen" class="button-secondary" type="button" @click="openCreate('embedding')">添加</DivButton>
           </div>
 
-          <div v-if="embeddingProviders.length === 0" class="personal-ai-empty personal-ai-empty--inline">
-            <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
-            <div>
-              <h4>还没有向量模型</h4>
-              <p>填一个支持 /embeddings 的服务，比如 text-embedding-3-small；不填则知识库只按关键词匹配。</p>
-            </div>
-            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('embedding')">添加向量模型</DivButton>
-          </div>
-
-          <div v-else class="personal-ai-list">
+          <div class="personal-ai-list">
             <article v-for="provider in embeddingProviders" :key="provider.id" class="personal-ai-provider">
               <div class="personal-ai-provider__main">
                 <span

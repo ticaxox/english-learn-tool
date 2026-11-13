@@ -24,57 +24,18 @@ describe('CrumbTime', () => {
     expect(wrapper.findAll('.crumb-time__cell.is-active')).toHaveLength(0)
   })
 
-  it('puts the colon where the hour actually ends', async () => {
-    const wrapper = mountTime(null)
-    const input = wrapper.get('input')
-    const el = inputOf(wrapper)
-
-    el.value = '9'
-    await input.trigger('input')
-    expect(el.value).toBe('9')
-
-    el.value = '93'
-    await input.trigger('input')
-    expect(el.value).toBe('93')
-
-    el.value = '930'
-    await input.trigger('input')
-    expect(el.value).toBe('9:30')
-
-    await input.trigger('blur')
-    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['09:30'])
-  })
-
-  it('keeps 12:30 as twelve thirty, not one twenty-three', async () => {
-    const wrapper = mountTime(null)
-    const input = wrapper.get('input')
-    const el = inputOf(wrapper)
-
-    el.value = '1230'
-    await input.trigger('input')
-    expect(el.value).toBe('12:30')
-  })
-
-  it('puts the stored value back when the typed text is not a time', async () => {
+  it('is a readout, not a text box: the wheels are how a time is chosen', async () => {
     const wrapper = mountTime('06:30')
     const input = wrapper.get('input')
-    const el = inputOf(wrapper)
 
-    el.value = '2'
+    expect(input.attributes('readonly')).toBeDefined()
+    expect(inputOf(wrapper).value).toBe('06:30')
+
+    // Typing into a read-only input changes nothing, in the box or the model.
+    inputOf(wrapper).value = '09:30'
     await input.trigger('input')
     await input.trigger('blur')
-
-    expect(el.value).toBe('06:30')
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
-  })
-
-  it('clears the model when the field is emptied', async () => {
-    const wrapper = mountTime('06:30')
-    const input = wrapper.get('input')
-    inputOf(wrapper).value = ''
-    await input.trigger('input')
-    await input.trigger('blur')
-    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([null])
   })
 
   it('changes one wheel without touching the other', async () => {
