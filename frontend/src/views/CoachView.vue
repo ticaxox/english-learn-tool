@@ -290,8 +290,8 @@ async function revertTo(message: CoachMessage): Promise<void> {
         </header>
 
         <DivButton class="coach-history__new" type="button" @click="startConversation">
-          <AppIcon name="plus" />
-          新对话
+          <span class="coach-history__new-disc"><AppIcon name="plus" /></span>
+          <span class="coach-history__new-label">新对话</span>
         </DivButton>
 
         <ErrorNotice v-if="coach.conversationsError.value" :error="coach.conversationsError.value" :show-retry="false" />

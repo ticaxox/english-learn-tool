@@ -143,22 +143,42 @@ html[data-theme='night'] .coach-page {
 .coach-page.coach-page .coach-history__new {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-  height: 36px;
-  margin: 0 0 14px;
+  justify-content: flex-start;
+  gap: 10px;
+  height: 44px;
+  margin: 0 0 16px;
+  padding: 0 14px 0 9px;
+  border-radius: 12px;
   background: var(--coach-accent);
   color: #35240f;
-  font-size: 0.82rem;
+  font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   cursor: pointer;
+  box-shadow: 0 2px 0 var(--coach-accent-ink), inset 0 1px 0 rgb(255 255 255 / 38%);
   transition: filter 140ms ease, transform 90ms ease, box-shadow 90ms ease;
-  box-shadow: 0 2px 0 var(--coach-accent-ink);
 }
-.coach-page.coach-page .coach-history__new:hover { filter: brightness(1.06); }
-.coach-page.coach-page .coach-history__new:active { transform: translateY(2px); box-shadow: 0 0 0 var(--coach-accent-ink); }
-.coach-page.coach-page .coach-history__new svg { width: 13px; height: 13px; }
+/* The plus sits in a paper disc, so the bar reads as "start something" rather
+   than as a coloured strip with a word on it. */
+.coach-page.coach-page .coach-history__new-disc {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--coach-page);
+  color: var(--coach-ink);
+  box-shadow: inset 0 0 0 1px rgb(53 36 15 / 10%);
+  transition: transform 180ms ease;
+}
+.coach-page.coach-page .coach-history__new-disc svg { width: 14px; height: 14px; }
+.coach-page.coach-page .coach-history__new:hover { filter: brightness(1.05); }
+.coach-page.coach-page .coach-history__new:hover .coach-history__new-disc { transform: scale(1.08); }
+.coach-page.coach-page .coach-history__new:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--coach-accent-ink), inset 0 1px 0 rgb(255 255 255 / 38%);
+}
 
 .coach-page.coach-page .coach-history__scroll {
   min-height: 0;
