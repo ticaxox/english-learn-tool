@@ -128,10 +128,10 @@
 .personal-workspace textarea,
 .personal-workspace select {
   border: 2px solid var(--ui-line-strong);
-  border-radius: 10px;
+  border-radius: 9px;
   /* A field is a control, not a text area: 13px type in a 40px box. */
-  font-size: 0.88rem;
-  padding: 7px 11px;
+  font-size: 0.82rem;
+  padding: 5px 9px;
   background-color: var(--ui-surface);
   box-shadow: inset 0 2px 0 rgb(59 42 26 / 5%);
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
@@ -1382,7 +1382,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 
 .ai-memory-stamp {
   color: var(--ui-muted);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -2630,7 +2630,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 }
 
 .challenge-dsl-summary { margin: 0 0 2px; font-size: 0.95rem; font-weight: 800; }
-.challenge-dsl-summary strong { font-size: 1.2rem; }
+.challenge-dsl-summary strong { font-size: 1.05rem; }
 .challenge-dsl-map__head .field-hint { margin: 0; }
 
 .challenge-dsl-legend {
@@ -5943,7 +5943,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   align-items: center;
   /* A number field is as wide as its digits plus two targets, not as wide as
    * the column it sits in. Three digits is the most it ever holds. */
-  width: min(100%, 116px);
+  width: min(100%, 100px);
   height: var(--ui-control);
   padding: 0 3px;
   border: 2px solid var(--ui-line-strong);
@@ -5985,7 +5985,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   background: transparent;
   box-shadow: none;
   text-align: center;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--ui-ink);
@@ -6000,8 +6000,8 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 
 .personal-workspace .crumb-stepper__step {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex: none;
   display: grid;
   place-items: center;
@@ -6051,7 +6051,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   gap: 6px;
   /* As wide as what it holds, not as wide as the column: a time is six
    * characters and a date is ten. Numbers are not prose. */
-  width: min(100%, 110px);
+  width: min(100%, 96px);
   height: var(--ui-control);
   padding: 0 10px 0 0;
   border: 2px solid var(--ui-line-strong);
@@ -6063,7 +6063,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 }
 
 /* A date needs ten characters and a glyph; a time needs six. */
-.personal-workspace .crumb-date { width: min(100%, 136px); }
+.personal-workspace .crumb-date { width: min(100%, 120px); }
 
 .personal-workspace .crumb-time:hover,
 .personal-workspace .crumb-date:hover { border-color: #c9ab80; }
@@ -6106,7 +6106,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   border: 0;
   background: transparent;
   box-shadow: none;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--ui-ink);
@@ -6352,7 +6352,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 .personal-workspace .crumb-date__weekdays,
 .personal-workspace .crumb-date__grid {
   display: grid;
-  grid-template-columns: repeat(7, 30px);
+  grid-template-columns: repeat(7, 26px);
   gap: 2px;
 }
 
@@ -6368,8 +6368,8 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 }
 
 .personal-workspace .crumb-date__cell {
-  width: 30px;
-  height: 28px;
+  width: 26px;
+  height: 24px;
   border: 0;
   border-radius: 8px;
   background: transparent;
