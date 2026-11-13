@@ -9,7 +9,6 @@
  */
 import { computed, onMounted, reactive, ref } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import CrumbDate from '../components/ui/CrumbDate.vue'
 import CrumbNumber from '../components/ui/CrumbNumber.vue'
 import CrumbTime from '../components/ui/CrumbTime.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -77,15 +76,6 @@ function togglePref(key: 'drillModes' | 'practiceTypes', value: string): void {
     list.push(value)
   }
 }
-
-// The exam date is already in the profile and already validated on save — this
-// is the field the page was missing, not a new preference.
-const examDateField = computed({
-  get: () => form.examDate || null,
-  set: (value: string | null) => {
-    form.examDate = value || null
-  },
-})
 
 const challengeTime = computed({
   get: () => form.challengeGenerationTime ?? null,
@@ -308,23 +298,6 @@ onMounted(() => {
             </div>
             <p v-if="fieldErrors.dailyMinutes" id="daily-minutes-error" class="field-error" role="alert">
               {{ fieldErrors.dailyMinutes }}
-            </p>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>考试</legend>
-          <div class="field">
-            <label for="exam-date">考试日期</label>
-            <CrumbDate
-              id="exam-date"
-              v-model="examDateField"
-              label="考试日期"
-              :invalid="Boolean(fieldErrors.examDate)"
-            />
-            <p class="field-hint">必须晚于今天；留空表示暂不设置。</p>
-            <p v-if="fieldErrors.examDate" id="exam-date-error" class="field-error" role="alert">
-              {{ fieldErrors.examDate }}
             </p>
           </div>
         </fieldset>
