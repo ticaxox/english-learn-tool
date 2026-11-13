@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import CrumbDate from '../components/ui/CrumbDate.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import {
@@ -69,6 +70,18 @@ function daysBetween(from: string, to: string): number {
 
 const dateFrom = ref(shiftIsoDate(shanghaiToday(), -6))
 const dateTo = ref(shanghaiToday())
+
+// The calendar speaks "YYYY-MM-DD" or nothing; an empty field is '' here, and
+// the range check below already refuses to run on it.
+const dateFromField = computed({
+  get: () => dateFrom.value || null,
+  set: (value: string | null) => { dateFrom.value = value ?? '' },
+})
+
+const dateToField = computed({
+  get: () => dateTo.value || null,
+  set: (value: string | null) => { dateTo.value = value ?? '' },
+})
 const department = ref('')
 const learningGroup = ref('')
 const pageSize = ref(10)
@@ -240,11 +253,11 @@ onMounted(() => {
     <form class="panel dashboard-filters" aria-label="组织看板筛选" @submit.prevent="applyFilters">
       <div class="field">
         <label for="dashboard-from">开始日期</label>
-        <input id="dashboard-from" v-model="dateFrom" type="date" required />
+        <CrumbDate id="dashboard-from" v-model="dateFromField" label="看板开始日期" />
       </div>
       <div class="field">
         <label for="dashboard-to">结束日期</label>
-        <input id="dashboard-to" v-model="dateTo" type="date" required />
+        <CrumbDate id="dashboard-to" v-model="dateToField" label="看板结束日期" />
       </div>
       <div class="field">
         <label for="dashboard-department">部门</label>

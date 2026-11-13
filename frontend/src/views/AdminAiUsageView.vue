@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import CrumbDate from '../components/ui/CrumbDate.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import {
@@ -20,6 +21,18 @@ function offsetDate(days: number): string {
 
 const dateFrom = ref(offsetDate(-29))
 const dateTo = ref(todayIsoDate())
+
+// The calendar speaks "YYYY-MM-DD" or nothing; an empty field is '' here, and
+// the range check already refuses to run on it.
+const dateFromField = computed({
+  get: () => dateFrom.value || null,
+  set: (value: string | null) => { dateFrom.value = value ?? '' },
+})
+
+const dateToField = computed({
+  get: () => dateTo.value || null,
+  set: (value: string | null) => { dateTo.value = value ?? '' },
+})
 const usage = ref<AiUsage | null>(null)
 const loading = ref(false)
 const error = ref<unknown>(null)
@@ -82,11 +95,11 @@ onMounted(() => {
     <form class="panel usage-filter" @submit.prevent="load">
       <div class="field">
         <label for="usage-from">开始日期</label>
-        <input id="usage-from" v-model="dateFrom" type="date" />
+        <CrumbDate id="usage-from" v-model="dateFromField" label="用量开始日期" />
       </div>
       <div class="field">
         <label for="usage-to">结束日期</label>
-        <input id="usage-to" v-model="dateTo" type="date" />
+        <CrumbDate id="usage-to" v-model="dateToField" label="用量结束日期" />
       </div>
       <DivButton class="button" type="submit" :disabled="loading">{{ loading ? '读取中…' : '应用范围' }}</DivButton>
     </form>

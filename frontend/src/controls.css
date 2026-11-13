@@ -6014,7 +6014,8 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
  * frame is the target — a person aims at the time, not at an 18px icon — so
  * the pointer that stands over it is the pointer, digits included. Same shell
  * as the stepper, because a time and a number sit in the same row. */
-.personal-workspace .crumb-time {
+.personal-workspace .crumb-time,
+.personal-workspace .crumb-date {
   position: relative;
   display: flex;
   align-items: center;
@@ -6030,18 +6031,23 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
-.personal-workspace .crumb-time:hover { border-color: #c9ab80; }
+.personal-workspace .crumb-time:hover,
+.personal-workspace .crumb-date:hover { border-color: #c9ab80; }
 
 .personal-workspace .crumb-time:focus-within,
-.personal-workspace .crumb-time.is-open {
+.personal-workspace .crumb-time.is-open,
+.personal-workspace .crumb-date:focus-within,
+.personal-workspace .crumb-date.is-open {
   border-color: var(--g-orange-edge);
   outline: 3px solid rgb(255 150 0 / 25%);
   outline-offset: 0;
 }
 
-.personal-workspace .crumb-time.is-invalid { border-color: var(--g-red); }
+.personal-workspace .crumb-time.is-invalid,
+.personal-workspace .crumb-date.is-invalid { border-color: var(--g-red); }
 
-.personal-workspace .crumb-time.is-disabled {
+.personal-workspace .crumb-time.is-disabled,
+.personal-workspace .crumb-date.is-disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -6055,7 +6061,8 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
  * `min-height: 0` is the same fix the stepper needs: without it the shared
  * field rule makes this input taller than the wrapper's content box, and its
  * rounded background paints over the wrapper's border. */
-.personal-workspace .crumb-time input.crumb-time__input[type="text"] {
+.personal-workspace .crumb-time input.crumb-time__input[type="text"],
+.personal-workspace .crumb-date input.crumb-date__input[type="text"] {
   flex: 1 1 0;
   width: auto;
   min-width: 0;
@@ -6072,7 +6079,9 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 }
 
 .personal-workspace .crumb-time input.crumb-time__input[type="text"]:focus,
-.personal-workspace .crumb-time input.crumb-time__input[type="text"]:hover {
+.personal-workspace .crumb-time input.crumb-time__input[type="text"]:hover,
+.personal-workspace .crumb-date input.crumb-date__input[type="text"]:focus,
+.personal-workspace .crumb-date input.crumb-date__input[type="text"]:hover {
   border: 0;
   outline: none;
   box-shadow: none;
@@ -6081,7 +6090,8 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 /* The clock marks the field as a time and says what a click will do. It is
  * drawn, not a second target: the frame around it already is one. */
-.personal-workspace .crumb-time__glyph {
+.personal-workspace .crumb-time__glyph,
+.personal-workspace .crumb-date__glyph {
   display: block;
   flex: none;
   width: 18px;
@@ -6091,7 +6101,9 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 }
 
 .personal-workspace .crumb-time:hover .crumb-time__glyph,
-.personal-workspace .crumb-time.is-open .crumb-time__glyph {
+.personal-workspace .crumb-time.is-open .crumb-time__glyph,
+.personal-workspace .crumb-date:hover .crumb-date__glyph,
+.personal-workspace .crumb-date.is-open .crumb-date__glyph {
   color: var(--g-orange-edge);
 }
 
@@ -6199,6 +6211,179 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background: var(--g-orange);
   color: var(--g-on-orange);
   box-shadow: inset 0 -2px 0 var(--g-orange-edge);
+}
+
+/* ------------------------------------------------------------------ crumb-date */
+
+/* The calendar panel: a month, a week of names, six rows of days. Same paper,
+ * same ink and same hard offset as the time wheel, so the two read as one kit. */
+.personal-workspace .crumb-date__picker {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 10px;
+  overflow: visible;
+  border: 2px solid var(--ui-line-strong);
+  border-radius: 16px;
+  background: var(--ui-surface);
+  box-shadow: 7px 7px 0 rgb(59 42 26 / 14%);
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-date__picker:popover-open {
+  display: block;
+  animation: crumb-time-panel 220ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .crumb-date__picker:popover-open { animation: none; }
+}
+
+.personal-workspace .crumb-date__head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.personal-workspace .crumb-date__month {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .crumb-date__step {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ui-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, scale 100ms ease;
+}
+
+.personal-workspace .crumb-date__step svg { width: 15px; height: 15px; }
+
+.personal-workspace .crumb-date__step:hover {
+  background: var(--g-orange-soft);
+  color: var(--g-orange-edge);
+}
+
+.personal-workspace .crumb-date__step:active { scale: 0.9; }
+
+.personal-workspace .crumb-date__step:focus-visible {
+  outline: 2px solid var(--g-orange-edge);
+  outline-offset: 1px;
+}
+
+.personal-workspace .crumb-date__weekdays,
+.personal-workspace .crumb-date__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 34px);
+  gap: 2px;
+}
+
+.personal-workspace .crumb-date__weekdays span {
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--ui-line);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--ui-muted);
+}
+
+.personal-workspace .crumb-date__cell {
+  width: 34px;
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ui-ink);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.personal-workspace .crumb-date__cell:hover { background: var(--ui-surface-subtle); }
+
+.personal-workspace .crumb-date__cell.is-outside { color: var(--ui-muted); opacity: 0.55; }
+
+/* Today is a ring, the choice is a filled day: two different facts, so they
+ * are drawn two different ways rather than one shade apart. */
+.personal-workspace .crumb-date__cell.is-today {
+  box-shadow: inset 0 0 0 2px var(--ui-line-strong);
+}
+
+.personal-workspace .crumb-date__cell.is-selected {
+  background: var(--g-orange);
+  color: var(--g-on-orange);
+  box-shadow: inset 0 -2px 0 var(--g-orange-edge);
+}
+
+.personal-workspace .crumb-date__cell.is-selected.is-today {
+  box-shadow: inset 0 -2px 0 var(--g-orange-edge), inset 0 0 0 2px var(--g-on-orange);
+}
+
+.personal-workspace .crumb-date__cell:focus-visible {
+  outline: 2px solid var(--g-orange-edge);
+  outline-offset: -2px;
+}
+
+.personal-workspace .crumb-date__foot {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ui-line);
+}
+
+/* The footer stays quiet: the pumpkin belongs to the chosen day, and two
+ * filled orange blocks in one panel would argue about which is the answer. */
+.personal-workspace .crumb-date__action {
+  flex: 1 1 0;
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, scale 100ms ease;
+}
+
+.personal-workspace .crumb-date__action:hover {
+  background: var(--g-orange);
+  color: var(--g-on-orange);
+}
+
+.personal-workspace .crumb-date__action:active { scale: 0.97; }
+
+.personal-workspace .crumb-date__action:focus-visible {
+  outline: 2px solid var(--g-orange-edge);
+  outline-offset: 1px;
+}
+
+.personal-workspace .crumb-date__action--quiet {
+  background: transparent;
+  color: var(--ui-muted);
+}
+
+.personal-workspace .crumb-date__action--quiet:hover {
+  background: var(--ui-surface-subtle);
+  color: var(--ui-ink);
 }
 
 /* ------------------------------------------------------------------- search */
@@ -6371,12 +6556,14 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 html[data-theme='night'] .personal-workspace .crumb-stepper,
 html[data-theme='night'] .personal-workspace .crumb-search,
 html[data-theme='night'] .personal-workspace .crumb-time,
+html[data-theme='night'] .personal-workspace .crumb-date,
 html[data-theme='night'] .personal-workspace .crumb-file {
   box-shadow: inset 0 -2px 0 rgb(8 3 20 / 45%);
 }
 
 html[data-theme='night'] .personal-workspace .crumb-stepper:hover,
 html[data-theme='night'] .personal-workspace .crumb-time:hover,
+html[data-theme='night'] .personal-workspace .crumb-date:hover,
 html[data-theme='night'] .personal-workspace .crumb-search:hover { border-color: var(--ui-line-strong); }
 
 html[data-theme='night'] .personal-workspace .crumb-file { border-color: #4a3d6b; }
@@ -6385,8 +6572,11 @@ html[data-theme='night'] .personal-workspace .crumb-stepper__step:disabled { col
 
 html[data-theme='night'] .personal-workspace .crumb-time.is-disabled .crumb-time__glyph { color: #5b4f7a; }
 
-/* The picker is a floating card, so its shadow is the room's hard offset, not
- * a soft drop — and at night that offset is nearly black. */
-html[data-theme='night'] .personal-workspace .crumb-time__picker {
+/* The pickers are floating cards, so their shadow is the room's hard offset,
+ * not a soft drop — and at night that offset is nearly black. */
+html[data-theme='night'] .personal-workspace .crumb-time__picker,
+html[data-theme='night'] .personal-workspace .crumb-date__picker {
   box-shadow: 7px 7px 0 rgb(8 3 20 / 55%);
 }
+
+html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date__glyph { color: #5b4f7a; }
