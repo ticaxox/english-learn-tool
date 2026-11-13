@@ -1035,6 +1035,26 @@
 .personal-workspace .records-detail__title { display: flex; gap: 12px; align-items: center; min-width: 0; }
 .personal-workspace .records-detail__title h2 { margin: 0; font-size: 17px; font-weight: 750; }
 .personal-workspace .records-detail__title p { margin: 2px 0 0; color: var(--ui-muted); font-size: 12px; }
+.personal-workspace .records-detail__aside {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 16px;
+  align-items: center;
+}
+.personal-workspace .records-detail__only-wrong {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  padding: 5px 11px 5px 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.personal-workspace .records-detail__only-wrong input[type='checkbox'] { margin: 0; }
 .personal-workspace .records-detail__score {
   display: flex;
   gap: 2px;

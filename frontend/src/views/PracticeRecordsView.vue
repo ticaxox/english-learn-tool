@@ -61,12 +61,29 @@ const activeId = ref<string | null>(null)
 const detail = ref<PracticeRecordDetail | null>(null)
 const detailLoading = ref(false)
 const detailError = ref<unknown>(null)
+/** In the mistake book, the record may still hold answers that were right. */
+const onlyWrong = ref(false)
 
 const selected = ref<string[]>([])
 const deleting = ref(false)
 const deleteError = ref<unknown>(null)
 let pendingDeleteKey: string | null = null
 let pendingDeleteSignature = ''
+
+const hasWrongAnswers = computed(() => Boolean(detail.value?.result?.questions.some((item) => item.isMistake)))
+/** The result, narrowed to the questions that went wrong when asked to. */
+const shownResult = computed(() => {
+  const result = detail.value?.result
+  if (!result) return null
+  if (!onlyWrong.value) return result
+  return { ...result, questions: result.questions.filter((item) => item.isMistake) }
+})
+const shownQuestions = computed(() => {
+  const questions = detail.value?.questions ?? []
+  if (!onlyWrong.value) return questions
+  const keep = new Set(shownResult.value?.questions.map((item) => item.questionId))
+  return questions.filter((question) => keep.has(question.id))
+})
 
 const page = computed(() => Math.floor(offset.value / limit) + 1)
 const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)))
@@ -141,6 +158,7 @@ async function loadAndSelectFirst(): Promise<void> {
 
 async function openRecord(record: PracticeRecordSummary, reveal = false): Promise<void> {
   activeId.value = record.id
+  onlyWrong.value = false
   detailLoading.value = true
   detailError.value = null
   try {
@@ -383,12 +401,18 @@ void loadAndSelectFirst()
                 <p>{{ PRACTICE_SOURCE_LABELS[detail.source] }} · {{ detail.totalQuestions }} 题 · {{ formatSubmittedAt(detail.submittedAt) }}</p>
               </div>
             </div>
-            <p class="records-detail__score">
-              <strong>{{ scoreText(detail) }}</strong><span>分</span>
-            </p>
+            <div class="records-detail__aside">
+              <label v-if="isMistakes && hasWrongAnswers" class="records-detail__only-wrong">
+                <input v-model="onlyWrong" type="checkbox" />
+                <span>只看错题</span>
+              </label>
+              <p class="records-detail__score">
+                <strong>{{ scoreText(detail) }}</strong><span>分</span>
+              </p>
+            </div>
           </header>
 
-          <PracticeResultView v-if="detail.result" :result="detail.result" :questions="detail.questions" />
+          <PracticeResultView v-if="shownResult" :result="shownResult" :questions="shownQuestions" />
           <p v-else class="records-empty">这次练习暂无可用结果，可能仍在评分或评分失败。</p>
         </template>
         <div v-else class="records-detail__blank">
