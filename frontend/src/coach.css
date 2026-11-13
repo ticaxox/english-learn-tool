@@ -70,6 +70,19 @@ html[data-theme='night'] .coach-page {
   line-height: inherit;
 }
 
+/* The shared button layer repaints itself green on hover. Inside the coach a
+   control keeps its own colour and only moves. */
+.coach-page.coach-page .div-button:hover,
+.coach-page.coach-page .div-button:focus,
+.coach-page.coach-page .div-button:focus-visible,
+.coach-page.coach-page .button:hover,
+.coach-page.coach-page .button-secondary:hover,
+.coach-page.coach-page .member-primary-button:hover {
+  background: none;
+  color: inherit;
+  border-color: inherit;
+}
+
 /* The coach page is the whole column, not a card inside its padding — and it
    is exactly one screen tall, so the thread scrolls and the composer stays
    put instead of riding the bottom of a growing document. */
@@ -173,7 +186,11 @@ html[data-theme='night'] .coach-page {
   transition: transform 180ms ease;
 }
 .coach-page.coach-page .coach-history__new-disc svg { width: 14px; height: 14px; }
-.coach-page.coach-page .coach-history__new:hover { filter: brightness(1.05); }
+.coach-page.coach-page .coach-history__new:hover,
+.coach-page.coach-page .coach-history__new:focus-visible {
+  background: var(--coach-accent);
+  color: #35240f;
+}
 .coach-page.coach-page .coach-history__new:hover .coach-history__new-disc { transform: scale(1.08); }
 .coach-page.coach-page .coach-history__new:active {
   transform: translateY(2px);
@@ -194,6 +211,8 @@ html[data-theme='night'] .coach-page {
 }
 .coach-page.coach-page .coach-history__item {
   position: relative;
+  min-width: 0;
+  overflow: hidden;
   border-radius: 8px;
   transition: background-color 160ms ease;
 }
