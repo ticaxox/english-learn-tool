@@ -254,7 +254,6 @@ onBeforeUnmount(() => {
 
       <div class="workspace-sidebar-footer">
         <div class="rail-daylight">
-          <span>昼夜</span>
           <ThemeSwitch />
         </div>
 

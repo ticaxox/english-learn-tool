@@ -915,13 +915,6 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   border: 1px solid var(--rail-line);
 }
 
-.personal-workspace .rail-daylight > span {
-  color: var(--rail-muted);
-  font-family: var(--font-code);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
 
 /* --- the rail folded to icons --- */
 
