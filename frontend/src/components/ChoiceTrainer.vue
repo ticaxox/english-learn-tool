@@ -201,65 +201,76 @@ function choose(optionId: string): void {
   pointer-events: none;
 }
 
-/* Each option is its own stone bar. The parent selector is here for
-   specificity: game-ui.css sets the same properties on .choice-option and wins
-   on load order otherwise.
-   The option is a block, not the workspace's three-column grid — that grid
-   would put the face in a 38px column instead of letting it fill the bar. */
+/* Each option is a fixed-length stone plate. It used to be a bar stretched to
+   whatever the column gave it, which made a four-letter word sit in a 370px
+   slab and pushed the letter marker to the far left, out of the reading line.
+   One length for every option: the word is the thing being read. */
 .study-card--choice .choice-option {
   display: block;
-  border-style: solid;
-  border-width: 12px 20px;
-  border-color: transparent;
-  border-image-source: url('../assets/halloween/card/bar-biscuit.png');
-  /* `fill` so the bar's own stone face shows through: the artwork is the
-     whole object, not a frame around a colour. */
-  border-image-slice: 8% 4% fill;
-  border-image-width: 12px 20px;
-  border-image-repeat: stretch;
+  width: 100%;
+  max-width: 288px;
+  height: 76px;
+  margin-inline: auto;
+  border: 0 !important;
   border-radius: 0;
-  background: none;
-  /* A real drop-shadow follows the chipped silhouette, which a box-shadow
-     cannot — it would print a pale rectangle through the gaps. */
-  filter: drop-shadow(0 2px 0 rgb(122 92 48 / 45%));
+  background-color: transparent;
+  background-image: url('../assets/halloween/card/option-plate-day.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   box-shadow: none;
+  filter: none;
 }
 
-.study-card--choice .choice-option:has(input:checked) {
-  border-image-source: url('../assets/halloween/card/bar-biscuit-on.png');
-  filter: drop-shadow(0 3px 6px rgb(122 92 48 / 55%));
+html[data-theme='night'] .study-card--choice .choice-option {
+  background-image: url('../assets/halloween/card/option-plate-night.png');
 }
 
 .choice-option__face {
+  position: relative;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  gap: 1.1rem;
+  /* The letter is a small mark at the left; the word owns the middle. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.55rem;
   align-items: center;
+  height: 100%;
   width: 100%;
-  padding: 0.5rem 0.6rem;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  transition: filter 140ms ease;
+  padding: 0.4rem 0.9rem;
 }
 
-.study-card--choice .choice-option:hover { filter: brightness(1.08) drop-shadow(0 3px 6px rgb(122 92 48 / 50%)); }
-.study-card--choice .choice-option:active { filter: brightness(0.96); }
+.study-card--choice .choice-option:hover { filter: brightness(1.06); }
+.study-card--choice .choice-option:active { filter: brightness(0.95); }
+
+/* Picked: the plate brightens and the ring appears; the plate itself is the
+   artwork and is never repainted. */
+.study-card--choice .choice-option--selected { filter: brightness(1.1); }
+.study-card--choice .choice-option--selected .choice-option__face::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 2px var(--g-orange, #ff9600);
+  pointer-events: none;
+}
 
 .choice-option__label {
-  font-size: 1.24rem;
+  grid-column: 2;
+  font-size: 1.28rem;
   font-weight: 800;
   color: #5a3a16;
-  line-height: 1.35;
+  line-height: 1.3;
   letter-spacing: 0.01em;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
+html[data-theme='night'] .choice-option__label { color: #f3e9d2; }
+
 .choice-option__tick {
+  grid-column: 3;
   display: grid;
   place-items: center;
-  justify-self: start;
-  width: 22px;
+  width: 20px;
   height: 22px;
   border-radius: 999px;
   background: #c98a2e;

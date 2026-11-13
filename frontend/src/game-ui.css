@@ -1285,8 +1285,9 @@ html[data-theme='night'] .personal-workspace .contract-gate__mark { background: 
 html[data-theme='night'] .personal-workspace .today-hero__badge { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .today-tile { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .study-card { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .choice-option { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .choice-option:hover { background: #2d2149; }
+/* The option carries its own plate artwork in both themes; a flat background
+ * colour here would paint a rectangle over it. */
+html[data-theme='night'] .personal-workspace .choice-option:hover { filter: brightness(1.06); }
 /* The given letters (a span, not an input) carry the same tile, and the night
  * rule above would otherwise paint a flat box over it. */
 html[data-theme='night'] .personal-workspace span.spelling-cell {

@@ -61,7 +61,9 @@ import cardBack from './card/card-back.png'
 import drillSteleDay from './card/drill-stele-day.png'
 import drillSteleNight from './card/drill-stele-night.png'
 import drillBiscuitDay from './card/drill-biscuit-day.png'
-import drillBiscuitNight from './card/drill-biscuit-night.png'
+import drillBoardNight from './card/drill-board-night.png'
+import optionPlateDay from './card/option-plate-day.png'
+import optionPlateNight from './card/option-plate-night.png'
 import optionTokenDay from './card/option-token-day.png'
 import optionTokenNight from './card/option-token-night.png'
 import letterTileDay from './card/letter-tile-day.png'
@@ -82,7 +84,9 @@ export const questionCard = {
  */
 export const drillFrame = {
   choice: { day: drillSteleDay, night: drillSteleNight },
-  spelling: { day: drillBiscuitDay, night: drillBiscuitNight },
+  // Baked by day, written on by night: night keeps the crinkle-cut silhouette
+  // but it is a chalkboard, because spelling is the drill where you write.
+  spelling: { day: drillBiscuitDay, night: drillBoardNight },
 } as const
 
 /**
@@ -93,6 +97,9 @@ export const drillFrame = {
 export const letterMark = {
   optionToken: { day: optionTokenDay, night: optionTokenNight },
   letterTile: { day: letterTileDay, night: letterTileNight },
+  // The option itself: one plate, always the same length, so a two-word
+  // choice and a one-word choice line up.
+  optionPlate: { day: optionPlateDay, night: optionPlateNight },
 } as const
 
 /**
