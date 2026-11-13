@@ -23,7 +23,16 @@ html[data-theme='night'] .personal-workspace {
 
 /* Flush with the content area: no inset frame around the page, no rounding.
  * The file manager is the page, not a card sitting on one. */
-.personal-workspace .workspace-content:has(.kb) { padding: 0; }
+/* The shell caps every page at 1320px and centres it with 24px of padding.
+ * This page is a window onto shelves, so while it is open the content area
+ * gives up the cap and the gutter and hands the whole width to it. */
+html .personal-workspace .workspace-content:has(.kb) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
 
 .personal-workspace .kb {
   display: grid;
