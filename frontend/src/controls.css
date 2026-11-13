@@ -193,6 +193,10 @@
   }
 
   .personal-workspace select::picker-icon {
+    /* `content: ''` is what removes the platform's own arrow. The icon box is
+     * a real element in base-select and still holds the UA glyph; painting a
+     * background over it left two arrows in the same corner. */
+    content: '';
     margin-left: auto;
     width: 15px;
     height: 15px;
