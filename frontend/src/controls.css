@@ -2777,17 +2777,19 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   color: #c8a06a;
 }
 
+/* The warm lantern is the one you are standing on: it is the only stop that
+ * should smile at you. A stop you already cleared goes spirit-green. */
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-completed {
-  background-image: var(--pumpkin-lit) !important;
-  color: #5a3208;
-  filter: drop-shadow(0 0 12px rgb(255 150 0 / 55%));
+  background-image: var(--pumpkin-green) !important;
+  color: #1d3a2a;
+  filter: drop-shadow(0 0 12px rgb(140 220 140 / 45%));
 }
 
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-in_progress,
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-unlocked {
-  background-image: var(--pumpkin-green) !important;
-  color: #1d3a2a;
-  filter: drop-shadow(0 0 12px rgb(140 220 140 / 45%));
+  background-image: var(--pumpkin-lit) !important;
+  color: #5a3208;
+  filter: drop-shadow(0 0 12px rgb(255 150 0 / 55%));
 }
 
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-failed {

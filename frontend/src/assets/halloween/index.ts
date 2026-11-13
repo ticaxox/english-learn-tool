@@ -223,7 +223,6 @@ export const bookObject = { day: bookObjectDay, night: bookObjectNight } as cons
 import pumpkinGreen from './char/pumpkin-green.png'
 import pumpkinGreenNight from './char/pumpkin-green-night.png'
 import pumpkinUnlit from './char/pumpkin-unlit.png'
-import pumpkinUnlitNight from './char/pumpkin-unlit-night.png'
 import pumpkinMorning from './char/pumpkin-morning.png'
 import pumpkinDusk from './char/pumpkin-dusk.png'
 import pumpkinBoss from './char/pumpkin-boss.png'
@@ -234,7 +233,9 @@ export const pumpkins = {
   /** A cleared stop: bright by morning, a hot burn after dark. */
   lit: { day: pumpkinMorning, night: pumpkinDusk },
   green: { day: pumpkinGreen, night: pumpkinGreenNight },
-  unlit: { day: pumpkinUnlit, night: pumpkinUnlitNight },
+  /** The stop out of reach still has a face: the plain silhouette read as a
+   * blank gourd after dark, so night keeps the carved one. */
+  unlit: { day: pumpkinUnlit, night: pumpkinUnlit },
   /** The last stop wears a crown; a side path is a quiet one. */
   boss: { day: pumpkinBoss, night: pumpkinBossNight },
   branch: { day: pumpkinBranch, night: pumpkinBranchNight },
