@@ -95,6 +95,10 @@ export function useAnchoredPopover(onEscape?: () => void): AnchoredPopover {
       if (!panel) return
       if (typeof panel.showPopover === 'function' && !isPopoverOpen(panel)) panel.showPopover()
       position()
+      // Once more after the frame that actually paints it: a panel whose size
+      // settles during that frame would otherwise be clamped against a size it
+      // no longer has.
+      requestAnimationFrame(() => { if (isOpen.value) position() })
       document.addEventListener('pointerdown', onPointerDown, true)
       document.addEventListener('keydown', onKeydown, true)
       window.addEventListener('resize', onViewportChange)

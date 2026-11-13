@@ -5914,8 +5914,8 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   display: flex;
   align-items: center;
   /* A number field is as wide as its digits plus two targets, not as wide as
-   * the column it sits in. */
-  width: min(100%, 148px);
+   * the column it sits in. Three digits is the most it ever holds. */
+  width: min(100%, 126px);
   height: var(--ui-control);
   padding: 0 4px;
   border: 2px solid var(--ui-line-strong);
@@ -6020,7 +6020,9 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   display: flex;
   align-items: center;
   gap: 6px;
-  width: min(100%, 170px);
+  /* As wide as what it holds, not as wide as the column: a time is six
+   * characters and a date is ten. Numbers are not prose. */
+  width: min(100%, 124px);
   height: var(--ui-control);
   padding: 0 12px 0 0;
   border: 2px solid var(--ui-line-strong);
@@ -6030,6 +6032,9 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   cursor: pointer;
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
+
+/* A date needs ten characters and a glyph; a time needs six. */
+.personal-workspace .crumb-date { width: min(100%, 150px); }
 
 .personal-workspace .crumb-time:hover,
 .personal-workspace .crumb-date:hover { border-color: #c9ab80; }
@@ -6113,6 +6118,10 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 .personal-workspace .crumb-time__picker {
   position: fixed;
   inset: auto;
+  /* A popover with `inset: auto` shrink-fits against its static position,
+   * which is inside a 124px field. Sized to its own content instead, so the
+   * panel is the same width wherever the field happens to sit. */
+  width: max-content;
   margin: 0;
   padding: 10px 9px 9px;
   overflow: visible;
@@ -6138,52 +6147,76 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   .personal-workspace .crumb-time__picker:popover-open { animation: none; }
 }
 
-.personal-workspace .crumb-time__wheel {
+/* The chosen time, whole, above the two dials: the wheels show what is near
+ * the choice, this shows the choice. */
+.personal-workspace .crumb-time__readout {
   display: flex;
-  align-items: stretch;
-  gap: 6px;
-}
-
-.personal-workspace .crumb-time__column {
-  display: flex;
-  flex-direction: column;
-  width: 58px;
-  padding: 2px;
-}
-
-.personal-workspace .crumb-time__caption {
-  margin: 0 0 3px;
-  padding: 2px 0 5px;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1px;
+  margin: 0 0 8px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--ui-line);
-  font-size: 0.68rem;
+  font-size: 1.5rem;
   font-weight: 800;
-  letter-spacing: 0.16em;
-  color: var(--ui-muted);
-  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--ui-ink);
 }
+
+.personal-workspace .crumb-time__readout em {
+  font-style: normal;
+  color: var(--ui-muted);
+}
+
+.personal-workspace .crumb-time__wheel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.personal-workspace .crumb-time__column { width: 54px; }
 
 /* The bar itself is noise on a wheel this short. What scrolls is the list; the
- * shadow at each end is the only affordance it needs. */
+ * fade at each end is the only affordance it needs.
+ *
+ * Five rows and a spacer at each end, so the first and last value can still
+ * sit in the middle — a wheel whose ends cannot reach the band reads as a
+ * broken list rather than a dial. */
 .personal-workspace .crumb-time__list {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-height: 198px;
-  padding: 4px 0;
+  height: 178px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  mask-image: linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 14px), transparent);
+  scroll-snap-type: y proximity;
+  mask-image: linear-gradient(to bottom, transparent, #000 26px, #000 calc(100% - 26px), transparent);
+}
+
+.personal-workspace .crumb-time__list::before,
+.personal-workspace .crumb-time__list::after {
+  content: "";
+  flex: none;
+  height: 70px;
 }
 
 .personal-workspace .crumb-time__list::-webkit-scrollbar { display: none; }
 
-.personal-workspace .crumb-time__seam {
-  display: grid;
-  place-items: center;
-  padding-top: 26px;
-  font-weight: 800;
-  color: var(--ui-muted);
+/* The band is where a row lands when the wheel stops: five rows means the
+ * middle one, so it is drawn once, behind both columns. */
+.personal-workspace .crumb-time__band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 40px;
+  translate: 0 -50%;
+  border-radius: 10px;
+  background: var(--ui-surface-subtle);
+  pointer-events: none;
 }
 
 .personal-workspace .crumb-time__cell {
@@ -6197,6 +6230,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
+  scroll-snap-align: center;
   transition: background 120ms ease, color 120ms ease;
 }
 
@@ -6220,6 +6254,8 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 .personal-workspace .crumb-date__picker {
   position: fixed;
   inset: auto;
+  /* Same reason as the time panel: size to the calendar, not to the field. */
+  width: max-content;
   margin: 0;
   padding: 10px;
   overflow: visible;

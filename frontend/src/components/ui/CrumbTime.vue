@@ -14,7 +14,7 @@
  * select's own popover. The whole frame is the target; the clock at its end is
  * a mark, not a second button.
  */
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useAnchoredPopover } from '../../composables/useAnchoredPopover'
 
 const props = withDefaults(defineProps<{
@@ -144,6 +144,46 @@ function scrollSelectionIntoView(): void {
   }
 }
 
+/** The row nearest the middle of the dial is the one under the band, so the
+ *  wheel picks a value when it stops: turning it is the interaction, not just
+ *  a way to reach a row to click. */
+function centredValue(list: HTMLElement): number | null {
+  const rect = list.getBoundingClientRect()
+  const middle = rect.top + rect.height / 2
+  let best: { value: number; distance: number } | null = null
+  for (const cell of list.querySelectorAll<HTMLElement>('[data-value]')) {
+    const box = cell.getBoundingClientRect()
+    const distance = Math.abs(box.top + box.height / 2 - middle)
+    if (!best || distance < best.distance) best = { value: Number(cell.dataset.value), distance }
+  }
+  return best ? best.value : null
+}
+
+let settleTimer: ReturnType<typeof setTimeout> | null = null
+
+function onDialScroll(dial: 'hour' | 'minute'): void {
+  if (settleTimer !== null) clearTimeout(settleTimer)
+  settleTimer = setTimeout(() => {
+    settleTimer = null
+    const list = dial === 'hour' ? hourColumn.value : minuteColumn.value
+    if (!list) return
+    const next = centredValue(list)
+    if (next === null) return
+    const current = dial === 'hour' ? value.value?.hour : value.value?.minute
+    if (next === current) return
+    if (dial === 'hour') setHour(next)
+    else setMinute(next)
+  }, 140)
+}
+
+onBeforeUnmount(() => {
+  if (settleTimer !== null) clearTimeout(settleTimer)
+})
+
+// A value set from anywhere — a click, a typed time, the form — rolls the
+// matching dial to it, so the band always sits over the truth.
+watch(display, () => { void nextTick(scrollSelectionIntoView) })
+
 function openPicker(): void {
   if (props.disabled) return
   openPanel()
@@ -213,15 +253,22 @@ function setMinute(minute: number): void {
     </svg>
 
     <div :ref="bindPanel" class="crumb-time__picker" popover="manual" role="dialog" :aria-label="`${label}选择`">
+      <p class="crumb-time__readout" aria-hidden="true">
+        <span>{{ value ? pad(value.hour) : '--' }}</span>
+        <em>:</em>
+        <span>{{ value ? pad(value.minute) : '--' }}</span>
+      </p>
+
       <div class="crumb-time__wheel">
-        <div class="crumb-time__column">
-          <p class="crumb-time__caption">时</p>
-          <div ref="hourColumn" class="crumb-time__list">
+        <span class="crumb-time__band" aria-hidden="true"></span>
+        <div class="crumb-time__column" aria-label="小时">
+          <div ref="hourColumn" class="crumb-time__list" @scroll="onDialScroll('hour')">
             <button
               v-for="hour in HOURS"
               :key="`h-${hour}`"
               class="crumb-time__cell"
               type="button"
+              :data-value="hour"
               :aria-current="value?.hour === hour ? 'true' : undefined"
               :class="{ 'is-active': value?.hour === hour }"
               @click="setHour(hour)"
@@ -230,15 +277,14 @@ function setMinute(minute: number): void {
             </button>
           </div>
         </div>
-        <div class="crumb-time__seam" aria-hidden="true">:</div>
-        <div class="crumb-time__column">
-          <p class="crumb-time__caption">分</p>
-          <div ref="minuteColumn" class="crumb-time__list">
+        <div class="crumb-time__column" aria-label="分钟">
+          <div ref="minuteColumn" class="crumb-time__list" @scroll="onDialScroll('minute')">
             <button
               v-for="minute in MINUTES"
               :key="`m-${minute}`"
               class="crumb-time__cell"
               type="button"
+              :data-value="minute"
               :aria-current="value?.minute === minute ? 'true' : undefined"
               :class="{ 'is-active': value?.minute === minute }"
               @click="setMinute(minute)"
