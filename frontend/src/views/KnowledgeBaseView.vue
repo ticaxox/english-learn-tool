@@ -87,6 +87,7 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null
 const menu = ref<{ x: number; y: number; label: string; items: MenuItem[] } | null>(null)
 const dialog = ref<DialogState | null>(null)
 const dialogInput = ref<HTMLInputElement | null>(null)
+const dialogFile = ref<HTMLInputElement | null>(null)
 const preview = ref<KnowledgeDocumentDetail | null>(null)
 
 const byParent = computed(() => {
@@ -353,6 +354,31 @@ async function importDocument(folderId: string): Promise<void> {
   } catch (cause) {
     error.value = cause
   }
+}
+
+/** A .txt or .md picked from disk fills the body; the name seeds the title. */
+async function readFile(file: File): Promise<void> {
+  const state = dialog.value
+  if (!state) return
+  if (file.size > 2 * 1024 * 1024) {
+    error.value = new Error('文件不能超过 2 MB。')
+    return
+  }
+  const text = await file.text()
+  state.content = text
+  if (!state.value.trim()) state.value = file.name.replace(/\.[^.]+$/, '')
+}
+
+async function onFilePick(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (file) await readFile(file)
+}
+
+async function onFileDrop(event: DragEvent): Promise<void> {
+  const file = event.dataTransfer?.files?.[0]
+  if (file) await readFile(file)
 }
 
 async function renameFolder(folder: KnowledgeFolder): Promise<void> {
@@ -766,7 +792,15 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-if="dialog" class="kb-backdrop" @click.self="cancelDialog">
-      <form class="kb-dialog" role="dialog" aria-modal="true" :aria-label="dialog.title" @submit.prevent="submitDialog">
+      <form
+        class="kb-dialog"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="dialog.title"
+        @submit.prevent="submitDialog"
+        @dragover.prevent
+        @drop.prevent="dialog.multiline && onFileDrop($event)"
+      >
         <h2>{{ dialog.title }}</h2>
         <p v-if="dialog.hint">{{ dialog.hint }}</p>
         <input
@@ -788,7 +822,26 @@ onBeforeUnmount(() => {
             <option value="TOEFL">托福</option>
           </select>
         </label>
-        <textarea v-if="dialog.multiline" v-model="dialog.content" aria-label="正文" placeholder="粘贴正文…"></textarea>
+        <template v-if="dialog.multiline">
+          <div class="kb-dialog__file">
+            <input
+              ref="dialogFile"
+              class="kb-dialog__fileinput"
+              type="file"
+              accept=".txt,.md,text/plain,text/markdown"
+              @change="onFilePick"
+            />
+            <DivButton class="kb-btn ghost" type="button" @click="dialogFile?.click()">选择文件…</DivButton>
+            <span>支持 .txt / .md，2 MB 以内；也可以直接拖进来或粘贴</span>
+          </div>
+          <textarea
+            v-model="dialog.content"
+            aria-label="正文"
+            placeholder="粘贴正文，或把文件拖到这里…"
+            @dragover.prevent
+            @drop.prevent="onFileDrop"
+          ></textarea>
+        </template>
         <div class="kb-dialog__acts">
           <DivButton class="kb-btn ghost" type="button" @click="cancelDialog">取消</DivButton>
           <DivButton

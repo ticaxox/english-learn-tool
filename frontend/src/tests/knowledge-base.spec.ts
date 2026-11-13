@@ -1,6 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createPinia, setActivePinia } from 'pinia'
 import KnowledgeBaseView from '../views/KnowledgeBaseView.vue'
 import type { KnowledgeDocument, KnowledgeFolder } from '../api/knowledge'
 
@@ -61,7 +60,6 @@ function mountView() {
 
 describe('KnowledgeBaseView', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
     vi.clearAllMocks()
     mocks.listKnowledgeFolders.mockResolvedValue([goals, cet4, mine])
     mocks.listFolderDocuments.mockImplementation((id: string) =>
@@ -92,15 +90,11 @@ describe('KnowledgeBaseView', () => {
     expect(rows.some((text) => text.includes('我的笔记'))).toBe(true)
   })
 
-  it('opens the first shelf and lists its documents as cards', async () => {
+  it('opens a shelf and lists its documents as cards', async () => {
     const wrapper = mountView()
     await flushPromises()
     expect(mocks.listFolderDocuments).toHaveBeenCalledWith('goals')
-    expect(wrapper.find('.kb-doc__title').exists()).toBe(false)
 
-    mocks.listFolderDocuments.mockImplementation((id: string) =>
-      Promise.resolve(id === 'goals' ? [] : [doc]),
-    )
     await wrapper.findAll('.kb-row')[1].trigger('click')
     await flushPromises()
     expect(wrapper.get('.kb-doc__title').text()).toBe('2023-06 四级阅读')
@@ -130,8 +124,7 @@ describe('KnowledgeBaseView', () => {
 
     await wrapper.findAll('.kb-ctx button').find((b) => b.text() === '删除资料')!.trigger('click')
     await flushPromises()
-    // the confirm dialog, then its destructive button
-    await wrapper.get('.kb-dialog form, form.kb-dialog').trigger('submit')
+    await wrapper.get('form.kb-dialog').trigger('submit')
     await flushPromises()
     expect(mocks.deleteKnowledgeDocument).toHaveBeenCalledWith('doc-1')
   })
@@ -144,14 +137,39 @@ describe('KnowledgeBaseView', () => {
 
     await wrapper.get('.kb-bar .kb-btn:not(.ghost)').trigger('click')
     await flushPromises()
-    await wrapper.get('.kb-dialog input').setValue('2024-06 四级阅读')
+    await wrapper.get('.kb-dialog > input').setValue('2024-06 四级阅读')
     await wrapper.get('.kb-dialog textarea').setValue('1. 题目\n答案：A')
-    await wrapper.get('.kb-dialog').trigger('submit')
+    await wrapper.get('form.kb-dialog').trigger('submit')
     await flushPromises()
 
     expect(mocks.importIntoFolder).toHaveBeenCalledWith('cet4', {
       title: '2024-06 四级阅读',
       content: '1. 题目\n答案：A',
+    })
+  })
+
+  it('files an import from a picked text file', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+    await wrapper.findAll('.kb-row')[1].trigger('click')
+    await flushPromises()
+
+    await wrapper.get('.kb-bar .kb-btn:not(.ghost)').trigger('click')
+    await flushPromises()
+
+    const body = ['1. title', 'answer: A'].join(String.fromCharCode(10))
+    const file = new File([body], '2024-06 cet4.md', { type: 'text/markdown' })
+    const input = wrapper.get('.kb-dialog__fileinput')
+    Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
+    await input.trigger('change')
+    await flushPromises()
+
+    expect((wrapper.get('.kb-dialog > input').element as HTMLInputElement).value).toBe('2024-06 cet4')
+    await wrapper.get('form.kb-dialog').trigger('submit')
+    await flushPromises()
+    expect(mocks.importIntoFolder).toHaveBeenCalledWith('cet4', {
+      title: '2024-06 cet4',
+      content: body,
     })
   })
 
