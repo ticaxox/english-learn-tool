@@ -226,6 +226,9 @@ html[data-theme='night'] .coach-page {
 .coach-page.coach-page .coach-history__new:focus-visible {
   background: var(--coach-accent);
   color: #35240f;
+  /* The shared layer clears box-shadow on hover; without the 2px edge the bar
+     reads as if it had risen off the paper. */
+  box-shadow: 0 2px 0 var(--coach-accent-ink), inset 0 1px 0 rgb(255 255 255 / 38%);
 }
 /* Hover does not move anything: the paper disc is stamped with ink and the plus
    flips to paper. A material swap, the way a seal changes the sheet. */
@@ -864,7 +867,11 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   box-shadow: 0 2px 0 var(--coach-accent-ink);
   transition: filter 140ms ease, transform 90ms ease, box-shadow 90ms ease;
 }
-.coach-page.coach-page .coach-composer__send:hover:not(:disabled) { filter: brightness(1.06); }
+.coach-page.coach-page .coach-composer__send:hover:not(:disabled) {
+  filter: brightness(1.06);
+  /* same reason as the new-conversation bar: the shared layer drops the edge */
+  box-shadow: 0 2px 0 var(--coach-accent-ink);
+}
 .coach-page.coach-page .coach-composer__send:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 var(--coach-accent-ink); }
 .coach-page.coach-page .coach-composer__send:disabled {
   background: color-mix(in srgb, var(--coach-ink) 8%, transparent);
