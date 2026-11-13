@@ -29,18 +29,19 @@ KNOWLEDGE_DIFFICULTIES = "'GAOKAO', 'CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL'
 
 
 class KnowledgeFolder(Base):
-    """A shelf a document sits on.
+    """A shelf a document sits on; shelves nest.
 
     Two scopes, one table. A global folder belongs to the product: only an
-    administrator writes to it, and at most one exists per difficulty, which is
-    what makes the retrieval for a CET-4 learner read the CET-4 papers and not
-    the TOEFL ones. A personal folder belongs to one learner, who names it and
-    keeps their own material there; nobody else can read it.
+    administrator writes to it. A personal folder belongs to one learner, who
+    names it and keeps their own material there; nobody else can read it.
 
-    The difficulty shelf is a folder with a `difficulty` and no owner. A global
-    folder with neither is the general shelf — where everything imported before
-    difficulty existed landed, and where an administrator can still put
-    material that applies to every exam.
+    Nesting is arbitrary. A difficulty is a tag on a *root* folder — CET-4 is
+    one shelf, and under it an administrator files 真题 / 词汇 / 解析 as deep as
+    it needs to go. A learner's folder nests the same way.
+
+    `scope` and `owner_id` are copied down the tree rather than looked up, so a
+    permission check never has to walk to the root; the service keeps the copy
+    honest when a folder is created.
     """
 
     __tablename__ = "knowledge_folders"
@@ -55,10 +56,17 @@ class KnowledgeFolder(Base):
             "OR (scope = 'personal' AND owner_id IS NOT NULL)",
             name="scope_owner_valid",
         ),
+        # A difficulty is a root tag: it decides which exam a whole shelf is
+        # for, so it cannot appear halfway down one.
+        CheckConstraint("parent_id IS NULL OR difficulty IS NULL", name="difficulty_root_only"),
         Index("ix_knowledge_folders_owner", "scope", "owner_id"),
+        Index("ix_knowledge_folders_parent", "parent_id"),
     )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    parent_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("knowledge_folders.id", ondelete="CASCADE")
+    )
     scope: Mapped[str] = mapped_column(String(16), nullable=False, default="personal")
     owner_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE")

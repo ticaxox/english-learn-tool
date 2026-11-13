@@ -15,13 +15,17 @@ export const KNOWLEDGE_DIFFICULTY_LABELS: Record<KnowledgeDifficulty, string> = 
   TOEFL: '托福',
 }
 
+export type KnowledgeLevel = KnowledgeDifficulty
+
 export interface KnowledgeFolder {
   id: string
+  parentId: string | null
   scope: KnowledgeScope
   difficulty: KnowledgeDifficulty | null
   name: string
   documentCount: number
   writable: boolean
+  isGeneral: boolean
   createdAt: string
   updatedAt: string
 }
@@ -63,12 +67,14 @@ function parseFolder(value: unknown): KnowledgeFolder {
   const body = record(value, '知识库文件夹')
   return {
     id: String(body.id ?? ''),
+    parentId: typeof body.parent_id === 'string' ? body.parent_id : null,
     scope: (body.scope === 'global' ? 'global' : 'personal') as KnowledgeScope,
     difficulty:
       typeof body.difficulty === 'string' ? (body.difficulty as KnowledgeDifficulty) : null,
     name: String(body.name ?? ''),
     documentCount: Number(body.document_count ?? 0),
     writable: body.writable === true,
+    isGeneral: body.is_general === true,
     createdAt: String(body.created_at ?? ''),
     updatedAt: String(body.updated_at ?? ''),
   }
@@ -97,17 +103,20 @@ export async function listKnowledgeFolders(): Promise<KnowledgeFolder[]> {
   return payload.items.map(parseFolder)
 }
 
+/** `level` is the exam a shelf is for; the wire calls it `difficulty`. */
 export async function createKnowledgeFolder(input: {
   name: string
   scope?: KnowledgeScope
-  difficulty?: KnowledgeDifficulty | null
+  level?: KnowledgeDifficulty | null
+  parentId?: string | null
 }): Promise<KnowledgeFolder> {
   const payload = await apiClient.post(
     '/knowledge/folders',
     {
       name: input.name,
       scope: input.scope ?? 'personal',
-      difficulty: input.difficulty ?? null,
+      difficulty: input.level ?? null,
+      parent_id: input.parentId ?? null,
     },
     { retryCount: 0 },
   )

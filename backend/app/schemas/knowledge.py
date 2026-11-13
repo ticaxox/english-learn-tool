@@ -33,6 +33,9 @@ class KnowledgeFolderCreate(_StrictModel):
     # explicitly, and with a difficulty it becomes that exam's shelf.
     scope: KnowledgeScope = "personal"
     difficulty: KnowledgeDifficulty | None = None
+    # Nests under this folder; omitted means a root. A child takes its scope
+    # and owner from the parent, so those fields are ignored when this is set.
+    parent_id: UUID | None = None
 
 
 class KnowledgeFolderUpdate(_StrictModel):
@@ -41,11 +44,14 @@ class KnowledgeFolderUpdate(_StrictModel):
 
 class KnowledgeFolderResponse(BaseModel):
     id: UUID
+    parent_id: UUID | None = None
     scope: KnowledgeScope
     difficulty: KnowledgeDifficulty | None = None
     name: str
     document_count: int = 0
     writable: bool = False
+    # The fallback shelf that holds unclassified papers and cannot be deleted.
+    is_general: bool = False
     created_at: datetime
     updated_at: datetime
 

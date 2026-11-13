@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
 import KnowledgeBaseView from '../views/KnowledgeBaseView.vue'
 import type { KnowledgeDocument, KnowledgeFolder } from '../api/knowledge'
 
@@ -20,11 +21,13 @@ vi.mock('../api/knowledge', async (importOriginal) => {
 
 const generalFolder: KnowledgeFolder = {
   id: 'f-general',
+  parentId: null,
   scope: 'global',
   difficulty: null,
   name: '综合',
   documentCount: 1,
   writable: false,
+  isGeneral: true,
   createdAt: '2026-11-01T00:00:00Z',
   updatedAt: '2026-11-01T00:00:00Z',
 }
@@ -35,6 +38,7 @@ const cet4Folder: KnowledgeFolder = {
   difficulty: 'CET4',
   name: '四级',
   documentCount: 0,
+  isGeneral: false,
 }
 
 const myFolder: KnowledgeFolder = {
@@ -44,6 +48,7 @@ const myFolder: KnowledgeFolder = {
   name: '我的笔记',
   documentCount: 2,
   writable: true,
+  isGeneral: false,
 }
 
 const document: KnowledgeDocument = {
@@ -62,6 +67,7 @@ const document: KnowledgeDocument = {
 
 describe('KnowledgeBaseView', () => {
   beforeEach(() => {
+    setActivePinia(createPinia())
     vi.clearAllMocks()
     knowledgeMocks.listKnowledgeFolders.mockResolvedValue([generalFolder, cet4Folder, myFolder])
     knowledgeMocks.listFolderDocuments.mockResolvedValue([document])
@@ -84,6 +90,37 @@ describe('KnowledgeBaseView', () => {
     expect(text).toContain('四级')
     expect(text).toContain('我的知识库')
     expect(text).toContain('我的笔记')
+  })
+
+  it('nests a child shelf under its parent, collapsed until asked', async () => {
+    const child: KnowledgeFolder = {
+      ...generalFolder,
+      id: 'f-cet4-papers',
+      parentId: cet4Folder.id,
+      difficulty: null,
+      name: '真题',
+      documentCount: 4,
+    }
+    knowledgeMocks.listKnowledgeFolders.mockResolvedValue([
+      generalFolder,
+      cet4Folder,
+      child,
+      myFolder,
+    ])
+    const wrapper = mount(KnowledgeBaseView)
+    await flushPromises()
+
+    const shelfNames = (): string[] => wrapper.findAll('.kb-folder').map((b) => b.text())
+
+    // The parent is there, the shelf under it is not — until the caret is used.
+    expect(shelfNames().some((name) => name.startsWith('四级'))).toBe(true)
+    expect(shelfNames().some((name) => name.startsWith('真题'))).toBe(false)
+
+    const caret = wrapper
+      .findAll('.kb-caret')
+      .find((b) => b.attributes('aria-label') === '展开')!
+    await caret.trigger('click')
+    expect(shelfNames().some((name) => name.startsWith('真题'))).toBe(true)
   })
 
   it('opens the first shelf and lists its documents', async () => {

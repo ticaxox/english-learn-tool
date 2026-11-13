@@ -70,11 +70,13 @@ def _document_response(row: KnowledgeDocument) -> KnowledgeDocumentResponse:
 def _folder_response(row: KnowledgeFolder, user: User, count: int = 0) -> KnowledgeFolderResponse:
     return KnowledgeFolderResponse(
         id=row.id,
+        parent_id=row.parent_id,
         scope=row.scope,
         difficulty=row.difficulty,
         name=row.name,
         document_count=count,
         writable=can_write(user, row),
+        is_general=row.id == GENERAL_FOLDER_ID,
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
@@ -229,7 +231,21 @@ async def list_folders(session: AsyncSession, user: User) -> list[KnowledgeFolde
 async def create_folder(
     session: AsyncSession, user: User, payload: KnowledgeFolderCreate
 ) -> KnowledgeFolderResponse:
-    if payload.scope == "global":
+    parent: KnowledgeFolder | None = None
+    if payload.parent_id is not None:
+        parent = await _folder_or_404(session, payload.parent_id)
+        if not can_write(user, parent):
+            raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Read-only shelf.")
+        # A child is the same kind of shelf as its parent, on the same side of
+        # the global/personal line; asking for a different one is a mistake,
+        # not an instruction.
+        folder = KnowledgeFolder(
+            parent_id=parent.id,
+            scope=parent.scope,
+            owner_id=parent.owner_id,
+            name=payload.name,
+        )
+    elif payload.scope == "global":
         require_admin(user)
         if payload.difficulty is not None:
             exists = await session.scalar(
@@ -271,21 +287,41 @@ async def delete_folder(session: AsyncSession, user: User, folder_id: UUID) -> N
     folder = await _folder_or_404(session, folder_id)
     if not can_write(user, folder):
         raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Not your shelf.")
-    if folder.scope == "global" and folder.difficulty is None:
+    # Only the fallback shelf itself is protected. Its children — and every
+    # other global folder without a difficulty — are ordinary shelves.
+    if folder.id == GENERAL_FOLDER_ID:
         raise AppError(
             status_code=422,
             code="KNOWLEDGE_GENERAL_SHELF",
             message="The general shelf cannot be deleted.",
         )
-    # The papers survive the shelf: they move to the general one rather than
-    # disappearing with a folder someone renamed.
+    # The papers survive the shelf: everything in the subtree moves to the
+    # general one rather than disappearing with a folder someone renamed.
+    doomed = [folder.id, *await _descendant_ids(session, folder.id)]
     await session.execute(
         KnowledgeDocument.__table__.update()
-        .where(KnowledgeDocument.folder_id == folder.id)
+        .where(KnowledgeDocument.folder_id.in_(doomed))
         .values(folder_id=GENERAL_FOLDER_ID)
     )
-    await session.delete(folder)
+    await session.execute(KnowledgeFolder.__table__.delete().where(KnowledgeFolder.id.in_(doomed)))
     await session.commit()
+
+
+async def _descendant_ids(session: AsyncSession, folder_id: UUID) -> list[UUID]:
+    """Every folder under this one, breadth first. Walks in memory: the tree is
+    a handful of rows, not a graph worth a recursive CTE."""
+    rows = (await session.execute(select(KnowledgeFolder.id, KnowledgeFolder.parent_id))).all()
+    children: dict[UUID, list[UUID]] = {}
+    for child_id, parent_id in rows:
+        if parent_id is not None:
+            children.setdefault(parent_id, []).append(child_id)
+    found: list[UUID] = []
+    queue = list(children.get(folder_id, []))
+    while queue:
+        current = queue.pop(0)
+        found.append(current)
+        queue.extend(children.get(current, []))
+    return found
 
 
 # -------------------------------------------------------------- documents
@@ -494,20 +530,46 @@ class RetrievedChunk:
 async def searchable_folder_ids(session: AsyncSession, user: User) -> list[UUID]:
     """The shelves one learner reads: general, their exam's, and their own.
 
-    A document with no shelf (imported before shelves existed, or moved off a
-    deleted one) stays readable — it is reference material nobody filed.
+    Subtrees count: a document under 四级 / 真题 / 2023 belongs to the CET-4
+    shelf just as much as one filed directly on it. A document with no shelf
+    (imported before shelves existed, or moved off a deleted one) stays
+    readable — it is reference material nobody filed.
     """
     target_exam = await session.scalar(
         select(UserProfile.target_exam).where(UserProfile.user_id == user.id)
     )
-    conditions = [(KnowledgeFolder.scope == "global") & (KnowledgeFolder.difficulty.is_(None))]
-    if target_exam:
-        conditions.append(
-            (KnowledgeFolder.scope == "global") & (KnowledgeFolder.difficulty == target_exam)
+    rows = (
+        await session.execute(
+            select(
+                KnowledgeFolder.id,
+                KnowledgeFolder.parent_id,
+                KnowledgeFolder.scope,
+                KnowledgeFolder.owner_id,
+                KnowledgeFolder.difficulty,
+            )
         )
-    conditions.append((KnowledgeFolder.scope == "personal") & (KnowledgeFolder.owner_id == user.id))
-    rows = (await session.scalars(select(KnowledgeFolder.id).where(or_(*conditions)))).all()
-    return [*rows, GENERAL_FOLDER_ID]
+    ).all()
+
+    def readable(row) -> bool:
+        if row.scope == "global":
+            return row.difficulty is None or (
+                target_exam is not None and row.difficulty == target_exam
+            )
+        return row.owner_id == user.id
+
+    roots = {row.id for row in rows if row.parent_id is None and readable(row)}
+    children: dict[UUID, list[UUID]] = {}
+    for row in rows:
+        if row.parent_id is not None:
+            children.setdefault(row.parent_id, []).append(row.id)
+
+    found: list[UUID] = []
+    queue = list(roots)
+    while queue:
+        current = queue.pop(0)
+        found.append(current)
+        queue.extend(children.get(current, []))
+    return [*found, GENERAL_FOLDER_ID]
 
 
 async def search(
