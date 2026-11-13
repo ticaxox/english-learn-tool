@@ -152,6 +152,23 @@ async def document_detail_endpoint(
     return await document_detail(session, context.user, document_id)
 
 
+@router.patch(
+    "/documents/{document_id}",
+    response_model=KnowledgeDocumentResponse,
+    responses=_RESPONSES,
+    summary="Rename a document on a shelf you can write to",
+)
+async def rename_document_endpoint(
+    document_id: UUID,
+    payload: KnowledgeDocumentUpdate,
+    request: Request,
+    context: Annotated[AuthContext, Depends(get_completed_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> KnowledgeDocumentResponse:
+    settings: Settings = request.app.state.settings
+    return await update_document(session, settings, context.user, document_id, payload)
+
+
 @router.delete(
     "/documents/{document_id}",
     status_code=status.HTTP_204_NO_CONTENT,

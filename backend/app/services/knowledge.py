@@ -51,10 +51,11 @@ GENERAL_FOLDER_ID = UUID("00000000-0000-4000-8000-000000000001")
 _QUESTION_SPLIT = re.compile(r"\n\s*(?=\d{1,3}[.、．])")
 
 
-def _document_response(row: KnowledgeDocument) -> KnowledgeDocumentResponse:
+def _document_response(row: KnowledgeDocument, snippet: str = "") -> KnowledgeDocumentResponse:
     return KnowledgeDocumentResponse(
         id=row.id,
         folder_id=row.folder_id,
+        snippet=snippet,
         source_type=row.source_type,
         title=row.title,
         metadata=row.metadata_json,
@@ -409,7 +410,23 @@ async def list_documents(
     if folder is not None:
         query = query.where(KnowledgeDocument.folder_id == folder.id)
     rows = list((await session.scalars(query.order_by(KnowledgeDocument.created_at.desc()))).all())
-    return [_document_response(row) for row in rows]
+    if not rows:
+        return []
+    # One query for the opening line of each, not one per card.
+    snippets = dict(
+        (
+            await session.execute(
+                select(KnowledgeChunk.document_id, KnowledgeChunk.content).where(
+                    KnowledgeChunk.document_id.in_([row.id for row in rows]),
+                    KnowledgeChunk.ordinal == 0,
+                )
+            )
+        ).all()
+    )
+    return [
+        _document_response(row, " ".join((snippets.get(row.id) or "").split())[:120])
+        for row in rows
+    ]
 
 
 async def document_detail(

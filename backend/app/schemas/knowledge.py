@@ -75,6 +75,9 @@ class KnowledgeDocumentResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
     status: KnowledgeStatus
     chunk_count: int
+    # The opening of the document, so a card can say what it is about without
+    # a second request per tile.
+    snippet: str = ""
     embedding_model: str | None = None
     error_message: str | None = None
     created_at: datetime

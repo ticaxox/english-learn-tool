@@ -38,6 +38,7 @@ export interface KnowledgeDocument {
   metadata: Record<string, unknown>
   status: KnowledgeStatus
   chunkCount: number
+  snippet: string
   embeddingModel: string | null
   errorMessage: string | null
   createdAt: string
@@ -90,6 +91,7 @@ function parseDocument(value: unknown): KnowledgeDocument {
     metadata: (body.metadata as Record<string, unknown>) ?? {},
     status: String(body.status ?? 'draft') as KnowledgeStatus,
     chunkCount: Number(body.chunk_count ?? 0),
+    snippet: typeof body.snippet === 'string' ? body.snippet : '',
     embeddingModel: typeof body.embedding_model === 'string' ? body.embedding_model : null,
     errorMessage: typeof body.error_message === 'string' ? body.error_message : null,
     createdAt: String(body.created_at ?? ''),
@@ -172,6 +174,15 @@ export async function getKnowledgeDocument(id: string): Promise<KnowledgeDocumen
     content: String(payload.content ?? ''),
     folders: typeof payload.folders === 'string' ? payload.folders : null,
   }
+}
+
+export async function renameKnowledgeDocument(id: string, title: string): Promise<KnowledgeDocument> {
+  const payload = await apiClient.patch(
+    `/knowledge/documents/${encodeURIComponent(id)}`,
+    { title },
+    { retryCount: 0 },
+  )
+  return parseDocument(payload)
 }
 
 export async function deleteKnowledgeDocument(id: string): Promise<void> {

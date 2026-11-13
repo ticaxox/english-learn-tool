@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import KnowledgeBaseView from '../views/KnowledgeBaseView.vue'
 import type { KnowledgeDocument, KnowledgeFolder } from '../api/knowledge'
 
-const knowledgeMocks = vi.hoisted(() => ({
+const mocks = vi.hoisted(() => ({
   listKnowledgeFolders: vi.fn(),
   listFolderDocuments: vi.fn(),
   getKnowledgeDocument: vi.fn(),
@@ -12,158 +12,151 @@ const knowledgeMocks = vi.hoisted(() => ({
   deleteKnowledgeDocument: vi.fn(),
   deleteKnowledgeFolder: vi.fn(),
   createKnowledgeFolder: vi.fn(),
+  renameKnowledgeDocument: vi.fn(),
+  renameKnowledgeFolder: vi.fn(),
 }))
 
 vi.mock('../api/knowledge', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api/knowledge')>()
-  return { ...actual, ...knowledgeMocks }
+  return { ...actual, ...mocks }
 })
 
-const generalFolder: KnowledgeFolder = {
-  id: 'f-general',
+const folder = (over: Partial<KnowledgeFolder>): KnowledgeFolder => ({
+  id: 'f',
   parentId: null,
   scope: 'global',
   difficulty: null,
-  name: '综合',
-  documentCount: 1,
+  name: '书架',
+  documentCount: 0,
   writable: false,
-  isGeneral: true,
+  isGeneral: false,
   createdAt: '2026-11-01T00:00:00Z',
   updatedAt: '2026-11-01T00:00:00Z',
-}
+  ...over,
+})
 
-const cet4Folder: KnowledgeFolder = {
-  ...generalFolder,
-  id: 'f-cet4',
-  difficulty: 'CET4',
-  name: '四级',
-  documentCount: 0,
-  isGeneral: false,
-}
+const goals = folder({ id: 'goals', name: '学习目标', writable: true, documentCount: 0 })
+const cet4 = folder({ id: 'cet4', parentId: 'goals', name: '四级', difficulty: 'CET4', writable: true, documentCount: 2 })
+const mine = folder({ id: 'mine', name: '我的笔记', scope: 'personal', writable: true, documentCount: 1 })
 
-const myFolder: KnowledgeFolder = {
-  ...generalFolder,
-  id: 'f-mine',
-  scope: 'personal',
-  name: '我的笔记',
-  documentCount: 2,
-  writable: true,
-  isGeneral: false,
-}
-
-const document: KnowledgeDocument = {
+const doc: KnowledgeDocument = {
   id: 'doc-1',
-  folderId: 'f-general',
+  folderId: 'cet4',
   sourceType: 'exam',
   title: '2023-06 四级阅读',
   metadata: {},
   status: 'ready',
-  chunkCount: 3,
+  chunkCount: 8,
+  snippet: 'Night markets bring neighbours together.',
   embeddingModel: null,
   errorMessage: null,
   createdAt: '2026-11-09T02:00:00Z',
   updatedAt: '2026-11-09T02:00:00Z',
 }
 
+function mountView() {
+  return mount(KnowledgeBaseView)
+}
+
 describe('KnowledgeBaseView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
-    knowledgeMocks.listKnowledgeFolders.mockResolvedValue([generalFolder, cet4Folder, myFolder])
-    knowledgeMocks.listFolderDocuments.mockResolvedValue([document])
-    knowledgeMocks.getKnowledgeDocument.mockResolvedValue({
-      ...document,
+    mocks.listKnowledgeFolders.mockResolvedValue([goals, cet4, mine])
+    mocks.listFolderDocuments.mockImplementation((id: string) =>
+      Promise.resolve(id === 'goals' ? [] : [doc]),
+    )
+    mocks.getKnowledgeDocument.mockResolvedValue({
+      ...doc,
       content: '夜市把邻里聚在一起。',
-      folders: '综合',
+      folders: '四级',
     })
-    knowledgeMocks.deleteKnowledgeDocument.mockResolvedValue(undefined)
-    knowledgeMocks.deleteKnowledgeFolder.mockResolvedValue(undefined)
-    knowledgeMocks.createKnowledgeFolder.mockResolvedValue(myFolder)
+    mocks.importIntoFolder.mockResolvedValue(doc)
+    mocks.deleteKnowledgeDocument.mockResolvedValue(undefined)
+    mocks.deleteKnowledgeFolder.mockResolvedValue(undefined)
+    mocks.createKnowledgeFolder.mockResolvedValue(folder({ id: 'new', writable: true }))
+    mocks.renameKnowledgeDocument.mockResolvedValue(doc)
+    mocks.renameKnowledgeFolder.mockResolvedValue(goals)
   })
 
-  it('shows the global shelves by difficulty and the learner’s own', async () => {
-    const wrapper = mount(KnowledgeBaseView)
+  it('shows the global shelves nested, and the learner’s own', async () => {
+    const wrapper = mountView()
     await flushPromises()
-    const text = wrapper.text()
-    expect(text).toContain('全局知识库')
-    expect(text).toContain('综合')
-    expect(text).toContain('四级')
-    expect(text).toContain('我的知识库')
-    expect(text).toContain('我的笔记')
+    const rows = wrapper.findAll('.kb-row').map((row) => row.text())
+    expect(rows.some((text) => text.includes('学习目标'))).toBe(true)
+    expect(rows.some((text) => text.includes('四级'))).toBe(true)
+    expect(rows.some((text) => text.includes('我的笔记'))).toBe(true)
   })
 
-  it('nests a child shelf under its parent, collapsed until asked', async () => {
-    const child: KnowledgeFolder = {
-      ...generalFolder,
-      id: 'f-cet4-papers',
-      parentId: cet4Folder.id,
-      difficulty: null,
-      name: '真题',
-      documentCount: 4,
-    }
-    knowledgeMocks.listKnowledgeFolders.mockResolvedValue([
-      generalFolder,
-      cet4Folder,
-      child,
-      myFolder,
-    ])
-    const wrapper = mount(KnowledgeBaseView)
+  it('opens the first shelf and lists its documents as cards', async () => {
+    const wrapper = mountView()
     await flushPromises()
+    expect(mocks.listFolderDocuments).toHaveBeenCalledWith('goals')
+    expect(wrapper.find('.kb-doc__title').exists()).toBe(false)
 
-    const shelfNames = (): string[] => wrapper.findAll('.kb-folder').map((b) => b.text())
-
-    // The parent is there, the shelf under it is not — until the caret is used.
-    expect(shelfNames().some((name) => name.startsWith('四级'))).toBe(true)
-    expect(shelfNames().some((name) => name.startsWith('真题'))).toBe(false)
-
-    const caret = wrapper
-      .findAll('.kb-caret')
-      .find((b) => b.attributes('aria-label') === '展开')!
-    await caret.trigger('click')
-    expect(shelfNames().some((name) => name.startsWith('真题'))).toBe(true)
+    mocks.listFolderDocuments.mockImplementation((id: string) =>
+      Promise.resolve(id === 'goals' ? [] : [doc]),
+    )
+    await wrapper.findAll('.kb-row')[1].trigger('click')
+    await flushPromises()
+    expect(wrapper.get('.kb-doc__title').text()).toBe('2023-06 四级阅读')
+    expect(wrapper.get('.kb-doc__snippet').text()).toContain('Night markets')
   })
 
-  it('opens the first shelf and lists its documents', async () => {
-    const wrapper = mount(KnowledgeBaseView)
+  it('opens a document as a preview', async () => {
+    const wrapper = mountView()
     await flushPromises()
-    expect(knowledgeMocks.listFolderDocuments).toHaveBeenCalledWith('f-general')
-    expect(wrapper.text()).toContain('2023-06 四级阅读')
-  })
-
-  it('reads a document when it is clicked', async () => {
-    const wrapper = mount(KnowledgeBaseView)
+    await wrapper.findAll('.kb-row')[1].trigger('click')
     await flushPromises()
-    await wrapper.get('.kb-doc').trigger('click')
+    await wrapper.get('.kb-doc__hit').trigger('click')
     await flushPromises()
-    expect(knowledgeMocks.getKnowledgeDocument).toHaveBeenCalledWith('doc-1')
+    expect(mocks.getKnowledgeDocument).toHaveBeenCalledWith('doc-1')
     expect(wrapper.get('.kb-doc-body').text()).toContain('夜市把邻里聚在一起。')
   })
 
-  it('does not offer import on a shelf the learner cannot write to', async () => {
-    const wrapper = mount(KnowledgeBaseView)
+  it('offers delete on a document’s context menu and deletes it', async () => {
+    const wrapper = mountView()
     await flushPromises()
-    expect(wrapper.findAll('[role="button"]').some((b) => b.text().includes('导入资料'))).toBe(false)
+    await wrapper.findAll('.kb-row')[1].trigger('click')
+    await flushPromises()
+
+    await wrapper.get('.kb-doc').trigger('contextmenu', { clientX: 10, clientY: 10 })
+    const items = wrapper.findAll('.kb-ctx button').map((b) => b.text())
+    expect(items).toContain('删除资料')
+
+    await wrapper.findAll('.kb-ctx button').find((b) => b.text() === '删除资料')!.trigger('click')
+    await flushPromises()
+    // the confirm dialog, then its destructive button
+    await wrapper.get('.kb-dialog form, form.kb-dialog').trigger('submit')
+    await flushPromises()
+    expect(mocks.deleteKnowledgeDocument).toHaveBeenCalledWith('doc-1')
   })
 
-  it('offers import when the shelf is the learner’s own', async () => {
-    const wrapper = mount(KnowledgeBaseView)
+  it('imports into the open shelf from the dialog', async () => {
+    const wrapper = mountView()
     await flushPromises()
-    await wrapper.findAll('.kb-folder').find((b) => b.text().includes('我的笔记'))!.trigger('click')
+    await wrapper.findAll('.kb-row')[1].trigger('click')
     await flushPromises()
-    expect(wrapper.findAll('[role="button"]').some((b) => b.text().includes('导入资料'))).toBe(true)
+
+    await wrapper.get('.kb-bar .kb-btn:not(.ghost)').trigger('click')
+    await flushPromises()
+    await wrapper.get('.kb-dialog input').setValue('2024-06 四级阅读')
+    await wrapper.get('.kb-dialog textarea').setValue('1. 题目\n答案：A')
+    await wrapper.get('.kb-dialog').trigger('submit')
+    await flushPromises()
+
+    expect(mocks.importIntoFolder).toHaveBeenCalledWith('cet4', {
+      title: '2024-06 四级阅读',
+      content: '1. 题目\n答案：A',
+    })
   })
 
-  it('deletes a document from the learner’s own shelf', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
-    const wrapper = mount(KnowledgeBaseView)
+  it('keeps the edit actions away from a read-only shelf', async () => {
+    mocks.listKnowledgeFolders.mockResolvedValue([folder({ id: 'ro', name: '只读', writable: false })])
+    const wrapper = mountView()
     await flushPromises()
-    // A global shelf is read-only, so the delete control only exists here.
-    await wrapper.findAll('.kb-folder').find((b) => b.text().includes('我的笔记'))!.trigger('click')
-    await flushPromises()
-    await wrapper.get('.kb-doc').trigger('click')
-    await flushPromises()
-    await wrapper.findAll('[role="button"]').find((b) => b.text() === '删除')!.trigger('click')
-    await flushPromises()
-    expect(knowledgeMocks.deleteKnowledgeDocument).toHaveBeenCalledWith('doc-1')
+    await wrapper.get('.kb-row').trigger('contextmenu', { clientX: 10, clientY: 10 })
+    const items = wrapper.findAll('.kb-ctx button').map((b) => b.text())
+    expect(items).toEqual(['打开'])
   })
 })
