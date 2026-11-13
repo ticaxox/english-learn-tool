@@ -70,12 +70,25 @@ html[data-theme='night'] .coach-page {
   line-height: inherit;
 }
 
-/* The coach page is the whole column, not a card inside its padding. */
+/* The coach page is the whole column, not a card inside its padding — and it
+   is exactly one screen tall, so the thread scrolls and the composer stays
+   put instead of riding the bottom of a growing document. */
+.personal-workspace:has(.coach-page) {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.personal-workspace:has(.coach-page) .workspace-main {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
 .personal-workspace .workspace-content:has(.coach-page) {
   width: 100%;
   max-width: none;
   margin: 0;
   padding: 0;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
 }
