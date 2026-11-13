@@ -219,9 +219,7 @@ html[data-theme='night'] .coach-page {
   background: var(--coach-page);
   color: var(--coach-ink);
   box-shadow: inset 0 0 0 1px rgb(53 36 15 / 10%);
-  transition:
-    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 .coach-page.coach-page .coach-history__new-disc svg { width: 14px; height: 14px; }
 .coach-page.coach-page .coach-history__new:hover,
@@ -229,15 +227,16 @@ html[data-theme='night'] .coach-page {
   background: var(--coach-accent);
   color: #35240f;
 }
+/* Hover does not move anything: the paper disc is stamped with ink and the plus
+   flips to paper. A material swap, the way a seal changes the sheet. */
 .coach-page.coach-page .coach-history__new:hover .coach-history__new-disc {
-  transform: translateY(-1px) scale(1.06);
-  box-shadow: inset 0 0 0 1px rgb(53 36 15 / 10%), 0 2px 5px rgb(53 36 15 / 22%);
+  background: #35240f;
+  color: var(--coach-page);
+  box-shadow: inset 0 0 0 1px transparent;
 }
-/* The disc is pressed into the paper before the bar springs back. */
-.coach-page.coach-page .coach-history__new:active .coach-history__new-disc {
-  transform: translateY(1px) scale(0.92);
-  box-shadow: inset 0 0 0 1px rgb(53 36 15 / 14%);
-  transition-duration: 80ms;
+html[data-theme='night'] .coach-page.coach-page .coach-history__new:hover .coach-history__new-disc {
+  background: #f4ecd0;
+  color: #241d46;
 }
 .coach-page.coach-page .coach-history__new:active {
   transform: translateY(2px);
