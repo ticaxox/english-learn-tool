@@ -128,7 +128,10 @@
 .personal-workspace textarea,
 .personal-workspace select {
   border: 2px solid var(--ui-line-strong);
-  border-radius: 12px;
+  border-radius: 10px;
+  /* A field is a control, not a text area: 13px type in a 40px box. */
+  font-size: 0.88rem;
+  padding: 7px 11px;
   background-color: var(--ui-surface);
   box-shadow: inset 0 2px 0 rgb(59 42 26 / 5%);
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
@@ -5940,11 +5943,11 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   align-items: center;
   /* A number field is as wide as its digits plus two targets, not as wide as
    * the column it sits in. Three digits is the most it ever holds. */
-  width: min(100%, 126px);
+  width: min(100%, 116px);
   height: var(--ui-control);
-  padding: 0 4px;
+  padding: 0 3px;
   border: 2px solid var(--ui-line-strong);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--ui-surface);
   box-shadow: inset 0 -2px 0 rgb(59 42 26 / 6%);
   transition: border-color 120ms ease, box-shadow 120ms ease;
@@ -5982,6 +5985,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   background: transparent;
   box-shadow: none;
   text-align: center;
+  font-size: 0.92rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--ui-ink);
@@ -5996,13 +6000,13 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 
 .personal-workspace .crumb-stepper__step {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   flex: none;
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 9px;
+  border-radius: 8px;
   background: transparent;
   color: var(--ui-muted);
   cursor: pointer;
@@ -6047,11 +6051,11 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   gap: 6px;
   /* As wide as what it holds, not as wide as the column: a time is six
    * characters and a date is ten. Numbers are not prose. */
-  width: min(100%, 124px);
+  width: min(100%, 110px);
   height: var(--ui-control);
-  padding: 0 12px 0 0;
+  padding: 0 10px 0 0;
   border: 2px solid var(--ui-line-strong);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--ui-surface);
   box-shadow: inset 0 -2px 0 rgb(59 42 26 / 6%);
   cursor: pointer;
@@ -6059,7 +6063,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 }
 
 /* A date needs ten characters and a glyph; a time needs six. */
-.personal-workspace .crumb-date { width: min(100%, 150px); }
+.personal-workspace .crumb-date { width: min(100%, 136px); }
 
 .personal-workspace .crumb-time:hover,
 .personal-workspace .crumb-date:hover { border-color: #c9ab80; }
@@ -6102,6 +6106,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   border: 0;
   background: transparent;
   box-shadow: none;
+  font-size: 0.92rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--ui-ink);
@@ -6182,7 +6187,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   margin: 0 0 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--ui-line);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
@@ -6347,7 +6352,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 .personal-workspace .crumb-date__weekdays,
 .personal-workspace .crumb-date__grid {
   display: grid;
-  grid-template-columns: repeat(7, 34px);
+  grid-template-columns: repeat(7, 30px);
   gap: 2px;
 }
 
@@ -6363,14 +6368,14 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 }
 
 .personal-workspace .crumb-date__cell {
-  width: 34px;
-  height: 32px;
+  width: 30px;
+  height: 28px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 8px;
   background: transparent;
   color: var(--ui-ink);
   font: inherit;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
