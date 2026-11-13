@@ -285,17 +285,19 @@ onBeforeUnmount(() => {
           </p>
         </div>
 
-        <DivButton
-          class="sidebar-collapse"
-          type="button"
-          :aria-label="sidebarCollapsed ? '展开导航栏' : '折叠导航栏'"
-          :aria-expanded="!sidebarCollapsed"
-          @click="toggleSidebar"
-        >
-          <AppIcon name="arrow-left" />
-        </DivButton>
       </div>
     </aside>
+
+    <DivButton
+      v-if="!immersive"
+      class="rail-handle"
+      type="button"
+      :aria-label="sidebarCollapsed ? '展开导航栏' : '折叠导航栏'"
+      :aria-expanded="!sidebarCollapsed"
+      @click="toggleSidebar"
+    >
+      <AppIcon name="arrow-left" />
+    </DivButton>
 
     <div class="workspace-main">
       <header v-if="!immersive" class="workspace-topbar member-topbar ia-topbar">
