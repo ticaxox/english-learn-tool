@@ -1016,31 +1016,52 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 .personal-workspace .choice-list--words .choice-option { max-width: none; }
 .personal-workspace .choice-list--words .choice-option__label { font-size: 1rem; }
 
-/* A quiet ring for the letter: no tag, no separate plate. */
+/* The letter sits on a carved stone token, cut for this app rather than drawn
+ * by the browser. The state colour is kept as a ring outside the token, so the
+ * stone still reads as stone when an option is picked, right or wrong. */
 .personal-workspace .option-badge {
   position: static;
   align-self: center;
   justify-self: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   min-height: 0;
-  border: 1.5px solid var(--badge-edge, var(--ui-line-strong));
+  border: 0;
   border-radius: 50%;
-  background: var(--badge-fill, #fffdf8);
+  background-color: transparent;
+  background-image: url('./assets/halloween/card/option-token-day.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   place-items: center;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: box-shadow 120ms ease;
+}
+
+html[data-theme='night'] .personal-workspace .option-badge {
+  background-image: url('./assets/halloween/card/option-token-night.png');
+}
+
+/* A picked, right or wrong option drops a ring around the token. */
+.personal-workspace .practice-option--correct .option-badge,
+.personal-workspace .practice-option--picked .option-badge,
+.personal-workspace .choice-option--selected .option-badge {
+  box-shadow: 0 0 0 2.5px var(--badge-edge, var(--ui-line-strong));
 }
 
 .personal-workspace .option-badge__letter {
   color: var(--badge-ink, var(--ui-ink));
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 900;
   line-height: 1;
 }
 
+/* The night token is near-black stone, so its letter is cream whatever state
+   the option is in — the state reads from the ring, not the glyph. */
+html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e9d2; }
+
 .personal-workspace .practice-option:hover .option-badge,
 .personal-workspace .choice-option:hover .option-badge {
-  border-color: var(--g-orange-edge);
+  box-shadow: 0 0 0 2px var(--g-orange-edge);
 }
 
 /* Review: option translations live below the options, not inside them. */

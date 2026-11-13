@@ -1280,7 +1280,16 @@ html[data-theme='night'] .personal-workspace .today-tile { background: #2d2149; 
 html[data-theme='night'] .personal-workspace .study-card { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .choice-option { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .choice-option:hover { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .spelling-cell { background: #2d2149; }
+/* The given letters (a span, not an input) carry the same tile, and the night
+ * rule above would otherwise paint a flat box over it. */
+html[data-theme='night'] .personal-workspace span.spelling-cell {
+  background-color: transparent;
+  background-image: url('./assets/halloween/card/letter-tile-night.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #f3e9d2;
+}
 html[data-theme='night'] .personal-workspace .wordbook-active-mark { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .wordbook-tabs { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .wordbook-tabs [role="button"]:hover { background: #2d2149; }
@@ -2344,21 +2353,26 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   height: 3.6rem;
   min-height: 0;
   padding: 0;
-  border-style: solid;
-  border-width: 7px 9px;
-  border-color: transparent;
-  border-image-source: url('./assets/halloween/card/chip-biscuit.png');
-  border-image-slice: 10% 5% fill;
-  border-image-width: 7px 9px;
-  border-image-repeat: stretch;
+  border: 0;
   border-radius: 0;
-  background: #d9c08a;
-  background-clip: padding-box;
+  /* Each letter sits on its own tile: baked by day, cut by night, the same
+   * material rule the frame follows. The tile is drawn once and stretched to
+   * the cell, which is what keeps a nine-letter word on one row. */
+  background-color: transparent;
+  background-image: url('./assets/halloween/card/letter-tile-day.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   box-shadow: none;
   text-align: center;
   font-size: 1.32rem;
   font-weight: 700;
   color: #5a3a16;
+}
+
+html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell {
+  background-image: url('./assets/halloween/card/letter-tile-night.png');
+  color: #f3e9d2;
 }
 
 .personal-workspace .spelling-cell--prefilled {

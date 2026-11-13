@@ -62,6 +62,10 @@ import drillSteleDay from './card/drill-stele-day.png'
 import drillSteleNight from './card/drill-stele-night.png'
 import drillBiscuitDay from './card/drill-biscuit-day.png'
 import drillBiscuitNight from './card/drill-biscuit-night.png'
+import optionTokenDay from './card/option-token-day.png'
+import optionTokenNight from './card/option-token-night.png'
+import letterTileDay from './card/letter-tile-day.png'
+import letterTileNight from './card/letter-tile-night.png'
 
 /** The question card. The frame is exactly 2:3; do not stretch it. */
 export const questionCard = {
@@ -79,6 +83,16 @@ export const questionCard = {
 export const drillFrame = {
   choice: { day: drillSteleDay, night: drillSteleNight },
   spelling: { day: drillBiscuitDay, night: drillBiscuitNight },
+} as const
+
+/**
+ * The two places a letter goes. The option marker is a round stone token —
+ * the choice drill is carved, so its letters sit on a carved disc. The
+ * spelling cell is a tile: baked by day, cut by night, like its frame.
+ */
+export const letterMark = {
+  optionToken: { day: optionTokenDay, night: optionTokenNight },
+  letterTile: { day: letterTileDay, night: letterTileNight },
 } as const
 
 /**
