@@ -11,10 +11,9 @@
  * shelf or a document and on the ⋯ of every card; the toolbar keeps only the
  * two actions a newcomer needs.
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import DivButton from '../components/DivButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import { useAuthStore } from '../stores/auth'
 import {
   createKnowledgeFolder,
   deleteKnowledgeDocument,
@@ -25,9 +24,12 @@ import {
   listKnowledgeFolders,
   renameKnowledgeDocument,
   renameKnowledgeFolder,
+  searchKnowledge,
+  type KnowledgeDifficulty,
   type KnowledgeDocument,
   type KnowledgeDocumentDetail,
   type KnowledgeFolder,
+  type KnowledgeHit,
   type KnowledgeScope,
 } from '../api/knowledge'
 import '../knowledge.css'
@@ -50,7 +52,10 @@ interface DialogState {
   multiline?: boolean
   danger?: boolean
   confirmLabel: string
-  resolve: (result: { name: string; content: string } | null) => void
+  /** A global shelf can be filed under an exam; the field only shows then. */
+  showLevel?: boolean
+  level?: string
+  resolve: (result: { name: string; content: string; level?: string } | null) => void
 }
 
 const ICONS: Record<IconName, string> = {
@@ -65,9 +70,6 @@ const ICONS: Record<IconName, string> = {
 const FOLDER_PATH =
   'M3 7.5A2.5 2.5 0 0 1 5.5 5h4l2 2.5h7A2.5 2.5 0 0 1 21 10v7.5A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z'
 
-const auth = useAuthStore()
-const isAdmin = computed(() => auth.isAdmin)
-
 const folders = ref<KnowledgeFolder[]>([])
 const documents = ref<KnowledgeDocument[]>([])
 const currentId = ref<string | null>(null)
@@ -77,6 +79,10 @@ const query = ref('')
 const loadingTree = ref(false)
 const loadingDocs = ref(false)
 const error = ref<unknown>(null)
+
+const results = ref<KnowledgeHit[] | null>(null)
+const searching = ref(false)
+let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 const menu = ref<{ x: number; y: number; label: string; items: MenuItem[] } | null>(null)
 const dialog = ref<DialogState | null>(null)
@@ -263,7 +269,7 @@ function onMenuKey(event: KeyboardEvent): void {
 
 function ask(
   state: Omit<DialogState, 'resolve' | 'confirmLabel'> & { confirmLabel?: string },
-): Promise<{ name: string; content: string } | null> {
+): Promise<{ name: string; content: string; level?: string } | null> {
   return new Promise((resolve) => {
     dialog.value = { ...state, confirmLabel: state.confirmLabel ?? '确定', resolve }
     void nextTick(() => dialogInput.value?.focus())
@@ -274,7 +280,11 @@ function submitDialog(): void {
   const state = dialog.value
   if (!state) return
   dialog.value = null
-  state.resolve({ name: state.value.trim(), content: state.content ?? '' })
+  state.resolve({
+    name: state.value.trim(),
+    content: state.content ?? '',
+    level: state.level ?? '',
+  })
 }
 
 function cancelDialog(): void {
@@ -285,22 +295,41 @@ function cancelDialog(): void {
 
 /* ------------------------------------------------------------ mutations */
 
-async function createFolder(parentId: string, scope: KnowledgeScope): Promise<void> {
-  const parent = folders.value.find((f) => f.id === parentId)
+async function createFolder(parentId: string | null, scope: KnowledgeScope): Promise<void> {
+  const parent = parentId ? folders.value.find((f) => f.id === parentId) : null
   const result = await ask({
     title: '新建书架',
-    hint: parent ? `建在「${parent.name}」里面。` : undefined,
+    hint: parent
+      ? `建在「${parent.name}」里面。`
+      : scope === 'global'
+        ? '建在「全局知识库」的顶层。'
+        : '建在「我的知识库」里。',
     value: '',
+    showLevel: scope === 'global',
+    level: '',
     confirmLabel: '创建',
   })
   if (!result?.name) return
   try {
-    const folder = await createKnowledgeFolder({ name: result.name, scope, parentId, level: null })
+    const folder = await createKnowledgeFolder({
+      name: result.name,
+      scope,
+      parentId,
+      // Only a global shelf may stand for an exam.
+      level: scope === 'global' && result.level ? (result.level as KnowledgeDifficulty) : null,
+    })
     await loadTree()
     openFolder(folder.id)
   } catch (cause) {
     error.value = cause
   }
+}
+
+/** The toolbar button: nest where you stand, or start a shelf of your own. */
+function newShelf(): void {
+  const folder = current.value
+  if (folder?.writable) void createFolder(folder.id, folder.scope)
+  else void createFolder(null, 'personal')
 }
 
 async function importDocument(folderId: string): Promise<void> {
@@ -393,6 +422,38 @@ async function openDocument(doc: KnowledgeDocument): Promise<void> {
 
 /* --------------------------------------------------------------- wiring */
 
+/* The box searches the shelves the learner can read, not just the one on
+ * screen: that is the question a search box asks, and the backend can answer
+ * it. Below two characters it falls back to filtering what is loaded. */
+function runSearch(term: string): void {
+  if (searchTimer) clearTimeout(searchTimer)
+  if (term.length < 2) {
+    results.value = null
+    searching.value = false
+    return
+  }
+  searchTimer = setTimeout(async () => {
+    searching.value = true
+    try {
+      results.value = await searchKnowledge(term, 12)
+    } catch {
+      results.value = []
+    } finally {
+      searching.value = false
+    }
+  }, 260)
+}
+
+watch(query, (value) => runSearch(value.trim()))
+
+async function openById(documentId: string): Promise<void> {
+  try {
+    preview.value = await getKnowledgeDocument(documentId)
+  } catch (cause) {
+    error.value = cause
+  }
+}
+
 function onGlobalKey(event: KeyboardEvent): void {
   if (event.key !== 'Escape') return
   if (menu.value) closeMenu()
@@ -451,12 +512,7 @@ onBeforeUnmount(() => {
         </button>
       </div>
 
-      <DivButton
-        v-if="isAdmin && current"
-        class="kb-btn ghost"
-        type="button"
-        @click="createFolder(current.id, current.scope)"
-      >新建书架</DivButton>
+      <DivButton class="kb-btn ghost" type="button" @click="newShelf">新建书架</DivButton>
       <DivButton
         v-if="canWrite && current"
         class="kb-btn"
@@ -543,7 +599,30 @@ onBeforeUnmount(() => {
           <p v-if="loadingTree && folders.length === 0" class="kb-loading">正在读取…</p>
 
           <template v-else-if="current">
-            <template v-if="view === 'grid'">
+            <template v-if="results !== null">
+              <p class="kb-section">搜索「{{ query }}」</p>
+              <p v-if="searching" class="kb-loading">正在检索…</p>
+              <div v-else-if="results.length" class="kb-results">
+                <button
+                  v-for="hit in results"
+                  :key="`${hit.documentId}-${hit.score}`"
+                  class="kb-result"
+                  type="button"
+                  @click="openById(hit.documentId)"
+                >
+                  <span class="kb-result__title">{{ hit.title }}</span>
+                  <span class="kb-result__snippet">{{ hit.content }}</span>
+                  <span class="kb-result__score">{{ Math.round(hit.score * 100) }}%</span>
+                </button>
+              </div>
+              <div v-else class="kb-empty">
+                <strong>没有匹配「{{ query }}」的内容</strong>
+                <span>换个说法试试，或者清除搜索回到书架。</span>
+                <DivButton class="kb-btn ghost" type="button" @click="query = ''">清除搜索</DivButton>
+              </div>
+            </template>
+
+            <template v-else-if="view === 'grid'">
               <template v-if="children.length">
                 <p class="kb-section">书架</p>
                 <div class="kb-folders">
@@ -557,7 +636,9 @@ onBeforeUnmount(() => {
                       <svg class="kb-folder__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path :d="FOLDER_PATH" /></svg>
                       <span class="kb-folder__text">
                         <span class="kb-folder__name">{{ folder.name }}</span>
-                        <span class="kb-folder__meta">{{ folder.documentCount }} 份资料</span>
+                        <span class="kb-folder__meta">
+                          <template v-if="childrenOf(folder.id).length">{{ childrenOf(folder.id).length }} 个子书架 · </template>{{ folder.documentCount }} 份资料
+                        </span>
                       </span>
                     </button>
                     <button
@@ -639,7 +720,7 @@ onBeforeUnmount(() => {
               </div>
             </template>
 
-            <div v-if="empty" class="kb-empty">
+            <div v-if="empty && results === null" class="kb-empty">
               <template v-if="query">
                 <strong>没有匹配「{{ query }}」的内容</strong>
                 <span>试试书架名或资料里的关键词。</span>
@@ -695,6 +776,18 @@ onBeforeUnmount(() => {
           :readonly="dialog.danger"
           @keydown.esc.prevent="cancelDialog"
         />
+        <label v-if="dialog.showLevel" class="kb-dialog__field">
+          <span>难度（可选）</span>
+          <select v-model="dialog.level" aria-label="难度">
+            <option value="">通用，不分难度</option>
+            <option value="GAOKAO">高考</option>
+            <option value="CET4">四级</option>
+            <option value="CET6">六级</option>
+            <option value="POSTGRAD">考研</option>
+            <option value="IELTS">雅思</option>
+            <option value="TOEFL">托福</option>
+          </select>
+        </label>
         <textarea v-if="dialog.multiline" v-model="dialog.content" aria-label="正文" placeholder="粘贴正文…"></textarea>
         <div class="kb-dialog__acts">
           <DivButton class="kb-btn ghost" type="button" @click="cancelDialog">取消</DivButton>

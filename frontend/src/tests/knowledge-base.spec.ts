@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   createKnowledgeFolder: vi.fn(),
   renameKnowledgeDocument: vi.fn(),
   renameKnowledgeFolder: vi.fn(),
+  searchKnowledge: vi.fn(),
 }))
 
 vi.mock('../api/knowledge', async (importOriginal) => {
@@ -77,6 +78,9 @@ describe('KnowledgeBaseView', () => {
     mocks.createKnowledgeFolder.mockResolvedValue(folder({ id: 'new', writable: true }))
     mocks.renameKnowledgeDocument.mockResolvedValue(doc)
     mocks.renameKnowledgeFolder.mockResolvedValue(goals)
+    mocks.searchKnowledge.mockResolvedValue([
+      { documentId: 'doc-1', title: '2023-06 四级阅读', content: '夜市把邻里聚在一起。', score: 0.8 },
+    ])
   })
 
   it('shows the global shelves nested, and the learner’s own', async () => {
@@ -149,6 +153,29 @@ describe('KnowledgeBaseView', () => {
       title: '2024-06 四级阅读',
       content: '1. 题目\n答案：A',
     })
+  })
+
+  it('searches the shelves the learner can read, not just the open one', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.get('.kb-search input').setValue('夜市')
+    await new Promise((resolve) => setTimeout(resolve, 320))
+    await flushPromises()
+
+    expect(mocks.searchKnowledge).toHaveBeenCalledWith('夜市', 12)
+    expect(wrapper.get('.kb-result__title').text()).toBe('2023-06 四级阅读')
+    expect(wrapper.get('.kb-result__snippet').text()).toContain('夜市')
+  })
+
+  it('lets anyone start a shelf of their own, not only an administrator', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+    const create = wrapper.findAll('.kb-bar .kb-btn').find((b) => b.text() === '新建书架')
+    expect(create).toBeTruthy()
+    await create!.trigger('click')
+    await flushPromises()
+    expect(wrapper.get('.kb-dialog h2').text()).toBe('新建书架')
   })
 
   it('keeps the edit actions away from a read-only shelf', async () => {
