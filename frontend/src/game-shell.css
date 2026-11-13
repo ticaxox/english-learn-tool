@@ -33,6 +33,7 @@
   --rail-edge: #35240f;
   --coach-face: #ff9600;
   --coach-face-hover: #e07f00;
+  --coach-edge: #b35f00;
   --coach-ink: #2f1c05;
 }
 
@@ -68,6 +69,7 @@ html[data-theme='night'] .personal-workspace {
   /* Night orange is already light, so darkening it would eat the ink on it. */
   --coach-face: #ff9f45;
   --coach-face-hover: #ffb877;
+  --coach-edge: #c76a10;
   --coach-ink: #2b1607;
 }
 
@@ -474,19 +476,6 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   overflow-y: auto;
   border-right: 2px solid var(--rail-edge);
   background-color: var(--rail-panel);
-  /* The cut corner is drawn, not implied: the hairline follows the diagonal
-   * so the notch reads as an edge of the panel. */
-  background-image: linear-gradient(
-    45deg,
-    transparent 48%,
-    var(--rail-line) 48%,
-    var(--rail-line) 57%,
-    transparent 57%
-  );
-  background-repeat: no-repeat;
-  background-position: top right;
-  background-size: 18px 18px;
-  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
   color: var(--rail-ink);
 }
 
@@ -798,21 +787,20 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   font-size: 11px;
 }
 
+/* A small handle on the panel rather than a labelled row: the arrow says it. */
 .personal-workspace .sidebar-collapse {
   display: flex;
-  width: 100%;
+  width: 30px;
   min-height: 30px;
-  gap: 6px;
+  /* Without this the generic control padding squeezes the arrow to nothing. */
+  padding: 0;
+  margin-left: auto;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--rail-line);
   border-radius: 0;
   background: transparent;
   color: var(--rail-muted);
-  font-family: var(--font-code);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
 }
 
 .personal-workspace .sidebar-collapse:hover {
@@ -820,7 +808,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   color: var(--rail-ink);
 }
 
-.personal-workspace .sidebar-collapse svg { width: 13px; height: 13px; }
+.personal-workspace .sidebar-collapse svg { width: 15px; height: 15px; }
 
 /* Mobile bottom nav reads as four chunky buttons. */
 .personal-workspace .member-mobile-nav a {
@@ -850,21 +838,6 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   color: var(--rail-ink);
 }
 
-.personal-workspace .workspace-topbar::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 18px;
-  height: 18px;
-  background: linear-gradient(
-    45deg,
-    transparent 48%,
-    var(--rail-line) 48%,
-    var(--rail-line) 57%,
-    transparent 57%
-  );
-  content: "";
-}
 
 .personal-workspace .workspace-topbar-heading {
   display: flex;
@@ -939,55 +912,34 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   margin-left: auto;
 }
 
-/* Today's quest count as a small tally, the same figure the rail lists. */
-.personal-workspace .topbar-quest {
-  display: inline-flex;
-  gap: 7px;
-  align-items: center;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid var(--rail-line);
-  color: var(--rail-muted);
-  font-family: var(--font-code);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
 
-.personal-workspace .topbar-quest__ticks { display: flex; gap: 3px; }
-
-.personal-workspace .topbar-quest__ticks i {
-  width: 6px;
-  height: 12px;
-  background: var(--rail-line);
-}
-
-.personal-workspace .topbar-quest__ticks i.is-on { background: var(--rail-accent); }
-
-.personal-workspace .topbar-quest strong {
-  color: var(--rail-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-/* The coach button keeps the panel's cut corners, in pumpkin. */
+/* The one action in the bar: a solid pumpkin key with a hard bottom edge, the
+ * same language as the product's primary button, not a cut from the chrome. */
 .personal-workspace .workspace-coach-button.member-concierge-button {
-  gap: 7px;
-  min-height: 34px;
-  padding: 0 15px;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 17px;
   border: 0;
-  border-radius: 0;
+  border-radius: 12px;
   background: var(--coach-face);
-  box-shadow: none;
+  box-shadow: 0 3px 0 var(--coach-edge);
   color: var(--coach-ink);
-  font-size: 0.84rem;
+  font-size: 0.86rem;
   font-weight: 900;
-  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+  clip-path: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
 }
 
 .personal-workspace .workspace-coach-button.member-concierge-button:hover {
   background: var(--coach-face-hover);
+  box-shadow: 0 4px 0 var(--coach-edge);
   color: var(--coach-ink);
+  transform: translateY(-1px);
+}
+
+.personal-workspace .workspace-coach-button.member-concierge-button:active {
+  box-shadow: 0 1px 0 var(--coach-edge);
+  transform: translateY(2px);
 }
 
 .personal-workspace .workspace-coach-button.member-concierge-button svg { width: 16px; height: 16px; }
@@ -1002,6 +954,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   border: 0;
   border-radius: 50%;
   background: var(--rail-mark);
+  box-shadow: 0 2px 0 var(--rail-edge);
   color: #3b2a14;
   font-family: var(--font-code);
   font-size: 11px;
@@ -1090,7 +1043,6 @@ html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__mo
 .personal-workspace.is-sidebar-collapsed .sidebar-collapse svg { transform: rotate(180deg); }
 
 @media (max-width: 960px) {
-  .personal-workspace .topbar-quest { display: none; }
   .personal-workspace .workspace-topbar-heading span { display: none; }
 }
 
