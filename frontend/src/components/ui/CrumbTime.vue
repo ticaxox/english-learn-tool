@@ -11,9 +11,11 @@
  * This keeps what the native field was good at — "HH:MM" as the value, arrow
  * keys and typed entry, `inputmode="numeric"` on a phone, a <label for> — and
  * draws the picker itself: two columns, in the same ink and paper as the
- * select's own popover.
+ * select's own popover. The whole frame is the target; the clock at its end is
+ * a mark, not a second button.
  */
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useAnchoredPopover } from '../../composables/useAnchoredPopover'
 
 const props = withDefaults(defineProps<{
   modelValue: string | null
@@ -52,13 +54,13 @@ const value = computed(() => parseTime(props.modelValue))
 const display = computed(() => (value.value ? `${pad(value.value.hour)}:${pad(value.value.minute)}` : ''))
 
 const inputEl = ref<HTMLInputElement | null>(null)
-const rootEl = ref<HTMLElement | null>(null)
-const pickerEl = ref<HTMLElement | null>(null)
 const hourColumn = ref<HTMLElement | null>(null)
 const minuteColumn = ref<HTMLElement | null>(null)
 
 const draft = ref(display.value)
-const open = ref(false)
+
+const { bindHost, bindPanel, isOpen: open, open: openPanel, containsPanel } =
+  useAnchoredPopover(() => inputEl.value?.focus())
 
 // The model is the source of truth; the box only holds what is being typed.
 watch(display, (next) => {
@@ -87,6 +89,14 @@ function onInput(event: Event): void {
 
   draft.value = formatted
   el.value = formatted
+
+  // A complete time is announced straight away: the form's own state should
+  // not wait for the blur that a submit button never gives it.
+  const parsed = parseTime(formatted)
+  if (parsed) {
+    const iso = `${pad(parsed.hour)}:${pad(parsed.minute)}`
+    if (iso !== props.modelValue) emit('update:modelValue', iso)
+  }
 }
 
 function commitDraft(): void {
@@ -116,39 +126,10 @@ function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'ArrowDown') {
     event.preventDefault()
     openPicker()
-    return
-  }
-  if (event.key === 'Escape' && open.value) {
-    event.preventDefault()
-    closePicker()
   }
 }
 
 /* ------------------------------------------------------------------ picker */
-
-function positionPicker(): void {
-  const host = rootEl.value
-  const panel = pickerEl.value
-  if (!host || !panel) return
-  const rect = host.getBoundingClientRect()
-  const margin = 10
-  const width = panel.offsetWidth
-  const height = panel.offsetHeight
-
-  let left = rect.left
-  if (left + width > window.innerWidth - margin) left = window.innerWidth - width - margin
-  if (left < margin) left = margin
-
-  // Below the field, unless the room below is too short — then above it.
-  let top = rect.bottom + 8
-  if (top + height > window.innerHeight - margin) {
-    const above = rect.top - height - 8
-    top = above >= margin ? above : Math.max(margin, window.innerHeight - height - margin)
-  }
-
-  panel.style.left = `${Math.round(left)}px`
-  panel.style.top = `${Math.round(top)}px`
-}
 
 function scrollSelectionIntoView(): void {
   for (const column of [hourColumn.value, minuteColumn.value]) {
@@ -163,68 +144,17 @@ function scrollSelectionIntoView(): void {
   }
 }
 
-function onPointerDown(event: PointerEvent): void {
-  const target = event.target as Node | null
-  if (target && (rootEl.value?.contains(target) || pickerEl.value?.contains(target))) return
-  closePicker()
-}
-
-function onWindowChange(): void {
-  positionPicker()
-}
-
-/** The picker degrades to an inline panel where the Popover API is missing;
- *  only the placement it wants (top layer) is lost, not the control. */
-function isPopoverOpen(panel: HTMLElement): boolean {
-  try {
-    return panel.matches(':popover-open')
-  } catch {
-    return false
-  }
-}
-
 function openPicker(): void {
-  if (props.disabled || open.value) return
-  open.value = true
-  void nextTick(() => {
-    const panel = pickerEl.value
-    if (!panel) return
-    if (typeof panel.showPopover === 'function' && !isPopoverOpen(panel)) panel.showPopover()
-    positionPicker()
-    scrollSelectionIntoView()
-    document.addEventListener('pointerdown', onPointerDown, true)
-    document.addEventListener('keydown', onKeydownAtLarge, true)
-    window.addEventListener('resize', onWindowChange)
-    window.addEventListener('scroll', onWindowChange, true)
-  })
-}
-
-function closePicker(): void {
-  if (!open.value) return
-  open.value = false
-  const panel = pickerEl.value
-  if (panel && typeof panel.hidePopover === 'function' && isPopoverOpen(panel)) panel.hidePopover()
-  document.removeEventListener('pointerdown', onPointerDown, true)
-  document.removeEventListener('keydown', onKeydownAtLarge, true)
-  window.removeEventListener('resize', onWindowChange)
-  window.removeEventListener('scroll', onWindowChange, true)
-}
-
-function onKeydownAtLarge(event: KeyboardEvent): void {
-  if (event.key !== 'Escape') return
-  event.preventDefault()
-  closePicker()
-  inputEl.value?.focus()
+  if (props.disabled) return
+  openPanel()
+  void nextTick(scrollSelectionIntoView)
 }
 
 /** The whole field is the target, not just the clock at its end: the digits
  *  are what a person aims at, and asking them to hit an 18px icon to change
- *  the time is the kind of thing only the native control does.
- *  A click inside the panel must not count — it is a child of this element,
- *  so the event bubbles up here even though the panel sits in the top layer. */
+ *  the time is the kind of thing only the native control does. */
 function onFieldClick(event: MouseEvent): void {
-  const target = event.target as Node | null
-  if (target && pickerEl.value?.contains(target)) return
+  if (containsPanel(event.target as Node | null)) return
   openPicker()
 }
 
@@ -239,19 +169,11 @@ function setMinute(minute: number): void {
   draft.value = `${pad(hour)}:${pad(minute)}`
   emit('update:modelValue', draft.value)
 }
-
-function onBlur(): void {
-  commitDraft()
-}
-
-onBeforeUnmount(() => {
-  closePicker()
-})
 </script>
 
 <template>
   <div
-    ref="rootEl"
+    :ref="bindHost"
     class="crumb-time"
     :class="{ 'is-disabled': disabled, 'is-invalid': invalid, 'is-open': open }"
     @click="onFieldClick"
@@ -273,7 +195,7 @@ onBeforeUnmount(() => {
       :aria-expanded="open"
       @input="onInput"
       @keydown="onKeydown"
-      @blur="onBlur"
+      @blur="commitDraft"
     />
 
     <svg
@@ -290,7 +212,7 @@ onBeforeUnmount(() => {
       <path d="M12 7.4V12l3.1 1.9" />
     </svg>
 
-    <div ref="pickerEl" class="crumb-time__picker" popover="manual" role="dialog" :aria-label="`${label}选择`">
+    <div :ref="bindPanel" class="crumb-time__picker" popover="manual" role="dialog" :aria-label="`${label}选择`">
       <div class="crumb-time__wheel">
         <div class="crumb-time__column">
           <p class="crumb-time__caption">时</p>

@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import CrumbNumber from '../components/ui/CrumbNumber.vue'
+import CrumbTime from '../components/ui/CrumbTime.vue'
 import NotificationStatePanel from '../components/NotificationStatePanel.vue'
 import {
   fetchNotificationPreferences,
@@ -51,6 +52,22 @@ function clonePreferences(value: NotificationPreferences): NotificationPreferenc
 const dirty = computed(() => {
   if (!preferences.value || !draft.value) return false
   return JSON.stringify(preferences.value) !== JSON.stringify(draft.value)
+})
+
+// The picker speaks "HH:MM" or nothing; the preference is a string that the
+// validator checks on save, so an empty field stays empty rather than "".
+const dndStart = computed({
+  get: () => draft.value?.dndStart ?? null,
+  set: (value: string | null) => {
+    if (draft.value) draft.value.dndStart = value ?? ''
+  },
+})
+
+const dndEnd = computed({
+  get: () => draft.value?.dndEnd ?? null,
+  set: (value: string | null) => {
+    if (draft.value) draft.value.dndEnd = value ?? ''
+  },
 })
 
 function setCategory(key: keyof NotificationCategoryPreferences, checked: boolean): void {
@@ -185,12 +202,12 @@ onMounted(() => {
         <div class="notification-quiet-hours">
           <label>
             <span>开始</span>
-            <input v-model="draft.dndStart" type="time" required />
+            <CrumbTime v-model="dndStart" label="免打扰开始时间" />
           </label>
           <span class="notification-quiet-hours__dash" aria-hidden="true">〰</span>
           <label>
             <span>结束</span>
-            <input v-model="draft.dndEnd" type="time" required />
+            <CrumbTime v-model="dndEnd" label="免打扰结束时间" />
           </label>
         </div>
         <p class="field-hint">开始与结束相同表示不启用。</p>
