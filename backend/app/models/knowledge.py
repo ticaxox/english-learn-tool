@@ -35,8 +35,8 @@ class KnowledgeFolder(Base):
     administrator writes to it. A personal folder belongs to one learner, who
     names it and keeps their own material there; nobody else can read it.
 
-    Nesting is arbitrary. A difficulty is a tag on a *root* folder — CET-4 is
-    one shelf, and under it an administrator files 真题 / 词汇 / 解析 as deep as
+    Nesting is arbitrary. The exam shelves sit inside 学习目标 — CET-4 is one
+    of them, and under it an administrator files 真题 / 词汇 / 解析 as deep as
     it needs to go. A learner's folder nests the same way.
 
     `scope` and `owner_id` are copied down the tree rather than looked up, so a
@@ -56,9 +56,6 @@ class KnowledgeFolder(Base):
             "OR (scope = 'personal' AND owner_id IS NOT NULL)",
             name="scope_owner_valid",
         ),
-        # A difficulty is a root tag: it decides which exam a whole shelf is
-        # for, so it cannot appear halfway down one.
-        CheckConstraint("parent_id IS NULL OR difficulty IS NULL", name="difficulty_root_only"),
         Index("ix_knowledge_folders_owner", "scope", "owner_id"),
         Index("ix_knowledge_folders_parent", "parent_id"),
     )

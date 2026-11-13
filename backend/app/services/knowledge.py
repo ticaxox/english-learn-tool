@@ -238,33 +238,47 @@ async def create_folder(
             raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Read-only shelf.")
         # A child is the same kind of shelf as its parent, on the same side of
         # the global/personal line; asking for a different one is a mistake,
-        # not an instruction.
-        folder = KnowledgeFolder(
-            parent_id=parent.id,
-            scope=parent.scope,
-            owner_id=parent.owner_id,
-            name=payload.name,
-        )
-    elif payload.scope == "global":
-        require_admin(user)
-        if payload.difficulty is not None:
-            exists = await session.scalar(
-                select(KnowledgeFolder.id).where(
-                    KnowledgeFolder.scope == "global",
-                    KnowledgeFolder.difficulty == payload.difficulty,
-                )
-            )
-            if exists is not None:
-                raise AppError(
-                    status_code=409,
-                    code="KNOWLEDGE_FOLDER_EXISTS",
-                    message="That difficulty already has a shelf.",
-                )
-        folder = KnowledgeFolder(
-            scope="global", owner_id=None, difficulty=payload.difficulty, name=payload.name
-        )
+        # not an instruction. Only a global shelf can name an exam.
+        scope = parent.scope
+        owner_id = parent.owner_id
     else:
-        folder = KnowledgeFolder(scope="personal", owner_id=user.id, name=payload.name)
+        scope = payload.scope
+        owner_id = None if scope == "global" else user.id
+        if scope == "global":
+            require_admin(user)
+
+    if scope != "global":
+        level = None
+    elif payload.difficulty is not None:
+        if user.role != "admin":
+            raise AppError(
+                status_code=403,
+                code="KNOWLEDGE_FORBIDDEN",
+                message="Administrator permission is required.",
+            )
+        exists = await session.scalar(
+            select(KnowledgeFolder.id).where(
+                KnowledgeFolder.scope == "global",
+                KnowledgeFolder.difficulty == payload.difficulty,
+            )
+        )
+        if exists is not None:
+            raise AppError(
+                status_code=409,
+                code="KNOWLEDGE_FOLDER_EXISTS",
+                message="That difficulty already has a shelf.",
+            )
+        level = payload.difficulty
+    else:
+        level = None
+
+    folder = KnowledgeFolder(
+        parent_id=parent.id if parent is not None else None,
+        scope=scope,
+        owner_id=owner_id,
+        difficulty=level,
+        name=payload.name,
+    )
     session.add(folder)
     await session.commit()
     await session.refresh(folder)
@@ -557,18 +571,21 @@ async def searchable_folder_ids(session: AsyncSession, user: User) -> list[UUID]
             )
         return row.owner_id == user.id
 
-    roots = {row.id for row in rows if row.parent_id is None and readable(row)}
+    readable_ids = {row.id for row in rows if readable(row)}
+    roots = {row.id for row in rows if row.parent_id is None and row.id in readable_ids}
     children: dict[UUID, list[UUID]] = {}
     for row in rows:
         if row.parent_id is not None:
             children.setdefault(row.parent_id, []).append(row.id)
 
+    # Pruning happens per node, not per root: the exam shelves all hang off
+    # 学习目标, so a branch is skipped when its own exam is not this learner's.
     found: list[UUID] = []
     queue = list(roots)
     while queue:
         current = queue.pop(0)
         found.append(current)
-        queue.extend(children.get(current, []))
+        queue.extend(child for child in children.get(current, []) if child in readable_ids)
     return [*found, GENERAL_FOLDER_ID]
 
 

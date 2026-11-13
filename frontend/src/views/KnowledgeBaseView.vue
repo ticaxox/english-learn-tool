@@ -9,7 +9,7 @@
  * Everyone reads the global shelves; only an administrator writes to them.
  * Yours are yours alone. The coach retrieves from exactly these.
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import DivButton from '../components/DivButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -212,12 +212,25 @@ async function removeDocument(document: KnowledgeDocument): Promise<void> {
   }
 }
 
+const nameInput = ref<HTMLInputElement | null>(null)
+
 function startCreate(parentId: string | null, scope: KnowledgeScope): void {
   newFolder.value = { parentId, scope }
   folderName.value = ''
   folderLevel.value = ''
   showImport.value = false
   actionError.value = null
+  void nextTick(() => nameInput.value?.focus())
+}
+
+function closeCreate(): void {
+  newFolder.value = null
+  folderName.value = ''
+  folderLevel.value = ''
+}
+
+function parentName(parentId: string): string {
+  return folders.value.find((folder) => folder.id === parentId)?.name ?? ''
 }
 
 async function submitFolder(): Promise<void> {
@@ -230,12 +243,10 @@ async function submitFolder(): Promise<void> {
       name,
       scope: target.scope,
       level:
-        target.scope === 'global' && target.parentId === null
-          ? ((folderLevel.value || null) as KnowledgeLevel | null)
-          : null,
+        target.scope === 'global' ? ((folderLevel.value || null) as KnowledgeLevel | null) : null,
       parentId: target.parentId,
     })
-    newFolder.value = null
+    closeCreate()
     await loadTree()
     await selectFolder(folder)
   } catch (error) {
@@ -356,6 +367,15 @@ onMounted(() => {
               <span class="kb-folder__name">{{ row.folder.name }}</span>
               <span class="kb-folder__count">{{ row.folder.documentCount }}</span>
             </button>
+            <button
+              v-if="row.folder.writable"
+              class="kb-add-child"
+              type="button"
+              :aria-label="`在「${row.folder.name}」里新建书架`"
+              @click.stop="startCreate(row.folder.id, row.folder.scope)"
+            >
+              ＋
+            </button>
           </div>
         </div>
 
@@ -393,6 +413,15 @@ onMounted(() => {
               <span class="kb-folder__name">{{ row.folder.name }}</span>
               <span class="kb-folder__count">{{ row.folder.documentCount }}</span>
             </button>
+            <button
+              v-if="row.folder.writable"
+              class="kb-add-child"
+              type="button"
+              :aria-label="`在「${row.folder.name}」里新建书架`"
+              @click.stop="startCreate(row.folder.id, row.folder.scope)"
+            >
+              ＋
+            </button>
           </div>
           <p v-if="personalRows.length === 0" class="kb-empty">
             还没有自己的文件夹。建一个，把笔记或资料放进来。
@@ -403,26 +432,46 @@ onMounted(() => {
       <div class="kb-main">
         <ErrorNotice v-if="actionError" :error="actionError" :show-retry="false" />
 
-        <form v-if="newFolder" class="kb-newform kb-newform--main" @submit.prevent="submitFolder">
-          <p class="kb-newform__title">
-            {{ newFolder.parentId ? `在「${selected?.name ?? ''}」里新建书架` : newFolder.scope === 'global' ? '新建全局书架' : '新建文件夹' }}
-          </p>
-          <div class="kb-newform__row">
-            <input v-model="folderName" maxlength="120" placeholder="名称" aria-label="书架名称" />
-            <select
-              v-if="newFolder.scope === 'global' && newFolder.parentId === null"
-              v-model="folderLevel"
-              aria-label="难度"
-            >
-              <option value="">通用（不分难度）</option>
-              <option v-for="[code, label] in LEVEL_OPTIONS" :key="code" :value="code">
-                {{ label }}
-              </option>
-            </select>
-            <DivButton type="submit" :disabled="!folderName.trim()">建</DivButton>
-            <DivButton class="button-secondary" type="button" @click="newFolder = null">取消</DivButton>
-          </div>
-        </form>
+        <div v-if="newFolder" class="dialog-backdrop" @click.self="closeCreate">
+          <form
+            class="dialog-card kb-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kb-dialog-title"
+            @submit.prevent="submitFolder"
+            @keydown.esc="closeCreate"
+          >
+            <header class="dialog-heading">
+              <div>
+                <p class="eyebrow">{{ newFolder.scope === 'global' ? '全局知识库' : '我的知识库' }}</p>
+                <h2 id="kb-dialog-title">
+                  {{ newFolder.parentId ? `在「${parentName(newFolder.parentId)}」里新建书架` : newFolder.scope === 'global' ? '新建全局书架' : '新建文件夹' }}
+                </h2>
+              </div>
+              <DivButton class="icon-button" type="button" aria-label="关闭" @click="closeCreate">✕</DivButton>
+            </header>
+
+            <label class="field">
+              <span>名称</span>
+              <input ref="nameInput" v-model="folderName" maxlength="120" placeholder="例如 真题、2023、阅读错题" />
+            </label>
+
+            <label v-if="newFolder.scope === 'global'" class="field">
+              <span>难度（可选）</span>
+              <select v-model="folderLevel">
+                <option value="">通用（不分难度）</option>
+                <option v-for="[code, label] in LEVEL_OPTIONS" :key="code" :value="code">
+                  {{ label }}
+                </option>
+              </select>
+            </label>
+
+            <div class="kb-dialog__acts">
+              <DivButton class="button-secondary" type="button" @click="closeCreate">取消</DivButton>
+              <DivButton type="submit" :disabled="!folderName.trim()">创建</DivButton>
+            </div>
+          </form>
+        </div>
 
         <template v-if="detail">
           <header class="kb-main__head">

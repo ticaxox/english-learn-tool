@@ -7,6 +7,10 @@
 .personal-workspace .kb {
   display: grid;
   gap: 18px;
+  /* The page sits in the middle of the content area rather than hugging its
+   * left edge: two columns of shelves read better with air on both sides. */
+  max-width: 1180px;
+  margin-inline: auto;
 }
 
 .personal-workspace .kb-head {
@@ -123,40 +127,43 @@
 .personal-workspace .kb-caret:hover { color: var(--ui-ink); }
 .personal-workspace .kb-caret--empty { pointer-events: none; }
 
-.personal-workspace .kb-newform {
+/* The add button rides the row it belongs to: every shelf you can write to
+ * offers a child, without going to the header first. */
+.personal-workspace .kb-add-child {
+  width: 24px;
+  height: 28px;
+  flex: none;
   display: grid;
-  gap: 8px;
-  padding: 2px;
-}
-
-.personal-workspace .kb-newform--main {
-  padding: 12px 14px;
-  border: 2px dashed var(--ui-line);
-  border-radius: 14px;
-  background: var(--ui-surface-subtle);
-}
-
-.personal-workspace .kb-newform__title { margin: 0; font-size: 0.82rem; font-weight: 800; color: var(--ui-muted); }
-
-.personal-workspace .kb-newform__row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-.personal-workspace .kb-newform input {
-  flex: 1 1 12rem;
-  width: auto;
-  min-width: 0;
-  min-height: 0;
-  height: 36px;
-  padding: 0 10px;
-}
-
-.personal-workspace .kb-newform select { height: 36px; padding: 0 30px 0 10px; }
-
-.personal-workspace .kb-path {
-  margin: 0 0 2px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
   color: var(--ui-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.personal-workspace .kb-row:hover .kb-add-child,
+.personal-workspace .kb-add-child:focus-visible { opacity: 1; }
+
+.personal-workspace .kb-add-child:hover { background: var(--g-orange-soft); color: var(--g-orange-edge); }
+
+/* The create shelf dialog. Same card as the rest of the product's dialogs. */
+.personal-workspace .kb-dialog {
+  display: grid;
+  gap: 14px;
+  width: min(460px, calc(100vw - 32px));
+  padding: 20px;
+}
+
+.personal-workspace .kb-dialog__acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .personal-workspace .kb-folder {
