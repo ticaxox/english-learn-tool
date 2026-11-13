@@ -290,17 +290,15 @@ function submit(): void {
   width: clamp(2.6rem, 6.4vw, 3.3rem);
   height: clamp(3rem, 7.2vw, 3.8rem);
   padding: 0;
-  /* Each letter sits in its own stone chip. */
-  border-style: solid;
-  border-width: 10px 12px;
-  border-color: transparent;
-  border-image-source: url('../assets/halloween/card/chip-biscuit.png');
-  border-image-slice: 10% 5%;
-  border-image-width: 10px 12px;
-  border-image-repeat: stretch;
+  /* Each letter sits on its own tile: baked by day, cut by night. */
+  border: 0;
   border-radius: 0;
-  background: #d9c08a;
-  background-clip: padding-box;
+  background-color: transparent;
+  background-color: transparent;
+  background-image: url('../assets/halloween/card/letter-tile-day.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   box-shadow: none;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(1.2rem, 3vw, 1.55rem);
@@ -311,15 +309,16 @@ function submit(): void {
   transition: filter 120ms ease;
 }
 
+/* The given letters are marked, not recoloured: the tile they sit on stays
+ * the tile, and a wash over it says "already here". */
 .spelling-cell--prefilled {
-  background: #b8a273;
   color: #4e3d24;
+  box-shadow: inset 0 0 0 999px rgb(120 92 40 / 26%);
 }
 
 .spelling-cell--active {
-  background: #c98a2e;
   color: #fff8e8;
-  box-shadow: inset 0 0 0 2px #8f5f18;
+  box-shadow: inset 0 0 0 999px rgb(150 90 10 / 42%);
 }
 
 .spelling-cell:focus-visible {
