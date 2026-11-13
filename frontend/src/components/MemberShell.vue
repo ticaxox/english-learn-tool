@@ -253,17 +253,6 @@ onBeforeUnmount(() => {
       </nav>
 
       <div class="workspace-sidebar-footer">
-        <div class="rail-meters">
-          <p class="rail-meter">
-            <strong>{{ progress?.crumbs ?? 0 }}</strong>
-            <span>碎屑</span>
-          </p>
-          <p class="rail-meter">
-            <strong>{{ progress?.streak ?? 0 }}</strong>
-            <span>连续天</span>
-          </p>
-        </div>
-
         <div class="rail-daylight">
           <span>昼夜</span>
           <ThemeSwitch />
