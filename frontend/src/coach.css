@@ -288,7 +288,7 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
 .coach-page.coach-page .coach-message {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
-  column-gap: 6px;
+  column-gap: 12px;
   row-gap: 0;
   padding: 13px 0;
   border: 0;
