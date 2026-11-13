@@ -343,7 +343,10 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   box-shadow: var(--coach-shadow);
   color: var(--coach-ink);
 }
+/* A one-word answer is narrower than the meta row under it; the bubble still
+   has to hug the portrait, not the left edge of that row. */
 .coach-page.coach-page .coach-message--user .coach-message__bubble {
+  justify-self: end;
   background: color-mix(in srgb, var(--coach-mine) 20%, var(--coach-page));
   border-color: color-mix(in srgb, var(--coach-mine) 55%, transparent);
   border-radius: 16px 4px 16px 16px;
