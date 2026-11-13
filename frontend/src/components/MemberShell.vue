@@ -319,6 +319,9 @@ onBeforeUnmount(() => {
         </nav>
         <div class="workspace-topbar-actions ia-topbar-actions">
           <span v-if="quests.length" class="topbar-quest" aria-label="今日任务完成度">
+            <span class="topbar-quest__ticks" aria-hidden="true">
+              <i v-for="quest in quests" :key="quest.key" :class="{ 'is-on': quest.done }"></i>
+            </span>
             <span>任务</span>
             <strong>{{ questsDone }}/{{ quests.length }}</strong>
           </span>
