@@ -74,7 +74,7 @@ from app.services.coach_uploads import (
     read_attachment,
     save_coach_attachment,
 )
-from app.services.knowledge import search as search_knowledge
+from app.services.knowledge import search_for_user as search_knowledge
 from app.services.learning import local_date_for
 from app.services.notifications import notify_ai_action
 from app.services.practice import _event as practice_event
@@ -575,7 +575,7 @@ async def create_coach_message(
     # Reference material is fetched only when the question looks like it needs it.
     snippets: list[str] = []
     if len(content) >= 4:
-        hits = await search_knowledge(session, settings, query=content, limit=3)
+        hits = await search_knowledge(session, settings, user, content, 3)
         snippets = [f"[{index + 1}] {hit.title}\n{hit.content}" for index, hit in enumerate(hits)]
 
     last_sequence = int(

@@ -8,6 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 KnowledgeSourceType = Literal["exam"]
 KnowledgeStatus = Literal["draft", "indexing", "ready", "failed", "archived"]
+KnowledgeScope = Literal["global", "personal"]
+KnowledgeDifficulty = Literal["GAOKAO", "CET4", "CET6", "POSTGRAD", "IELTS", "TOEFL"]
 
 
 class _StrictModel(BaseModel):
@@ -20,6 +22,36 @@ class KnowledgeImportRequest(_StrictModel):
     title: str = Field(min_length=1, max_length=200)
     content: str = Field(min_length=1, max_length=400_000)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # The shelf it lands on. Omitted means the general shelf, which is where
+    # the old flat list lives.
+    folder_id: UUID | None = None
+
+
+class KnowledgeFolderCreate(_StrictModel):
+    name: str = Field(min_length=1, max_length=120)
+    # A learner may only create personal shelves; an administrator picks global
+    # explicitly, and with a difficulty it becomes that exam's shelf.
+    scope: KnowledgeScope = "personal"
+    difficulty: KnowledgeDifficulty | None = None
+
+
+class KnowledgeFolderUpdate(_StrictModel):
+    name: str = Field(min_length=1, max_length=120)
+
+
+class KnowledgeFolderResponse(BaseModel):
+    id: UUID
+    scope: KnowledgeScope
+    difficulty: KnowledgeDifficulty | None = None
+    name: str
+    document_count: int = 0
+    writable: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+
+class KnowledgeFolderListResponse(BaseModel):
+    items: list[KnowledgeFolderResponse]
 
 
 class KnowledgeDocumentUpdate(_StrictModel):
@@ -31,6 +63,7 @@ class KnowledgeDocumentUpdate(_StrictModel):
 
 class KnowledgeDocumentResponse(BaseModel):
     id: UUID
+    folder_id: UUID | None = None
     source_type: KnowledgeSourceType
     title: str
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -44,6 +77,13 @@ class KnowledgeDocumentResponse(BaseModel):
 
 class KnowledgeDocumentListResponse(BaseModel):
     items: list[KnowledgeDocumentResponse]
+
+
+class KnowledgeDocumentDetail(KnowledgeDocumentResponse):
+    """The document as it is read, not as it is searched."""
+
+    content: str
+    folders: str | None = None
 
 
 class KnowledgeSearchHit(BaseModel):

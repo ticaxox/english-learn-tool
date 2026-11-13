@@ -8,7 +8,7 @@ import {
 } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import AccountSecurityView from '../views/AccountSecurityView.vue'
-import AdminKnowledgeView from '../views/AdminKnowledgeView.vue'
+import KnowledgeBaseView from '../views/KnowledgeBaseView.vue'
 import AdminUsersView from '../views/AdminUsersView.vue'
 import AdminDashboardView from '../views/AdminDashboardView.vue'
 import AdminAiProvidersView from '../views/AdminAiProvidersView.vue'
@@ -157,8 +157,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'knowledge',
             name: 'settings-knowledge',
-            component: AdminKnowledgeView,
-            meta: { adminOnly: true },
+            component: KnowledgeBaseView,
           },
         ],
       },
@@ -184,7 +183,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'admin/knowledge',
         name: 'admin-knowledge',
-        component: AdminKnowledgeView,
+        component: KnowledgeBaseView,
         meta: { adminOnly: true },
       },
       {

@@ -1,9 +1,13 @@
-"""Admin-maintained reference knowledge (exam papers) with retrieval.
+"""Reference knowledge with retrieval.
 
-Only administrators import documents; learners only search. Chunks are embedded
-through the same provider gateway the rest of the product uses, and retrieval
-falls back to keyword scoring when no embedding is available, so a missing
-embedding model degrades quality instead of breaking the coach.
+Two kinds of shelf hold documents. A global shelf belongs to the product: the
+administrator files exam papers there, one per difficulty, so a CET-4 learner's
+coach reads CET-4 material. A personal shelf belongs to one learner, who puts
+their own material there and is the only one who can read it.
+
+Retrieval asks a narrower question than it used to: not "every ready chunk",
+but "the shelves this learner may read" — the general shelf, the shelf for
+their target exam, and their own.
 """
 
 from __future__ import annotations
@@ -13,17 +17,20 @@ import re
 from dataclasses import dataclass
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.models.ai import AiProvider
-from app.models.identity import User
-from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
+from app.models.identity import User, UserProfile
+from app.models.knowledge import KnowledgeChunk, KnowledgeDocument, KnowledgeFolder
 from app.schemas.knowledge import (
+    KnowledgeDocumentDetail,
     KnowledgeDocumentResponse,
     KnowledgeDocumentUpdate,
+    KnowledgeFolderCreate,
+    KnowledgeFolderResponse,
     KnowledgeImportRequest,
     KnowledgeSearchHit,
     KnowledgeSearchResponse,
@@ -37,12 +44,17 @@ CHUNK_OVERLAP = 120
 MAX_CHUNKS = 400
 EMBED_BATCH = 16
 
+# Seeded by the migration: the global shelf that applies to every exam, and
+# where every document imported before shelves existed now lives.
+GENERAL_FOLDER_ID = UUID("00000000-0000-4000-8000-000000000001")
+
 _QUESTION_SPLIT = re.compile(r"\n\s*(?=\d{1,3}[.、．])")
 
 
 def _document_response(row: KnowledgeDocument) -> KnowledgeDocumentResponse:
     return KnowledgeDocumentResponse(
         id=row.id,
+        folder_id=row.folder_id,
         source_type=row.source_type,
         title=row.title,
         metadata=row.metadata_json,
@@ -53,6 +65,32 @@ def _document_response(row: KnowledgeDocument) -> KnowledgeDocumentResponse:
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
+
+
+def _folder_response(row: KnowledgeFolder, user: User, count: int = 0) -> KnowledgeFolderResponse:
+    return KnowledgeFolderResponse(
+        id=row.id,
+        scope=row.scope,
+        difficulty=row.difficulty,
+        name=row.name,
+        document_count=count,
+        writable=can_write(user, row),
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+def can_read(user: User, folder: KnowledgeFolder) -> bool:
+    """Global shelves are the product's; a personal shelf is its owner's."""
+    if folder.scope == "global":
+        return True
+    return folder.owner_id == user.id
+
+
+def can_write(user: User, folder: KnowledgeFolder) -> bool:
+    if folder.scope == "global":
+        return user.role == "admin"
+    return folder.owner_id == user.id
 
 
 def split_text(text: str) -> list[str]:
@@ -93,9 +131,7 @@ async def _embedding_provider(
     when no dedicated one exists, so an upgrade does not silently stop
     indexing.
     """
-    query = select(AiProvider).where(
-        AiProvider.enabled.is_(True), AiProvider.kind == "embedding"
-    )
+    query = select(AiProvider).where(AiProvider.enabled.is_(True), AiProvider.kind == "embedding")
     if owner_id is not None:
         query = query.where(AiProvider.owner_id == owner_id)
     provider = await session.scalar(query.order_by(AiProvider.priority.asc()).limit(1))
@@ -151,17 +187,140 @@ async def _embed(
     return vectors, model
 
 
+# ---------------------------------------------------------------- folders
+
+
+async def _folder_or_404(session: AsyncSession, folder_id: UUID) -> KnowledgeFolder:
+    folder = await session.get(KnowledgeFolder, folder_id)
+    if folder is None:
+        raise AppError(
+            status_code=404, code="KNOWLEDGE_FOLDER_NOT_FOUND", message="No such folder."
+        )
+    return folder
+
+
+async def list_folders(session: AsyncSession, user: User) -> list[KnowledgeFolderResponse]:
+    """Every shelf this user may read, with how many documents sit on each."""
+    rows = list(
+        (
+            await session.scalars(
+                select(KnowledgeFolder).order_by(
+                    KnowledgeFolder.scope.desc(),
+                    KnowledgeFolder.difficulty.asc().nullsfirst(),
+                    KnowledgeFolder.name.asc(),
+                )
+            )
+        ).all()
+    )
+    counts = dict(
+        (
+            await session.execute(
+                select(KnowledgeDocument.folder_id, func.count(KnowledgeDocument.id))
+                .where(KnowledgeDocument.status != "archived")
+                .group_by(KnowledgeDocument.folder_id)
+            )
+        ).all()
+    )
+    return [
+        _folder_response(row, user, counts.get(row.id, 0)) for row in rows if can_read(user, row)
+    ]
+
+
+async def create_folder(
+    session: AsyncSession, user: User, payload: KnowledgeFolderCreate
+) -> KnowledgeFolderResponse:
+    if payload.scope == "global":
+        require_admin(user)
+        if payload.difficulty is not None:
+            exists = await session.scalar(
+                select(KnowledgeFolder.id).where(
+                    KnowledgeFolder.scope == "global",
+                    KnowledgeFolder.difficulty == payload.difficulty,
+                )
+            )
+            if exists is not None:
+                raise AppError(
+                    status_code=409,
+                    code="KNOWLEDGE_FOLDER_EXISTS",
+                    message="That difficulty already has a shelf.",
+                )
+        folder = KnowledgeFolder(
+            scope="global", owner_id=None, difficulty=payload.difficulty, name=payload.name
+        )
+    else:
+        folder = KnowledgeFolder(scope="personal", owner_id=user.id, name=payload.name)
+    session.add(folder)
+    await session.commit()
+    await session.refresh(folder)
+    return _folder_response(folder, user, 0)
+
+
+async def rename_folder(
+    session: AsyncSession, user: User, folder_id: UUID, name: str
+) -> KnowledgeFolderResponse:
+    folder = await _folder_or_404(session, folder_id)
+    if not can_write(user, folder):
+        raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Not your shelf.")
+    folder.name = name
+    await session.commit()
+    await session.refresh(folder)
+    return _folder_response(folder, user, 0)
+
+
+async def delete_folder(session: AsyncSession, user: User, folder_id: UUID) -> None:
+    folder = await _folder_or_404(session, folder_id)
+    if not can_write(user, folder):
+        raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Not your shelf.")
+    if folder.scope == "global" and folder.difficulty is None:
+        raise AppError(
+            status_code=422,
+            code="KNOWLEDGE_GENERAL_SHELF",
+            message="The general shelf cannot be deleted.",
+        )
+    # The papers survive the shelf: they move to the general one rather than
+    # disappearing with a folder someone renamed.
+    await session.execute(
+        KnowledgeDocument.__table__.update()
+        .where(KnowledgeDocument.folder_id == folder.id)
+        .values(folder_id=GENERAL_FOLDER_ID)
+    )
+    await session.delete(folder)
+    await session.commit()
+
+
+# -------------------------------------------------------------- documents
+
+
+async def _folder_for_import(
+    session: AsyncSession, user: User, folder_id: UUID | None
+) -> KnowledgeFolder:
+    if folder_id is None:
+        folder = await session.get(KnowledgeFolder, GENERAL_FOLDER_ID)
+        if folder is None:
+            raise AppError(
+                status_code=500, code="KNOWLEDGE_GENERAL_SHELF_MISSING", message="No general shelf."
+            )
+        if not can_write(user, folder):
+            raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Read-only shelf.")
+        return folder
+    folder = await _folder_or_404(session, folder_id)
+    if not can_write(user, folder):
+        raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Read-only shelf.")
+    return folder
+
+
 async def import_document(
     session: AsyncSession,
     settings: Settings,
-    admin: User,
+    user: User,
     payload: KnowledgeImportRequest,
 ) -> KnowledgeDocumentResponse:
-    require_admin(admin)
+    folder = await _folder_for_import(session, user, payload.folder_id)
     chunks = split_text(payload.content)
     if not chunks:
         raise AppError(status_code=422, code="KNOWLEDGE_EMPTY", message="The document has no text.")
     document = KnowledgeDocument(
+        folder_id=folder.id,
         source_type=payload.source_type,
         title=payload.title,
         metadata_json=payload.metadata,
@@ -188,31 +347,66 @@ async def import_document(
     return _document_response(document)
 
 
-async def list_documents(session: AsyncSession, admin: User) -> list[KnowledgeDocumentResponse]:
-    require_admin(admin)
-    rows = list(
+async def list_documents(
+    session: AsyncSession, user: User, folder_id: UUID | None = None
+) -> list[KnowledgeDocumentResponse]:
+    folder = await _folder_or_404(session, folder_id) if folder_id else None
+    if folder is not None and not can_read(user, folder):
+        raise AppError(
+            status_code=404, code="KNOWLEDGE_FOLDER_NOT_FOUND", message="No such folder."
+        )
+    query = select(KnowledgeDocument).where(KnowledgeDocument.status != "archived")
+    if folder is not None:
+        query = query.where(KnowledgeDocument.folder_id == folder.id)
+    rows = list((await session.scalars(query.order_by(KnowledgeDocument.created_at.desc()))).all())
+    return [_document_response(row) for row in rows]
+
+
+async def document_detail(
+    session: AsyncSession, user: User, document_id: UUID
+) -> KnowledgeDocumentDetail:
+    document = await session.get(KnowledgeDocument, document_id)
+    if document is None or document.status == "archived":
+        raise AppError(status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document.")
+    if document.folder_id is not None:
+        folder = await session.get(KnowledgeFolder, document.folder_id)
+        if folder is not None and not can_read(user, folder):
+            raise AppError(status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document.")
+    chunks = list(
         (
             await session.scalars(
-                select(KnowledgeDocument)
-                .where(KnowledgeDocument.status != "archived")
-                .order_by(KnowledgeDocument.created_at.desc())
+                select(KnowledgeChunk.content)
+                .where(KnowledgeChunk.document_id == document.id)
+                .order_by(KnowledgeChunk.ordinal.asc())
             )
         ).all()
     )
-    return [_document_response(row) for row in rows]
+    folder_name = None
+    if document.folder_id is not None:
+        folder_row = await session.get(KnowledgeFolder, document.folder_id)
+        folder_name = folder_row.name if folder_row is not None else None
+    base = _document_response(document)
+    return KnowledgeDocumentDetail(
+        **base.model_dump(), content="\n\n".join(chunks), folders=folder_name
+    )
 
 
 async def update_document(
     session: AsyncSession,
     settings: Settings,
-    admin: User,
+    user: User,
     document_id: UUID,
     payload: KnowledgeDocumentUpdate,
 ) -> KnowledgeDocumentResponse:
-    require_admin(admin)
     document = await session.get(KnowledgeDocument, document_id)
     if document is None or document.status == "archived":
         raise AppError(status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document.")
+    if document.folder_id is not None:
+        folder = await session.get(KnowledgeFolder, document.folder_id)
+        if folder is not None and not can_write(user, folder):
+            raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Read-only shelf.")
+    else:
+        require_admin(user)
     if payload.title is not None:
         document.title = payload.title
     if payload.metadata is not None:
@@ -246,11 +440,16 @@ async def update_document(
     return _document_response(document)
 
 
-async def archive_document(session: AsyncSession, admin: User, document_id: UUID) -> None:
-    require_admin(admin)
+async def archive_document(session: AsyncSession, user: User, document_id: UUID) -> None:
     document = await session.get(KnowledgeDocument, document_id)
     if document is None:
         raise AppError(status_code=404, code="KNOWLEDGE_NOT_FOUND", message="No such document.")
+    if document.folder_id is not None:
+        folder = await session.get(KnowledgeFolder, document.folder_id)
+        if folder is not None and not can_write(user, folder):
+            raise AppError(status_code=403, code="KNOWLEDGE_FORBIDDEN", message="Read-only shelf.")
+    else:
+        require_admin(user)
     # Chunks cascade on delete; archive keeps the row for audit.
     document.status = "archived"
     await session.execute(
@@ -258,6 +457,9 @@ async def archive_document(session: AsyncSession, admin: User, document_id: UUID
     )
     document.chunk_count = 0
     await session.commit()
+
+
+# --------------------------------------------------------------- retrieval
 
 
 def _cosine(left: list[float], right: list[float]) -> float:
@@ -289,6 +491,25 @@ class RetrievedChunk:
     score: float
 
 
+async def searchable_folder_ids(session: AsyncSession, user: User) -> list[UUID]:
+    """The shelves one learner reads: general, their exam's, and their own.
+
+    A document with no shelf (imported before shelves existed, or moved off a
+    deleted one) stays readable — it is reference material nobody filed.
+    """
+    target_exam = await session.scalar(
+        select(UserProfile.target_exam).where(UserProfile.user_id == user.id)
+    )
+    conditions = [(KnowledgeFolder.scope == "global") & (KnowledgeFolder.difficulty.is_(None))]
+    if target_exam:
+        conditions.append(
+            (KnowledgeFolder.scope == "global") & (KnowledgeFolder.difficulty == target_exam)
+        )
+    conditions.append((KnowledgeFolder.scope == "personal") & (KnowledgeFolder.owner_id == user.id))
+    rows = (await session.scalars(select(KnowledgeFolder.id).where(or_(*conditions)))).all()
+    return [*rows, GENERAL_FOLDER_ID]
+
+
 async def search(
     session: AsyncSession,
     settings: Settings,
@@ -296,9 +517,16 @@ async def search(
     query: str,
     limit: int = 6,
     min_score: float = 0.12,
+    folder_ids: list[UUID] | None = None,
 ) -> list[RetrievedChunk]:
-    # The corpus is exam papers only, so every ready document is fair game.
     filters = [KnowledgeDocument.status == "ready"]
+    if folder_ids is not None:
+        filters.append(
+            or_(
+                KnowledgeDocument.folder_id.in_(folder_ids),
+                KnowledgeDocument.folder_id.is_(None),
+            )
+        )
     rows = (
         await session.execute(
             select(KnowledgeChunk, KnowledgeDocument.title)
@@ -331,10 +559,17 @@ async def search(
     return scored[:limit]
 
 
+async def search_for_user(
+    session: AsyncSession, settings: Settings, user: User, query: str, limit: int = 6
+) -> list[RetrievedChunk]:
+    folder_ids = await searchable_folder_ids(session, user)
+    return await search(session, settings, query=query, limit=limit, folder_ids=folder_ids)
+
+
 async def search_response(
     session: AsyncSession, settings: Settings, user: User, query: str, limit: int = 6
 ) -> KnowledgeSearchResponse:
-    hits = await search(session, settings, query=query, limit=limit)
+    hits = await search_for_user(session, settings, user, query, limit)
     return KnowledgeSearchResponse(
         items=[
             KnowledgeSearchHit(

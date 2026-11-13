@@ -49,7 +49,7 @@ TOOL_SPECS: dict[str, dict[str, Any]] = {
     },
     "search_knowledge": {
         "action_type": "search_knowledge",
-        "description": "在真题知识库里检索与问题相关的原文片段，返回带出处的引用。",
+        "description": "在知识库里检索与问题相关的原文片段，返回带出处的引用。只检索这个学习者有权读的书架。",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -60,6 +60,25 @@ TOOL_SPECS: dict[str, dict[str, Any]] = {
             "additionalProperties": False,
         },
         "handler": "search",
+    },
+    "list_knowledge": {
+        "handler": "knowledge_folders",
+        "description": "列出这个学习者可以读的知识库书架，以及每个书架里的文档数与编号。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+        },
+    },
+    "read_knowledge_document": {
+        "handler": "knowledge_document",
+        "description": "按文档 id 读取一篇知识库文档的全文，用来核对原文或引用完整段落。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"document_id": {"type": "string", "format": "uuid"}},
+            "required": ["document_id"],
+            "additionalProperties": False,
+        },
     },
     "start_practice": {
         "action_type": "start_practice",
@@ -150,7 +169,7 @@ async def call_coach_tool(
             message="Tool arguments must be an object.",
         )
     if spec.get("handler") == "search":
-        from app.services.knowledge import search
+        from app.services.knowledge import search_for_user
 
         query = str((arguments or {}).get("query") or "").strip()
         if not query:
@@ -160,7 +179,9 @@ async def call_coach_tool(
                 message="A search query is required.",
             )
         limit = int((arguments or {}).get("limit") or 6)
-        hits = await search(session, settings, query=query, limit=min(limit, 10))
+        # The same shelves the coach reads: general, the learner's exam
+        # difficulty, and their own. An MCP caller gets no wider a view.
+        hits = await search_for_user(session, settings, user, query, min(limit, 10))
         return {
             "items": [
                 {
@@ -171,6 +192,44 @@ async def call_coach_tool(
                 }
                 for hit in hits
             ]
+        }
+    if spec.get("handler") == "knowledge_folders":
+        from app.services.knowledge import list_folders
+
+        folders = await list_folders(session, user)
+        return {
+            "items": [
+                {
+                    "id": str(folder.id),
+                    "scope": folder.scope,
+                    "difficulty": folder.difficulty,
+                    "name": folder.name,
+                    "document_count": folder.document_count,
+                    "writable": folder.writable,
+                }
+                for folder in folders
+            ]
+        }
+    if spec.get("handler") == "knowledge_document":
+        from uuid import UUID
+
+        from app.services.knowledge import document_detail
+
+        raw = str((arguments or {}).get("document_id") or "")
+        try:
+            document_id = UUID(raw)
+        except ValueError as exc:
+            raise AppError(
+                status_code=422,
+                code="MCP_TOOL_ARGUMENTS_INVALID",
+                message="document_id must be a UUID.",
+            ) from exc
+        document = await document_detail(session, user, document_id)
+        return {
+            "document_id": str(document.id),
+            "title": document.title,
+            "folder": document.folders,
+            "content": document.content,
         }
     if spec.get("handler") == "authoring":
         try:

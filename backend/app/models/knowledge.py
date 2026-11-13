@@ -24,10 +24,57 @@ from app.db.base import Base
 
 KNOWLEDGE_SOURCE_TYPES = "'exam'"
 KNOWLEDGE_STATUSES = "'draft', 'indexing', 'ready', 'failed', 'archived'"
+KNOWLEDGE_SCOPES = "'global', 'personal'"
+KNOWLEDGE_DIFFICULTIES = "'GAOKAO', 'CET4', 'CET6', 'POSTGRAD', 'IELTS', 'TOEFL'"
+
+
+class KnowledgeFolder(Base):
+    """A shelf a document sits on.
+
+    Two scopes, one table. A global folder belongs to the product: only an
+    administrator writes to it, and at most one exists per difficulty, which is
+    what makes the retrieval for a CET-4 learner read the CET-4 papers and not
+    the TOEFL ones. A personal folder belongs to one learner, who names it and
+    keeps their own material there; nobody else can read it.
+
+    The difficulty shelf is a folder with a `difficulty` and no owner. A global
+    folder with neither is the general shelf — where everything imported before
+    difficulty existed landed, and where an administrator can still put
+    material that applies to every exam.
+    """
+
+    __tablename__ = "knowledge_folders"
+    __table_args__ = (
+        CheckConstraint(f"scope IN ({KNOWLEDGE_SCOPES})", name="scope_valid"),
+        CheckConstraint(
+            f"difficulty IS NULL OR difficulty IN ({KNOWLEDGE_DIFFICULTIES})",
+            name="difficulty_valid",
+        ),
+        CheckConstraint(
+            "(scope = 'global' AND owner_id IS NULL) "
+            "OR (scope = 'personal' AND owner_id IS NOT NULL)",
+            name="scope_owner_valid",
+        ),
+        Index("ix_knowledge_folders_owner", "scope", "owner_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    scope: Mapped[str] = mapped_column(String(16), nullable=False, default="personal")
+    owner_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE")
+    )
+    difficulty: Mapped[str | None] = mapped_column(String(16))
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
 
 class KnowledgeDocument(Base):
-    """One imported exam paper — the only thing the retrieval base holds.
+    """One imported reference document, filed on a folder.
 
     Wordbooks and coach attachments are deliberately not indexed: a wordbook is
     a SQL record with its own scheduling, and an attachment stays an attachment.
@@ -39,9 +86,15 @@ class KnowledgeDocument(Base):
         CheckConstraint(f"status IN ({KNOWLEDGE_STATUSES})", name="status_valid"),
         CheckConstraint("chunk_count >= 0", name="chunk_count_nonnegative"),
         Index("ix_knowledge_documents_status", "source_type", "status"),
+        Index("ix_knowledge_documents_folder", "folder_id"),
     )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    # SET NULL, not CASCADE: deleting a shelf must not silently destroy papers;
+    # the service moves them to the general shelf instead.
+    folder_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("knowledge_folders.id", ondelete="SET NULL")
+    )
     source_type: Mapped[str] = mapped_column(String(16), nullable=False, default="exam")
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     # Free-form filters: year, paper, question types, tags.
