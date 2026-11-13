@@ -908,11 +908,8 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
  * keeps the switch's own brass: it is the one control that relights the room. */
 .personal-workspace .rail-daylight {
   display: flex;
-  gap: 12px;
-  align-items: center;
   justify-content: center;
-  padding: 9px 12px;
-  border: 1px solid var(--rail-line);
+  padding: 2px 0;
 }
 
 /* A longer throw and a taller seat than the bar's: the rail has the room, and
