@@ -232,6 +232,7 @@ onMounted(() => {
           to="/practice/tasks"
           aria-current="page"
         >题目列表</RouterLink>
+        <RouterLink class="practice-task-tab" to="/practice/records">题目集</RouterLink>
         <RouterLink class="practice-task-tab" to="/practice/mistakes">错题本</RouterLink>
       </div>
     </header>

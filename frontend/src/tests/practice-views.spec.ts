@@ -209,17 +209,26 @@ describe('practice views', () => {
     expect(wrapper.text()).toContain('词义')
   })
 
-  it('filters records and bulk deletes only selected records after confirmation', async () => {
+  it('filters records by type from the URL and bulk deletes the selected record', async () => {
     vi.spyOn(window, 'confirm').mockReturnValueOnce(true)
-    const { wrapper } = await mountRoute(PracticeRecordsView, '/practice/records')
-    expect(wrapper.findAll('.practice-records-table tbody tr')).toHaveLength(1)
-    await wrapper.get('#record-type').setValue('fill_blank')
+    const { wrapper, router } = await mountRoute(PracticeRecordsView, '/practice/records')
+    expect(wrapper.findAll('.records-row')).toHaveLength(1)
+    await router.push('/practice/records?type=fill_blank')
     await flushPromises()
     expect(practiceMocks.listPracticeRecords).toHaveBeenLastCalledWith(expect.objectContaining({ practiceType: 'fill_blank', offset: 0 }))
-    await wrapper.get('tbody input[type="checkbox"]').setValue(true)
-    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('删除选中'))!.trigger('click')
+    await wrapper.get('.records-row input[type="checkbox"]').setValue(true)
+    await wrapper.findAll('[role="button"]').find((button) => button.text().includes('删除'))!.trigger('click')
     await flushPromises()
     expect(practiceMocks.deletePracticeRecords).toHaveBeenCalledWith(['record-1'], expect.any(String))
+  })
+
+  it('opens the first record and reads its questions back', async () => {
+    practiceMocks.getPracticeRecord.mockResolvedValueOnce({ ...recordPage.items[0], result, questions: [question] })
+    const { wrapper } = await mountRoute(PracticeRecordsView, '/practice/records')
+    await flushPromises()
+    expect(practiceMocks.getPracticeRecord).toHaveBeenCalledWith('record-1')
+    expect(wrapper.text()).toContain('Context points to resilience.')
+    expect(wrapper.text()).toContain('The team remained ____.')
   })
 
   it('uses the mistakes endpoint on the dedicated mistakes view', async () => {

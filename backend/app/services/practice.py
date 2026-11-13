@@ -1358,9 +1358,11 @@ async def get_practice_record(
         )
     submission = await _latest_submission(session, practice.id)
     summary = _record_summary(practice)
+    questions = await _current_questions(session, practice)
     return PracticeRecordDetail(
         **summary.model_dump(),
         result=_result_from_submission(practice, submission) if submission else None,
+        questions=[_question_public(question) for question in questions],
     )
 
 

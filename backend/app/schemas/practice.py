@@ -256,6 +256,10 @@ class PracticeRecordListResponse(BaseModel):
 
 class PracticeRecordDetail(PracticeRecordSummary):
     result: PracticeResultResponse | None = None
+    # The questions as they were asked, so a record can be read back whole:
+    # the result alone carries ids and answers, which say nothing without the
+    # sentence, the options and the passage they belonged to.
+    questions: list[PracticeQuestionPublic] = Field(default_factory=list)
 
 
 class PracticeDeleteRequest(_StrictModel):

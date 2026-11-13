@@ -200,6 +200,8 @@ export interface PracticeRecordSummary {
 
 export interface PracticeRecordDetail extends PracticeRecordSummary {
   result: PracticeResult | null
+  /** The questions as they were asked, so the record reads back whole. */
+  questions: PracticeQuestion[]
 }
 
 export interface PracticeRecordPage {
@@ -592,9 +594,17 @@ export function parsePracticeRecordPage(payload: unknown): PracticeRecordPage {
 export function parsePracticeRecordDetail(payload: unknown): PracticeRecordDetail {
   const context = '练习记录详情响应'
   const body = record(payload, context)
+  if (body.questions !== undefined && body.questions !== null && !Array.isArray(body.questions)) {
+    fail(context, 'questions 应为数组')
+  }
   return {
     ...parseRecordSummary(body, context),
     result: body.result === null || body.result === undefined ? null : parsePracticeResult(body.result),
+    // Older records predate the field; the page still opens, just without the
+    // question text.
+    questions: Array.isArray(body.questions)
+      ? body.questions.map((item, index) => parseQuestion(item, index))
+      : [],
   }
 }
 
