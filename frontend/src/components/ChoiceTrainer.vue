@@ -9,7 +9,7 @@ import type { ChoiceQuestion } from '../types/learning'
 import OptionBadge from './OptionBadge.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
 
-const { surface } = useRuneSurface()
+const { surface } = useRuneSurface('choice')
 
 const props = defineProps<{
   question: ChoiceQuestion

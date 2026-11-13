@@ -9,7 +9,7 @@ import { useSpellingGrid } from '../composables/useSpellingGrid'
 import { SPELLING_BLANK_LABELS, type SpellingBlank, type SpellingQuestion } from '../types/learning'
 import { useRuneSurface } from '../composables/useRuneSurface'
 
-const { surface } = useRuneSurface()
+const { surface } = useRuneSurface('spelling')
 
 const props = defineProps<{
   question: SpellingQuestion

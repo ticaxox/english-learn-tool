@@ -5122,13 +5122,18 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   margin-inline: 0;
   padding: 0 !important;
   border-style: solid !important;
-  /* The question card, not a biscuit slab: the pumpkin corners and the vines
-   * run down the border band, and the parchment middle is what stretches.
-   * 9% keeps the four corner pumpkins whole at every size. */
-  border-width: 54px !important;
+  /* The material is the drill's own: a carved stele for choice, a baked
+   * biscuit for spelling, and the pumpkin card for everything else. All three
+   * are 9-slice sources whose rim sits in a band about 64px wide on the
+   * delivered art, so the slice is given in pixels — a percentage would cut a
+   * different depth out of the top than out of the side on a 3:2 image.
+   * `border-image-width` is what decides how much room the band takes on
+   * screen, and it is deliberately smaller than the slice: the art is drawn
+   * at 800px wide but the card is not. */
+  border-width: 30px !important;
   border-image-source: var(--rune-card) !important;
-  border-image-slice: 9% fill !important;
-  border-image-width: 54px !important;
+  border-image-slice: 64 fill !important;
+  border-image-width: 30px !important;
   border-image-repeat: stretch !important;
   border-radius: 0 !important;
   background: transparent !important;
