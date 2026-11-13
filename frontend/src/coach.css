@@ -287,8 +287,8 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
 /* ---------- 一句话：头像框 + 气泡 + 右下角的元信息 ---------- */
 .coach-page.coach-page .coach-message {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) 52px;
-  column-gap: 9px;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  column-gap: 6px;
   row-gap: 0;
   padding: 13px 0;
   border: 0;
@@ -302,14 +302,14 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   align-self: start;
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   background: var(--coach-bubble);
   border: 1px solid var(--coach-line);
   box-shadow: var(--coach-shadow);
 }
-.coach-page.coach-page .coach-message-avatar__art { width: 38px; height: 38px; }
+.coach-page.coach-page .coach-message-avatar__art { width: 32px; height: 32px; }
 .coach-page.coach-page .coach-message-avatar__you {
   font-family: var(--coach-display);
   font-size: 1.1rem;
