@@ -6,6 +6,7 @@ import CoachImage from '../components/CoachImage.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import CoachMarkdown from '../components/CoachMarkdown.vue'
+import CoachDeleteDialog from '../components/CoachDeleteDialog.vue'
 import { speak } from '../composables/useSpeechSynthesis'
 import {
   COACH_ACTION_LABELS,
@@ -175,9 +176,16 @@ async function openConversation(conversationId: string): Promise<void> {
   await coach.selectConversation(conversationId)
 }
 
-async function removeConversation(conversationId: string): Promise<void> {
-  if (!window.confirm('删除这段对话？记录会保留在历史里但不再显示。')) return
-  await coach.removeConversation(conversationId, false)
+const pendingDelete = ref<{ id: string; title: string } | null>(null)
+
+function askDelete(conversation: { id: string; title: string }): void {
+  pendingDelete.value = conversation
+}
+
+async function confirmDelete(): Promise<void> {
+  const target = pendingDelete.value
+  pendingDelete.value = null
+  if (target) await coach.removeConversation(target.id, false)
 }
 
 async function submitMessage(): Promise<void> {
@@ -316,7 +324,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
                 class="coach-history__delete"
                 type="button"
                 :aria-label="`删除 ${conversation.title}`"
-                @click="removeConversation(conversation.id)"
+                @click="askDelete(conversation)"
               ><CrumbIcon name="remove" :size="16" /></DivButton>
             </li>
           </ul>
@@ -574,5 +582,12 @@ async function revertTo(message: CoachMessage): Promise<void> {
         </template>
       </section>
     </div>
+
+    <CoachDeleteDialog
+      v-if="pendingDelete"
+      :title="pendingDelete.title"
+      @close="pendingDelete = null"
+      @confirm="confirmDelete"
+    />
   </article>
 </template>
