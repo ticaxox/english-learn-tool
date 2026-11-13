@@ -296,7 +296,16 @@ onBeforeUnmount(() => {
       :aria-expanded="!sidebarCollapsed"
       @click="toggleSidebar"
     >
-      <AppIcon name="arrow-left" />
+      <svg class="rail-handle__chevron" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M14.5 5.5 8 12l6.5 6.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
     </DivButton>
 
     <div class="workspace-main">

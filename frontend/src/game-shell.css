@@ -32,6 +32,9 @@
   --rail-active-ink: #fff3dc;
   --rail-edge: #35240f;
   --rail-hover: rgb(53 36 15 / 7%);
+  --rail-handle-face: #a85708;
+  --rail-handle-hover: #8c4706;
+  --rail-handle-ink: #fff3dc;
   --rail-width: 232px;
   --coach-face: #ff9600;
   --coach-face-hover: #e07f00;
@@ -69,6 +72,9 @@ html[data-theme='night'] .personal-workspace {
   --rail-active-ink: #efe6f7;
   --rail-edge: #392a5e;
   --rail-hover: #1d1436;
+  --rail-handle-face: #5fd39a;
+  --rail-handle-hover: #7fe0b2;
+  --rail-handle-ink: #08251a;
   /* Night orange is already light, so darkening it would eat the ink on it. */
   --coach-face: #ff9f45;
   --coach-face-hover: #ffb877;
@@ -790,32 +796,33 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   font-size: 11px;
 }
 
-/* A round handle hung on the rail's edge: half on the panel, half over the
- * page, and it rides the edge when the rail folds. */
+/* The fold is a drawer handle, not a button in a row: a small solid pull that
+ * straddles the rail's edge, half on the panel and half over the page. Fixed to
+ * the viewport so it rides the edge as the rail folds and never scrolls away. */
 .personal-workspace .rail-handle {
   position: fixed;
   z-index: 40;
-  left: calc(var(--rail-width) - 15px);
-  bottom: 22px;
+  left: calc(var(--rail-width) - 12px);
+  /* Mid-height: the rail's foot is full of the quest card and the meters. */
+  top: calc(50% - 23px);
   display: grid;
-  width: 30px;
-  height: 30px;
-  /* Without this the generic control padding squeezes the arrow to nothing. */
+  width: 24px;
+  height: 46px;
+  /* Without this the generic control padding squeezes the chevron to nothing. */
   padding: 0;
   place-items: center;
-  border: 2px solid var(--rail-edge);
-  border-radius: 50%;
-  background: var(--rail-panel);
-  color: var(--rail-muted);
-  transition: left 180ms ease, color 130ms ease, border-color 130ms ease;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rail-handle-face);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 20%);
+  color: var(--rail-handle-ink);
+  transition: left 180ms ease, background 130ms ease, transform 100ms ease;
 }
 
-.personal-workspace .rail-handle:hover {
-  border-color: var(--rail-ink);
-  color: var(--rail-ink);
-}
+.personal-workspace .rail-handle:hover { background: var(--rail-handle-hover); }
+.personal-workspace .rail-handle:active { transform: scale(0.94); }
 
-.personal-workspace .rail-handle svg { width: 15px; height: 15px; }
+.personal-workspace .rail-handle__chevron { width: 13px; height: 13px; }
 
 /* Mobile bottom nav reads as four chunky buttons. */
 .personal-workspace .member-mobile-nav a {
@@ -1047,7 +1054,7 @@ html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__mo
 }
 
 .personal-workspace.is-sidebar-collapsed .workspace-sidebar-footer { padding: 10px; }
-.personal-workspace.is-sidebar-collapsed .rail-handle svg { transform: rotate(180deg); }
+.personal-workspace.is-sidebar-collapsed .rail-handle__chevron { transform: rotate(180deg); }
 
 @media (max-width: 1180px) {
   .personal-workspace { --rail-width: 212px; }
