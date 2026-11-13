@@ -8,7 +8,6 @@ import CrumboMark from './CrumboMark.vue'
 import { getActivePinia } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import { useGamification } from '../composables/useGamification'
-import { QUEST_LABELS } from '../api/progress'
 
 const props = defineProps<{
   displayName: string
@@ -65,14 +64,6 @@ const xpSegments = computed(() => {
   if (!level.value || xpForNextLevel.value <= 0) return 0
   return Math.round((xpIntoLevel.value / xpForNextLevel.value) * 10)
 })
-const quests = computed(() =>
-  (progress.value?.quests ?? []).map((quest) => ({
-    key: quest.key,
-    done: quest.completed,
-    label: QUEST_LABELS[quest.key] ?? quest.key,
-  })),
-)
-const questsDone = computed(() => quests.value.filter((quest) => quest.done).length)
 
 const currentPageTitle = computed(() => pageTitles[String(route.name ?? '')] ?? '学习工作台')
 // Practice and memory are their own screens: no app sidebar or top bar there.
@@ -262,27 +253,8 @@ onBeforeUnmount(() => {
       </nav>
 
       <div class="workspace-sidebar-footer">
-        <section v-if="quests.length" class="rail-quests" aria-label="今日任务">
-          <p class="rail-quests__head">
-            <span>今日任务</span>
-            <strong>{{ questsDone }} / {{ quests.length }}</strong>
-          </p>
-          <ul class="rail-quests__list">
-            <li v-for="quest in quests" :key="quest.key" :class="{ 'is-done': quest.done }">
-              {{ quest.label }}
-            </li>
-          </ul>
-        </section>
-
-        <div class="rail-meters">
-          <p class="rail-meter">
-            <strong>{{ progress?.crumbs ?? 0 }}</strong>
-            <span>碎屑</span>
-          </p>
-          <p class="rail-meter">
-            <strong>{{ progress?.streak ?? 0 }}</strong>
-            <span>连续天</span>
-          </p>
+        <div class="rail-daylight">
+          <ThemeSwitch />
         </div>
 
         <DivButton
@@ -326,8 +298,6 @@ onBeforeUnmount(() => {
           </RouterLink>
         </nav>
         <div class="workspace-topbar-actions ia-topbar-actions">
-          <ThemeSwitch />
-
           <DivButton
             class="workspace-coach-button member-concierge-button ia-coach-toggle"
             type="button"

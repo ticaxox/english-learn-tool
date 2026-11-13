@@ -722,90 +722,6 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   border-top: 1px solid var(--rail-line);
 }
 
-.personal-workspace .rail-quests {
-  display: grid;
-  gap: 8px;
-  padding: 11px 10px 12px;
-  border: 1px solid var(--rail-line);
-  background: var(--rail-panel-hi);
-}
-
-.personal-workspace .rail-quests__head {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  justify-content: space-between;
-  margin: 0;
-  color: var(--rail-muted);
-  font-family: var(--font-code);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
-.personal-workspace .rail-quests__head strong { color: var(--rail-accent-ink); }
-
-.personal-workspace .rail-quests__list {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.personal-workspace .rail-quests__list li {
-  display: grid;
-  grid-template-columns: 11px minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
-  color: var(--rail-muted);
-  font-size: 12px;
-}
-
-.personal-workspace .rail-quests__list li::before {
-  width: 10px;
-  height: 10px;
-  border: 1.5px solid var(--rail-line);
-  content: "";
-}
-
-.personal-workspace .rail-quests__list li.is-done { color: var(--rail-ink); }
-.personal-workspace .rail-quests__list li.is-done::before {
-  border-color: var(--rail-done);
-  background: var(--rail-done);
-}
-
-.personal-workspace .rail-meters {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.personal-workspace .rail-meter {
-  display: grid;
-  gap: 1px;
-  margin: 0;
-  padding: 5px 9px 6px;
-  border: 1px solid var(--rail-line);
-}
-
-.personal-workspace .rail-meter strong {
-  color: var(--rail-ink);
-  font-family: var(--font-code);
-  font-size: 15px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-}
-
-.personal-workspace .rail-meter span {
-  color: var(--rail-muted);
-  font-size: 11px;
-}
-
-/* The fold is a solid knob on the rail's edge, half on the panel and half over
- * the page, hanging just above the footer's rule. It rides the edge as the
- * rail folds. */
 .personal-workspace .rail-handle {
   position: absolute;
   z-index: 40;
@@ -988,44 +904,27 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   letter-spacing: 0.04em;
 }
 
-/* The day/night switch was drawn for the paper bar and lands bright as a coin
- * on the panel. On the panel it is a small brass switch: dark seat, brass knob,
- * and only the knob carries the state. */
-.personal-workspace .workspace-topbar .theme-switch__track {
-  border-color: var(--rail-line);
-  background: var(--rail-panel-hi);
-  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 28%);
+/* Day and night, on the panel where the rest of the learner's state sits. It
+ * keeps the switch's own brass: it is the one control that relights the room. */
+.personal-workspace .rail-daylight {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
 }
 
-.personal-workspace .workspace-topbar .theme-switch__knob {
-  background: var(--rail-mark);
-  box-shadow: 0 2px 0 rgb(0 0 0 / 32%);
+/* A longer throw and a taller seat than the bar's: the rail has the room, and
+ * the bar-sized switch alone in a 216px plate read undersized. */
+.personal-workspace .rail-daylight .theme-switch__track {
+  width: 96px;
+  height: 38px;
 }
 
-.personal-workspace .workspace-topbar .theme-switch__sun,
-.personal-workspace .workspace-topbar .theme-switch__moon {
-  stroke: var(--rail-muted);
+.personal-workspace .rail-daylight .theme-switch__sun,
+.personal-workspace .rail-daylight .theme-switch__moon {
+  width: 18px;
+  height: 18px;
 }
 
-html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__track {
-  border-color: #5a4886;
-  background: #241740;
-}
-
-html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__knob {
-  background: radial-gradient(circle at 35% 30%, #f4ecdc, #c9bda8);
-  box-shadow: 0 2px 0 rgb(0 0 0 / 40%), 0 0 10px rgb(190 170 255 / 35%);
-}
-
-html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__sun {
-  stroke: #8f7ad0;
-  opacity: 0.7;
-}
-
-html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__moon {
-  stroke: #2b1d12;
-  opacity: 1;
-}
 
 /* --- the rail folded to icons --- */
 
@@ -1059,8 +958,7 @@ html[data-theme='night'] .personal-workspace .workspace-topbar .theme-switch__mo
 .personal-workspace.is-sidebar-collapsed .rail-plate__xp,
 .personal-workspace.is-sidebar-collapsed .rail-plate__num,
 .personal-workspace.is-sidebar-collapsed .rail-kicker,
-.personal-workspace.is-sidebar-collapsed .rail-quests,
-.personal-workspace.is-sidebar-collapsed .rail-meters { display: none; }
+.personal-workspace.is-sidebar-collapsed .rail-daylight { display: none; }
 
 .personal-workspace.is-sidebar-collapsed .workspace-nav { padding: 12px 10px; }
 
