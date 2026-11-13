@@ -58,11 +58,27 @@ import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
 import cardFrameNight from './card/card-frame-night.png'
 import cardBack from './card/card-back.png'
+import drillSteleDay from './card/drill-stele-day.png'
+import drillSteleNight from './card/drill-stele-night.png'
+import drillBiscuitDay from './card/drill-biscuit-day.png'
+import drillBiscuitNight from './card/drill-biscuit-night.png'
 
 /** The question card. The frame is exactly 2:3; do not stretch it. */
 export const questionCard = {
   frame: { day: cardFrameDay, night: cardFrameNight },
   back: cardBack,
+} as const
+
+/**
+ * The two memory drills that are not a flashcard get their own material, so
+ * they stop being the same object as the card they are not: the choice
+ * question is cut in stone, the spelling question is baked. Both are 3:2 and
+ * meant for a 9-slice — the carved rim lives in the border band, the flat
+ * middle is what stretches.
+ */
+export const drillFrame = {
+  choice: { day: drillSteleDay, night: drillSteleNight },
+  spelling: { day: drillBiscuitDay, night: drillBiscuitNight },
 } as const
 
 /**
