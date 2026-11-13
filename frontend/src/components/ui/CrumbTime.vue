@@ -78,8 +78,17 @@ function onKeydown(event: KeyboardEvent): void {
 
 function scrollSelectionIntoView(): void {
   for (const column of [hourColumn.value, minuteColumn.value]) {
-    const active = column?.querySelector('[aria-current="true"]')
-    if (!(active instanceof HTMLElement) || !column) continue
+    if (!column) continue
+    const active = column.querySelector('[aria-current="true"]')
+    if (!(active instanceof HTMLElement)) {
+      // Nothing chosen yet: line the first row up with the top of the window
+      // instead of leaving the wheel's own leading spacer showing as a blank.
+      const first = column.querySelector<HTMLElement>('[data-value]')
+      if (first) {
+        column.scrollTop += first.getBoundingClientRect().top - column.getBoundingClientRect().top
+      }
+      continue
+    }
     // Measured from the two rects, not from offsetTop: the list is not the
     // offset parent, so offsetTop is a distance from the field, not the list.
     const listRect = column.getBoundingClientRect()

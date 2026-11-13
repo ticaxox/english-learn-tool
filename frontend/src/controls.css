@@ -258,10 +258,14 @@
     transition: background 120ms ease;
   }
 
-  .personal-workspace select option::checkmark {
-    order: -1;
-    color: var(--g-green-edge);
-    font-weight: 900;
+  /* No tick: the chosen row is filled instead, which is the same signal the
+   * rest of the page uses for «this one». */
+  .personal-workspace select option::checkmark { display: none; }
+
+  .personal-workspace select option:checked {
+    background: var(--g-orange-soft);
+    color: var(--g-on-orange-soft);
+    font-weight: 800;
   }
 
   .personal-workspace select option:hover { background: var(--ui-surface-subtle); }
@@ -6008,6 +6012,11 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
 
 /* A date needs ten characters and a glyph; a time needs six. */
 .personal-workspace .crumb-date { width: min(100%, 120px); }
+
+/* A read-only time is a label with a frame: dragging across it should not 
+select the digits. */
+.personal-workspace .crumb-time,
+.personal-workspace .crumb-date { user-select: none; }
 
 .personal-workspace .crumb-time:hover,
 .personal-workspace .crumb-date:hover { border-color: #c9ab80; }

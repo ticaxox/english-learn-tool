@@ -52,6 +52,9 @@ function byPriority(list: AiProvider[]): AiProvider[] {
 const chatProviders = computed(() => byPriority(providers.value.filter((p) => p.kind !== 'embedding')))
 const embeddingProviders = computed(() => byPriority(providers.value.filter((p) => p.kind === 'embedding')))
 
+/** One shelf: chat first, then embedding, each by priority. */
+const sortedProviders = computed(() => [...chatProviders.value, ...embeddingProviders.value])
+
 /** Which list the open form belongs to. */
 const formKind = ref<AiProviderKind>('chat')
 
@@ -226,26 +229,26 @@ onMounted(() => {
       <ErrorNotice v-else-if="loadError" :error="loadError" retry-label="重新读取 AI 配置" @retry="load" />
 
       <template v-else>
-        <section class="personal-ai-group" aria-labelledby="chatProviders-title">
+        <section class="personal-ai-group" aria-labelledby="providers-title">
           <div class="personal-ai-group__head">
             <div>
-              <h3 id="chatProviders-title">对话模型</h3>
-              <p class="field-hint">AI 教练、出题和评分用它写文字。至少要有一个。</p>
+              <h3 id="providers-title">已配置的模型</h3>
+              <p class="field-hint">对话模型写文字，向量模型给知识库做语义检索；两个都配就都生效。</p>
             </div>
             <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
           </div>
 
-          <div v-if="chatProviders.length === 0" class="personal-ai-empty personal-ai-empty--inline">
+          <div v-if="providers.length === 0" class="personal-ai-empty personal-ai-empty--inline">
             <span class="personal-ai-empty__mark" aria-hidden="true"><AppIcon name="spark" /></span>
             <div>
-              <h4>还没有对话模型</h4>
-              <p>添加一个 OpenAI 兼容服务，AI 教练、出题和评分才能开始工作。</p>
+              <h4>还没有配置模型</h4>
+              <p>添加一个 OpenAI 兼容服务。对话模型让教练、出题和评分工作；向量模型让知识库能按语义检索。</p>
             </div>
             <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
           </div>
 
           <div v-else class="personal-ai-list">
-            <article v-for="provider in chatProviders" :key="provider.id" class="personal-ai-provider">
+            <article v-for="provider in sortedProviders" :key="provider.id" class="personal-ai-provider">
               <div class="personal-ai-provider__main">
                 <span
                   class="ai-status-dot"
@@ -253,6 +256,7 @@ onMounted(() => {
                   :title="provider.enabled ? '已启用' : '已停用'"
                   aria-hidden="true"
                 ></span>
+                <span v-if="provider.kind === 'embedding'" class="personal-ai-provider__tag">向量</span>
                 <h3>{{ provider.name }}</h3>
                 <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
                 <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
@@ -280,50 +284,6 @@ onMounted(() => {
           </div>
         </section>
 
-        <section class="personal-ai-group" aria-labelledby="embeddingProviders-title">
-          <div class="personal-ai-group__head">
-            <div>
-              <h3 id="embeddingProviders-title">向量模型</h3>
-              <p class="field-hint">知识库用它把真题变成向量，语义检索才有效。不配就只用关键词检索。</p>
-            </div>
-            <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('embedding')">添加</DivButton>
-          </div>
-
-          <div class="personal-ai-list">
-            <article v-for="provider in embeddingProviders" :key="provider.id" class="personal-ai-provider">
-              <div class="personal-ai-provider__main">
-                <span
-                  class="ai-status-dot"
-                  :class="{ 'is-on': provider.enabled }"
-                  :title="provider.enabled ? '已启用' : '已停用'"
-                  aria-hidden="true"
-                ></span>
-                <h3>{{ provider.name }}</h3>
-                <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
-                <span class="personal-ai-provider__url">{{ provider.baseUrl }}</span>
-              </div>
-              <label class="personal-ai-provider__priority">
-                <span>优先级</span>
-                <CrumbNumber
-                  :model-value="provider.priority"
-                  :min="0"
-                  :max="10000"
-                  :step="1"
-                  :disabled="Boolean(actionKey)"
-                  label="优先级"
-                  @update:model-value="updatePriority(provider, $event)"
-                />
-              </label>
-              <div class="personal-ai-provider__actions">
-                <DivButton class="button-secondary" type="button" @click="openEdit(provider)">编辑</DivButton>
-                <DivButton class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
-                  {{ provider.enabled ? '停用' : '启用' }}
-                </DivButton>
-                <DivButton class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</DivButton>
-              </div>
-            </article>
-          </div>
-        </section>
       </template>
 
       <AiMemoryPanel />

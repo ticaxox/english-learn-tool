@@ -2420,6 +2420,22 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 }
 
 /* Provider cards live in a 480px column: stack the actions under the details. */
+.personal-workspace .personal-ai-group .personal-ai-list {
+  display: grid;
+  gap: 12px;
+}
+
+/* The one thing that separates a vector model from a chat model in the list. */
+.personal-workspace .personal-ai-provider__tag {
+  padding: 1px 7px;
+  border-radius: 7px;
+  background: var(--g-purple-soft);
+  color: var(--g-purple-edge);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
 .personal-workspace .personal-ai-provider {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--ui-space-3);
