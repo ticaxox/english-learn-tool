@@ -893,14 +893,7 @@
   white-space: nowrap;
 }
 
-/* The pair itself. */
-.personal-workspace .records-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-}
-
+/* 题目集 is the list and nothing else: a record opens on a page of its own. */
 .personal-workspace .records-list {
   display: grid;
   overflow: hidden;
@@ -909,24 +902,16 @@
   background: var(--ui-surface);
 }
 
-/* The list stays where the learner left it while the record on the right runs
- * past a screen. The shell's top bar is 60px tall. */
-@media (min-width: 1021px) {
-  .personal-workspace .records-list {
-    position: sticky;
-    top: 76px;
-    max-height: calc(100vh - 96px);
-  }
-  .personal-workspace .records-rows { max-height: calc(100vh - 230px); }
-}
-
-.personal-workspace .records-list__bar {
+/* Select-all and delete sit above the list rather than inside it: the mistake
+ * book is several lists, and one toolbar has to serve them all. */
+.personal-workspace .records-toolbar {
   display: flex;
   gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
-  border-bottom: 1px solid var(--ui-line);
+  padding: 9px 14px;
+  border: 1.5px solid var(--ui-line);
+  border-radius: 14px;
   background: var(--ui-surface-subtle);
 }
 .personal-workspace .records-check-all {
@@ -942,10 +927,8 @@
 
 .personal-workspace .records-rows {
   display: grid;
-  max-height: 62vh;
   margin: 0;
   padding: 0;
-  overflow-y: auto;
   list-style: none;
 }
 .personal-workspace .records-row {
@@ -971,10 +954,6 @@
 }
 .personal-workspace .records-row:hover { background: var(--ui-surface-subtle); }
 .personal-workspace .records-row.is-selected { background: var(--ui-gold-soft); }
-.personal-workspace .records-row.is-active {
-  background: var(--ui-forest-soft);
-  box-shadow: inset 3px 0 0 var(--ui-forest);
-}
 .personal-workspace .records-row__body { display: grid; min-width: 0; gap: 2px; }
 .personal-workspace .records-row__title { font-size: 13px; font-weight: 700; }
 .personal-workspace .records-row__meta {
@@ -995,6 +974,12 @@
 .personal-workspace .records-row__score small { margin-left: 1px; font-size: 10px; font-weight: 650; }
 .personal-workspace .records-row__wrong { color: var(--ui-danger); font-size: 11px; font-weight: 700; }
 .personal-workspace .records-row__clean { color: var(--ui-forest); font-size: 11px; font-weight: 700; }
+.personal-workspace .records-row__go {
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  color: var(--ui-muted);
+}
 
 .personal-workspace .records-pager {
   display: flex;
@@ -1016,32 +1001,67 @@
   line-height: 1.6;
 }
 
-/* The right pane is the whole record: its own score line, then the questions. */
-.personal-workspace .records-detail {
+/* 错题本 groups the same rows by exercise type: one shelf per type, newest
+ * first inside it. The type is the thing a learner is weak in, so it earns a
+ * heading rather than a column. */
+.personal-workspace .records-groups { display: grid; gap: 18px; }
+.personal-workspace .records-group {
   display: grid;
-  min-width: 0;
-  gap: 14px;
-}
-.personal-workspace .records-detail__head {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
+  overflow: hidden;
   border: 1.5px solid var(--ui-line);
   border-radius: 16px;
   background: var(--ui-surface);
 }
-.personal-workspace .records-detail__title { display: flex; gap: 12px; align-items: center; min-width: 0; }
-.personal-workspace .records-detail__title h2 { margin: 0; font-size: 17px; font-weight: 750; }
-.personal-workspace .records-detail__title p { margin: 2px 0 0; color: var(--ui-muted); font-size: 12px; }
-.personal-workspace .records-detail__aside {
+.personal-workspace .records-group__head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ui-line);
+  background: var(--ui-surface-subtle);
+}
+.personal-workspace .records-group__head h2 { margin: 0; font-size: 14px; font-weight: 750; }
+.personal-workspace .records-group__count {
+  margin-left: auto;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.personal-workspace .records-loadmore { display: flex; justify-content: center; padding: 2px 0 10px; }
+
+/* One record, read back whole: its own score line, then the questions.
+ * A centred reading column, the way a finished session reads. */
+.personal-workspace .record-detail {
+  display: grid;
+  width: min(100%, 960px);
+  min-width: 0;
+  margin-inline: auto;
+  gap: 14px;
+}
+.personal-workspace .practice-record-page .practice-result {
+  width: 100%;
+  max-width: none;
+}
+.personal-workspace .record-detail__head {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border: 1.5px solid var(--ui-line);
+  border-radius: 16px;
+  background: var(--ui-surface);
+}
+.personal-workspace .record-detail__title { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.personal-workspace .record-detail__title h2 { margin: 0; font-size: 17px; font-weight: 750; }
+.personal-workspace .record-detail__title p { margin: 2px 0 0; color: var(--ui-muted); font-size: 12px; }
+.personal-workspace .record-detail__aside {
   display: flex;
   flex: 0 0 auto;
   gap: 16px;
   align-items: center;
 }
-.personal-workspace .records-detail__only-wrong {
+.personal-workspace .record-detail__only-wrong {
   display: inline-flex;
   gap: 7px;
   align-items: center;
@@ -1054,8 +1074,8 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.personal-workspace .records-detail__only-wrong input[type='checkbox'] { margin: 0; }
-.personal-workspace .records-detail__score {
+.personal-workspace .record-detail__only-wrong input[type='checkbox'] { margin: 0; }
+.personal-workspace .record-detail__score {
   display: flex;
   gap: 2px;
   align-items: baseline;
@@ -1063,49 +1083,43 @@
   color: var(--ui-forest);
   font-variant-numeric: tabular-nums;
 }
-.personal-workspace .records-detail__score strong { font-size: 30px; font-weight: 850; letter-spacing: -0.04em; }
-.personal-workspace .records-detail__score span { font-size: 12px; font-weight: 700; }
+.personal-workspace .record-detail__score strong { font-size: 30px; font-weight: 850; letter-spacing: -0.04em; }
+.personal-workspace .record-detail__score span { font-size: 12px; font-weight: 700; }
 
 /* The result brings its own score card; the head already says it. Drop the
- * aside so the questions get the full width of the pane. */
-.personal-workspace .records-detail .practice-result__layout { grid-template-columns: minmax(0, 1fr); }
-.personal-workspace .records-detail .practice-result__aside { display: none; }
-.personal-workspace .records-detail .practice-result__answers { grid-column: 1; grid-row: auto; }
+ * aside so the questions get the full width of the page. */
+.personal-workspace .record-detail .practice-result__layout { grid-template-columns: minmax(0, 1fr); }
+.personal-workspace .record-detail .practice-result__aside { display: none; }
+.personal-workspace .record-detail .practice-result__answers { grid-column: 1; grid-row: auto; }
 
-.personal-workspace .records-detail__blank {
-  display: grid;
-  gap: 12px;
-  justify-items: center;
-  padding: 58px 24px;
-  border: 1.5px dashed var(--ui-line);
-  border-radius: 16px;
+.personal-workspace .record-detail__back {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
   color: var(--ui-muted);
-  text-align: center;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
 }
-.personal-workspace .records-detail__blank p { max-width: 34ch; margin: 0; line-height: 1.6; }
+.personal-workspace .record-detail__back:hover { color: var(--ui-ink); }
+.personal-workspace .record-detail__back svg { width: 15px; height: 15px; }
 
-html[data-theme='night'] .personal-workspace .records-row.is-active { background: var(--g-green-soft); }
 html[data-theme='night'] .personal-workspace .records-row.is-selected { background: var(--g-gold-soft); }
 html[data-theme='night'] .personal-workspace .records-scope__link.is-active { color: var(--g-green); }
 
 /* The passage keeps its own day ink (`#3d2c18`) for the session page's paper
- * card; on the record pane's dark surface that ink is unreadable, so night
+ * card; on the record page's dark surface that ink is unreadable, so night
  * relights it here. */
-html[data-theme='night'] .personal-workspace .records-detail .practice-article-panel .practice-article,
-html[data-theme='night'] .personal-workspace .records-detail .practice-article-panel .eyebrow { color: #f3e9d2; }
-
-@media (max-width: 1020px) {
-  .personal-workspace .records-shell { grid-template-columns: minmax(0, 1fr); }
-  .personal-workspace .records-detail { order: -1; }
-  .personal-workspace .records-rows { max-height: none; }
-}
+html[data-theme='night'] .personal-workspace .record-detail .practice-article-panel .practice-article,
+html[data-theme='night'] .personal-workspace .record-detail .practice-article-panel .eyebrow { color: #f3e9d2; }
 
 @media (max-width: 620px) {
   .personal-workspace .records-header { display: grid; gap: 14px; }
   .personal-workspace .records-scope { justify-self: start; }
   .personal-workspace .records-filters { display: grid; gap: 10px; }
   .personal-workspace .records-filters__tail { justify-content: space-between; }
+  .personal-workspace .record-detail__head { display: grid; gap: 12px; }
+  .personal-workspace .record-detail__aside { justify-content: space-between; }
 }
 
 /* ------------------------------------------- 题目列表: the generated sets */

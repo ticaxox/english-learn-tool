@@ -37,6 +37,7 @@ function makeRouter() {
       { path: '/practice', name: 'practice', component: StubPage },
       { path: '/practice/records', name: 'practice-records', component: StubPage },
       { path: '/practice/mistakes', name: 'practice-mistakes', component: StubPage },
+      { path: '/practice/records/:recordId', name: 'practice-record', component: StubPage },
       { path: '/practice/:sessionId', name: 'practice-session', component: StubPage },
       { path: '/wordbooks', name: 'wordbooks', component: StubPage },
       { path: '/memory', name: 'memory', component: StubPage },
@@ -222,13 +223,35 @@ describe('practice views', () => {
     expect(practiceMocks.deletePracticeRecords).toHaveBeenCalledWith(['record-1'], expect.any(String))
   })
 
-  it('opens the first record and reads its questions back', async () => {
-    practiceMocks.getPracticeRecord.mockResolvedValueOnce({ ...recordPage.items[0], result, questions: [question] })
-    const { wrapper } = await mountRoute(PracticeRecordsView, '/practice/records')
+  it('opens a record on its own page instead of beside the list', async () => {
+    const { wrapper, router } = await mountRoute(PracticeRecordsView, '/practice/records')
+    // The list is a list: nothing is fetched until a record is picked.
+    expect(practiceMocks.getPracticeRecord).not.toHaveBeenCalled()
+    await wrapper.get('.records-row__open').trigger('click')
     await flushPromises()
-    expect(practiceMocks.getPracticeRecord).toHaveBeenCalledWith('record-1')
-    expect(wrapper.text()).toContain('Context points to resilience.')
-    expect(wrapper.text()).toContain('The team remained ____.')
+    expect(router.currentRoute.value.name).toBe('practice-record')
+    expect(router.currentRoute.value.params.recordId).toBe('record-1')
+  })
+
+  it('groups the mistake book by type, newest first inside each type', async () => {
+    practiceMocks.listPracticeMistakes.mockResolvedValueOnce({
+      items: [
+        { ...recordPage.items[0], id: 'm1', practiceType: 'reading', wrongCount: 1, submittedAt: '2026-10-24T04:00:00Z' },
+        { ...recordPage.items[0], id: 'm2', practiceType: 'fill_blank', wrongCount: 1, submittedAt: '2026-10-22T04:00:00Z' },
+        { ...recordPage.items[0], id: 'm3', practiceType: 'reading', wrongCount: 2, submittedAt: '2026-10-23T04:00:00Z' },
+      ],
+      total: 3,
+      offset: 0,
+      limit: 100,
+    })
+    const { wrapper } = await mountRoute(PracticeRecordsView, '/practice/mistakes', { onlyMistakes: true })
+    await flushPromises()
+    const groups = wrapper.findAll('.records-group')
+    expect(groups.map((group) => group.get('h2').text())).toEqual(['填空', '阅读'])
+    // 10-24 comes before 10-23, so the newer record (one wrong) leads the group.
+    const readingMetas = groups[1].findAll('.records-row__meta').map((meta) => meta.text())
+    expect(readingMetas[0]).toContain('错 1')
+    expect(readingMetas[1]).toContain('错 2')
   })
 
   it('uses the mistakes endpoint on the dedicated mistakes view', async () => {

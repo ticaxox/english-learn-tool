@@ -23,6 +23,7 @@ import LearningSettingsView from '../views/LearningSettingsView.vue'
 import PersonalAiConfigView from '../views/PersonalAiConfigView.vue'
 import PracticeHubView from '../views/PracticeHubView.vue'
 import PracticeRecordsView from '../views/PracticeRecordsView.vue'
+import PracticeRecordDetailView from '../views/PracticeRecordDetailView.vue'
 import PracticeTasksView from '../views/PracticeTasksView.vue'
 import MistakesView from '../views/MistakesView.vue'
 import SettingsHubView from '../views/SettingsHubView.vue'
@@ -97,6 +98,13 @@ const routes: RouteRecordRaw[] = [
         name: 'practice-mistakes',
         component: PracticeRecordsView,
         props: { onlyMistakes: true },
+      },
+      {
+        // One submitted record, read back whole. The list only carries
+        // summaries, so the questions and answers live here.
+        path: 'practice/records/:recordId',
+        name: 'practice-record',
+        component: PracticeRecordDetailView,
       },
       {
         path: 'practice/:sessionId',

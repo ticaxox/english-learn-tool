@@ -1,29 +1,28 @@
 <script setup lang="ts">
 /**
- * /practice/records and /practice/mistakes — one page, two scopes.
+ * /practice/records and /practice/mistakes — one list, two scopes.
  *
  * A submitted practice is a record; a record that still holds a wrong answer is
- * a mistake. Both are read the same way: the list on the left, the whole record
- * on the right. The switch at the top only changes the filter the list is drawn
- * with, so nothing on the page has to be learned twice. The scope and the type
- * filter live in the URL, which makes a filtered view something you can link to.
+ * a mistake. Both are lists here and nothing more: a record opens on its own
+ * page, where the questions and the answers are. The switch at the top swaps
+ * the filter, not the layout, and the mistake book lays the same rows out by
+ * exercise type — the type a learner is weak in is the thing worth naming —
+ * newest first inside each type. Scope and type live in the URL, so a filtered
+ * view is something you can link to.
  */
-import { computed, nextTick, ref, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
-import PracticeResultView from '../components/PracticeResultView.vue'
 import TypeMark from '../components/TypeMark.vue'
 import AppIcon from '../components/AppIcon.vue'
 import DivButton from '../components/DivButton.vue'
 import {
   deletePracticeRecords,
-  getPracticeRecord,
   listPracticeMistakes,
   listPracticeRecords,
   PRACTICE_SOURCE_LABELS,
   PRACTICE_TYPE_LABELS,
-  type PracticeRecordDetail,
   type PracticeRecordSummary,
   type PracticeSource,
   type PracticeType,
@@ -33,9 +32,13 @@ import '../practice.css'
 const props = withDefaults(defineProps<{ onlyMistakes?: boolean }>(), { onlyMistakes: false })
 
 const route = useRoute()
+const router = useRouter()
 
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'conversation', 'mixed']
 const practiceSources: PracticeSource[] = ['today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty']
+/** The mistake book groups in one pass, so it loads a bigger slice at a time. */
+const MISTAKE_BATCH = 100
+const PAGE_SIZE = 12
 
 /** The URL decides which half of the pair the page is showing. */
 const scope = computed<'all' | 'mistakes'>(() =>
@@ -52,17 +55,9 @@ const source = ref<PracticeSource | ''>('')
 const records = ref<PracticeRecordSummary[]>([])
 const total = ref(0)
 const offset = ref(0)
-const limit = 12
 const loading = ref(false)
+const loadingMore = ref(false)
 const error = ref<unknown>(null)
-const reloading = ref(false)
-
-const activeId = ref<string | null>(null)
-const detail = ref<PracticeRecordDetail | null>(null)
-const detailLoading = ref(false)
-const detailError = ref<unknown>(null)
-/** In the mistake book, the record may still hold answers that were right. */
-const onlyWrong = ref(false)
 
 const selected = ref<string[]>([])
 const deleting = ref(false)
@@ -70,26 +65,32 @@ const deleteError = ref<unknown>(null)
 let pendingDeleteKey: string | null = null
 let pendingDeleteSignature = ''
 
-const hasWrongAnswers = computed(() => Boolean(detail.value?.result?.questions.some((item) => item.isMistake)))
-/** The result, narrowed to the questions that went wrong when asked to. */
-const shownResult = computed(() => {
-  const result = detail.value?.result
-  if (!result) return null
-  if (!onlyWrong.value) return result
-  return { ...result, questions: result.questions.filter((item) => item.isMistake) }
-})
-const shownQuestions = computed(() => {
-  const questions = detail.value?.questions ?? []
-  if (!onlyWrong.value) return questions
-  const keep = new Set(shownResult.value?.questions.map((item) => item.questionId))
-  return questions.filter((question) => keep.has(question.id))
-})
-
-const page = computed(() => Math.floor(offset.value / limit) + 1)
-const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)))
+const page = computed(() => Math.floor(offset.value / PAGE_SIZE) + 1)
+const pages = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
 const canPrev = computed(() => offset.value > 0)
-const canNext = computed(() => offset.value + limit < total.value)
-const allSelected = computed(() => records.value.length > 0 && records.value.every((record) => selected.value.includes(record.id)))
+const canNext = computed(() => offset.value + PAGE_SIZE < total.value)
+const canLoadMore = computed(() => records.value.length < total.value)
+const allSelected = computed(
+  () => records.value.length > 0 && records.value.every((record) => selected.value.includes(record.id)),
+)
+
+/**
+ * The mistake book is read type by type, newest first in each type. The server
+ * already answers newest-first; sorting again keeps the promise if a page ever
+ * arrives out of order.
+ */
+const groups = computed(() =>
+  practiceTypes
+    .map((type) => ({
+      type,
+      label: PRACTICE_TYPE_LABELS[type],
+      items: records.value
+        .filter((record) => record.practiceType === type)
+        .slice()
+        .sort((left, right) => (right.submittedAt ?? '').localeCompare(left.submittedAt ?? '')),
+    }))
+    .filter((group) => group.items.length > 0),
+)
 
 function formatSubmittedAt(value: string | null): string {
   if (!value) return '—'
@@ -114,6 +115,17 @@ function viewQuery(type: PracticeType | ''): Record<string, string> {
   return query
 }
 
+/** Where a record opens, and where its page should send the learner back to. */
+function recordTarget(record: PracticeRecordSummary) {
+  const query: Record<string, string> = { ...viewQuery(practiceType.value) }
+  if (isMistakes.value) query.from = 'mistakes'
+  return { name: 'practice-record', params: { recordId: record.id }, query }
+}
+
+function openRecord(record: PracticeRecordSummary): void {
+  void router.push(recordTarget(record))
+}
+
 function newKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
   return `practice-delete-${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -123,18 +135,26 @@ async function load(): Promise<void> {
   loading.value = true
   error.value = null
   try {
-    const pageData = isMistakes.value
-      ? await listPracticeMistakes({ practiceType: practiceType.value || undefined, offset: offset.value, limit })
-      : await listPracticeRecords({
-          practiceType: practiceType.value || undefined,
-          source: source.value || undefined,
-          onlyMistakes: false,
-          offset: offset.value,
-          limit,
-        })
-    records.value = pageData.items
-    total.value = pageData.total
-    selected.value = selected.value.filter((id) => pageData.items.some((item) => item.id === id))
+    if (isMistakes.value) {
+      const pageData = await listPracticeMistakes({
+        practiceType: practiceType.value || undefined,
+        offset: 0,
+        limit: MISTAKE_BATCH,
+      })
+      records.value = pageData.items
+      total.value = pageData.total
+    } else {
+      const pageData = await listPracticeRecords({
+        practiceType: practiceType.value || undefined,
+        source: source.value || undefined,
+        onlyMistakes: false,
+        offset: offset.value,
+        limit: PAGE_SIZE,
+      })
+      records.value = pageData.items
+      total.value = pageData.total
+    }
+    selected.value = selected.value.filter((id) => records.value.some((item) => item.id === id))
   } catch (requestError) {
     records.value = []
     total.value = 0
@@ -144,36 +164,23 @@ async function load(): Promise<void> {
   }
 }
 
-/** Load a page of records, then open the first one so the right pane is never blank. */
-async function loadAndSelectFirst(): Promise<void> {
-  await load()
-  if (records.value.length === 0) {
-    activeId.value = null
-    detail.value = null
-    return
-  }
-  const keep = records.value.find((record) => record.id === activeId.value)
-  await openRecord(keep ?? records.value[0])
-}
-
-async function openRecord(record: PracticeRecordSummary, reveal = false): Promise<void> {
-  activeId.value = record.id
-  onlyWrong.value = false
-  detailLoading.value = true
-  detailError.value = null
+async function loadMore(): Promise<void> {
+  if (loadingMore.value || !canLoadMore.value) return
+  loadingMore.value = true
+  deleteError.value = null
   try {
-    detail.value = await getPracticeRecord(record.id)
+    const pageData = await listPracticeMistakes({
+      practiceType: practiceType.value || undefined,
+      offset: records.value.length,
+      limit: MISTAKE_BATCH,
+    })
+    const known = new Set(records.value.map((record) => record.id))
+    records.value = [...records.value, ...pageData.items.filter((record) => !known.has(record.id))]
+    total.value = pageData.total
   } catch (requestError) {
-    detail.value = null
-    detailError.value = requestError
+    error.value = requestError
   } finally {
-    detailLoading.value = false
-  }
-  // Only a click asks to be shown the result. Auto-opening the first record on
-  // load must leave the page where it is, or the header scrolls away by itself.
-  if (reveal) {
-    await nextTick()
-    document.querySelector<HTMLElement>('.records-detail')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    loadingMore.value = false
   }
 }
 
@@ -203,15 +210,11 @@ async function removeSelected(): Promise<void> {
     pendingDeleteKey = null
     pendingDeleteSignature = ''
     selected.value = []
-    if (detail.value && removed.deletedIds.includes(detail.value.id)) {
-      detail.value = null
-      activeId.value = null
-    }
     // The page may now be past the end of the list; step back before reloading.
-    if (records.value.length <= removed.deletedIds.length && offset.value >= limit) {
-      offset.value = Math.max(0, offset.value - limit)
+    if (!isMistakes.value && records.value.length <= removed.deletedIds.length && offset.value >= PAGE_SIZE) {
+      offset.value = Math.max(0, offset.value - PAGE_SIZE)
     }
-    await loadAndSelectFirst()
+    await load()
   } catch (requestError) {
     deleteError.value = requestError
   } finally {
@@ -222,17 +225,7 @@ async function removeSelected(): Promise<void> {
 function changePage(nextOffset: number): void {
   offset.value = Math.max(0, nextOffset)
   selected.value = []
-  void loadAndSelectFirst()
-}
-
-async function refresh(): Promise<void> {
-  if (reloading.value) return
-  reloading.value = true
-  try {
-    await loadAndSelectFirst()
-  } finally {
-    reloading.value = false
-  }
+  void load()
 }
 
 watch(
@@ -240,20 +233,18 @@ watch(
   () => {
     offset.value = 0
     selected.value = []
-    detail.value = null
-    activeId.value = null
     // The source filter belongs to the records list only.
     if (isMistakes.value) source.value = ''
-    void loadAndSelectFirst()
+    void load()
   },
 )
 
 watch(source, () => {
   offset.value = 0
-  void loadAndSelectFirst()
+  void load()
 })
 
-void loadAndSelectFirst()
+void load()
 </script>
 
 <template>
@@ -267,8 +258,8 @@ void loadAndSelectFirst()
         <h1>{{ isMistakes ? '错题本' : '题目集' }}</h1>
         <p class="workspace-page-lead">
           {{ isMistakes
-            ? '只列出还有错题的练习。左边挑一条，右边看当时那道题和解析。'
-            : '左边挑一条记录，右边看题目、你的答案、正确答案和解析。' }}
+            ? '答错过的练习按题型归在一起，每种题型里最近的在最前面。点一条看当时那道题。'
+            : '每一次提交都在这里。点开一条，才看它的题目、你的作答和解析。' }}
         </p>
       </div>
 
@@ -319,53 +310,51 @@ void loadAndSelectFirst()
       </div>
     </section>
 
-    <div class="records-shell">
-      <section class="records-list" aria-label="记录列表">
-        <header class="records-list__bar">
-          <label class="records-check-all">
-            <input type="checkbox" :checked="allSelected" :disabled="records.length === 0" @change="toggleAll" />
-            <span>{{ selected.length ? `已选 ${selected.length}` : '全选' }}</span>
-          </label>
-          <DivButton
-            class="button-danger button-small"
-            type="button"
-            :disabled="selected.length === 0 || deleting"
-            @click="removeSelected"
-          >
-            {{ deleting ? '删除中…' : '删除' }}
-          </DivButton>
-        </header>
+    <LoadingState v-if="loading && records.length === 0" label="正在读取记录…" />
+    <section v-else-if="error" class="panel">
+      <ErrorNotice :error="error" retry-label="重新读取记录" @retry="load" />
+    </section>
 
+    <template v-else>
+      <div class="records-toolbar">
+        <label class="records-check-all">
+          <input type="checkbox" :checked="allSelected" :disabled="records.length === 0" @change="toggleAll" />
+          <span>{{ selected.length ? `已选 ${selected.length}` : '全选' }}</span>
+        </label>
         <ErrorNotice v-if="deleteError" :error="deleteError" :show-retry="false" retry-label="重试" @retry="removeSelected" />
+        <DivButton
+          class="button-danger button-small"
+          type="button"
+          :disabled="selected.length === 0 || deleting"
+          @click="removeSelected"
+        >
+          {{ deleting ? '删除中…' : '删除选中' }}
+        </DivButton>
+      </div>
 
-        <LoadingState v-if="loading && records.length === 0" label="正在读取记录…" />
-        <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取记录" @retry="refresh" />
-        <p v-else-if="records.length === 0" class="records-empty">
-          {{ isMistakes
-            ? '还没有带着错题的练习记录。答错过的题目会自动出现在这里。'
-            : '还没有符合条件的记录。完成一次练习并提交后，记录会出现在这里。' }}
-        </p>
+      <p v-if="records.length === 0" class="records-empty panel">
+        {{ isMistakes
+          ? '还没有带着错题的练习。答错过的题目会自动归到这里。'
+          : '还没有符合条件的记录。完成一次练习并提交后，记录会出现在这里。' }}
+      </p>
 
-        <ul v-else class="records-rows" role="list">
+      <!-- 题目集: one flat list, newest first. -->
+      <section v-else-if="!isMistakes" class="records-list" aria-label="记录列表">
+        <ul class="records-rows" role="list">
           <li
             v-for="record in records"
             :key="record.id"
             class="records-row"
-            :class="{ 'is-active': record.id === activeId, 'is-selected': selected.includes(record.id) }"
+            :class="{ 'is-selected': selected.includes(record.id) }"
           >
             <input
               class="records-row__check"
               type="checkbox"
               :checked="selected.includes(record.id)"
-              :aria-label="`选择第 ${record.totalQuestions} 题的${PRACTICE_TYPE_LABELS[record.practiceType]}记录`"
+              :aria-label="`选择${PRACTICE_TYPE_LABELS[record.practiceType]}记录`"
               @change="toggleSelected(record.id)"
             />
-            <button
-              class="records-row__open"
-              type="button"
-              :aria-current="record.id === activeId ? 'true' : undefined"
-              @click="openRecord(record, true)"
-            >
+            <button class="records-row__open" type="button" @click="openRecord(record)">
               <TypeMark :type="record.practiceType" :size="24" />
               <span class="records-row__body">
                 <span class="records-row__title">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
@@ -378,48 +367,62 @@ void loadAndSelectFirst()
                 <span v-if="record.wrongCount" class="records-row__wrong">{{ record.wrongCount }} 错</span>
                 <span v-else class="records-row__clean">全对</span>
               </span>
+              <AppIcon class="records-row__go" name="arrow" />
             </button>
           </li>
         </ul>
 
-        <nav v-if="total > limit" class="records-pager" aria-label="记录分页">
-          <DivButton class="button-secondary button-small" type="button" :disabled="!canPrev || loading" @click="changePage(offset - limit)">上一页</DivButton>
+        <nav v-if="total > PAGE_SIZE" class="records-pager" aria-label="记录分页">
+          <DivButton class="button-secondary button-small" type="button" :disabled="!canPrev || loading" @click="changePage(offset - PAGE_SIZE)">上一页</DivButton>
           <span>{{ page }} / {{ pages }}</span>
-          <DivButton class="button-secondary button-small" type="button" :disabled="!canNext || loading" @click="changePage(offset + limit)">下一页</DivButton>
+          <DivButton class="button-secondary button-small" type="button" :disabled="!canNext || loading" @click="changePage(offset + PAGE_SIZE)">下一页</DivButton>
         </nav>
       </section>
 
-      <section class="records-detail" aria-label="记录详情" aria-live="polite">
-        <LoadingState v-if="detailLoading" label="正在读取这次记录…" />
-        <ErrorNotice v-else-if="detailError" :error="detailError" retry-label="重新读取" @retry="detail && openRecord(detail)" />
-        <template v-else-if="detail">
-          <header class="records-detail__head">
-            <div class="records-detail__title">
-              <TypeMark :type="detail.practiceType" :size="30" />
-              <div>
-                <h2>{{ PRACTICE_TYPE_LABELS[detail.practiceType] }}练习</h2>
-                <p>{{ PRACTICE_SOURCE_LABELS[detail.source] }} · {{ detail.totalQuestions }} 题 · {{ formatSubmittedAt(detail.submittedAt) }}</p>
-              </div>
-            </div>
-            <div class="records-detail__aside">
-              <label v-if="isMistakes && hasWrongAnswers" class="records-detail__only-wrong">
-                <input v-model="onlyWrong" type="checkbox" />
-                <span>只看错题</span>
-              </label>
-              <p class="records-detail__score">
-                <strong>{{ scoreText(detail) }}</strong><span>分</span>
-              </p>
-            </div>
+      <!-- 错题本: the same rows, one shelf per type. -->
+      <div v-else class="records-groups">
+        <section v-for="group in groups" :key="group.type" class="records-group" :aria-label="`${group.label}错题`">
+          <header class="records-group__head">
+            <TypeMark :type="group.type" :size="22" />
+            <h2>{{ group.label }}</h2>
+            <span class="records-group__count">{{ group.items.length }} 条</span>
           </header>
+          <ul class="records-rows" role="list">
+            <li
+              v-for="record in group.items"
+              :key="record.id"
+              class="records-row"
+              :class="{ 'is-selected': selected.includes(record.id) }"
+            >
+              <input
+                class="records-row__check"
+                type="checkbox"
+                :checked="selected.includes(record.id)"
+                :aria-label="`选择${formatSubmittedAt(record.submittedAt)}的${group.label}记录`"
+                @change="toggleSelected(record.id)"
+              />
+              <button class="records-row__open" type="button" @click="openRecord(record)">
+                <span class="records-row__body">
+                  <span class="records-row__title">{{ formatSubmittedAt(record.submittedAt) }}</span>
+                  <span class="records-row__meta">
+                    {{ PRACTICE_SOURCE_LABELS[record.source] }} · {{ record.totalQuestions }} 题 · 错 {{ record.wrongCount }}
+                  </span>
+                </span>
+                <span class="records-row__marks">
+                  <span class="records-row__score">{{ scoreText(record) }}<small>分</small></span>
+                </span>
+                <AppIcon class="records-row__go" name="arrow" />
+              </button>
+            </li>
+          </ul>
+        </section>
 
-          <PracticeResultView v-if="shownResult" :result="shownResult" :questions="shownQuestions" />
-          <p v-else class="records-empty">这次练习暂无可用结果，可能仍在评分或评分失败。</p>
-        </template>
-        <div v-else class="records-detail__blank">
-          <TypeMark type="reading" :size="46" />
-          <p>从左边挑一条记录，这里会显示题目、你的答案和解析。</p>
+        <div v-if="canLoadMore" class="records-loadmore">
+          <DivButton class="button-secondary button-small" type="button" :disabled="loadingMore" @click="loadMore">
+            {{ loadingMore ? '读取中…' : '加载更多' }}
+          </DivButton>
         </div>
-      </section>
-    </div>
+      </div>
+    </template>
   </article>
 </template>
