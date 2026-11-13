@@ -2426,7 +2426,10 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 }
 
 /* The one thing that separates a vector model from a chat model in the list. */
+/* Pushed to the end of the row's own block, so the tag reads as a badge on
+ * the provider rather than as part of its name. */
 .personal-workspace .personal-ai-provider__tag {
+  margin-left: auto;
   padding: 1px 7px;
   border-radius: 7px;
   background: var(--g-purple-soft);
