@@ -5463,6 +5463,14 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   color: #f3e9d2;
 }
 
+/* The spelling board is dark wood by day, so its ink is cream in both themes. */
+html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__prompt,
+html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__eyebrow,
+html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__phonetic,
+html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__hint {
+  color: #f6e8cf;
+}
+
 /* The option is a fixed-length stone plate, drawn once and used at one size,
  * so a four-letter word and an eight-letter word sit on the same object. The
  * word is what the eye should land on; the letter marker is a small mark at

@@ -60,7 +60,7 @@ import cardFrameNight from './card/card-frame-night.png'
 import cardBack from './card/card-back.png'
 import drillSteleDay from './card/drill-stele-day.png'
 import drillSteleNight from './card/drill-stele-night.png'
-import drillBiscuitDay from './card/drill-biscuit-day.png'
+import drillTrayDay from './card/drill-tray-day.png'
 import drillBoardNight from './card/drill-board-night.png'
 import optionPlateDay from './card/option-plate-day.png'
 import optionPlateNight from './card/option-plate-night.png'
@@ -84,9 +84,9 @@ export const questionCard = {
  */
 export const drillFrame = {
   choice: { day: drillSteleDay, night: drillSteleNight },
-  // Baked by day, written on by night: night keeps the crinkle-cut silhouette
-  // but it is a chalkboard, because spelling is the drill where you write.
-  spelling: { day: drillBiscuitDay, night: drillBoardNight },
+  // Spelling is the drill where you set letters into place: a wooden type
+  // tray by day, a slate by night. Neither of them is a biscuit.
+  spelling: { day: drillTrayDay, night: drillBoardNight },
 } as const
 
 /**
