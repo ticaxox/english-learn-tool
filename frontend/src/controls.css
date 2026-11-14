@@ -5414,14 +5414,14 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   margin-inline: 0;
   padding: 0 !important;
   border-style: solid !important;
-  /* The material is the drill's own: a carved stele for choice, a baked
-   * biscuit for spelling, and the pumpkin card for everything else. All three
-   * are 9-slice sources whose rim sits in a band about 64px wide on the
-   * delivered art, so the slice is given in pixels — a percentage would cut a
-   * different depth out of the top than out of the side on a 3:2 image.
-   * `border-image-width` is what decides how much room the band takes on
-   * screen, and it is deliberately smaller than the slice: the art is drawn
-   * at 800px wide but the card is not. */
+  /* The material is the drill's own: a carved stele for choice, a wooden type
+   * tray for spelling by day and a slate by night, and the pumpkin card for
+   * everything else. All of them are 9-slice sources whose rim sits in a band
+   * about 64px wide on the delivered art, so the slice is given in pixels — a
+   * percentage would cut a different depth out of the top than out of the
+   * side on a 3:2 image. `border-image-width` is what decides how much room
+   * the band takes on screen, and it is deliberately smaller than the slice:
+   * the art is drawn at 800px wide but the card is not. */
   border-width: 30px !important;
   border-image-source: var(--rune-card) !important;
   border-image-slice: 64 fill !important;
@@ -5431,6 +5431,14 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background: transparent !important;
   box-shadow: none !important;
   color: #3b2a1a;
+}
+
+/* A card, not a bar. The spelling drill is one short row of cells and would
+ * otherwise collapse to 820x260. The memory page sets 260px on `.study-card`
+ * with four class names, so the height is restated here at the same weight. */
+.personal-workspace .rune-surface,
+.personal-workspace .memory-page .memory-main-card .study-card.rune-surface {
+  min-height: 420px;
 }
 
 /* Night is the same card after dark: near-black ground, cream ink. */
@@ -5463,12 +5471,19 @@ html[data-theme='night'] .personal-workspace .rune-surface .spell-head__prompt {
   color: #f3e9d2;
 }
 
-/* The spelling board is dark wood by day, so its ink is cream in both themes. */
-html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__prompt,
-html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__eyebrow,
+/* The tray is pale pine by day, so its ink is the cocoa the rest of the day
+ * palette uses; night is the dark slate and keeps its cream. */
+html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__prompt {
+  color: #3b2a1a;
+}
+
+html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__eyebrow {
+  color: #4a3524;
+}
+
 html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__phonetic,
 html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__hint {
-  color: #f6e8cf;
+  color: #6b533a;
 }
 
 /* The option is a fixed-length stone plate, drawn once and used at one size,
