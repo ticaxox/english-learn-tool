@@ -371,30 +371,31 @@ void load()
     </section>
 
     <template v-else>
-      <div class="records-toolbar">
-        <label class="records-check-all">
-          <input type="checkbox" :checked="allSelected" :disabled="records.length === 0" @change="toggleAll" />
-          <span>{{ selected.length ? `已选 ${selected.length}` : '全选' }}</span>
-        </label>
-        <ErrorNotice v-if="deleteError" :error="deleteError" :show-retry="false" retry-label="重试" @retry="removeSelected" />
-        <DivButton
-          class="button-danger button-small"
-          type="button"
-          :disabled="selected.length === 0 || deleting"
-          @click="removeSelected"
-        >
-          {{ deleting ? '删除中…' : '删除选中' }}
-        </DivButton>
-      </div>
-
       <p v-if="!hasRows" class="records-empty panel">
         {{ isMistakes
           ? '还没有带着错题的练习。答错过的题目会自动归到这里。'
           : '还没有符合条件的记录。完成一次练习并提交后，记录会出现在这里。' }}
       </p>
 
-      <!-- 题目集: one flat list, newest first. -->
-      <section v-else-if="!isMistakes" class="records-list" aria-label="记录列表">
+      <div v-else class="records-body">
+        <div class="records-toolbar">
+          <label class="records-check-all">
+            <input type="checkbox" :checked="allSelected" :disabled="records.length === 0" @change="toggleAll" />
+            <span>{{ selected.length ? `已选 ${selected.length}` : '全选' }}</span>
+          </label>
+          <ErrorNotice v-if="deleteError" :error="deleteError" :show-retry="false" retry-label="重试" @retry="removeSelected" />
+          <DivButton
+            class="records-delete"
+            type="button"
+            :disabled="selected.length === 0 || deleting"
+            @click="removeSelected"
+          >
+            {{ deleting ? '删除中…' : selected.length ? `删除 ${selected.length} 条` : '删除' }}
+          </DivButton>
+        </div>
+
+        <!-- 题目集: one flat list, newest first. -->
+        <section v-if="!isMistakes" class="records-list" aria-label="记录列表">
         <ul class="records-rows" role="list">
           <PracticeRecordRow
             v-for="record in records"
@@ -465,6 +466,7 @@ void load()
           <DivButton class="button-secondary button-small" type="button" :disabled="loadingMore" @click="loadMore">
             {{ loadingMore ? '读取中…' : '加载更多' }}
           </DivButton>
+        </div>
         </div>
       </div>
     </template>

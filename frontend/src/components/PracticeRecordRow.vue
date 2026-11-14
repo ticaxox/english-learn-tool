@@ -40,7 +40,9 @@ const checkLabel = computed(() => `选择${PRACTICE_TYPE_LABELS[props.record.pra
       @change="emit('toggle')"
     />
     <button class="records-row__open" type="button" @click="emit('open')">
-      <TypeMark v-if="showMark" :type="record.practiceType" :size="24" />
+      <span v-if="showMark" class="records-row__mark">
+        <TypeMark :type="record.practiceType" :size="28" />
+      </span>
       <span class="records-row__body">
         <span class="records-row__title">{{ title }}</span>
         <span class="records-row__meta">{{ meta }}</span>
@@ -50,7 +52,9 @@ const checkLabel = computed(() => `选择${PRACTICE_TYPE_LABELS[props.record.pra
         <span v-if="record.wrongCount" class="records-row__wrong">{{ record.wrongCount }} 错</span>
         <span v-else class="records-row__clean">全对</span>
       </span>
-      <AppIcon class="records-row__go" name="arrow" />
+      <span class="records-row__go" aria-hidden="true">
+        <AppIcon name="arrow" />
+      </span>
     </button>
   </li>
 </template>
