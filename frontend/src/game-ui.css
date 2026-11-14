@@ -1278,8 +1278,9 @@ html[data-theme='night'] .personal-workspace .contract-gate__mark { background: 
 html[data-theme='night'] .personal-workspace .today-hero__badge { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .today-tile { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .study-card { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .choice-option { background: #2d2149; }
-html[data-theme='night'] .personal-workspace .choice-option:hover { background: #2d2149; }
+/* The option carries its own plate artwork in both themes; a flat background
+ * colour here would paint a rectangle over it. */
+html[data-theme='night'] .personal-workspace .choice-option:hover { filter: brightness(1.06); }
 /* The given letters (a span, not an input) carry the same tile, and the night
  * rule above would otherwise paint a flat box over it. */
 html[data-theme='night'] .personal-workspace span.spelling-cell {
@@ -3772,7 +3773,9 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 }
 
 .personal-workspace .memory-page .memory-main-card {
-  width: min(100%, 820px);
+  /* Wide enough for the two drills that lay out in rows. The flip card is
+   * capped by its own stage, so it does not grow with this. */
+  width: min(100%, 1080px);
   margin-inline: auto;
 }
 
@@ -4577,8 +4580,16 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 /* ------------------------------------------------ memory: one card, one run */
 /* Two objects side by side: the question on the left, the controls on the
    right. The rail is a column of its own, not a strip under the card. */
+/* The drill pages need more room than a reading page: the memory workbench is
+   a slab plus its control rail, and at the shared 1240px page width the slab
+   was squeezed to 864 and its options wrapped early. Only pages that actually
+   hold the workbench widen. */
+.personal-workspace .workspace-content:has(.memory-page) {
+  width: min(100%, 1480px);
+}
+
 .personal-workspace .memory-workbench-grid.is-session {
-  grid-template-columns: minmax(0, 820px) 268px;
+  grid-template-columns: minmax(0, 1080px) 268px;
   justify-content: center;
   align-items: start;
   gap: 18px 44px;
@@ -5502,14 +5513,13 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 /* The inscription lies long: the slab is a tablet, not a tile. */
 .personal-workspace .memory-main-card .study-card--choice,
 .personal-workspace .memory-main-card .study-card--spelling {
-  max-width: 820px;
+  max-width: 1080px;
   width: 100%;
 }
 
-/* ...and its options run the full width of the slab instead of sitting as
-   small tiles in the middle of a lot of stone. */
+/* The options keep their own length. Stretching them to the slab put a
+   four-letter word in a slab-wide bar and drowned the word in stone. */
 .personal-workspace .memory-main-card .study-card--choice .choice-list .choice-option {
-  width: 100%;
   min-height: 0;
 }
 

@@ -311,9 +311,10 @@ function submit(): void {
 
 /* The given letters are marked, not recoloured: the tile they sit on stays
  * the tile, and a wash over it says "already here". */
+/* The given letters are marked by their colour alone. A wash over the tile
+ * turned the wood grey, which read as a disabled control rather than a hint. */
 .spelling-cell--prefilled {
-  color: #4e3d24;
-  box-shadow: inset 0 0 0 999px rgb(120 92 40 / 26%);
+  color: #8a6a3e;
 }
 
 .spelling-cell--active {
