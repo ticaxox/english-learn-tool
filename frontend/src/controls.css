@@ -5493,7 +5493,7 @@ html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__hi
 .personal-workspace .rune-surface .choice-option {
   display: block;
   width: 100%;
-  max-width: 288px;
+  max-width: 360px;
   height: 76px;
   margin-inline: auto;
   padding: 0;

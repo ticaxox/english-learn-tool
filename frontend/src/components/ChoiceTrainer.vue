@@ -208,7 +208,7 @@ function choose(optionId: string): void {
 .study-card--choice .choice-option {
   display: block;
   width: 100%;
-  max-width: 288px;
+  max-width: 360px;
   height: 76px;
   margin-inline: auto;
   border: 0 !important;
