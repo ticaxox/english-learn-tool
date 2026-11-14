@@ -233,25 +233,47 @@ describe('practice views', () => {
     expect(router.currentRoute.value.params.recordId).toBe('record-1')
   })
 
-  it('groups the mistake book by type, newest first inside each type', async () => {
+  it('groups the mistake book by date, then by type inside each date', async () => {
     practiceMocks.listPracticeMistakes.mockResolvedValueOnce({
       items: [
         { ...recordPage.items[0], id: 'm1', practiceType: 'reading', wrongCount: 1, submittedAt: '2026-10-24T04:00:00Z' },
-        { ...recordPage.items[0], id: 'm2', practiceType: 'fill_blank', wrongCount: 1, submittedAt: '2026-10-22T04:00:00Z' },
-        { ...recordPage.items[0], id: 'm3', practiceType: 'reading', wrongCount: 2, submittedAt: '2026-10-23T04:00:00Z' },
+        { ...recordPage.items[0], id: 'm2', practiceType: 'fill_blank', wrongCount: 1, submittedAt: '2026-10-24T06:00:00Z' },
+        { ...recordPage.items[0], id: 'm3', practiceType: 'reading', wrongCount: 2, submittedAt: '2026-10-24T08:00:00Z' },
+        { ...recordPage.items[0], id: 'm4', practiceType: 'reading', wrongCount: 2, submittedAt: '2026-10-23T04:00:00Z' },
       ],
-      total: 3,
+      total: 4,
       offset: 0,
       limit: 100,
     })
     const { wrapper } = await mountRoute(PracticeRecordsView, '/practice/mistakes', { onlyMistakes: true })
     await flushPromises()
-    const groups = wrapper.findAll('.records-group')
-    expect(groups.map((group) => group.get('h2').text())).toEqual(['填空', '阅读'])
-    // 10-24 comes before 10-23, so the newer record (one wrong) leads the group.
-    const readingMetas = groups[1].findAll('.records-row__meta').map((meta) => meta.text())
-    expect(readingMetas[0]).toContain('错 1')
-    expect(readingMetas[1]).toContain('错 2')
+    const days = wrapper.findAll('.records-group')
+    // Newest day first; each day keeps the fixed type order.
+    expect(days).toHaveLength(2)
+    expect(days[0].findAll('.records-subgroup h3').map((heading) => heading.text())).toEqual(['填空', '阅读'])
+    expect(days[1].findAll('.records-subgroup h3').map((heading) => heading.text())).toEqual(['阅读'])
+    // Inside a type the newest practice leads: 08:00 (two wrong) before 04:00 (one).
+    const readingMetas = days[0].findAll('.records-subgroup')[1].findAll('.records-row__meta').map((meta) => meta.text())
+    expect(readingMetas[0]).toContain('错 2')
+    expect(readingMetas[1]).toContain('错 1')
+  })
+
+  it('keeps only the date groups when one type is picked', async () => {
+    practiceMocks.listPracticeMistakes.mockResolvedValueOnce({
+      items: [
+        { ...recordPage.items[0], id: 'm1', practiceType: 'reading', wrongCount: 1, submittedAt: '2026-10-24T04:00:00Z' },
+      ],
+      total: 1,
+      offset: 0,
+      limit: 100,
+    })
+    const { wrapper } = await mountRoute(PracticeRecordsView, '/practice/mistakes?type=reading', { onlyMistakes: true })
+    await flushPromises()
+    expect(practiceMocks.listPracticeMistakes).toHaveBeenLastCalledWith(
+      expect.objectContaining({ practiceType: 'reading' }),
+    )
+    expect(wrapper.findAll('.records-group').length).toBe(1)
+    expect(wrapper.findAll('.records-subgroup')).toHaveLength(0)
   })
 
   it('uses the mistakes endpoint on the dedicated mistakes view', async () => {

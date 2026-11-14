@@ -15,6 +15,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import TypeMark from '../components/TypeMark.vue'
+import PracticeRecordRow from '../components/PracticeRecordRow.vue'
 import AppIcon from '../components/AppIcon.vue'
 import DivButton from '../components/DivButton.vue'
 import {
@@ -74,23 +75,73 @@ const allSelected = computed(
   () => records.value.length > 0 && records.value.every((record) => selected.value.includes(record.id)),
 )
 
+/** A local calendar day, not a timestamp: the mistake book is read by date. */
+function dayKeyOf(value: string | null): string {
+  const date = value ? new Date(value) : null
+  if (!date || Number.isNaN(date.getTime())) return ''
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function dayLabelOf(key: string, value: string | null): string {
+  const date = value ? new Date(value) : null
+  if (!date || Number.isNaN(date.getTime())) return '日期未知'
+  const today = new Date()
+  const yesterday = new Date()
+  yesterday.setDate(today.getDate() - 1)
+  if (key === dayKeyOf(today.toISOString())) return '今天'
+  if (key === dayKeyOf(yesterday.toISOString())) return '昨天'
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  }).format(date)
+}
+
 /**
- * The mistake book is read type by type, newest first in each type. The server
- * already answers newest-first; sorting again keeps the promise if a page ever
- * arrives out of order.
+ * The mistake book opens on dates: one group per day, newest day first. Inside
+ * a day the rows are split by exercise type — the type a learner is weak in is
+ * worth naming — and within a type the newest practice leads. With one type
+ * picked, the day already says everything the type would, so the rows sit
+ * straight under the date.
  */
-const groups = computed(() =>
-  practiceTypes
-    .map((type) => ({
-      type,
-      label: PRACTICE_TYPE_LABELS[type],
-      items: records.value
-        .filter((record) => record.practiceType === type)
+const dayGroups = computed(() => {
+  // The server filters by type already; doing it again keeps a loose response
+  // from mixing types into a view that promised one.
+  const visible = practiceType.value
+    ? records.value.filter((record) => record.practiceType === practiceType.value)
+    : records.value
+  const buckets = new Map<string, PracticeRecordSummary[]>()
+  for (const record of visible) {
+    const key = dayKeyOf(record.submittedAt)
+    const bucket = buckets.get(key) ?? []
+    bucket.push(record)
+    buckets.set(key, bucket)
+  }
+  return [...buckets.entries()]
+    .sort((left, right) => right[0].localeCompare(left[0]))
+    .map(([key, items]) => {
+      const sorted = items
         .slice()
-        .sort((left, right) => (right.submittedAt ?? '').localeCompare(left.submittedAt ?? '')),
-    }))
-    .filter((group) => group.items.length > 0),
-)
+        .sort((left, right) => (right.submittedAt ?? '').localeCompare(left.submittedAt ?? ''))
+      return {
+        key,
+        label: dayLabelOf(key, sorted[0]?.submittedAt ?? null),
+        count: sorted.length,
+        items: sorted,
+        types: practiceTypes
+          .map((type) => ({
+            type,
+            label: PRACTICE_TYPE_LABELS[type],
+            items: sorted.filter((record) => record.practiceType === type),
+          }))
+          .filter((group) => group.items.length > 0),
+      }
+    })
+})
+
+/** What the list actually has to show, after the client-side type guard. */
+const hasRows = computed(() => (isMistakes.value ? dayGroups.value.length > 0 : records.value.length > 0))
 
 function formatSubmittedAt(value: string | null): string {
   if (!value) return '—'
@@ -104,8 +155,12 @@ function formatSubmittedAt(value: string | null): string {
   }).format(date)
 }
 
-function scoreText(record: PracticeRecordSummary): string {
-  return record.score === null ? '—' : String(Math.round(record.score))
+/** A row inside a dated group needs the clock time, not the whole date. */
+function timeOfDay(value: string | null): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit' }).format(date)
 }
 
 /** The same query, with the type replaced or removed. */
@@ -258,7 +313,7 @@ void load()
         <h1>{{ isMistakes ? '错题本' : '题目集' }}</h1>
         <p class="workspace-page-lead">
           {{ isMistakes
-            ? '答错过的练习按题型归在一起，每种题型里最近的在最前面。点一条看当时那道题。'
+            ? '答错过的练习先按日期归堆，最近的日期在最前面；一天里再按题型分开。点一条看当时那道题。'
             : '每一次提交都在这里。点开一条，才看它的题目、你的作答和解析。' }}
         </p>
       </div>
@@ -332,7 +387,7 @@ void load()
         </DivButton>
       </div>
 
-      <p v-if="records.length === 0" class="records-empty panel">
+      <p v-if="!hasRows" class="records-empty panel">
         {{ isMistakes
           ? '还没有带着错题的练习。答错过的题目会自动归到这里。'
           : '还没有符合条件的记录。完成一次练习并提交后，记录会出现在这里。' }}
@@ -341,35 +396,16 @@ void load()
       <!-- 题目集: one flat list, newest first. -->
       <section v-else-if="!isMistakes" class="records-list" aria-label="记录列表">
         <ul class="records-rows" role="list">
-          <li
+          <PracticeRecordRow
             v-for="record in records"
             :key="record.id"
-            class="records-row"
-            :class="{ 'is-selected': selected.includes(record.id) }"
-          >
-            <input
-              class="records-row__check"
-              type="checkbox"
-              :checked="selected.includes(record.id)"
-              :aria-label="`选择${PRACTICE_TYPE_LABELS[record.practiceType]}记录`"
-              @change="toggleSelected(record.id)"
-            />
-            <button class="records-row__open" type="button" @click="openRecord(record)">
-              <TypeMark :type="record.practiceType" :size="24" />
-              <span class="records-row__body">
-                <span class="records-row__title">{{ PRACTICE_TYPE_LABELS[record.practiceType] }}</span>
-                <span class="records-row__meta">
-                  {{ PRACTICE_SOURCE_LABELS[record.source] }} · {{ record.totalQuestions }} 题 · {{ formatSubmittedAt(record.submittedAt) }}
-                </span>
-              </span>
-              <span class="records-row__marks">
-                <span class="records-row__score">{{ scoreText(record) }}<small>分</small></span>
-                <span v-if="record.wrongCount" class="records-row__wrong">{{ record.wrongCount }} 错</span>
-                <span v-else class="records-row__clean">全对</span>
-              </span>
-              <AppIcon class="records-row__go" name="arrow" />
-            </button>
-          </li>
+            :record="record"
+            :checked="selected.includes(record.id)"
+            :title="PRACTICE_TYPE_LABELS[record.practiceType]"
+            :meta="`${PRACTICE_SOURCE_LABELS[record.source]} · ${record.totalQuestions} 题 · ${formatSubmittedAt(record.submittedAt)}`"
+            @toggle="toggleSelected(record.id)"
+            @open="openRecord(record)"
+          />
         </ul>
 
         <nav v-if="total > PAGE_SIZE" class="records-pager" aria-label="记录分页">
@@ -379,41 +415,49 @@ void load()
         </nav>
       </section>
 
-      <!-- 错题本: the same rows, one shelf per type. -->
+      <!-- 错题本: dates first; inside a day, one shelf per type unless a type is picked. -->
       <div v-else class="records-groups">
-        <section v-for="group in groups" :key="group.type" class="records-group" :aria-label="`${group.label}错题`">
+        <section v-for="day in dayGroups" :key="day.key" class="records-group" :aria-label="`${day.label}的错题`">
           <header class="records-group__head">
-            <TypeMark :type="group.type" :size="22" />
-            <h2>{{ group.label }}</h2>
-            <span class="records-group__count">{{ group.items.length }} 条</span>
+            <h2>{{ day.label }}</h2>
+            <span class="records-group__count">{{ day.count }} 条</span>
           </header>
-          <ul class="records-rows" role="list">
-            <li
-              v-for="record in group.items"
+
+          <template v-if="practiceType === ''">
+            <div v-for="group in day.types" :key="group.type" class="records-subgroup">
+              <header class="records-subgroup__head">
+                <TypeMark :type="group.type" :size="18" />
+                <h3>{{ group.label }}</h3>
+                <span>{{ group.items.length }} 条</span>
+              </header>
+              <ul class="records-rows" role="list">
+                <PracticeRecordRow
+                  v-for="record in group.items"
+                  :key="record.id"
+                  :record="record"
+                  :checked="selected.includes(record.id)"
+                  :show-mark="false"
+                  :title="timeOfDay(record.submittedAt)"
+                  :meta="`${PRACTICE_SOURCE_LABELS[record.source]} · ${record.totalQuestions} 题 · 错 ${record.wrongCount}`"
+                  @toggle="toggleSelected(record.id)"
+                  @open="openRecord(record)"
+                />
+              </ul>
+            </div>
+          </template>
+
+          <ul v-else class="records-rows" role="list">
+            <PracticeRecordRow
+              v-for="record in day.items"
               :key="record.id"
-              class="records-row"
-              :class="{ 'is-selected': selected.includes(record.id) }"
-            >
-              <input
-                class="records-row__check"
-                type="checkbox"
-                :checked="selected.includes(record.id)"
-                :aria-label="`选择${formatSubmittedAt(record.submittedAt)}的${group.label}记录`"
-                @change="toggleSelected(record.id)"
-              />
-              <button class="records-row__open" type="button" @click="openRecord(record)">
-                <span class="records-row__body">
-                  <span class="records-row__title">{{ formatSubmittedAt(record.submittedAt) }}</span>
-                  <span class="records-row__meta">
-                    {{ PRACTICE_SOURCE_LABELS[record.source] }} · {{ record.totalQuestions }} 题 · 错 {{ record.wrongCount }}
-                  </span>
-                </span>
-                <span class="records-row__marks">
-                  <span class="records-row__score">{{ scoreText(record) }}<small>分</small></span>
-                </span>
-                <AppIcon class="records-row__go" name="arrow" />
-              </button>
-            </li>
+              :record="record"
+              :checked="selected.includes(record.id)"
+              :show-mark="false"
+              :title="timeOfDay(record.submittedAt)"
+              :meta="`${PRACTICE_SOURCE_LABELS[record.source]} · ${record.totalQuestions} 题 · 错 ${record.wrongCount}`"
+              @toggle="toggleSelected(record.id)"
+              @open="openRecord(record)"
+            />
           </ul>
         </section>
 
