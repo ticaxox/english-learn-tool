@@ -2841,7 +2841,7 @@ than its row reads as a different kind of thing. */
   border: 0;
   border-radius: 0;
   background-color: transparent !important;
-  background-image: var(--pumpkin-todo) !important;
+  background-image: var(--pumpkin-unlit) !important;
   background-position: center !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
@@ -2849,25 +2849,21 @@ than its row reads as a different kind of thing. */
   color: #c8a06a;
 }
 
-/* A stop you finished keeps the same smiling face it had while you walked up
- * to it - warm by day, the same smile re-lit violet after dark. */
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-completed {
-  background-image: var(--pumpkin-done) !important;
+  background-image: var(--pumpkin-lit) !important;
   color: #5a3208;
   filter: drop-shadow(0 0 12px rgb(255 150 0 / 55%));
 }
 
-/* The stop ahead wears the waiting lantern; the one you are on is the same
- * face with the light on it. */
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-in_progress,
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-unlocked {
-  background-image: var(--pumpkin-todo) !important;
-  color: #5a3208;
-  filter: drop-shadow(0 0 14px rgb(255 170 60 / 70%));
+  background-image: var(--pumpkin-green) !important;
+  color: #1d3a2a;
+  filter: drop-shadow(0 0 12px rgb(140 220 140 / 45%));
 }
 
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-failed {
-  background-image: var(--pumpkin-todo) !important;
+  background-image: var(--pumpkin-unlit) !important;
   color: #ff9a8a;
   filter: saturate(0.7) brightness(0.85);
 }
@@ -3138,45 +3134,30 @@ than its row reads as a different kind of thing. */
   box-shadow: 0 6px 0 rgb(59 42 26 / 8%);
 }
 
-/* T-FE-021: the board is one panel. The player bar takes a row of its own
- * across the whole card; the tasks and the wordbook share the row below. */
+/* T-FE-021: the board is one panel with a task column and a stats column. */
 .personal-workspace .crumb-today-board.crumb-merged {
   grid-template-columns: minmax(0, 1fr) 250px;
-  gap: 18px 26px;
+  gap: 26px;
   align-items: start;
 }
-.personal-workspace .crumb-today-board.crumb-merged > .game-hud {
-  grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
-  margin: 0;
-  padding: 11px 16px;
-  border-radius: 14px;
-}
-.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-crumbo { display: none; }
-.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level { width: 50px; height: 50px; }
-.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level__inner { width: 40px; height: 40px; }
-.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level__inner strong { font-size: 17px; }
-.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-stat { min-width: 58px; padding: 5px 9px; }
 .personal-workspace .crumb-merged-main { display: flex; flex-direction: column; min-width: 0; }
+.personal-workspace .crumb-merged-title {
+  margin: 6px 0 4px;
+  font: 800 26px/1.28 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+.personal-workspace .crumb-merged-title b { color: var(--ui-forest); }
+.personal-workspace .crumb-merged-actions { display: flex; align-items: center; gap: 14px; margin: 12px 0 10px; }
+.personal-workspace .crumb-merged-count { font-size: 12px; color: var(--ui-muted); }
 .personal-workspace .crumb-merged-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.personal-workspace .crumb-merged-ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.personal-workspace .crumb-merged-stamp { text-align: center; font-size: 11.5px; color: var(--ui-muted); }
+.personal-workspace .crumb-merged-stamp strong { display: block; color: var(--ui-ink); }
 .personal-workspace .crumb-merged-book {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas: "cover eyebrow" "cover name" "cover link";
-  gap: 2px 14px;
-  align-items: center;
+  display: flex; flex-direction: column; gap: 2px;
+  border-top: 2px dashed var(--ui-line); padding-top: 12px;
 }
-.personal-workspace .crumb-merged-book > .crumb-eyebrow { grid-area: eyebrow; }
-.personal-workspace .crumb-merged-book > strong { grid-area: name; font-size: 14px; line-height: 1.35; }
-.personal-workspace .crumb-merged-book > .crumb-inline-link { grid-area: link; justify-self: start; margin-top: 2px; }
-.personal-workspace .crumb-merged-book__cover {
-  grid-area: cover;
-  width: 78px;
-  height: 106px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 0 rgb(59 42 26 / 18%));
-}
+.personal-workspace .crumb-merged-book strong { font-size: 14px; }
 .personal-workspace .crumb-merged .crumb-task-list { list-style: none; margin: 0; padding: 0; }
 .personal-workspace .crumb-merged .crumb-task-list li { border-top: 2px dashed var(--ui-line); }
 .personal-workspace .crumb-merged .crumb-task-list li:last-child { border-bottom: 2px dashed var(--ui-line); }
@@ -4230,208 +4211,15 @@ than its row reads as a different kind of thing. */
 
 /* ------------------------------------------- weekly report and badge wall */
 
-/* Two cards under the map: the month's footprint, and the shape of the words.
- * Each card splits into two columns so both can be read at a glance. */
-.personal-workspace .today-insights {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-  margin-top: 18px;
-}
-
-.personal-workspace .insight-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 18px 20px;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 22px;
-  background: var(--ui-surface);
-  box-shadow: 0 6px 0 rgb(59 42 26 / 12%);
-}
-
-.personal-workspace .insight-card__eyebrow {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ui-muted);
-}
-
-.personal-workspace .insight-split {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-  flex: 1;
-}
-
-.personal-workspace .insight-col {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-/* The month, one cell a day: filled when studied, ringed when it is today. */
-.personal-workspace .trail-month {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 34px));
-  justify-content: center;
-  gap: 6px;
-}
-
-.personal-workspace .trail-month__dow {
-  padding-bottom: 2px;
-  text-align: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ui-muted);
-}
-
-.personal-workspace .trail-month__gap {
-  aspect-ratio: 1;
-  border-radius: 9px;
-  outline: 2px dashed var(--ui-line);
-  outline-offset: -2px;
-}
-
-.personal-workspace .trail-month__day {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  border-radius: 9px;
-  background: #f4e9d5;
-  color: #b7a184;
-  font-size: 10px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.personal-workspace .trail-month__day.is-past { background: #e6d6b8; color: #8d7455; }
-
-.personal-workspace .trail-month__day.is-lit { background: var(--g-orange, #ff9600); color: #fff; }
-
-.personal-workspace .trail-month__day.is-today {
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  outline: 2px solid var(--g-gold-edge, #d9a400);
-  outline-offset: -2px;
-}
-
-.personal-workspace .trail-week__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 6px;
-}
-
-.personal-workspace .trail-week__title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ui-muted);
-}
-
-.personal-workspace .trail-week__meta {
-  font-size: 10.5px;
-  color: var(--ui-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.personal-workspace .insight-card .weekly-bars { gap: 5px; }
-.personal-workspace .insight-card .weekly-day__slot { height: 104px; }
-.personal-workspace .insight-card .weekly-day__lamp { font-size: 10.5px; }
-.personal-workspace .insight-card .weekly-day__xp { font-size: 9.5px; }
-.personal-workspace .insight-card .weekly-goals {
-  gap: 7px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 2px dashed var(--ui-line);
-}
-
-/* One word, one slice: the bar is the whole vocabulary, bottom up. */
-.personal-workspace .state-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 22px;
-  align-items: center;
-  flex: 1;
-  min-height: 0;
-}
-
-.personal-workspace .state-scale {
-  display: flex;
-  gap: 10px;
-  align-self: center;
-}
-
-.personal-workspace .state-scale__track {
-  display: flex;
-  flex-direction: column-reverse;
-  width: 12px;
-  height: 250px;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 999px;
-  background: #f7ecd8;
-}
-
-.personal-workspace .state-scale__seg { position: relative; display: block; width: 100%; }
-
-.personal-workspace .state-scale__seg:first-child { border-radius: 0 0 999px 999px; }
-.personal-workspace .state-scale__seg:last-child { border-radius: 999px 999px 0 0; }
-
-/* The slice answers on hover: name, how many, and the share it takes. */
-.personal-workspace .state-scale__seg::after {
-  position: absolute;
-  top: 50%;
-  right: calc(100% + 11px);
-  z-index: 6;
-  padding: 5px 10px;
-  border-radius: 9px;
-  background: var(--ui-ink, #35240f);
-  color: #fff8ec;
-  content: attr(data-tip);
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-50%) scale(0.95);
-  transition: opacity 0.14s ease, transform 0.14s ease;
-}
-
-.personal-workspace .state-scale__seg:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) scale(1);
-}
-
-.personal-workspace .state-scale__labels {
-  position: relative;
-  width: 48px;
-  height: 250px;
-}
-
-.personal-workspace .state-scale__labels b {
-  position: absolute;
-  left: 0;
-  transform: translateY(-50%);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  color: #6f573d;
-}
-
 .personal-workspace .today-extras {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 18px;
+  align-items: start;
   margin-top: 18px;
 }
 
+.personal-workspace .weekly-report,
 .personal-workspace .badge-wall {
   display: grid;
   gap: 12px;
@@ -4442,18 +4230,33 @@ than its row reads as a different kind of thing. */
   background: var(--ui-surface);
 }
 
-/* The unlocked count rides at the far end of the rail, not under the title. */
-.personal-workspace .badge-wall__head .badge-wall__rail { flex: 1; }
-.personal-workspace .badge-wall__head .field-hint {
-  margin: 0;
-  font-size: 12px;
-  white-space: nowrap;
-  color: var(--ui-muted);
+.personal-workspace .weekly-report__head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
 }
-.personal-workspace .badge-wall__head .field-hint strong { color: var(--ui-ink); font-weight: 800; }
 
-@media (max-width: 1180px) {
-  .personal-workspace .today-insights { grid-template-columns: minmax(0, 1fr); }
+.personal-workspace .weekly-report__head strong { font-size: 1.05rem; }
+
+.personal-workspace .weekly-report__streak {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 9px 3px 6px;
+  border-radius: 999px;
+  background: var(--g-orange-soft);
+  color: var(--g-on-orange-soft);
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.personal-workspace .weekly-report__streak svg {
+  width: 15px;
+  height: 15px;
+  fill: var(--g-orange);
+  stroke: none;
 }
 
 /* Seven candles: height is the day's XP, a lit flame means the day was
@@ -5140,10 +4943,10 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background-clip: padding-box;
   box-shadow: none;
   border-style: solid;
-  border-width: 34px 60px 32px;
+  border-width: 30px;
   border-image-source: var(--rune-scroll);
-  border-image-slice: 14% 12% 14% 12% fill;
-  border-image-width: 34px 60px 32px;
+  border-image-slice: 7% fill;
+  border-image-width: 30px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
@@ -5161,7 +4964,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   border-style: solid !important;
   border-width: 24px !important;
   border-image-source: var(--rune-parchment) !important;
-  border-image-slice: 5% fill !important;
+  border-image-slice: 7% fill !important;
   border-image-width: 24px !important;
   border-image-repeat: stretch !important;
   border-color: transparent !important;
@@ -5176,7 +4979,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   .member-practice-page .practice-question-card.practice-question-card--fill_blank,
   .member-practice-page .practice-question-card.practice-question-card--reading,
   .member-practice-page .practice-question-card.practice-question-card--translation {
-    border-width: 22px 40px 22px; border-image-width: 22px 40px 22px;
+    border-width: 22px; border-image-width: 22px;
   }
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
@@ -5186,6 +4989,28 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .practice-article-panel .practice-article,
 .practice-article-panel .eyebrow { color: #3d2c18; }
+
+/* Night ink on the same paper. The rules above paint ink for a cream sheet;
+ * after dark the sheet is violet-black, so the ink has to turn over or the
+ * passage and the essay prompt sink into it. */
+html[data-theme='night'] .personal-workspace .practice-article-panel .practice-article,
+html[data-theme='night'] .personal-workspace .practice-article-panel .eyebrow,
+html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-writing,
+html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-answer-textarea {
+  color: #f3e9d2;
+}
+
+html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-prompt-note,
+html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-requirements {
+  color: #cdbfe4;
+}
+
+/* The translation answer is a scrap of torn paper lying on the card, so the
+ * ink is simply the night ink on that scrap. */
+html[data-theme='night'] .personal-workspace .practice-question-card--translation .practice-answer-textarea {
+  background: transparent !important;
+  color: #f3e9d2;
+}
 
 /* Writing: the prompt is a sheet of its own, the answer is written on another.
    Two objects, not one frame around both. */
@@ -5209,7 +5034,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   border-style: solid;
   border-width: 24px;
   border-image-source: var(--rune-parchment);
-  border-image-slice: 5% fill;
+  border-image-slice: 7% fill;
   border-image-width: 24px;
   border-image-repeat: stretch;
   border-color: transparent;
@@ -5223,10 +5048,10 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background: #f3e3c3;
   background-clip: padding-box;
   border-style: solid;
-  border-width: 34px 60px 32px;
-  border-image-source: var(--rune-scroll);
-  border-image-slice: 14% 12% 14% 12% fill;
-  border-image-width: 34px 60px 32px;
+  border-width: 30px;
+  border-image-source: var(--rune-torn);
+  border-image-slice: 7% fill;
+  border-image-width: 30px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
@@ -5297,6 +5122,9 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background: #35240f;
   border-color: #35240f;
   color: #f6e7c8;
+  /* The stamp is a solid ink disc, so the letter on it has to be the paper,
+   * not the ink — `--badge-ink` is what the glyph actually reads. */
+  --badge-ink: #f6e7c8;
 }
 
 .member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked) .option-badge,
@@ -5308,23 +5136,24 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   color: #35240f;
 }
 
-/* The translation answer is ruled paper, so it reads as somewhere to write. */
+/* The translation answer is where you write, so it is a torn sheet laid on the
+   card: the question is the filed document, the answer is the scrap. */
 .member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
 .member-practice-page .practice-question-card--translation .practice-answer-textarea {
-  min-height: 150px;
-  padding: 10px 12px;
-  border-width: 1px;
-  border-color: rgb(122 92 48 / 40%);
-  background-color: rgb(255 250 238 / 60%) !important;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 31px,
-    rgb(122 92 48 / 22%) 31px,
-    rgb(122 92 48 / 22%) 32px
-  ) !important;
-  background-size: 100% 32px;
-  line-height: 32px;
+  min-height: 180px;
+  padding: 10px 16px;
+  border-style: solid;
+  border-width: 18px;
+  border-image-source: var(--rune-torn);
+  border-image-slice: 7% fill;
+  border-image-width: 18px;
+  border-image-repeat: stretch;
+  border-color: transparent;
+  border-radius: 0;
+  background: transparent !important;
+  background-image: none !important;
+  color: #3d2c18;
+  line-height: 1.9;
 }
 
 /* ============================================================

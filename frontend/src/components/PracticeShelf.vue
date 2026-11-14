@@ -10,14 +10,27 @@
 import { computed } from 'vue'
 import { practiceBooks } from '../assets/halloween'
 import ArtImage from './ArtImage.vue'
+import AppIcon from './AppIcon.vue'
 import type { PracticeType } from '../api/practice'
+
+/** 设置不是一本书：它是书架最右端的一张卡片，打开的是配置而不是练习。 */
+export interface ShelfExtraBook {
+  key: string
+  label: string
+  hint: string
+  icon: string
+}
 
 const props = defineProps<{
   types: readonly PracticeType[]
   labels: Record<string, string>
+  extra?: readonly ShelfExtraBook[]
 }>()
 
-const emit = defineEmits<{ (event: 'pick', type: PracticeType): void }>()
+const emit = defineEmits<{
+  (event: 'pick', type: PracticeType): void
+  (event: 'pick-extra', key: string): void
+}>()
 
 /** One line under each book: what that exercise asks of you. */
 const hints: Record<string, string> = {
@@ -52,6 +65,22 @@ const books = computed(() =>
 
       <span class="shelf-book__title">{{ book.label }}</span>
       <span class="shelf-book__hint">{{ book.hint }}</span>
+    </button>
+
+    <button
+      v-for="entry in props.extra ?? []"
+      :key="entry.key"
+      class="module-card practice-shelf-card"
+      :class="`practice-shelf-card--${entry.key}`"
+      type="button"
+      @click="emit('pick-extra', entry.key)"
+    >
+      <span class="practice-shelf-card__plate" aria-hidden="true">
+        <AppIcon :name="entry.icon" />
+      </span>
+
+      <span class="shelf-book__title">{{ entry.label }}</span>
+      <span class="shelf-book__hint">{{ entry.hint }}</span>
     </button>
     <span class="shelf-board" aria-hidden="true"></span>
   </div>

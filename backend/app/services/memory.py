@@ -344,17 +344,26 @@ def _stable_options(correct: str, pool: list[str], entry_id: UUID) -> list[str]:
 PROMPT_SIDES = ("headword", "definition", "phonetic")
 
 
-def _pick_prompt_type(value: object) -> str:
-    """Choose one of the enabled prompt sides; unknown values fall back to a word prompt."""
+def _enabled_sides(value: object) -> list[str]:
+    """The sides the learner ticked, in their order, at least one.
+
+    A side that was not ticked is not a hint — it is the answer — so the card
+    builder only ever draws from this list.
+    """
     if isinstance(value, str):
-        candidates = [item for item in value.split(",") if item in PROMPT_SIDES]
+        candidates = [item.strip() for item in value.split(",")]
     elif isinstance(value, list):
-        candidates = [str(item) for item in value if str(item) in PROMPT_SIDES]
+        candidates = [str(item).strip() for item in value]
     else:
         candidates = []
-    if not candidates:
-        candidates = ["definition"]
-    return random.choice(candidates)
+    sides = [item for item in candidates if item in PROMPT_SIDES]
+    unique = list(dict.fromkeys(sides))
+    return unique or ["definition"]
+
+
+def _pick_prompt_type(value: object) -> str:
+    """Choose one of the enabled prompt sides; unset falls back to the meaning."""
+    return random.choice(_enabled_sides(value))
 
 
 async def _card_prompt(
@@ -370,8 +379,11 @@ async def _card_prompt(
     definition_zh = definition.definition_zh if definition else None
     part_of_speech = definition.part_of_speech if definition else None
     if module == "flashcard":
-        # The learner picks which sides may be shown; unset means every side.
-        front = _pick_prompt_type(preferences.get("flashcard_prompt_types"))
+        # The learner ticks which sides a card may show. Only a ticked side is
+        # drawn, and only a ticked phonetic is printed under it: an unticked
+        # 读音 on a card asked for its 中文 is the answer given away.
+        sides = _enabled_sides(preferences.get("flashcard_prompt_types"))
+        front = random.choice(sides)
         if front == "definition" and definition_zh:
             prompt, label = definition_zh, "definition"
         elif front == "phonetic" and entry.phonetic:
@@ -382,7 +394,7 @@ async def _card_prompt(
             module="flashcard",
             prompt=prompt,
             prompt_label=label,
-            phonetic=entry.phonetic,
+            phonetic=entry.phonetic if "phonetic" in sides else None,
             part_of_speech=part_of_speech,
         )
     if module == "spelling":
@@ -400,9 +412,10 @@ async def _card_prompt(
             phonetic=entry.phonetic,
             part_of_speech=part_of_speech,
         )
-    prompt_type = _pick_prompt_type(
+    sides = _enabled_sides(
         preferences.get("choice_prompt_types") or preferences.get("choice_prompt")
     )
+    prompt_type = random.choice(sides)
     if prompt_type not in {"headword", "definition", "phonetic"}:
         prompt_type = "definition"
     if prompt_type == "phonetic" and entry.phonetic:
@@ -466,7 +479,7 @@ async def _card_prompt(
         module="choice",
         prompt=prompt,
         prompt_label=prompt_label,
-        phonetic=entry.phonetic,
+        phonetic=entry.phonetic if "phonetic" in sides else None,
         part_of_speech=part_of_speech,
         options=options,
         option_count=len(options),

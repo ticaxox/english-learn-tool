@@ -88,6 +88,8 @@ function pick(module: ShelfModule): void {
       <span class="shelf-book__title">{{ book.label }}</span>
       <span class="shelf-book__hint">{{ book.hint }}</span>
     </button>
+
+    <span class="shelf-board" aria-hidden="true"></span>
   </div>
 </template>
 

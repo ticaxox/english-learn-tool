@@ -26,6 +26,7 @@ export function useRuneSurface(drill: RuneDrill = 'question') {
       '--rune-slab-url': `url(${forMode(runeStone.slab, mode)})`,
       '--rune-scroll': `url(${forMode(runePaper.scroll, mode)})`,
       '--rune-parchment': `url(${forMode(runePaper.parchment, mode)})`,
+      '--rune-torn': `url(${forMode(runePaper.torn, mode)})`,
       // The question card is the drill's own frame: pumpkins in the corners,
       // vines down the sides, blank parchment in the middle to write on. The
       // two memory drills draw on their own material instead of borrowing it.

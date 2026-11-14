@@ -49,10 +49,10 @@ import barStele from './card/bar-stele.png'
 import barSteleOn from './card/bar-stele-on.png'
 import chipBiscuit from './card/chip-biscuit.png'
 import chipStele from './card/chip-stele.png'
-import sheetDay from './card/sheet-day.png'
-import sheetNight from './card/sheet-night.png'
-import sheetFlatDay from './card/sheet-flat-day.png'
-import sheetFlatNight from './card/sheet-flat-night.png'
+import sheetBrassDay from './card/sheet-brass-day.png'
+import sheetBrassNight from './card/sheet-brass-night.png'
+import sheetParchedDay from './card/sheet-parched-day.png'
+import sheetParchedNight from './card/sheet-parched-night.png'
 import wordbookCoverDay from './card/wordbook-cover-day.png'
 import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
@@ -119,17 +119,24 @@ export const runeStone = {
   chipOn: { day: barBiscuitOn, night: barSteleOn },
 } as const
 
-/** The paper the AI practice questions are written on: a rolled sheet and a
-    plain torn one, day and night. */
+/** The paper the AI practice questions are written on.
+
+    Two stocks, because the exercises are two different acts: the graded card
+    (fill-blank, reading, translation, and the reading passage itself) is a
+    brass-cornered document — a sheet that was bound and filed; the writing
+    exercise is a loose sheet, torn out and written on by hand. The old slot
+    names stay: `scroll` is the graded card, `parchment` the passage, and
+    `torn` the writing paper. */
 export const runePaper = {
-  scroll: { day: sheetDay, night: sheetNight },
-  parchment: { day: sheetFlatDay, night: sheetFlatNight },
+  scroll: { day: sheetBrassDay, night: sheetBrassNight },
+  parchment: { day: sheetBrassDay, night: sheetBrassNight },
+  torn: { day: sheetParchedDay, night: sheetParchedNight },
 } as const
 
 /** The question surface for the AI exercise types: one sheet, text lives on it. */
 export const parchment: ThemeMode = {
-  day: sheetDay,
-  night: sheetNight,
+  day: sheetBrassDay,
+  night: sheetBrassNight,
 }
 
 /** A wordbook cover with nothing printed on it; the title and badges sit on top. */
@@ -230,29 +237,23 @@ export const bookObject = { day: bookObjectDay, night: bookObjectNight } as cons
 /* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
  * spirit-green one for the stop you are on, a dark unlit one for a stop out
  * of reach. */
+import pumpkinGreen from './char/pumpkin-green.png'
 import pumpkinGreenNight from './char/pumpkin-green-night.png'
+import pumpkinUnlit from './char/pumpkin-unlit.png'
+import pumpkinUnlitNight from './char/pumpkin-unlit-night.png'
 import pumpkinMorning from './char/pumpkin-morning.png'
-import pumpkinMidnight from './char/pumpkin-midnight.png'
 import pumpkinDusk from './char/pumpkin-dusk.png'
 import pumpkinBoss from './char/pumpkin-boss.png'
 import pumpkinBossNight from './char/pumpkin-boss-night.png'
 import pumpkinBranch from './char/pumpkin-branch.png'
 import pumpkinBranchNight from './char/pumpkin-branch-night.png'
-
-/**
- * Two lanterns carry the whole trail: the one that smiles because you are
- * done with it, and the one still waiting for you.
- *
- * `done` is the same drawing at both ends of the day - a warm smile by
- * daylight, the same smile re-lit violet after dark (`pumpkin-midnight`).
- * `todo` is the stop ahead: a red-orange face in the sun, a cold one at night.
- */
 export const pumpkins = {
-  done: { day: pumpkinMorning, night: pumpkinMidnight },
-  todo: { day: pumpkinDusk, night: pumpkinGreenNight },
+  /** A cleared stop: bright by morning, a hot burn after dark. */
+  lit: { day: pumpkinMorning, night: pumpkinDusk },
+  green: { day: pumpkinGreen, night: pumpkinGreenNight },
+  unlit: { day: pumpkinUnlit, night: pumpkinUnlitNight },
   /** The last stop wears a crown; a side path is a quiet one. */
-  boss: { day: pumpkinBossNight, night: pumpkinBoss },
-  /** The side stop keeps one face for the small hours and one for the sun. */
+  boss: { day: pumpkinBoss, night: pumpkinBossNight },
   branch: { day: pumpkinBranch, night: pumpkinBranchNight },
 } as const
 

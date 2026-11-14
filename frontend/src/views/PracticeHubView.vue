@@ -23,6 +23,7 @@ import MemoryPracticeView from './MemoryPracticeView.vue'
 import { MEMORY_MODULES, MEMORY_MODULE_LABELS, type MemoryConfig, type MemoryModule } from '../types/learning'
 import PracticeTaskList from '../components/PracticeTaskList.vue'
 import PracticeShelf from '../components/PracticeShelf.vue'
+import DrillConfigDialog from '../components/DrillConfigDialog.vue'
 
 import '../practice.css'
 import ShelfPicker from '../components/ShelfPicker.vue'
@@ -56,6 +57,9 @@ const enabledMemoryModules = computed(() => MEMORY_MODULES.filter(memoryEnabled)
 /** The spelling drill has one setting, so it asks before it starts. */
 const spellingOpen = ref(false)
 
+/** 记忆题型配置：哪几个面可以出现，改一次对三种练习都生效。 */
+const drillConfigOpen = ref(false)
+
 function startMemory(module: MemoryModule): void {
   if (module === 'spelling') {
     spellingOpen.value = true
@@ -71,10 +75,12 @@ function startSpelling(): void {
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing']
 const practiceTypeOptions: PracticeType[] = [...practiceTypes, 'conversation', 'mixed']
 
-/** The conversation drill is one dialogue, not a generated set, so it stands
- *  with the card drills rather than with the exercise books. */
-const cardRowBooks = [
-  { type: 'conversation' as PracticeType, label: '对话', hint: '和 AI 角色对话' },
+/** 书架分三行：记忆三本一行，练习三本一行，对话、作文和设置一行。 */
+const exerciseRow: PracticeType[] = ['fill_blank', 'reading', 'translation']
+const pairRow: PracticeType[] = ['conversation', 'writing']
+/** 设置不是一种练习，它打开的是练习的题型配置。 */
+const settingsBooks = [
+  { key: 'settings', label: '设置', hint: '配置练习的题型', icon: 'settings' },
 ]
 function queryType(value: unknown): PracticeType | null {
   return typeof value === 'string' && practiceTypeOptions.includes(value as PracticeType)
@@ -261,27 +267,42 @@ onMounted(() => {
     <PracticeSessionView v-else-if="activeSessionId" embedded :session-id="activeSessionId" />
 
     <template v-else>
-      <ShelfPicker
-        :modules="MEMORY_MODULES"
-        :enabled="enabledMemoryModules"
-        :labels="MEMORY_MODULE_LABELS"
-        :books="cardRowBooks"
-        @pick="startMemory"
-        @pick-book="openConfig"
-      />
+      <!-- 书架在左、题目列表在右：书分三行摆，列表是右边的边栏。 -->
+      <div class="practice-hub-layout practice-hub-layout--split">
+        <div class="practice-hub-shelf">
+          <ShelfPicker
+            :modules="MEMORY_MODULES"
+            :enabled="enabledMemoryModules"
+            :labels="MEMORY_MODULE_LABELS"
+            @pick="startMemory"
+          />
 
-      <PracticeShelf :types="practiceTypes" :labels="PRACTICE_TYPE_LABELS" @pick="openConfig" />
+          <PracticeShelf :types="exerciseRow" :labels="PRACTICE_TYPE_LABELS" @pick="openConfig" />
 
-      <!-- No book of its own: a mixed set is the same books drawn at random. -->
-      <p class="practice-shelf__mixed">
-        <DivButton class="practice-shelf__mixed-link" type="button" @click="openConfig('mixed')">
-          来一组随机混合的题
-        </DivButton>
-      </p>
+          <PracticeShelf
+            :types="pairRow"
+            :labels="PRACTICE_TYPE_LABELS"
+            :extra="settingsBooks"
+            @pick="openConfig"
+            @pick-extra="drillConfigOpen = true"
+          />
 
-      <div class="practice-hub-layout practice-hub-layout--solo">
-        <PracticeTaskList :limit="5" show-tabs />
+          <!-- No book of its own: a mixed set is the same books drawn at random. -->
+          <p class="practice-shelf__mixed">
+            <DivButton class="practice-shelf__mixed-link" type="button" @click="openConfig('mixed')">
+              来一组随机混合的题
+            </DivButton>
+          </p>
+        </div>
+
+        <PracticeTaskList class="practice-hub-tasks" :limit="8" show-tabs />
       </div>
+
+      <DrillConfigDialog
+        :open="drillConfigOpen"
+        @close="drillConfigOpen = false"
+        @saved="memoryConfig = $event"
+      />
 
       <div v-if="spellingOpen" class="dialog-backdrop" @click.self="spellingOpen = false">
         <section class="dialog-card practice-config-dialog" role="dialog" aria-modal="true" aria-labelledby="spelling-start-title">

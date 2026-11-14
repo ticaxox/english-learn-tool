@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { type PracticeQuestion, type PracticeResult } from '../api/practice'
 import PracticeQuestionCard from './PracticeQuestionCard.vue'
+import { useRuneSurface } from '../composables/useRuneSurface'
 import { countUp } from '../composables/useMotion'
 import SpokenText from './SpokenText.vue'
 import { illustration } from '../assets/halloween'
@@ -13,6 +14,8 @@ const props = defineProps<{
   questions?: PracticeQuestion[]
 }>()
 
+// The passage is its own sheet; the card rows below bind their own paper.
+const { surface } = useRuneSurface()
 const scoreRef = ref<HTMLElement | null>(null)
 const scoreLabel = computed(() => (props.result.score === null ? '—' : `${Math.round(props.result.score)} 分`))
 
@@ -57,7 +60,11 @@ const correctPercent = computed(() => {
 
 <template>
   <section class="practice-result" aria-labelledby="practice-result-title">
-    <section v-if="isReading && readingArticle" class="panel practice-article-panel practice-article-panel--wide">
+    <section
+      v-if="isReading && readingArticle"
+      class="panel practice-article-panel practice-article-panel--wide"
+      :style="surface"
+    >
       <p class="eyebrow">阅读材料</p>
       <SpokenText class="practice-article" :text="readingArticle" :highlight="readingWords" />
       <p v-if="readingArticleZh" class="practice-translation-note practice-translation-note--article">{{ readingArticleZh }}</p>

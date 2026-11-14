@@ -20,6 +20,7 @@ import {
   type PracticeAnswerInput,
 } from '../api/practice'
 import PracticeTopBar from '../components/PracticeTopBar.vue'
+import { useRuneSurface } from '../composables/useRuneSurface'
 import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { fetchProgress } from '../api/progress'
 import { crumbBurst, popIn } from '../composables/useMotion'
@@ -28,6 +29,9 @@ import '../practice.css'
 const props = withDefaults(defineProps<{ sessionId?: string; embedded?: boolean }>(), { embedded: false })
 
 const route = useRoute()
+// The reading passage is its own sheet, so it binds the paper itself: the card
+// below sets the variables on its own element and would not hand them down.
+const { surface } = useRuneSurface()
 const router = useRouter()
 const sessionTimer = useSessionTimer()
 const timerLimit = timerLimitFromQuery(route.query.timer)
@@ -278,7 +282,11 @@ void practice.load()
       </section>
 
       <template v-else-if="session.status === 'ready'">
-        <section v-if="isReading && readingArticle" class="panel practice-article-panel practice-article-panel--wide">
+        <section
+          v-if="isReading && readingArticle"
+          class="panel practice-article-panel practice-article-panel--wide"
+          :style="surface"
+        >
           <p class="eyebrow">阅读材料</p>
           <SpokenText class="practice-article" :text="readingArticle" :highlight="readingWords" />
         </section>
