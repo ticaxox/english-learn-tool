@@ -93,6 +93,8 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(css).toContain('--crumb-moss')
     expect(css).toContain('.crumb-trail-board')
     expect(css).toContain('.workspace-shell .crumb-wordbooks .wordbook-cover--clay')
-    expect(css).toContain('.crumb-challenge .challenge-path::before { display: none; }')
+    // The list-shaped map went with its rules; the trail is the map now.
+    expect(css).not.toContain('.challenge-node--')
+    expect(css).not.toContain('.crumb-challenge .challenge-path')
   })
 })
