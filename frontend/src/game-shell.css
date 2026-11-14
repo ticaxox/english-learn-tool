@@ -1076,3 +1076,222 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   fill: var(--g-orange);
   flex: 0 0 auto;
 }
+
+/* ======================================================= phone, held in hand */
+
+/* The general field rule gives every input 100% width, which pulled the
+ * visually-hidden file picker across the whole page and widened the layout. */
+.personal-workspace .visually-hidden {
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+
+/* The rail already carries a day/night switch; the menu copy is for phones. */
+.personal-workspace .ia-profile-theme { display: none; }
+
+/* The rail is a desktop console: on a phone it would eat half the screen and
+ * push the page into a strip. It folds away and the bottom bar takes over. */
+@media (max-width: 860px) {
+  .personal-workspace {
+    display: block;
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 0;
+  }
+
+  .personal-workspace .workspace-sidebar { display: none; }
+  .personal-workspace .workspace-main { width: 100%; min-width: 0; }
+
+  .personal-workspace .workspace-topbar {
+    min-width: 0;
+    min-height: 58px;
+    gap: 10px;
+    padding: 8px 14px;
+  }
+
+  .personal-workspace .workspace-topbar-heading {
+    display: grid;
+    flex: 0 1 auto;
+    min-width: 0;
+    gap: 0;
+    padding-right: 10px;
+    border-right: 0;
+  }
+
+  .personal-workspace .workspace-topbar-heading strong {
+    overflow: hidden;
+    font-size: 1.02rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .personal-workspace .workspace-topbar-tabs {
+    flex: 1 1 auto;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .personal-workspace .workspace-topbar-tabs::-webkit-scrollbar { display: none; }
+  .personal-workspace .workspace-topbar-tabs .workspace-topbar-tab { flex: 0 0 auto; }
+
+  /* Tabs and filter pills were 24px tall: a comfortable line in a mouse
+   * interface, a miss under a thumb. */
+  .personal-workspace .workspace-topbar-tab,
+  .personal-workspace .practice-task-tab {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+  }
+
+  .personal-workspace .crumb-search__clear { width: 32px; height: 32px; }
+
+  /* The stepper's +/- were 24px squares, and widening them left the number
+   * field a few pixels wide, so the plate grows with its targets. */
+  .personal-workspace .crumb-stepper { width: min(100%, 124px); min-height: 44px; }
+  .personal-workspace .crumb-stepper__step { width: 36px; height: 36px; }
+  .personal-workspace .crumb-stepper__input { height: 36px; font-size: 1rem; }
+  .personal-workspace .records-back { min-height: 44px; }
+
+  /* The session's small marks: exit, speak, rate and end. */
+  .personal-workspace .lesson-hud__exit { width: 40px; height: 40px; }
+  .personal-workspace .speak-button { width: 36px; height: 36px; }
+  .personal-workspace .workspace-avatar-button.ia-profile-trigger { width: 40px; height: 40px; }
+  .personal-workspace .memory-rail-end,
+  .personal-workspace .memory-session-rail .memory-rail-end { min-height: 44px; }
+  .personal-workspace .memory-rail-actions .div-button { min-height: 44px; }
+
+  .personal-workspace .workspace-content {
+    padding: 16px 14px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .personal-workspace .member-mobile-nav {
+    position: fixed;
+    z-index: 40;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 8px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: 16px;
+    background: var(--ui-surface);
+    box-shadow: 0 8px 24px rgb(49 36 29 / 16%);
+  }
+
+  .personal-workspace .member-mobile-nav a {
+    min-height: 54px;
+    padding: 6px 4px;
+    border-radius: 10px;
+    color: var(--ui-muted);
+    font-size: 0.68rem;
+    font-weight: 750;
+  }
+
+  .personal-workspace .member-mobile-nav a.router-link-active,
+  .personal-workspace .member-mobile-nav a.is-section-active {
+    background: var(--ui-gold-soft);
+    color: var(--ui-ink);
+  }
+
+  .personal-workspace .member-mobile-nav svg { width: 18px; height: 18px; }
+
+  /* The rail's day/night switch is off-screen on a phone; the account menu
+   * carries the same control so the theme is still reachable. */
+  .personal-workspace .ia-profile-theme {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 2px -8px;
+    padding: 8px;
+    border-bottom: 1px solid var(--ui-line);
+    color: var(--ui-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .personal-workspace .ia-profile-theme .theme-switch { transform: scale(0.82); transform-origin: right center; }
+
+  /* The board is the whole page on a phone: the player bar gets its own row
+   * instead of sharing one with the counters. */
+  .personal-workspace .crumb-today-board { padding: 16px 14px; }
+  .personal-workspace .crumb-today-board.crumb-merged { gap: 14px; }
+}
+
+/* A tablet is wide enough that a full-bleed four-item bar reads like a footer
+ * stripe; keep it a compact dock. */
+@media (min-width: 621px) and (max-width: 860px) {
+  .personal-workspace .member-mobile-nav {
+    right: auto;
+    left: 50%;
+    width: min(520px, calc(100vw - 16px));
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 760px) {
+  .personal-workspace .crumb-today-board.crumb-merged > .game-hud {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 11px 12px;
+  }
+
+  .personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-stats { justify-content: space-between; }
+  .personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-stat { flex: 1 1 0; min-width: 0; }
+  .personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-xp__track { flex: 1 1 auto; min-width: 0; }
+}
+
+@media (max-width: 620px) {
+  /* Books stay books: two on a shelf row, not one full-width slab each. */
+  .personal-workspace .wordbook-grid,
+  .personal-workspace .crumb-wordbooks .wordbook-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px 10px;
+  }
+
+  /* At two books per row the cover is narrow. The absolutely positioned
+   * title could not wrap inside it, so on a phone the title returns to the
+   * flow, centred in the cover's padded inner area. */
+  .personal-workspace .wordbook-grid .wordbook-cover {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* Clears the bookmark at the top and sits in the cover's title band,
+     * above the metal clasp in the middle of the binding. */
+    padding: 54px 12% 0;
+  }
+
+  /* The older member layer made every cover child relative; the bookmark has
+   * to stay out of the flow or it pushes the title to the book's foot. */
+  .personal-workspace .wordbook-grid .wordbook-cover > .wordbook-cover__bookmark { position: absolute; }
+
+  .personal-workspace .wordbook-grid .wordbook-cover__name {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    z-index: 1;
+    width: 100%;
+    max-width: none;
+    overflow-wrap: anywhere;
+    font-size: clamp(0.7rem, 3.4vw, 0.82rem);
+  }
+
+  /* Twelve rows of medals turned the page into a scroll marathon. */
+  .personal-workspace .badge-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 4px;
+  }
+
+  .personal-workspace .badge__medal { width: 74px; height: 74px; }
+  .personal-workspace .badge__name { font-size: 0.76rem; }
+  .personal-workspace .badge__hint { font-size: 0.66rem; }
+}

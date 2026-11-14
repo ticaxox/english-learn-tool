@@ -7,6 +7,7 @@ import HobMark from './HobMark.vue'
 import { getActivePinia } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import { useGamification } from '../composables/useGamification'
+import { isNight } from '../composables/useTheme'
 
 const props = defineProps<{
   displayName: string
@@ -35,6 +36,7 @@ const pageTitles: Record<string, string> = {
   memory: '练习',
   'memory-mistakes': '记忆错词',
   practice: '练习',
+  'practice-tasks': '题目列表',
   'practice-records': '题目集',
   'practice-mistakes': '错题本',
   'practice-record': '练习记录',
@@ -43,6 +45,7 @@ const pageTitles: Record<string, string> = {
   'challenge-detail': '学习地图',
   coach: 'Hob',
   'settings-learning': '设置',
+  'settings-wordbooks': '设置',
   'settings-ai': '设置',
   'settings-security': '设置',
   'settings-knowledge': '设置',
@@ -261,6 +264,10 @@ onBeforeUnmount(() => {
                 <strong>{{ displayName }}</strong>
                 <span>@{{ username }}</span>
               </div>
+              <div class="ia-profile-theme">
+                <span>{{ isNight ? '夜晚' : '白天' }}</span>
+                <ThemeSwitch />
+              </div>
               <RouterLink
                 v-if="auth?.isAdmin"
                 role="menuitem"
@@ -283,7 +290,12 @@ onBeforeUnmount(() => {
     </div>
 
     <nav v-if="!immersive" class="workspace-mobile-nav member-mobile-nav ia-mobile-nav" aria-label="移动端主导航">
-      <RouterLink v-for="link in primaryLinks" :key="link.key" :to="link.to">
+      <RouterLink
+        v-for="link in primaryLinks"
+        :key="link.key"
+        :to="link.to"
+        :class="{ 'is-section-active': isGroupActive(link.key) }"
+      >
         <AppIcon :name="link.icon" />
         <span>{{ link.label }}</span>
       </RouterLink>

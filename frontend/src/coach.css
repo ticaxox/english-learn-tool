@@ -985,3 +985,116 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
 }
 .coach-confirm__danger:hover { filter: brightness(1.06); }
 .coach-confirm__danger:active { transform: translateY(2px); box-shadow: 0 0 0 color-mix(in srgb, var(--coach-seal) 55%, #000); }
+
+/* ============================================================ phone screen */
+
+/* The floating phone controls stand in for the history rail. */
+.coach-page.coach-page { position: relative; }
+.coach-page.coach-page .coach-mobile-actions { display: none; }
+
+@media (max-width: 900px) {
+  .coach-page.coach-page .coach-mobile-actions {
+    position: absolute;
+    z-index: 6;
+    top: 8px;
+    right: 12px;
+    left: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  .coach-page.coach-page .coach-mobile-actions > * { pointer-events: auto; }
+
+  .coach-page.coach-page .coach-mobile-picker {
+    max-width: 58%;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--coach-line);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--coach-page) 90%, transparent);
+    color: var(--coach-ink);
+    font: 700 0.78rem/1 var(--font-body);
+    backdrop-filter: blur(8px);
+  }
+
+  .coach-page.coach-page .coach-mobile-actions .coach-mobile-new {
+    display: inline-flex;
+    min-height: 36px;
+    gap: 6px;
+    align-items: center;
+    padding: 0 12px;
+    border: 1px solid var(--coach-line);
+    border-radius: 9px;
+    background: var(--coach-page);
+    color: var(--coach-accent-ink);
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  .coach-page.coach-page .coach-mobile-new svg { width: 15px; height: 15px; }
+
+  .coach-page.coach-page .coach-messages { padding-top: 52px; }
+
+  /* The welcome art starts under the floating history controls otherwise. */
+  .personal-workspace .workspace-content:has(.coach-page) .coach-main-empty { padding-top: 96px; }
+}
+
+@media (max-width: 860px) {
+  /* The fixed bottom bar owns the last ~80px of the screen, so the coach page
+   * ends above it. Without this the composer sat under the navigation. */
+  .personal-workspace .workspace-content:has(.coach-page) {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  /* The empty page was a two-row grid stretched over the whole column: the
+   * rows filled the height and left a hole between the art and the copy. */
+  .coach-page.coach-page .coach-main-empty,
+  .coach-page.coach-page .coach-messages-empty {
+    width: 100%;
+    padding: 16px 16px 20px;
+    gap: 16px;
+    align-content: center;
+    align-items: start;
+    text-align: left;
+  }
+
+  .coach-page.coach-page .coach-messages-empty { margin-top: 0; }
+  .coach-page.coach-page .coach-empty-art { width: 104px; height: 104px; justify-self: start; }
+
+  .coach-page.coach-page .coach-main-empty__copy h2,
+  .coach-page.coach-page .coach-main-empty__copy strong { font-size: 1.34rem; }
+
+  .coach-page.coach-page .coach-empty-lede { font-size: 0.92rem; line-height: 1.65; }
+
+  .coach-page.coach-page .coach-suggested-prompts { margin-top: 12px; }
+  .coach-page.coach-page .coach-suggested-prompts > * { min-height: 44px; padding: 10px 0; font-size: 0.9rem; }
+  .coach-page.coach-page .coach-empty-scope { margin-top: 14px; }
+  .coach-page.coach-page .coach-empty-start { min-height: 44px; padding: 10px 16px; }
+
+  /* The composer keeps its send button clear of the bottom bar and the
+   * phone's home indicator. */
+  .coach-page.coach-page .coach-composer {
+    padding: 0 16px calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .coach-page.coach-page .coach-composer__tool,
+  .coach-page.coach-page .coach-composer__send { width: 42px; height: 42px; }
+
+  .coach-page.coach-page .coach-message {
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    column-gap: 8px;
+  }
+
+  .coach-page.coach-page .coach-message-avatar { width: 36px; height: 36px; border-radius: 11px; }
+  .coach-page.coach-page .coach-message-avatar__art { width: 28px; height: 28px; }
+}
+
+@media (max-width: 620px) {
+  .coach-page.coach-page .coach-main-topbar { padding-inline: 12px; }
+  .coach-page.coach-page .coach-messages { padding: 56px 14px 4px; }
+  .coach-page.coach-page .coach-composer { padding-inline: 12px; }
+}

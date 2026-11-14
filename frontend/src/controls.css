@@ -816,6 +816,18 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   gap: 14px 26px;
 }
 
+/* A phone cannot hold two 280px plates side by side: the pair was wider than
+ * the card and hung off both edges. One plate per row, still centered. */
+@media (max-width: 720px) {
+  .personal-workspace .rune-surface .choice-list {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 12px;
+  }
+
+  .personal-workspace .rune-surface .choice-option { width: min(280px, 100%); }
+}
+
 .personal-workspace .choice-option { position: relative; }
 
 .personal-workspace .choice-option input[type="radio"] {
@@ -3115,7 +3127,7 @@ than its row reads as a different kind of thing. */
 .personal-workspace .crumb-wordbooks .wordbook-toolbar { border-bottom: 0 !important; }
 
 @media (max-width: 900px) {
-  .personal-workspace .ai-quota-list { grid-template-columns: repeat(3, minmax(240px, 1fr)); }
+  .personal-workspace .ai-quota-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* All memory card copy is vertically centred inside the surface. */
@@ -3969,11 +3981,23 @@ than its row reads as a different kind of thing. */
   .personal-workspace .coach-page .coach-messages { max-height: 55vh; }
 }
 
-/* AI quota: three equal-sized boxes and a compact timeout field. */
+/* AI quota: three equal-sized boxes and a compact timeout field. On a tablet
+ * it becomes two, on a phone one; a minimum width here used to force the
+ * whole page into a shrink-to-fit zoom. */
 .personal-workspace .ai-quota-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .ai-quota-global { flex-wrap: wrap; }
+  .personal-workspace .ai-quota-global input { width: 100%; max-width: none; }
 }
 
 .personal-workspace .ai-quota-row { width: 100%; }
@@ -7574,3 +7598,128 @@ html[data-theme='night'] .personal-workspace .ai-kind-switch__option:focus {
 /* 再收一档：目标字段里标签到数字框几乎贴着；供应商三颗按钮并拢。 */
 .personal-workspace .settings-goal-grid .field { gap: 2px; }
 .personal-workspace .personal-ai-provider__actions { gap: 0; }
+
+/* ====================================================== phone-sized controls */
+
+@media (max-width: 640px) {
+  /* Daily goals: label over control. The two-column row left the label
+   * floating halfway down a stepper block that was taller than it. */
+  .personal-workspace .settings-goal-grid .field,
+  .personal-workspace .settings-pair > .field--inline {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    align-items: start;
+  }
+
+  .personal-workspace .settings-goal-grid .field > label,
+  .personal-workspace .settings-pair > .field--inline > label {
+    white-space: normal;
+  }
+
+  .personal-workspace .settings-goal-grid .field > input,
+  .personal-workspace .settings-pair > .field--inline > select,
+  .personal-workspace .settings-pair > .field--inline > input {
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+  }
+
+  .personal-workspace .settings-goal-grid .field-inline-note {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    align-items: center;
+    justify-content: flex-start;
+    justify-self: stretch;
+  }
+
+  .personal-workspace .settings-goal-grid .field-inline-note input {
+    width: auto;
+    max-width: none;
+  }
+
+  /* A quota row is a label plus a checkbox, stepper and usage count. On a
+   * phone the label gets its own line so nothing is squeezed to a stub. */
+  .personal-workspace .ai-quota-row {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+
+  .personal-workspace .ai-quota-row .ai-quota-row__copy {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .personal-workspace .ai-quota-row .ai-quota-row__copy strong {
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .personal-workspace .ai-quota-row .ai-quota-row__controls { flex: 1 1 auto; }
+  .personal-workspace .ai-quota-row .ai-quota-row__used { flex: 0 0 auto; margin-left: auto; }
+
+  /* The account card is a grid whose implicit track grew to the token row's
+   * widest unbroken line, dragging 80px of it past the card edge. */
+  .personal-workspace .ia-account-security {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .personal-workspace .ia-security-form { grid-template-columns: minmax(0, 1fr); }
+
+  .personal-workspace .ia-token-form { flex-wrap: wrap; }
+  .personal-workspace .ia-token-form > input { flex: 1 1 100%; }
+  .personal-workspace .ia-token-form > .div-button { flex: 1 1 100%; min-height: 44px; }
+
+  .personal-workspace .mcp-token-list li {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    align-items: flex-start;
+  }
+
+  .personal-workspace .mcp-token-list li > div.mcp-token-main {
+    flex-wrap: wrap;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .personal-workspace .mcp-token-main small {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  /* The wordbook dialog header: cover and title share the first row, the
+   * actions get a row of their own instead of stacking in the cover column. */
+  .personal-workspace .wordbook-detail-dialog { width: calc(100vw - 24px); }
+
+  .personal-workspace .wordbook-detail-dialog .dialog-heading {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 8px 12px;
+    padding: 18px 16px 12px;
+  }
+
+  .personal-workspace .wordbook-detail-dialog .wordbook-detail-heading .wordbook-detail-cover { width: 56px; }
+
+  .personal-workspace .wordbook-detail-dialog .dialog-heading h2 {
+    padding-right: 40px;
+    font-size: 1.22rem;
+  }
+
+  .personal-workspace .wordbook-detail-dialog .dialog-heading .eyebrow { font-size: 0.66rem; }
+
+  .personal-workspace .wordbook-detail-dialog .wordbook-detail-actions {
+    grid-column: 1 / -1;
+    margin-top: 2px;
+  }
+
+  .personal-workspace .wordbook-detail-dialog .wordbook-detail-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 14px 16px;
+  }
+}

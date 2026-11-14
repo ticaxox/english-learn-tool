@@ -2604,10 +2604,9 @@ fieldset + fieldset {
     box-shadow: 0 6px 0 var(--cookie-300);
   }
 
-  .auth-card::before {
-    top: 0;
-    left: 1.15rem;
-  }
+  /* The paper tape is a card detail; full-bleed on a phone it reads as a red
+   * tab cut off by the screen edge. */
+  .auth-card::before { display: none; }
 
   .auth-card__masthead {
     align-items: flex-start;

@@ -176,6 +176,12 @@ async function openConversation(conversationId: string): Promise<void> {
   await coach.selectConversation(conversationId)
 }
 
+/** The phone has no history rail: a select in the corner stands in for it. */
+function switchMobileConversation(event: Event): void {
+  const id = (event.target as HTMLSelectElement).value
+  if (id) void openConversation(id)
+}
+
 const pendingDelete = ref<{ id: string; title: string } | null>(null)
 
 function askDelete(conversation: { id: string; title: string }): void {
@@ -289,6 +295,24 @@ async function revertTo(message: CoachMessage): Promise<void> {
 
 <template>
   <article class="coach-page member-coach-page coach-workspace workspace-page">
+
+    <div v-if="isPage" class="coach-mobile-actions">
+      <select
+        class="coach-mobile-picker"
+        :value="coach.selectedConversationId.value ?? ''"
+        aria-label="历史对话"
+        @change="switchMobileConversation"
+      >
+        <option v-if="!coach.selectedConversationId.value" value="" disabled>历史对话</option>
+        <option v-for="conversation in coach.conversations.value" :key="conversation.id" :value="conversation.id">
+          {{ conversation.title }}
+        </option>
+      </select>
+      <DivButton class="coach-mobile-new" type="button" @click="startConversation">
+        <AppIcon name="plus" />
+        新对话
+      </DivButton>
+    </div>
 
     <div class="coach-layout" :class="{ 'coach-layout--with-history': isPage }">
       <aside v-if="isPage" class="coach-history" aria-label="历史记录">
