@@ -49,7 +49,10 @@ TOOL_SPECS: dict[str, dict[str, Any]] = {
     },
     "search_knowledge": {
         "action_type": "search_knowledge",
-        "description": "在知识库里检索与问题相关的原文片段，返回带出处的引用。只检索这个学习者有权读的书架。",
+        "description": (
+            "在知识库里检索与问题相关的原文片段，返回带出处的引用。"
+            "只检索这个学习者有权读的书架。"
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
