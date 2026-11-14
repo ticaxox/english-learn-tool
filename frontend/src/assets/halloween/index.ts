@@ -28,6 +28,8 @@ import writingDay from './book/book-writing-day.png'
 import writingNight from './book/book-writing-night.png'
 import conversationDay from './book/book-conversation-day.png'
 import conversationNight from './book/book-conversation-night.png'
+import settingsCardDay from './card/settings-card-day.png'
+import settingsCardNight from './card/settings-card-night.png'
 
 /** Keyed by the product's own type names; `cloze` is the file name for fill-blank. */
 export const practiceBooks: PracticeArt = {
@@ -40,6 +42,9 @@ export const practiceBooks: PracticeArt = {
   writing: { day: writingDay, night: writingNight },
   conversation: { day: conversationDay, night: conversationNight },
 }
+
+/** 设置不是一本书：它是一张立起来的卡片，和书站在同一块木板上。 */
+export const settingsCard: ThemeMode = { day: settingsCardDay, night: settingsCardNight }
 
 import slabBiscuit from './card/slab-biscuit.png'
 import slabStele from './card/slab-stele.png'

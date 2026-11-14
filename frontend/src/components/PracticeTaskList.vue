@@ -9,7 +9,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import AppIcon from './AppIcon.vue'
-import TypeMark from './TypeMark.vue'
 import ErrorNotice from './ErrorNotice.vue'
 import LoadingState from './LoadingState.vue'
 import {
@@ -232,7 +231,6 @@ onMounted(() => {
           to="/practice/tasks"
           aria-current="page"
         >题目列表</RouterLink>
-        <RouterLink class="practice-task-tab" to="/practice/records">题目集</RouterLink>
         <RouterLink class="practice-task-tab" to="/practice/mistakes">错题本</RouterLink>
       </div>
     </header>
@@ -249,7 +247,6 @@ onMounted(() => {
         :aria-label="`${PRACTICE_TYPE_LABELS[row.practiceType]}，${taskName(row)}，${statusLabel(row)}，${row.count} 题`"
         @click="openDialog(row)"
       >
-        <TypeMark class="practice-task-mark" :type="row.practiceType" :size="20" />
         <span class="practice-task-type">{{ PRACTICE_TYPE_LABELS[row.practiceType] }}</span>
         <strong>{{ taskName(row) }}</strong>
         <span class="practice-task-count">

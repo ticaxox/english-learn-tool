@@ -9,8 +9,8 @@
  */
 import { computed } from 'vue'
 import { practiceBooks } from '../assets/halloween'
+import type { ThemeMode } from '../assets/halloween'
 import ArtImage from './ArtImage.vue'
-import AppIcon from './AppIcon.vue'
 import type { PracticeType } from '../api/practice'
 
 /** 设置不是一本书：它是书架最右端的一张卡片，打开的是配置而不是练习。 */
@@ -18,7 +18,7 @@ export interface ShelfExtraBook {
   key: string
   label: string
   hint: string
-  icon: string
+  art: ThemeMode
 }
 
 const props = defineProps<{
@@ -70,14 +70,12 @@ const books = computed(() =>
     <button
       v-for="entry in props.extra ?? []"
       :key="entry.key"
-      class="module-card practice-shelf-card"
-      :class="`practice-shelf-card--${entry.key}`"
+      class="module-card shelf-book"
+      :class="`shelf-book--${entry.key}`"
       type="button"
       @click="emit('pick-extra', entry.key)"
     >
-      <span class="practice-shelf-card__plate" aria-hidden="true">
-        <AppIcon :name="entry.icon" />
-      </span>
+      <ArtImage class="shelf-book__art" :set="entry.art" />
 
       <span class="shelf-book__title">{{ entry.label }}</span>
       <span class="shelf-book__hint">{{ entry.hint }}</span>

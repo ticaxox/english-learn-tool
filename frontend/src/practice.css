@@ -687,7 +687,7 @@
 /* 书架在左、题目列表在右。书分三行：记忆三本、练习三本、对话与作文与设置三本。 */
 .personal-workspace .practice-hub-layout.practice-hub-layout--split {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(288px, 360px);
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 470px);
   grid-template-areas: 'shelf tasks';
   gap: 22px;
   align-items: start;
@@ -725,78 +725,28 @@
   padding-inline: 1rem;
 }
 
-/* 设置不是一本书，是书架最右端的一张卡片：一个齿轮、一行名字、一行说明。 */
-.shelf .module-card.practice-shelf-card {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 8px;
-  width: min(100%, 156px);
-  justify-self: center;
-  min-height: 176px;
-  margin-bottom: 6px;
-  padding: 16px 12px;
-  border: 2px solid var(--ui-line);
-  border-radius: 16px;
-  background: var(--ui-surface);
-  box-shadow: 0 4px 0 var(--ui-line);
-  color: inherit;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.25, 1.05);
-}
+/* 设置不是书，但和书站在同一块木板上：卡片本身就是一张画好的素材，
+ * 尺寸、投影和悬停手感都跟着书走，所以这里不留额外的描边和底色。 */
 
-.shelf .module-card.practice-shelf-card:hover,
-.shelf .module-card.practice-shelf-card:focus-visible {
-  transform: translateY(-4px);
-}
-
-.practice-shelf-card__plate {
-  display: grid;
-  place-items: center;
-  width: 68px;
-  height: 68px;
-  border-radius: 20px;
-  background: var(--ui-surface-subtle);
-  box-shadow: inset 0 -3px 0 var(--ui-line);
-  color: var(--ui-ink);
-}
-
-.practice-shelf-card__plate .crumb-icon,
-.practice-shelf-card__plate svg {
-  width: 34px;
-  height: 34px;
-}
-
-/* 边栏里的题目行：一栏只有三百来像素，按三行摆——题型与状态一行、名字一行、
- * 题量与箭头一行，不再硬挤成一排。 */
+/* 边栏够宽了，一条题目就排成一行：题型、名字、题量、状态、箭头。 */
 .personal-workspace .practice-hub-tasks .practice-task-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    'type status'
-    'name name'
-    'count arrow';
-  gap: 3px 8px;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  gap: 10px;
   align-items: center;
   flex-wrap: nowrap;
-  padding: 10px 2px;
+  padding: 11px 2px;
 }
-
-.personal-workspace .practice-hub-tasks .practice-task-type { grid-area: type; }
-.personal-workspace .practice-hub-tasks .practice-task-status { grid-area: status; justify-self: end; }
 
 .personal-workspace .practice-hub-tasks .practice-task-row > strong {
-  grid-area: name;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.86rem;
 }
 
-.personal-workspace .practice-hub-tasks .practice-task-count { grid-area: count; }
-
 .personal-workspace .practice-hub-tasks .practice-task-row > svg {
-  grid-area: arrow;
   margin-left: 0;
   justify-self: end;
 }

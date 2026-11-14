@@ -27,7 +27,7 @@ import DrillConfigDialog from '../components/DrillConfigDialog.vue'
 
 import '../practice.css'
 import ShelfPicker from '../components/ShelfPicker.vue'
-import { illustration } from '../assets/halloween'
+import { illustration, settingsCard } from '../assets/halloween'
 
 const router = useRouter()
 const route = useRoute()
@@ -80,7 +80,7 @@ const exerciseRow: PracticeType[] = ['fill_blank', 'reading', 'translation']
 const pairRow: PracticeType[] = ['conversation', 'writing']
 /** 设置不是一种练习，它打开的是练习的题型配置。 */
 const settingsBooks = [
-  { key: 'settings', label: '设置', hint: '配置练习的题型', icon: 'settings' },
+  { key: 'settings', label: '设置', hint: '配置练习的题型', art: settingsCard },
 ]
 function queryType(value: unknown): PracticeType | null {
   return typeof value === 'string' && practiceTypeOptions.includes(value as PracticeType)
@@ -286,13 +286,6 @@ onMounted(() => {
             @pick="openConfig"
             @pick-extra="drillConfigOpen = true"
           />
-
-          <!-- No book of its own: a mixed set is the same books drawn at random. -->
-          <p class="practice-shelf__mixed">
-            <DivButton class="practice-shelf__mixed-link" type="button" @click="openConfig('mixed')">
-              来一组随机混合的题
-            </DivButton>
-          </p>
         </div>
 
         <PracticeTaskList class="practice-hub-tasks" :limit="8" show-tabs />
