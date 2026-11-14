@@ -133,29 +133,28 @@ describe('practice views', () => {
     expect(router.currentRoute.value.query.session).toBeTruthy()
   })
 
-  it('offers the four generated exercise types as books', async () => {
+  it('offers the generated exercise types as books', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice')
-    const books = wrapper.findAll('.practice-shelf .shelf-book')
-    expect(books.map((book) => book.text())).toHaveLength(4)
-    const labels = books.map((book) => book.text())
-    expect(labels.some((text) => text.includes('填空'))).toBe(true)
-    expect(labels.some((text) => text.includes('阅读'))).toBe(true)
-    // Conversation is one dialogue, so it stands on the card row instead.
-    expect(labels.some((text) => text.includes('对话'))).toBe(false)
+    const labels = wrapper.findAll('.practice-shelf .shelf-book').map((book) => book.text())
+    for (const kind of ['填空', '阅读', '翻译', '对话', '作文']) {
+      expect(labels.some((text) => text.includes(kind))).toBe(true)
+    }
+    // 设置 sits at the end of the shelf but opens the drill settings, not a drill.
+    expect(labels.some((text) => text.includes('设置'))).toBe(true)
     // The form is not on the page until a book is picked.
     expect(wrapper.find('.practice-config-dialog').exists()).toBe(false)
   })
 
-  it('offers the memory drills as cards, with conversation among them', async () => {
+  it('offers the memory drills as cards, apart from the exercise books', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice')
-    const cards = wrapper.findAll('.shelf--cards .shelf-book')
-    const labels = cards.map((card) => card.text())
+    const labels = wrapper.findAll('.shelf--cards .shelf-book').map((card) => card.text())
     expect(labels.some((text) => text.includes('翻卡'))).toBe(true)
     expect(labels.some((text) => text.includes('选择'))).toBe(true)
     expect(labels.some((text) => text.includes('拼写'))).toBe(true)
-    expect(labels.some((text) => text.includes('对话'))).toBe(true)
-    // A board under the books is the shelf; the card row stands on the page.
-    expect(wrapper.find('.shelf--cards .shelf-board').exists()).toBe(false)
+    // Speaking is an exercise now: it belongs on the books shelf, not here.
+    expect(labels.some((text) => text.includes('对话'))).toBe(false)
+    // The card row sits on its own board now that it carries real covers.
+    expect(wrapper.find('.shelf--cards .shelf-board').exists()).toBe(true)
   })
 
   it('opens the settings dialog when a book is picked', async () => {
@@ -172,15 +171,17 @@ describe('practice views', () => {
     expect(input.practiceType).toBe('reading')
   })
 
-  it('keeps a mixed set reachable without a book of its own', async () => {
+  it('keeps the drill settings at the end of the shelf instead of a mixed book', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice')
-    await wrapper.get('.practice-shelf__mixed-link').trigger('click')
+    const settings = wrapper
+      .findAll('.practice-shelf .shelf-book')
+      .find((book) => book.text().includes('设置'))
+    expect(settings).toBeTruthy()
+    await settings!.trigger('click')
     await flushPromises()
     expect(wrapper.find('.practice-config-dialog').exists()).toBe(true)
-    await wrapper.get('.practice-config-dialog form').trigger('submit')
-    await flushPromises()
-    const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!
-    expect(input.practiceType).toBe('mixed')
+    // 设置 configures a drill; it must not start a session by itself.
+    expect(practiceMocks.createPracticeSession).not.toHaveBeenCalled()
   })
 
   it('renders a choice question without any answer or explanation fields', () => {
