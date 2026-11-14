@@ -3142,30 +3142,45 @@ than its row reads as a different kind of thing. */
   box-shadow: 0 6px 0 rgb(59 42 26 / 8%);
 }
 
-/* T-FE-021: the board is one panel with a task column and a stats column. */
+/* T-FE-021: the board is one panel. The player bar takes a row of its own
+ * across the whole card; the tasks and the wordbook share the row below. */
 .personal-workspace .crumb-today-board.crumb-merged {
   grid-template-columns: minmax(0, 1fr) 250px;
-  gap: 26px;
+  gap: 18px 26px;
   align-items: start;
 }
+.personal-workspace .crumb-today-board.crumb-merged > .game-hud {
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  margin: 0;
+  padding: 11px 16px;
+  border-radius: 14px;
+}
+.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-crumbo { display: none; }
+.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level { width: 50px; height: 50px; }
+.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level__inner { width: 40px; height: 40px; }
+.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level__inner strong { font-size: 17px; }
+.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-stat { min-width: 58px; padding: 5px 9px; }
 .personal-workspace .crumb-merged-main { display: flex; flex-direction: column; min-width: 0; }
-.personal-workspace .crumb-merged-title {
-  margin: 6px 0 4px;
-  font: 800 26px/1.28 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  letter-spacing: -0.02em;
-}
-.personal-workspace .crumb-merged-title b { color: var(--ui-forest); }
-.personal-workspace .crumb-merged-actions { display: flex; align-items: center; gap: 14px; margin: 12px 0 10px; }
-.personal-workspace .crumb-merged-count { font-size: 12px; color: var(--ui-muted); }
 .personal-workspace .crumb-merged-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.personal-workspace .crumb-merged-ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.personal-workspace .crumb-merged-stamp { text-align: center; font-size: 11.5px; color: var(--ui-muted); }
-.personal-workspace .crumb-merged-stamp strong { display: block; color: var(--ui-ink); }
 .personal-workspace .crumb-merged-book {
-  display: flex; flex-direction: column; gap: 2px;
-  border-top: 2px dashed var(--ui-line); padding-top: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "cover eyebrow" "cover name" "cover link";
+  gap: 2px 14px;
+  align-items: center;
 }
-.personal-workspace .crumb-merged-book strong { font-size: 14px; }
+.personal-workspace .crumb-merged-book > .crumb-eyebrow { grid-area: eyebrow; }
+.personal-workspace .crumb-merged-book > strong { grid-area: name; font-size: 14px; line-height: 1.35; }
+.personal-workspace .crumb-merged-book > .crumb-inline-link { grid-area: link; justify-self: start; margin-top: 2px; }
+.personal-workspace .crumb-merged-book__cover {
+  grid-area: cover;
+  width: 78px;
+  height: 106px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 0 rgb(59 42 26 / 18%));
+}
 .personal-workspace .crumb-merged .crumb-task-list { list-style: none; margin: 0; padding: 0; }
 .personal-workspace .crumb-merged .crumb-task-list li { border-top: 2px dashed var(--ui-line); }
 .personal-workspace .crumb-merged .crumb-task-list li:last-child { border-bottom: 2px dashed var(--ui-line); }
