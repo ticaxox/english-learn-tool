@@ -5523,10 +5523,9 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
   width: 100%;
 }
 
-/* ...and its options run the full width of the slab instead of sitting as
-   small tiles in the middle of a lot of stone. */
+/* The options keep their own length. Stretching them to the slab put a
+   four-letter word in a slab-wide bar and drowned the word in stone. */
 .personal-workspace .memory-main-card .study-card--choice .choice-list .choice-option {
-  width: 100%;
   min-height: 0;
 }
 

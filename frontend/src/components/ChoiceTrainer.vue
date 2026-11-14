@@ -174,8 +174,11 @@ function choose(optionId: string): void {
 /* Options are answer tiles on the table, not a vertical form list. */
 .choice-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.8rem;
+  /* Columns are the plate's own width, so the pair sits together in the middle
+     of the slab instead of each plate floating at its far end. */
+  grid-template-columns: repeat(2, 280px);
+  justify-content: center;
+  gap: 0.9rem 1.6rem;
   margin: 0;
   padding: 0;
   border: 0;
@@ -207,9 +210,8 @@ function choose(optionId: string): void {
    One length for every option: the word is the thing being read. */
 .study-card--choice .choice-option {
   display: block;
-  width: 100%;
-  max-width: 360px;
-  height: 76px;
+  width: 280px;
+  height: 84px;
   margin-inline: auto;
   border: 0 !important;
   border-radius: 0;

@@ -789,6 +789,14 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   gap: 10px;
 }
 
+/* The drill's options are a pair of fixed plates sitting together in the
+   middle of the slab, not two bars pinned to its edges. */
+.personal-workspace .rune-surface .choice-list {
+  grid-template-columns: repeat(2, 280px);
+  justify-content: center;
+  gap: 14px 26px;
+}
+
 .personal-workspace .choice-option { position: relative; }
 
 .personal-workspace .choice-option input[type="radio"] {
@@ -5492,9 +5500,9 @@ html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__hi
  * its left. */
 .personal-workspace .rune-surface .choice-option {
   display: block;
-  width: 100%;
-  max-width: 360px;
-  height: 76px;
+  width: 280px;
+  max-width: 100%;
+  height: 84px;
   margin-inline: auto;
   padding: 0;
   border: 0 !important;
