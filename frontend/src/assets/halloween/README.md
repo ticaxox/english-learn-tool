@@ -50,6 +50,11 @@
 | `scroll-{cap-left,middle,cap-right}.png` | 卷轴三件套框 |
 | `slab-{cap-left,middle,cap-right}.png` | 石板三件套框 |
 | `parchment-{cap-left,middle,cap-right}.png` | 羊皮纸三件套框 |
+| `panel-board-{day,night}.png` | 悬浮窗大板：四角铜角/符文夹住撕边，九宫格拉伸 |
+| `panel-strip-{day,night}.png` | 决策签条：两端火漆，3.33:1，整张铺底不切 |
+| `panel-scrap-{day,night}.png` | 定点碎片：popover / 右键菜单，定尺铺底 |
+
+**悬浮窗的三块板**（`panel-*`）：所有 `[role=dialog]` 都用 `panel-board`——`border-image: url(...) 14% 14% 15% fill round`，边框带 40px，角上留铜角、边条平铺、中间纯平那圈放内容。它不锁比例，34rem 的确认框和 48rem 的详情框共用一张图；框自己不再画圆角、背景和阴影。`panel-strip` 和 `panel-scrap` 的火漆和钉子会被切片切开，所以不走九宫格，按各自比例整张铺底，内容用 padding 让开边缘。
 
 **两种材质**：白天是**饼干**（烘焙色 `#E8C58A`，压花边、扎孔、掰角），黑夜是**石碑**（深紫 `#3A3254`，凿槽、刻线、符文）。这两套是同一构图的两次独立绘制，不是滤镜。
 
