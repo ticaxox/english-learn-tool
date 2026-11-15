@@ -638,7 +638,18 @@
 @media (max-width: 620px) {
   .shelf { gap: 0.7rem; padding: 1rem 0.5rem 2rem; }
   .shelf-book__title { font-size: 0.94rem; }
-  .shelf-book__hint { font-size: 0.72rem; }
+  /* Two lines are always reserved, so a two-line hint does not push its book
+   * lower than the others in the row. */
+  .shelf-book__hint { min-height: 2.2em; font-size: 0.72rem; line-height: 1.15; }
+
+  /* Phone: all three rows stand three books across at the size of the
+   * memory row. Each shelf group has three entries, so every row fills. */
+  .personal-workspace .shelf.shelf--cards,
+  .personal-workspace .practice-shelf.practice-shelf {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .personal-workspace .shelf .shelf-book__art { width: min(100%, 78px); }
 }
 
 /* Four across: the covers give a little so they do not run into each other. */

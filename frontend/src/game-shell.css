@@ -1170,6 +1170,18 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
     padding: 16px 14px calc(96px + env(safe-area-inset-bottom));
   }
 
+  .personal-workspace .wordbook-toolbar .wordbook-toolbar-actions { justify-self: end; }
+  .personal-workspace .wordbook-toolbar .wordbook-toolbar-actions .button-secondary {
+    width: auto;
+    min-height: 40px;
+    justify-self: auto;
+  }
+
+  /* The shelf is the page on a phone: the library hero and the separate
+   * current-book strip are for the wider layout only. */
+  .personal-workspace .crumb-wordbooks .crumb-shelf-header,
+  .personal-workspace .crumb-wordbooks .crumb-current-book { display: none; }
+
   .personal-workspace .member-mobile-nav {
     position: fixed;
     z-index: 40;
@@ -1250,6 +1262,23 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 }
 
 @media (max-width: 620px) {
+  /* The shelf toolbar gets three lines: name and count, a full search field,
+   * then the two actions. One row left the search box 27px wide. */
+  .personal-workspace .wordbook-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "heading count" "search search" "actions actions";
+    gap: 8px 10px;
+  }
+
+  .personal-workspace .wordbook-toolbar .wordbook-toolbar-heading { grid-area: heading; }
+  .personal-workspace .wordbook-toolbar .count-pill { grid-area: count; justify-self: end; }
+  .personal-workspace .wordbook-toolbar .wordbook-search { grid-area: search; width: 100%; }
+  .personal-workspace .wordbook-toolbar .wordbook-toolbar-actions {
+    grid-area: actions;
+    justify-self: stretch;
+    justify-content: flex-end;
+  }
+
   /* Books stay books: two on a shelf row, not one full-width slab each. */
   .personal-workspace .wordbook-grid,
   .personal-workspace .crumb-wordbooks .wordbook-grid {

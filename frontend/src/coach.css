@@ -1084,6 +1084,17 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   .coach-page.coach-page .coach-composer__tool,
   .coach-page.coach-page .coach-composer__send { width: 42px; height: 42px; }
 
+  /* One line, not a writing desk: the composer is a single-row bar. */
+  .coach-page.coach-page .coach-composer .coach-composer__field { padding: 5px 12px; }
+
+  .coach-page.coach-page .coach-composer .coach-composer__field textarea {
+    height: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    line-height: 24px;
+    resize: none;
+  }
+
   .coach-page.coach-page .coach-message {
     grid-template-columns: 36px minmax(0, 1fr) 36px;
     column-gap: 8px;

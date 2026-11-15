@@ -232,9 +232,14 @@ onMounted(() => {
 
         <span class="count-pill">{{ filterActive ? `${filteredBooks.length} 个结果` : `${personalBookCount} 本` }}</span>
 
-        <DivButton class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
-          {{ loading ? '读取中…' : '刷新' }}
-        </DivButton>
+        <div class="wordbook-toolbar-actions">
+          <DivButton class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
+            {{ loading ? '读取中…' : '刷新' }}
+          </DivButton>
+          <DivButton class="button-secondary button-small wordbook-import-mobile" type="button" @click="importOpen = true">
+            <AppIcon name="plus" /> 导入
+          </DivButton>
+        </div>
       </div>
 
       <p v-if="operationMessage" class="alert alert-success" role="status">{{ operationMessage }}</p>

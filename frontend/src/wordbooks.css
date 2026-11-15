@@ -927,3 +927,18 @@
     flex-direction: column;
   }
 }
+
+/* Refresh and import share the toolbar's last cell. */
+.wordbook-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-self: end;
+}
+
+/* The phone has no hero import button, so the shelf toolbar carries one. */
+.wordbook-toolbar-actions .wordbook-import-mobile { display: none; }
+
+@media (max-width: 860px) {
+  .wordbook-toolbar-actions .wordbook-import-mobile { display: inline-flex; }
+}
