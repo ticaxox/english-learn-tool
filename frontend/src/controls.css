@@ -4398,15 +4398,9 @@ than its row reads as a different kind of thing. */
   height: 100%;
   max-width: 100%;
   margin-inline: auto;
-  /* An unlit day is the same candle with the flame drained out of it. */
-  filter: grayscale(0.85) brightness(0.82);
-  opacity: 0.55;
+  /* Each burn state is its own drawing, so no filter fakes the night or the
+   * cold wick; the cold drawing already carries the soot and the grey wax. */
   transition: filter 420ms ease, opacity 420ms ease;
-}
-
-.personal-workspace .weekly-day.is-active .weekly-day__art {
-  filter: none;
-  opacity: 1;
 }
 
 .personal-workspace .weekly-day__lamp {

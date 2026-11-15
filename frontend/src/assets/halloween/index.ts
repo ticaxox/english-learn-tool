@@ -334,8 +334,33 @@ export const charge = {
   key: { day: chargeKey, night: chargeKeyNight },
 } as const
 
-/* The week's candles: cream wax and an orange flame by day, violet wax and a
- * teal flame after dark. */
-import candleDay from './char/candle-day.png'
-import candleNight from './char/candle-night.png'
-export const candles = { day: candleDay, night: candleNight } as const
+/* The week's candles: one drawing per burn state, day and night. The lengths
+ * still come from the day's XP; these drawings change the wax and flame. */
+import candleColdDay from './char/candle-cold-day.png'
+import candleLowDay from './char/candle-low-day.png'
+import candleMidDay from './char/candle-mid-day.png'
+import candleHighDay from './char/candle-high-day.png'
+import candleColdNight from './char/candle-cold-night.png'
+import candleLowNight from './char/candle-low-night.png'
+import candleMidNight from './char/candle-mid-night.png'
+import candleHighNight from './char/candle-high-night.png'
+
+export type CandleState = 'cold' | 'low' | 'mid' | 'high'
+
+export const candleStates: Readonly<Record<Mode, Readonly<Record<CandleState, string>>>> = {
+  day: {
+    cold: candleColdDay,
+    low: candleLowDay,
+    mid: candleMidDay,
+    high: candleHighDay,
+  },
+  night: {
+    cold: candleColdNight,
+    low: candleLowNight,
+    mid: candleMidNight,
+    high: candleHighNight,
+  },
+} as const
+
+/** The mid burn state, for callers that only need one candle. */
+export const candles = { day: candleMidDay, night: candleMidNight } as const

@@ -1305,15 +1305,21 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 
   .personal-workspace .personal-ai-provider__actions .button-secondary,
   .personal-workspace .personal-ai-provider__actions .button-danger {
-    min-height: 34px;
-    padding: 0 7px;
-    font-size: 0.72rem;
+    min-width: 36px;
+    min-height: 32px;
+    padding: 0 6px;
+    font-size: 0.95rem;
+    line-height: 1;
   }
 
-  /* Smaller steppers everywhere on a phone: number + two 30px targets. */
-  .personal-workspace .crumb-stepper { width: min(100%, 96px); min-height: 38px; }
-  .personal-workspace .crumb-stepper__step { width: 30px; height: 30px; }
-  .personal-workspace .crumb-stepper__input { height: 30px; font-size: 0.92rem; }
+  /* Smaller steppers everywhere on a phone: number + two 24px targets. */
+  .personal-workspace .crumb-stepper {
+    width: min(100%, 88px);
+    min-height: 30px;
+    padding: 0 2px;
+  }
+  .personal-workspace .crumb-stepper__step { width: 24px; height: 24px; }
+  .personal-workspace .crumb-stepper__input { height: 24px; font-size: 0.86rem; }
 
   /* Daily goals and the map-time row: label and control on one line. */
   .personal-workspace .settings-goal-grid .field,
@@ -1339,13 +1345,13 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   }
 
   .personal-workspace .settings-pair > .field--inline > select {
-    width: 120px;
-    flex: 0 0 120px;
+    width: 88px;
+    flex: 0 0 88px;
   }
 
   .personal-workspace .settings-pair > .field--inline .crumb-time {
-    width: 116px;
-    flex: 0 0 116px;
+    width: 96px;
+    flex: 0 0 96px;
   }
 
   .personal-workspace .settings-goal-grid .field-inline-note {
