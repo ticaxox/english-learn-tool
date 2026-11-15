@@ -6,7 +6,7 @@
  * only renders what the server returned and forwards learner actions with
  * idempotency keys. Heartbeats run while a session is open.
  */
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
@@ -15,8 +15,6 @@ import ContractGate from '../components/ContractGate.vue'
 import FlashcardTrainer from '../components/FlashcardTrainer.vue'
 import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
-import LessonHud from '../components/LessonHud.vue'
-import LessonFeedback from '../components/LessonFeedback.vue'
 import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { illustration } from '../assets/halloween'
 import ShelfPicker from '../components/ShelfPicker.vue'
@@ -97,7 +95,15 @@ const dueRemaining = computed(() => {
 /** Session position, from the server's summary rather than local counting. */
 const sessionTotal = computed(() => session.total.value ?? 0)
 const cardsDone = computed(() => Math.max(0, sessionTotal.value - (session.question.value?.remaining ?? 0)))
-const cardIndex = computed(() => Math.min(sessionTotal.value, cardsDone.value + 1))
+/**
+ * `remaining` drops the moment a card is graded, not when the queue moves on.
+ * While the verdict is held the learner is still looking at the card just
+ * answered, so the rail must not step to the next number until it does.
+ */
+const cardIndex = computed(() => {
+  const position = verdict.value ? cardsDone.value : cardsDone.value + 1
+  return Math.max(1, Math.min(sessionTotal.value, position))
+})
 watch(
   () => session.question.value?.questionId,
   () => { flashRevealed.value = false },
@@ -183,8 +189,10 @@ interface Verdict {
 const MAX_HEARTS = 5
 
 /**
- * The beat after an answer. Every graded answer pauses here instead of
- * silently advancing: that pause is where the combo and the correction land.
+ * The beat after an answer. A miss holds the card — the wrong plate stays red,
+ * the answer's plate goes green, and the rail offers the only way on. A hit
+ * does not hold anything: the plate flashes green and the next card lands by
+ * itself, which is the whole point of a drill.
  */
 const verdict = ref<Verdict | null>(null)
 const reveal = ref<{ word: string | null; phonetic: string | null; partOfSpeech: string | null; meaning: string | null } | null>(null)
@@ -203,7 +211,30 @@ const runAccuracy = computed(() => {
   return graded > 0 ? Math.round((runCorrect.value / graded) * 100) : 0
 })
 
+/** How long a right answer stays green before the next card lands. */
+const RIGHT_ANSWER_BEAT_MS = 720
+
+let advanceTimer: number | null = null
+
+function clearAdvance(): void {
+  if (advanceTimer !== null) {
+    window.clearTimeout(advanceTimer)
+    advanceTimer = null
+  }
+}
+
+function scheduleAdvance(): void {
+  clearAdvance()
+  advanceTimer = window.setTimeout(() => {
+    advanceTimer = null
+    void continueAfterVerdict()
+  }, RIGHT_ANSWER_BEAT_MS)
+}
+
+onBeforeUnmount(clearAdvance)
+
 function resetRun(): void {
+  clearAdvance()
   verdict.value = null
   reveal.value = null
   combo.value = 0
@@ -253,6 +284,8 @@ async function answerChoice(questionId: string, optionId: string): Promise<void>
     })
   }
   showVerdict(correct, feedback.headline)
+  // Right answers are not held: the plate goes green, then the queue moves.
+  if (correct) scheduleAdvance()
 }
 
 async function answerSpelling(questionId: string, answer: string): Promise<void> {
@@ -276,10 +309,12 @@ async function answerSpelling(questionId: string, answer: string): Promise<void>
     })
   }
   showVerdict(correct, feedback.headline)
+  if (correct) scheduleAdvance()
 }
 
-/** Leaving the pause: clear the sheet and pull the next card. */
+/** Leaving the pause: clear the marks and pull the next card. */
 async function continueAfterVerdict(): Promise<void> {
+  clearAdvance()
   verdict.value = null
   reveal.value = null
   // Hearts are the only thing that can end a run early; otherwise the queue
@@ -463,19 +498,8 @@ watch(challengeModule, async (module, previous) => {
     </section>
 
     <template v-else>
-      <!-- In a run, the HUD replaces the page furniture: position, combo, way out. -->
-      <LessonHud
-        v-if="session.question.value"
-        :index="cardIndex"
-        :total="sessionTotal"
-        :done="cardsDone"
-        :combo="combo"
-        :hearts="hearts"
-        :max-hearts="MAX_HEARTS"
-        :show-hearts="false"
-        :label="session.module.value ? MEMORY_MODULE_LABELS[session.module.value] : '记忆练习'"
-        @exit="endSession"
-      />
+      <!-- No strip above the card: where you are and the way out both live in
+        the rail, and the card is the only thing at the top of the page. -->
 
       <!-- The payoff: what this run actually earned, then one way forward. -->
       <section v-if="showSummary" class="lesson-summary" aria-labelledby="lesson-summary-title">
@@ -557,41 +581,46 @@ watch(challengeModule, async (module, previous) => {
 
         <LoadingState v-if="session.busy.value && !session.question.value" label="正在提交…" />
 
-        <FlashcardTrainer
-          v-if="session.question.value?.kind === 'flashcard'"
-          :question="session.question.value"
-          :disabled="session.busy.value || Boolean(verdict)"
-          :show-rating="false"
-          @reveal="onFlashReveal"
-          @rate="(rating) => rateFlashcard(session.question.value!.questionId, rating)"
-          @master="() => master(session.question.value!.questionId)"
-        />
+        <!-- The card is the only thing on the page, so the change of question
+          is the transition: the answered card leaves upwards, the next one
+          rises into place. -->
+        <Transition name="memory-swap" mode="out-in">
+          <div :key="session.question.value?.questionId ?? 'empty'" class="memory-card-slot">
+            <FlashcardTrainer
+              v-if="session.question.value?.kind === 'flashcard'"
+              :question="session.question.value"
+              :disabled="session.busy.value || Boolean(verdict)"
+              :show-rating="false"
+              @reveal="onFlashReveal"
+              @rate="(rating) => rateFlashcard(session.question.value!.questionId, rating)"
+              @master="() => master(session.question.value!.questionId)"
+            />
 
-        <ChoiceTrainer
-          v-else-if="session.question.value?.kind === 'choice'"
-          :question="session.question.value"
-          :disabled="session.busy.value || Boolean(verdict)"
-          @answer="(optionId) => answerChoice(session.question.value!.questionId, optionId)"
-        />
+            <ChoiceTrainer
+              v-else-if="session.question.value?.kind === 'choice'"
+              :question="session.question.value"
+              :disabled="session.busy.value || Boolean(verdict)"
+              :outcome="verdict ? (verdict.correct ? 'correct' : 'wrong') : null"
+              :correct-label="verdict && !verdict.correct ? reveal?.word ?? null : null"
+              :missed="Boolean(verdict && !verdict.correct)"
+              :hit="Boolean(verdict && verdict.correct)"
+              @answer="(optionId) => answerChoice(session.question.value!.questionId, optionId)"
+              @continue="continueAfterVerdict"
+            />
 
-        <SpellingTrainer
-          v-else-if="session.question.value?.kind === 'spelling'"
-          :question="session.question.value"
-          :disabled="session.busy.value || Boolean(verdict)"
-          :result="verdict ? reveal?.word ?? null : null"
-          @answer="(value) => answerSpelling(session.question.value!.questionId, value)"
-        />
-
-        <LessonFeedback
-          :verdict="verdict"
-          :word="reveal?.word ?? null"
-          :phonetic="reveal?.phonetic ?? null"
-          :part-of-speech="reveal?.partOfSpeech ?? null"
-          :meaning="reveal?.meaning ?? null"
-          :combo="combo"
-          :busy="session.busy.value"
-          @continue="continueAfterVerdict"
-        />
+            <SpellingTrainer
+              v-else-if="session.question.value?.kind === 'spelling'"
+              :question="session.question.value"
+              :disabled="session.busy.value || Boolean(verdict)"
+              :outcome="verdict ? (verdict.correct ? 'correct' : 'wrong') : null"
+              :result="verdict && !verdict.correct ? reveal?.word ?? null : null"
+              :missed="Boolean(verdict && !verdict.correct)"
+              :hit="Boolean(verdict && verdict.correct)"
+              @answer="(value) => answerSpelling(session.question.value!.questionId, value)"
+              @continue="continueAfterVerdict"
+            />
+          </div>
+        </Transition>
 
         <section v-if="showModulePicker && selectedModule && session.lastError.value" class="memory-resume-row">
           <DivButton class="button workspace-secondary-button" type="button" @click="resume">继续上一次会话</DivButton>
@@ -602,68 +631,72 @@ watch(challengeModule, async (module, previous) => {
         </p>
       </section>
 
-      <aside v-if="session.hasSession.value || session.finished.value" class="workspace-card memory-session-rail" aria-label="本次训练">
-        <div class="memory-rail-head">
-          <p v-if="session.question.value" class="memory-rail-remaining">
-            本轮剩余 <strong>{{ session.question.value.remaining }}</strong> 张
-          </p>
-          <p v-else class="memory-rail-remaining">本轮已完成</p>
-          <div class="memory-rail-progress">
-            <span class="memory-rail-count">第 {{ cardIndex }} / {{ sessionTotal || '—' }} 张</span>
+      <aside v-if="session.hasSession.value || session.finished.value" class="memory-session-side" aria-label="本次训练">
+        <div class="workspace-card memory-session-rail">
+          <!-- One readout, three facts: the lives over the count, the clock
+            beside it. No labels — the hearts and a clock need none. -->
+          <div class="memory-rail-head">
+            <span class="memory-rail-heartrow" :aria-label="`剩余 ${hearts} 颗心`">
+              <svg v-for="n in MAX_HEARTS" :key="n" viewBox="0 0 24 24" aria-hidden="true"
+                   :class="{ 'is-empty': n > hearts }">
+                <path d="M12 20s-7-4.4-7-9.1A4 4 0 0 1 12 8a4 4 0 0 1 7 2.9C19 15.6 12 20 12 20Z" />
+              </svg>
+            </span>
+            <div class="memory-rail-progress">
+              <span class="memory-rail-count">{{ cardIndex }}/{{ sessionTotal || '—' }}</span>
+              <span class="memory-rail-clock" :class="`memory-timer--${heartbeat.state.value}`">
+                {{ timer.running.value ? timer.label.value : '已暂停' }}
+              </span>
+            </div>
             <span class="memory-rail-track" aria-hidden="true">
               <span :style="{ width: `${progressPercent}%` }"></span>
             </span>
+            <p v-if="!session.question.value" class="memory-rail-state">本轮已完成</p>
           </div>
+
+          <DivButton
+            v-if="!session.finished.value"
+            class="button-secondary memory-rail-end"
+            type="button"
+            @click="endSession"
+          >
+            结束本次
+          </DivButton>
+          <p v-else class="memory-rail-state">本轮训练已结束，成绩会记入今日进度。</p>
         </div>
 
-        <div class="memory-rail-block memory-rail-hearts">
-          <span class="memory-rail-label">生命</span>
-          <span class="memory-rail-heartrow" :aria-label="`剩余 ${hearts} 颗心`">
-            <svg v-for="n in MAX_HEARTS" :key="n" viewBox="0 0 24 24" aria-hidden="true"
-                 :class="{ 'is-empty': n > hearts }">
-              <path d="M12 20s-7-4.4-7-9.1A4 4 0 0 1 12 8a4 4 0 0 1 7 2.9C19 15.6 12 20 12 20Z" />
-            </svg>
-          </span>
-        </div>
-
-        <div class="memory-rail-block">
-          <span class="memory-rail-label">本次用时</span>
-          <span class="workspace-status memory-rail-clock" :class="`memory-timer--${heartbeat.state.value}`">
-            {{ timer.running.value ? `${timerLimit > 0 ? '倒计时' : '正计时'} ${timer.label.value}` : '已暂停' }}
-          </span>
-        </div>
-
+        <!-- What you make of the card is the one thing to do after it turns
+          over, so it stands on its own under the rail instead of sitting in a
+          labelled slot inside it. -->
         <div
-          v-if="session.question.value?.kind === 'flashcard' && !session.finished.value"
-          class="memory-rail-block memory-rail-answer"
+          v-if="flashRevealed && session.question.value?.kind === 'flashcard' && !session.finished.value"
+          class="memory-ratings"
         >
-          <span class="memory-rail-label">这张记住了吗</span>
-          <div v-if="flashRevealed" class="memory-rail-actions">
-            <DivButton class="button-secondary" type="button" :disabled="session.busy.value || Boolean(verdict)"
-                       @click="rateFlashcard(session.question.value!.questionId, 'again')">
-              无印象
-            </DivButton>
-            <DivButton class="button-secondary" type="button" :disabled="session.busy.value || Boolean(verdict)"
-                       @click="rateFlashcard(session.question.value!.questionId, 'good')">
-              有印象
-            </DivButton>
-            <DivButton class="button-secondary" type="button" :disabled="session.busy.value || Boolean(verdict)"
-                       @click="master(session.question.value!.questionId)">
-              已记住
-            </DivButton>
-          </div>
-          <p v-else class="memory-rail-state">翻开卡片，再选记得多牢。</p>
+          <DivButton
+            class="memory-rating memory-rating--again"
+            type="button"
+            :disabled="session.busy.value || Boolean(verdict)"
+            @click="rateFlashcard(session.question.value!.questionId, 'again')"
+          >
+            无印象
+          </DivButton>
+          <DivButton
+            class="memory-rating memory-rating--good"
+            type="button"
+            :disabled="session.busy.value || Boolean(verdict)"
+            @click="rateFlashcard(session.question.value!.questionId, 'good')"
+          >
+            有印象
+          </DivButton>
+          <DivButton
+            class="memory-rating memory-rating--mastered"
+            type="button"
+            :disabled="session.busy.value || Boolean(verdict)"
+            @click="master(session.question.value!.questionId)"
+          >
+            已记住
+          </DivButton>
         </div>
-
-        <DivButton
-          v-if="!session.finished.value"
-          class="button-secondary memory-rail-end"
-          type="button"
-          @click="endSession"
-        >
-          结束本次
-        </DivButton>
-        <p v-else class="memory-rail-state">本轮训练已结束，成绩会记入今日进度。</p>
       </aside>
 
       <aside v-else-if="!props.embedded" class="workspace-card memory-context-card" aria-label="当前学习信息">

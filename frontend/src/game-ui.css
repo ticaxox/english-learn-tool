@@ -2376,6 +2376,19 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
   color: #f3e9d2;
 }
 
+/* Letter by letter, once the server has graded: green where the letter was
+   right, red where it was not. A wash over the tile rather than a new tile, so
+   the pin hole and the grain still read through it. */
+.personal-workspace .spelling-grid input.spelling-cell.spelling-cell--right {
+  color: #12380f;
+  box-shadow: inset 0 0 0 999px rgb(88 181 82 / 55%);
+}
+
+.personal-workspace .spelling-grid input.spelling-cell.spelling-cell--wrong {
+  color: #3c0f0b;
+  box-shadow: inset 0 0 0 999px rgb(223 79 66 / 52%);
+}
+
 .personal-workspace .spelling-cell--prefilled {
   display: grid;
   width: 3.1rem;
@@ -5698,4 +5711,243 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 
 .personal-workspace .personal-ai-empty--inline {
   padding: 14px;
+}
+
+/* ============================================================
+   Memory drill: the frame is a card, the verdict lives on the rail.
+   ============================================================ */
+
+/* Two plates wide, not a slab. The choice frame ran to 976px at desktop —
+   a lot of empty carved edge around four plates, and the eye had to cross
+   the whole page to read a four-word question. */
+/* A card, not a sliver: with the column sized to its content the drill card
+   shrank to whatever the plates happened to need. This is the width it is
+   designed at. */
+.personal-workspace .memory-page .rune-surface {
+  width: 780px;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+/* The rail column: the readings card first, then whatever the card asks for
+   next, standing on the page rather than inside that card. */
+.personal-workspace .memory-workbench-grid.is-session .memory-session-side {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  /* The readings sit lower than the top of the card, and the ratings lower
+     again: the card leads, the side follows. */
+  gap: 46px;
+  padding-top: 48px;
+  align-content: start;
+}
+
+.personal-workspace .memory-workbench-grid.is-session .memory-session-side .memory-session-rail {
+  position: static;
+  top: auto;
+}
+
+.memory-ratings {
+  display: grid;
+  gap: 10px;
+}
+
+/* The base button styles the app already ships are heavier than a single
+   class, so the plates are named through their stack. */
+.personal-workspace .memory-ratings .memory-rating {
+  width: 100%;
+  min-height: 54px;
+  justify-content: center;
+  border: 2px solid #35240f;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #2a1c0d;
+  background-image: none;
+  box-shadow: 0 3px 0 rgb(53 36 15 / 45%);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.personal-workspace .memory-ratings .memory-rating:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 rgb(53 36 15 / 45%);
+}
+
+.personal-workspace .memory-ratings .memory-rating:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgb(53 36 15 / 45%);
+}
+
+.personal-workspace .memory-ratings .memory-rating--again { background: #e6d6bb; }
+.personal-workspace .memory-ratings .memory-rating--good { background: var(--g-orange); }
+.personal-workspace .memory-ratings .memory-rating--mastered { background: #6f8a3c; color: #fff6df; }
+
+html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating {
+  border-color: #0b0618;
+  box-shadow: 0 3px 0 rgb(0 0 0 / 55%);
+}
+
+html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating--again { background: #40315f; color: #efe4ff; }
+html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating--mastered { background: #4f7a3a; color: #eaffd8; }
+
+/* Narrow screens keep the readings as one strip above the card: the wrapper
+   steps out of the way and its children take part in the page grid again, so
+   the rail's own `order: -1` still applies while the verdict and the ratings
+   stay where the card left off. */
+@media (max-width: 980px) {
+  .personal-workspace .memory-workbench-grid.is-session .memory-session-side {
+    display: contents;
+  }
+
+  .personal-workspace .memory-ratings {
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+}
+
+/* ------------------------------------------------------------ rail readout */
+
+/* The rail is one readout, not a form: the lives alone on their line, then
+   how far in you are with the clock beside it, then the bar. No labels. */
+.personal-workspace .memory-session-rail .memory-rail-head {
+  display: grid;
+  gap: 8px;
+}
+
+.personal-workspace .memory-session-rail .memory-rail-heartrow { gap: 4px; }
+.personal-workspace .memory-session-rail .memory-rail-heartrow svg { width: 17px; height: 17px; }
+
+.personal-workspace .memory-session-rail .memory-rail-progress {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+}
+
+.personal-workspace .memory-session-rail .memory-rail-count {
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .memory-session-rail .memory-rail-clock {
+  font-size: 0.92rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-muted);
+}
+
+.personal-workspace .memory-session-rail .memory-rail-track { margin-top: 2px; }
+
+/* --------------------------------------------------------- card and column */
+
+/* The column hugs the card and sits beside it, not against the right edge, and
+   the pair starts lower down the page than the room's usual first line. */
+.personal-workspace .memory-workbench-grid.is-session {
+  grid-template-columns: auto 268px;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  gap: 18px 88px;
+  padding-top: 46px;
+}
+
+/* The ratings stand well clear of the readings card: they are the next thing
+   to do, not another row in it. */
+/* ------------------------------------------------------------------- a miss */
+
+/* The card takes the hit itself: one shake, then a red halo that keeps
+   breathing until the learner touches the card to go on. */
+@keyframes memoryCardShake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-9px) rotate(-0.4deg); }
+  32% { transform: translateX(7px) rotate(0.35deg); }
+  48% { transform: translateX(-5px) rotate(-0.25deg); }
+  64% { transform: translateX(4px) rotate(0.2deg); }
+  80% { transform: translateX(-2px); }
+}
+
+/* The halo is a drop-shadow, not a box-shadow: the drill card is a 9-slice
+   image with a carved rim, and `box-shadow` is switched off with `!important`
+   on `.rune-surface` anyway. A drop-shadow follows the carved edge. */
+@keyframes memoryCardGlow {
+  0%, 100% { filter: drop-shadow(0 0 7px rgb(214 60 60 / 55%)); }
+  50% { filter: drop-shadow(0 0 20px rgb(214 60 60 / 85%)); }
+}
+
+.personal-workspace .memory-main-card .study-card.is-missed {
+  cursor: pointer;
+  animation:
+    memoryCardShake 460ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 1,
+    memoryCardGlow 1700ms ease-in-out 460ms infinite;
+}
+
+/* Nothing inside the card is a control any more: the card is the button. */
+.personal-workspace .memory-main-card .study-card.is-missed .choice-list,
+.personal-workspace .memory-main-card .study-card.is-missed .spelling-grid {
+  pointer-events: none;
+}
+
+.personal-workspace .memory-main-card .study-card.is-missed:focus-visible {
+  outline: 3px solid var(--g-red, #d63c3c);
+  outline-offset: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .memory-main-card .study-card.is-missed {
+    animation: none;
+    filter: drop-shadow(0 0 14px rgb(214 60 60 / 75%));
+  }
+}
+
+/* ------------------------------------------------------------------ a hit */
+
+/* A right answer is felt the same way a miss is, in the other colour: one
+   shake, then a green halo while the card holds its ground and the queue
+   moves on by itself. */
+@keyframes memoryCardHitGlow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgb(58 170 88 / 60%)); }
+  50% { filter: drop-shadow(0 0 22px rgb(58 170 88 / 90%)); }
+}
+
+.personal-workspace .memory-main-card .study-card.is-hit {
+  animation:
+    memoryCardShake 460ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 1,
+    memoryCardHitGlow 1500ms ease-in-out 460ms infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personal-workspace .memory-main-card .study-card.is-hit {
+    animation: none;
+    filter: drop-shadow(0 0 16px rgb(58 170 88 / 70%));
+  }
+}
+
+/* ------------------------------------------------------------ next question */
+
+.memory-card-slot {
+  display: grid;
+  width: 100%;
+  place-items: center;
+}
+
+/* The answered card lifts away and the next one rises in behind it. Short
+   enough that a drill does not feel gated, long enough to read as a movement. */
+.memory-swap-enter-active {
+  transition: opacity 190ms ease, transform 240ms cubic-bezier(0.2, 0.9, 0.25, 1.05);
+}
+
+.memory-swap-leave-active {
+  transition: opacity 110ms ease, transform 110ms ease;
+}
+
+.memory-swap-enter-from { opacity: 0; transform: translateY(20px) scale(0.985); }
+.memory-swap-leave-to { opacity: 0; transform: translateY(-12px) scale(0.99); }
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-swap-enter-active,
+  .memory-swap-leave-active { transition: none; }
 }

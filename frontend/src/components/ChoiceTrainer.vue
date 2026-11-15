@@ -6,7 +6,6 @@
  */
 import { computed, nextTick, ref, watch } from 'vue'
 import type { ChoiceQuestion } from '../types/learning'
-import OptionBadge from './OptionBadge.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
 
 const { surface } = useRuneSurface('choice')
@@ -14,10 +13,27 @@ const { surface } = useRuneSurface('choice')
 const props = defineProps<{
   question: ChoiceQuestion
   disabled?: boolean
+  /**
+   * The server's verdict for the option just chosen. The chosen plate turns
+   * green when it was right; when it was wrong it turns red and the plate that
+   * carries the answer turns green, so the correction is read off the card
+   * rather than announced in a sheet underneath it.
+   */
+  outcome?: 'correct' | 'wrong' | null
+  /** The server's corrected word; only used to find the right plate. */
+  correctLabel?: string | null
+  /**
+   * The pick was wrong and the card is waiting. It shakes, it keeps a red
+   * halo, and the whole card becomes the way on — no sheet, no button.
+   */
+  missed?: boolean
+  /** Right, and the card says so the same way a miss does, in green. */
+  hit?: boolean
 }>()
 
 const emit = defineEmits<{
   (event: 'answer', optionId: string): void
+  (event: 'continue'): void
 }>()
 
 const wordOptions = computed(() => props.question.options.length > 0
@@ -54,6 +70,18 @@ watch(
   },
 )
 
+/** Which plate carries which mark, once the server has graded. */
+function plateState(option: { optionId: string; label: string }): 'right' | 'wrong' | null {
+  if (!props.outcome) return null
+  const chosen = selected.value === option.optionId
+  if (props.outcome === 'correct') return chosen ? 'right' : null
+  // The server only names the answer when the pick was wrong, so the pair of
+  // marks is only ever drawn on a miss.
+  const answer = props.correctLabel?.trim().toLowerCase()
+  if (answer && option.label.trim().toLowerCase() === answer) return 'right'
+  return chosen ? 'wrong' : null
+}
+
 function choose(optionId: string): void {
   if (props.disabled || !optionsWellFormed.value) {
     return
@@ -65,9 +93,19 @@ function choose(optionId: string): void {
 </script>
 
 <template>
-  <section class="study-card study-card--choice rune-surface" :style="surface" aria-labelledby="choice-prompt">
+  <section
+    class="study-card study-card--choice rune-surface"
+    :class="{ 'is-missed': props.missed, 'is-hit': props.hit }"
+    :style="surface"
+    :role="props.missed ? 'button' : undefined"
+    :tabindex="props.missed ? 0 : undefined"
+    :aria-label="props.missed ? '回答错误，点一下进入下一题' : undefined"
+    aria-labelledby="choice-prompt"
+    @click="props.missed && emit('continue')"
+    @keydown.enter.prevent="props.missed && emit('continue')"
+    @keydown.space.prevent="props.missed && emit('continue')"
+  >
     <div class="choice-head">
-      <span class="choice-head__eyebrow">选出正确释义</span>
       <h2 id="choice-prompt" ref="promptHeading" class="choice-head__prompt" tabindex="-1">{{ props.question.prompt }}</h2>
       <p v-if="props.question.phonetic" class="choice-head__phonetic">{{ props.question.phonetic }}</p>
     </div>
@@ -88,7 +126,11 @@ function choose(optionId: string): void {
         v-for="(option, index) in props.question.options"
         :key="option.optionId"
         class="choice-option"
-        :class="{ 'choice-option--selected': selected === option.optionId }"
+        :class="{
+          'choice-option--selected': selected === option.optionId,
+          'choice-option--right': plateState(option) === 'right',
+          'choice-option--wrong': plateState(option) === 'wrong',
+        }"
       >
         <input
           type="radio"
@@ -98,11 +140,15 @@ function choose(optionId: string): void {
           @change="choose(option.optionId)"
         />
         <span class="choice-option__face">
-          <OptionBadge :letter="String.fromCharCode(65 + index)" />
+          <span class="choice-option__mark" aria-hidden="true">{{ String.fromCharCode(65 + index) }}</span>
           <span class="choice-option__label">{{ option.label }}</span>
           <span class="choice-option__tick" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="choice-option__yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 13l4.5 4.5L19 7" />
+            </svg>
+            <svg class="choice-option__no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6.5 6.5 17.5 17.5" />
+              <path d="M17.5 6.5 6.5 17.5" />
             </svg>
           </span>
         </span>
@@ -144,14 +190,6 @@ function choose(optionId: string): void {
   gap: 0.4rem;
   justify-items: center;
   text-align: center;
-}
-
-.choice-head__eyebrow {
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #7a6647;
 }
 
 .choice-head__prompt {
@@ -268,6 +306,36 @@ html[data-theme='night'] .study-card--choice .choice-option {
 
 html[data-theme='night'] .choice-option__label { color: #f3e9d2; }
 
+/* The letter belongs to the plate: a stamped monogram at its left end,
+   pressed into the paper rather than a badge laid on top. The word keeps the
+   middle of the plate to itself. */
+/* The letter is a stamp pressed into the plate's left end: a hairline seal
+   with the letter cut into it, set well clear of the plate's rounded edge. */
+.choice-option__mark {
+  justify-self: start;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: 16px;
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #a9885a;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%), 0 1px 0 rgb(255 255 255 / 55%);
+}
+
+html[data-theme='night'] .choice-option__mark {
+  color: #b9a4e6;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%), 0 1px 0 rgb(0 0 0 / 45%);
+}
+
+.choice-option--right .choice-option__mark { color: #2f6b2c; }
+.choice-option--wrong .choice-option__mark { color: #9c2b22; }
+
 .choice-option__tick {
   grid-column: 3;
   display: grid;
@@ -297,6 +365,43 @@ html[data-theme='night'] .choice-option__label { color: #f3e9d2; }
 }
 
 .choice-list:disabled .choice-option { cursor: not-allowed; opacity: 0.6; }
+
+/* The verdict is painted on the plates, not announced below the card: the
+   answer's plate goes green, and a wrong pick goes red beside it. The colour
+   is multiplied over the plate art so the carved edge and grain stay visible
+   under it — a flat fill would read as a different, flatter object. */
+.choice-option::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 9px;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  transition: opacity 160ms ease;
+}
+
+.choice-option--right::after { background: #58b552; opacity: 0.58; }
+.choice-option--wrong::after { background: #df4f42; opacity: 0.5; }
+
+/* The mark on the plate is the verdict, not the selection: a right plate keeps
+   the tick, a wrong one swaps it for a cross and closes on the same red. */
+.choice-option--right .choice-option__tick {
+  opacity: 1;
+  transform: scale(1);
+  background: #2f7a2f;
+}
+
+.choice-option__no { display: none; }
+
+.choice-option--wrong .choice-option__tick {
+  opacity: 1;
+  transform: scale(1);
+  background: #a83232;
+}
+
+.choice-option--wrong .choice-option__yes { display: none; }
+.choice-option--wrong .choice-option__no { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   .choice-option__face,

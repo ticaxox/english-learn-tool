@@ -44,9 +44,26 @@ watch(
 
 const canRate = computed(() => revealed.value && !props.disabled)
 
-/** Says which side the learner is now looking at. */
-const backEyebrow = computed(() =>
-  props.question.backLabel === 'headword' ? '这个词是' : '释义',
+/**
+ * The front is asked either by its word or by its meaning. Printing the
+ * phonetic under a meaning hands over the spelling, so it only shows when the
+ * front is the word itself.
+ */
+const frontShowsPhonetic = computed(() =>
+  Boolean(props.question.phonetic) && props.question.frontLabel !== 'definition',
+)
+
+/**
+ * The back is the whole entry, not just the half the front did not show: once
+ * the card is turned the learner should be able to read the word, how it is
+ * said, what it means and see it in a sentence without turning it back.
+ */
+const backWord = computed(() =>
+  props.question.backLabel === 'headword' ? props.question.back : props.question.front,
+)
+
+const backMeaning = computed(() =>
+  props.question.backLabel === 'headword' ? props.question.front : props.question.back,
 )
 
 function flip(): void {
@@ -84,11 +101,12 @@ function rate(rating: FlashcardRating): void {
             <h2 id="flashcard-front" ref="frontHeading" class="flipface__word" tabindex="-1">
               {{ props.question.front }}
             </h2>
-            <div class="flipface__phoneticrow">
+            <!-- A pronunciation under a Chinese prompt gives the answer away,
+                 so the front only prints it when the front is not the meaning. -->
+            <div v-if="frontShowsPhonetic" class="flipface__phoneticrow">
+              <p class="flipface__phonetic">{{ props.question.phonetic }}</p>
               <SpeakButton :text="props.question.front" />
-              <p v-if="props.question.phonetic" class="flipface__phonetic">{{ props.question.phonetic }}</p>
             </div>
-            <span class="flipface__cue">点一下翻面</span>
           </div>
         </div>
 
@@ -102,10 +120,14 @@ function rate(rating: FlashcardRating): void {
           <div class="flipface__content">
             <template v-if="revealed">
               <div id="flashcard-back" ref="backRegion" class="flipface__body study-card__back" aria-live="polite" tabindex="-1">
-                <p class="flipface__eyebrow">{{ backEyebrow }}</p>
+                <p v-if="backWord" class="flipface__word flipface__word--back">{{ backWord }}</p>
+                <div v-if="backWord && props.question.phonetic" class="flipface__leader">
+                  <p class="flipface__phonetic">{{ props.question.phonetic }}</p>
+                  <SpeakButton :text="backWord" />
+                </div>
                 <p class="flipface__meaning">
                   <span v-if="props.question.partOfSpeech" class="flipface__pos">{{ props.question.partOfSpeech }}</span>
-                  <span v-if="props.question.back" class="flipface__definition" :class="{ 'is-headword': props.question.backLabel === 'headword' }">{{ props.question.back }}</span>
+                  <span v-if="backMeaning" class="flipface__definition">{{ backMeaning }}</span>
                   <span v-else class="inline-note">暂时没有释义，可以按自己的印象选择。</span>
                 </p>
                 <p v-if="props.question.example" class="flipface__example">{{ props.question.example }}</p>
@@ -147,7 +169,9 @@ function rate(rating: FlashcardRating): void {
   transition: transform 640ms cubic-bezier(0.2, 0.9, 0.25, 1.02);
 }
 
-.flipcard.is-flipped { transform: rotateY(180deg); }
+/* It turns the other way: the card comes up towards the left, so the reveal
+   reads as picking the card up rather than spinning it away. */
+.flipcard.is-flipped { transform: rotateY(-180deg); }
 
 /* No plate, no border, no radius: the artwork is the card. */
 .flipface {
@@ -157,7 +181,7 @@ function rate(rating: FlashcardRating): void {
   -webkit-backface-visibility: hidden;
 }
 
-.flipface--back { transform: rotateY(180deg); }
+.flipface--back { transform: rotateY(-180deg); }
 
 .flipface__frame {
   display: block;
@@ -202,16 +226,22 @@ function rate(rating: FlashcardRating): void {
   color: #7a6448;
 }
 
-.flipface__cue {
-  margin-top: 0.3rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #b09a78;
-  animation: cuePulse 2.4s ease-in-out infinite;
+/* The word carries its own speaker, so hearing it never means looking away
+   from it. */
+/* The word has its own line; how it is said has the next one, with the button
+   that says it on the right of the phonetic. */
+.flipface__leader {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.4rem;
 }
 
-@keyframes cuePulse { 50% { opacity: 0.4; } }
+.flipface__word--back {
+  margin: 0;
+  text-align: center;
+}
 
 .flipface__body {
   display: grid;
@@ -219,17 +249,14 @@ function rate(rating: FlashcardRating): void {
   outline: none;
 }
 
-.flipface__eyebrow {
-  margin: 0;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  color: #b09a78;
-}
-
+/* Part of speech and the meaning share one line: the meaning is what the
+   learner came for, the tag sits beside it rather than above it. */
 .flipface__meaning {
-  display: grid;
-  gap: 0.3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: baseline;
+  justify-content: center;
   margin: 0;
 }
 
@@ -250,14 +277,6 @@ function rate(rating: FlashcardRating): void {
 
 /* Revealed because the front asked for its meaning: the word comes back to
    the middle of the card, at the size the front had it. */
-.flipface__definition.is-headword {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.7rem, 4.6vw, 2.5rem);
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-}
-
 /* A phrasebook line, not a tinted box. */
 .flipface__example {
   margin: 0;
