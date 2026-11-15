@@ -638,9 +638,10 @@
 @media (max-width: 620px) {
   .shelf { gap: 0.7rem; padding: 1rem 0.5rem 2rem; }
   .shelf-book__title { font-size: 0.94rem; }
-  /* Two lines are always reserved, so a two-line hint does not push its book
-   * lower than the others in the row. */
-  .shelf-book__hint { min-height: 2.2em; font-size: 0.72rem; line-height: 1.15; }
+
+  /* Phone shelves carry the name only: the one-line explanation moved out of
+   * the way, leaving the book and its title. */
+  .personal-workspace .practice-hub-shelf .shelf-book__hint { display: none; }
 
   /* Phone: all three rows stand three books across at the size of the
    * memory row. Each shelf group has three entries, so every row fills. */

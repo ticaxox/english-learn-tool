@@ -1279,28 +1279,30 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
     justify-content: flex-end;
   }
 
-  /* Books stay books: two on a shelf row, not one full-width slab each. */
+  /* Books stay books: three smaller covers on a shelf row. */
   .personal-workspace .wordbook-grid,
   .personal-workspace .crumb-wordbooks .wordbook-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 14px 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px 8px;
   }
 
-  /* At two books per row the cover is narrow. The absolutely positioned
-   * title could not wrap inside it, so on a phone the title returns to the
-   * flow, centred in the cover's padded inner area. */
+  /* Three smaller books per row. The absolutely positioned title could not
+   * wrap inside a narrow cover, so the title returns to the flow, in the
+   * cover's title band above the metal clasp. */
   .personal-workspace .wordbook-grid .wordbook-cover {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    /* Clears the bookmark at the top and sits in the cover's title band,
-     * above the metal clasp in the middle of the binding. */
-    padding: 54px 12% 0;
+    padding: 36px 9% 0;
   }
 
   /* The older member layer made every cover child relative; the bookmark has
    * to stay out of the flow or it pushes the title to the book's foot. */
-  .personal-workspace .wordbook-grid .wordbook-cover > .wordbook-cover__bookmark { position: absolute; }
+  .personal-workspace .wordbook-grid .wordbook-cover > .wordbook-cover__bookmark {
+    position: absolute;
+    width: 14px;
+    height: 34px;
+  }
 
   .personal-workspace .wordbook-grid .wordbook-cover__name {
     position: relative;
@@ -1308,10 +1310,16 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
     right: auto;
     left: auto;
     z-index: 1;
+    display: -webkit-box;
     width: 100%;
     max-width: none;
+    overflow: hidden;
     overflow-wrap: anywhere;
-    font-size: clamp(0.7rem, 3.4vw, 0.82rem);
+    font-size: clamp(0.58rem, 2.6vw, 0.7rem);
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
   /* Twelve rows of medals turned the page into a scroll marathon. */
@@ -1323,4 +1331,14 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   .personal-workspace .badge__medal { width: 74px; height: 74px; }
   .personal-workspace .badge__name { font-size: 0.76rem; }
   .personal-workspace .badge__hint { font-size: 0.66rem; }
+}
+
+@media (max-width: 360px) {
+  /* The smallest phones need the title to finish above the clasp. */
+  .personal-workspace .wordbook-grid .wordbook-cover { padding-top: 20px; }
+  .personal-workspace .wordbook-grid .wordbook-cover > .wordbook-cover__bookmark {
+    width: 12px;
+    height: 18px;
+  }
+  .personal-workspace .wordbook-grid .wordbook-cover__name { font-size: 0.56rem; }
 }
