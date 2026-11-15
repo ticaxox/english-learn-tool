@@ -58,7 +58,7 @@ watch(
         </span>
       </span>
       <div class="hud-ident">
-        <strong class="hud-title">{{ level?.title ?? '点灯人' }}</strong>
+        <strong class="hud-title">{{ level?.title ?? '余烬' }}</strong>
         <span class="hud-xp">
           <span class="hud-xp__track" aria-hidden="true">
             <span class="hud-xp__fill" :style="{ width: `${xpPercent}%` }"></span>

@@ -63,9 +63,9 @@ DAILY_CRUMB_CAP = 1200
 
 QUEST_KEYS = ("review_due", "practice_one", "challenge_done")
 QUEST_REWARD = {"review_due": 30, "practice_one": 40, "challenge_done": 60}
-# The ladder is one lamp: you light it, you trim it, you keep it, it lights the
-# night, and at last it never goes out.
-LEVEL_TITLES = ((1, "点灯人"), (5, "挑灯人"), (10, "守灯人"), (20, "照夜人"), (35, "长明者"))
+# The ladder is one fire, not five jobs: the thing you keep alive starts buried
+# in ash and ends cold-blue, because the hottest fire is the coldest colour.
+LEVEL_TITLES = ((1, "余烬"), (5, "火舌"), (10, "熔炉"), (20, "锻铁"), (35, "淬火"))
 
 
 def xp_for_level(level: int) -> int:
@@ -305,8 +305,8 @@ BADGES: dict[str, tuple[str, str]] = {
     "streak_3": ("三日不灭", "灯连着亮 3 夜"),
     "streak_7": ("七日长明", "灯连着亮 7 夜"),
     "streak_30": ("一月不熄", "灯连着亮 30 夜"),
-    "level_5": ("挑灯人", "达到 5 级"),
-    "level_10": ("守灯人", "达到 10 级"),
+    "level_5": ("火舌", "达到 5 级"),
+    "level_10": ("熔炉", "达到 10 级"),
     "practice_10": ("练习成瘾", "累计提交 10 组练习"),
     "practice_50": ("题海老手", "累计提交 50 组练习"),
     "perfect_5": ("灯下无暗", "五组练习全部答对"),
@@ -316,7 +316,7 @@ BADGES: dict[str, tuple[str, str]] = {
     "streak_14": ("半月不熄", "灯连着亮 14 夜"),
     "streak_100": ("百日长明", "灯连着亮 100 夜"),
     "level_3": ("初添灯油", "达到 3 级"),
-    "level_20": ("照夜人", "达到 20 级"),
+    "level_20": ("锻铁", "达到 20 级"),
     "practice_100": ("百炼成钢", "累计提交 100 组练习"),
     "perfect_20": ("二十夜无暗", "二十组练习全部答对"),
     "boss_10": ("十度夜行", "通过十次闯关终点"),
