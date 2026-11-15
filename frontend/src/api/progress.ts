@@ -80,10 +80,14 @@ export interface GamificationFootprint {
   states: WordStateCounts
 }
 
+/**
+ * Tonight's three chores. Each line names the ceremony first and the work
+ * second, so the lamp story never hides what the learner actually has to do.
+ */
 export const QUEST_LABELS: Record<string, string> = {
-  review_due: '清空今日到期',
-  practice_one: '做一组练习',
-  challenge_done: '完成今日闯关',
+  review_due: '添油 · 清空今日到期',
+  practice_one: '挑芯 · 做一组练习',
+  challenge_done: '巡夜 · 完成今日闯关',
 }
 
 function record(value: unknown, context: string): Record<string, unknown> {

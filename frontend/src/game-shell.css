@@ -220,7 +220,17 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 }
 
 .personal-workspace .hud-flame { font-size: 14px; line-height: 1; }
+/* The pale core is what makes it read as fire rather than as another drop —
+ * the currency beside it is a drop, so the streak must not be one too. */
+.personal-workspace .hud-flame__core { fill: #ffe9a8; }
 .personal-workspace .hud-stat--streak.is-hot .hud-flame { animation: hud-flicker 1.8s ease-in-out infinite; }
+/* A broken streak is not a missing number: the wick is still there and the
+ * flame is out. That is the whole reason the lamp is the streak. */
+.personal-workspace .hud-stat--streak:not(.is-hot) .hud-flame {
+  fill: var(--ui-muted);
+  opacity: 0.45;
+}
+.personal-workspace .hud-stat--streak:not(.is-hot) .hud-flame__core { fill: var(--ui-muted); }
 
 @keyframes hud-flicker {
   0%, 100% { transform: scale(1) rotate(-2deg); filter: saturate(1); }

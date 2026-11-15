@@ -7,7 +7,7 @@
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import HobMark from './HobMark.vue'
-import { crumbBurst, gsap, motionAllowed } from '../composables/useMotion'
+import { sparkBurst, gsap, motionAllowed } from '../composables/useMotion'
 
 const props = defineProps<{ level: number; title: string }>()
 const emit = defineEmits<{ close: [] }>()
@@ -23,7 +23,7 @@ onMounted(() => {
       { scale: 1, opacity: 1, y: 0, duration: 0.55, ease: 'back.out(1.7)' },
     )
   }
-  crumbBurst(cardRef.value, 24)
+  sparkBurst(cardRef.value, 24)
   timer = window.setTimeout(() => emit('close'), 4200)
 })
 

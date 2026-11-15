@@ -63,7 +63,7 @@ onMounted(() => {
             {{ progress.level.xpIntoLevel }} / {{ progress.level.xpForNextLevel }} XP
           </span>
           <span class="progress-card__crumbs">
-            <RewardMark mark="coin" :size="16" /> 碎屑 {{ progress.crumbs }}
+            <RewardMark mark="oil" :size="16" /> 灯油 {{ progress.crumbs }}
           </span>
         </div>
         <div class="progress-card__streak" :class="{ 'is-active': progress.activeToday }">

@@ -2966,8 +2966,8 @@ than its row reads as a different kind of thing. */
   50% { transform: translateY(-3px) rotate(2deg); }
 }
 
-/* Crumbs left behind by the walker, so the leg reads as just-walked. */
-.challenge-dsl-crumb {
+/* Sparks left behind by the walker, so the leg reads as just-walked. */
+.challenge-dsl-spark {
   position: absolute;
   z-index: 1;
   width: 7px;
@@ -4131,6 +4131,8 @@ than its row reads as a different kind of thing. */
 .personal-workspace .progress-card__streak.is-active { color: #c2410c; }
 .personal-workspace .progress-card__streak strong { font-size: 1.15rem; }
 .personal-workspace .progress-card__streak svg { width: 14px; height: 14px; }
+/* An unlit night leaves the candle dark rather than removing it. */
+.personal-workspace .progress-card__streak:not(.is-active) svg { opacity: 0.45; }
 
 .personal-workspace .progress-card__quests { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
 

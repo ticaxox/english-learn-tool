@@ -251,22 +251,22 @@ function keepFocusInSight(smooth: boolean): void {
   }
 }
 
-/** Drop one crumb behind the walker; it fades on its own. */
+/** Drop one spark behind the walker; it fades on its own. */
 function dropCrumb(x: number, y: number): void {
   const canvas = boardRef.value?.querySelector('.challenge-dsl-canvas')
   if (!canvas) return
-  const crumb = document.createElement('span')
-  crumb.className = 'challenge-dsl-crumb'
-  crumb.style.left = `${x}px`
-  crumb.style.top = `${y}px`
-  canvas.appendChild(crumb)
-  gsap.to(crumb, {
+  const spark = document.createElement('span')
+  spark.className = 'challenge-dsl-spark'
+  spark.style.left = `${x}px`
+  spark.style.top = `${y}px`
+  canvas.appendChild(spark)
+  gsap.to(spark, {
     opacity: 0,
     scale: 0.4,
     duration: 0.75,
     delay: 0.1,
     ease: 'power2.out',
-    onComplete: () => crumb.remove(),
+    onComplete: () => spark.remove(),
   })
 }
 
@@ -324,7 +324,7 @@ function walkTo(fromId: string, toId: string): void {
   }
 
   const state = { t: 0 }
-  const crumbs = [0.18, 0.38, 0.58, 0.78]
+  const sparkPoints = [0.18, 0.38, 0.58, 0.78]
   let dropped = 0
   walkTween = gsap.to(state, {
     t: 1,
@@ -334,7 +334,7 @@ function walkTo(fromId: string, toId: string): void {
       const point = pointOn(edge, start, target, state.t)
       // A small hop arc keeps the walk from looking like a slide.
       guidePos.value = { x: point.x, y: point.y - Math.sin(state.t * Math.PI) * 12 }
-      if (dropped < crumbs.length && state.t >= crumbs[dropped]) {
+      if (dropped < sparkPoints.length && state.t >= sparkPoints[dropped]) {
         dropCrumb(point.x, point.y)
         dropped += 1
       }

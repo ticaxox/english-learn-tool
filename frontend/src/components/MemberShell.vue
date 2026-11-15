@@ -225,7 +225,7 @@ onBeforeUnmount(() => {
       <section class="rail-plate" aria-label="等级进度">
         <p class="rail-plate__lv">
           <strong>LV {{ level?.level ?? 1 }}</strong>
-          <span>{{ level?.title ?? '拾屑人' }}</span>
+          <span>{{ level?.title ?? '点灯人' }}</span>
         </p>
         <div class="rail-plate__xp" aria-hidden="true">
           <i v-for="segment in 10" :key="segment" :class="{ 'is-on': segment <= xpSegments }"></i>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * The reward marks: a level crest, a crumb coin and a streak candle.
+ * The reward marks: a level crest, an oil drop and a streak candle.
  *
  * Drawn as SVG rather than cut from the `badges-*` sheet: that sheet is a
  * design reference whose margins differ every time it is generated, so there
