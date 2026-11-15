@@ -384,9 +384,26 @@ describe('SpellingTrainer', () => {
     expect(wrapper.findAll('.spelling-cell--prefilled')[0].text()).toBe('o')
   })
 
-  it('describes the active blanking strategy to the learner', () => {
+  // The card no longer narrates how it blanks the word: the tiles themselves
+  // say which letters the server gave away.
+  it('does not narrate the blanking strategy on the card', () => {
     const wrapper = mount(SpellingTrainer, { props: { question: spelling({ blankType: 'full' }) } })
-    expect(wrapper.text()).toContain('全挖空')
+    expect(wrapper.text()).not.toContain('全挖空')
+    expect(wrapper.text()).not.toContain('按提示拼写')
+  })
+
+  it('writes the answer back into the cells once the card is graded', () => {
+    const blanks = [
+      { index: 0, prefilled: false, character: null },
+      { index: 1, prefilled: false, character: null },
+      { index: 2, prefilled: false, character: null },
+    ]
+    const wrapper = mount(SpellingTrainer, {
+      props: { question: spelling({ blanks }), result: 'cat', outcome: 'wrong' },
+    })
+    const values = wrapper.findAll('input').map((input) => (input.element as HTMLInputElement).value)
+    expect(values).toEqual(['c', 'a', 't'])
+    expect(wrapper.findAll('.spelling-cell--wrong')).toHaveLength(3)
   })
 
   it('blocks submission while disabled', async () => {

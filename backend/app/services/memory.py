@@ -390,11 +390,15 @@ async def _card_prompt(
             prompt, label = entry.phonetic, "phonetic"
         else:
             prompt, label = entry.headword, "headword"
+        # The phonetic is sent with the card; the front hides it while the
+        # answer is still hidden, because a pronunciation under a Chinese
+        # prompt gives the spelling away. The back is past that point and
+        # shows the whole entry.
         return SessionCardPrompt(
             module="flashcard",
             prompt=prompt,
             prompt_label=label,
-            phonetic=entry.phonetic if "phonetic" in sides else None,
+            phonetic=entry.phonetic,
             part_of_speech=part_of_speech,
         )
     if module == "spelling":

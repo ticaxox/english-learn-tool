@@ -6,7 +6,9 @@
  */
 import { computed, nextTick, ref, watch } from 'vue'
 import { useSpellingGrid } from '../composables/useSpellingGrid'
-import { SPELLING_BLANK_LABELS, type SpellingBlank, type SpellingQuestion } from '../types/learning'
+import { type SpellingBlank, type SpellingQuestion } from '../types/learning'
+import SpeakButton from './SpeakButton.vue'
+import AppIcon from './AppIcon.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
 
 const { surface } = useRuneSurface('spelling')
@@ -16,10 +18,27 @@ const props = defineProps<{
   disabled?: boolean
   /** The graded word once the server has answered; null while still answering. */
   result?: string | null
+  /** The server's verdict; drives the per-letter marks. */
+  outcome?: 'correct' | 'wrong' | null
+  /** Wrong, and the card is waiting: it shakes, glows, and is the way on. */
+  missed?: boolean
+  /** Right, and the card says so the same way a miss does, in green. */
+  hit?: boolean
 }>()
 
 /** Per-letter mark, only ever after grading — the word is never sent earlier. */
+/** After grading the cell shows the letter it should have held; before that,
+ * what the learner typed. The mark beside it is still about what they typed. */
+function cellValue(blank: SpellingBlank): string {
+  if (props.result) return props.result[blank.index] ?? grid.values.value[blank.index] ?? ''
+  return grid.values.value[blank.index] ?? ''
+}
+
 function letterState(blank: SpellingBlank): 'right' | 'wrong' | null {
+  if (!props.outcome) return null
+  // A word that was right spells every letter right; the server does not send
+  // the answer back to prove it.
+  if (props.outcome === 'correct') return 'right'
   if (!props.result) return null
   const expected = props.result[blank.index]
   if (expected === undefined) return null
@@ -29,6 +48,7 @@ function letterState(blank: SpellingBlank): 'right' | 'wrong' | null {
 
 const emit = defineEmits<{
   (event: 'answer', value: string): void
+  (event: 'continue'): void
 }>()
 
 const grid = useSpellingGrid()
@@ -51,11 +71,6 @@ watch(
   (done) => {
     if (done && !props.disabled) submit()
   },
-)
-
-/** Inside the card: spelling needs to say which letters the server gave away. */
-const blankLabel = computed(() =>
-  props.question.blankType ? SPELLING_BLANK_LABELS[props.question.blankType] : '按提示拼写',
 )
 
 function setInputRef(element: Element | null, index: number): void {
@@ -168,12 +183,30 @@ function submit(): void {
 </script>
 
 <template>
-  <section class="study-card study-card--spelling rune-surface" :style="surface" aria-labelledby="spelling-definition">
+  <section
+    class="study-card study-card--spelling rune-surface"
+    :class="{ 'is-missed': props.missed, 'is-hit': props.hit }"
+    :style="surface"
+    :role="props.missed ? 'button' : undefined"
+    :tabindex="props.missed ? 0 : undefined"
+    :aria-label="props.missed ? '回答错误，点一下进入下一题' : undefined"
+    aria-labelledby="spelling-definition"
+    @click="props.missed && emit('continue')"
+    @keydown.enter.prevent="props.missed && emit('continue')"
+    @keydown.space.prevent="props.missed && emit('continue')"
+  >
     <div class="spell-head">
-      <span class="spell-head__eyebrow">拼写</span>
       <h2 id="spelling-definition" class="spell-head__prompt" tabindex="-1">{{ props.question.definition }}</h2>
-      <p v-if="props.question.phonetic" class="spell-head__phonetic">{{ props.question.phonetic }}</p>
-      <p class="spell-head__hint">{{ blankLabel }}</p>
+      <div v-if="props.question.phonetic" class="spell-head__aside">
+        <p class="spell-head__phonetic">{{ props.question.phonetic }}</p>
+        <SpeakButton v-if="props.result" :text="props.result" />
+        <!-- The word is the answer, so it is only read out once it has been
+          spelled; the speaker shows from the start so the pair is not a
+          surprise appearing halfway through the card. -->
+        <span v-else class="spell-head__speaker-off" title="答题后可以听发音" aria-hidden="true">
+          <AppIcon name="speaker" />
+        </span>
+      </div>
     </div>
 
     <div class="spelling-grid" role="group" aria-label="按字母顺序填写单词">
@@ -200,7 +233,7 @@ function submit(): void {
           lang="en"
           maxlength="1"
           :aria-label="`第 ${blank.index + 1} 个字母`"
-          :value="grid.values.value[blank.index] ?? ''"
+          :value="cellValue(blank)"
           :readonly="!touchTyping"
           :disabled="props.disabled"
           @input="handleInput(blank.index, $event)"
@@ -244,14 +277,6 @@ function submit(): void {
   text-align: center;
 }
 
-.spell-head__eyebrow {
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #7a6647;
-}
-
 .spell-head__prompt {
   margin: 0;
   font-family: Georgia, 'Times New Roman', serif;
@@ -269,12 +294,26 @@ function submit(): void {
   color: #6c573a;
 }
 
-.spell-head__hint {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 700;
+/* The phonetic line carries the way the word is said, and the button that
+   says it — the answer itself is never printed before it is spelled. */
+.spell-head__aside {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+}
+
+.spell-head__speaker-off {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  opacity: 0.45;
   color: #6c573a;
 }
+
+.spell-head__speaker-off :deep(svg) { width: 16px; height: 16px; }
 
 /* Letter slots sit on the table like tiles, so each one reads as a cell to fill. */
 .spelling-grid {
