@@ -1262,6 +1262,104 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 }
 
 @media (max-width: 620px) {
+  /* AI settings: the title and its add button share one line. */
+  .personal-workspace .personal-ai-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+
+  .personal-workspace .personal-ai-toolbar .button { min-height: 40px; }
+
+  /* Provider: priority and the three actions sit on one footer row. */
+  .personal-workspace .personal-ai-provider { gap: 10px 12px; }
+  .personal-workspace .personal-ai-provider__main { flex: 1 1 100%; }
+  .personal-workspace .personal-ai-provider__priority {
+    order: 2;
+    width: 130px;
+    flex: 0 0 130px;
+    margin-right: auto;
+    gap: 4px;
+    font-size: 0.72rem;
+  }
+
+  /* "优先级" is three characters the footer cannot spare; "优先" reads. */
+  .personal-workspace .personal-ai-provider__priority > span {
+    font-size: 0;
+    line-height: 0;
+  }
+
+  .personal-workspace .personal-ai-provider__priority > span::after {
+    content: "优先";
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+  .personal-workspace .personal-ai-provider__actions {
+    order: 3;
+    width: auto;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+  }
+
+  .personal-workspace .personal-ai-provider__actions .button-secondary,
+  .personal-workspace .personal-ai-provider__actions .button-danger {
+    min-height: 34px;
+    padding: 0 7px;
+    font-size: 0.72rem;
+  }
+
+  /* Smaller steppers everywhere on a phone: number + two 30px targets. */
+  .personal-workspace .crumb-stepper { width: min(100%, 96px); min-height: 38px; }
+  .personal-workspace .crumb-stepper__step { width: 30px; height: 30px; }
+  .personal-workspace .crumb-stepper__input { height: 30px; font-size: 0.92rem; }
+
+  /* Daily goals and the map-time row: label and control on one line. */
+  .personal-workspace .settings-goal-grid .field,
+  .personal-workspace .settings-pair > .field--inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    align-items: center;
+  }
+
+  .personal-workspace .settings-goal-grid .field > label,
+  .personal-workspace .settings-pair > .field--inline > label {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .personal-workspace .settings-goal-grid .field > input,
+  .personal-workspace .settings-pair > .field--inline > select,
+  .personal-workspace .settings-pair > .field--inline > input {
+    width: auto;
+    max-width: none;
+    justify-self: auto;
+  }
+
+  .personal-workspace .settings-pair > .field--inline > select {
+    width: 120px;
+    flex: 0 0 120px;
+  }
+
+  .personal-workspace .settings-pair > .field--inline .crumb-time {
+    width: 116px;
+    flex: 0 0 116px;
+  }
+
+  .personal-workspace .settings-goal-grid .field-inline-note {
+    display: flex;
+    width: auto;
+    max-width: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    align-items: center;
+    justify-content: flex-start;
+    justify-self: auto;
+  }
+
   /* The shelf toolbar gets three lines: name and count, a full search field,
    * then the two actions. One row left the search box 27px wide. */
   .personal-workspace .wordbook-toolbar {
