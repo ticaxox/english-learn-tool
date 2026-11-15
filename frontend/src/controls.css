@@ -6701,9 +6701,7 @@ html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date
  * 同优先级下后写的赢；与其逐个改，不如让「卡片用什么材质」只有一个出处。 */
 .personal-workspace .crumb-today-board,
 .personal-workspace .insight-card,
-.personal-workspace .badge-wall,
-.personal-workspace .settings-choice-block,
-.personal-workspace .settings-hero {
+.personal-workspace .badge-wall {
   border: 20px solid transparent;
   border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
   border-radius: 0;
@@ -6723,9 +6721,179 @@ html[data-theme='night'] .personal-workspace :is(
   .crumb-today-board,
   .insight-card,
   .badge-wall,
-  .settings-choice-block,
-  .settings-hero,
   .memory-rail-block
 ) {
   border-image-source: url('./assets/halloween/card/panel-board-night.png');
 }
+
+/* ------------------------------------------- 学习设置：一张纸，不是一块板 */
+
+/* 一块板是「拿在手上的一面牌子」，一整页表单铺上去就变成了给贴纸镶边。
+ * 所以这一页退回纸面：标题只做排版，表单是一张细线框住的纸，段落之间靠横线分。
+ * 材质交给里面的控件——凸起的铜牌是按钮，凹进去的槽是输入框和下拉框。 */
+.personal-workspace .settings-form.panel {
+  padding: 24px 26px 22px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* 选项组不再各自是一张卡片。两列之间那条竖线就够了。 */
+.personal-workspace .settings-form .settings-choice-block {
+  padding: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------- 控件：铜牌与凹槽 */
+
+/* 两件零件，一副因果关系：按得下去的东西是凸起的铜牌（按钮、选中的选项），
+ * 往里放东西的地方是凹进去的槽（输入框、下拉框、未选中）。板子上摆的就是这两样。 */
+/* 这些属性上有四到六层旧主题在压（`[role=button][type=submit]`、`.dialog-actions > [role=button]`……），
+ * 权重一层比一层高。材质只该有一个出处，所以这里用 !important 把它钉在最后，
+ * 而不是再写一串更长的选择器去和旧规则比谁更长。布局属性（min-height、display）不动。 */
+.personal-workspace .settings-form :is(.button, .button-secondary, .button-danger, [role="button"][type="submit"]),
+.personal-workspace .dialog-card :is(.button, .button-secondary, .button-danger),
+.personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
+  padding: 3px 14px !important;
+  border-width: 6px 15px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-button-day.png') 16% 10% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: #33200b !important;
+  text-shadow: 0 1px 0 rgb(255 236 196 / 45%);
+}
+
+.personal-workspace .settings-form :is(.button, .button-secondary, .button-danger, [role="button"][type="submit"]):hover:not(:disabled),
+.personal-workspace .dialog-card :is(.button, .button-secondary, .button-danger):hover:not(:disabled),
+.personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button):hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: none !important;
+  box-shadow: none !important;
+  filter: brightness(1.04);
+}
+
+.personal-workspace .settings-form [role="button"][type="submit"]:active:not(:disabled),
+.personal-workspace .dialog-card .dialog-actions > [role="button"]:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none !important;
+}
+
+.personal-workspace .settings-toggle {
+  padding: 5px 15px;
+  border-width: 6px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .settings-form .settings-toggle.is-active {
+  border-width: 6px 14px;
+  border-image: url('./assets/halloween/card/control-button-day.png') 16% 10% fill stretch;
+  background: none;
+  box-shadow: none;
+  color: #33200b;
+}
+
+.personal-workspace .settings-form .crumb-stepper,
+.personal-workspace .settings-form select,
+.personal-workspace .dialog-card .crumb-stepper,
+.personal-workspace .dialog-card select,
+.personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+.personal-workspace .dialog-card textarea {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .settings-form :is(.crumb-time, .crumb-date),
+.personal-workspace .dialog-card :is(.crumb-time, .crumb-date, .crumb-search, .crumb-file) {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form :is(.crumb-time, .crumb-date),
+html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crumb-date, .crumb-search, .crumb-file) {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+}
+
+.personal-workspace .settings-form .crumb-stepper:hover,
+.personal-workspace .settings-form select:hover,
+.personal-workspace .dialog-card .crumb-stepper:hover,
+.personal-workspace .dialog-card select:hover,
+.personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):hover,
+.personal-workspace .dialog-card textarea:hover { border-color: transparent; }
+
+.personal-workspace .settings-form .crumb-stepper:focus-within,
+.personal-workspace .settings-form select:focus,
+.personal-workspace .dialog-card .crumb-stepper:focus-within,
+.personal-workspace .dialog-card select:focus,
+.personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):focus,
+.personal-workspace .dialog-card textarea:focus {
+  border-color: transparent;
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+/* 夜间：铜牌换成发烟的石牌，槽换成靛色墨沟。 */
+html[data-theme='night'] .personal-workspace .settings-form :is(.button, .button-secondary, .button-danger, [role="button"][type="submit"]),
+html[data-theme='night'] .personal-workspace .dialog-card :is(.button, .button-secondary, .button-danger),
+html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button),
+html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
+  border-image-source: url('./assets/halloween/card/control-button-night.png') !important;
+  color: #efe6ff !important;
+  text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
+}
+
+html[data-theme='night'] .personal-workspace .settings-toggle,
+html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper,
+html[data-theme='night'] .personal-workspace .settings-form select,
+html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper,
+html[data-theme='night'] .personal-workspace .dialog-card select,
+html[data-theme='night'] .personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+html[data-theme='night'] .personal-workspace .dialog-card textarea {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  color: #efe6ff;
+}
+
+/* 下拉列表浮在页面上，所以它和右键菜单、日期选择器一样是一块板。 */
+@supports (appearance: base-select) {
+  .personal-workspace select::picker(select) {
+    padding: 12px 14px;
+    border: 14px solid transparent;
+    border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  html[data-theme='night'] .personal-workspace select::picker(select) {
+    border-image-source: url('./assets/halloween/card/panel-board-night.png');
+  }
+}
+
+html[data-theme='night'] .personal-workspace .dialog-card ::placeholder,
+html[data-theme='night'] .personal-workspace .settings-form ::placeholder { color: #9b8bbd; }
