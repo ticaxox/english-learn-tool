@@ -637,7 +637,7 @@
 
 @media (max-width: 620px) {
   .shelf { gap: 0.7rem; padding: 1rem 0.5rem 2rem; }
-  .shelf-book__title { font-size: 0.94rem; }
+  .shelf-book__title { font-size: 0.82rem; }
 
   /* Phone shelves carry the name only: the one-line explanation moved out of
    * the way, leaving the book and its title. */

@@ -1315,7 +1315,7 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
     max-width: none;
     overflow: hidden;
     overflow-wrap: anywhere;
-    font-size: clamp(0.58rem, 2.6vw, 0.7rem);
+    font-size: clamp(0.54rem, 2.35vw, 0.64rem);
     line-height: 1.25;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
@@ -1340,5 +1340,5 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
     width: 12px;
     height: 18px;
   }
-  .personal-workspace .wordbook-grid .wordbook-cover__name { font-size: 0.56rem; }
+  .personal-workspace .wordbook-grid .wordbook-cover__name { font-size: 0.52rem; }
 }
