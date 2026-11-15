@@ -384,17 +384,29 @@ html[data-theme='night'] .personal-workspace {
 
 /* ------------------------------------------------------------------ cards */
 
+/* 卡片就是一块大板，和弹窗同一张图，只是边框带收窄到 20px。这条原本用 !important
+ * 压住旧主题，改材质时保留同样的权重。书架上的封面卡和七本书是「摆着的物件」，
+ * 不在这条里——它们自己就是画好的书。 */
 .personal-workspace .workspace-card,
 .personal-workspace .panel,
-.personal-workspace .wordbook-card,
-.personal-workspace .practice-type-card,
 .personal-workspace .challenge-self-study__card,
 .personal-workspace .wordbook-active-strip,
 .personal-workspace .memory-context-card {
-  border: 2px solid var(--ui-line) !important;
-  border-radius: var(--ui-radius-md) !important;
-  background: var(--ui-surface);
-  box-shadow: 0 2px 0 rgb(59 42 26 / 5%) !important;
+  border: 20px solid transparent !important;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace :is(
+  .workspace-card,
+  .panel,
+  .challenge-self-study__card,
+  .wordbook-active-strip,
+  .memory-context-card
+) {
+  border-image-source: url('./assets/halloween/card/panel-board-night.png') !important;
 }
 
 /* ------------------------------------------------------------------ pills */
@@ -539,11 +551,18 @@ html[data-theme='night'] .personal-workspace {
   transform: rotate(2deg);
 }
 
+/* 今日的板子也是同一块大板。这条原本用 !important 压住一堆旧主题，改材质时保留同样的
+ * 权重，否则今天这块卡会掉回圆角矩形。 */
 .personal-workspace .crumb-trail-board {
-  border: 2px solid var(--ui-line-strong) !important;
-  border-radius: 24px !important;
-  background: var(--ui-surface) !important;
-  box-shadow: 0 6px 0 rgb(59 42 26 / 8%) !important;
+  border: 20px solid transparent !important;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .crumb-trail-board {
+  border-image-source: url('./assets/halloween/card/panel-board-night.png') !important;
 }
 
 .personal-workspace .crumb-trail-board-head {

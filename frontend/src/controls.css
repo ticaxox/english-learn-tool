@@ -6692,3 +6692,40 @@ html[data-theme='night'] .personal-workspace .crumb-date__picker {
 }
 
 html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date__glyph { color: #5b4f7a; }
+
+/* ------------------------------------------------------------ cards on the board */
+
+/* 页面上的卡片和弹窗是同一块板：角上铜角、边条平铺、中间那块平涂放内容。
+ * 边框带按尺寸收窄——整栏的卡片 20px，右栏那种小方块 14px。
+ * 这块放在文件末尾，是因为这些类在 controls.css 和 game-ui.css 里各有声明，
+ * 同优先级下后写的赢；与其逐个改，不如让「卡片用什么材质」只有一个出处。 */
+.personal-workspace .crumb-today-board,
+.personal-workspace .insight-card,
+.personal-workspace .badge-wall,
+.personal-workspace .settings-choice-block,
+.personal-workspace .settings-hero {
+  border: 20px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.personal-workspace .memory-rail-block {
+  border: 14px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .personal-workspace :is(
+  .crumb-today-board,
+  .insight-card,
+  .badge-wall,
+  .settings-choice-block,
+  .settings-hero,
+  .memory-rail-block
+) {
+  border-image-source: url('./assets/halloween/card/panel-board-night.png');
+}
