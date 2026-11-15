@@ -6709,21 +6709,24 @@ html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date
   box-shadow: none;
 }
 
-.personal-workspace .memory-rail-block {
-  border: 14px solid transparent;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-
 html[data-theme='night'] .personal-workspace :is(
   .crumb-today-board,
   .insight-card,
-  .badge-wall,
-  .memory-rail-block
+  .badge-wall
 ) {
   border-image-source: url('./assets/halloween/card/panel-board-night.png');
+}
+
+/* 板里不再套板。右侧训练栏已经是一块板，里面的计时、生命那几格再各套一层，
+ * 就成了板上贴板：外圈铜角、里圈再铜角，中间还夹一圈空白。板只有一层，
+ * 里面的分组退回横线——原本那条 border-top 就是为这件事写的。 */
+.personal-workspace :is(.panel, .workspace-card, .crumb-today-board, .insight-card, .badge-wall, .dialog-card, .memory-context-card)
+  :is(.panel, .workspace-card, .crumb-today-board, .insight-card, .badge-wall, .challenge-self-study__card) {
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 
 /* ------------------------------------------- 学习设置：一张纸，不是一块板 */
@@ -6757,8 +6760,19 @@ html[data-theme='night'] .personal-workspace :is(
 /* 这些属性上有四到六层旧主题在压（`[role=button][type=submit]`、`.dialog-actions > [role=button]`……），
  * 权重一层比一层高。材质只该有一个出处，所以这里用 !important 把它钉在最后，
  * 而不是再写一串更长的选择器去和旧规则比谁更长。布局属性（min-height、display）不动。 */
-.personal-workspace .settings-form :is(.button, .button-secondary, .button-danger, [role="button"][type="submit"]),
-.personal-workspace .dialog-card :is(.button, .button-secondary, .button-danger),
+/* 全站一个按钮：凸起的铜牌。做题目右侧的「结束本次」、词书页的「导入词书」、
+ * 弹窗里的「取消」，都是同一块牌子；只有自绘的 SVG 牌按钮和图标按钮不套，
+ * 它们本来就是自己的形状。 */
+.personal-workspace :is(
+  .button,
+  .button-secondary,
+  .button-danger,
+  .member-primary-button,
+  .workspace-primary-button,
+  .workspace-secondary-button,
+  .crumb-primary-action,
+  [role="button"][type="submit"]
+):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
   padding: 3px 14px !important;
   border-width: 6px 15px !important;
@@ -6772,8 +6786,7 @@ html[data-theme='night'] .personal-workspace :is(
   text-shadow: 0 1px 0 rgb(255 236 196 / 45%);
 }
 
-.personal-workspace .settings-form :is(.button, .button-secondary, .button-danger, [role="button"][type="submit"]):hover:not(:disabled),
-.personal-workspace .dialog-card :is(.button, .button-secondary, .button-danger):hover:not(:disabled),
+.personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):hover:not(:disabled),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button):hover:not(:disabled) {
   transform: translateY(-1px);
   background: none !important;
@@ -6781,7 +6794,8 @@ html[data-theme='night'] .personal-workspace :is(
   filter: brightness(1.04);
 }
 
-.personal-workspace .settings-form [role="button"][type="submit"]:active:not(:disabled),
+.personal-workspace [role="button"][type="submit"]:active:not(:disabled),
+.personal-workspace :is(.button, .button-secondary, .button-danger):active:not(:disabled),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: none !important;
@@ -6859,13 +6873,53 @@ html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crum
 }
 
 /* 夜间：铜牌换成发烟的石牌，槽换成靛色墨沟。 */
-html[data-theme='night'] .personal-workspace .settings-form :is(.button, .button-secondary, .button-danger, [role="button"][type="submit"]),
-html[data-theme='night'] .personal-workspace .dialog-card :is(.button, .button-secondary, .button-danger),
+html[data-theme='night'] .personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle),
 html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button),
 html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
   border-image-source: url('./assets/halloween/card/control-button-night.png') !important;
   color: #efe6ff !important;
   text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
+}
+
+/* 设置页的文本框、下拉框、日期时间框：凹槽。练习题和 AI 教练的输入框是各自
+ * 画的（答题区、教练输入条），不在这一条里，免得把它们的定制样式顶掉。 */
+.personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+  textarea,
+  select,
+  .crumb-stepper,
+  .crumb-time,
+  .crumb-date
+) {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option {
+  border-image-source: url('./assets/halloween/card/control-field-night.png');
+  color: #efe6ff;
+}
+
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option.is-active {
+  border-image-source: url('./assets/halloween/card/control-button-night.png');
+  color: #efe6ff;
+}
+
+html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+  textarea,
+  select,
+  .crumb-stepper,
+  .crumb-time,
+  .crumb-date
+) {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  color: #efe6ff;
 }
 
 html[data-theme='night'] .personal-workspace .settings-toggle,
@@ -6897,3 +6951,130 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
 
 html[data-theme='night'] .personal-workspace .dialog-card ::placeholder,
 html[data-theme='night'] .personal-workspace .settings-form ::placeholder { color: #9b8bbd; }
+
+/* ------------------------------------------------------------ 开关 */
+
+/* 第三件零件，和铜牌、凹槽都不一样：它不是按下去的，也不是拿来装东西的，
+ * 而是一颗能在槽里滑到另一头的圆钮。四种状态各画一张（关/开 × 昼/夜），
+ * 切换时两张图交叉淡出 160ms——真旋钮不会瞬移，滤镜也调不出另一张画。 */
+.personal-workspace .notification-switch {
+  width: 2.85rem;
+  height: 1.3rem;
+  border: 0;
+  border-radius: 0;
+  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+  transition: none;
+}
+
+.personal-workspace .notification-switch span { display: none; }
+
+.personal-workspace .notification-switch::after {
+  position: absolute;
+  inset: 0;
+  background: url('./assets/halloween/card/control-switch-on-day.png') center / 100% 100% no-repeat;
+  content: "";
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(.2, .9, .25, 1.05);
+}
+
+.personal-workspace .notification-category-option > input:checked + .notification-switch {
+  border-color: transparent;
+  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+}
+
+.personal-workspace .notification-category-option > input:checked + .notification-switch::after { opacity: 1; }
+
+.personal-workspace .notification-category-option > input:focus-visible + .notification-switch {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 3px;
+}
+
+html[data-theme='night'] .personal-workspace .notification-switch,
+html[data-theme='night'] .personal-workspace .notification-category-option > input:checked + .notification-switch {
+  background-image: url('./assets/halloween/card/control-switch-off-night.png');
+}
+
+html[data-theme='night'] .personal-workspace .notification-switch::after {
+  background-image: url('./assets/halloween/card/control-switch-on-night.png');
+}
+
+/* 「启用 / 停用」是开关，不是按钮：它没有「按下去做一件事」的语义，只有两种状态。
+ * 所以它不套铜牌，靠左边那颗开关和一行字说明自己。 */
+.personal-workspace .ai-toggle[aria-pressed] {
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  min-height: 0;
+  padding: 2px 0 !important;
+  border: 0 !important;
+  border-image: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--ui-ink) !important;
+  text-shadow: none !important;
+}
+
+.personal-workspace .ai-toggle[aria-pressed]:hover:not(:disabled) { transform: none; filter: none; }
+
+.personal-workspace .ai-toggle .ai-toggle__dot {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 2.85rem;
+  height: 1.3rem;
+  border: 0;
+  border-radius: 0;
+  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+}
+
+/* 开态叠一层，用不透明度过渡——背景图本身没法补间，硬切会让旋钮瞬移。 */
+.personal-workspace .ai-toggle .ai-toggle__dot::after {
+  position: absolute;
+  inset: 0;
+  background: url('./assets/halloween/card/control-switch-on-day.png') center / 100% 100% no-repeat;
+  content: "";
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(.2, .9, .25, 1.05);
+}
+
+.personal-workspace .ai-toggle .ai-toggle__dot.is-on::after { opacity: 1; }
+
+html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot {
+  background-image: url('./assets/halloween/card/control-switch-off-night.png');
+}
+
+html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
+  background-image: url('./assets/halloween/card/control-switch-on-night.png');
+}
+
+/* 「对话模型 / 向量模型」是一组选项，跟设置里的选项用同一对零件：
+ * 选中的是铜牌，没选中的是凹槽。它们外面那圈小圆角框去掉，两个芯片自己站。 */
+.personal-workspace .ai-kind-switch {
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.personal-workspace .ai-kind-switch__option {
+  min-height: 0;
+  padding: 5px 15px;
+  border-width: 6px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch;
+  border-radius: 0;
+  background: none;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .ai-kind-switch__option:hover { color: var(--ui-ink); }
+
+.personal-workspace .ai-kind-switch__option.is-active {
+  padding: 5px 15px;
+  border-width: 6px 14px;
+  border-image: url('./assets/halloween/card/control-button-day.png') 16% 10% fill stretch;
+  background: none;
+  color: #33200b;
+}
