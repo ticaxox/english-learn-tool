@@ -6199,10 +6199,11 @@ select the digits. */
   margin: 0;
   padding: 10px 9px 9px;
   overflow: visible;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 16px;
-  background: var(--ui-surface);
-  box-shadow: 7px 7px 0 rgb(59 42 26 / 14%);
+  border: 18px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   color: var(--ui-ink);
 }
 
@@ -6333,10 +6334,11 @@ select the digits. */
   margin: 0;
   padding: 10px;
   overflow: visible;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 16px;
-  background: var(--ui-surface);
-  box-shadow: 7px 7px 0 rgb(59 42 26 / 14%);
+  border: 18px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   color: var(--ui-ink);
 }
 
@@ -6682,11 +6684,11 @@ html[data-theme='night'] .personal-workspace .crumb-stepper__step:disabled { col
 
 html[data-theme='night'] .personal-workspace .crumb-time.is-disabled .crumb-time__glyph { color: #5b4f7a; }
 
-/* The pickers are floating cards, so their shadow is the room's hard offset,
- * not a soft drop — and at night that offset is nearly black. */
+/* The pickers hang on the same board as the dialogs; at night the frame is the
+ * stone one, so the panel no longer needs a shadow of its own. */
 html[data-theme='night'] .personal-workspace .crumb-time__picker,
 html[data-theme='night'] .personal-workspace .crumb-date__picker {
-  box-shadow: 7px 7px 0 rgb(8 3 20 / 55%);
+  border-image-source: url('./assets/halloween/card/panel-board-night.png');
 }
 
 html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date__glyph { color: #5b4f7a; }
