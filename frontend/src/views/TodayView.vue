@@ -7,12 +7,12 @@
  * never the source of truth.
  *
  * The page reads top to bottom: the player bar, the day's tasks, one line of
- * advice from Crumbo, the map, then the two charts that put today in context.
+ * advice from Hob, the map, then the two charts that put today in context.
  */
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import ChallengeView from './ChallengeView.vue'
-import CrumboMark from '../components/CrumboMark.vue'
+import HobMark from '../components/HobMark.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
@@ -30,7 +30,7 @@ import type { TodayPlan } from '../types/learning'
 import '../learning.css'
 
 const gamification = useGamification()
-const crumboMood = computed(() => gamification.crumboMood.value)
+const hobMood = computed(() => gamification.hobMood.value)
 const plan = ref<TodayPlan | null>(null)
 const loading = ref(false)
 const error = ref<unknown>(null)
@@ -92,7 +92,7 @@ const todayTasks = computed(() => {
   }))
 })
 
-const crumboTip = computed(() => {
+const hobTip = computed(() => {
   const remaining = todayTasks.value.filter((task) => !task.done)
   if (remaining.length === 0) return '今天的任务都完成了，可以再走一圈，也可以明天再来。'
   const next = remaining[0]
@@ -148,7 +148,7 @@ onMounted(() => {
 
     <section v-else-if="error" class="crumb-state-panel" :class="needsActiveWordbook ? 'crumb-empty-state' : 'crumb-error-panel'">
       <div v-if="needsActiveWordbook" class="crumb-empty-note">
-        <CrumboMark size="medium" :mood="crumboMood" />
+        <HobMark size="medium" :mood="hobMood" />
         <div>
           <strong>先选一本词书，路线才能开始。</strong>
           <p>选好词书后，今天的任务会自动出现。</p>
@@ -202,8 +202,8 @@ onMounted(() => {
 
       <div class="crumb-note-out">
         <div class="crumb-tip">
-          <CrumboMark size="small" :mood="crumboMood" />
-          <p>{{ crumboTip }}</p>
+          <HobMark size="small" :mood="hobMood" />
+          <p>{{ hobTip }}</p>
         </div>
       </div>
 

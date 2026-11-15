@@ -734,7 +734,7 @@
 .study-stats--compact .study-stats__value strong { color: var(--workspace-accent); font-family: inherit; font-size: 24px; font-weight: 700; }
 .study-stats--compact .study-stats__value > span:not(.study-stats__badge) { color: var(--workspace-muted); font-size: 12px; }
 
-/* T-FE-018 — CrumbTrail / Crumbo visual system */
+/* T-FE-018 — Hob / Hob visual system */
 :root {
   --crumb-forest: #193f32;
   --crumb-forest-deep: #102d24;
@@ -749,7 +749,7 @@
   --crumb-paper: #fff8e8;
 }
 
-.workspace-brand-mark .crumbo-mark {
+.workspace-brand-mark .hob-mark {
   width: 28px;
   height: 28px;
 }
@@ -771,7 +771,7 @@
 }
 .crumb-today-intro { display: grid; min-width: 0; gap: 12px; }
 .crumb-mascot-lockup { display: flex; gap: 18px; align-items: center; }
-.crumb-mascot-lockup .crumbo-mark { width: 104px; height: 104px; }
+.crumb-mascot-lockup .hob-mark { width: 104px; height: 104px; }
 .crumb-brand-kicker,
 .crumb-eyebrow {
   display: block;
@@ -954,7 +954,7 @@
   color: var(--crumb-cream);
 }
 .crumb-guide-note { display: flex; gap: 10px; align-items: center; }
-.crumb-guide-note .crumbo-mark { width: 46px; height: 46px; }
+.crumb-guide-note .hob-mark { width: 46px; height: 46px; }
 .crumb-guide-note span { display: block; color: var(--crumb-gold); font-size: 9px; font-weight: 800; letter-spacing: 0.08em; }
 .crumb-guide-note p { margin: 2px 0 0; color: var(--crumb-cream); font-size: 11px; }
 .workspace-shell .crumb-primary-action {
@@ -1026,7 +1026,7 @@
 }
 @media (max-width: 620px) {
   .crumb-mascot-lockup { align-items: flex-start; }
-  .crumb-mascot-lockup .crumbo-mark { width: 72px; height: 72px; }
+  .crumb-mascot-lockup .hob-mark { width: 72px; height: 72px; }
   .crumb-stop { grid-template-columns: 38px minmax(0, 1fr); }
   .crumb-stop > svg { display: none; }
   .crumb-stop-card, .crumb-stop:nth-child(even) .crumb-stop-card { margin-left: 0; }
@@ -1035,7 +1035,7 @@
   .workspace-shell .crumb-primary-action { width: 100%; justify-content: center; }
   .crumb-today-side { grid-template-columns: 1fr; }
 }
-/* CrumbTrail wordbook shelf */
+/* Hob wordbook shelf */
 .crumb-wordbooks { --crumb-current: var(--crumb-moss); }
 .crumb-wordbooks .crumb-shelf-header {
   display: flex;
@@ -1048,7 +1048,7 @@
   background: var(--crumb-parchment);
 }
 .crumb-shelf-heading { display: flex; gap: 16px; align-items: center; }
-.crumb-shelf-heading .crumbo-mark { width: 72px; height: 72px; }
+.crumb-shelf-heading .hob-mark { width: 72px; height: 72px; }
 .crumb-shelf-heading h1 {
   margin: 0 0 4px;
   color: var(--crumb-cocoa);
@@ -1193,9 +1193,9 @@
 @media (max-width: 620px) {
   .crumb-wordbooks .wordbook-grid { grid-template-columns: 1fr; }
   .crumb-wordbooks .wordbook-card--compact { min-height: 330px; }
-  .crumb-shelf-heading .crumbo-mark { width: 58px; height: 58px; }
+  .crumb-shelf-heading .hob-mark { width: 58px; height: 58px; }
 }
-/* CrumbTrail daily route */
+/* Hob daily route */
 .crumb-challenge { --crumb-current: var(--crumb-pumpkin); color: var(--crumb-cocoa); }
 .crumb-challenge .challenge-page-header {
   padding: 18px 22px;
@@ -1225,7 +1225,7 @@
   background: var(--crumb-pumpkin);
   box-shadow: 4px 4px 0 var(--crumb-parchment-deep);
 }
-.crumb-challenge .challenge-next-step > .crumbo-mark { width: 58px; height: 58px; }
+.crumb-challenge .challenge-next-step > .hob-mark { width: 58px; height: 58px; }
 .crumb-challenge .challenge-next-step__copy h2 { color: var(--crumb-cocoa); }
 .crumb-challenge .challenge-next-step__copy p { color: #6b3a24; }
 .crumb-challenge .challenge-next-step > .button {

@@ -11,7 +11,7 @@ const progress = ref<GamificationProgress | null>(null)
 const loading = ref(false)
 const error = ref<unknown>(null)
 
-export type CrumboMood = 'tired' | 'normal' | 'happy' | 'glowing'
+export type HobMood = 'tired' | 'normal' | 'happy' | 'glowing'
 
 async function load(): Promise<void> {
   loading.value = true
@@ -25,7 +25,7 @@ async function load(): Promise<void> {
   }
 }
 
-const crumboMood = computed<CrumboMood>(() => {
+const hobMood = computed<HobMood>(() => {
   const value = progress.value
   if (!value) return 'normal'
   if (value.streak === 0) return 'tired'
@@ -39,7 +39,7 @@ export function useGamification() {
     progress: readonly(progress),
     loading: readonly(loading),
     error: readonly(error),
-    crumboMood,
+    hobMood,
     load,
   }
 }

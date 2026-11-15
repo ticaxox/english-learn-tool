@@ -293,7 +293,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
     <div class="coach-layout" :class="{ 'coach-layout--with-history': isPage }">
       <aside v-if="isPage" class="coach-history" aria-label="历史记录">
         <header class="coach-history__head">
-          <ArtImage class="coach-history__mark" :set="illustration.crumbo" />
+          <ArtImage class="coach-history__mark" :set="illustration.hob" />
           <strong class="coach-history__name">AI 教练</strong>
         </header>
 
@@ -401,7 +401,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
               :class="`coach-message--${message.role}`"
             >
               <span class="coach-message-avatar" :class="`coach-message-avatar--${message.role}`" aria-hidden="true">
-                <ArtImage v-if="message.role === 'assistant'" class="coach-message-avatar__art" :set="illustration.crumbo" />
+                <ArtImage v-if="message.role === 'assistant'" class="coach-message-avatar__art" :set="illustration.hob" />
                 <span v-else class="coach-message-avatar__you">你</span>
               </span>
 

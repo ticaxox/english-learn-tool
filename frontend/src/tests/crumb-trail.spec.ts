@@ -23,13 +23,13 @@ const book: Wordbook = {
   updated_at: '2026-10-22T10:00:00Z',
 }
 
-describe('T-FE-018 CrumbTrail IP depth', () => {
-  it('renames the member brand and gives Crumbo one reusable mark', () => {
+describe('T-FE-018 Hob IP depth', () => {
+  it('renames the member brand and gives Hob one reusable mark', () => {
     const shell = source('../components/MemberShell.vue')
-    expect(shell).toContain('CrumbTrail')
-    expect(shell).toContain('CrumboMark')
+    expect(shell).toContain('Hob')
+    expect(shell).toContain('HobMark')
     // The mascot is the drawn character (day/night), not a second vector sketch.
-    expect(source('../components/CrumboMark.vue')).toContain('illustration.crumbo')
+    expect(source('../components/HobMark.vue')).toContain('illustration.hob')
   })
 
   it('uses a crumb trail, not the old generic Today workbench', () => {
@@ -37,12 +37,12 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(today).toContain('crumb-today')
     expect(today).toContain('crumb-trail-board')
     expect(today).toContain('crumb-task-list')
-    expect(today).toContain('CrumboMark')
+    expect(today).toContain('HobMark')
     expect(today).not.toContain('today-workbench')
     expect(today).not.toContain('member-hero')
   })
 
-  it('turns wordbooks into CrumbTrail books, not rows', () => {
+  it('turns wordbooks into Hob books, not rows', () => {
     const wordbooks = source('../views/WordbooksView.vue')
     expect(wordbooks).toContain('crumb-bookshelf')
     expect(wordbooks).toContain('crumb-shelf-header')
@@ -84,7 +84,7 @@ describe('T-FE-018 CrumbTrail IP depth', () => {
     expect(map).toContain('is-branch')
   })
 
-  it('defines the CrumbTrail palette and no-legacy structure tokens', () => {
+  it('defines the Hob palette and no-legacy structure tokens', () => {
     const css = source('../workspace-reset.css')
     expect(css).toContain('--crumb-forest')
     expect(css).toContain('--crumb-pumpkin')

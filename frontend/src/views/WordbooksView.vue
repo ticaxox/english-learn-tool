@@ -19,7 +19,7 @@ import WordbookExportDialog from '../components/WordbookExportDialog.vue'
 import WordbookImportDialog from '../components/WordbookImportDialog.vue'
 import WordbookShelfCard from '../components/WordbookShelfCard.vue'
 import AppIcon from '../components/AppIcon.vue'
-import CrumboMark from '../components/CrumboMark.vue'
+import HobMark from '../components/HobMark.vue'
 
 const PAGE_SIZE = 12
 const CATALOG_PAGE_SIZE = 100
@@ -192,11 +192,11 @@ onMounted(() => {
   <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page crumb-wordbooks">
     <header class="crumb-shelf-header">
       <div class="crumb-shelf-heading">
-        <CrumboMark size="medium" />
+        <HobMark size="medium" />
         <div>
-          <p class="crumb-brand-kicker">CRUMBTRAIL LIBRARY</p>
+          <p class="crumb-brand-kicker">HOB LIBRARY</p>
           <h1>咬一口，多记一个词。</h1>
-          <p>每一本词书，都是 Crumbo 留下的一串面包屑。</p>
+          <p>每一本词书，都是 Hob 守着的一炉火。</p>
         </div>
       </div>
       <DivButton class="button crumb-import-button" type="button" @click="importOpen = true">

@@ -2945,7 +2945,7 @@ than its row reads as a different kind of thing. */
   color: #4a1010;
 }
 
-/* Crumbo perches on top of the stop it stands on, clear of the reward tag. */
+/* Hob perches on top of the stop it stands on, clear of the reward tag. */
 .challenge-dsl-guide {
   position: absolute;
   z-index: 3;
@@ -2959,7 +2959,7 @@ than its row reads as a different kind of thing. */
   filter: drop-shadow(0 3px 0 rgb(59 42 26 / 16%));
 }
 
-.challenge-dsl-guide .crumbo-mark { animation: challenge-guide-bob 2.4s ease-in-out infinite; }
+.challenge-dsl-guide .hob-mark { animation: challenge-guide-bob 2.4s ease-in-out infinite; }
 
 @keyframes challenge-guide-bob {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
@@ -2996,7 +2996,7 @@ than its row reads as a different kind of thing. */
   .challenge-dsl-card.is-focus::after { animation: none; opacity: 0; }
   .personal-workspace .challenge-dsl-card.is-focus,
   .personal-workspace .challenge-dsl-card.is-focus .challenge-dsl-card__face,
-  .challenge-dsl-guide .crumbo-mark,
+  .challenge-dsl-guide .hob-mark,
   .personal-workspace .challenge-dsl-card.is-landed .challenge-dsl-reward { animation: none; }
 }
 
@@ -3157,7 +3157,7 @@ than its row reads as a different kind of thing. */
   padding: 11px 16px;
   border-radius: 14px;
 }
-.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-crumbo { display: none; }
+.personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-hob { display: none; }
 .personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level { width: 50px; height: 50px; }
 .personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level__inner { width: 40px; height: 40px; }
 .personal-workspace .crumb-today-board.crumb-merged > .game-hud .hud-level__inner strong { font-size: 17px; }

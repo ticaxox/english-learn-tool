@@ -4,7 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import ThemeSwitch from './ThemeSwitch.vue'
 import CoachView from '../views/CoachView.vue'
-import CrumboMark from './CrumboMark.vue'
+import HobMark from './HobMark.vue'
 import { getActivePinia } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import { useGamification } from '../composables/useGamification'
@@ -214,10 +214,10 @@ onBeforeUnmount(() => {
     :class="{ 'is-coach-open': coachOpen, 'is-immersive': immersive, 'is-sidebar-collapsed': sidebarCollapsed }"
   >
     <aside v-if="!immersive" class="workspace-sidebar ia-sidebar" aria-label="主导航">
-      <RouterLink class="workspace-brand" to="/overview" aria-label="CrumbTrail 今日学习">
-        <span class="workspace-brand-mark"><CrumboMark size="small" /></span>
+      <RouterLink class="workspace-brand" to="/overview" aria-label="Hob 今日学习">
+        <span class="workspace-brand-mark"><HobMark size="small" /></span>
         <span class="workspace-brand-copy">
-          <strong>CrumbTrail</strong>
+          <strong>Hob</strong>
           <small>英语学习路线</small>
         </span>
       </RouterLink>

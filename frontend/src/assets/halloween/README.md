@@ -1,6 +1,6 @@
 # 万圣节素材集 · Halloween asset set
 
-昼夜双态位图素材，供 CrumbTrail 前端在 `frontend/src/assets/halloween/**` 下直接引用。
+昼夜双态位图素材，供 Hob 前端在 `frontend/src/assets/halloween/**` 下直接引用。
 
 - 生成模型：`gpt-image-2.6-sunburst`（1024×1024 / 1024×1536 / 1536×1024）
 - 交付处理：按真实使用尺寸 ×2 DPI 缩放；平涂色量化到 64 色（边缘抗锯齿保留，软化带 0.6%–0.7%）；PNG 透明底
@@ -63,13 +63,13 @@
 
 | 文件 | 用途 |
 |---|---|
-| `crumbo-{day,night}.png` | Crumbo 主角立绘。教练页 NPC、引导页、奖励页 |
-| `empty-{day,night}.png` | 空状态插画。Crumbo 趴在空白书页上，四处空状态共用 |
-| `result-{day,night}.png` | 练习结算页顶部插画。奖杯 + Crumbo |
-| `brewing-{day,night}.png` | Crumbo 在坩埚边，题目生成中 |
-| `empty-search-{day,night}.png` | Crumbo 拿放大镜，错题本为空 |
+| `hob-{day,night}.png` | Hob 主角立绘。教练页 NPC、引导页、奖励页 |
+| `empty-{day,night}.png` | 空状态插画。Hob 趴在空白书页上，四处空状态共用 |
+| `result-{day,night}.png` | 练习结算页顶部插画。奖杯 + Hob |
+| `brewing-{day,night}.png` | Hob 在坩埚边，题目生成中 |
+| `empty-search-{day,night}.png` | Hob 拿放大镜，错题本为空 |
 
-Crumbo 配色取自 `frontend/src/components/CrumboMark.vue`：金身 `#e9b43b`、苔绿叶帽 `#66753a`、可可眼 `#573022`。
+Hob 配色取自 `frontend/src/components/HobMark.vue`：金身 `#e9b43b`、苔绿叶帽 `#66753a`、可可眼 `#573022`。
 
 ### `char/` — 游戏化层（第二期补齐）
 

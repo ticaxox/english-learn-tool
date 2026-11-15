@@ -31,7 +31,7 @@ describe('T-FE-017 workspace depth', () => {
     expect(today).toContain('<GameHud')
     expect(today).toContain('crumb-task-list')
     expect(today).toContain('crumb-merged-book')
-    // The tip is advice from Crumbo, so it sits outside the plan card.
+    // The tip is advice from Hob, so it sits outside the plan card.
     expect(today).toContain('crumb-note-out')
   })
 

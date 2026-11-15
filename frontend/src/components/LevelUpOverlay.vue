@@ -6,7 +6,7 @@
  * going, and it disappears on its own after a few seconds.
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import CrumboMark from './CrumboMark.vue'
+import HobMark from './HobMark.vue'
 import { crumbBurst, gsap, motionAllowed } from '../composables/useMotion'
 
 const props = defineProps<{ level: number; title: string }>()
@@ -42,7 +42,7 @@ onBeforeUnmount(() => {
       aria-label="等级提升"
       @click.stop
     >
-      <CrumboMark size="large" mood="glowing" />
+      <HobMark size="large" mood="glowing" />
       <p class="levelup-kicker">LEVEL UP</p>
       <h2>Lv.{{ props.level }}</h2>
       <p class="levelup-title">{{ props.title }}</p>

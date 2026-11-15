@@ -122,7 +122,7 @@ body {
   border-radius: 13px 9px 12px 8px;
   background: var(--ui-surface);
 }
-.personal-workspace .workspace-brand-mark .crumbo-mark,
+.personal-workspace .workspace-brand-mark .hob-mark,
 .personal-workspace .workspace-brand-mark .whisker-crumb-mark {
   width: 34px;
   height: 34px;
@@ -534,7 +534,7 @@ body {
   gap: var(--ui-space-4);
   align-items: center;
 }
-.personal-workspace .crumb-mascot-lockup .crumbo-mark {
+.personal-workspace .crumb-mascot-lockup .hob-mark {
   width: 82px;
   height: 82px;
   flex: 0 0 auto;
@@ -820,7 +820,7 @@ body {
   gap: var(--ui-space-4);
   align-items: center;
 }
-.personal-workspace .crumb-shelf-heading .crumbo-mark {
+.personal-workspace .crumb-shelf-heading .hob-mark {
   width: 74px;
   height: 74px;
   flex: 0 0 auto;
@@ -1158,7 +1158,7 @@ body {
     gap: var(--ui-space-3);
     width: 100%;
   }
-  .personal-workspace .crumb-mascot-lockup .crumbo-mark { width: 62px; height: 62px; }
+  .personal-workspace .crumb-mascot-lockup .hob-mark { width: 62px; height: 62px; }
   .personal-workspace .crumb-mascot-lockup > div { width: 100%; min-width: 0; }
   .personal-workspace .crumb-today h1 {
     max-width: none;
@@ -1236,7 +1236,7 @@ body {
   }
   .personal-workspace .wordbook-grid { grid-template-columns: 1fr; }
   .personal-workspace .crumb-shelf-heading { align-items: flex-start; }
-  .personal-workspace .crumb-shelf-heading .crumbo-mark { width: 58px; height: 58px; }
+  .personal-workspace .crumb-shelf-heading .hob-mark { width: 58px; height: 58px; }
   .personal-workspace .practice-records-table-wrap { overflow: visible; }
   .personal-workspace .practice-records-table,
   .personal-workspace .practice-records-table tbody,

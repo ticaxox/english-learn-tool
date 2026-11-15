@@ -1,4 +1,4 @@
-/* CrumbTrail Arcade — game-feel design layer (T-INDEP-001).
+/* Hob Arcade — game-feel design layer (T-INDEP-001).
  *
  * Loaded last on purpose: the personal shell already defines a token set and a
  * component layer, so this file re-points those tokens and re-skins the
@@ -506,7 +506,7 @@ html[data-theme='night'] .personal-workspace {
   gap: 20px;
 }
 
-.personal-workspace .crumb-mascot-lockup .crumbo-mark,
+.personal-workspace .crumb-mascot-lockup .hob-mark,
 .personal-workspace .crumb-mascot-lockup svg {
   width: 76px;
   height: 76px;
@@ -1933,7 +1933,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 }
 
 /* ============================================================ component kit */
-/* Primitives from reka-ui, skinned to the CrumbTrail palette. */
+/* Primitives from reka-ui, skinned to the Hob palette. */
 
 /* Toasts ------------------------------------------------------------------ */
 .crumb-toast-viewport {

@@ -7,7 +7,7 @@
  * so connectors stay attached without measuring the DOM.
  */
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import CrumboMark from './CrumboMark.vue'
+import HobMark from './HobMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
 import { pumpkins } from '../assets/halloween'
 import { themeMode } from '../composables/useTheme'
@@ -209,7 +209,7 @@ const focusId = computed(() => {
 
 const hasFocus = computed(() => Boolean(focusId.value))
 
-/** Where Crumbo stands, in canvas pixels. Animated so it can walk the trail. */
+/** Where Hob stands, in canvas pixels. Animated so it can walk the trail. */
 const guidePos = ref<{ x: number; y: number } | null>(null)
 const walking = ref(false)
 let walkTween: gsap.core.Tween | null = null
@@ -560,7 +560,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
           <span class="visually-hidden">{{ placed.node.title }}</span>
         </DivButton>
 
-        <CrumboMark
+        <HobMark
           v-if="guidePos"
           size="small"
           class="challenge-dsl-guide"

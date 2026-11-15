@@ -161,8 +161,8 @@ import brewingDay from './char/brewing-day.png'
 import brewingNight from './char/brewing-night.png'
 import emptySearchDay from './char/empty-search-day.png'
 import emptySearchNight from './char/empty-search-night.png'
-import crumboDay from './char/crumbo-day.png'
-import crumboNight from './char/crumbo-night.png'
+import hobDay from './char/hob-day.png'
+import hobNight from './char/hob-night.png'
 import emptyDay from './char/empty-day.png'
 import emptyNight from './char/empty-night.png'
 import resultDay from './char/result-day.png'
@@ -170,12 +170,12 @@ import resultNight from './char/result-night.png'
 
 /** Large illustrations: the mascot, the empty state, the practice result hero. */
 export const illustration = {
-  crumbo: { day: crumboDay, night: crumboNight },
+  hob: { day: hobDay, night: hobNight },
   empty: { day: emptyDay, night: emptyNight },
   result: { day: resultDay, night: resultNight },
-  /** Crumbo at the cauldron while a set of questions is being generated. */
+  /** Hob at the cauldron while a set of questions is being generated. */
   brewing: { day: brewingDay, night: brewingNight },
-  /** Crumbo with a magnifier for an empty mistakes list. */
+  /** Hob with a magnifier for an empty mistakes list. */
   emptySearch: { day: emptySearchDay, night: emptySearchNight },
 } as const
 

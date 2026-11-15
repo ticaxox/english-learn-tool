@@ -7,7 +7,7 @@
  */
 import { computed, onMounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
-import CrumboMark from './CrumboMark.vue'
+import HobMark from './HobMark.vue'
 import { useGamification } from '../composables/useGamification'
 import { breathe, bump, countUp, popIn } from '../composables/useMotion'
 
@@ -17,7 +17,7 @@ const progress = gamification.progress
 const xpValue = ref<HTMLElement | null>(null)
 const root = ref<HTMLElement | null>(null)
 const levelBadge = ref<HTMLElement | null>(null)
-const crumboRef = ref<HTMLElement | null>(null)
+const hobRef = ref<HTMLElement | null>(null)
 
 const level = computed(() => progress.value?.level ?? null)
 const xpPercent = computed(() => {
@@ -36,7 +36,7 @@ onMounted(async () => {
   if (xpValue.value) countUp(xpValue.value, level.value?.xpIntoLevel ?? 0)
   const stats = root.value ? Array.from(root.value.querySelectorAll('.hud-stat')) : []
   popIn(stats, { y: 10, stagger: 0.07 })
-  breathe(crumboRef.value)
+  breathe(hobRef.value)
 })
 
 watch(
@@ -86,8 +86,8 @@ watch(
       </li>
     </ul>
 
-    <span ref="crumboRef" class="hud-crumbo">
-      <CrumboMark size="medium" :mood="gamification.crumboMood.value" />
+    <span ref="hobRef" class="hud-hob">
+      <HobMark size="medium" :mood="gamification.hobMood.value" />
     </span>
   </section>
 </template>

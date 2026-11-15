@@ -129,7 +129,7 @@ export function crumbBurst(anchor: Element | null, count = 14): void {
   window.setTimeout(() => layer.remove(), 1600)
 }
 
-/** Idle bob for Crumbo, so the mascot reads as alive. */
+/** Idle bob for Hob, so the mascot reads as alive. */
 export function breathe(target: Element | null): gsap.core.Timeline | null {
   if (!target || !motionAllowed()) return null
   const timeline = gsap.timeline({ repeat: -1, yoyo: true })
