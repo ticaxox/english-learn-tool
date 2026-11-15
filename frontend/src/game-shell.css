@@ -975,12 +975,36 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   .personal-workspace { --rail-width: 224px; }
 }
 
+/* The old member layout turned the rail into a 5rem icon strip below 980px and
+ * hid every label to make it fit. This rail is 224px there, so the labels stay
+ * — unless the learner folded it, which has its own rule. */
+@media (max-width: 980px) {
+  .personal-workspace:not(.is-sidebar-collapsed) .workspace-nav-link.member-nav-link span {
+    display: block;
+  }
+}
+
 @media (max-width: 960px) {
   .personal-workspace .workspace-topbar-heading span { display: none; }
 }
 
+/* Phones drop the rail for the bottom nav. This file states the rail's own
+ * display, so it has to restate the mobile hiding or the rule above wins and the
+ * rail lands on a 390px screen with its labels unreadable. */
 @media (max-width: 860px) {
+  .personal-workspace .workspace-sidebar { display: none; }
   .personal-workspace .rail-handle { display: none; }
+
+  /* This width drops the coach button's label, so the key becomes a round one
+   * instead of an orange square with a lone icon in it. */
+  .personal-workspace .workspace-coach-button.member-concierge-button {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 860px) {
