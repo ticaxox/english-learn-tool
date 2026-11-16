@@ -71,7 +71,6 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
   >
     <header class="practice-question-card__header">
       <div class="practice-question-step">
-        <span class="practice-question-number">{{ String(index + 1).padStart(2, '0') }}</span>
         <div>
           <span class="status-badge">{{ questionLabel }}</span>
           <span v-if="question.sourceCitation" class="practice-question-source">
@@ -90,12 +89,12 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
     </div>
 
     <div v-else-if="question.questionType === 'fill_blank'" class="practice-fill-blank">
-      <SpokenText :id="promptId" as="h2" class="practice-sentence" :text="question.sentence ?? ''" :highlight="question.targetWords" />
+      <SpokenText :id="promptId" as="h2" class="practice-sentence" :text="question.sentence ?? ''" :highlight="question.targetWords" emphasis="bold" />
       <p v-if="inReview && question.sentenceZh" class="practice-translation-note">{{ question.sentenceZh }}</p>
     </div>
 
     <div v-else-if="question.questionType === 'translation'" class="practice-translation">
-      <SpokenText v-if="question.sourceText" class="practice-prompt-text" :text="question.sourceText" :highlight="question.targetWords" />
+      <SpokenText v-if="question.sourceText" class="practice-prompt-text" :text="question.sourceText" :highlight="question.targetWords" emphasis="bold" />
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
       </div>
@@ -112,7 +111,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
 
     <div v-else class="practice-writing">
       <p class="practice-prompt-note">题目</p>
-      <SpokenText v-if="question.prompt" class="practice-prompt-text" :text="question.prompt" :highlight="question.targetWords" />
+      <SpokenText v-if="question.prompt" class="practice-prompt-text" :text="question.prompt" :highlight="question.targetWords" emphasis="bold" />
       <p v-if="question.requirements.length" class="practice-prompt-note">要求</p>
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
@@ -143,7 +142,7 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
         />
         <OptionBadge :letter="String.fromCharCode(65 + optionIndex)" />
         <span class="practice-option__body">
-          <SpokenText as="span" class="practice-option__text" :text="option.text" :highlight="question.targetWords" />
+          <SpokenText as="span" class="practice-option__text" :text="option.text" :highlight="question.targetWords" emphasis="bold" />
         </span>
         </label>
         <small v-if="inReview && option.textZh" class="practice-option-translation">{{ option.textZh }}</small>

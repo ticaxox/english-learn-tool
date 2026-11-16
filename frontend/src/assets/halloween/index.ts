@@ -63,10 +63,8 @@ import wordbookCoverNight from './card/wordbook-cover-night.png'
 import cardFrameDay from './card/card-frame-day.png'
 import cardFrameNight from './card/card-frame-night.png'
 import cardBack from './card/card-back.png'
-import drillSteleDay from './card/drill-stele-day.png'
-import drillSteleNight from './card/drill-stele-night.png'
-import drillTrayDay from './card/drill-tray-day.png'
-import drillBoardNight from './card/drill-board-night.png'
+import paperCardDay from './card/card-frame-paper-day.png'
+import paperCardNight from './card/card-frame-paper-night.png'
 import optionPlateDay from './card/option-plate-day.png'
 import optionPlateNight from './card/option-plate-night.png'
 import optionTokenDay from './card/option-token-day.png'
@@ -81,17 +79,16 @@ export const questionCard = {
 } as const
 
 /**
- * The two memory drills that are not a flashcard get their own material, so
- * they stop being the same object as the card they are not: the choice
- * question is cut in stone, the spelling question is baked. Both are 3:2 and
- * meant for a 9-slice — the carved rim lives in the border band, the flat
- * middle is what stretches.
+ * The cut-paper card: an olive rule, a hairline inside it, a diamond at each
+ * corner and a blank face. 3:2, meant for a 9-slice — the rim lives in the
+ * border band, the blank face is what stretches. The memory drills use it, and
+ * so does every other question card, so one stock runs through the product.
  */
+export const paperCard = { day: paperCardDay, night: paperCardNight } as const
+
 export const drillFrame = {
-  choice: { day: drillSteleDay, night: drillSteleNight },
-  // Spelling is the drill where you set letters into place: a wooden type
-  // tray by day, a slate by night. Neither of them is a biscuit.
-  spelling: { day: drillTrayDay, night: drillBoardNight },
+  choice: { day: paperCardDay, night: paperCardNight },
+  spelling: { day: paperCardDay, night: paperCardNight },
 } as const
 
 /**

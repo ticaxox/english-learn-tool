@@ -199,6 +199,9 @@ const reveal = ref<{ word: string | null; phonetic: string | null; partOfSpeech:
 const combo = ref(0)
 const bestCombo = ref(0)
 const hearts = ref(MAX_HEARTS)
+/** The flip card asks for a rating, not an answer, so nothing there costs
+    a life — its rail shows the count and the clock only. */
+const showsLives = computed(() => (selectedModule.value ?? session.module.value) !== 'flashcard')
 /** This run's own tally — the server keeps the durable record. */
 const runCorrect = ref(0)
 const runWrong = ref(0)
@@ -633,10 +636,11 @@ watch(challengeModule, async (module, previous) => {
 
       <aside v-if="session.hasSession.value || session.finished.value" class="memory-session-side" aria-label="本次训练">
         <div class="workspace-card memory-session-rail">
-          <!-- One readout, three facts: the lives over the count, the clock
-            beside it. No labels — the hearts and a clock need none. -->
+          <!-- One readout: the lives over the count, the clock beside it. No
+            labels — the hearts and a clock need none. The flip card has no
+            lives to lose, so its rail starts at the count. -->
           <div class="memory-rail-head">
-            <span class="memory-rail-heartrow" :aria-label="`剩余 ${hearts} 颗心`">
+            <span v-if="showsLives" class="memory-rail-heartrow" :aria-label="`剩余 ${hearts} 颗心`">
               <svg v-for="n in MAX_HEARTS" :key="n" viewBox="0 0 24 24" aria-hidden="true"
                    :class="{ 'is-empty': n > hearts }">
                 <path d="M12 20s-7-4.4-7-9.1A4 4 0 0 1 12 8a4 4 0 0 1 7 2.9C19 15.6 12 20 12 20Z" />

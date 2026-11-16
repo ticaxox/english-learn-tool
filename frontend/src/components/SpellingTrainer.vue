@@ -339,16 +339,8 @@ function submit(): void {
   width: clamp(2.6rem, 6.4vw, 3.3rem);
   height: clamp(3rem, 7.2vw, 3.8rem);
   padding: 0;
-  /* Each letter sits on its own tile: baked by day, cut by night. */
-  border: 0;
-  border-radius: 0;
-  background-color: transparent;
-  background-color: transparent;
-  background-image: url('../assets/halloween/card/letter-tile-day.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  box-shadow: none;
+  /* The tile itself is drawn in game-ui.css, next to the rest of the drill
+     surfaces; this block only sets the letter. */
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(1.2rem, 3vw, 1.55rem);
   font-weight: 700;
@@ -368,14 +360,14 @@ function submit(): void {
   color: #8a6a3e;
 }
 
-.spelling-cell--active {
-  color: #fff8e8;
-  box-shadow: inset 0 0 0 999px rgb(150 90 10 / 42%);
-}
 
 .spelling-cell:focus-visible {
-  outline: 2px solid #8f5f18;
+  outline: 2px solid #b0742a;
   outline-offset: 2px;
+}
+
+html[data-theme='night'] .spelling-cell:focus-visible {
+  outline-color: #c0acee;
 }
 
 .spelling-cell:disabled { opacity: 0.6; }

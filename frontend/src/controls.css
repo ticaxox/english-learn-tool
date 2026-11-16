@@ -3,6 +3,16 @@
  * Loaded last so it can refine the game layer without rewrites.
  */
 
+/* The faced initial every option letter is cut from: the memory drills have
+   it baked into their plates, the AI practice sets it live. */
+@font-face {
+  font-family: 'Almendra Display';
+  src: url('./assets/fonts/almendra-display.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ------------------------------------------------------- browser surfaces */
 
 .personal-workspace ::selection {
@@ -2466,21 +2476,67 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
   }
 }
 
-/* Practice side rail: timer and submission share one card. */
+/* The practice side rail is the memory rail: the same cream card, the same
+   count over the track, the same small secondary button under it. */
 .personal-workspace .practice-session-side {
   display: grid;
-  gap: 16px;
-  padding: 18px;
+  gap: 14px;
+  padding: 22px 20px;
+  border: 2px solid #ecd9bb;
+  border-radius: 18px;
+  background: #fffdf6;
+  box-shadow: 0 2px 0 rgb(59 42 26 / 5%);
 }
 
-.personal-workspace .practice-session-side__timer {
+.personal-workspace .practice-rail-head {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  gap: 10px;
+  align-items: baseline;
   justify-content: space-between;
-  padding-bottom: 14px;
-  border-bottom: 1px dashed var(--ui-line);
 }
+
+.personal-workspace .practice-rail-count {
+  color: #35240f;
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.personal-workspace .practice-rail-clock {
+  color: #7d6247;
+  font-size: 0.92rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.personal-workspace .practice-rail-clock.is-expired { color: #a83232; }
+
+.personal-workspace .practice-rail-track {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ecd9bb;
+}
+
+.personal-workspace .practice-rail-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #14573d;
+  transition: width 200ms ease;
+}
+
+html[data-theme='night'] .personal-workspace .practice-session-side {
+  border-color: #3a3160;
+  background: #221b3a;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .personal-workspace .practice-rail-count { color: #f3e9d2; }
+html[data-theme='night'] .personal-workspace .practice-rail-clock { color: #b9a4e6; }
+html[data-theme='night'] .personal-workspace .practice-rail-track { background: #3a3160; }
+html[data-theme='night'] .personal-workspace .practice-rail-track span { background: #8fd9b0; }
 
 /* Memory cards: word on the left, sound and meaning on the right. */
 .personal-workspace .memory-wrong-detail__card { padding: 38px 44px; }
@@ -3564,9 +3620,14 @@ than its row reads as a different kind of thing. */
 .memory-wrong-detail__word-row .memory-wrong-detail__word-letters { flex-wrap: wrap; }
 
 .personal-workspace .spoken-text { white-space: pre-wrap; }
-.personal-workspace .spoken-word { cursor: pointer; border-radius: 4px; }
-.personal-workspace .spoken-word:hover {
-  background: var(--ui-surface-subtle, #fbf7ee);
+.personal-workspace .spoken-word--target { cursor: pointer; }
+
+/* A question's own words: weighted so the learner sees which of them the
+   exercise is about, but not marked, not underlined and not pressable. */
+.personal-workspace .spoken-word--bold { font-weight: 800; }
+/* Only the wordbook's own words answer to the pointer: a page where every
+   word lights up on hover reads as a wall of links. */
+.personal-workspace .spoken-word--target:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -4947,18 +5008,20 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 .member-practice-page .practice-question-card.practice-question-card--translation {
   width: min(100%, 860px);
   margin-inline: auto;
-  background: #f3e3c3;
+  /* The same cut-paper card the memory drills sit on, not the scroll: one
+     stock runs through every question the product asks. */
+  background: transparent;
   background-clip: padding-box;
   box-shadow: none;
   border-style: solid;
-  border-width: 30px;
-  border-image-source: var(--rune-scroll);
-  border-image-slice: 7% fill;
-  border-image-width: 30px;
+  border-width: 40px;
+  border-image-source: var(--rune-paper-card);
+  border-image-slice: 64 fill;
+  border-image-width: 40px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
-  padding: 0 16px;
+  padding: 4px 26px 6px;
 }
 
 /* The reading passage gets its own sheet, same stock, laid out wide.
@@ -4966,18 +5029,129 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
    shorthand takes the border image with it, so this has to answer in kind. */
 .member-practice-session-page .practice-article-panel,
 .member-practice-page .practice-article-panel {
-  background: #f3e3c3 !important;
+  background: transparent !important;
   background-clip: padding-box;
   box-shadow: none !important;
   border-style: solid !important;
-  border-width: 24px !important;
-  border-image-source: var(--rune-parchment) !important;
-  border-image-slice: 7% fill !important;
-  border-image-width: 24px !important;
+  border-width: 34px !important;
+  border-image-source: var(--rune-paper-card) !important;
+  border-image-slice: 64 fill !important;
+  border-image-width: 34px !important;
   border-image-repeat: stretch !important;
   border-color: transparent !important;
   border-radius: 0 !important;
   padding-inline: 20px;
+}
+
+/* The question number sits close to the line it introduces, and the answer
+   plates get the room instead: the gap above the sentence shrinks, the gap
+   between the sentence and the options grows. */
+.member-practice-session-page .practice-question-card,
+.member-practice-page .practice-question-card {
+  row-gap: 4px;
+}
+
+.member-practice-session-page .practice-question-card .practice-options,
+.member-practice-page .practice-question-card .practice-options {
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.member-practice-session-page .practice-question-card .practice-sentence,
+.member-practice-page .practice-question-card .practice-sentence,
+.member-practice-session-page .practice-question-card .practice-prompt-text,
+.member-practice-page .practice-question-card .practice-prompt-text {
+  margin-bottom: 0;
+}
+
+/* The options inside those cards are the answer plates from the memory
+   drills: one fill, one ink rule, one hairline inside it — no token, no lip. */
+.member-practice-session-page .practice-question-card .practice-option,
+.member-practice-page .practice-question-card .practice-option {
+  min-height: 52px;
+  border: 1.5px solid #6f6a45 !important;
+  border-radius: 3px !important;
+  background: #f1ead6 !important;
+  box-shadow: inset 0 0 0 3px #f1ead6, inset 0 0 0 4px #d5c9a4 !important;
+  transform: none;
+}
+
+.member-practice-session-page .practice-question-card .practice-option:hover,
+.member-practice-page .practice-question-card .practice-option:hover {
+  border-color: #b0742a !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option:has(input:checked),
+.member-practice-page .practice-question-card .practice-option:has(input:checked) {
+  border-color: #b0742a !important;
+  box-shadow: inset 0 0 0 3px #f6eed9, inset 0 0 0 4px #d9b877 !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option--correct,
+.member-practice-page .practice-question-card .practice-option--correct {
+  border-color: #5d8f52 !important;
+  background: #e9f1d9 !important;
+  box-shadow: inset 0 0 0 3px #e9f1d9, inset 0 0 0 4px #b7cfa2 !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option--wrong,
+.member-practice-page .practice-question-card .practice-option--wrong {
+  border-color: #a95244 !important;
+  background: #f7ded6 !important;
+  box-shadow: inset 0 0 0 3px #f7ded6, inset 0 0 0 4px #dcae9f !important;
+}
+
+/* The letter is cut into the plate, not set in a stone token. */
+.member-practice-session-page .practice-question-card .practice-option .option-badge,
+.member-practice-page .practice-question-card .practice-option .option-badge {
+  width: 26px;
+  height: 26px;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option .option-badge__letter,
+.member-practice-page .practice-question-card .practice-option .option-badge__letter {
+  color: #3a2a18;
+  /* The letter cut into the drill plates: Almendra, thickened with its own ink
+     so a 16px initial reads as firmly as the baked one. */
+  font-family: 'Almendra Display', Georgia, 'Times New Roman', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  -webkit-text-stroke: 0.45px currentColor;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option {
+  border-color: #8f83b8 !important;
+  background: #241d3a !important;
+  box-shadow: inset 0 0 0 3px #241d3a, inset 0 0 0 4px #50457a !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option:has(input:checked),
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option:has(input:checked) {
+  border-color: #c0acee !important;
+  box-shadow: inset 0 0 0 3px #241d3a, inset 0 0 0 4px #c0acee !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--correct,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option--correct {
+  border-color: #6faf62 !important;
+  background: #1f3a24 !important;
+  box-shadow: inset 0 0 0 3px #1f3a24, inset 0 0 0 4px #3d5a36 !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--wrong,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option--wrong {
+  border-color: #c4746a !important;
+  background: #3a1f1e !important;
+  box-shadow: inset 0 0 0 3px #3a1f1e, inset 0 0 0 4px #5d3733 !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option .option-badge__letter,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option .option-badge__letter {
+  color: #ece3cf;
 }
 
 @media (max-width: 760px) {
@@ -4987,7 +5161,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   .member-practice-page .practice-question-card.practice-question-card--fill_blank,
   .member-practice-page .practice-question-card.practice-question-card--reading,
   .member-practice-page .practice-question-card.practice-question-card--translation {
-    border-width: 22px; border-image-width: 22px;
+    border-width: 28px; border-image-width: 28px;
   }
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
