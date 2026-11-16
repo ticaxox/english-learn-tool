@@ -2233,7 +2233,7 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 .personal-workspace .settings-goal-grid .field {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 16px;
+  gap: 10px 8px;
   align-items: center;
 }
 
@@ -7360,7 +7360,9 @@ html[data-theme='night'] .personal-workspace .field-badge {
 
 /* 数字框按选型改用 chip-off：羊皮纸小牌 + 一道细描边，和选项芯片是同一张。 */
 .personal-workspace .settings-form .crumb-stepper,
-.personal-workspace .dialog-card .crumb-stepper {
+.personal-workspace .dialog-card .crumb-stepper,
+.personal-workspace .personal-ai-page .crumb-stepper,
+.personal-workspace .ia-account-security .crumb-stepper {
   border-width: 6px 10px;
   border-style: solid;
   border-color: transparent;
@@ -7371,7 +7373,9 @@ html[data-theme='night'] .personal-workspace .field-badge {
 }
 
 html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper,
-html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper {
+html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper,
+html[data-theme='night'] .personal-workspace .personal-ai-page .crumb-stepper,
+html[data-theme='night'] .personal-workspace .ia-account-security .crumb-stepper {
   border-image-source: url('./assets/halloween/card/control-chip-off-night.png') !important;
 }
 
@@ -7392,7 +7396,7 @@ html[data-theme='night'] .personal-workspace .settings-toggle {
 
 /* 1. 数字框整体放大一档：104×38，加减各 22px，数字仍有 30px 空间。 */
 .personal-workspace .crumb-stepper {
-  width: min(100%, 104px);
+  width: min(100%, 96px);
   height: 38px;
 }
 
@@ -7515,3 +7519,16 @@ html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hu
   background: none !important;
   color: #efe6ff;
 }
+
+/* 芯片悬停：老规则（[role=button]:hover）会在悬停时刷一层绿底，
+ * 把牌面整块盖掉。这里只让图亮一点，不换底。 */
+.personal-workspace .settings-toggle:hover,
+.personal-workspace .settings-toggle:active,
+.personal-workspace .ai-kind-switch__option:hover {
+  background: none !important;
+  box-shadow: none !important;
+  filter: brightness(1.04);
+}
+
+/* 供应商行尾三颗按钮靠近一点：8px → 4px。 */
+.personal-workspace .personal-ai-provider__actions { gap: 4px; }
