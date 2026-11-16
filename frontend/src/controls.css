@@ -672,12 +672,12 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  gap: 16px;
+  gap: 10px;
 }
 
 .personal-workspace .settings-form fieldset + fieldset {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 14px;
+  padding-top: 14px;
   border-top: 1px dashed var(--ui-line-strong);
 }
 
@@ -2052,7 +2052,7 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 
 .ai-quota-row__unlimited {
   display: flex;
-  gap: 6px;
+  gap: 3px;
   align-items: center;
   font-size: 0.8rem;
   font-weight: 800;
@@ -2243,7 +2243,7 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 .personal-workspace .settings-goal-grid .field {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 16px;
+  gap: 10px 8px;
   align-items: center;
 }
 
@@ -5965,10 +5965,11 @@ html[data-theme='night'] .personal-workspace .rune-surface .choice-option__label
   display: flex;
   align-items: center;
   /* A number field is as wide as its digits plus two targets, not as wide as
-   * the column it sits in. Three digits is the most it ever holds. */
+   * the column it sits in. 宽度不变，数字和 ± 之间的空当靠收窄 ± 的按钮盒
+   * 换出来：图标贴到框边，数字两边才有余量。 */
   width: min(100%, 88px);
   height: var(--ui-control);
-  padding: 0 3px;
+  padding: 0;
   border: 2px solid var(--ui-line-strong);
   border-radius: 10px;
   background: var(--ui-surface);
@@ -6023,7 +6024,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .choice-option__label
 
 .personal-workspace .crumb-stepper__step {
   position: relative;
-  width: 24px;
+  width: 18px;
   height: 24px;
   flex: none;
   display: grid;
@@ -6194,10 +6195,11 @@ select the digits. */
   margin: 0;
   padding: 10px 9px 9px;
   overflow: visible;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 16px;
-  background: var(--ui-surface);
-  box-shadow: 7px 7px 0 rgb(59 42 26 / 14%);
+  border: 18px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   color: var(--ui-ink);
 }
 
@@ -6328,10 +6330,11 @@ select the digits. */
   margin: 0;
   padding: 10px;
   overflow: visible;
-  border: 2px solid var(--ui-line-strong);
-  border-radius: 16px;
-  background: var(--ui-surface);
-  box-shadow: 7px 7px 0 rgb(59 42 26 / 14%);
+  border: 18px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   color: var(--ui-ink);
 }
 
@@ -6677,11 +6680,897 @@ html[data-theme='night'] .personal-workspace .crumb-stepper__step:disabled { col
 
 html[data-theme='night'] .personal-workspace .crumb-time.is-disabled .crumb-time__glyph { color: #5b4f7a; }
 
-/* The pickers are floating cards, so their shadow is the room's hard offset,
- * not a soft drop — and at night that offset is nearly black. */
+/* The pickers hang on the same board as the dialogs; at night the frame is the
+ * stone one, so the panel no longer needs a shadow of its own. */
 html[data-theme='night'] .personal-workspace .crumb-time__picker,
 html[data-theme='night'] .personal-workspace .crumb-date__picker {
-  box-shadow: 7px 7px 0 rgb(8 3 20 / 55%);
+  border-image-source: url('./assets/halloween/card/panel-board-night.png');
 }
 
 html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date__glyph { color: #5b4f7a; }
+
+/* ------------------------------------------------------------ cards on the board */
+
+/* 页面上的卡片和弹窗是同一块板：角上铜角、边条平铺、中间那块平涂放内容。
+ * 边框带按尺寸收窄——整栏的卡片 20px，右栏那种小方块 14px。
+ * 这块放在文件末尾，是因为这些类在 controls.css 和 game-ui.css 里各有声明，
+ * 同优先级下后写的赢；与其逐个改，不如让「卡片用什么材质」只有一个出处。 */
+.personal-workspace .crumb-today-board,
+.personal-workspace .insight-card,
+.personal-workspace .badge-wall {
+  border: 20px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .personal-workspace :is(
+  .crumb-today-board,
+  .insight-card,
+  .badge-wall
+) {
+  border-image-source: url('./assets/halloween/card/panel-board-night.png');
+}
+
+/* 板里不再套板。右侧训练栏已经是一块板，里面的计时、生命那几格再各套一层，
+ * 就成了板上贴板：外圈铜角、里圈再铜角，中间还夹一圈空白。板只有一层，
+ * 里面的分组退回横线——原本那条 border-top 就是为这件事写的。 */
+.personal-workspace :is(.panel, .workspace-card, .crumb-today-board, .insight-card, .badge-wall, .dialog-card, .memory-context-card)
+  :is(.panel, .workspace-card, .crumb-today-board, .insight-card, .badge-wall, .challenge-self-study__card) {
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* ------------------------------------------- 学习设置：一张纸，不是一块板 */
+
+/* 外面这张大卡还是板：里面的控件已经是铜牌和凹槽，卡片再是纸片就托不住它们。
+ * 板里的分组不另起一层板——那是上一轮的重点——只留横线。 */
+.personal-workspace .settings-form.panel {
+  padding: 14px 16px 12px !important;
+  border: 20px solid transparent !important;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form.panel {
+  border-image-source: url('./assets/halloween/card/panel-board-night.png') !important;
+}
+
+/* 选项组不再各自是一张卡片。两列之间那条竖线就够了。 */
+.personal-workspace .settings-form .settings-choice-block {
+  padding: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------- 控件：铜牌与凹槽 */
+
+/* 两件零件，一副因果关系：按得下去的东西是凸起的铜牌（按钮、选中的选项），
+ * 往里放东西的地方是凹进去的槽（输入框、下拉框、未选中）。板子上摆的就是这两样。 */
+/* 这些属性上有四到六层旧主题在压（`[role=button][type=submit]`、`.dialog-actions > [role=button]`……），
+ * 权重一层比一层高。材质只该有一个出处，所以这里用 !important 把它钉在最后，
+ * 而不是再写一串更长的选择器去和旧规则比谁更长。布局属性（min-height、display）不动。 */
+/* 全站一个按钮：凸起的铜牌。做题目右侧的「结束本次」、词书页的「导入词书」、
+ * 弹窗里的「取消」，都是同一块牌子；只有自绘的 SVG 牌按钮和图标按钮不套，
+ * 它们本来就是自己的形状。 */
+.personal-workspace :is(
+  .button,
+  .button-secondary,
+  .button-danger,
+  .member-primary-button,
+  .workspace-primary-button,
+  .workspace-secondary-button,
+  .crumb-primary-action,
+  [role="button"][type="submit"]
+):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.ai-provider-action):not(.kb *, .coach-page *),
+.personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
+  min-height: 40px;
+  padding: 2px 10px !important;
+  border-width: 10px 12px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-badge-day.png') 30% 17% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: #33200b !important;
+  text-shadow: 0 1px 0 rgb(255 236 196 / 45%);
+}
+
+.personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):hover:not(:disabled),
+.personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button):hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: none !important;
+  box-shadow: none !important;
+  filter: brightness(1.04);
+}
+
+.personal-workspace [role="button"][type="submit"]:active:not(:disabled),
+.personal-workspace :is(.button, .button-secondary, .button-danger):active:not(:disabled),
+.personal-workspace .dialog-card .dialog-actions > [role="button"]:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none !important;
+}
+
+.personal-workspace .settings-toggle {
+  padding: 5px 15px;
+  border-width: 8px 12px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-option-off-day.png') 30% 8% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .settings-form .settings-toggle.is-active {
+  border-width: 8px 12px;
+  border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+  background: none;
+  box-shadow: none;
+  color: #33200b;
+}
+
+.personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+.personal-workspace .dialog-card textarea {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .settings-form :is(.crumb-time, .crumb-date),
+.personal-workspace .dialog-card :is(.crumb-time, .crumb-date, .crumb-search, .crumb-file) {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form :is(.crumb-time, .crumb-date),
+html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crumb-date, .crumb-search, .crumb-file) {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+}
+
+.personal-workspace .settings-form .crumb-stepper:hover,
+.personal-workspace .settings-form select:hover,
+.personal-workspace .dialog-card .crumb-stepper:hover,
+.personal-workspace .dialog-card select:hover,
+.personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):hover,
+.personal-workspace .dialog-card textarea:hover { border-color: transparent; }
+
+.personal-workspace .settings-form .crumb-stepper:focus-within,
+.personal-workspace .settings-form select:focus,
+.personal-workspace .dialog-card .crumb-stepper:focus-within,
+.personal-workspace .dialog-card select:focus,
+.personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):focus,
+.personal-workspace .dialog-card textarea:focus {
+  border-color: transparent;
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+/* 夜间：铜牌换成发烟的石牌，槽换成靛色墨沟。 */
+html[data-theme='night'] .personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.ai-provider-action):not(.kb *, .coach-page *),
+html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
+  border-image-source: url('./assets/halloween/card/control-badge-night.png') !important;
+  color: #efe6ff !important;
+  text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
+}
+
+/* 设置页的文本框、下拉框、日期时间框：凹槽。练习题和 AI 教练的输入框是各自
+ * 画的（答题区、教练输入条），不在这一条里，免得把它们的定制样式顶掉。 */
+.personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+  textarea,
+  .crumb-time,
+  .crumb-date
+) {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option {
+  border-image-source: url('./assets/halloween/card/control-option-off-night.png');
+  color: #efe6ff;
+}
+
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option.is-active {
+  border-image-source: url('./assets/halloween/card/control-option-on-night.png');
+  color: #efe6ff;
+}
+
+html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+  textarea,
+  .crumb-time,
+  .crumb-date
+) {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  color: #efe6ff;
+}
+
+html[data-theme='night'] .personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+html[data-theme='night'] .personal-workspace .dialog-card textarea {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  color: #efe6ff;
+}
+
+/* 下拉菜单、里面的选项、外面那个选择框，各自有自己的素材；菜单面用九宫格
+ * 铺（picker 这个伪元素盒只吃 border-image/background，不吃我们别的写法）。 */
+@supports (appearance: base-select) {
+  /* 下拉的弹层跟时间选择器用同一块板：18px 边带、panel-board、同样的内距。
+   * 之前这里是 control-menu 10px，两个弹层放在一起一眼就能看出不是一个东西。 */
+  .personal-workspace select::picker(select) {
+    padding: 6px 4px;
+    min-width: 0;
+    width: max-content;
+    border: 12px solid transparent;
+    border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  html[data-theme='night'] .personal-workspace select::picker(select) {
+    border-image-source: url('./assets/halloween/card/panel-board-night.png');
+  }
+
+  /* 只有被选中的那一行有框，别的是干净的行。框整张铺底——行只有三十几像素
+   * 高，九宫格的角在这尺寸上会把左端那颗铜珠压扁。 */
+  /* 行跟时间选择器的数字格同一种做法：透明、9px 圆角、悬停浅底、选中填橙。
+   * 不再贴图形，两个弹层里的「一行」看起来才是一样的东西。 */
+  .personal-workspace select option {
+    padding: 2px 6px;
+    font-size: 12.5px;
+    justify-content: center;
+    text-align: center;
+    /* 只有被选中的那行有框；其它行留同样宽度的透明边，换行时不跳高度。 */
+    border-width: 4px 6px;
+    border-style: solid;
+    border-color: transparent;
+    border-radius: 0;
+    background: none;
+    color: #33200b;
+    font-weight: 700;
+  }
+
+  .personal-workspace select option:hover { color: #33200b; }
+
+  .personal-workspace select option:hover { color: #33200b; }
+
+  /* 选中的那一行就是同一张 option-off「加了颜色」的那版：option-on。 */
+  .personal-workspace select option:checked,
+  .personal-workspace select option:focus {
+    border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+    background: none;
+    color: #33200b;
+    font-weight: 800;
+  }
+
+  /* 时间选择器的数字格沿用同一个「被选中」框。 */
+  .personal-workspace .crumb-time__cell {
+    border-width: 4px 6px;
+    border-style: solid;
+    border-color: transparent;
+    border-radius: 0;
+    background: none;
+  }
+
+  .personal-workspace .crumb-time__cell.is-active {
+    border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+    background: none;
+    box-shadow: none;
+    color: #33200b;
+    font-weight: 800;
+  }
+
+  html[data-theme='night'] .personal-workspace .crumb-time__cell.is-active {
+    border-image-source: url('./assets/halloween/card/control-option-on-night.png');
+    color: #efe6ff;
+  }
+
+  html[data-theme='night'] .personal-workspace select option { color: #efe6ff; }
+
+  html[data-theme='night'] .personal-workspace select option {
+    color: #efe6ff;
+  }
+
+  html[data-theme='night'] .personal-workspace select option:checked,
+  html[data-theme='night'] .personal-workspace select option:focus {
+    border-image-source: url('./assets/halloween/card/control-option-on-night.png');
+    color: #efe6ff;
+  }
+}
+
+/* 右边那个下拉箭头不要了：它是「这里能展开」的提示，但页面上每个下拉旁边
+ * 都有标签，箭头反而在点开时翻成朝上，看着像另一个按钮。 */
+.personal-workspace select,
+.personal-workspace select:hover {
+  padding-right: 12px;
+  background-image: none !important;
+}
+
+@supports (appearance: base-select) {
+  .personal-workspace select::picker-icon {
+    display: none;
+    content: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+  }
+}
+
+html[data-theme='night'] .personal-workspace .dialog-card ::placeholder,
+html[data-theme='night'] .personal-workspace .settings-form ::placeholder { color: #9b8bbd; }
+
+/* ------------------------------------------------------------ 开关 */
+
+/* 第三件零件，和铜牌、凹槽都不一样：它不是按下去的，也不是拿来装东西的，
+ * 而是一颗能在槽里滑到另一头的圆钮。四种状态各画一张（关/开 × 昼/夜），
+ * 切换时两张图交叉淡出 160ms——真旋钮不会瞬移，滤镜也调不出另一张画。 */
+.personal-workspace .notification-switch {
+  width: 2.85rem;
+  height: 1.3rem;
+  border: 0;
+  border-radius: 0;
+  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+  transition: none;
+}
+
+.personal-workspace .notification-switch span { display: none; }
+
+.personal-workspace .notification-switch::after {
+  position: absolute;
+  inset: 0;
+  background: url('./assets/halloween/card/control-switch-on-day.png') center / 100% 100% no-repeat;
+  content: "";
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(.2, .9, .25, 1.05);
+}
+
+.personal-workspace .notification-category-option > input:checked + .notification-switch {
+  border-color: transparent;
+  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+}
+
+.personal-workspace .notification-category-option > input:checked + .notification-switch::after { opacity: 1; }
+
+.personal-workspace .notification-category-option > input:focus-visible + .notification-switch {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 3px;
+}
+
+html[data-theme='night'] .personal-workspace .notification-switch,
+html[data-theme='night'] .personal-workspace .notification-category-option > input:checked + .notification-switch {
+  background-image: url('./assets/halloween/card/control-switch-off-night.png');
+}
+
+html[data-theme='night'] .personal-workspace .notification-switch::after {
+  background-image: url('./assets/halloween/card/control-switch-on-night.png');
+}
+
+/* 「启用 / 停用」是开关，不是按钮：它没有「按下去做一件事」的语义，只有两种状态。
+ * 所以它不套铜牌，靠左边那颗开关和一行字说明自己。 */
+.personal-workspace .ai-toggle[aria-pressed] {
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  min-height: 0;
+  padding: 2px 0 !important;
+  border: 0 !important;
+  border-image: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--ui-ink) !important;
+  text-shadow: none !important;
+}
+
+.personal-workspace .ai-toggle[aria-pressed]:hover:not(:disabled) { transform: none; filter: none; }
+
+.personal-workspace .ai-toggle .ai-toggle__dot {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 2.85rem;
+  height: 1.3rem;
+  border: 0;
+  border-radius: 0;
+  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+}
+
+/* 开态叠一层，用不透明度过渡——背景图本身没法补间，硬切会让旋钮瞬移。 */
+.personal-workspace .ai-toggle .ai-toggle__dot::after {
+  position: absolute;
+  inset: 0;
+  background: url('./assets/halloween/card/control-switch-on-day.png') center / 100% 100% no-repeat;
+  content: "";
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(.2, .9, .25, 1.05);
+}
+
+.personal-workspace .ai-toggle .ai-toggle__dot.is-on::after { opacity: 1; }
+
+html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot {
+  background-image: url('./assets/halloween/card/control-switch-off-night.png');
+}
+
+html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
+  background-image: url('./assets/halloween/card/control-switch-on-night.png');
+}
+
+/* 「对话模型 / 向量模型」是一组选项，跟设置里的选项用同一对零件：
+ * 选中的是铜牌，没选中的是凹槽。它们外面那圈小圆角框去掉，两个芯片自己站。 */
+.personal-workspace .ai-kind-switch {
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.personal-workspace .ai-kind-switch__option {
+  min-height: 0;
+  padding: 5px 15px;
+  border-width: 8px 12px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-option-off-day.png') 30% 8% fill stretch;
+  border-radius: 0;
+  background: none;
+  color: var(--ui-ink);
+}
+
+.personal-workspace .ai-kind-switch__option:hover { color: var(--ui-ink); }
+
+.personal-workspace .ai-kind-switch__option.is-active {
+  padding: 5px 15px;
+  border-width: 8px 14px;
+  border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+  background: none;
+  color: #33200b;
+}
+
+/* 时间控件右边那颗时钟只是装饰，真正要读的是 06:00 这几个字。去掉图标，
+ * 把宽度让给读数。 */
+.personal-workspace .crumb-time__glyph { display: none; }
+
+.personal-workspace .crumb-time__input { padding-right: 4px; }
+
+.personal-workspace .crumb-stepper__step svg { width: 14px; height: 14px; }
+
+/* 选中与未选中是同一块地方的两个状态，盒子必须一样大，否则点一下会跳。
+ * 两边都用 14px 的端头：铜牌上的铆钉按这个宽度画的，槽跟着走。 */
+.personal-workspace .settings-toggle,
+.personal-workspace .ai-kind-switch__option {
+  border-width: 8px 12px;
+}
+
+/* 时间控件去掉时钟以后，读数要落在框中间：容器右边原本留了 7px 给时钟，
+ * 现在把内边距收干净，读数才和框同一条中线。 */
+.personal-workspace .crumb-time { padding: 0; }
+
+.personal-workspace .crumb-time input.crumb-time__input[type="text"] {
+  padding: 0;
+  text-align: center;
+}
+
+/* 下拉框的「外面那个按钮」不是普通输入框：它是能拉下一张单子的抽屉，
+ * 所以用自己的一张图——槽口一样，右端多一块铜片当把手，没有箭头。 */
+.personal-workspace .settings-form select,
+.personal-workspace .dialog-card select,
+.personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-width: 4px 8px !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form select,
+html[data-theme='night'] .personal-workspace .dialog-card select,
+html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  color: #efe6ff;
+}
+
+/* ---------------------------------------------------------- AI 配置的小件 */
+
+/* 「对话 / 向量」的标签和模型 ID 是同一类东西：一枚挂在行里的小牌子。
+ * 左端那枚铜眼圈是辨识点，文字让开它。 */
+.personal-workspace .personal-ai-provider__tag,
+.personal-workspace .personal-ai-provider__model {
+  padding: 3px 10px;
+  border-width: 5px 8px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch;
+  border-radius: 0;
+  background: none;
+  color: #33200b;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__tag,
+html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
+  border-image-source: url('./assets/halloween/card/control-ornament-night.png');
+  color: #efe6ff;
+}
+
+/* 「不限」勾上以后数字框不消失，只变成不能用的样子：压暗、掉色、
+ * 光标也告诉人点不动。 */
+.personal-workspace .ai-quota-row .crumb-stepper.is-disabled {
+  opacity: 0.45;
+  filter: saturate(0.35);
+}
+
+/* 下拉框按内容收：宽 200px 的框里只有「关闭」两个字，右边那截空着最显眼。 */
+.personal-workspace .settings-form .settings-pair > .field--inline > select {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 240px;
+}
+
+/* 下拉框本身也把选中的字摆在中间：菜单里是居中的，关起来时靠左会跳一下。
+ * 同样是 flex 盒，所以用 justify-content 而不是 text-align。 */
+@supports (appearance: base-select) {
+  .personal-workspace select {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* 勾选框：方框在素材里，勾还是矢量——那个符号不该烘焙进图。 */
+.personal-workspace .personal-ai-page input[type="checkbox"] {
+  appearance: none;
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: url('./assets/halloween/card/control-check-off-day.png') center / 100% 100% no-repeat;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.personal-workspace .personal-ai-page input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2333200b' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
+    url('./assets/halloween/card/control-check-on-day.png') center / 100% 100% no-repeat;
+}
+
+.personal-workspace .personal-ai-page input[type="checkbox"]:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"] {
+  background-image: url('./assets/halloween/card/control-check-off-night.png');
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23201337' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
+    url('./assets/halloween/card/control-check-on-night.png') center / 100% 100% no-repeat;
+}
+
+/* 悬浮窗右上角那颗关闭钮：一枚小铜牌，中间的叉还是矢量图标，
+ * 素材只负责牌面，不画那个叉。 */
+.personal-workspace .dialog-card .workspace-icon-button {
+  width: 34px;
+  height: 34px;
+  min-height: 0;
+  padding: 0 !important;
+  border-width: 5px !important;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-close-day.png') 20% 20% fill stretch !important;
+  border-radius: 0;
+  background: none !important;
+  box-shadow: none !important;
+  color: #33200b !important;
+}
+
+.personal-workspace .dialog-card .workspace-icon-button:hover:not(:disabled) {
+  background: none !important;
+  filter: brightness(1.06);
+}
+
+html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button {
+  border-image-source: url('./assets/halloween/card/control-close-night.png') !important;
+  color: #efe6ff !important;
+}
+
+/* 下拉菜单打开/收起不要动效：一开就从框底弹出来、选项还逐行升起，看起来像
+ * 页面上多了一层东西在动。直接出现、直接消失。 */
+@supports (appearance: base-select) {
+  .personal-workspace select::picker(select),
+  .personal-workspace select:open::picker(select) {
+    opacity: 1;
+    translate: 0;
+    scale: 1;
+    transition: none;
+  }
+
+  .personal-workspace select:open option { animation: none; }
+}
+
+/* 「不限」和那个勾靠在一起，和右边的数字框分开：它们是一句话的两半。 */
+.personal-workspace .ai-quota-row__unlimited { margin-right: 8px; }
+
+.personal-workspace .ai-quota-row__unlimited input[type="checkbox"] { margin-right: 4px; }
+
+/* 设置页那颗保存比通用按钮小一号：它在一张大板的角落里，不需要和主按钮一样重。 */
+.personal-workspace .settings-form .button-row .button {
+  min-height: 38px;
+  padding: 2px 10px !important;
+}
+
+/* 「≈ 1 天」这种小读数：一枚胶囊徽章，两端是圆的，跟别的方角件区分开。 */
+.personal-workspace .field-badge {
+  padding: 6px 12px;
+  border-width: 8px 13px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-badge-day.png') 30% 17% fill stretch;
+  border-radius: 0;
+  background: none;
+}
+
+html[data-theme='night'] .personal-workspace .field-badge {
+  border-image-source: url('./assets/halloween/card/control-badge-night.png');
+}
+
+/* 额度三列在窄面板里放不下：每行会被压到 200px 出头，右边那句「已用 N 次」
+ * 直接溢出到隔壁列，看着像标题重影。窄了就少一列、再窄就竖排。 */
+@media (max-width: 1180px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* 数字框按选型改用 chip-off：羊皮纸小牌 + 一道细描边，和选项芯片是同一张。 */
+.personal-workspace .settings-form .crumb-stepper,
+.personal-workspace .dialog-card .crumb-stepper,
+.personal-workspace .personal-ai-page .crumb-stepper,
+.personal-workspace .ia-account-security .crumb-stepper {
+  border-width: 6px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-chip-off-day.png') 12% 5% fill stretch !important;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper,
+html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper,
+html[data-theme='night'] .personal-workspace .personal-ai-page .crumb-stepper,
+html[data-theme='night'] .personal-workspace .ia-account-security .crumb-stepper {
+  border-image-source: url('./assets/halloween/card/control-chip-off-night.png') !important;
+}
+
+/* 选中的选项芯片：夜间换 another 张图（白天是琥珀牌，夜里是亮紫牌）。 */
+html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
+  border-image-source: url('./assets/halloween/card/control-option-on-night.png') !important;
+  color: #efe6ff !important;
+  text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
+}
+
+html[data-theme='night'] .personal-workspace .settings-toggle {
+  border-image-source: url('./assets/halloween/card/control-option-off-night.png') !important;
+}
+
+/* ------------------------------------------------------------------
+ * 批注收口（2026-11-16 晚）
+ * ------------------------------------------------------------------ */
+
+/* 1. 数字框整体放大一档：104×38，加减各 22px，数字仍有 30px 空间。 */
+.personal-workspace .crumb-stepper {
+  width: min(100%, 96px);
+  height: 38px;
+}
+
+.personal-workspace .crumb-stepper__step {
+  width: 22px;
+  height: 28px;
+}
+
+.personal-workspace .crumb-stepper__step svg { width: 15px; height: 15px; }
+
+/* 2. 下拉框与时间框完全同一套：同样的边带、同样的高度。 */
+.personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-width: 6px 10px !important;
+  min-height: 34px;
+}
+
+/* 3. 文本框的边框收细：输入框和下拉框分开对待。 */
+.personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+  textarea
+) {
+  min-height: 38px;
+  padding: 6px 10px;
+  border-width: 4px 8px !important;
+}
+
+.personal-workspace .dialog-card :is(input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input), textarea) {
+  border-width: 4px 8px !important;
+}
+
+/* 5. 「不限」和勾再靠近一点。 */
+.personal-workspace .ai-quota-row__unlimited { margin-right: 6px; }
+.personal-workspace .ai-quota-row__unlimited input[type="checkbox"] { margin-right: 2px; }
+
+/* 6. AI 配置的大标题降到和小标题同一号，别一进门就压一层。 */
+.personal-workspace #personal-ai-title {
+  font-size: 1.05rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+/* 7.「向量」不再是牌子，改成跟在名字后面的一枚内嵌标记。 */
+.personal-workspace .personal-ai-provider__tag {
+  padding: 1px 6px;
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 4px;
+  background: rgb(200 122 26 / 16%);
+  box-shadow: inset 0 1px 2px rgb(120 66 0 / 24%);
+  color: #8a4a06;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__tag {
+  background: rgb(124 240 196 / 16%);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 45%);
+  color: #7cf0c4;
+}
+
+/* 供应商行尾的三颗动作按钮：只放图标，做成小方块。 */
+.personal-workspace .personal-ai-provider__actions .ai-provider-action {
+  width: 30px;
+  min-height: 30px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0;
+  background: none !important;
+  box-shadow: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ui-ink) !important;
+}
+
+.personal-workspace .personal-ai-provider__actions .ai-provider-action:hover:not(:disabled) {
+  background: none !important;
+  color: var(--accent-ink, #b4610b) !important;
+  transform: none;
+  filter: none;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__actions .ai-provider-action {
+  background: none !important;
+  color: #efe6ff !important;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__actions .ai-provider-action:hover:not(:disabled) {
+  background: none !important;
+  color: #ffb45a !important;
+}
+
+.personal-workspace .ai-provider-action svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+/* 下拉框：素材一直没显出来，是因为底下压着一层「奶白底 + 圆角 + 实色描边」，
+ * 把那三层复位掉，图片才露出来。 */
+.personal-workspace .settings-form select,
+.personal-workspace .dialog-card select,
+.personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  min-height: 34px;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form select,
+html[data-theme='night'] .personal-workspace .dialog-card select,
+html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  background: none !important;
+  color: #efe6ff;
+}
+
+/* 芯片悬停：老规则（[role=button]:hover）会在悬停时刷一层绿底，
+ * 把牌面整块盖掉。这里只让图亮一点，不换底。 */
+.personal-workspace .settings-toggle:hover,
+.personal-workspace .settings-toggle:active,
+.personal-workspace .ai-kind-switch__option:hover {
+  background: none !important;
+  box-shadow: none !important;
+  filter: brightness(1.04);
+}
+
+/* 供应商行尾三颗按钮靠近一点：8px → 4px。 */
+.personal-workspace .personal-ai-provider__actions { gap: 4px; }
+
+/* 悬停时老规则会把字刷成白色，牌面一浅就看不见了——这里把颜色钉住。 */
+.personal-workspace .settings-toggle:hover,
+.personal-workspace .settings-toggle:focus,
+.personal-workspace .settings-toggle:active,
+.personal-workspace .ai-kind-switch__option:hover,
+.personal-workspace .ai-kind-switch__option:focus {
+  color: #33200b !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-toggle:hover,
+html[data-theme='night'] .personal-workspace .settings-toggle:focus,
+html[data-theme='night'] .personal-workspace .settings-toggle:active,
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option:hover,
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option:focus {
+  color: #efe6ff !important;
+}
+
+/* 下拉框和时间框：鼠标点完不要再套一圈橙色描边。键盘 Tab 过去仍然给可见焦点。 */
+.personal-workspace select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace select:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%) !important;
+  outline-offset: 2px;
+}
+
+.personal-workspace .crumb-time:focus-within,
+.personal-workspace .crumb-time.is-open,
+.personal-workspace .crumb-date:focus-within,
+.personal-workspace .crumb-date.is-open {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+.personal-workspace .crumb-time:has(input:focus-visible),
+.personal-workspace .crumb-date:has(input:focus-visible) {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
+
+/* 再收一档：目标字段里标签到数字框几乎贴着；供应商三颗按钮并拢。 */
+.personal-workspace .settings-goal-grid .field { gap: 2px; }
+.personal-workspace .personal-ai-provider__actions { gap: 0; }

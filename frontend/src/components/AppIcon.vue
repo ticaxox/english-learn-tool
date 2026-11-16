@@ -26,6 +26,9 @@ withDefaults(
       | 'moon'
       | 'sun'
       | 'dialogue'
+      | 'edit'
+      | 'trash'
+      | 'power'
   }>(),
   { name: 'spark' },
 )
@@ -119,6 +122,20 @@ withDefaults(
     <template v-else-if="name === 'dialogue'">
       <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H9l-5 4v-13.5Z" />
       <path d="M8.5 9.5h7M8.5 12.5h4" />
+    </template>
+    <template v-else-if="name === 'edit'">
+      <path d="M4.5 19.5 5 16l10-10a2.6 2.6 0 0 1 3.7 3.7l-10 10-4.2.8Z" />
+      <path d="m14 6.8 3.2 3.2" />
+    </template>
+    <template v-else-if="name === 'trash'">
+      <path d="M4.5 7h15" />
+      <path d="M9.5 7V4.8h5V7" />
+      <path d="m6.8 7 1 12.2h8.4L17.2 7" />
+      <path d="M10.2 10.5v5.5M13.8 10.5v5.5" />
+    </template>
+    <template v-else-if="name === 'power'">
+      <path d="M12 3.5v7.5" />
+      <path d="M7.6 6.6a7 7 0 1 0 8.8 0" />
     </template>
   </svg>
 </template>

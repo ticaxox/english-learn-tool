@@ -128,14 +128,13 @@ onMounted(() => {
             <input v-model="unlimited[kind.key]" type="checkbox" />
             不限
           </label>
-          <span v-if="unlimited[kind.key]" class="ai-quota-unlimited">不限</span>
           <CrumbNumber
-            v-else
             v-model="values[kind.key]"
             class="ai-quota-row__input"
             :min="0"
             :max="10000"
             :step="1"
+            :disabled="unlimited[kind.key]"
             :label="`${kind.label}每日上限`"
           />
         </div>

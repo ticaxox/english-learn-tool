@@ -113,7 +113,6 @@ onMounted(() => {
           <div>
             <p class="eyebrow">AI 配置</p>
             <h2 id="ai-memory-dialog-title">教练记住的事</h2>
-            <p class="field-hint">教练回答前会按相关性读取这些内容；你可以随时让它忘记。</p>
           </div>
           <DivButton class="workspace-icon-button" type="button" aria-label="关闭" @click="closeDialog">
             <AppIcon name="close" />
@@ -156,9 +155,6 @@ onMounted(() => {
             </DivButton>
           </li>
         </ul>
-        <p v-else-if="!loading" class="field-hint">
-          教练还没有记住任何事。对话里说「记住…」，或在这里添加。
-        </p>
       </section>
     </div>
   </section>
