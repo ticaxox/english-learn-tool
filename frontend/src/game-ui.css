@@ -1281,15 +1281,10 @@ html[data-theme='night'] .personal-workspace .study-card { background: #2d2149; 
 /* The option carries its own plate artwork in both themes; a flat background
  * colour here would paint a rectangle over it. */
 html[data-theme='night'] .personal-workspace .choice-option:hover { filter: brightness(1.06); }
-/* The given letters (a span, not an input) carry the same tile, and the night
- * rule above would otherwise paint a flat box over it. */
+/* The given letters are spans, not inputs: they carry the same flat tile as
+ * the rest of the row, drawn at the tile rules further down. */
 html[data-theme='night'] .personal-workspace span.spelling-cell {
-  background-color: transparent;
-  background-image: url('./assets/halloween/card/letter-tile-night.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  color: #f3e9d2;
+  color: #b9a4e6;
 }
 html[data-theme='night'] .personal-workspace .wordbook-active-mark { background: #2d2149; }
 html[data-theme='night'] .personal-workspace .wordbook-tabs { background: #2d2149; }
@@ -2348,32 +2343,51 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
    rule must not stretch them. */
 /* The letter cell is a stone chip. Longhands, because a `border` shorthand any
    later in the cascade would reset border-image and blank the chip. */
+/* Each letter sits on a flat paper tile cut from the question card's own
+   stock: the same cream, the same olive rule as the answer plates, no pin hole
+   and no shading. One rule for the whole row, so a nine-letter word stays on
+   one line. */
 .personal-workspace .spelling-grid input.spelling-cell {
   width: 3.1rem;
   min-width: 3.1rem;
   height: 3.6rem;
   min-height: 0;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  /* Each letter sits on its own tile: baked by day, cut by night, the same
-   * material rule the frame follows. The tile is drawn once and stretched to
-   * the cell, which is what keeps a nine-letter word on one row. */
-  background-color: transparent;
-  background-image: url('./assets/halloween/card/letter-tile-day.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  border: 1.5px solid #6f6a45;
+  border-radius: 3px;
+  background-color: #f1ead6;
+  background-image: none;
   box-shadow: none;
   text-align: center;
   font-size: 1.32rem;
   font-weight: 700;
-  color: #5a3a16;
+  color: #3a2a18;
+  caret-color: #b0742a;
 }
 
 html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell {
-  background-image: url('./assets/halloween/card/letter-tile-night.png');
-  color: #f3e9d2;
+  border-color: #8f83b8;
+  background-color: #241d3a;
+  color: #ece3cf;
+  caret-color: #c0acee;
+}
+
+/* The cell being typed into is the one that is ruled in orange, not filled.
+   The rule doubles as the focus ring, so the field's own glow is replaced
+   rather than stacked on top of it. */
+.personal-workspace .spelling-grid input.spelling-cell.spelling-cell--active,
+.personal-workspace .spelling-grid input.spelling-cell:focus,
+.personal-workspace .spelling-grid input.spelling-cell:focus-visible {
+  border-color: #b0742a;
+  outline: 2px solid #b0742a;
+  outline-offset: 1px;
+}
+
+html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell.spelling-cell--active,
+html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell:focus,
+html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell:focus-visible {
+  border-color: #c0acee;
+  outline-color: #c0acee;
 }
 
 /* Letter by letter, once the server has graded: green where the letter was
@@ -2389,11 +2403,26 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
   box-shadow: inset 0 0 0 999px rgb(223 79 66 / 52%);
 }
 
+/* A letter that was given is printed on the same tile, in a paler ink and on
+   a slightly duller stock, so the row reads as one word with some of it
+   already filled in. */
 .personal-workspace .spelling-cell--prefilled {
   display: grid;
   width: 3.1rem;
   height: 3.6rem;
   place-items: center;
+  border: 1.5px solid #6f6a45;
+  border-radius: 3px;
+  background-color: #e7dcc0;
+  color: #8a6a3e;
+  /* The flat tile has no thickness; the shared chip lip would fake one. */
+  box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
+  border-color: #8f83b8;
+  background-color: #2d2549;
+  color: #b9a4e6;
 }
 
 /* A correct pick stays green even though the radio is checked. */
