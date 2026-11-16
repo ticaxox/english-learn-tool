@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import '../wordbooks.css'
 import { computed, onMounted, reactive, ref } from 'vue'
+import ArtImage from '../components/ArtImage.vue'
+import { illustration } from '../assets/halloween'
 import { useAuthStore } from '../stores/auth'
 import {
   activateWordbook,
@@ -192,9 +194,9 @@ onMounted(() => {
   <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page crumb-wordbooks">
     <header class="crumb-shelf-header">
       <div class="crumb-shelf-heading">
-        <HobMark size="medium" />
+        <HobMark size="medium" :set="illustration.library" />
         <div>
-          <p class="crumb-brand-kicker">HOB LIBRARY</p>
+          <p class="crumb-brand-kicker">GRIMOIRE LIBRARY</p>
           <h1>咬一口，多记一个词。</h1>
           <p>每一本词书，都是 Hob 守着的一炉火。</p>
         </div>
@@ -241,7 +243,7 @@ onMounted(() => {
       <ErrorNotice v-else-if="error" :error="error" retry-label="重新读取词书" @retry="load" />
 
       <div v-else-if="empty" class="workspace-empty-state wordbook-empty">
-        <span class="wordbook-empty-mark" aria-hidden="true">Aa</span>
+        <ArtImage class="wordbook-empty-art" :set="illustration.library" />
         <strong>还没有词书</strong>
         <p>导入一套词书，今天的任务才能开始。</p>
         <DivButton class="button workspace-primary-button" type="button" @click="importOpen = true">导入一本词书</DivButton>

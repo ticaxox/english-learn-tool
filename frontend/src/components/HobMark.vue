@@ -5,15 +5,22 @@
  * the empty states use, not a second drawing of him.
  */
 import ArtImage from './ArtImage.vue'
-import { illustration } from '../assets/halloween'
+import { illustration, type ThemeMode } from '../assets/halloween'
 
 withDefaults(defineProps<{
   size?: 'small' | 'medium' | 'large' | 'hero'
   /** Driven by the streak: tired after a break, glowing on a long run. */
   mood?: 'tired' | 'normal' | 'happy' | 'glowing'
+  /**
+   * Which painting of the character to draw. Defaults to the lantern mark.
+   * Most places should pass their own — the mark is the logo and is the only
+   * drawing meant to repeat; everywhere else is a different moment.
+   */
+  set?: ThemeMode
 }>(), {
   size: 'small',
   mood: 'normal',
+  set: () => illustration.hob,
 })
 </script>
 
@@ -24,7 +31,7 @@ withDefaults(defineProps<{
     role="img"
     :aria-label="`Hob，${mood === 'tired' ? '有点累' : mood === 'glowing' ? '精神饱满' : '状态不错'}`"
   >
-    <ArtImage :set="illustration.hob" />
+    <ArtImage :set="set" />
   </span>
 </template>
 

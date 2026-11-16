@@ -504,17 +504,18 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 
 .personal-workspace .workspace-brand {
   display: flex;
+  width: 100%;
   min-height: 0;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  padding: 16px 14px 12px;
+  padding: 16px 12px 14px;
   color: var(--rail-ink);
 }
 
 .personal-workspace .workspace-brand-mark {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 72px;
+  height: 72px;
   flex: 0 0 auto;
   place-items: center;
   border: 0;
@@ -523,10 +524,9 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
 
-.personal-workspace .workspace-brand-mark .hob-mark,
-.personal-workspace .workspace-brand-mark .whisker-crumb-mark {
-  width: 27px;
-  height: 27px;
+.personal-workspace .workspace-brand-mark .hob-mark {
+  width: 60px;
+  height: 60px;
 }
 
 .personal-workspace .workspace-brand-copy { gap: 0; }
@@ -534,15 +534,15 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 .personal-workspace .workspace-brand-copy strong {
   color: var(--rail-ink);
   font-family: var(--font-code);
-  font-size: 0.8rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .personal-workspace .workspace-brand-copy small {
   color: var(--rail-muted);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 /* --- level plate --- */
@@ -867,34 +867,6 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 
 /* The one action in the bar: a solid pumpkin key with a hard bottom edge, the
  * same language as the product's primary button, not a cut from the chrome. */
-.personal-workspace .workspace-coach-button.member-concierge-button {
-  gap: 8px;
-  min-height: 38px;
-  padding: 0 17px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--coach-face);
-  box-shadow: 0 3px 0 var(--coach-edge);
-  color: var(--coach-ink);
-  font-size: 0.86rem;
-  font-weight: 900;
-  clip-path: none;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
-}
-
-.personal-workspace .workspace-coach-button.member-concierge-button:hover {
-  background: var(--coach-face-hover);
-  box-shadow: 0 4px 0 var(--coach-edge);
-  color: var(--coach-ink);
-  transform: translateY(-1px);
-}
-
-.personal-workspace .workspace-coach-button.member-concierge-button:active {
-  box-shadow: 0 1px 0 var(--coach-edge);
-  transform: translateY(2px);
-}
-
-.personal-workspace .workspace-coach-button.member-concierge-button svg { width: 16px; height: 16px; }
 
 .personal-workspace .workspace-avatar-button.ia-profile-trigger {
   display: grid;

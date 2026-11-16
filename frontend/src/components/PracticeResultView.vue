@@ -72,7 +72,7 @@ const correctPercent = computed(() => {
 
     <div class="practice-result__layout">
     <aside class="practice-result__aside">
-    <ArtImage class="practice-result__art" :set="illustration.result" />
+    <ArtImage class="practice-result__art" :set="illustration.celebrate" />
 
     <section class="panel practice-result__card">
       <h2 id="practice-result-title" class="visually-hidden">本次练习得分</h2>

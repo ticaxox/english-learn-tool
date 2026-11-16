@@ -365,15 +365,6 @@ html[data-theme='night'] .personal-workspace {
   color: var(--ui-ink);
 }
 
-.personal-workspace .member-concierge-button {
-  border: 2px solid var(--g-purple-edge);
-  border-radius: 14px;
-  background: var(--g-purple-soft);
-  color: #4b1f78;
-  font-weight: 850;
-  box-shadow: 0 3px 0 var(--g-purple-edge);
-}
-
 .personal-workspace .ia-profile-trigger {
   border: 2px solid var(--g-green-edge);
   background: var(--g-green-soft);
@@ -901,24 +892,11 @@ html[data-theme='night'] .personal-workspace {
   box-shadow: 0 10px 0 rgb(59 42 26 / 14%);
 }
 
-/* ------------------------------------------------------------------ coach */
-
-.personal-workspace .ia-coach-panel { animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1); }/* Stage cards lift on hover, press on click. */
+/* ------------------------------------------------------------------ coach *//* Stage cards lift on hover, press on click. */
 .personal-workspace .practice-type-card:hover, .personal-workspace .challenge-node--unlocked:hover, .personal-workspace .challenge-node--in_progress:hover {
   transform: translateY(-2px);
   filter: brightness(1.02);
 }.personal-workspace .practice-type-card, .personal-workspace .challenge-node { transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease; }
-
-.personal-workspace .ia-coach-panel {
-  border-left: 0;
-  background: var(--ui-sidebar);
-  box-shadow: -1px 0 0 var(--ui-line), -14px 0 34px rgb(59 42 26 / 10%);
-}
-
-.personal-workspace .ia-coach-panel-header {
-  border-bottom: 2px solid var(--ui-line);
-  background: var(--ui-sidebar);
-}
 
 /* ------------------------------------------------------- stage colour coding */
 
@@ -1075,16 +1053,6 @@ html[data-theme='night'] .personal-workspace {
 }
 
 /* The coach entry carries the AI stage colour. */
-.personal-workspace .workspace-coach-button.member-concierge-button {
-  border: 2px solid var(--g-purple-edge);
-  background: var(--g-purple-soft);
-  color: #4b1f78;
-  box-shadow: 0 3px 0 var(--g-purple-edge);
-}
-
-html[data-theme='night'] .personal-workspace .workspace-coach-button.member-concierge-button {
-  color: #e6d7ff;
-}
 
 /* ------------------------------------------------------------- day / night */
 
@@ -2176,47 +2144,15 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 @media (min-width: 861px) {
   /* The coach is a sidebar flush with the right edge, full height. It overlays
      the page without resizing it. */
-  .personal-workspace .ia-coach-panel {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: auto;
-    width: min(460px, calc(100vw - 212px));
-    height: 100vh;
-    border: 0;
-    border-left: 2px solid var(--ui-line-strong);
-    border-radius: 0;
-    background: var(--ui-surface);
-    box-shadow: -12px 0 32px rgb(59 42 26 / 14%);
-    animation: coach-slide-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
 
   /* The page keeps its own columns; it only gives up the docked width. */
-  .personal-workspace.is-coach-open .ia-coach-backdrop { display: none; }
-  .personal-workspace .ia-coach-panel .coach-layout { grid-template-columns: minmax(0, 1fr); }
-  .personal-workspace .ia-coach-panel .coach-sidebar {
-    max-height: 42%;
-    overflow-y: auto;
-  }
 }
 
 /* Wide screens dock the coach: the page narrows instead of being covered. */
 @media (min-width: 1181px) {
-  .personal-workspace .ia-coach-panel { width: 460px; }
-
-  .personal-workspace.is-coach-open .workspace-main {
-    margin-right: 460px;
-    transition: margin-right 180ms ease;
-  }
-
-  .personal-workspace.is-coach-open .workspace-content {
-    padding-right: clamp(12px, 2vw, 24px);
-  }
 }
 
 @media (min-width: 861px) and (max-width: 1180px) {
-  .personal-workspace .ia-coach-panel { width: min(460px, calc(100vw - 212px)); }
-  .personal-workspace.is-coach-open .workspace-main { margin-right: 0; }
 }
 
 @keyframes coach-pop {
@@ -2398,14 +2334,9 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 
 /* A smaller mascot keeps the right rail from shouting. */
 .personal-workspace .member-session-mascot { padding: 12px; }
-.personal-workspace .member-session-mascot .whisker-crumb-mark { width: 4.2rem; }
 .personal-workspace .member-session-mascot p { font-size: 0.85rem; text-align: center; }
 
 /* Keep the history toggle reachable while the thread scrolls. */
-.personal-workspace .ia-coach-panel .coach-main-topbar {
-  padding: 4px 12px 6px;
-  background: var(--ui-surface);
-}
 
 /* Provider cards live in a 480px column: stack the actions under the details. */
 .personal-workspace .personal-ai-group .personal-ai-list {
@@ -2607,26 +2538,6 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 }
 
 /* ------------------------------------------------------ coach: compact thread */
-
-.personal-workspace .ia-coach-panel .coach-message {
-  max-width: 100%;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
-  padding: 9px 11px;
-  border-left-width: 0;
-  box-shadow: none;
-}
-
-.personal-workspace .ia-coach-panel .coach-message-avatar { display: none; }
-.personal-workspace .ia-coach-panel .coach-message-body { width: 100%; min-width: 0; }
-.personal-workspace .ia-coach-panel .coach-message__meta { gap: 2px 8px; font-size: 0.72rem; }
-.personal-workspace .ia-coach-panel .coach-message__text { margin: 0; font-size: 0.92rem; line-height: 1.55; }
-
-.personal-workspace .ia-coach-panel .coach-actions { gap: 6px; }
-.personal-workspace .ia-coach-panel .coach-receipt { padding: 8px 10px; gap: 4px; }
-.personal-workspace .ia-coach-panel .coach-receipt p { margin: 0; font-size: 0.85rem; }
-.personal-workspace .ia-coach-panel .coach-receipt__conflict { color: var(--ui-muted); }
-.personal-workspace .ia-coach-panel .coach-messages { gap: 8px; padding: 8px; }
 
 /* -------------------------------------------------- wordbooks: clean covers */
 
@@ -2846,212 +2757,11 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 }
 
 /* Coach sidebar: shorter header, tighter composer, scrollbar at the edge. */
-.personal-workspace .ia-coach-panel .ia-coach-panel-header {
-  min-height: 52px;
-  padding: 6px 12px;
-}
-
-.personal-workspace .ia-coach-panel .ia-coach-panel-header h2 {
-  font-size: 1.15rem;
-  line-height: 1.2;
-}
-
-.personal-workspace .ia-coach-panel .ia-coach-panel-header p { display: none; }
-
-.personal-workspace .ia-coach-panel .coach-main { padding: 0 10px 10px; }
-
-.personal-workspace .ia-coach-panel .coach-composer {
-  gap: 6px;
-  margin-top: 6px;
-  padding: 8px 10px;
-}
-
-.personal-workspace .ia-coach-panel .coach-composer label { display: none; }
-
-.personal-workspace .ia-coach-panel .coach-composer textarea {
-  min-height: 64px;
-  padding: 8px 10px;
-}
-
-.personal-workspace .ia-coach-panel .coach-messages {
-  padding: 6px 8px 6px 10px;
-}
 
 /* Sidebar chrome: one compact line per section, scroll area flush to the edge. */
 @media (min-width: 861px) {
-  .personal-workspace .ia-coach-panel {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .personal-workspace .ia-coach-panel .ia-coach-panel-header {
-    flex: 0 0 auto;
-    min-height: 46px;
-    height: 46px;
-    align-items: center;
-    padding: 0 8px 0 14px;
-    overflow: visible;
-  }
-
-  .personal-workspace .ia-coach-panel .ia-coach-panel-header .workspace-icon-button {
-    width: 32px;
-    height: 32px;
-    min-height: 0;
-  }
-
-  .personal-workspace .ia-coach-panel .ia-coach-panel-header > div {
-    min-width: 0;
-    max-width: calc(100% - 158px);
-  }
-
-  .personal-workspace .ia-coach-panel-body {
-    display: flex;
-    flex: 1 1 auto;
-    min-height: 0;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-page {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-layout {
-    flex: 1 1 auto;
-    min-height: 0;
-    grid-template-rows: minmax(0, 1fr);
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-messages {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: none;
-  }
 
   /* The history toggle rides in the panel header instead of taking a row. */
-  .personal-workspace .ia-coach-panel .coach-main-topbar {
-    position: absolute;
-    top: 9px;
-    right: 60px;
-    z-index: 3;
-    height: auto;
-    padding: 0;
-    margin: 0;
-  }
-
-  .personal-workspace .ia-coach-panel .ia-coach-panel-header h2 {
-    font-size: 1rem;
-    line-height: 1.3;
-    white-space: nowrap;
-  }
-
-  .personal-workspace .ia-coach-panel .ia-coach-panel-header .workspace-icon-button {
-    flex: 0 0 auto;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main-topbar {
-    height: auto;
-    align-items: center;
-    padding: 2px 10px 2px 12px;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main-topbar .button-secondary {
-    min-height: 0;
-    height: 28px;
-    padding: 0 10px;
-    font-size: 0.8rem;
-    line-height: 1;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main {
-    padding: 0 0 8px;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main-header {
-    min-height: 0;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    padding: 8px 10px 8px 12px;
-    border-bottom: 1px solid var(--ui-line);
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main-header > div:first-child {
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-    min-width: 0;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main-header .eyebrow { display: none; }
-
-  .personal-workspace .ia-coach-panel .coach-main-header h2 {
-    margin: 0;
-    font-size: 0.95rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main-header .field-hint {
-    margin: 0;
-    font-size: 0.74rem;
-    white-space: nowrap;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main-header .button-row { gap: 4px; flex: 0 0 auto; }
-
-  .personal-workspace .ia-coach-panel .coach-main-header .button-secondary {
-    min-height: 0;
-    height: 26px;
-    padding: 0 8px;
-    font-size: 0.76rem;
-    line-height: 1;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-composer {
-    margin: 0;
-    padding: 10px 12px 12px;
-    border: 0;
-    border-top: 2px solid var(--ui-line);
-    border-radius: 0;
-    background: var(--ui-surface);
-  }
-
-  .personal-workspace .ia-coach-panel .coach-main { padding-bottom: 0; }
-
-  .personal-workspace .ia-coach-panel .coach-message__meta strong {
-    color: var(--ui-muted);
-    font-size: 0.72rem;
-    font-weight: 800;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-thinking { padding: 4px 2px; }
-
-  .personal-workspace .ia-coach-panel .coach-composer textarea {
-    height: 54px;
-    min-height: 54px;
-    font-size: 0.9rem;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-composer__footer {
-    align-items: center;
-    gap: 8px;
-  }
-
-  .personal-workspace .ia-coach-panel .coach-composer__footer .button {
-    min-height: 0;
-    height: 32px;
-    padding: 0 14px;
-  }
 }
 
 /* Node details open as a floating dialog over the map. */
@@ -3491,84 +3201,18 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 
 /* ------------------------------------------------ coach thread: quieter rows */
 
-.personal-workspace .ia-coach-panel .coach-message {
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  padding: 9px 0;
-}
-
-.personal-workspace .ia-coach-panel .coach-message + .coach-message {
-  border-top: 1px dashed var(--ui-line);
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user { justify-items: end; }
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
-  max-width: 88%;
-  justify-items: end;
-  text-align: right;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
-  padding: 8px 12px;
-  border-radius: 12px 12px 4px;
-  background: var(--g-blue-soft);
-  text-align: left;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--assistant .coach-message__text {
-  color: var(--ui-ink);
-}
-
 /* User bubbles shrink to their text instead of one character per line. */
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  width: 100%;
-  max-width: none;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
-  display: inline-block;
-  width: auto;
-  max-width: 84%;
-  white-space: pre-wrap;
-}
 
 /* Give the conversation title room: the privacy hint is not needed in the panel. */
-.personal-workspace .ia-coach-panel .coach-main-header .field-hint { display: none; }
-
-.personal-workspace .ia-coach-panel .coach-main-header h2 { max-width: 52%; }
 
 /* The thread header is just the conversation name; rename/clear live in the list. */
-.personal-workspace .ia-coach-panel .coach-main-header .button-row { display: none; }
-.personal-workspace .ia-coach-panel .coach-main-header h2 { max-width: none; }
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
-  width: max-content;
-  max-width: 84%;
-}
 
 .personal-workspace .ai-model-menu { padding-bottom: 8px; }
 
 /* Short user messages stay on one line: size the bubble against the thread. */
-.personal-workspace .ia-coach-panel .coach-message--user { justify-items: stretch; }
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
-  width: fit-content !important;
-  max-width: 84% !important;
-}
 
 /* Between 861 and 1180 the dock would squeeze the page, so it reads as a drawer. */
 @media (min-width: 861px) and (max-width: 1180px) {
-  .personal-workspace.is-coach-open .ia-coach-backdrop { display: block; }
 }
 
 /* -------------------------------------------- AI providers: list + guide layout */
@@ -3990,21 +3634,6 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 }
 
 /* One bubble rule: the article, row and text all shrink to the message. */
-.personal-workspace .ia-coach-panel .coach-message--user {
-  width: fit-content;
-  max-width: 88%;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message-body {
-  width: auto !important;
-  max-width: none !important;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
-  width: max-content !important;
-  max-width: 100% !important;
-  white-space: pre-wrap;
-}
 
 .personal-workspace .personal-ai-provider__url {
   max-width: 46ch;
@@ -4239,233 +3868,23 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 /* One flat sheet: a quiet header, a scrolling thread, a docked composer.
    Nothing inside the panel is a card inside another card. */
 
-.personal-workspace .ia-coach-panel {
-  background: var(--ui-surface);
-}
-
-.personal-workspace .ia-coach-panel .ia-coach-panel-header {
-  min-height: 58px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--ui-line);
-  background: var(--ui-surface);
-}
-
-.personal-workspace .ia-coach-panel .ia-coach-panel-header p {
-  color: var(--ui-muted);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-}
-
-.personal-workspace .ia-coach-panel .ia-coach-panel-header h2 {
-  color: var(--ui-ink);
-  font-size: 1.05rem;
-  font-weight: 900;
-}
-
 /* The history toggle is a toolbar row, never floating over the thread. */
-.personal-workspace .ia-coach-panel .coach-main-topbar {
-  position: static;
-  padding: 10px 16px 0;
-  margin: 0;
-  background: transparent;
-}
-
-.personal-workspace .ia-coach-panel .coach-main-topbar .button-secondary {
-  min-height: 30px;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-}
 
 /* Thread */
-.personal-workspace .ia-coach-panel .coach-layout { display: flex; flex-direction: column; gap: 0; }
-
-.personal-workspace .ia-coach-panel .coach-main {
-  padding: 0;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.personal-workspace .ia-coach-panel .coach-main-header {
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--ui-line);
-}
-
-.personal-workspace .ia-coach-panel .coach-main-header h2 { margin: 0; font-size: 0.98rem; }
-
-.personal-workspace .ia-coach-panel .coach-messages {
-  gap: 18px;
-  padding: 16px;
-  background: transparent;
-}
-
-.personal-workspace .ia-coach-panel .coach-message {
-  max-width: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--assistant { justify-self: stretch; }
-
-.personal-workspace .ia-coach-panel .coach-message--user {
-  justify-self: end;
-  max-width: 84%;
-  padding: 8px 12px;
-  border-radius: 14px;
-  background: var(--g-gold-soft);
-}
-
-.personal-workspace .ia-coach-panel .coach-message__meta {
-  margin-bottom: 3px;
-  color: var(--ui-muted);
-  font-size: 0.7rem;
-  letter-spacing: 0.02em;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message__meta { justify-content: flex-end; }
-
-.personal-workspace .ia-coach-panel .coach-message__meta strong { color: var(--ui-muted); font-weight: 800; }
-
-.personal-workspace .ia-coach-panel .coach-message__text {
-  font-size: 0.94rem;
-  line-height: 1.68;
-}
-
-.personal-workspace .ia-coach-panel .coach-message--user .coach-message__text {
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  line-height: 1.55;
-}
 
 /* Failure reads as a line of text, not another boxed card. */
-.personal-workspace .ia-coach-panel .coach-message__error {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 6px 0 0;
-}
-
-.personal-workspace .ia-coach-panel .coach-message__error .field-error { margin: 0; }
-
-.personal-workspace .ia-coach-panel .coach-message__error .button-secondary {
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-}
 
 /* Applied adjustments: a quiet indented list. */
-.personal-workspace .ia-coach-panel .coach-actions {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--ui-line);
-}
-
-.personal-workspace .ia-coach-panel .coach-actions h3 {
-  margin: 0 0 4px;
-  color: var(--ui-muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-}
-
-.personal-workspace .ia-coach-panel .coach-receipt {
-  padding: 6px 0 6px 10px;
-  border: 0;
-  border-left: 3px solid var(--g-green-edge);
-  border-radius: 0;
-  background: transparent;
-}
 
 /* Composer: docked strip, no inner box. */
-.personal-workspace .ia-coach-panel .coach-composer {
-  gap: 4px;
-  margin: 0;
-  padding: 10px 14px 12px;
-  border: 0;
-  border-top: 1px solid var(--ui-line);
-  border-radius: 0;
-  background: var(--ui-surface);
-}
-
-.personal-workspace .ia-coach-panel .coach-composer label { display: none; }
-
-.personal-workspace .ia-coach-panel .coach-composer textarea {
-  min-height: 56px;
-  max-height: 132px;
-  padding: 2px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  resize: none;
-  font-size: 0.94rem;
-  line-height: 1.6;
-}
-
-.personal-workspace .ia-coach-panel .coach-composer textarea:focus { outline: none; }
-
-.personal-workspace .ia-coach-panel .coach-composer__footer { align-items: center; }
-
-.personal-workspace .ia-coach-panel .coach-composer__footer .member-primary-button {
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: 999px;
-  font-size: 0.88rem;
-}
 
 /* History: flat rows under the header, a hairline away from the thread. */
-.personal-workspace .ia-coach-panel .coach-sidebar {
-  padding: 12px 16px;
-  border: 0 !important;
-  border-bottom: 1px solid var(--ui-line) !important;
-  border-radius: 0 !important;
-  background: var(--ui-surface-subtle) !important;
-  box-shadow: none !important;
-}
-
-.personal-workspace .ia-coach-panel .coach-conversation {
-  padding: 8px 6px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-}
-
-.personal-workspace .ia-coach-panel .coach-conversation--active { background: var(--g-gold-soft); }
-
-.personal-workspace .ia-coach-panel .coach-conversation__actions .link-button {
-  color: var(--ui-muted);
-  font-size: 0.78rem;
-}
 
 /* No dashed separators between chat messages; the spacing does that work. */
-.personal-workspace .ia-coach-panel .coach-message + .coach-message {
-  border-top: 0 !important;
-}
 
 /* The panel already names the coach and the thread: no second conversation bar. */
-.personal-workspace .ia-coach-panel .coach-main-header {
-  display: none !important;
-}
-
-.personal-workspace .ia-coach-panel .coach-sidebar__heading { align-items: center; }
-.personal-workspace .ia-coach-panel .coach-sidebar__heading h2 { margin: 0; font-size: 0.95rem; }
-.personal-workspace .ia-coach-panel .coach-sidebar__heading .eyebrow { display: none; }
-.personal-workspace .ia-coach-panel .coach-conversation__title { font-size: 0.88rem; font-weight: 750; }
-.personal-workspace .ia-coach-panel .coach-conversation__meta { font-size: 0.72rem; }
 
 /* A hairline under the history row so the thread clips against an edge, not text. */
-.personal-workspace .ia-coach-panel .coach-main-topbar {
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--ui-line);
-}
 
 /* Secondary menus sit centred in the top bar on wide screens. */
 .personal-workspace .workspace-topbar-actions { margin-left: auto; }
@@ -4861,24 +4280,8 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell 
 .personal-workspace .ai-model-caret:active { transform: translateY(-50%); }
 
 /* Coach: history toggle rides beside the close button; history is a modal. */
-.personal-workspace .ia-coach-panel .coach-main-topbar {
-  position: fixed;
-  top: 13px;
-  right: 62px;
-  z-index: 5;
-  padding: 0;
-  margin: 0;
-  border: 0;
-}
 
 /* The coach speaks in a bubble too, not bare text. */
-.personal-workspace .ia-coach-panel .coach-message--assistant {
-  justify-self: start;
-  max-width: 92%;
-  padding: 9px 12px;
-  border-radius: 14px;
-  background: var(--ui-surface-subtle);
-}
 
 /* Word options: outrank the legacy 1rem rule in controls.css. */
 .personal-workspace .memory-main-card .choice-list--words .choice-option__label {

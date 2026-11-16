@@ -72,69 +72,6 @@
 .workspace-shell .ia-profile-menu [role="button"]:hover { background: var(--crumb-parchment); color: var(--crumb-forest); }
 .workspace-shell .ia-profile-menu .ia-profile-signout { color: #8a3f2d; }
 
-.ia-coach-backdrop {
-  position: fixed;
-  z-index: 80;
-  inset: 0;
-  background: rgb(25 63 50 / 28%);
-  backdrop-filter: blur(2px);
-}
-.ia-coach-panel {
-  position: fixed;
-  z-index: 90;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  display: grid;
-  width: min(760px, calc(100vw - 250px));
-  min-width: 0;
-  grid-template-rows: auto minmax(0, 1fr);
-  overflow: hidden;
-  border-left: 2px solid var(--crumb-forest);
-  background: var(--crumb-parchment);
-  box-shadow: -12px 0 34px rgb(25 63 50 / 20%);
-}
-.ia-coach-panel-header {
-  display: flex;
-  min-height: 64px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 10px 16px;
-  border-bottom: 2px solid var(--crumb-forest);
-  background: var(--crumb-paper);
-}
-.ia-coach-panel-header p { margin: 0; color: #7a5a49; font-size: 10px; font-weight: 750; letter-spacing: 0.08em; }
-.ia-coach-panel-header h2 { margin: 0; color: var(--crumb-cocoa); font-size: 18px; }
-.ia-coach-panel-body { min-height: 0; overflow: hidden; }
-.ia-coach-panel-body .coach-page {
-  display: grid;
-  height: 100%;
-  gap: 0;
-  padding: 0;
-  background: transparent;
-}
-.ia-coach-panel-body .coach-page-header { display: none; }
-.ia-coach-panel-body .coach-layout {
-  height: 100%;
-  min-height: 0;
-  grid-template-columns: 210px minmax(0, 1fr);
-  gap: 0;
-}
-.ia-coach-panel-body .coach-sidebar {
-  min-height: 0;
-  border-width: 0 1px 0 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-.ia-coach-panel-body .coach-main {
-  min-height: 0;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-.ia-coach-panel-body .coach-messages { min-height: 0; }
-
 .ia-admin-hub,
 .ia-settings-hub { display: grid; gap: 16px; }
 .ia-hub-header {
@@ -251,17 +188,10 @@
 .challenge-self-study__card > svg { width: 16px; height: 16px; }
 
 @media (max-width: 1024px) {
-  .ia-coach-panel { width: min(720px, calc(100vw - 160px)); }
-  .ia-coach-panel-body .coach-layout { grid-template-columns: 190px minmax(0, 1fr); }
   .ia-admin-hub .workspace-page-header,
   .ia-settings-hub .workspace-page-header { gap: 12px; }
 }
 @media (max-width: 860px) {
-  .ia-coach-backdrop { background: rgb(25 63 50 / 42%); }
-  .ia-coach-panel { width: 100%; border-left: 0; }
-  .ia-coach-panel-body .coach-layout { height: 100%; grid-template-columns: 1fr; }
-  .ia-coach-panel-body .coach-sidebar { display: block; max-height: 190px; overflow-y: auto; border-right: 0; border-bottom: 1px solid var(--workspace-line); }
-  .ia-coach-panel-body .coach-main { min-height: 0; }
   .ia-hub-header { padding: 15px 16px; }
   .challenge-self-study__grid { grid-template-columns: 1fr; }
   .challenge-self-study > header { display: grid; gap: 5px; }
@@ -270,7 +200,6 @@
   .ia-mobile-nav { grid-auto-columns: minmax(62px, 1fr); }
   .ia-mobile-nav span { overflow: hidden; max-width: 72px; text-overflow: ellipsis; white-space: nowrap; }
   .ia-profile-menu { position: fixed; top: 58px; right: 10px; }
-  .ia-coach-panel-header { min-height: 58px; padding: 8px 12px; }
   .ia-tabs { flex-wrap: nowrap; overflow-x: auto; }
   .workspace-shell .ia-tab { flex: 0 0 auto; }
   .ia-subsection-header { display: grid; }

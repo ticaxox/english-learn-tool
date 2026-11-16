@@ -7,6 +7,7 @@
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import HobMark from './HobMark.vue'
+import { illustration } from '../assets/halloween'
 import { sparkBurst, gsap, motionAllowed } from '../composables/useMotion'
 
 const props = defineProps<{ level: number; title: string }>()
@@ -42,7 +43,7 @@ onBeforeUnmount(() => {
       aria-label="等级提升"
       @click.stop
     >
-      <HobMark size="large" mood="glowing" />
+      <HobMark size="large" mood="glowing" :set="illustration.celebrate" />
       <p class="levelup-kicker">LEVEL UP</p>
       <h2>Lv.{{ props.level }}</h2>
       <p class="levelup-title">{{ props.title }}</p>

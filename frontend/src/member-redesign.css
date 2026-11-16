@@ -71,10 +71,6 @@
   transform: rotate(3deg) translateY(-1px);
 }
 
-.member-brand-mark > .whisker-crumb-mark {
-  width: 87%;
-}
-
 .member-brand-copy {
   display: grid;
   gap: 0.05rem;
@@ -305,25 +301,6 @@
   background: var(--paper-white);
   color: var(--forest);
   box-shadow: 0 2px 0 var(--line);
-}
-
-.member-concierge-button {
-  display: flex;
-  min-height: 2.55rem;
-  gap: 0.45rem;
-  align-items: center;
-  padding: 0.28rem 0.72rem 0.28rem 0.32rem;
-  border: 1.2px solid var(--forest);
-  border-radius: 999px;
-  background: var(--paper-white);
-  color: var(--forest);
-  box-shadow: 0 2px 0 var(--line);
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.member-concierge-button .whisker-crumb-mark {
-  width: 1.85rem;
 }
 
 .member-avatar-button {
@@ -588,12 +565,6 @@
   min-height: 12rem;
   place-items: center;
   padding: 0.4rem;
-}
-
-.member-hero-mascot > .whisker-crumb-mark {
-  width: clamp(9rem, 13vw, 12.5rem);
-  filter: drop-shadow(0 12px 15px rgb(0 0 0 / 18%));
-  animation: member-mascot-float 4.8s ease-in-out infinite;
 }
 
 @keyframes member-mascot-float {
@@ -1415,10 +1386,6 @@
   transform: rotate(1.5deg);
 }
 
-.practice-room-mascot .whisker-crumb-mark {
-  width: 7rem;
-}
-
 .practice-room-mascot span {
   color: var(--forest);
   font-family: var(--font-display);
@@ -1459,10 +1426,6 @@
   background: var(--lime-soft);
   box-shadow: 3px 4px 0 var(--forest);
   transform: rotate(-0.5deg);
-}
-
-.member-coach-break > .whisker-crumb-mark {
-  width: 3.8rem;
 }
 
 .member-coach-break p:not(.eyebrow) {
@@ -1519,10 +1482,6 @@
   border-radius: 18px 9px 17px 8px;
   background: var(--lime-soft);
   box-shadow: 3px 4px 0 var(--forest);
-}
-
-.member-session-mascot .whisker-crumb-mark {
-  width: 7rem;
 }
 
 .member-session-mascot p {
@@ -1688,11 +1647,6 @@
   padding: 0.6rem;
 }
 
-.coach-letter-mascot > .whisker-crumb-mark {
-  width: clamp(7rem, 11vw, 10rem);
-  filter: drop-shadow(0 10px 14px rgb(21 62 55 / 14%));
-}
-
 .coach-privacy-stamp {
   display: inline-flex;
   gap: 0.3rem;
@@ -1762,10 +1716,6 @@
   transform: rotate(-4deg);
 }
 
-.coach-empty-mark .whisker-crumb-mark {
-  width: 92%;
-}
-
 /* Member drawer */
 .member-drawer-backdrop {
   position: fixed;
@@ -1832,10 +1782,6 @@
   display: grid;
   min-height: 11rem;
   place-items: center;
-}
-
-.member-drawer-mascot .whisker-crumb-mark {
-  width: 9.5rem;
 }
 
 .member-drawer-copy {
@@ -2008,19 +1954,8 @@
   }
 
   .member-topbar-center,
-  .member-concierge-button span,
   .member-avatar-button {
     display: none;
-  }
-
-  .member-concierge-button {
-    width: 2.55rem;
-    padding: 0.22rem;
-    justify-content: center;
-  }
-
-  .member-concierge-button .whisker-crumb-mark {
-    width: 2rem;
   }
 
   .member-page-content {
@@ -2173,10 +2108,6 @@
     width: 100%;
   }
 
-  .practice-room-mascot .whisker-crumb-mark {
-    width: 5.7rem;
-  }
-
   .member-practice-session-aside {
     order: -1;
   }
@@ -2273,9 +2204,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .member-hero-mascot > .whisker-crumb-mark,
-  .member-concierge-drawer,
-  .member-trail-stop,
   .member-wordbooks-page .wordbook-card {
     animation: none !important;
     transition: none !important;

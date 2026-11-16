@@ -9,6 +9,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import HobMark from './HobMark.vue'
 import RewardMark from './RewardMark.vue'
+import { illustration } from '../assets/halloween'
 import { useGamification } from '../composables/useGamification'
 import { breathe, bump, countUp, popIn } from '../composables/useMotion'
 
@@ -91,7 +92,7 @@ watch(
     </ul>
 
     <span ref="hobRef" class="hud-hob">
-      <HobMark size="medium" :mood="gamification.hobMood.value" />
+      <HobMark size="medium" :mood="gamification.hobMood.value" :set="illustration.gnaw" />
     </span>
   </section>
 </template>

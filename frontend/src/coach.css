@@ -135,18 +135,18 @@ html[data-theme='night'] .coach-page {
 .coach-page.coach-page .coach-history__head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 18px;
   padding-left: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 .coach-page.coach-page .coach-history__mark {
-  width: 36px;
-  height: 36px;
+  width: 120px;
+  height: 120px;
   flex: 0 0 auto;
 }
 .coach-page.coach-page .coach-history__name {
   font-family: var(--coach-display);
-  font-size: 1.24rem;
+  font-size: 2.4rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.1;

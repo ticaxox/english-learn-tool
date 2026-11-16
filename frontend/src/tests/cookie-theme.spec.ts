@@ -1,9 +1,7 @@
 /// <reference types="node" />
-import { mount } from '@vue/test-utils'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
 
 function source(relativePath: string): string {
   return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), 'utf8')
@@ -13,7 +11,7 @@ const theme = source('../cookie-theme.css')
 const main = source('../main.ts')
 const shell = source('../components/AppShell.vue')
 
-describe('Whisker Crumb theme contract', () => {
+describe('cookie theme contract', () => {
   it('publishes the full biscuit, cocoa, jam and British-ink token set', () => {
     expect(theme).toContain('--cookie-50: #fff8e9')
     expect(theme).toContain('--cookie-100: #f7e7c6')
@@ -67,17 +65,5 @@ describe('Whisker Crumb theme contract', () => {
     expect(shell).not.toContain(':is-admin="auth.isAdmin"')
     expect(shell).not.toContain('app-shell--admin')
     expect(shell).not.toContain('WhiskerCrumbMark')
-  })
-
-  it('renders an abstract hat, eyes, moustache and bow without a human figure', () => {
-    const wrapper = mount(WhiskerCrumbMark, { props: { size: 'hero' } })
-    expect(wrapper.find('svg').exists()).toBe(true)
-    expect(wrapper.classes()).toContain('whisker-crumb-mark')
-    expect(wrapper.classes()).toContain('whisker-crumb-mark--hero')
-    expect(wrapper.html()).toContain('whisker-crumb-mark__hat')
-    expect(wrapper.html()).toContain('whisker-crumb-mark__eye')
-    expect(wrapper.html()).toContain('whisker-crumb-mark__moustache')
-    expect(wrapper.html()).toContain('whisker-crumb-mark__bow')
-    expect(wrapper.attributes('aria-hidden')).toBe('true')
   })
 })

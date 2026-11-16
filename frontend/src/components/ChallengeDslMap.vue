@@ -9,7 +9,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import HobMark from './HobMark.vue'
 import { parseChallengeMapDsl, spreadSpacing, type ChallengeMapNode } from '../utils/challenge-map'
-import { pumpkins } from '../assets/halloween'
+import { illustration, pumpkins } from '../assets/halloween'
 import { themeMode } from '../composables/useTheme'
 
 import { bump, drawPaths, gsap, motionAllowed, popIn } from '../composables/useMotion'
@@ -563,6 +563,7 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
         <HobMark
           v-if="guidePos"
           size="small"
+          :set="illustration.result"
           class="challenge-dsl-guide"
           :style="{ left: `${guidePos.x}px`, top: `${guidePos.y}px` }"
         />

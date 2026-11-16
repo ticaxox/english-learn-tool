@@ -1,4 +1,4 @@
-import { flushPromises, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { describe, expect, it, vi } from 'vitest'
 import MemberShell from '../components/MemberShell.vue'
@@ -56,12 +56,12 @@ describe('member redesign', () => {
     expect(wrapper.findAll('.ia-nav-group')).toHaveLength(4)
     expect(wrapper.findAll('.ia-nav-subitem')).toHaveLength(0)
     expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
-    expect(wrapper.get('.workspace-nav').text()).toContain('AI 教练')
+    expect(wrapper.get('.workspace-nav').text()).toContain('Hob')
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
     expect(wrapper.text()).toContain('今天也学一点')
   })
 
-  it('keeps the floating coach and also offers a full coach page', async () => {
+  it('offers the coach as a page and no longer as a floating window', async () => {
     const router = makeRouter()
     await router.push('/overview')
     await router.isReady()
@@ -69,17 +69,13 @@ describe('member redesign', () => {
       props: { displayName: 'Harold Chen', username: 'demo_member' },
       global: { plugins: [router] },
     })
-    await wrapper.get('.ia-coach-toggle').trigger('click')
-    await flushPromises()
 
-    // Floating window: the page underneath does not change.
-    expect(router.currentRoute.value.name).toBe('overview')
-    expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
-    // The panel has no history list; the page route does.
-    expect(wrapper.find('.ia-coach-panel .coach-history').exists()).toBe(false)
+    // The drawer is gone: nothing in the top bar opens a panel over the page.
+    expect(wrapper.find('.ia-coach-toggle').exists()).toBe(false)
+    expect(wrapper.find('.ia-coach-panel').exists()).toBe(false)
+    expect(wrapper.find('.personal-workspace.is-coach-open').exists()).toBe(false)
+    // The coach still has a home of its own, one click from the rail.
     expect(wrapper.find('.workspace-nav a[href="/coach"]').exists()).toBe(true)
-    // The shell marks itself so the desktop layout can give the coach real space.
-    expect(wrapper.find('.personal-workspace.is-coach-open').exists()).toBe(true)
   })
 
   it('renders the real wordbook as a bare shelf object that opens its panel', async () => {

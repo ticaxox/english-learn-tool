@@ -84,7 +84,7 @@ export const NOTIFICATION_CATEGORY_LABELS: Record<NotificationCategory, string> 
   ai_completed: 'AI 任务完成',
   ai_failed: 'AI 任务失败',
   plan_adjusted: '学习计划调整',
-  ai_action: 'AI 教练建议',
+  ai_action: 'Hob 建议',
 }
 
 export const NOTIFICATION_CATEGORY_ORDER: NotificationCategory[] = [

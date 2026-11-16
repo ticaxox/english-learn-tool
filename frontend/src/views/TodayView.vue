@@ -20,7 +20,7 @@ import GameHud from '../components/GameHud.vue'
 import BadgeWall from '../components/BadgeWall.vue'
 import TodayInsights from '../components/TodayInsights.vue'
 import { useGamification } from '../composables/useGamification'
-import { bookObject } from '../assets/halloween'
+import { bookObject, illustration } from '../assets/halloween'
 import { themeMode } from '../composables/useTheme'
 import { ensureTodayPlan, fetchTodayPlan } from '../api/learning'
 import { apiClient } from '../api/client'
@@ -148,7 +148,7 @@ onMounted(() => {
 
     <section v-else-if="error" class="crumb-state-panel" :class="needsActiveWordbook ? 'crumb-empty-state' : 'crumb-error-panel'">
       <div v-if="needsActiveWordbook" class="crumb-empty-note">
-        <HobMark size="medium" :mood="hobMood" />
+        <HobMark size="medium" :mood="hobMood" :set="illustration.guide" />
         <div>
           <strong>先选一本词书，路线才能开始。</strong>
           <p>选好词书后，今天的任务会自动出现。</p>
@@ -202,7 +202,7 @@ onMounted(() => {
 
       <div class="crumb-note-out">
         <div class="crumb-tip">
-          <HobMark size="small" :mood="hobMood" />
+          <HobMark size="small" :mood="hobMood" :set="illustration.celebrate" />
           <p>{{ hobTip }}</p>
         </div>
       </div>

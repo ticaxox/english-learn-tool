@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import ThemeSwitch from './ThemeSwitch.vue'
-import CoachView from '../views/CoachView.vue'
 import HobMark from './HobMark.vue'
 import { getActivePinia } from 'pinia'
 import { useAuthStore } from '../stores/auth'
@@ -20,18 +19,14 @@ const route = useRoute()
 // Tests mount the shell without a Pinia; the admin link is simply absent there.
 const auth = getActivePinia() ? useAuthStore() : null
 const profileOpen = ref(false)
-const coachOpen = ref(false)
 const profileArea = ref<HTMLElement | null>(null)
 const profileTrigger = ref<HTMLButtonElement | null>(null)
-const coachPanel = ref<HTMLElement | null>(null)
-const coachCloseButton = ref<HTMLButtonElement | null>(null)
-let previousFocus: HTMLElement | null = null
 
 
 const primaryLinks = [
   { key: 'today', label: '今日学习', to: '/overview', icon: 'today' as const },
   { key: 'practice', label: '练习', to: '/practice', icon: 'book' as const },
-  { key: 'coach', label: 'AI 教练', to: '/coach', icon: 'coach' as const },
+  { key: 'coach', label: 'Hob', to: '/coach', icon: 'coach' as const },
   { key: 'settings', label: '设置', to: '/settings', icon: 'settings' as const },
 ] as const
 
@@ -46,7 +41,7 @@ const pageTitles: Record<string, string> = {
   'practice-session': '练习',
   challenges: '学习地图',
   'challenge-detail': '学习地图',
-  coach: 'AI 教练',
+  coach: 'Hob',
   'settings-learning': '设置',
   'settings-ai': '设置',
   'settings-security': '设置',
@@ -124,69 +119,17 @@ function toggleProfile(): void {
   profileOpen.value = !profileOpen.value
 }
 
-async function openCoach(): Promise<void> {
-  // The coach is a floating window, never a page: opening it leaves the URL be.
-  closeProfile()
-  previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
-  coachOpen.value = true
-}
-
-function closeCoach(): void {
-  coachOpen.value = false
-}
-
-function focusableElements(): HTMLElement[] {
-  if (!coachPanel.value) return []
-  return Array.from(coachPanel.value.querySelectorAll<HTMLElement>(
-    'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-  )).filter((element) => !element.hidden && element.offsetParent !== null)
-}
-
-function trapCoachFocus(event: KeyboardEvent): void {
-  const elements = focusableElements()
-  if (elements.length === 0) return
-  const first = elements[0]
-  const last = elements[elements.length - 1]
-  if (event.shiftKey && document.activeElement === first) {
-    event.preventDefault()
-    last.focus()
-  } else if (!event.shiftKey && document.activeElement === last) {
-    event.preventDefault()
-    first.focus()
-  }
-}
-
 function onDocumentClick(event: MouseEvent): void {
   if (!profileOpen.value || !profileArea.value) return
   if (event.target instanceof Node && !profileArea.value.contains(event.target)) closeProfile()
 }
 
 function onKeydown(event: KeyboardEvent): void {
-  if (event.key === 'Escape') {
-    if (profileOpen.value) {
-      closeProfile()
-      profileTrigger.value?.focus()
-      return
-    }
-    if (coachOpen.value) {
-      closeCoach()
-      return
-    }
+  if (event.key === 'Escape' && profileOpen.value) {
+    closeProfile()
+    profileTrigger.value?.focus()
   }
-
-  if (event.key === 'Tab' && coachOpen.value) trapCoachFocus(event)
 }
-
-watch(coachOpen, async (open) => {
-  if (open) {
-    await nextTick()
-    coachCloseButton.value?.focus()
-  } else if (previousFocus) {
-    await nextTick()
-    previousFocus?.focus()
-    previousFocus = null
-  }
-})
 
 watch(() => route.fullPath, () => {
   closeProfile()
@@ -211,13 +154,13 @@ onBeforeUnmount(() => {
 
   <div
     class="app-shell app-shell--member workspace-shell ia-workspace personal-workspace"
-    :class="{ 'is-coach-open': coachOpen, 'is-immersive': immersive, 'is-sidebar-collapsed': sidebarCollapsed }"
+    :class="{ 'is-immersive': immersive, 'is-sidebar-collapsed': sidebarCollapsed }"
   >
     <aside v-if="!immersive" class="workspace-sidebar ia-sidebar" aria-label="主导航">
-      <RouterLink class="workspace-brand" to="/overview" aria-label="Hob 今日学习">
+      <RouterLink class="workspace-brand" to="/overview" aria-label="Grimoire 今日学习">
         <span class="workspace-brand-mark"><HobMark size="small" /></span>
         <span class="workspace-brand-copy">
-          <strong>Hob</strong>
+          <strong>Grimoire</strong>
           <small>英语学习路线</small>
         </span>
       </RouterLink>
@@ -299,18 +242,6 @@ onBeforeUnmount(() => {
           </RouterLink>
         </nav>
         <div class="workspace-topbar-actions ia-topbar-actions">
-          <DivButton
-            class="workspace-coach-button member-concierge-button ia-coach-toggle"
-            type="button"
-            aria-label="打开 AI 教练"
-            :aria-expanded="coachOpen"
-            aria-controls="global-coach-panel"
-            @click="openCoach"
-          >
-            <AppIcon name="coach" />
-            <span>AI 教练</span>
-          </DivButton>
-
           <div ref="profileArea" class="ia-profile-area">
             <DivButton
               ref="profileTrigger"
@@ -357,36 +288,5 @@ onBeforeUnmount(() => {
         <span>{{ link.label }}</span>
       </RouterLink>
     </nav>
-
-    <div v-if="coachOpen" class="ia-coach-backdrop" @click="closeCoach"></div>
-    <aside
-      v-if="coachOpen"
-      id="global-coach-panel"
-      ref="coachPanel"
-      class="ia-coach-panel"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="global-coach-title"
-      @click.stop
-    >
-      <header class="ia-coach-panel-header">
-        <div>
-          <p>AI 教练</p>
-          <h2 id="global-coach-title">随时问一句</h2>
-        </div>
-        <DivButton
-          ref="coachCloseButton"
-          class="workspace-icon-button"
-          type="button"
-          aria-label="关闭 AI 教练"
-          @click="closeCoach"
-        >
-          <AppIcon name="close" />
-        </DivButton>
-      </header>
-      <div class="ia-coach-panel-body">
-        <CoachView />
-      </div>
-    </aside>
   </div>
 </template>

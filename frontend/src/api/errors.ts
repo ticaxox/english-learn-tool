@@ -169,6 +169,36 @@ export function toErrorPresentation(error: unknown): ErrorPresentation {
       }
     }
 
+    // A 422 is not always a field error: the provider-URL guard answers with a
+    // business code, and the generic "提交内容有误" hid the reason behind it.
+    if (error.code === 'AI_PROVIDER_URL_BLOCKED') {
+      return {
+        title: '这个地址不能用作提供商',
+        message:
+          '它解析到了内网或保留地址，被安全策略拦下了。如果本机开着代理（例如 Clash 的 fake-ip，会把域名解析成 198.18 开头的地址），换一个能解析到公网的真实域名，或者关掉代理再试。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.code === 'AI_PROVIDER_URL_INVALID') {
+      return {
+        title: '提供商地址格式不对',
+        message: '填完整的 http(s) 地址，不要带用户名、密码、查询参数或末尾斜杠。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
+    if (error.code === 'AI_PROVIDER_DNS_FAILED') {
+      return {
+        title: '提供商域名解析不了',
+        message: '这个域名没有解析出地址。检查拼写，或者确认这台机器能连外网。',
+        requestId: error.requestId,
+        retryable: false,
+      }
+    }
+
     if ([502, 503, 504].includes(error.status)) {
       return {
         title: '学习服务暂不可用',
