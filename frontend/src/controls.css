@@ -6808,10 +6808,10 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 
 .personal-workspace .settings-toggle {
   padding: 5px 15px;
-  border-width: 6px 10px;
+  border-width: 8px 12px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-chip-off-day.png') 12% 5% fill stretch;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -6819,7 +6819,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 }
 
 .personal-workspace .settings-form .settings-toggle.is-active {
-  border-width: 8px 14px;
+  border-width: 8px 12px;
   border-image: url('./assets/halloween/card/control-chip-on-day.png') 12% 5% fill stretch;
   background: none;
   box-shadow: none;
@@ -6903,7 +6903,7 @@ html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-
 }
 
 html[data-theme='night'] .personal-workspace .ai-kind-switch__option {
-  border-image-source: url('./assets/halloween/card/control-field-night.png');
+  border-image-source: url('./assets/halloween/card/control-chip-off-night.png');
   color: #efe6ff;
 }
 
@@ -7114,10 +7114,10 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .ai-kind-switch__option {
   min-height: 0;
   padding: 5px 15px;
-  border-width: 6px 10px;
+  border-width: 8px 12px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-chip-off-day.png') 12% 5% fill stretch;
   border-radius: 0;
   background: none;
   color: var(--ui-ink);
@@ -7145,7 +7145,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
  * 两边都用 14px 的端头：铜牌上的铆钉按这个宽度画的，槽跟着走。 */
 .personal-workspace .settings-toggle,
 .personal-workspace .ai-kind-switch__option {
-  border-width: 6px 14px;
+  border-width: 8px 12px;
 }
 
 /* 时间控件去掉时钟以后，读数要落在框中间：容器右边原本留了 7px 给时钟，
