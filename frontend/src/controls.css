@@ -6951,7 +6951,7 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
   /* 只有被选中的那一行有框，别的是干净的行。框整张铺底——行只有三十几像素
    * 高，九宫格的角在这尺寸上会把左端那颗铜珠压扁。 */
   .personal-workspace select option {
-    padding: 8px 16px 8px 24px;
+    padding: 8px 16px 8px 20px;
     border: 0;
     border-radius: 0;
     background: none;
@@ -7154,8 +7154,8 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .settings-form select,
 .personal-workspace .dialog-card select,
 .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
-  border-width: 6px 14px !important;
-  border-image: url('./assets/halloween/card/control-select-day.png') 24% 9% fill stretch !important;
+  border-width: 5px 7px !important;
+  border-image: url('./assets/halloween/card/control-select-day.png') 22% 8% fill stretch !important;
 }
 
 html[data-theme='night'] .personal-workspace .settings-form select,
@@ -7171,11 +7171,11 @@ html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .
  * 左端那枚铜眼圈是辨识点，文字让开它。 */
 .personal-workspace .personal-ai-provider__tag,
 .personal-workspace .personal-ai-provider__model {
-  padding: 1px 8px 1px 14px;
-  border-width: 3px 6px;
+  padding: 1px 8px;
+  border-width: 2px 6px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-tag-day.png') 16% 10% fill stretch;
+  border-image: url('./assets/halloween/card/control-tag-day.png') 8% 4% fill stretch;
   border-radius: 0;
   background: none;
   color: #33200b;
@@ -7187,39 +7187,16 @@ html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
   color: #efe6ff;
 }
 
-/* 勾选框：方框画在素材里，勾还是矢量——那个符号不该烘焙进图。 */
-.personal-workspace .personal-ai-page input[type="checkbox"] {
-  appearance: none;
-  display: inline-block;
-  flex: none;
-  width: 18px;
-  height: 18px;
-  min-height: 18px;
-  margin: 0 6px 0 0;
-  border: 0;
-  border-radius: 0;
-  background: url('./assets/halloween/card/control-check-off-day.png') center / 100% 100% no-repeat;
-  cursor: pointer;
-  vertical-align: middle;
+/* 「不限」勾上以后数字框不消失，只变成不能用的样子：压暗、掉色、
+ * 光标也告诉人点不动。 */
+.personal-workspace .ai-quota-row .crumb-stepper.is-disabled {
+  opacity: 0.45;
+  filter: saturate(0.35);
 }
 
-.personal-workspace .personal-ai-page input[type="checkbox"]:checked {
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2333200b' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
-    url('./assets/halloween/card/control-check-on-day.png') center / 100% 100% no-repeat;
-}
-
-.personal-workspace .personal-ai-page input[type="checkbox"]:focus-visible {
-  outline: 3px solid rgb(255 150 0 / 45%);
-  outline-offset: 2px;
-}
-
-html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"] {
-  background-image: url('./assets/halloween/card/control-check-off-night.png');
-}
-
-html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"]:checked {
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23201337' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
-    url('./assets/halloween/card/control-check-on-night.png') center / 100% 100% no-repeat;
+/* 下拉框按内容收：宽 200px 的框里只有「关闭」两个字，右边那截空着最显眼。 */
+.personal-workspace .settings-form .settings-pair > .field--inline > select {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 240px;
 }
