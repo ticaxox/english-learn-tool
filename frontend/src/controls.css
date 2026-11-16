@@ -6927,44 +6927,48 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
 /* 下拉菜单、里面的选项、外面那个选择框，各自有自己的素材；菜单面用九宫格
  * 铺（picker 这个伪元素盒只吃 border-image/background，不吃我们别的写法）。 */
 @supports (appearance: base-select) {
+  /* 下拉的弹层跟时间选择器用同一块板：18px 边带、panel-board、同样的内距。
+   * 之前这里是 control-menu 10px，两个弹层放在一起一眼就能看出不是一个东西。 */
   .personal-workspace select::picker(select) {
-    padding: 12px 14px;
+    padding: 10px 9px 9px;
     min-width: 120px;
-    border: 10px solid transparent;
-    border-image: url('./assets/halloween/card/control-menu-day.png') 8% 14% fill stretch;
+    border: 18px solid transparent;
+    border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
     border-radius: 0;
     background: none;
     box-shadow: none;
   }
 
   html[data-theme='night'] .personal-workspace select::picker(select) {
-    border-image-source: url('./assets/halloween/card/control-menu-night.png');
+    border-image-source: url('./assets/halloween/card/panel-board-night.png');
   }
 
   /* 只有被选中的那一行有框，别的是干净的行。框整张铺底——行只有三十几像素
    * 高，九宫格的角在这尺寸上会把左端那颗铜珠压扁。 */
+  /* 行跟时间选择器的数字格同一种做法：透明、9px 圆角、悬停浅底、选中填橙。
+   * 不再贴图形，两个弹层里的「一行」看起来才是一样的东西。 */
   .personal-workspace select option {
-    padding: 4px 10px;
-    /* option 本身是 flex 盒，text-align 管不到它——文字要靠 justify-content 居中。 */
+    padding: 6px 10px;
     justify-content: center;
     text-align: center;
-    /* 所有行留同样的边框宽度：选中时只是把图填进去，行高不跳。 */
-    border-width: 6px 10px;
-    border-style: solid;
-    border-color: transparent;
-    border-radius: 0;
-    background: none;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
     color: #33200b;
     font-weight: 700;
   }
 
   .personal-workspace select option:hover { color: #33200b; }
 
+  .personal-workspace select option:hover {
+    background: var(--ui-surface-subtle);
+  }
+
   .personal-workspace select option:checked,
   .personal-workspace select option:focus {
-    /* 三截铺：两端的圆收在切片里，中间那块平色随菜单宽度伸缩。 */
-    border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
-    color: #33200b;
+    background: var(--g-orange);
+    color: var(--g-on-orange);
+    box-shadow: inset 0 -2px 0 var(--g-orange-edge);
     font-weight: 800;
   }
 
@@ -6972,8 +6976,9 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
 
   html[data-theme='night'] .personal-workspace select option:checked,
   html[data-theme='night'] .personal-workspace select option:focus {
-    border-image-source: url('./assets/halloween/card/control-option-on-night.png');
-    color: #efe6ff;
+    background: #7c5bd6;
+    color: #f4ecdc;
+    box-shadow: inset 0 -2px 0 #a98cff;
   }
 }
 
