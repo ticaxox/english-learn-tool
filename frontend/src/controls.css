@@ -7575,3 +7575,7 @@ html[data-theme='night'] .personal-workspace .ai-kind-switch__option:focus {
   outline: 3px solid rgb(255 150 0 / 45%);
   outline-offset: 2px;
 }
+
+/* 再收一档：目标字段里标签到数字框几乎贴着；供应商三颗按钮并拢。 */
+.personal-workspace .settings-goal-grid .field { gap: 2px; }
+.personal-workspace .personal-ai-provider__actions { gap: 0; }
