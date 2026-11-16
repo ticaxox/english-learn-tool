@@ -239,7 +239,6 @@ onMounted(() => {
   <article class="settings-page">
     <header class="settings-hero">
       <div>
-        <p class="eyebrow">学习设置</p>
         <h1>学习设置</h1>
         <p class="lead">设置目标、每日学习量和记忆方式。</p>
       </div>

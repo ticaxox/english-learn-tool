@@ -50,6 +50,26 @@
 | `scroll-{cap-left,middle,cap-right}.png` | 卷轴三件套框 |
 | `slab-{cap-left,middle,cap-right}.png` | 石板三件套框 |
 | `parchment-{cap-left,middle,cap-right}.png` | 羊皮纸三件套框 |
+| `panel-board-{day,night}.png` | 悬浮窗大板：四角铜角/符文夹住撕边，九宫格拉伸 |
+| `panel-strip-{day,night}.png` | 决策签条：两端火漆，3.33:1，整张铺底不切 |
+| `panel-scrap-{day,night}.png` | 定点碎片：popover / 右键菜单，定尺铺底 |
+| `control-button-{day,night}.png` | 凸起的铜牌/石牌：按钮、选中的选项 |
+| `control-field-{day,night}.png` | 凹进去的槽：输入框、下拉框、未选中的选项 |
+| `control-switch-{off,on}-{day,night}.png` | 开关四态：关/开 × 昼/夜，整张铺底，旋钮画在图里 |
+| `control-menu-{day,night}.png` | 下拉菜单面：直边羊皮纸，四角铜片，九宫格 |
+| `control-option-on-{day,night}.png` | 菜单里被选中的那一行：琥珀/紫条、双线、左端一颗铜珠 |
+| `control-ornament-{day,night}.png` | 花边牌：双线镶边 + 四角小结，无铆钉；选项芯片、模型标签、下拉框共用 |
+| `control-badge-{day,night}.png` | 胶囊徽章：两端全圆，给「≈ 1 天」这类小读数 |
+| `control-check-{off,on}-{day,night}.png` | 勾选框两态：空框 / 铜底，勾是矢量叠上去的 |
+| `control-close-{day,night}.png` | 悬浮窗关闭钮：一枚小方牌，中间的叉仍是矢量图标 |
+
+**悬浮窗的三块板**（`panel-*`）：所有 `[role=dialog]` 都用 `panel-board`——`border-image: url(...) 14% 14% 15% fill round`，边框带 40px，角上留铜角、边条平铺、中间纯平那圈放内容。它不锁比例，34rem 的确认框和 48rem 的详情框共用一张图；框自己不再画圆角、背景和阴影。`panel-scrap` 用 `12% fill stretch`：撕边留在四周切片里，中间随内容伸缩，不再整张拉伸。签条（panel-strip）已废弃——两端火漆在小尺寸下读不出来，确认类浮层改用 `panel-board`。
+
+**控件两件套**（`control-*`）：板子上的零件只有两种状态——按得下去的是凸起的铜牌（按钮、选中的选项），往里放东西的是凹进去的槽（输入框、下拉框、未选中的选项）。两者都是平的、正对着画的，只做横向九宫格：铜牌 `border-image: url(...) 16% 10% fill stretch`、边框 `6px 15px`（铆钉落在左右切片里，按钮多宽都是同一块牌子）；槽 `14% 5% fill stretch`、边框 `6px 10px`。这里用 `stretch` 不用 `round`：控件只有几十像素高，重复的边条会露出接缝。
+
+**开关**（`control-switch-*`）是第三件零件，和前两件不共用一个逻辑：它既不是按下去的，也不是拿来装东西的，而是一颗能在槽里滑到另一头的圆钮。四种状态各一张图，旋钮画在图里，切换时两张图交叉淡出 160ms——不放一个 CSS 假旋钮，也不用滤镜调出另一个状态。四张图都按 2.2:1 交付，框也就定成 2.85rem × 1.3rem；换图不改框，旋钮才不会在切换时变形。
+
+**下拉三件套**（`control-select` / `control-menu` / `control-option`）：下拉框本体、菜单面、菜单里的一行，各画一张。菜单面用九宫格（`8% 14%`，边框 10px），菜单里只有被选中的那一行有框，用 `control-option-on` 整张铺底（行只有三十几像素高，九宫格的角会把左端的铜珠压扁）；没选中的行是干净的一行文字，悬停只变字色。
 
 **两种材质**：白天是**饼干**（烘焙色 `#E8C58A`，压花边、扎孔、掰角），黑夜是**石碑**（深紫 `#3A3254`，凿槽、刻线、符文）。这两套是同一构图的两次独立绘制，不是滤镜。
 
