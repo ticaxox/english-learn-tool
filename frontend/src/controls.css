@@ -5970,9 +5970,9 @@ html[data-theme='night'] .personal-workspace .rune-surface .choice-option__label
   display: flex;
   align-items: center;
   /* A number field is as wide as its digits plus two targets, not as wide as
-   * the column it sits in. 现在的边框带占了左右各 10px，± 贴到框边之后
-   * 中间还要留给数字，所以整体比原来宽一点、内边距收成 0。 */
-  width: min(100%, 108px);
+   * the column it sits in. 宽度不变，数字和 ± 之间的空当靠收窄 ± 的按钮盒
+   * 换出来：图标贴到框边，数字两边才有余量。 */
+  width: min(100%, 88px);
   height: var(--ui-control);
   padding: 0;
   border: 2px solid var(--ui-line-strong);
@@ -6029,7 +6029,7 @@ html[data-theme='night'] .personal-workspace .rune-surface .choice-option__label
 
 .personal-workspace .crumb-stepper__step {
   position: relative;
-  width: 24px;
+  width: 18px;
   height: 24px;
   flex: none;
   display: grid;
@@ -6732,16 +6732,19 @@ html[data-theme='night'] .personal-workspace :is(
 
 /* ------------------------------------------- 学习设置：一张纸，不是一块板 */
 
-/* 一块板是「拿在手上的一面牌子」，一整页表单铺上去就变成了给贴纸镶边。
- * 所以这一页退回纸面：标题只做排版，表单是一张细线框住的纸，段落之间靠横线分。
- * 材质交给里面的控件——凸起的铜牌是按钮，凹进去的槽是输入框和下拉框。 */
+/* 外面这张大卡还是板：里面的控件已经是铜牌和凹槽，卡片再是纸片就托不住它们。
+ * 板里的分组不另起一层板——那是上一轮的重点——只留横线。 */
 .personal-workspace .settings-form.panel {
-  padding: 24px 26px 22px !important;
-  border: 1px solid var(--ui-line) !important;
-  border-image: none !important;
+  padding: 22px 24px 20px !important;
+  border: 20px solid transparent !important;
+  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form.panel {
+  border-image-source: url('./assets/halloween/card/panel-board-night.png') !important;
 }
 
 /* 选项组不再各自是一张卡片。两列之间那条竖线就够了。 */
@@ -6823,9 +6826,7 @@ html[data-theme='night'] .personal-workspace :is(
 }
 
 .personal-workspace .settings-form .crumb-stepper,
-.personal-workspace .settings-form select,
 .personal-workspace .dialog-card .crumb-stepper,
-.personal-workspace .dialog-card select,
 .personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
 .personal-workspace .dialog-card textarea {
   border-width: 6px 10px !important;
@@ -6887,7 +6888,6 @@ html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-
 .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
   textarea,
-  select,
   .crumb-stepper,
   .crumb-time,
   .crumb-date
@@ -6914,7 +6914,6 @@ html[data-theme='night'] .personal-workspace .ai-kind-switch__option.is-active {
 html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
   textarea,
-  select,
   .crumb-stepper,
   .crumb-time,
   .crumb-date
@@ -6925,28 +6924,63 @@ html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hu
 
 html[data-theme='night'] .personal-workspace .settings-toggle,
 html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper,
-html[data-theme='night'] .personal-workspace .settings-form select,
 html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper,
-html[data-theme='night'] .personal-workspace .dialog-card select,
 html[data-theme='night'] .personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
 html[data-theme='night'] .personal-workspace .dialog-card textarea {
   border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
   color: #efe6ff;
 }
 
-/* 下拉列表浮在页面上，用定点碎片那张图整张铺底——picker 这个伪元素盒
- * 不画 border-image，只能走 background。 */
+/* 下拉菜单、里面的选项、外面那个选择框，各自有自己的素材；菜单面用九宫格
+ * 铺（picker 这个伪元素盒只吃 border-image/background，不吃我们别的写法）。 */
 @supports (appearance: base-select) {
   .personal-workspace select::picker(select) {
-    padding: 18px 16px 16px;
-    border: 0;
+    padding: 12px 14px;
+    min-width: 168px;
+    border: 10px solid transparent;
+    border-image: url('./assets/halloween/card/control-menu-day.png') 8% 14% fill stretch;
     border-radius: 0;
-    background: url('./assets/halloween/card/panel-scrap-day.png') center / 100% 100% no-repeat;
+    background: none;
     box-shadow: none;
   }
 
   html[data-theme='night'] .personal-workspace select::picker(select) {
-    background-image: url('./assets/halloween/card/panel-scrap-night.png');
+    border-image-source: url('./assets/halloween/card/control-menu-night.png');
+  }
+
+  .personal-workspace select option {
+    padding: 6px 16px;
+    border-width: 6px 14px;
+    border-style: solid;
+    border-color: transparent;
+    border-image: url('./assets/halloween/card/control-option-day.png') 22% 10% fill stretch;
+    border-radius: 0;
+    background: none;
+    color: #33200b;
+    font-weight: 700;
+  }
+
+  /* 悬停亮一点，选中的那行换铜牌——和页面上的选项芯片是同一句话：
+   * 选中的是凸起来的。 */
+  .personal-workspace select option:hover { filter: brightness(1.04); color: #33200b; }
+
+  .personal-workspace select option:checked,
+  .personal-workspace select option:focus {
+    border-image: url('./assets/halloween/card/control-button-day.png') 16% 10% fill stretch;
+    background: none;
+    color: #33200b;
+    font-weight: 800;
+  }
+
+  html[data-theme='night'] .personal-workspace select option:checked,
+  html[data-theme='night'] .personal-workspace select option:focus {
+    border-image-source: url('./assets/halloween/card/control-button-night.png');
+    color: #efe6ff;
+  }
+
+  html[data-theme='night'] .personal-workspace select option {
+    border-image-source: url('./assets/halloween/card/control-option-night.png');
+    color: #efe6ff;
   }
 }
 
@@ -7103,3 +7137,34 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .crumb-time__glyph { display: none; }
 
 .personal-workspace .crumb-time__input { padding-right: 4px; }
+
+.personal-workspace .crumb-stepper__step svg { width: 14px; height: 14px; }
+
+/* 选中与未选中是同一块地方的两个状态，盒子必须一样大，否则点一下会跳。
+ * 两边都用 14px 的端头：铜牌上的铆钉按这个宽度画的，槽跟着走。 */
+.personal-workspace .settings-toggle,
+.personal-workspace .ai-kind-switch__option {
+  border-width: 6px 14px;
+}
+
+/* 时间控件去掉时钟以后，读数要落在框中间。 */
+.personal-workspace .crumb-time input.crumb-time__input[type="text"] {
+  padding: 0 6px;
+  text-align: center;
+}
+
+/* 下拉框的「外面那个按钮」不是普通输入框：它是能拉下一张单子的抽屉，
+ * 所以用自己的一张图——槽口一样，右端多一块铜片当把手，没有箭头。 */
+.personal-workspace .settings-form select,
+.personal-workspace .dialog-card select,
+.personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-width: 6px 14px !important;
+  border-image: url('./assets/halloween/card/control-select-day.png') 24% 9% fill stretch !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form select,
+html[data-theme='night'] .personal-workspace .dialog-card select,
+html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-image-source: url('./assets/halloween/card/control-select-night.png') !important;
+  color: #efe6ff;
+}
