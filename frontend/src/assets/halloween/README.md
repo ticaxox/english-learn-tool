@@ -56,10 +56,10 @@
 | `control-button-{day,night}.png` | 凸起的铜牌/石牌：按钮、选中的选项 |
 | `control-field-{day,night}.png` | 凹进去的槽：输入框、下拉框、未选中的选项 |
 | `control-switch-{off,on}-{day,night}.png` | 开关四态：关/开 × 昼/夜，整张铺底，旋钮画在图里 |
-| `control-select-{day,night}.png` | 下拉框本体：直边槽口，右端一圈略厚的铜沿，不带箭头也不留空块 |
 | `control-menu-{day,night}.png` | 下拉菜单面：直边羊皮纸，四角铜片，九宫格 |
 | `control-option-on-{day,night}.png` | 菜单里被选中的那一行：琥珀/紫条、双线、左端一颗铜珠 |
-| `control-tag-{day,night}.png` | 小标签（对话/向量、模型 ID）：平牌面 + 左脊一道铜条 |
+| `control-ornament-{day,night}.png` | 花边牌：双线镶边 + 四角小结，无铆钉；选项芯片、模型标签、下拉框共用 |
+| `control-badge-{day,night}.png` | 胶囊徽章：两端全圆，给「≈ 1 天」这类小读数 |
 | `control-check-{off,on}-{day,night}.png` | 勾选框两态：空框 / 铜底，勾是矢量叠上去的 |
 | `control-close-{day,night}.png` | 悬浮窗关闭钮：一枚小方牌，中间的叉仍是矢量图标 |
 

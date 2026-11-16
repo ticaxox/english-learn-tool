@@ -221,7 +221,6 @@ onMounted(() => {
       <div class="personal-ai-toolbar">
         <div>
           <h2 id="personal-ai-title">你的 AI 提供商</h2>
-          <p class="field-hint">写作和向量是两种服务，分开配置；用哪一家都行。</p>
         </div>
         <DivButton v-if="!formOpen" class="button" type="button" @click="openCreate('chat')">添加</DivButton>
       </div>
