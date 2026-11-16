@@ -7406,32 +7406,76 @@ html[data-theme='night'] .personal-workspace .settings-toggle {
   border: 0 !important;
   border-image: none !important;
   border-radius: 4px;
-  background: rgb(53 36 15 / 9%);
-  box-shadow: inset 0 1px 2px rgb(53 36 15 / 18%);
-  color: var(--ui-ink);
+  background: rgb(200 122 26 / 16%);
+  box-shadow: inset 0 1px 2px rgb(120 66 0 / 24%);
+  color: #8a4a06;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.03em;
 }
 
 html[data-theme='night'] .personal-workspace .personal-ai-provider__tag {
-  background: rgb(0 0 0 / 28%);
+  background: rgb(124 240 196 / 16%);
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 45%);
-  color: #efe6ff;
+  color: #7cf0c4;
 }
 
 /* 供应商行尾的三颗动作按钮：只放图标，做成小方块。 */
 .personal-workspace .personal-ai-provider__actions .ai-provider-action {
-  width: 40px;
-  min-height: 36px;
+  width: 36px;
+  min-height: 34px;
   padding: 0 !important;
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 8px;
+  background: rgb(53 36 15 / 7%) !important;
+  box-shadow: none !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: var(--ui-ink) !important;
+}
+
+.personal-workspace .personal-ai-provider__actions .ai-provider-action:hover:not(:disabled) {
+  background: rgb(53 36 15 / 14%) !important;
+  transform: none;
+  filter: none;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__actions .ai-provider-action {
+  background: rgb(255 255 255 / 8%) !important;
+  color: #efe6ff !important;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__actions .ai-provider-action:hover:not(:disabled) {
+  background: rgb(255 255 255 / 15%) !important;
 }
 
 .personal-workspace .ai-provider-action svg {
   flex: 0 0 auto;
   width: 15px;
   height: 15px;
+}
+
+/* 下拉框：素材一直没显出来，是因为底下压着一层「奶白底 + 圆角 + 实色描边」，
+ * 把那三层复位掉，图片才露出来。 */
+.personal-workspace .settings-form select,
+.personal-workspace .dialog-card select,
+.personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-width: 6px 10px !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  min-height: 34px;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form select,
+html[data-theme='night'] .personal-workspace .dialog-card select,
+html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  background: none !important;
+  color: #efe6ff;
 }
