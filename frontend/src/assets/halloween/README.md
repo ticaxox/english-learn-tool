@@ -59,7 +59,9 @@
 | `control-select-{day,night}.png` | 下拉框本体：直边槽口，右端一圈略厚的铜沿，不带箭头也不留空块 |
 | `control-menu-{day,night}.png` | 下拉菜单面：直边羊皮纸，四角铜片，九宫格 |
 | `control-option-on-{day,night}.png` | 菜单里被选中的那一行：琥珀/紫条、双线、左端一颗铜珠 |
-| `control-tag-{day,night}.png` | 小标签（对话/向量、模型 ID）：左端一枚铜眼圈 |
+| `control-tag-{day,night}.png` | 小标签（对话/向量、模型 ID）：铜片 + 上下各一道内线 |
+| `control-check-{off,on}-{day,night}.png` | 勾选框两态：空框 / 铜底，勾是矢量叠上去的 |
+| `control-close-{day,night}.png` | 悬浮窗关闭钮：一枚小方牌，中间的叉仍是矢量图标 |
 
 **悬浮窗的三块板**（`panel-*`）：所有 `[role=dialog]` 都用 `panel-board`——`border-image: url(...) 14% 14% 15% fill round`，边框带 40px，角上留铜角、边条平铺、中间纯平那圈放内容。它不锁比例，34rem 的确认框和 48rem 的详情框共用一张图；框自己不再画圆角、背景和阴影。`panel-strip` 和 `panel-scrap` 的火漆和钉子会被切片切开，所以不走九宫格，按各自比例整张铺底，内容用 padding 让开边缘。
 
