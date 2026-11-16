@@ -6951,11 +6951,14 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
   /* 只有被选中的那一行有框，别的是干净的行。框整张铺底——行只有三十几像素
    * 高，九宫格的角在这尺寸上会把左端那颗铜珠压扁。 */
   .personal-workspace select option {
-    padding: 7px 10px;
+    padding: 4px 10px;
     /* option 本身是 flex 盒，text-align 管不到它——文字要靠 justify-content 居中。 */
     justify-content: center;
     text-align: center;
-    border: 0;
+    /* 所有行留同样的边框宽度：选中时只是把图填进去，行高不跳。 */
+    border-width: 6px 10px;
+    border-style: solid;
+    border-color: transparent;
     border-radius: 0;
     background: none;
     color: #33200b;
@@ -6966,7 +6969,8 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
 
   .personal-workspace select option:checked,
   .personal-workspace select option:focus {
-    background: url('./assets/halloween/card/control-option-on-day.png') center / 100% 100% no-repeat;
+    /* 三截铺：两端的圆收在切片里，中间那块平色随菜单宽度伸缩。 */
+    border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
     color: #33200b;
     font-weight: 800;
   }
@@ -6975,7 +6979,7 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
 
   html[data-theme='night'] .personal-workspace select option:checked,
   html[data-theme='night'] .personal-workspace select option:focus {
-    background-image: url('./assets/halloween/card/control-option-on-night.png');
+    border-image-source: url('./assets/halloween/card/control-option-on-night.png');
     color: #efe6ff;
   }
 }

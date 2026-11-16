@@ -63,7 +63,7 @@
 | `control-check-{off,on}-{day,night}.png` | 勾选框两态：空框 / 铜底，勾是矢量叠上去的 |
 | `control-close-{day,night}.png` | 悬浮窗关闭钮：一枚小方牌，中间的叉仍是矢量图标 |
 
-**悬浮窗的三块板**（`panel-*`）：所有 `[role=dialog]` 都用 `panel-board`——`border-image: url(...) 14% 14% 15% fill round`，边框带 40px，角上留铜角、边条平铺、中间纯平那圈放内容。它不锁比例，34rem 的确认框和 48rem 的详情框共用一张图；框自己不再画圆角、背景和阴影。`panel-strip` 和 `panel-scrap` 的火漆和钉子会被切片切开，所以不走九宫格，按各自比例整张铺底，内容用 padding 让开边缘。
+**悬浮窗的三块板**（`panel-*`）：所有 `[role=dialog]` 都用 `panel-board`——`border-image: url(...) 14% 14% 15% fill round`，边框带 40px，角上留铜角、边条平铺、中间纯平那圈放内容。它不锁比例，34rem 的确认框和 48rem 的详情框共用一张图；框自己不再画圆角、背景和阴影。`panel-strip` 用 `0 10% fill stretch`——两端火漆固定在切片里，中间那块平纸随文字长短复制或截断；`panel-scrap` 用 `12% fill stretch`，撕边留在四周切片里，中间随内容伸缩。两者都不再整张拉伸。
 
 **控件两件套**（`control-*`）：板子上的零件只有两种状态——按得下去的是凸起的铜牌（按钮、选中的选项），往里放东西的是凹进去的槽（输入框、下拉框、未选中的选项）。两者都是平的、正对着画的，只做横向九宫格：铜牌 `border-image: url(...) 16% 10% fill stretch`、边框 `6px 15px`（铆钉落在左右切片里，按钮多宽都是同一块牌子）；槽 `14% 5% fill stretch`、边框 `6px 10px`。这里用 `stretch` 不用 `round`：控件只有几十像素高，重复的边条会露出接缝。
 
