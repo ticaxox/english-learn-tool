@@ -111,7 +111,7 @@
 | `pumpkin-unlit.png` / `pumpkin-unlit-night.png` | 未解锁节点。无刻脸、无光 |
 | `pumpkin-boss.png` / `pumpkin-boss-night.png` | 最终关。白天金冠，夜间失光银冠 |
 | `pumpkin-branch.png` / `pumpkin-branch-night.png` | 分支关。白天藤蔓，夜间薄荷刻脸 |
-| `candle-{day,night}.png` | 周报蜡烛。白天奶白蜡 + 橙焰，夜间紫蜡 + 薄荷焰 |
+| `candle-{cold,low,mid,high}-{day,night}.png` | 周报蜡烛，四种燃烧状态各画一张：冷（无焰、灰蜡）、低、中、高（白天带金环）。柱身等宽，高低由画本身决定，不再靠 CSS 拉伸 |
 | `charge-{flame,moon,book,crown,skull,star,owl,hourglass,key}.png` | 徽章中心的徽记（AI 绘制，非 emoji）。夜间为 `-night` 版 |
 | `card/book-object-{day,night}.png` | 词书封面本体。白天绿皮卡 + 黄铜，夜间紫皮卡 + 薄荷扣 |
 
