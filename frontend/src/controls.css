@@ -5249,10 +5249,9 @@ html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__hi
   color: #6b533a;
 }
 
-/* The option is a fixed-length stone plate, drawn once and used at one size,
- * so a four-letter word and an eight-letter word sit on the same object. The
- * word is what the eye should land on; the letter marker is a small mark at
- * its left. */
+/* The option is a flat label: one fill, one ink rule. There is no bevel,
+ * shading or stud on it — the depth belongs to the card around it, not to the
+ * thing you are asked to press. */
 .personal-workspace .rune-surface .choice-option {
   display: block;
   width: 280px;
@@ -5260,13 +5259,10 @@ html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__hi
   height: 84px;
   margin-inline: auto;
   padding: 0;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background-color: transparent !important;
-  background-image: url('./assets/halloween/card/option-plate-day.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  border: 2px solid #6f4c25 !important;
+  border-radius: 3px !important;
+  background-color: #f8e6c0 !important;
+  background-image: none !important;
   color: #35240f;
   box-shadow: none !important;
   filter: none;
@@ -5274,12 +5270,30 @@ html[data-theme='day'] .personal-workspace .study-card--spelling .spell-head__hi
 }
 
 html[data-theme='night'] .personal-workspace .rune-surface .choice-option {
-  background-image: url('./assets/halloween/card/option-plate-night.png');
+  border-color: #9c8ac6 !important;
+  background-color: #2c2249 !important;
   color: #f3e9d2;
 }
 
 .personal-workspace .rune-surface .choice-option:hover { filter: brightness(1.06); }
 .personal-workspace .rune-surface .choice-option--selected { filter: brightness(1.1); }
+
+/* The first four options are drawn plates: fill, rule and the initial are one
+ * piece of artwork, so the CSS frame steps aside and the drawing supplies it
+ * all. The URLs are handed in per option as custom properties. */
+.personal-workspace .rune-surface .choice-option--art {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  background-image: var(--plate-day) !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+}
+
+html[data-theme='night'] .personal-workspace .rune-surface .choice-option--art {
+  background-image: var(--plate-night) !important;
+}
 
 /* The option face stays light paper in both themes, so the letter on it has to
  * stay dark ink in both themes. Left to --ui-ink it turns cream at night and

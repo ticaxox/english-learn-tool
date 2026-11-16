@@ -7,6 +7,27 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import type { ChoiceQuestion } from '../types/learning'
 import { useRuneSurface } from '../composables/useRuneSurface'
+import plateDayA from '../assets/halloween/card/option-day-a.png'
+import plateDayB from '../assets/halloween/card/option-day-b.png'
+import plateDayC from '../assets/halloween/card/option-day-c.png'
+import plateDayD from '../assets/halloween/card/option-day-d.png'
+import plateNightA from '../assets/halloween/card/option-night-a.png'
+import plateNightB from '../assets/halloween/card/option-night-b.png'
+import plateNightC from '../assets/halloween/card/option-night-c.png'
+import plateNightD from '../assets/halloween/card/option-night-d.png'
+
+/** One drawing per letter per theme: the letter is cut into the plate. */
+const PLATE_ART = {
+  day: [plateDayA, plateDayB, plateDayC, plateDayD],
+  night: [plateNightA, plateNightB, plateNightC, plateNightD],
+}
+
+function plateArt(index: number): Record<string, string> {
+  return {
+    '--plate-day': `url(${PLATE_ART.day[index]})`,
+    '--plate-night': `url(${PLATE_ART.night[index]})`,
+  }
+}
 
 const { surface } = useRuneSurface('choice')
 
@@ -130,7 +151,9 @@ function choose(optionId: string): void {
           'choice-option--selected': selected === option.optionId,
           'choice-option--right': plateState(option) === 'right',
           'choice-option--wrong': plateState(option) === 'wrong',
+          'choice-option--art': index < 4,
         }"
+        :style="index < 4 ? plateArt(index) : undefined"
       >
         <input
           type="radio"
@@ -140,7 +163,7 @@ function choose(optionId: string): void {
           @change="choose(option.optionId)"
         />
         <span class="choice-option__face">
-          <span class="choice-option__mark" aria-hidden="true">{{ String.fromCharCode(65 + index) }}</span>
+          <span class="choice-option__mark" aria-hidden="true">{{ index >= 4 ? String.fromCharCode(65 + index) : '' }}</span>
           <span class="choice-option__label">{{ option.label }}</span>
           <span class="choice-option__tick" aria-hidden="true">
             <svg class="choice-option__yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
@@ -152,6 +175,8 @@ function choose(optionId: string): void {
             </svg>
           </span>
         </span>
+        <span v-if="plateState(option)" class="choice-option__stamp" aria-hidden="true"></span>
+        <span v-if="props.hit && plateState(option) === 'right'" class="choice-option__burst" aria-hidden="true"></span>
       </label>
     </fieldset>
   </section>
@@ -246,36 +271,19 @@ function choose(optionId: string): void {
    whatever the column gave it, which made a four-letter word sit in a 370px
    slab and pushed the letter marker to the far left, out of the reading line.
    One length for every option: the word is the thing being read. */
-.study-card--choice .choice-option {
-  display: block;
-  width: 280px;
-  height: 84px;
-  margin-inline: auto;
-  border: 0 !important;
-  border-radius: 0;
-  background-color: transparent;
-  background-image: url('../assets/halloween/card/option-plate-day.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  box-shadow: none;
-  filter: none;
-}
-
-html[data-theme='night'] .study-card--choice .choice-option {
-  background-image: url('../assets/halloween/card/option-plate-night.png');
-}
-
+/* The plate itself is styled in controls.css, next to the rest of the drill
+   surfaces; the option only carries its own inner layout. */
 .choice-option__face {
   position: relative;
   display: grid;
-  /* The letter is a small mark at the left; the word owns the middle. */
+  /* The letter is a small mark at the left; the word owns the middle. The left
+     padding is the medallion's centre: 46px from the plate's edge. */
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.55rem;
   align-items: center;
   height: 100%;
   width: 100%;
-  padding: 0.4rem 0.9rem;
+  padding: 0.3rem 1rem 0.3rem 18px;
 }
 
 .study-card--choice .choice-option:hover { filter: brightness(1.06); }
@@ -287,9 +295,9 @@ html[data-theme='night'] .study-card--choice .choice-option {
 .study-card--choice .choice-option--selected .choice-option__face::after {
   content: '';
   position: absolute;
-  inset: 6px;
-  border-radius: 14px;
-  box-shadow: 0 0 0 2px var(--g-orange, #ff9600);
+  inset: 0;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 2.5px var(--g-orange, #ff9600);
   pointer-events: none;
 }
 
@@ -297,6 +305,9 @@ html[data-theme='night'] .study-card--choice .choice-option {
   grid-column: 2;
   font-size: 1.28rem;
   font-weight: 800;
+  /* The word is the thing being read, so it is set bold by default and
+     thickened a breath further than the face's own bold cut. */
+  -webkit-text-stroke: 0.35px currentColor;
   color: #5a3a16;
   line-height: 1.3;
   letter-spacing: 0.01em;
@@ -306,35 +317,107 @@ html[data-theme='night'] .study-card--choice .choice-option {
 
 html[data-theme='night'] .choice-option__label { color: #f3e9d2; }
 
-/* The letter belongs to the plate: a stamped monogram at its left end,
-   pressed into the paper rather than a badge laid on top. The word keeps the
-   middle of the plate to itself. */
-/* The letter is a stamp pressed into the plate's left end: a hairline seal
-   with the letter cut into it, set well clear of the plate's rounded edge. */
+@font-face {
+  font-family: 'Almendra Display';
+  src: url('../assets/fonts/almendra-display.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* The letter is an engraved initial rather than a plain capital: a swashed
+   display serif, struck into the coin with a light lip and a dark cut. */
 .choice-option__mark {
   justify-self: start;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  margin-left: 16px;
-  border: 1.5px solid currentColor;
-  border-radius: 8px;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 0.98rem;
+  width: 40px;
+  height: 40px;
+  font-family: 'Almendra Display', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-size: 2.35rem;
   font-weight: 700;
   line-height: 1;
-  color: #a9885a;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%), 0 1px 0 rgb(255 255 255 / 55%);
+  color: #211207;
+  /* Almendra is drawn with hairlines; at this size the stem would read as
+     a smudge of brown, so the ink is thickened to its own colour. */
+  -webkit-text-stroke: 0.6px currentColor;
 }
 
 html[data-theme='night'] .choice-option__mark {
-  color: #b9a4e6;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%), 0 1px 0 rgb(0 0 0 / 45%);
+  color: #f0e5cf;
 }
 
 .choice-option--right .choice-option__mark { color: #2f6b2c; }
 .choice-option--wrong .choice-option__mark { color: #9c2b22; }
+
+/**
+ * The verdict is stamped on rather than tinted on: an inked ring with a check
+ * or a cross, pressed into the plate in one beat. It replaces the small picked
+ * badge, so the pick is read from the stamp and not from two markers at once.
+ */
+.choice-option__stamp {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  margin-top: -23px;
+  background: center / contain no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  /* Above the verdict wash, or the stamp reads through it as mud. */
+  z-index: 2;
+}
+
+.choice-option--right .choice-option__stamp {
+  background-image: url('../assets/halloween/card/verdict-right-day.png');
+  animation: choiceStamp 260ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
+}
+
+.choice-option--wrong .choice-option__stamp {
+  background-image: url('../assets/halloween/card/verdict-wrong-day.png');
+  animation: choiceStamp 260ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
+}
+
+html[data-theme='night'] .choice-option--right .choice-option__stamp {
+  background-image: url('../assets/halloween/card/verdict-right-night.png');
+}
+
+html[data-theme='night'] .choice-option--wrong .choice-option__stamp {
+  background-image: url('../assets/halloween/card/verdict-wrong-night.png');
+}
+
+@keyframes choiceStamp {
+  0% { opacity: 0; transform: rotate(-14deg) scale(1.7); }
+  55% { opacity: 1; transform: rotate(-8deg) scale(0.95); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+
+/* Crumbs are what this product pays in, so a right answer scatters them
+   around the stamp at the plate's right end, clear of the word. */
+.choice-option__burst {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 112px;
+  height: 112px;
+  margin-top: -56px;
+  background: url('../assets/halloween/card/burst-crumbs.png') 0 0 / 896px 112px no-repeat;
+  pointer-events: none;
+  z-index: 1;
+  /* Starts once the pieces have left the middle: the opening frame is a
+     tight clump that would read as a smudge on the plate. */
+  animation: choiceCrumbBurst 520ms steps(6) forwards;
+}
+
+@keyframes choiceCrumbBurst {
+  from { background-position: -224px 0; }
+  to { background-position: -896px 0; }
+}
+
+/* One marker at a time: the stamp carries the verdict. */
+.choice-option--right .choice-option__tick,
+.choice-option--wrong .choice-option__tick { opacity: 0; transform: scale(0.5); }
 
 .choice-option__tick {
   grid-column: 3;
@@ -373,8 +456,8 @@ html[data-theme='night'] .choice-option__mark {
 .choice-option::after {
   content: '';
   position: absolute;
-  inset: 6px;
-  border-radius: 9px;
+  inset: 0;
+  border-radius: 2px;
   opacity: 0;
   pointer-events: none;
   mix-blend-mode: multiply;
@@ -383,6 +466,20 @@ html[data-theme='night'] .choice-option__mark {
 
 .choice-option--right::after { background: #58b552; opacity: 0.58; }
 .choice-option--wrong::after { background: #df4f42; opacity: 0.5; }
+
+/* On the dark plate a multiply wash only makes it darker; the verdict has to
+   lighten instead, or the win and the loss read as the same shade. */
+html[data-theme='night'] .choice-option--right::after {
+  background: #4bc064;
+  opacity: 0.34;
+  mix-blend-mode: screen;
+}
+
+html[data-theme='night'] .choice-option--wrong::after {
+  background: #b0433a;
+  opacity: 0.4;
+  mix-blend-mode: screen;
+}
 
 /* The mark on the plate is the verdict, not the selection: a right plate keeps
    the tick, a wrong one swaps it for a cross and closes on the same red. */
@@ -406,6 +503,9 @@ html[data-theme='night'] .choice-option__mark {
 @media (prefers-reduced-motion: reduce) {
   .choice-option__face,
   .choice-option__tick { transition: none; }
+  /* The stamp lands without travel, and the crumbs do not fly at all. */
+  .choice-option__stamp { animation: none; opacity: 1; transform: rotate(-8deg); }
+  .choice-option__burst { display: none; }
 }
 
 @media (max-width: 620px) {
