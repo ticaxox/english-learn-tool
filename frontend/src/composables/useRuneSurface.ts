@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { runeStone, runePaper, questionCard, drillFrame, forMode } from '../assets/halloween'
+import { runeStone, runePaper, questionCard, drillFrame, paperCard, forMode } from '../assets/halloween'
 import { themeMode } from './useTheme'
 
 /** Which drill is drawing itself: each one sits on its own material. */
@@ -31,6 +31,8 @@ export function useRuneSurface(drill: RuneDrill = 'question') {
       // vines down the sides, blank parchment in the middle to write on. The
       // two memory drills draw on their own material instead of borrowing it.
       '--rune-card': `url(${forMode(frame, mode)})`,
+      // The cut-paper card, for screens that are not one of the three drills.
+      '--rune-paper-card': `url(${forMode(paperCard, mode)})`,
     }
   })
 

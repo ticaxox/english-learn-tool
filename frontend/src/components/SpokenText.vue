@@ -2,10 +2,10 @@
 /**
  * Text where the wordbook's own words can be pressed to see what they mean.
  *
- * Words are plain spans with one delegated click handler rather than hundreds
- * of buttons, so a long passage does not flood the tab order. Words outside
- * the book still speak when clicked, but they wear no highlight and no
- * underline: only the words the learner is meant to learn look pressable.
+ * Only the wordbook's own words become spans; everything else stays plain
+ * text, so the passage has exactly as many pressable things as it has words to
+ * learn. The spans share one delegated click handler rather than a listener
+ * each, so a long passage does not flood the tab order.
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from './AppIcon.vue'
@@ -93,11 +93,10 @@ onBeforeUnmount(() => {
   <component :is="as" class="spoken-text" @click="onWordClick">
     <template v-for="(part, index) in parts" :key="index">
       <span
-        v-if="part.word"
-        class="spoken-word"
-        :class="{ 'spoken-word--target': part.target }"
+        v-if="part.target"
+        class="spoken-word spoken-word--target"
         :data-word="part.text"
-        :title="part.target ? `查看 ${part.text} 的释义` : `朗读 ${part.text}`"
+        :title="`查看 ${part.text} 的释义`"
       >{{ part.text }}</span>
       <template v-else>{{ part.text }}</template>
     </template>

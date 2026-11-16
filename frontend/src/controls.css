@@ -3610,7 +3610,7 @@ than its row reads as a different kind of thing. */
 .memory-wrong-detail__word-row .memory-wrong-detail__word-letters { flex-wrap: wrap; }
 
 .personal-workspace .spoken-text { white-space: pre-wrap; }
-.personal-workspace .spoken-word { cursor: pointer; border-radius: 4px; }
+.personal-workspace .spoken-word--target { cursor: pointer; }
 /* Only the wordbook's own words answer to the pointer: a page where every
    word lights up on hover reads as a wall of links. */
 .personal-workspace .spoken-word--target:hover {
@@ -4994,13 +4994,15 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 .member-practice-page .practice-question-card.practice-question-card--translation {
   width: min(100%, 860px);
   margin-inline: auto;
-  background: #f3e3c3;
+  /* The same cut-paper card the memory drills sit on, not the scroll: one
+     stock runs through every question the product asks. */
+  background: transparent;
   background-clip: padding-box;
   box-shadow: none;
   border-style: solid;
   border-width: 30px;
-  border-image-source: var(--rune-scroll);
-  border-image-slice: 7% fill;
+  border-image-source: var(--rune-paper-card);
+  border-image-slice: 64 fill;
   border-image-width: 30px;
   border-image-repeat: stretch;
   border-color: transparent;
@@ -5013,18 +5015,104 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
    shorthand takes the border image with it, so this has to answer in kind. */
 .member-practice-session-page .practice-article-panel,
 .member-practice-page .practice-article-panel {
-  background: #f3e3c3 !important;
+  background: transparent !important;
   background-clip: padding-box;
   box-shadow: none !important;
   border-style: solid !important;
   border-width: 24px !important;
-  border-image-source: var(--rune-parchment) !important;
-  border-image-slice: 7% fill !important;
+  border-image-source: var(--rune-paper-card) !important;
+  border-image-slice: 64 fill !important;
   border-image-width: 24px !important;
   border-image-repeat: stretch !important;
   border-color: transparent !important;
   border-radius: 0 !important;
   padding-inline: 20px;
+}
+
+/* The options inside those cards are the answer plates from the memory
+   drills: one fill, one ink rule, one hairline inside it — no token, no lip. */
+.member-practice-session-page .practice-question-card .practice-option,
+.member-practice-page .practice-question-card .practice-option {
+  min-height: 52px;
+  border: 1.5px solid #6f6a45 !important;
+  border-radius: 3px !important;
+  background: #f1ead6 !important;
+  box-shadow: inset 0 0 0 3px #f1ead6, inset 0 0 0 4px #d5c9a4 !important;
+  transform: none;
+}
+
+.member-practice-session-page .practice-question-card .practice-option:hover,
+.member-practice-page .practice-question-card .practice-option:hover {
+  border-color: #b0742a !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option:has(input:checked),
+.member-practice-page .practice-question-card .practice-option:has(input:checked) {
+  border-color: #b0742a !important;
+  box-shadow: inset 0 0 0 3px #f6eed9, inset 0 0 0 4px #d9b877 !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option--correct,
+.member-practice-page .practice-question-card .practice-option--correct {
+  border-color: #5d8f52 !important;
+  background: #e9f1d9 !important;
+  box-shadow: inset 0 0 0 3px #e9f1d9, inset 0 0 0 4px #b7cfa2 !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option--wrong,
+.member-practice-page .practice-question-card .practice-option--wrong {
+  border-color: #a95244 !important;
+  background: #f7ded6 !important;
+  box-shadow: inset 0 0 0 3px #f7ded6, inset 0 0 0 4px #dcae9f !important;
+}
+
+/* The letter is cut into the plate, not set in a stone token. */
+.member-practice-session-page .practice-question-card .practice-option .option-badge,
+.member-practice-page .practice-question-card .practice-option .option-badge {
+  width: 26px;
+  height: 26px;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.member-practice-session-page .practice-question-card .practice-option .option-badge__letter,
+.member-practice-page .practice-question-card .practice-option .option-badge__letter {
+  color: #3a2a18;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option {
+  border-color: #8f83b8 !important;
+  background: #241d3a !important;
+  box-shadow: inset 0 0 0 3px #241d3a, inset 0 0 0 4px #50457a !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option:has(input:checked),
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option:has(input:checked) {
+  border-color: #c0acee !important;
+  box-shadow: inset 0 0 0 3px #241d3a, inset 0 0 0 4px #c0acee !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--correct,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option--correct {
+  border-color: #6faf62 !important;
+  background: #1f3a24 !important;
+  box-shadow: inset 0 0 0 3px #1f3a24, inset 0 0 0 4px #3d5a36 !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--wrong,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option--wrong {
+  border-color: #c4746a !important;
+  background: #3a1f1e !important;
+  box-shadow: inset 0 0 0 3px #3a1f1e, inset 0 0 0 4px #5d3733 !important;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option .option-badge__letter,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option .option-badge__letter {
+  color: #ece3cf;
 }
 
 @media (max-width: 760px) {

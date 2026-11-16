@@ -79,11 +79,13 @@ export const questionCard = {
 } as const
 
 /**
- * The memory drills sit on the same stock as the answer plates: a cut paper
- * card with an olive rule, a hairline inside it, and a diamond at each corner.
- * Both frames are 3:2 and meant for a 9-slice — the rim lives in the border
- * band, the blank face is what stretches.
+ * The cut-paper card: an olive rule, a hairline inside it, a diamond at each
+ * corner and a blank face. 3:2, meant for a 9-slice — the rim lives in the
+ * border band, the blank face is what stretches. The memory drills use it, and
+ * so does every other question card, so one stock runs through the product.
  */
+export const paperCard = { day: paperCardDay, night: paperCardNight } as const
+
 export const drillFrame = {
   choice: { day: paperCardDay, night: paperCardNight },
   spelling: { day: paperCardDay, night: paperCardNight },
