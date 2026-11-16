@@ -2357,7 +2357,9 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   border-radius: 3px;
   background-color: #f1ead6;
   background-image: none;
-  box-shadow: none;
+  /* One hairline inside the rule, the same double edge the answer plates and
+     the card frame carry, so a cell is the same stock as everything else. */
+  box-shadow: inset 0 0 0 3px #f1ead6, inset 0 0 0 4px #d5c9a4;
   text-align: center;
   font-size: 1.32rem;
   font-weight: 700;
@@ -2368,6 +2370,7 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
 html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell {
   border-color: #8f83b8;
   background-color: #241d3a;
+  box-shadow: inset 0 0 0 3px #241d3a, inset 0 0 0 4px #50457a;
   color: #ece3cf;
   caret-color: #c0acee;
 }
@@ -2415,13 +2418,15 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell:
   border-radius: 3px;
   background-color: #e7dcc0;
   color: #8a6a3e;
-  /* The flat tile has no thickness; the shared chip lip would fake one. */
-  box-shadow: none !important;
+  /* The flat tile has no thickness; the shared chip lip would fake one. The
+     hairline inside the rule is the only shadow it keeps. */
+  box-shadow: inset 0 0 0 3px #e7dcc0, inset 0 0 0 4px #cdbf98 !important;
 }
 
 html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
   border-color: #8f83b8;
   background-color: #2d2549;
+  box-shadow: inset 0 0 0 3px #2d2549, inset 0 0 0 4px #50457a !important;
   color: #b9a4e6;
 }
 
