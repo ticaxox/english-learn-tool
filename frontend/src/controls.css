@@ -5039,7 +5039,8 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .member-practice-session-page .practice-question-card .practice-options,
 .member-practice-page .practice-question-card .practice-options {
-  margin-top: 18px;
+  gap: 16px;
+  margin-top: 32px;
 }
 
 .member-practice-session-page .practice-question-card .practice-sentence,
