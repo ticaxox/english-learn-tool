@@ -5029,6 +5029,26 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   padding-inline: 20px;
 }
 
+/* The question number sits close to the line it introduces, and the answer
+   plates get the room instead: the gap above the sentence shrinks, the gap
+   between the sentence and the options grows. */
+.member-practice-session-page .practice-question-card,
+.member-practice-page .practice-question-card {
+  row-gap: 4px;
+}
+
+.member-practice-session-page .practice-question-card .practice-options,
+.member-practice-page .practice-question-card .practice-options {
+  margin-top: 18px;
+}
+
+.member-practice-session-page .practice-question-card .practice-sentence,
+.member-practice-page .practice-question-card .practice-sentence,
+.member-practice-session-page .practice-question-card .practice-prompt-text,
+.member-practice-page .practice-question-card .practice-prompt-text {
+  margin-bottom: 0;
+}
+
 /* The options inside those cards are the answer plates from the memory
    drills: one fill, one ink rule, one hairline inside it — no token, no lip. */
 .member-practice-session-page .practice-question-card .practice-option,
