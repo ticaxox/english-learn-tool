@@ -7532,3 +7532,46 @@ html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hu
 
 /* 供应商行尾三颗按钮靠近一点：8px → 4px。 */
 .personal-workspace .personal-ai-provider__actions { gap: 4px; }
+
+/* 悬停时老规则会把字刷成白色，牌面一浅就看不见了——这里把颜色钉住。 */
+.personal-workspace .settings-toggle:hover,
+.personal-workspace .settings-toggle:focus,
+.personal-workspace .settings-toggle:active,
+.personal-workspace .ai-kind-switch__option:hover,
+.personal-workspace .ai-kind-switch__option:focus {
+  color: #33200b !important;
+}
+
+html[data-theme='night'] .personal-workspace .settings-toggle:hover,
+html[data-theme='night'] .personal-workspace .settings-toggle:focus,
+html[data-theme='night'] .personal-workspace .settings-toggle:active,
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option:hover,
+html[data-theme='night'] .personal-workspace .ai-kind-switch__option:focus {
+  color: #efe6ff !important;
+}
+
+/* 下拉框和时间框：鼠标点完不要再套一圈橙色描边。键盘 Tab 过去仍然给可见焦点。 */
+.personal-workspace select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.personal-workspace select:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%) !important;
+  outline-offset: 2px;
+}
+
+.personal-workspace .crumb-time:focus-within,
+.personal-workspace .crumb-time.is-open,
+.personal-workspace .crumb-date:focus-within,
+.personal-workspace .crumb-date.is-open {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+.personal-workspace .crumb-time:has(input:focus-visible),
+.personal-workspace .crumb-date:has(input:focus-visible) {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
