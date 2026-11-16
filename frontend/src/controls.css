@@ -6953,12 +6953,12 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
     font-size: 12.5px;
     justify-content: center;
     text-align: center;
+    /* 只有被选中的那行有框；其它行留同样宽度的透明边，换行时不跳高度。 */
     border-width: 4px 6px;
     border-style: solid;
     border-color: transparent;
     border-radius: 0;
     background: none;
-    border-image: url('./assets/halloween/card/control-option-off-day.png') 30% 8% fill stretch;
     color: #33200b;
     font-weight: 700;
   }
@@ -6976,10 +6976,31 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
     font-weight: 800;
   }
 
+  /* 时间选择器的数字格沿用同一个「被选中」框。 */
+  .personal-workspace .crumb-time__cell {
+    border-width: 4px 6px;
+    border-style: solid;
+    border-color: transparent;
+    border-radius: 0;
+    background: none;
+  }
+
+  .personal-workspace .crumb-time__cell.is-active {
+    border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+    background: none;
+    box-shadow: none;
+    color: #33200b;
+    font-weight: 800;
+  }
+
+  html[data-theme='night'] .personal-workspace .crumb-time__cell.is-active {
+    border-image-source: url('./assets/halloween/card/control-option-on-night.png');
+    color: #efe6ff;
+  }
+
   html[data-theme='night'] .personal-workspace select option { color: #efe6ff; }
 
   html[data-theme='night'] .personal-workspace select option {
-    border-image-source: url('./assets/halloween/card/control-option-off-night.png');
     color: #efe6ff;
   }
 
