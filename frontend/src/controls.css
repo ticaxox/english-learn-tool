@@ -6779,11 +6779,11 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 ):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
   min-height: 40px;
-  padding: 2px 12px !important;
-  border-width: 6px 10px !important;
+  padding: 2px 14px !important;
+  border-width: 10px 14px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-action-day.png') 12% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-badge-day.png') 30% 17% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -6811,7 +6811,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 8px 12px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-chip-off-day.png') 12% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-off-day.png') 30% 8% fill stretch;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -6820,14 +6820,12 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 
 .personal-workspace .settings-form .settings-toggle.is-active {
   border-width: 8px 12px;
-  border-image: url('./assets/halloween/card/control-chip-on-day.png') 12% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
   background: none;
   box-shadow: none;
   color: #33200b;
 }
 
-.personal-workspace .settings-form .crumb-stepper,
-.personal-workspace .dialog-card .crumb-stepper,
 .personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
 .personal-workspace .dialog-card textarea {
   border-width: 6px 10px !important;
@@ -6877,9 +6875,8 @@ html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crum
 
 /* 夜间：铜牌换成发烟的石牌，槽换成靛色墨沟。 */
 html[data-theme='night'] .personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
-html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button),
-html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
-  border-image-source: url('./assets/halloween/card/control-chip-on-night.png') !important;
+html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
+  border-image-source: url('./assets/halloween/card/control-badge-night.png') !important;
   color: #efe6ff !important;
   text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
 }
@@ -6889,7 +6886,6 @@ html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-
 .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
   textarea,
-  .crumb-stepper,
   .crumb-time,
   .crumb-date
 ) {
@@ -6903,19 +6899,18 @@ html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-
 }
 
 html[data-theme='night'] .personal-workspace .ai-kind-switch__option {
-  border-image-source: url('./assets/halloween/card/control-chip-off-night.png');
+  border-image-source: url('./assets/halloween/card/control-option-off-night.png');
   color: #efe6ff;
 }
 
 html[data-theme='night'] .personal-workspace .ai-kind-switch__option.is-active {
-  border-image-source: url('./assets/halloween/card/control-chip-on-night.png');
+  border-image-source: url('./assets/halloween/card/control-option-on-night.png');
   color: #efe6ff;
 }
 
 html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
   textarea,
-  .crumb-stepper,
   .crumb-time,
   .crumb-date
 ) {
@@ -6923,9 +6918,6 @@ html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hu
   color: #efe6ff;
 }
 
-html[data-theme='night'] .personal-workspace .settings-toggle,
-html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper,
-html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper,
 html[data-theme='night'] .personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
 html[data-theme='night'] .personal-workspace .dialog-card textarea {
   border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
@@ -7117,7 +7109,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
   border-width: 8px 12px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-chip-off-day.png') 12% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-off-day.png') 30% 8% fill stretch;
   border-radius: 0;
   background: none;
   color: var(--ui-ink);
@@ -7128,7 +7120,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .ai-kind-switch__option.is-active {
   padding: 5px 15px;
   border-width: 8px 14px;
-  border-image: url('./assets/halloween/card/control-chip-on-day.png') 12% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
   background: none;
   color: #33200b;
 }
@@ -7162,7 +7154,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .settings-form select,
 .personal-workspace .dialog-card select,
 .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
-  border-width: 6px 10px !important;
+  border-width: 4px 8px !important;
   border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
 }
 
@@ -7330,4 +7322,32 @@ html[data-theme='night'] .personal-workspace .field-badge {
 
 @media (max-width: 820px) {
   .personal-workspace .ai-quota-list { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* 数字框按选型改用 chip-off：羊皮纸小牌 + 一道细描边，和选项芯片是同一张。 */
+.personal-workspace .settings-form .crumb-stepper,
+.personal-workspace .dialog-card .crumb-stepper {
+  border-width: 6px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-chip-off-day.png') 12% 5% fill stretch !important;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper,
+html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper {
+  border-image-source: url('./assets/halloween/card/control-chip-off-night.png') !important;
+}
+
+/* 选中的选项芯片：夜间换 another 张图（白天是琥珀牌，夜里是亮紫牌）。 */
+html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
+  border-image-source: url('./assets/halloween/card/control-option-on-night.png') !important;
+  color: #efe6ff !important;
+  text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
+}
+
+html[data-theme='night'] .personal-workspace .settings-toggle {
+  border-image-source: url('./assets/halloween/card/control-option-off-night.png') !important;
 }
