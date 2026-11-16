@@ -12,7 +12,7 @@ import ErrorNotice from './ErrorNotice.vue'
 import WordKindRadar from './WordKindRadar.vue'
 import { fetchWeekly, type GamificationWeekly } from '../api/progress'
 import { countUp, gsap, motionAllowed } from '../composables/useMotion'
-import { candles } from '../assets/halloween'
+import { candleStates, type CandleState } from '../assets/halloween'
 import { themeMode } from '../composables/useTheme'
 
 const weekly = ref<GamificationWeekly | null>(null)
@@ -23,16 +23,15 @@ const xpRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 let lit = false
 
-const CANDLE_MIN = 26
-const CANDLE_MAX = 104
-
 const peak = computed(() => Math.max(1, ...(weekly.value?.days ?? []).map((day) => day.xp)))
 
-/** Every day gets a candle; height is its XP share of the best day. */
-/** The candle's height carries the day's XP; the art scales with it. */
-function candleHeight(xp: number): number {
-  if (xp <= 0) return CANDLE_MIN
-  return CANDLE_MIN + (xp / peak.value) * (CANDLE_MAX - CANDLE_MIN)
+/** The burn state picks its own drawing, and with it its own height. */
+function candleState(xp: number): CandleState {
+  if (xp <= 0) return 'cold'
+  const ratio = xp / peak.value
+  if (ratio <= 1 / 3) return 'low'
+  if (ratio <= 2 / 3) return 'mid'
+  return 'high'
 }
 
 function weekday(date: string): string {
@@ -195,11 +194,11 @@ onBeforeUnmount(() => {
             <span
               class="weekly-day__candle"
               :class="{ 'is-lit': day.active }"
-              :style="{ '--candle-h': `${candleHeight(day.xp)}px` }"
+              :data-state="candleState(day.xp)"
             >
               <img
                 class="weekly-day__art"
-                :src="candles[themeMode]"
+                :src="candleStates[themeMode][candleState(day.xp)]"
                 alt=""
                 aria-hidden="true"
               />

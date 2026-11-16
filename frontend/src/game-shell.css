@@ -1435,6 +1435,10 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   .personal-workspace .badge__medal { width: 74px; height: 74px; }
   .personal-workspace .badge__name { font-size: 0.76rem; }
   .personal-workspace .badge__hint { font-size: 0.66rem; }
+
+  /* Seven candles want the whole width of the row: at the desktop gap they
+   * lose a finger's width each and the week stops reading as a week. */
+  .personal-workspace .weekly-bars { gap: 3px; }
 }
 
 @media (max-width: 360px) {

@@ -4383,20 +4383,20 @@ than its row reads as a different kind of thing. */
   height: 110px;
 }
 
+/* Every drawing is the same width; the state decides how tall it stands. */
 .personal-workspace .weekly-day__candle {
   position: relative;
   display: block;
-  width: 100%;
-  height: var(--candle-h, 40px);
-  max-width: 56px;
+  width: var(--candle-w, 33px);
+  max-width: 100%;
 }
 
 .personal-workspace .weekly-day__art {
   display: block;
-  /* The art is sized by the day's XP: a day with more of it stands taller. */
-  width: auto;
-  height: 100%;
-  max-width: 100%;
+  /* The state draws the height: the art is as wide as the pillar and keeps
+   * its own proportion, so a burning day stands taller than a cold one. */
+  width: 100%;
+  height: auto;
   margin-inline: auto;
   /* Each burn state is its own drawing, so no filter fakes the night or the
    * cold wick; the cold drawing already carries the soot and the grey wax. */
