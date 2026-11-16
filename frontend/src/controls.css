@@ -6936,7 +6936,7 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
 @supports (appearance: base-select) {
   .personal-workspace select::picker(select) {
     padding: 12px 14px;
-    min-width: 168px;
+    min-width: 120px;
     border: 10px solid transparent;
     border-image: url('./assets/halloween/card/control-menu-day.png') 8% 14% fill stretch;
     border-radius: 0;
@@ -6952,6 +6952,8 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
    * 高，九宫格的角在这尺寸上会把左端那颗铜珠压扁。 */
   .personal-workspace select option {
     padding: 7px 10px;
+    /* option 本身是 flex 盒，text-align 管不到它——文字要靠 justify-content 居中。 */
+    justify-content: center;
     text-align: center;
     border: 0;
     border-radius: 0;
@@ -7172,11 +7174,11 @@ html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .
  * 左端那枚铜眼圈是辨识点，文字让开它。 */
 .personal-workspace .personal-ai-provider__tag,
 .personal-workspace .personal-ai-provider__model {
-  padding: 1px 7px;
+  padding: 2px 8px 2px 9px;
   border-width: 2px 5px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-tag-day.png') 18% 6% fill stretch;
+  border-image: url('./assets/halloween/card/control-tag-day.png') 8% 10% fill stretch;
   border-radius: 0;
   background: none;
   color: #33200b;
@@ -7202,8 +7204,14 @@ html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
   max-width: 240px;
 }
 
-/* 下拉框本身也把选中的字摆在中间：菜单里是居中的，关起来时靠左会跳一下。 */
-.personal-workspace select { text-align: center; }
+/* 下拉框本身也把选中的字摆在中间：菜单里是居中的，关起来时靠左会跳一下。
+ * 同样是 flex 盒，所以用 justify-content 而不是 text-align。 */
+@supports (appearance: base-select) {
+  .personal-workspace select {
+    justify-content: center;
+    text-align: center;
+  }
+}
 
 /* 勾选框：方框在素材里，勾还是矢量——那个符号不该烘焙进图。 */
 .personal-workspace .personal-ai-page input[type="checkbox"] {

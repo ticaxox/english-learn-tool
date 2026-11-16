@@ -59,7 +59,7 @@
 | `control-select-{day,night}.png` | 下拉框本体：直边槽口，右端一圈略厚的铜沿，不带箭头也不留空块 |
 | `control-menu-{day,night}.png` | 下拉菜单面：直边羊皮纸，四角铜片，九宫格 |
 | `control-option-on-{day,night}.png` | 菜单里被选中的那一行：琥珀/紫条、双线、左端一颗铜珠 |
-| `control-tag-{day,night}.png` | 小标签（对话/向量、模型 ID）：铜片 + 上下各一道内线 |
+| `control-tag-{day,night}.png` | 小标签（对话/向量、模型 ID）：平牌面 + 左脊一道铜条 |
 | `control-check-{off,on}-{day,night}.png` | 勾选框两态：空框 / 铜底，勾是矢量叠上去的 |
 | `control-close-{day,night}.png` | 悬浮窗关闭钮：一枚小方牌，中间的叉仍是矢量图标 |
 
