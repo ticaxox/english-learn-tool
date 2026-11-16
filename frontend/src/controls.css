@@ -6778,12 +6778,12 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   [role="button"][type="submit"]
 ):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
-  min-height: 54px;
-  padding: 2px 20px !important;
-  border-width: 16px 20px !important;
+  min-height: 46px;
+  padding: 2px 16px !important;
+  border-width: 10px 14px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-action-day.png') 18% 6% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-action-day.png') 12% 5% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -6820,7 +6820,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 
 .personal-workspace .settings-form .settings-toggle.is-active {
   border-width: 8px 14px;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-chip-on-day.png') 12% 5% fill stretch;
   background: none;
   box-shadow: none;
   color: #33200b;
@@ -6879,7 +6879,7 @@ html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crum
 html[data-theme='night'] .personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
 html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button),
 html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
-  border-image-source: url('./assets/halloween/card/control-ornament-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-chip-on-night.png') !important;
   color: #efe6ff !important;
   text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
 }
@@ -6908,7 +6908,7 @@ html[data-theme='night'] .personal-workspace .ai-kind-switch__option {
 }
 
 html[data-theme='night'] .personal-workspace .ai-kind-switch__option.is-active {
-  border-image-source: url('./assets/halloween/card/control-ornament-night.png');
+  border-image-source: url('./assets/halloween/card/control-chip-on-night.png');
   color: #efe6ff;
 }
 
@@ -7128,7 +7128,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .ai-kind-switch__option.is-active {
   padding: 5px 15px;
   border-width: 8px 14px;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-chip-on-day.png') 12% 5% fill stretch;
   background: none;
   color: #33200b;
 }
@@ -7163,13 +7163,13 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .dialog-card select,
 .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
   border-width: 7px 10px !important;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-select-day.png') 14% 4% fill stretch !important;
 }
 
 html[data-theme='night'] .personal-workspace .settings-form select,
 html[data-theme='night'] .personal-workspace .dialog-card select,
 html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
-  border-image-source: url('./assets/halloween/card/control-ornament-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-select-night.png') !important;
   color: #efe6ff;
 }
 
@@ -7303,8 +7303,8 @@ html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button
 
 /* 设置页那颗保存比通用按钮小一号：它在一张大板的角落里，不需要和主按钮一样重。 */
 .personal-workspace .settings-form .button-row .button {
-  min-height: 50px;
-  padding: 2px 14px !important;
+  min-height: 42px;
+  padding: 2px 12px !important;
 }
 
 /* 「≈ 1 天」这种小读数：一枚胶囊徽章，两端是圆的，跟别的方角件区分开。 */
