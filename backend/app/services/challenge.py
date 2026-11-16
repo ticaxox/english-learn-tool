@@ -165,51 +165,6 @@ async def _node_complete(
     return False
 
 
-async def _add_side_stop(
-    session: AsyncSession, plan: DailyChallengePlan, nodes: list[ChallengeNode]
-) -> ChallengeNode | None:
-    """One optional side stop, built from the words the plan already carries.
-
-    The generator is free to leave the side path out, but a trail with no
-    shortcut reads as a corridor. Nothing new is asked of the learner: the
-    stop just re-drills ten of today's own words, and it never blocks the
-    main line.
-    """
-    words: list[str] = []
-    for node in nodes:
-        for entry_id in node.word_entry_ids or []:
-            if entry_id not in words:
-                words.append(str(entry_id))
-        if len(words) >= 10:
-            break
-    if not words:
-        return None
-    side = ChallengeNode(
-        plan_id=plan.id,
-        client_key="side-stop",
-        node_type="OPTIONAL_SIDE",
-        order_index=max(node.order_index for node in nodes) + 10,
-        title="支线 · 顺路再练一组",
-        description="路边的小摊：用今天这几个词多做一组，不算进主线。",
-        estimated_minutes=5,
-        word_entry_ids=words[:10],
-        practice_spec={"drill_mode": "choice"},
-        optional=True,
-    )
-    session.add(side)
-    await session.flush()
-    session.add(
-        ChallengeNodeProgress(
-            node_id=side.id,
-            plan_id=plan.id,
-            user_id=plan.user_id,
-            status="unlocked",
-        )
-    )
-    await session.flush()
-    return side
-
-
 async def _sync_plan(
     session: AsyncSession, plan: DailyChallengePlan, user: User, settings: Settings
 ) -> None:
@@ -224,10 +179,6 @@ async def _sync_plan(
     )
     if not nodes:
         return
-    if plan.status == "ready" and not any(node.optional for node in nodes):
-        side = await _add_side_stop(session, plan, nodes)
-        if side is not None:
-            nodes = sorted([*nodes, side], key=lambda node: node.order_index)
     progress_rows = list(
         (
             await session.scalars(

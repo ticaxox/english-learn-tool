@@ -26,13 +26,11 @@ function book(): Wordbook {
 }
 
 describe('T-FE-017 workspace depth', () => {
-  it('puts the player bar and the day\'s tasks on the Today board', () => {
+  it('adds a readable Today progress ring and real streak/goal support', () => {
     const today = source('../views/TodayView.vue')
-    expect(today).toContain('<GameHud')
-    expect(today).toContain('crumb-task-list')
-    expect(today).toContain('crumb-merged-book')
-    // The tip is advice from Crumbo, so it sits outside the plan card.
-    expect(today).toContain('crumb-note-out')
+    expect(today).toContain('today-task-sentence')
+    expect(today).toContain('<StudyStatsPanel')
+    expect(today).toContain('crumb-primary-action')
   })
 
   it('keeps a wordbook card to its cover and name', () => {

@@ -34,14 +34,11 @@ from app.models.wordbooks import (
 from app.schemas.gamification import (
     BadgeResponse,
     DailyQuestResponse,
-    FootprintDay,
-    GamificationFootprintResponse,
     GamificationProgressResponse,
     GamificationWeeklyResponse,
     LevelProgress,
     RadarAxis,
     WeeklyGoal,
-    WordStateCounts,
 )
 from app.services.auth import utcnow
 from app.services.learning import local_date_for
@@ -611,57 +608,4 @@ async def weekly(
         radar=await _word_kind_radar(session, user, start),
         streak=stats.streak,
         goals=goals,
-    )
-
-
-async def footprint(
-    session: AsyncSession, settings: Settings, user: User
-) -> GamificationFootprintResponse:
-    """The month so far and where every word currently sits.
-
-    Days are cut on the learner's own clock, not UTC, so a session at 00:30
-    counts for the day it felt like. The month runs to its last day rather than
-    to today: the empties ahead are part of the picture.
-    """
-    today = local_date_for(settings, user)
-    first = today.replace(day=1)
-    next_month = (first + timedelta(days=32)).replace(day=1)
-    last = next_month - timedelta(days=1)
-
-    rows = (
-        await session.execute(
-            select(XpEvent.day, func.sum(XpEvent.xp))
-            .where(XpEvent.user_id == user.id, XpEvent.day >= first, XpEvent.day <= last)
-            .group_by(XpEvent.day)
-        )
-    ).all()
-    by_day = {row[0]: int(row[1] or 0) for row in rows}
-
-    days: list[FootprintDay] = []
-    cursor = first
-    while cursor <= last:
-        xp = by_day.get(cursor, 0)
-        days.append(FootprintDay(date=cursor.isoformat(), xp=xp, active=xp > 0))
-        cursor += timedelta(days=1)
-
-    state_rows = (
-        await session.execute(
-            select(UserWordState.status, func.count(UserWordState.id))
-            .where(UserWordState.user_id == user.id, UserWordState.status != "suspended")
-            .group_by(UserWordState.status)
-        )
-    ).all()
-    counts = {"new": 0, "learning": 0, "review": 0, "relearning": 0}
-    for status, count in state_rows:
-        key = "review" if status == "mastered" else status
-        if key in counts:
-            counts[key] += int(count or 0)
-
-    stats = await _stats(session, user.id)
-    return GamificationFootprintResponse(
-        month=f"{first.year:04d}-{first.month:02d}",
-        days=days,
-        active_days=sum(1 for entry in days if entry.active),
-        streak=stats.streak,
-        states=WordStateCounts(**counts, total=sum(counts.values())),
     )

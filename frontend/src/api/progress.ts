@@ -57,29 +57,6 @@ export interface GamificationWeekly {
   radar: RadarAxis[]
 }
 
-export interface FootprintDay {
-  date: string
-  xp: number
-  active: boolean
-}
-
-export interface WordStateCounts {
-  new: number
-  learning: number
-  review: number
-  relearning: number
-  total: number
-}
-
-export interface GamificationFootprint {
-  /** The calendar month being shown, as `YYYY-MM`. */
-  month: string
-  days: FootprintDay[]
-  activeDays: number
-  streak: number
-  states: WordStateCounts
-}
-
 export const QUEST_LABELS: Record<string, string> = {
   review_due: '清空今日到期',
   practice_one: '做一组练习',
@@ -174,37 +151,6 @@ export async function fetchProgress(): Promise<GamificationProgress> {
 
 export async function fetchWeekly(): Promise<GamificationWeekly> {
   return parseWeekly(await apiClient.get('/me/progress/weekly'))
-}
-
-function parseStates(value: unknown): WordStateCounts {
-  const body = record(value, '词态分布')
-  return {
-    new: num(body.new),
-    learning: num(body.learning),
-    review: num(body.review),
-    relearning: num(body.relearning),
-    total: num(body.total),
-  }
-}
-
-export function parseFootprint(value: unknown): GamificationFootprint {
-  const body = record(value, '学习足迹')
-  const days = Array.isArray(body.days) ? body.days.map((item) => record(item, '足迹日')) : []
-  return {
-    month: String(body.month ?? ''),
-    days: days.map((day) => ({
-      date: String(day.date ?? ''),
-      xp: num(day.xp),
-      active: day.active === true,
-    })),
-    activeDays: num(body.active_days),
-    streak: num(body.streak),
-    states: parseStates(body.states),
-  }
-}
-
-export async function fetchFootprint(): Promise<GamificationFootprint> {
-  return parseFootprint(await apiClient.get('/me/progress/footprint'))
 }
 
 
