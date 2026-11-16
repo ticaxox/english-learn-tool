@@ -3,6 +3,16 @@
  * Loaded last so it can refine the game layer without rewrites.
  */
 
+/* The faced initial every option letter is cut from: the memory drills have
+   it baked into their plates, the AI practice sets it live. */
+@font-face {
+  font-family: 'Almendra Display';
+  src: url('./assets/fonts/almendra-display.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ------------------------------------------------------- browser surfaces */
 
 .personal-workspace ::selection {
@@ -5099,9 +5109,13 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 .member-practice-session-page .practice-question-card .practice-option .option-badge__letter,
 .member-practice-page .practice-question-card .practice-option .option-badge__letter {
   color: #3a2a18;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1rem;
+  /* The letter cut into the drill plates: Almendra, thickened with its own ink
+     so a 16px initial reads as firmly as the baked one. */
+  font-family: 'Almendra Display', Georgia, 'Times New Roman', serif;
+  font-size: 1.15rem;
   font-weight: 700;
+  line-height: 1;
+  -webkit-text-stroke: 0.45px currentColor;
 }
 
 html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option,

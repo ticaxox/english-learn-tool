@@ -317,14 +317,6 @@ function choose(optionId: string): void {
 
 html[data-theme='night'] .choice-option__label { color: #f3e9d2; }
 
-@font-face {
-  font-family: 'Almendra Display';
-  src: url('../assets/fonts/almendra-display.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* The letter is an engraved initial rather than a plain capital: a swashed
    display serif, struck into the coin with a light lip and a dark cut. */
 .choice-option__mark {
