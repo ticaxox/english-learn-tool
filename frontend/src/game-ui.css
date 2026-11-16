@@ -2393,18 +2393,41 @@ html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell:
   outline-color: #c0acee;
 }
 
-/* Letter by letter, once the server has graded: green where the letter was
-   right, red where it was not. A wash over the tile rather than a new tile, so
-   the pin hole and the grain still read through it. */
+/* Letter by letter, once the server has graded. The tile keeps its rule and
+   its inner hairline — only the stock and the ink change colour — so a graded
+   row still reads as the same row of cells, in green and red. */
 .personal-workspace .spelling-grid input.spelling-cell.spelling-cell--right {
-  color: #12380f;
-  box-shadow: inset 0 0 0 999px rgb(88 181 82 / 55%);
+  border-color: #5d8f52;
+  background-color: #e9f1d9;
+  box-shadow: inset 0 0 0 3px #e9f1d9, inset 0 0 0 4px #b7cfa2;
+  color: #2f5b28;
 }
 
 .personal-workspace .spelling-grid input.spelling-cell.spelling-cell--wrong {
-  color: #3c0f0b;
-  box-shadow: inset 0 0 0 999px rgb(223 79 66 / 52%);
+  border-color: #a95244;
+  background-color: #f7ded6;
+  box-shadow: inset 0 0 0 3px #f7ded6, inset 0 0 0 4px #dcae9f;
+  color: #6e2a20;
 }
+
+html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell.spelling-cell--right {
+  border-color: #6faf62;
+  background-color: #1f3a24;
+  box-shadow: inset 0 0 0 3px #1f3a24, inset 0 0 0 4px #3d5a36;
+  color: #d3edc6;
+}
+
+html[data-theme='night'] .personal-workspace .spelling-grid input.spelling-cell.spelling-cell--wrong {
+  border-color: #c4746a;
+  background-color: #3a1f1e;
+  box-shadow: inset 0 0 0 3px #3a1f1e, inset 0 0 0 4px #5d3733;
+  color: #f7d6cf;
+}
+
+/* A graded cell is the message, so it is not faded with the rest of the
+   disabled row. */
+.personal-workspace .spelling-grid .spelling-cell--right,
+.personal-workspace .spelling-grid .spelling-cell--wrong { opacity: 1; }
 
 /* A letter that was given is printed on the same tile, in a paler ink and on
    a slightly duller stock, so the row reads as one word with some of it

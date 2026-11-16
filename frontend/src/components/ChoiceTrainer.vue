@@ -415,10 +415,6 @@ html[data-theme='night'] .choice-option--wrong .choice-option__stamp {
   to { background-position: -896px 0; }
 }
 
-/* One marker at a time: the stamp carries the verdict. */
-.choice-option--right .choice-option__tick,
-.choice-option--wrong .choice-option__tick { opacity: 0; transform: scale(0.5); }
-
 .choice-option__tick {
   grid-column: 3;
   display: grid;
@@ -440,6 +436,14 @@ html[data-theme='night'] .choice-option--wrong .choice-option__stamp {
 .choice-option--selected .choice-option__tick {
   opacity: 1;
   transform: scale(1);
+}
+
+/* One marker at a time: once the server has spoken, the stamp carries the
+   verdict and the little picked badge steps out of its way. */
+.choice-option--right .choice-option__tick,
+.choice-option--wrong .choice-option__tick {
+  opacity: 0;
+  transform: scale(0.5);
 }
 
 .choice-option input:focus-visible + .choice-option__face {
@@ -481,23 +485,6 @@ html[data-theme='night'] .choice-option--wrong::after {
   mix-blend-mode: screen;
 }
 
-/* The mark on the plate is the verdict, not the selection: a right plate keeps
-   the tick, a wrong one swaps it for a cross and closes on the same red. */
-.choice-option--right .choice-option__tick {
-  opacity: 1;
-  transform: scale(1);
-  background: #2f7a2f;
-}
-
-.choice-option__no { display: none; }
-
-.choice-option--wrong .choice-option__tick {
-  opacity: 1;
-  transform: scale(1);
-  background: #a83232;
-}
-
-.choice-option--wrong .choice-option__yes { display: none; }
 .choice-option--wrong .choice-option__no { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
