@@ -6782,7 +6782,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 6px 15px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-button-day.png') 16% 10% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-action-day.png') 30% 6% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -6810,7 +6810,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 6px 10px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -6819,7 +6819,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 
 .personal-workspace .settings-form .settings-toggle.is-active {
   border-width: 6px 14px;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 16% 8% fill stretch;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch;
   background: none;
   box-shadow: none;
   color: #33200b;
@@ -6832,7 +6832,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 6px 10px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -6844,7 +6844,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 6px 10px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -6895,7 +6895,7 @@ html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-
   border-width: 6px 10px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -7116,7 +7116,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
   border-width: 6px 10px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-field-day.png') 14% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch;
   border-radius: 0;
   background: none;
   color: var(--ui-ink);
@@ -7127,7 +7127,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .ai-kind-switch__option.is-active {
   padding: 5px 15px;
   border-width: 6px 14px;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 16% 8% fill stretch;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch;
   background: none;
   color: #33200b;
 }
@@ -7162,7 +7162,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .dialog-card select,
 .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
   border-width: 6px 10px !important;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 16% 8% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch !important;
 }
 
 html[data-theme='night'] .personal-workspace .settings-form select,
@@ -7182,7 +7182,7 @@ html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .
   border-width: 3px 7px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 16% 8% fill stretch;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch;
   border-radius: 0;
   background: none;
   color: #33200b;
