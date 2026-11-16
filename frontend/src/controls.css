@@ -2466,21 +2466,67 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
   }
 }
 
-/* Practice side rail: timer and submission share one card. */
+/* The practice side rail is the memory rail: the same cream card, the same
+   count over the track, the same small secondary button under it. */
 .personal-workspace .practice-session-side {
   display: grid;
-  gap: 16px;
-  padding: 18px;
+  gap: 14px;
+  padding: 22px 20px;
+  border: 2px solid #ecd9bb;
+  border-radius: 18px;
+  background: #fffdf6;
+  box-shadow: 0 2px 0 rgb(59 42 26 / 5%);
 }
 
-.personal-workspace .practice-session-side__timer {
+.personal-workspace .practice-rail-head {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  gap: 10px;
+  align-items: baseline;
   justify-content: space-between;
-  padding-bottom: 14px;
-  border-bottom: 1px dashed var(--ui-line);
 }
+
+.personal-workspace .practice-rail-count {
+  color: #35240f;
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.personal-workspace .practice-rail-clock {
+  color: #7d6247;
+  font-size: 0.92rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.personal-workspace .practice-rail-clock.is-expired { color: #a83232; }
+
+.personal-workspace .practice-rail-track {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ecd9bb;
+}
+
+.personal-workspace .practice-rail-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #14573d;
+  transition: width 200ms ease;
+}
+
+html[data-theme='night'] .personal-workspace .practice-session-side {
+  border-color: #3a3160;
+  background: #221b3a;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .personal-workspace .practice-rail-count { color: #f3e9d2; }
+html[data-theme='night'] .personal-workspace .practice-rail-clock { color: #b9a4e6; }
+html[data-theme='night'] .personal-workspace .practice-rail-track { background: #3a3160; }
+html[data-theme='night'] .personal-workspace .practice-rail-track span { background: #8fd9b0; }
 
 /* Memory cards: word on the left, sound and meaning on the right. */
 .personal-workspace .memory-wrong-detail__card { padding: 38px 44px; }
@@ -3565,8 +3611,9 @@ than its row reads as a different kind of thing. */
 
 .personal-workspace .spoken-text { white-space: pre-wrap; }
 .personal-workspace .spoken-word { cursor: pointer; border-radius: 4px; }
-.personal-workspace .spoken-word:hover {
-  background: var(--ui-surface-subtle, #fbf7ee);
+/* Only the wordbook's own words answer to the pointer: a page where every
+   word lights up on hover reads as a wall of links. */
+.personal-workspace .spoken-word--target:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }

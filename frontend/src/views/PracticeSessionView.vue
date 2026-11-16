@@ -11,6 +11,7 @@ import PracticeConversation from '../components/PracticeConversation.vue'
 import SpokenText from '../components/SpokenText.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
 import { usePracticeSession } from '../composables/usePracticeSession'
+import { loadWordGlossary } from '../composables/useWordGlossary'
 import { useToast } from '../composables/useToast'
 import { isApiError } from '../api/errors'
 import {
@@ -58,6 +59,14 @@ watch(() => session.value?.status, (status) => {
   }
 }, { immediate: true })
 const result = practice.result
+
+// Words in the passage that belong to the learner's wordbook open a little
+// gloss; the whole book is read once per session.
+watch(
+  () => session.value?.wordbookId,
+  (wordbookId) => { void loadWordGlossary(wordbookId) },
+  { immediate: true },
+)
 const questions = computed(() => session.value?.questions ?? [])
 const answeredCount = computed(() => questions.value.filter((question) => (answers.value[question.id] ?? '').trim()).length)
 const allAnswered = computed(() => questions.value.length > 0 && answeredCount.value === questions.value.length)
@@ -324,19 +333,15 @@ void practice.load()
 
           <aside class="member-practice-session-aside" aria-label="作答操作">
             <section class="panel practice-session-side" aria-label="作答操作">
-              <div v-if="sessionTimer.running.value" class="practice-session-side__timer">
-                <span class="practice-rail-clock__label">本次用时</span>
-                <span class="practice-stage-clock" :class="{ 'is-expired': sessionTimer.expired.value }">
-                  <AppIcon name="today" />
-                  <span>{{ timerLimit ? '倒计时' : '正计时' }} {{ sessionTimer.label.value }}</span>
+              <div class="practice-rail-head">
+                <span class="practice-rail-count">{{ answeredCount }}/{{ questions.length }}</span>
+                <span class="practice-rail-clock" :class="{ 'is-expired': sessionTimer.expired.value }">
+                  {{ sessionTimer.running.value ? sessionTimer.label.value : '已暂停' }}
                 </span>
               </div>
-              <div class="practice-submit-progress">
-                <div class="practice-submit-progress__top">
-                  <span>已答 {{ answeredCount }} / {{ questions.length }}</span>
-                </div>
-                <div class="progress"><span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span></div>
-              </div>
+              <span class="practice-rail-track" aria-hidden="true">
+                <span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span>
+              </span>
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />
               <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value || !allAnswered" @click="submit">
