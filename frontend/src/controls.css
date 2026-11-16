@@ -6948,38 +6948,31 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
     border-image-source: url('./assets/halloween/card/control-menu-night.png');
   }
 
+  /* 只有被选中的那一行有框，别的是干净的行。框整张铺底——行只有三十几像素
+   * 高，九宫格的角在这尺寸上会把左端那颗铜珠压扁。 */
   .personal-workspace select option {
-    padding: 6px 16px;
-    border-width: 6px 14px;
-    border-style: solid;
-    border-color: transparent;
-    border-image: url('./assets/halloween/card/control-option-day.png') 22% 10% fill stretch;
+    padding: 8px 16px 8px 24px;
+    border: 0;
     border-radius: 0;
     background: none;
     color: #33200b;
     font-weight: 700;
   }
 
-  /* 悬停亮一点，选中的那行换铜牌——和页面上的选项芯片是同一句话：
-   * 选中的是凸起来的。 */
-  .personal-workspace select option:hover { filter: brightness(1.04); color: #33200b; }
+  .personal-workspace select option:hover { color: #33200b; }
 
   .personal-workspace select option:checked,
   .personal-workspace select option:focus {
-    border-image: url('./assets/halloween/card/control-button-day.png') 16% 10% fill stretch;
-    background: none;
+    background: url('./assets/halloween/card/control-option-on-day.png') center / 100% 100% no-repeat;
     color: #33200b;
     font-weight: 800;
   }
 
+  html[data-theme='night'] .personal-workspace select option { color: #efe6ff; }
+
   html[data-theme='night'] .personal-workspace select option:checked,
   html[data-theme='night'] .personal-workspace select option:focus {
-    border-image-source: url('./assets/halloween/card/control-button-night.png');
-    color: #efe6ff;
-  }
-
-  html[data-theme='night'] .personal-workspace select option {
-    border-image-source: url('./assets/halloween/card/control-option-night.png');
+    background-image: url('./assets/halloween/card/control-option-on-night.png');
     color: #efe6ff;
   }
 }
@@ -7147,9 +7140,12 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
   border-width: 6px 14px;
 }
 
-/* 时间控件去掉时钟以后，读数要落在框中间。 */
+/* 时间控件去掉时钟以后，读数要落在框中间：容器右边原本留了 7px 给时钟，
+ * 现在把内边距收干净，读数才和框同一条中线。 */
+.personal-workspace .crumb-time { padding: 0; }
+
 .personal-workspace .crumb-time input.crumb-time__input[type="text"] {
-  padding: 0 6px;
+  padding: 0;
   text-align: center;
 }
 
@@ -7167,4 +7163,63 @@ html[data-theme='night'] .personal-workspace .dialog-card select,
 html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
   border-image-source: url('./assets/halloween/card/control-select-night.png') !important;
   color: #efe6ff;
+}
+
+/* ---------------------------------------------------------- AI 配置的小件 */
+
+/* 「对话 / 向量」的标签和模型 ID 是同一类东西：一枚挂在行里的小牌子。
+ * 左端那枚铜眼圈是辨识点，文字让开它。 */
+.personal-workspace .personal-ai-provider__tag,
+.personal-workspace .personal-ai-provider__model {
+  padding: 1px 8px 1px 14px;
+  border-width: 3px 6px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-tag-day.png') 16% 10% fill stretch;
+  border-radius: 0;
+  background: none;
+  color: #33200b;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__tag,
+html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
+  border-image-source: url('./assets/halloween/card/control-tag-night.png');
+  color: #efe6ff;
+}
+
+/* 勾选框：方框画在素材里，勾还是矢量——那个符号不该烘焙进图。 */
+.personal-workspace .personal-ai-page input[type="checkbox"] {
+  appearance: none;
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: url('./assets/halloween/card/control-check-off-day.png') center / 100% 100% no-repeat;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.personal-workspace .personal-ai-page input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2333200b' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
+    url('./assets/halloween/card/control-check-on-day.png') center / 100% 100% no-repeat;
+}
+
+.personal-workspace .personal-ai-page input[type="checkbox"]:focus-visible {
+  outline: 3px solid rgb(255 150 0 / 45%);
+  outline-offset: 2px;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"] {
+  background-image: url('./assets/halloween/card/control-check-off-night.png');
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23201337' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
+    url('./assets/halloween/card/control-check-on-night.png') center / 100% 100% no-repeat;
 }

@@ -56,9 +56,11 @@
 | `control-button-{day,night}.png` | 凸起的铜牌/石牌：按钮、选中的选项 |
 | `control-field-{day,night}.png` | 凹进去的槽：输入框、下拉框、未选中的选项 |
 | `control-switch-{off,on}-{day,night}.png` | 开关四态：关/开 × 昼/夜，整张铺底，旋钮画在图里 |
-| `control-select-{day,night}.png` | 下拉框本体：槽口右端一块铜片当把手，不带箭头 |
+| `control-select-{day,night}.png` | 下拉框本体：直边槽口，右端一圈略厚的铜沿，不带箭头也不留空块 |
 | `control-menu-{day,night}.png` | 下拉菜单面：直边羊皮纸，四角铜片，九宫格 |
-| `control-option-{day,night}.png` | 菜单里的一行：一条琥珀/紫条，左端一颗铜钉 |
+| `control-option-on-{day,night}.png` | 菜单里被选中的那一行：琥珀/紫条、双线、左端一颗铜珠 |
+| `control-tag-{day,night}.png` | 小标签（对话/向量、模型 ID）：左端一枚铜眼圈 |
+| `control-check-{off,on}-{day,night}.png` | 勾选框两态：空框 / 铜底，勾是矢量叠上去的 |
 
 **悬浮窗的三块板**（`panel-*`）：所有 `[role=dialog]` 都用 `panel-board`——`border-image: url(...) 14% 14% 15% fill round`，边框带 40px，角上留铜角、边条平铺、中间纯平那圈放内容。它不锁比例，34rem 的确认框和 48rem 的详情框共用一张图；框自己不再画圆角、背景和阴影。`panel-strip` 和 `panel-scrap` 的火漆和钉子会被切片切开，所以不走九宫格，按各自比例整张铺底，内容用 padding 让开边缘。
 
@@ -66,7 +68,7 @@
 
 **开关**（`control-switch-*`）是第三件零件，和前两件不共用一个逻辑：它既不是按下去的，也不是拿来装东西的，而是一颗能在槽里滑到另一头的圆钮。四种状态各一张图，旋钮画在图里，切换时两张图交叉淡出 160ms——不放一个 CSS 假旋钮，也不用滤镜调出另一个状态。四张图都按 2.2:1 交付，框也就定成 2.85rem × 1.3rem；换图不改框，旋钮才不会在切换时变形。
 
-**下拉三件套**（`control-select` / `control-menu` / `control-option`）：下拉框本体、菜单面、菜单里的一行，各画一张。菜单面用九宫格（`8% 14%`，边框 10px），菜单里的行走 `control-option`（`22% 10%`，边框 6px 14px），选中的那一行换成铜牌（`control-button`），和页面上的选项芯片是同一句话。
+**下拉三件套**（`control-select` / `control-menu` / `control-option`）：下拉框本体、菜单面、菜单里的一行，各画一张。菜单面用九宫格（`8% 14%`，边框 10px），菜单里只有被选中的那一行有框，用 `control-option-on` 整张铺底（行只有三十几像素高，九宫格的角会把左端的铜珠压扁）；没选中的行是干净的一行文字，悬停只变字色。
 
 **两种材质**：白天是**饼干**（烘焙色 `#E8C58A`，压花边、扎孔、掰角），黑夜是**石碑**（深紫 `#3A3254`，凿槽、刻线、符文）。这两套是同一构图的两次独立绘制，不是滤镜。
 
