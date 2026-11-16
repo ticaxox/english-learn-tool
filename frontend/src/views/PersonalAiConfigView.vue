@@ -250,7 +250,7 @@ onMounted(() => {
                 ></span>
                 <div class="personal-ai-provider__name">
                   <h3>{{ provider.name }}</h3>
-                  <span v-if="provider.kind === 'embedding'" class="personal-ai-provider__tag">向量</span>
+                  <span v-if="provider.kind === 'embedding'" class="personal-ai-provider__tag">嵌入</span>
                 </div>
                 <span class="personal-ai-provider__model">{{ provider.modelId }}</span>
               </div>
