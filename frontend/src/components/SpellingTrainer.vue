@@ -195,6 +195,16 @@ function submit(): void {
     @keydown.enter.prevent="props.missed && emit('continue')"
     @keydown.space.prevent="props.missed && emit('continue')"
   >
+    <span
+      v-if="props.outcome"
+      class="spell-verdict"
+      :class="{
+        'spell-verdict--right': props.outcome === 'correct',
+        'spell-verdict--wrong': props.outcome === 'wrong',
+      }"
+      aria-hidden="true"
+    ></span>
+    <span v-if="props.hit" class="spell-burst" aria-hidden="true"></span>
     <div class="spell-head">
       <h2 id="spelling-definition" class="spell-head__prompt" tabindex="-1">{{ props.question.definition }}</h2>
       <div v-if="props.question.phonetic" class="spell-head__aside">
@@ -342,6 +352,8 @@ function submit(): void {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(1.2rem, 3vw, 1.55rem);
   font-weight: 700;
+  /* Bold by default, like the word on the answer plates. */
+  -webkit-text-stroke: 0.45px currentColor;
   color: #5a3a16;
   text-align: center;
   text-transform: lowercase;
@@ -370,5 +382,67 @@ function submit(): void {
 
 @media (prefers-reduced-motion: reduce) {
   .spelling-cell { transition: none; }
+  .spell-verdict { animation: none; opacity: 1; transform: rotate(-8deg); }
+  .spell-burst { display: none; }
+}
+
+/* The verdict is stamped into the card the same way it is on the answer
+   plates: one inked ring, pressed in, with crumbs for a right answer. */
+.study-card--spelling { position: relative; }
+
+/* The shared shell puts every direct child of the card in flow
+   (`.personal-workspace .rune-surface > *`), so these two have to say
+   otherwise out loud. */
+.spell-verdict {
+  position: absolute !important;
+  top: 16px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  background: center / contain no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.spell-verdict--right {
+  background-image: url('../assets/halloween/card/verdict-right-day.png');
+  animation: spellStamp 280ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
+}
+
+.spell-verdict--wrong {
+  background-image: url('../assets/halloween/card/verdict-wrong-day.png');
+  animation: spellStamp 280ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
+}
+
+html[data-theme='night'] .spell-verdict--right {
+  background-image: url('../assets/halloween/card/verdict-right-night.png');
+}
+
+html[data-theme='night'] .spell-verdict--wrong {
+  background-image: url('../assets/halloween/card/verdict-wrong-night.png');
+}
+
+@keyframes spellStamp {
+  0% { opacity: 0; transform: rotate(-14deg) scale(1.7); }
+  55% { opacity: 1; transform: rotate(-8deg) scale(0.95); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+
+.spell-burst {
+  position: absolute !important;
+  top: 6px;
+  right: -14px;
+  width: 112px;
+  height: 112px;
+  background: url('../assets/halloween/card/burst-crumbs.png') 0 0 / 896px 112px no-repeat;
+  pointer-events: none;
+  z-index: 1;
+  animation: spellCrumbBurst 520ms steps(6) forwards;
+}
+
+@keyframes spellCrumbBurst {
+  from { background-position: -224px 0; }
+  to { background-position: -896px 0; }
 }
 </style>
