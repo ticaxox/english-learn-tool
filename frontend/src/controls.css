@@ -5000,14 +5000,14 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background-clip: padding-box;
   box-shadow: none;
   border-style: solid;
-  border-width: 30px;
+  border-width: 40px;
   border-image-source: var(--rune-paper-card);
   border-image-slice: 64 fill;
-  border-image-width: 30px;
+  border-image-width: 40px;
   border-image-repeat: stretch;
   border-color: transparent;
   border-radius: 0;
-  padding: 0 16px;
+  padding: 4px 26px 6px;
 }
 
 /* The reading passage gets its own sheet, same stock, laid out wide.
@@ -5019,10 +5019,10 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   background-clip: padding-box;
   box-shadow: none !important;
   border-style: solid !important;
-  border-width: 24px !important;
+  border-width: 34px !important;
   border-image-source: var(--rune-paper-card) !important;
   border-image-slice: 64 fill !important;
-  border-image-width: 24px !important;
+  border-image-width: 34px !important;
   border-image-repeat: stretch !important;
   border-color: transparent !important;
   border-radius: 0 !important;
@@ -5143,7 +5143,7 @@ html[data-theme='night'] .member-practice-page .practice-question-card .practice
   .member-practice-page .practice-question-card.practice-question-card--fill_blank,
   .member-practice-page .practice-question-card.practice-question-card--reading,
   .member-practice-page .practice-question-card.practice-question-card--translation {
-    border-width: 22px; border-image-width: 22px;
+    border-width: 28px; border-image-width: 28px;
   }
   .member-practice-session-page .practice-article-panel,
   .member-practice-page .practice-article-panel {
