@@ -2042,7 +2042,7 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 
 .ai-quota-row__unlimited {
   display: flex;
-  gap: 6px;
+  gap: 3px;
   align-items: center;
   font-size: 0.8rem;
   font-weight: 800;
@@ -7380,6 +7380,8 @@ html[data-theme='night'] .personal-workspace .settings-toggle {
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
   textarea
 ) {
+  min-height: 38px;
+  padding: 6px 10px;
   border-width: 4px 8px !important;
 }
 
@@ -7400,17 +7402,23 @@ html[data-theme='night'] .personal-workspace .settings-toggle {
 
 /* 7.「向量」不再是牌子，改成跟在名字后面的一枚内嵌标记。 */
 .personal-workspace .personal-ai-provider__tag {
-  padding: 0;
+  padding: 1px 6px;
   border: 0 !important;
   border-image: none !important;
-  background: none;
-  color: var(--g-orange-edge, #b4610b);
+  border-radius: 4px;
+  background: rgb(53 36 15 / 9%);
+  box-shadow: inset 0 1px 2px rgb(53 36 15 / 18%);
+  color: var(--ui-ink);
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
-html[data-theme='night'] .personal-workspace .personal-ai-provider__tag { color: #ffa04a; }
+html[data-theme='night'] .personal-workspace .personal-ai-provider__tag {
+  background: rgb(0 0 0 / 28%);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 45%);
+  color: #efe6ff;
+}
 
 /* 供应商行尾的三颗动作按钮：只放图标，做成小方块。 */
 .personal-workspace .personal-ai-provider__actions .ai-provider-action {
@@ -7422,4 +7430,8 @@ html[data-theme='night'] .personal-workspace .personal-ai-provider__tag { color:
   justify-content: center;
 }
 
-.personal-workspace .ai-provider-action svg { width: 15px; height: 15px; }
+.personal-workspace .ai-provider-action svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
