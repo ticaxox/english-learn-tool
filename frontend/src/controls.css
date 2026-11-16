@@ -6778,11 +6778,12 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   [role="button"][type="submit"]
 ):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
-  padding: 3px 14px !important;
-  border-width: 6px 15px !important;
+  min-height: 48px;
+  padding: 2px 16px !important;
+  border-width: 12px 16px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-action-day.png') 30% 6% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-action-day.png') 16% 6% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -6818,8 +6819,8 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 }
 
 .personal-workspace .settings-form .settings-toggle.is-active {
-  border-width: 6px 14px;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch;
+  border-width: 8px 14px;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch;
   background: none;
   box-shadow: none;
   color: #33200b;
@@ -7126,8 +7127,8 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 
 .personal-workspace .ai-kind-switch__option.is-active {
   padding: 5px 15px;
-  border-width: 6px 14px;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch;
+  border-width: 8px 14px;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch;
   background: none;
   color: #33200b;
 }
@@ -7161,8 +7162,8 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .settings-form select,
 .personal-workspace .dialog-card select,
 .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
-  border-width: 6px 10px !important;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch !important;
+  border-width: 7px 10px !important;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch !important;
 }
 
 html[data-theme='night'] .personal-workspace .settings-form select,
@@ -7178,11 +7179,11 @@ html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .
  * 左端那枚铜眼圈是辨识点，文字让开它。 */
 .personal-workspace .personal-ai-provider__tag,
 .personal-workspace .personal-ai-provider__model {
-  padding: 2px 10px;
-  border-width: 3px 7px;
+  padding: 3px 10px;
+  border-width: 5px 8px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 14% 6% fill stretch;
+  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch;
   border-radius: 0;
   background: none;
   color: #33200b;
@@ -7302,7 +7303,7 @@ html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button
 
 /* 设置页那颗保存比通用按钮小一号：它在一张大板的角落里，不需要和主按钮一样重。 */
 .personal-workspace .settings-form .button-row .button {
-  min-height: 38px;
+  min-height: 44px;
   padding: 2px 10px !important;
 }
 
