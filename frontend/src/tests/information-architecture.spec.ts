@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { flushPromises, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { describe, expect, it, vi } from 'vitest'
@@ -55,7 +55,7 @@ describe('T-FE-020 personal information architecture', () => {
   it('shows four first-level destinations for every personal account', async () => {
     const { wrapper } = await mountShell()
     const labels = wrapper.findAll('.ia-nav-primary').map((link) => link.text().trim())
-    expect(labels).toEqual(['今日学习', '练习', 'AI 教练', '设置'])
+    expect(labels).toEqual(['今日学习', '练习', 'Hob', '设置'])
     expect(wrapper.findAll('.ia-mobile-nav a')).toHaveLength(4)
     expect(wrapper.find('[data-nav-group="organization"]').exists()).toBe(false)
     expect(wrapper.find('.ia-notification-button').exists()).toBe(false)
@@ -82,7 +82,7 @@ describe('T-FE-020 personal information architecture', () => {
     expect(practiceShell.get('.workspace-topbar-heading').text()).toContain('练习')
   })
 
-  it('keeps profile actions and the global AI coach on the shared shell', async () => {
+  it('keeps profile actions on the shared shell and leaves the coach to its own page', async () => {
     const { wrapper, router } = await mountShell()
     await wrapper.get('.ia-profile-trigger').trigger('click')
     const menu = wrapper.get('.ia-profile-menu')
@@ -90,11 +90,10 @@ describe('T-FE-020 personal information architecture', () => {
     expect(menu.find('a[href="/settings/security"]').exists()).toBe(true)
     expect(menu.text()).toContain('退出登录')
 
-    await wrapper.get('.ia-coach-toggle').trigger('click')
-    await flushPromises()
-    // The coach is a floating window now: opening it leaves the page alone.
+    // No floating coach window: the top bar opens nothing over the page.
+    expect(wrapper.find('.ia-coach-toggle').exists()).toBe(false)
+    expect(wrapper.find('.ia-coach-panel').exists()).toBe(false)
     expect(router.currentRoute.value.name).toBe('overview')
-    expect(wrapper.get('.ia-coach-panel').text()).toContain('对话仅你可见')
   })
 
   it('puts the four settings tabs in the shared top bar', async () => {

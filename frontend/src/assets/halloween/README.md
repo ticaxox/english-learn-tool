@@ -1,6 +1,6 @@
 # 万圣节素材集 · Halloween asset set
 
-昼夜双态位图素材，供 CrumbTrail 前端在 `frontend/src/assets/halloween/**` 下直接引用。
+昼夜双态位图素材，供 Hob 前端在 `frontend/src/assets/halloween/**` 下直接引用。
 
 - 生成模型：`gpt-image-2.6-sunburst`（1024×1024 / 1024×1536 / 1536×1024）
 - 交付处理：按真实使用尺寸 ×2 DPI 缩放；平涂色量化到 64 色（边缘抗锯齿保留，软化带 0.6%–0.7%）；PNG 透明底
@@ -83,13 +83,22 @@
 
 | 文件 | 用途 |
 |---|---|
-| `crumbo-{day,night}.png` | Crumbo 主角立绘。教练页 NPC、引导页、奖励页 |
-| `empty-{day,night}.png` | 空状态插画。Crumbo 趴在空白书页上，四处空状态共用 |
-| `result-{day,night}.png` | 练习结算页顶部插画。奖杯 + Crumbo |
-| `brewing-{day,night}.png` | Crumbo 在坩埚边，题目生成中 |
-| `empty-search-{day,night}.png` | Crumbo 拿放大镜，错题本为空 |
+| `hob-{day,night}.png` | 角色标记：提着一盏灯。侧栏品牌徽、教练消息头像、改密卡片 |
+| `welcome-{day,night}.png` | 招手。登录卡片首屏 |
+| `guide-{day,night}.png` | 指着前方。今日页"还没选词书"那一步 |
+| `gnaw-{day,night}.png` | 啃自己的瓜秧。HUD 头像 |
+| `celebrate-{day,night}.png` | 双手举起、带金色星芒。升级弹层、任务条提示、练习结果页 |
+| `result-{day,night}.png` | 双手叉腰。闯关地图上的引导点、记忆训练小结 |
+| `library-{day,night}.png` | 抱着一本书。词书页抬头、空书架 |
+| `muse-{day,night}.png` | 托腮思考。教练历史栏标题 |
+| `empty-{day,night}.png` | 趴在摊开的书上阅读。教练空态两处 |
+| `notfound-{day,night}.png` | 眨眼。404 页 |
+| `brewing-{day,night}.png` | 守着炼药锅搅拌，锅里有蒸汽。题目生成中 |
+| `empty-search-{day,night}.png` | 举着放大镜。错题本为空 |
 
-Crumbo 配色取自 `frontend/src/components/CrumboMark.vue`：金身 `#e9b43b`、苔绿叶帽 `#66753a`、可可眼 `#573022`。
+**一块地方一张画。** `hob` 是角色标记，只出现在"这是谁"的身份位（品牌徽、教练消息头像）；其余位置各有一个专属姿势，同一个位置不会和别的页面共用一张图。映射关系写在 `index.ts` 的 `illustration` 导出里，页面通过 `<ArtImage :set="illustration.xxx">` 或 `<HobMark :set="...">` 取用。
+
+配色：昼版瓜壳 `#FF9600`、火 `#FF7A18` 配金芯、四肢 `#C25200`、翅膀 `#6D4C9A`、描边 `#3A2819`；夜版瓜壳 `#8894C3`、火 `#7CF0C4` 配象牙芯、四肢 `#6D77A8`、翅膀 `#3E4778`、描边 `#241F42`。昼夜是同一姿势的两次独立绘制，切换靠 520ms 交叉淡出，不用滤镜。
 
 ### `char/` — 游戏化层（第二期补齐）
 

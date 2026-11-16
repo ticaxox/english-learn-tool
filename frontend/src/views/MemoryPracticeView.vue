@@ -25,7 +25,7 @@ import { useMemorySession } from '../composables/useMemorySession'
 import { useGamification } from '../composables/useGamification'
 import { useStudyHeartbeat } from '../composables/useStudyHeartbeat'
 import { useToast } from '../composables/useToast'
-import { crumbBurst, shake } from '../composables/useMotion'
+import { sparkBurst, shake } from '../composables/useMotion'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
 import {
   MEMORY_MODULES,
@@ -178,7 +178,7 @@ function onFlashReveal(): void {
 async function rateFlashcard(questionId: string, rating: 'again' | 'good'): Promise<void> {
   await session.rateFlashcard(questionId, rating)
   heartbeat.markInteraction()
-  if (rating === 'good') crumbBurst(document.querySelector('.memory-main-card'), 8)
+  if (rating === 'good') sparkBurst(document.querySelector('.memory-main-card'), 8)
 }
 
 interface Verdict {

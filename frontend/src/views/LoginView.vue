@@ -2,7 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
+import ArtImage from '../components/ArtImage.vue'
+import { illustration } from '../assets/halloween'
 import { useAuthStore } from '../stores/auth'
 import { safeInternalRedirect, validateUsername } from '../lib/validation'
 
@@ -102,8 +103,8 @@ async function retryConnection(): Promise<void> {
   <main class="auth-page">
     <section class="auth-card" aria-labelledby="login-title">
       <div class="auth-card__masthead">
-        <WhiskerCrumbMark size="medium" />
-        <span class="auth-card__seal">CURIOUS ENGLISH CLUB</span>
+        <ArtImage class="auth-card__mark" :set="illustration.welcome" />
+        <span class="auth-card__seal">GRIMOIRE</span>
       </div>
       <p class="eyebrow">个人英语学习空间</p>
       <h1 id="login-title">{{ mode === 'login' ? '登录学习空间' : '创建学习账号' }}</h1>

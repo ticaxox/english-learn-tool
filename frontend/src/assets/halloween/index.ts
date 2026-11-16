@@ -158,21 +158,58 @@ import brewingDay from './char/brewing-day.png'
 import brewingNight from './char/brewing-night.png'
 import emptySearchDay from './char/empty-search-day.png'
 import emptySearchNight from './char/empty-search-night.png'
-import crumboDay from './char/crumbo-day.png'
-import crumboNight from './char/crumbo-night.png'
+import hobDay from './char/hob-day.png'
+import hobNight from './char/hob-night.png'
 import emptyDay from './char/empty-day.png'
 import emptyNight from './char/empty-night.png'
 import resultDay from './char/result-day.png'
 import resultNight from './char/result-night.png'
+import welcomeDay from './char/welcome-day.png'
+import welcomeNight from './char/welcome-night.png'
+import notFoundDay from './char/notfound-day.png'
+import notFoundNight from './char/notfound-night.png'
+import libraryDay from './char/library-day.png'
+import libraryNight from './char/library-night.png'
+import celebrateDay from './char/celebrate-day.png'
+import celebrateNight from './char/celebrate-night.png'
+import gnawDay from './char/gnaw-day.png'
+import gnawNight from './char/gnaw-night.png'
+import guideDay from './char/guide-day.png'
+import guideNight from './char/guide-night.png'
+import museDay from './char/muse-day.png'
+import museNight from './char/muse-night.png'
 
-/** Large illustrations: the mascot, the empty state, the practice result hero. */
+/**
+ * Large illustrations: one per moment, not one repeated everywhere.
+ *
+ * `hob` is the character mark — the same drawing wherever the creature is
+ * standing for the product. Every other slot is a different pose for a
+ * different moment, so a result page and an empty shelf never show the same
+ * picture.
+ */
 export const illustration = {
-  crumbo: { day: crumboDay, night: crumboNight },
+  hob: { day: hobDay, night: hobNight },
+  /** Reading, face down over an open book: the empty coach. */
   empty: { day: emptyDay, night: emptyNight },
+  /** Arms on hips, pleased with itself: the practice result. */
   result: { day: resultDay, night: resultNight },
-  /** Crumbo at the cauldron while a set of questions is being generated. */
+  /** Waving hello: the sign-in card. */
+  welcome: { day: welcomeDay, night: welcomeNight },
+  /** A wink, for an address that does not exist. */
+  notFound: { day: notFoundDay, night: notFoundNight },
+  /** Hugging a book, for an empty shelf. */
+  library: { day: libraryDay, night: libraryNight },
+  /** Both arms up with sparkles: level-up and a finished drill. */
+  celebrate: { day: celebrateDay, night: celebrateNight },
+  /** Chewing its own stem: the small avatar that sits in the HUD. */
+  gnaw: { day: gnawDay, night: gnawNight },
+  /** Pointing the way ahead: today's greeting and the challenge map. */
+  guide: { day: guideDay, night: guideNight },
+  /** Hand at the chin: the coach's room, where you think out loud. */
+  muse: { day: museDay, night: museNight },
+  /** Hob at the cauldron while a set of questions is being generated. */
   brewing: { day: brewingDay, night: brewingNight },
-  /** Crumbo with a magnifier for an empty mistakes list. */
+  /** Hob with a magnifier for an empty mistakes list. */
   emptySearch: { day: emptySearchDay, night: emptySearchNight },
 } as const
 

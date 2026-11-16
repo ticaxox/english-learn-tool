@@ -27,7 +27,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
   { key: 'aiCompleted', label: 'AI 任务完成', description: '练习生成或评分任务完成时提醒。', ai: true },
   { key: 'aiFailed', label: 'AI 任务失败', description: 'AI 任务未能完成时提醒。', ai: true },
   { key: 'planAdjusted', label: '学习计划调整', description: '学习计划由系统调整时提醒。', ai: true },
-  { key: 'aiAction', label: 'AI 教练建议', description: 'AI 教练产生可查看建议时提醒。', ai: true },
+  { key: 'aiAction', label: 'Hob 建议', description: 'Hob 产生可查看建议时提醒。', ai: true },
 ]
 
 const preferences = ref<NotificationPreferences | null>(null)

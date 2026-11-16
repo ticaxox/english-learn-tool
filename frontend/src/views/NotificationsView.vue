@@ -61,7 +61,7 @@ function businessLink(item: NotificationItem): string {
 
 function businessLinkLabel(item: NotificationItem): string {
   if (item.businessRefType === 'ai_job') return '前往 AI 练习'
-  if (item.businessRefType === 'coach_action') return '查看 AI 教练'
+  if (item.businessRefType === 'coach_action') return '查看 Hob'
   return '前往学习概览'
 }
 

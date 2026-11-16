@@ -98,10 +98,10 @@ export function drawPaths(container: Element | null, options: { delay?: number }
 }
 
 /**
- * Reward burst: a handful of crumbs fly out from an element.
+ * Reward burst: a handful of sparks fly out from an element.
  * Uses DOM nodes rather than canvas so it inherits the theme colours.
  */
-export function crumbBurst(anchor: Element | null, count = 14): void {
+export function sparkBurst(anchor: Element | null, count = 14): void {
   if (!anchor || !motionAllowed()) return
   const rect = anchor.getBoundingClientRect()
   if (rect.width === 0) return
@@ -129,7 +129,7 @@ export function crumbBurst(anchor: Element | null, count = 14): void {
   window.setTimeout(() => layer.remove(), 1600)
 }
 
-/** Idle bob for Crumbo, so the mascot reads as alive. */
+/** Idle bob for Hob, so the mascot reads as alive. */
 export function breathe(target: Element | null): gsap.core.Timeline | null {
   if (!target || !motionAllowed()) return null
   const timeline = gsap.timeline({ repeat: -1, yoyo: true })

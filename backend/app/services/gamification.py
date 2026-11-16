@@ -1,4 +1,4 @@
-"""XP, crumbs, streaks and the three daily quests.
+"""XP, lamp oil, streaks and the three nightly chores.
 
 Everything is awarded server-side from actions that already happened (a graded
 card, a submitted practice, a completed map node). Each award is stored as an
@@ -44,7 +44,7 @@ from app.services.auth import utcnow
 from app.services.learning import local_date_for
 from app.services.word_kinds import POS_AXES, normalize_part_of_speech
 
-# XP grows with use; crumbs are what the map spends.
+# XP grows with use; lamp oil is what the map spends.
 AWARDS = {
     "review": (2, 2),
     "practice": (4, 4),
@@ -60,7 +60,9 @@ DAILY_CRUMB_CAP = 1200
 
 QUEST_KEYS = ("review_due", "practice_one", "challenge_done")
 QUEST_REWARD = {"review_due": 30, "practice_one": 40, "challenge_done": 60}
-LEVEL_TITLES = ((1, "拾屑人"), (5, "探路者"), (10, "收集家"), (20, "语言匠"), (35, "说客"))
+# The ladder is one fire, not five jobs: the thing you keep alive starts buried
+# in ash and ends cold-blue, because the hottest fire is the coldest colour.
+LEVEL_TITLES = ((1, "余烬"), (5, "火舌"), (10, "熔炉"), (20, "锻铁"), (35, "淬火"))
 
 
 def xp_for_level(level: int) -> int:
@@ -296,25 +298,25 @@ async def refresh_quests(
 
 
 BADGES: dict[str, tuple[str, str]] = {
-    "first_lesson": ("初次拾屑", "完成第一次学习"),
-    "streak_3": ("三日不辍", "连续学习 3 天"),
-    "streak_7": ("七日连胜", "连续学习 7 天"),
-    "streak_30": ("月度坚持", "连续学习 30 天"),
-    "level_5": ("探路者", "达到 5 级"),
-    "level_10": ("收藏家", "达到 10 级"),
+    "first_lesson": ("初次点灯", "点亮第一晚"),
+    "streak_3": ("三日不灭", "灯连着亮 3 夜"),
+    "streak_7": ("七日长明", "灯连着亮 7 夜"),
+    "streak_30": ("一月不熄", "灯连着亮 30 夜"),
+    "level_5": ("火舌", "达到 5 级"),
+    "level_10": ("熔炉", "达到 10 级"),
     "practice_10": ("练习成瘾", "累计提交 10 组练习"),
     "practice_50": ("题海老手", "累计提交 50 组练习"),
-    "perfect_5": ("全对五连", "五组练习全部答对"),
-    "boss_1": ("首胜首领", "首次通过闯关终点"),
+    "perfect_5": ("灯下无暗", "五组练习全部答对"),
+    "boss_1": ("首破夜关", "首次通过闯关终点"),
     "review_100": ("百词成诵", "累计复习 100 张卡片"),
-    "quest_all": ("今日全勤", "一天内完成三条每日任务"),
-    "streak_14": ("半月不倒", "连续学习 14 天"),
-    "streak_100": ("百日长明", "连续学习 100 天"),
-    "level_3": ("初尝甜头", "达到 3 级"),
-    "level_20": ("夜行学者", "达到 20 级"),
+    "quest_all": ("一夜三添", "一天内完成三条每日任务"),
+    "streak_14": ("半月不熄", "灯连着亮 14 夜"),
+    "streak_100": ("百日长明", "灯连着亮 100 夜"),
+    "level_3": ("初添灯油", "达到 3 级"),
+    "level_20": ("锻铁", "达到 20 级"),
     "practice_100": ("百炼成钢", "累计提交 100 组练习"),
-    "perfect_20": ("全对二十连", "二十组练习全部答对"),
-    "boss_10": ("十度远征", "通过十次闯关终点"),
+    "perfect_20": ("二十夜无暗", "二十组练习全部答对"),
+    "boss_10": ("十度夜行", "通过十次闯关终点"),
     "review_1000": ("千词之海", "累计复习 1000 张卡片"),
     "first_boss_win": ("破晓者", "首次击败终点守卫"),
     "night_owl": ("夜猫子", "在深夜完成一次学习"),

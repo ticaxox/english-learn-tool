@@ -1,15 +1,16 @@
 <script setup lang="ts">
 /**
- * The two small reward marks: a crumb coin and a streak candle.
+ * The three small reward marks: the oil drop you spend, the coin the older
+ * profile pages still show, and the candle that carries a streak.
  *
  * Same flat vector language as the crest — solid fills, one outline weight,
- * no gradients and no glow. The candle is the streak because a streak is days
- * on end, and the coin is the crumb because a crumb is what you collect.
+ * no gradients and no glow. The candle is the streak because a streak is a
+ * lamp that stayed lit, and the drop is the oil you keep adding to it.
  */
 withDefaults(defineProps<{
-  mark?: 'coin' | 'candle'
+  mark?: 'coin' | 'candle' | 'oil'
   size?: number
-}>(), { mark: 'coin', size: 18 })
+}>(), { mark: 'oil', size: 18 })
 </script>
 
 <template>
@@ -24,6 +25,25 @@ withDefaults(defineProps<{
   >
     <circle cx="12" cy="12" r="9" fill="#FFC800" stroke="#B37E00" stroke-width="2" />
     <path d="M12 6.5 13.9 10l3.6.5-2.6 2.5.7 3.5-3.6-1.9-3.5 1.9.6-3.5L6.5 10l3.6-.5L12 6.5Z" fill="#FFE9A8" />
+  </svg>
+
+  <svg
+    v-else-if="mark === 'oil'"
+    class="mark"
+    :width="size"
+    :height="size"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M12 2.8c3.2 4.3 5.1 7.1 5.1 9.5a5.1 5.1 0 0 1-10.2 0c0-2.4 1.9-5.2 5.1-9.5Z"
+      fill="#FFC800"
+      stroke="#B37E00"
+      stroke-width="2"
+      stroke-linejoin="round"
+    />
+    <path d="M9.4 12.6c0 1.7 1.1 2.8 2.6 2.9" stroke="#FFE9A8" stroke-width="1.8" stroke-linecap="round" />
   </svg>
 
   <svg

@@ -1,4 +1,4 @@
-/* Whisker Crumb — T-FE-013
+/* Cookie theme — T-FE-013
  * A warm biscuit, ink-blue and jam palette layered over the production UI.
  * This file changes presentation only; it does not own business state.
  */
@@ -462,6 +462,28 @@ pre {
   margin-bottom: 1.35rem;
   padding-bottom: 1rem;
   border-bottom: 1px dashed var(--cookie-300);
+}
+
+/* The sign-in card's mark is the creature waving hello, not the old cookie
+ * glyph: same character as everywhere else, in the pose that greets. */
+.auth-card__mark {
+  display: block;
+  width: 84px;
+  height: 84px;
+  flex: 0 0 auto;
+}
+
+.auth-card__mark .art-swap,
+.auth-card__mark .art-swap__stack {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-card__mark .art-swap__frame {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .auth-card__seal {

@@ -3001,7 +3001,7 @@ than its row reads as a different kind of thing. */
   color: #4a1010;
 }
 
-/* Crumbo perches on top of the stop it stands on, clear of the reward tag. */
+/* Hob perches on top of the stop it stands on, clear of the reward tag. */
 .challenge-dsl-guide {
   position: absolute;
   z-index: 3;
@@ -3015,7 +3015,7 @@ than its row reads as a different kind of thing. */
   filter: drop-shadow(0 3px 0 rgb(59 42 26 / 16%));
 }
 
-.challenge-dsl-guide .crumbo-mark { animation: challenge-guide-bob 2.4s ease-in-out infinite; }
+.challenge-dsl-guide .hob-mark { animation: challenge-guide-bob 2.4s ease-in-out infinite; }
 
 @keyframes challenge-guide-bob {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
@@ -3052,7 +3052,7 @@ than its row reads as a different kind of thing. */
   .challenge-dsl-card.is-focus::after { animation: none; opacity: 0; }
   .personal-workspace .challenge-dsl-card.is-focus,
   .personal-workspace .challenge-dsl-card.is-focus .challenge-dsl-card__face,
-  .challenge-dsl-guide .crumbo-mark,
+  .challenge-dsl-guide .hob-mark,
   .personal-workspace .challenge-dsl-card.is-landed .challenge-dsl-reward { animation: none; }
 }
 

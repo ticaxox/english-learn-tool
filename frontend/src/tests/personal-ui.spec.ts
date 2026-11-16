@@ -57,12 +57,13 @@ describe('T-FE-020 personal UI system', () => {
     expect(css).toContain('.personal-workspace .mistake-table thead { display: none; }')
   })
 
-  it('keeps mobile actions at least 44px and hides the duplicate coach header', () => {
+  it('keeps mobile actions at least 44px and leaves no floating coach window behind', () => {
     const css = source('../personal-ui.css')
-    expect(css).toContain('.personal-workspace .ia-coach-panel-body .coach-page-header { display: none; }')
     expect(css).toContain('.personal-workspace.workspace-shell .button-small')
-    expect(css).toContain('.personal-workspace .workspace-coach-button.member-concierge-button')
     expect(css).toContain('min-height: 44px')
+    // The floating coach is gone, so its window and its button have no styles.
+    expect(css).not.toContain('.ia-coach-panel-body')
+    expect(css).not.toContain('.workspace-coach-button')
   })
 
   it('keeps choice radios at their intrinsic size instead of stretching to the row', () => {
@@ -80,12 +81,12 @@ describe('T-FE-020 personal UI system', () => {
     expect(css).toContain('.personal-workspace .personal-ai-empty { max-width: none; }')
   })
 
-  it('docks the coach beside the workspace without collapsing page columns', () => {
+  it('leaves the workspace full width now that no coach panel docks beside it', () => {
     const css = source('../game-ui.css')
-    expect(css).toContain('.personal-workspace.is-coach-open .workspace-main')
-    expect(css).toContain('margin-right: 460px')
-    const personal = source('../personal-ui.css')
-    expect(personal).not.toContain('.personal-workspace.is-coach-open .crumb-today-layout')
+    // The docking layout belonged to the floating window; with it gone the
+    // workspace keeps the whole row and no margin is reserved for a panel.
+    expect(css).not.toContain('.personal-workspace.is-coach-open .workspace-main')
+    expect(css).not.toContain('margin-right: 460px')
   })
 
   it('lets wordbook dialogs use their designed desktop width', () => {

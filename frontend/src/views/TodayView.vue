@@ -11,7 +11,8 @@ import { RouterLink } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ChallengeView from './ChallengeView.vue'
 import GoalRing from '../components/ui/GoalRing.vue'
-import CrumboMark from '../components/CrumboMark.vue'
+import HobMark from '../components/HobMark.vue'
+import { illustration } from '../assets/halloween'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
@@ -27,7 +28,7 @@ import { TODAY_STATUS_LABELS, type TodayPlan } from '../types/learning'
 import '../learning.css'
 
 const gamification = useGamification()
-const crumboMood = computed(() => gamification.crumboMood.value)
+const hobMood = computed(() => gamification.hobMood.value)
 const plan = ref<TodayPlan | null>(null)
 const loading = ref(false)
 const error = ref<unknown>(null)
@@ -111,7 +112,7 @@ const primaryTask = computed(() => todayTasks.value[activeTaskIndex.value] ?? nu
 const ringTask = computed(() => primaryTask.value ?? todayTasks.value[0] ?? null)
 const completedTaskCount = computed(() => todayTasks.value.filter((task) => task.done).length)
 
-const crumboTip = computed(() => {
+const hobTip = computed(() => {
   const remaining = todayTasks.value.filter((task) => !task.done)
   if (remaining.length === 0) return '今天的任务都完成了，可以再走一圈，也可以明天再来。'
   const next = remaining[0]
@@ -167,7 +168,7 @@ onMounted(() => {
 
     <section v-else-if="error" class="crumb-state-panel" :class="needsActiveWordbook ? 'crumb-empty-state' : 'crumb-error-panel'">
       <div v-if="needsActiveWordbook" class="crumb-empty-note">
-        <CrumboMark size="medium" :mood="crumboMood" />
+        <HobMark size="medium" :mood="hobMood" :set="illustration.guide" />
         <div>
           <strong>先选一本词书，路线才能开始。</strong>
           <p>选好词书后，今天的任务会自动出现。</p>
@@ -214,8 +215,8 @@ onMounted(() => {
           </ul>
 
           <div class="crumb-tip">
-            <CrumboMark size="small" :mood="crumboMood" />
-            <p>{{ crumboTip }}</p>
+            <HobMark size="small" :mood="hobMood" :set="illustration.celebrate" />
+            <p>{{ hobTip }}</p>
           </div>
         </div>
 

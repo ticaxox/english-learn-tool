@@ -74,7 +74,7 @@ function toggleSlow(): void {
 
     <main class="lab-body">
       <section class="lab-block">
-        <p class="lab-caption">玩家条 · 等级、经验、碎屑、连击、今日任务</p>
+        <p class="lab-caption">玩家条 · 等级、经验、灯油、连击、今日任务</p>
         <GameHud />
         <button type="button" class="lab-button" @click="showLevelUp = true">看升级庆祝</button>
       </section>

@@ -15,7 +15,7 @@ vi.mock('../api/progress', async (importOriginal) => {
 const payload = {
   xp: 480,
   crumbs: 120,
-  level: { level: 2, title: '拾屑人', xp_into_level: 160, xp_for_next_level: 400 },
+  level: { level: 2, title: '余烬', xp_into_level: 160, xp_for_next_level: 400 },
   streak: 3,
   streak_best: 5,
   active_today: true,
@@ -36,7 +36,7 @@ describe('gamification', () => {
   it('parses level, streak and the three quests', () => {
     const progress = parseProgress(payload)
     expect(progress.level.level).toBe(2)
-    expect(progress.level.title).toBe('拾屑人')
+    expect(progress.level.title).toBe('余烬')
     expect(progress.streak).toBe(3)
     expect(progress.quests.map((quest) => quest.key)).toEqual([
       'review_due',

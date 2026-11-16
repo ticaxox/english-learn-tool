@@ -2,7 +2,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import WhiskerCrumbMark from '../components/WhiskerCrumbMark.vue'
+import ArtImage from '../components/ArtImage.vue'
+import { illustration } from '../assets/halloween'
 import { validateStrongPassword } from '../lib/validation'
 import { PasswordChangedLoginRequiredError, useAuthStore } from '../stores/auth'
 
@@ -71,8 +72,8 @@ async function signOut(): Promise<void> {
   <main class="auth-page">
     <section class="auth-card auth-card--wide" aria-labelledby="change-password-title">
       <div class="auth-card__masthead">
-        <WhiskerCrumbMark size="medium" />
-        <span class="auth-card__seal">CURIOUS ENGLISH CLUB</span>
+        <ArtImage class="auth-card__mark" :set="illustration.empty" />
+        <span class="auth-card__seal">GRIMOIRE</span>
       </div>
       <p class="eyebrow">首次登录或密码已重置</p>
       <h1 id="change-password-title">设置新密码</h1>

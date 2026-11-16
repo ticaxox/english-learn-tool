@@ -24,7 +24,7 @@ import PracticeTopBar from '../components/PracticeTopBar.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
 import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { fetchProgress } from '../api/progress'
-import { crumbBurst, popIn } from '../composables/useMotion'
+import { sparkBurst, popIn } from '../composables/useMotion'
 import '../practice.css'
 
 const props = withDefaults(defineProps<{ sessionId?: string; embedded?: boolean }>(), { embedded: false })
@@ -176,7 +176,7 @@ async function submit(): Promise<void> {
         // Let the result render, then pop the line and throw a crumb burst.
         await nextTick()
         popIn(document.querySelector('.practice-award'), { y: 10, scale: 0.94 })
-        if (xp > 0) crumbBurst(document.querySelector('.practice-award'))
+        if (xp > 0) sparkBurst(document.querySelector('.practice-award'))
         if (after.level.level > before.level.level) {
           levelUp.value = { level: after.level.level, title: after.level.title }
         }
@@ -278,7 +278,7 @@ void practice.load()
           <span v-if="award.to > award.from" class="practice-award__levelup">
             升级到 Lv.{{ award.to }}！
           </span>
-          <span>+{{ award.xp }} XP · +{{ award.crumbs }} 碎屑</span>
+          <span>+{{ award.xp }} XP · +{{ award.crumbs }} 灯油</span>
         </p>
         <PracticeResultView :result="result" :questions="questions" />
       </template>

@@ -16,9 +16,9 @@ async def test_level_curve_is_monotonic_and_titles_progress() -> None:
     for level in range(1, 40):
         assert xp_for_level(level + 1) > xp_for_level(level)
         assert level_for_xp(xp_for_level(level)) == level
-    assert title_for_level(1) == "拾屑人"
-    assert title_for_level(6) == "探路者"
-    assert title_for_level(40) == "说客"
+    assert title_for_level(1) == "余烬"
+    assert title_for_level(6) == "火舌"
+    assert title_for_level(40) == "淬火"
 
 
 async def test_fresh_account_reads_zero_progress_with_three_quests(client, member_user) -> None:

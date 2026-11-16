@@ -293,8 +293,8 @@ async function revertTo(message: CoachMessage): Promise<void> {
     <div class="coach-layout" :class="{ 'coach-layout--with-history': isPage }">
       <aside v-if="isPage" class="coach-history" aria-label="历史记录">
         <header class="coach-history__head">
-          <ArtImage class="coach-history__mark" :set="illustration.crumbo" />
-          <strong class="coach-history__name">AI 教练</strong>
+          <ArtImage class="coach-history__mark" :set="illustration.muse" />
+          <strong class="coach-history__name">Hob</strong>
         </header>
 
         <DivButton
@@ -342,7 +342,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
         <div v-if="!coach.selectedConversation.value" class="coach-main-empty">
           <ArtImage class="coach-empty-art" :set="illustration.empty" />
           <div class="coach-main-empty__copy">
-            <h2>和 Mr. Whisker 聊聊</h2>
+            <h2>和 Hob 聊聊</h2>
             <p class="coach-empty-lede">学习计划、复习顺序，或者一句想改得更自然的英文。</p>
             <div class="coach-suggested-prompts" aria-label="建议提问">
               <DivButton v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">
@@ -384,7 +384,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
             <div v-if="coach.messages.value.length === 0 && !coach.messagesLoading.value" class="coach-messages-empty">
               <ArtImage class="coach-empty-art" :set="illustration.empty" />
               <div class="coach-main-empty__copy">
-                <strong>和 Mr. Whisker 聊聊</strong>
+                <strong>和 Hob 聊聊</strong>
                 <p class="coach-empty-lede">学习计划、复习顺序，或者一句想改得更自然的英文。</p>
                 <div class="coach-suggested-prompts" aria-label="建议提问">
                   <DivButton v-for="prompt in suggestedPrompts" :key="prompt" type="button" @click="useSuggestedPrompt(prompt)">
@@ -401,7 +401,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
               :class="`coach-message--${message.role}`"
             >
               <span class="coach-message-avatar" :class="`coach-message-avatar--${message.role}`" aria-hidden="true">
-                <ArtImage v-if="message.role === 'assistant'" class="coach-message-avatar__art" :set="illustration.crumbo" />
+                <ArtImage v-if="message.role === 'assistant'" class="coach-message-avatar__art" :set="illustration.hob" />
                 <span v-else class="coach-message-avatar__you">你</span>
               </span>
 
@@ -411,7 +411,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
                     v-if="(message.status === 'queued' || message.status === 'streaming' || coach.streamingMessageId.value === message.id) && !coach.messageText(message)"
                     class="coach-thinking"
                     role="status"
-                    aria-label="AI 教练正在思考"
+                    aria-label="Hob 正在思考"
                   >
                     <span></span><span></span><span></span>
                   </div>
@@ -505,7 +505,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
           <ErrorNotice v-if="coach.sendError.value" :error="coach.sendError.value" :show-retry="false" />
 
           <form class="coach-composer" @submit.prevent="submitMessage">
-            <label class="visually-hidden" for="coach-message-input">给 AI 教练发消息</label>
+            <label class="visually-hidden" for="coach-message-input">给 Hob 发消息</label>
             <input
               ref="attachmentInput"
               class="visually-hidden"

@@ -6,8 +6,9 @@
  * going, and it disappears on its own after a few seconds.
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import CrumboMark from './CrumboMark.vue'
-import { crumbBurst, gsap, motionAllowed } from '../composables/useMotion'
+import HobMark from './HobMark.vue'
+import { illustration } from '../assets/halloween'
+import { sparkBurst, gsap, motionAllowed } from '../composables/useMotion'
 
 const props = defineProps<{ level: number; title: string }>()
 const emit = defineEmits<{ close: [] }>()
@@ -23,7 +24,7 @@ onMounted(() => {
       { scale: 1, opacity: 1, y: 0, duration: 0.55, ease: 'back.out(1.7)' },
     )
   }
-  crumbBurst(cardRef.value, 24)
+  sparkBurst(cardRef.value, 24)
   timer = window.setTimeout(() => emit('close'), 4200)
 })
 
@@ -42,7 +43,7 @@ onBeforeUnmount(() => {
       aria-label="等级提升"
       @click.stop
     >
-      <CrumboMark size="large" mood="glowing" />
+      <HobMark size="large" mood="glowing" :set="illustration.celebrate" />
       <p class="levelup-kicker">LEVEL UP</p>
       <h2>Lv.{{ props.level }}</h2>
       <p class="levelup-title">{{ props.title }}</p>
