@@ -3621,6 +3621,10 @@ than its row reads as a different kind of thing. */
 
 .personal-workspace .spoken-text { white-space: pre-wrap; }
 .personal-workspace .spoken-word--target { cursor: pointer; }
+
+/* A question's own words: weighted so the learner sees which of them the
+   exercise is about, but not marked, not underlined and not pressable. */
+.personal-workspace .spoken-word--bold { font-weight: 800; }
 /* Only the wordbook's own words answer to the pointer: a page where every
    word lights up on hover reads as a wall of links. */
 .personal-workspace .spoken-word--target:hover {

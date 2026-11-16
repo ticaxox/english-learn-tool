@@ -13,8 +13,15 @@ import { speak } from '../composables/useSpeechSynthesis'
 import { useWordGlossary } from '../composables/useWordGlossary'
 
 const props = withDefaults(
-  defineProps<{ text: string; as?: string; highlight?: string[] }>(),
-  { as: 'p', highlight: () => [] },
+  defineProps<{
+    text: string
+    as?: string
+    highlight?: string[]
+    /** 'highlight' = the reading aid (marked and pressable); 'bold' = the
+     *  question's own words, weighted but silent. */
+    emphasis?: 'highlight' | 'bold'
+  }>(),
+  { as: 'p', highlight: () => [], emphasis: 'highlight' },
 )
 
 const EN_WORD = /[A-Za-z][A-Za-z'’-]*/g
@@ -93,7 +100,11 @@ onBeforeUnmount(() => {
   <component :is="as" class="spoken-text" @click="onWordClick">
     <template v-for="(part, index) in parts" :key="index">
       <span
-        v-if="part.target"
+        v-if="part.target && props.emphasis === 'bold'"
+        class="spoken-word spoken-word--bold"
+      >{{ part.text }}</span>
+      <span
+        v-else-if="part.target"
         class="spoken-word spoken-word--target"
         :data-word="part.text"
         :title="`查看 ${part.text} 的释义`"
