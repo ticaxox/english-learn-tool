@@ -5970,10 +5970,11 @@ html[data-theme='night'] .personal-workspace .rune-surface .choice-option__label
   display: flex;
   align-items: center;
   /* A number field is as wide as its digits plus two targets, not as wide as
-   * the column it sits in. Three digits is the most it ever holds. */
-  width: min(100%, 88px);
+   * the column it sits in. 现在的边框带占了左右各 10px，± 贴到框边之后
+   * 中间还要留给数字，所以整体比原来宽一点、内边距收成 0。 */
+  width: min(100%, 108px);
   height: var(--ui-control);
-  padding: 0 3px;
+  padding: 0;
   border: 2px solid var(--ui-line-strong);
   border-radius: 10px;
   background: var(--ui-surface);
@@ -6772,7 +6773,7 @@ html[data-theme='night'] .personal-workspace :is(
   .workspace-secondary-button,
   .crumb-primary-action,
   [role="button"][type="submit"]
-):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle),
+):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
   padding: 3px 14px !important;
   border-width: 6px 15px !important;
@@ -6873,7 +6874,7 @@ html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crum
 }
 
 /* 夜间：铜牌换成发烟的石牌，槽换成靛色墨沟。 */
-html[data-theme='night'] .personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle),
+html[data-theme='night'] .personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
 html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button),
 html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
   border-image-source: url('./assets/halloween/card/control-button-night.png') !important;
@@ -6933,19 +6934,37 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
   color: #efe6ff;
 }
 
-/* 下拉列表浮在页面上，所以它和右键菜单、日期选择器一样是一块板。 */
+/* 下拉列表浮在页面上，用定点碎片那张图整张铺底——picker 这个伪元素盒
+ * 不画 border-image，只能走 background。 */
 @supports (appearance: base-select) {
   .personal-workspace select::picker(select) {
-    padding: 12px 14px;
-    border: 14px solid transparent;
-    border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+    padding: 18px 16px 16px;
+    border: 0;
     border-radius: 0;
-    background: none;
+    background: url('./assets/halloween/card/panel-scrap-day.png') center / 100% 100% no-repeat;
     box-shadow: none;
   }
 
   html[data-theme='night'] .personal-workspace select::picker(select) {
-    border-image-source: url('./assets/halloween/card/panel-board-night.png');
+    background-image: url('./assets/halloween/card/panel-scrap-night.png');
+  }
+}
+
+/* 右边那个下拉箭头不要了：它是「这里能展开」的提示，但页面上每个下拉旁边
+ * 都有标签，箭头反而在点开时翻成朝上，看着像另一个按钮。 */
+.personal-workspace select,
+.personal-workspace select:hover {
+  padding-right: 12px;
+  background-image: none !important;
+}
+
+@supports (appearance: base-select) {
+  .personal-workspace select::picker-icon {
+    display: none;
+    content: none;
+    width: 0;
+    height: 0;
+    margin: 0;
   }
 }
 
@@ -7078,3 +7097,9 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
   background: none;
   color: #33200b;
 }
+
+/* 时间控件右边那颗时钟只是装饰，真正要读的是 06:00 这几个字。去掉图标，
+ * 把宽度让给读数。 */
+.personal-workspace .crumb-time__glyph { display: none; }
+
+.personal-workspace .crumb-time__input { padding-right: 4px; }

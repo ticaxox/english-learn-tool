@@ -583,16 +583,11 @@ html .personal-workspace .workspace-content:has(.kb) {
   position: fixed;
   z-index: 60;
   min-width: 196px;
-  padding: 2px 6px 6px;
-  border: 12px solid transparent;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-
-html[data-theme='night'] .personal-workspace .kb-ctx {
-  border-image-source: url('./assets/halloween/card/panel-board-night.png');
+  padding: 5px;
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  background: var(--ui-surface);
+  box-shadow: 0 10px 30px rgb(20 10 30 / 22%);
 }
 
 .personal-workspace .kb-ctx__label {
