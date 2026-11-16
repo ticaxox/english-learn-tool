@@ -63,7 +63,7 @@ describe('AiQuotaPanel', () => {
     })
   })
 
-  it('shows an unlimited limit as a label instead of a number', async () => {
+  it('keeps the number field but disables it when the limit is unlimited', async () => {
     apiMocks.fetchLearningProfile.mockResolvedValue({ aiQuotaLimits: { question_generation: -1 } })
     apiMocks.fetchPracticeUsage.mockResolvedValue({
       ...usage,
@@ -75,7 +75,11 @@ describe('AiQuotaPanel', () => {
     })
     const wrapper = mount(AiQuotaPanel)
     await flushPromises()
-    expect(wrapper.findAll('.ai-quota-row')[1].text()).toContain('不限')
-    expect(wrapper.findAll('.ai-quota-row')[1].find('input[type="number"]').exists()).toBe(false)
+    const row = wrapper.findAll('.ai-quota-row')[1]
+    expect(row.text()).toContain('不限')
+    /* 「不限」勾上以后数字框还在，只是不能用了——不再换成一块「不限」标签。 */
+    const field = row.find('input[type="number"]')
+    expect(field.exists()).toBe(true)
+    expect(field.attributes('disabled')).toBeDefined()
   })
 })
