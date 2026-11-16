@@ -7320,3 +7320,13 @@ html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button
 html[data-theme='night'] .personal-workspace .field-badge {
   border-image-source: url('./assets/halloween/card/control-badge-night.png');
 }
+
+/* 额度三列在窄面板里放不下：每行会被压到 200px 出头，右边那句「已用 N 次」
+ * 直接溢出到隔壁列，看着像标题重影。窄了就少一列、再窄就竖排。 */
+@media (max-width: 1180px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  .personal-workspace .ai-quota-list { grid-template-columns: minmax(0, 1fr); }
+}
