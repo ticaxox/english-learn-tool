@@ -6779,8 +6779,8 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 ):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.kb *, .coach-page *),
 .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
   min-height: 40px;
-  padding: 2px 14px !important;
-  border-width: 10px 14px !important;
+  padding: 2px 10px !important;
+  border-width: 10px 12px !important;
   border-style: solid !important;
   border-color: transparent !important;
   border-image: url('./assets/halloween/card/control-badge-day.png') 30% 17% fill stretch !important;
@@ -7351,3 +7351,75 @@ html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-
 html[data-theme='night'] .personal-workspace .settings-toggle {
   border-image-source: url('./assets/halloween/card/control-option-off-night.png') !important;
 }
+
+/* ------------------------------------------------------------------
+ * 批注收口（2026-11-16 晚）
+ * ------------------------------------------------------------------ */
+
+/* 1. 数字框整体放大一档：104×38，加减各 22px，数字仍有 30px 空间。 */
+.personal-workspace .crumb-stepper {
+  width: min(100%, 104px);
+  height: 38px;
+}
+
+.personal-workspace .crumb-stepper__step {
+  width: 22px;
+  height: 28px;
+}
+
+.personal-workspace .crumb-stepper__step svg { width: 15px; height: 15px; }
+
+/* 2. 下拉框与时间框完全同一套：同样的边带、同样的高度。 */
+.personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
+  border-width: 6px 10px !important;
+  min-height: 34px;
+}
+
+/* 3. 文本框的边框收细：输入框和下拉框分开对待。 */
+.personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
+  textarea
+) {
+  border-width: 4px 8px !important;
+}
+
+.personal-workspace .dialog-card :is(input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input), textarea) {
+  border-width: 4px 8px !important;
+}
+
+/* 5. 「不限」和勾再靠近一点。 */
+.personal-workspace .ai-quota-row__unlimited { margin-right: 6px; }
+.personal-workspace .ai-quota-row__unlimited input[type="checkbox"] { margin-right: 2px; }
+
+/* 6. AI 配置的大标题降到和小标题同一号，别一进门就压一层。 */
+.personal-workspace #personal-ai-title {
+  font-size: 1.05rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+/* 7.「向量」不再是牌子，改成跟在名字后面的一枚内嵌标记。 */
+.personal-workspace .personal-ai-provider__tag {
+  padding: 0;
+  border: 0 !important;
+  border-image: none !important;
+  background: none;
+  color: var(--g-orange-edge, #b4610b);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+html[data-theme='night'] .personal-workspace .personal-ai-provider__tag { color: #ffa04a; }
+
+/* 供应商行尾的三颗动作按钮：只放图标，做成小方块。 */
+.personal-workspace .personal-ai-provider__actions .ai-provider-action {
+  width: 40px;
+  min-height: 36px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.personal-workspace .ai-provider-action svg { width: 15px; height: 15px; }

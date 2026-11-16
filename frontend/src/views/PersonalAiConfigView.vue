@@ -267,11 +267,22 @@ onMounted(() => {
                 />
               </label>
               <div class="personal-ai-provider__actions">
-                <DivButton class="button-secondary" type="button" @click="openEdit(provider)">编辑</DivButton>
-                <DivButton class="button-secondary" type="button" :disabled="Boolean(actionKey)" @click="toggleEnabled(provider)">
-                  {{ provider.enabled ? '停用' : '启用' }}
+                <DivButton class="button-secondary ai-provider-action" type="button" aria-label="编辑" title="编辑" @click="openEdit(provider)">
+                  <AppIcon name="edit" />
                 </DivButton>
-                <DivButton class="button-danger" type="button" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">删除</DivButton>
+                <DivButton
+                  class="button-secondary ai-provider-action"
+                  type="button"
+                  :aria-label="provider.enabled ? '停用' : '启用'"
+                  :title="provider.enabled ? '停用' : '启用'"
+                  :disabled="Boolean(actionKey)"
+                  @click="toggleEnabled(provider)"
+                >
+                  <AppIcon name="power" />
+                </DivButton>
+                <DivButton class="button-danger ai-provider-action" type="button" aria-label="删除" title="删除" :disabled="Boolean(actionKey)" @click="deleteTarget = provider">
+                  <AppIcon name="trash" />
+                </DivButton>
               </div>
             </article>
           </div>
