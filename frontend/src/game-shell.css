@@ -1055,16 +1055,21 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 
 .personal-workspace .practice-submit-button:active { transform: translateY(3px); box-shadow: none; }
 
-/* Hob's line fills the board's lower left with something worth reading. */
+/* Hob's line is advice, not part of the plan: it sits between the board
+ * and the map, plain on the page ground rather than boxed inside the card. */
+.personal-workspace .crumb-note-out {
+  margin: 12px 4px 0;
+}
+
 .personal-workspace .crumb-tip {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-top: auto;
-  padding: 12px 14px;
-  border: 1.5px dashed var(--game-line, #e8d7bb);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--ui-surface-subtle) 85%, transparent);
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .personal-workspace .crumb-tip p { margin: 0; color: var(--ui-muted); font-size: 13px; line-height: 1.5; }

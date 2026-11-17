@@ -119,7 +119,7 @@ describe('learning surfaces with the frozen contract', () => {
     const wrapper = await mountWithRouter(TodayView)
     expect(apiMocks.fetchTodayPlan).toHaveBeenCalledTimes(1)
     expect(wrapper.findAll('.today-tile')).toHaveLength(0)
-    expect(wrapper.text()).toContain('今天要')
+    expect(wrapper.text()).toContain('完成到期复习')
     expect(wrapper.text()).toContain('CET-6 核心词')
     expect(wrapper.findAll('[role="progressbar"]').length).toBeGreaterThanOrEqual(1)
   })
