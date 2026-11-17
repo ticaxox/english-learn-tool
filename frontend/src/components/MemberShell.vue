@@ -262,7 +262,6 @@ onBeforeUnmount(() => {
               <div class="ia-profile-summary">
                 <span class="ia-profile-menu-label">个人资料</span>
                 <strong>{{ displayName }}</strong>
-                <span>@{{ username }}</span>
               </div>
               <div class="ia-profile-theme">
                 <span>{{ isNight ? '夜晚' : '白天' }}</span>

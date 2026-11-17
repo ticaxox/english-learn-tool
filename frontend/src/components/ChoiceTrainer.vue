@@ -165,15 +165,6 @@ function choose(optionId: string): void {
         <span class="choice-option__face">
           <span class="choice-option__mark" aria-hidden="true">{{ index >= 4 ? String.fromCharCode(65 + index) : '' }}</span>
           <span class="choice-option__label">{{ option.label }}</span>
-          <span class="choice-option__tick" aria-hidden="true">
-            <svg class="choice-option__yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 13l4.5 4.5L19 7" />
-            </svg>
-            <svg class="choice-option__no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6.5 6.5 17.5 17.5" />
-              <path d="M17.5 6.5 6.5 17.5" />
-            </svg>
-          </span>
         </span>
         <span v-if="plateState(option)" class="choice-option__stamp" aria-hidden="true"></span>
         <span v-if="props.hit && plateState(option) === 'right'" class="choice-option__burst" aria-hidden="true"></span>
@@ -407,36 +398,7 @@ html[data-theme='night'] .choice-option--wrong .choice-option__stamp {
   to { background-position: -896px 0; }
 }
 
-.choice-option__tick {
-  grid-column: 3;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 22px;
-  border-radius: 999px;
-  background: #c98a2e;
-  color: #fff8e8;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: opacity 160ms ease, transform 200ms cubic-bezier(0.2, 0.9, 0.25, 1.4);
-}
-
-.choice-option__tick svg { width: 14px; height: 14px; }
-
 .choice-option--selected .choice-option__face { filter: none; }
-
-.choice-option--selected .choice-option__tick {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* One marker at a time: once the server has spoken, the stamp carries the
-   verdict and the little picked badge steps out of its way. */
-.choice-option--right .choice-option__tick,
-.choice-option--wrong .choice-option__tick {
-  opacity: 0;
-  transform: scale(0.5);
-}
 
 .choice-option input:focus-visible + .choice-option__face {
   outline: 3px solid #1cb0f6;
