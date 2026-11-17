@@ -185,6 +185,15 @@
   font-size: 0.8rem;
 }
 
+/* 没答完也能交：提前说清楚空着的按错题算，而不是把按钮锁上。 */
+.practice-submit-hint {
+  margin: 0 0 6px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .practice-generation-panel {
   display: grid;
   grid-template-columns: minmax(140px, 190px) minmax(0, 1fr);

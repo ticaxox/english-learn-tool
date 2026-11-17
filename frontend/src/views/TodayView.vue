@@ -182,7 +182,6 @@ onMounted(() => {
               <img :src="bookObject[themeMode]" alt="" aria-hidden="true" />
               <span class="crumb-today-book__name">{{ plan.wordbook?.name ?? '还没有词书' }}</span>
             </span>
-            <span class="crumb-inline-link">{{ plan.wordbook ? '换一本' : '去选择' }}</span>
           </RouterLink>
         </aside>
       </section>

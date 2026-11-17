@@ -3258,14 +3258,19 @@ than its row reads as a different kind of thing. */
 .personal-workspace .crumb-today-book {
   display: grid;
   justify-items: center;
-  gap: 6px;
+  align-content: center;
+  height: 100%;
   text-decoration: none;
 }
+/* The book is the size of the column it stands in: the cover keeps its 2:3
+ * shape and takes whatever height the task list beside it gives. */
 .personal-workspace .crumb-today-book__cover {
   position: relative;
   display: block;
-  width: 96px;
-  height: 130px;
+  height: 100%;
+  min-height: 128px;
+  aspect-ratio: 2 / 3;
+  width: auto;
 }
 .personal-workspace .crumb-today-book__cover img {
   width: 100%;
@@ -3275,11 +3280,11 @@ than its row reads as a different kind of thing. */
 }
 .personal-workspace .crumb-today-book__name {
   position: absolute;
-  top: 26%;
+  top: 24%;
   right: 11%;
   left: 11%;
   color: #fbf2da;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 900;
   line-height: 1.3;
   text-align: center;
@@ -5351,10 +5356,16 @@ html[data-theme='night'] .personal-workspace .result-question {
   border-color: #b0742a !important;
 }
 
+/* 选中态跟着卡片走：同一张羊皮纸、同一道棕墨边，只是这一格被点亮了。 */
 .member-practice-session-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
 .member-practice-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) {
-  border-color: #b0742a !important;
-  box-shadow: inset 0 0 0 3px #f6eed9, inset 0 0 0 4px #d9b877 !important;
+  border-width: 2px !important;
+  border-color: #6f5226 !important;
+  background: #fbf4e2 !important;
+  box-shadow:
+    inset 0 0 0 3px #fbf4e2,
+    inset 0 0 0 4px #c9a86a,
+    0 0 0 3px rgb(160 122 58 / 16%) !important;
 }
 
 .member-practice-session-page .practice-question-card .practice-option--correct,
@@ -5403,14 +5414,15 @@ html[data-theme='night'] .member-practice-page .practice-question-card .practice
 
 html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
 html[data-theme='night'] .member-practice-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) {
-  /* 夜里的同一盏灯：底色透出琥珀，内壁一圈暖光，外面一层薄晕。 */
-  background: #3d2d1c !important;
+  /* 夜里同一种石头：底色亮一层紫，边是淡紫，内壁一圈微光。 */
+  background: #3a3160 !important;
   border-width: 2px !important;
-  border-color: #f0c274 !important;
+  border-color: #b9a6e6 !important;
   box-shadow:
-    inset 0 0 0 3px #3d2d1c,
-    inset 0 0 22px rgb(255 196 96 / 35%),
-    0 0 0 3px rgb(255 196 96 / 18%) !important;
+    inset 0 0 0 3px #3a3160,
+    inset 0 0 0 4px #6b5da0,
+    inset 0 0 22px rgb(185 166 230 / 30%),
+    0 0 0 3px rgb(185 166 230 / 16%) !important;
 }
 
 html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--correct,

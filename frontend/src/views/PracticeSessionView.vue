@@ -143,10 +143,7 @@ const levelUp = ref<{ level: number; title: string } | null>(null)
 
 async function submit(): Promise<void> {
   formError.value = null
-  if (!allAnswered.value) {
-    formError.value = `还有 ${questions.value.length - answeredCount.value} 题未作答。请完成全部题目后提交。`
-    return
-  }
+  // A learner may hand in what they have: the empty ones count as wrong.
   const payload = answerPayload()
   const signature = JSON.stringify(payload)
   if (!pendingSubmitKey || pendingSubmitSignature !== signature) {
@@ -323,7 +320,10 @@ void practice.load()
               </span>
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />
-              <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value || !allAnswered" @click="submit">
+              <p v-if="!allAnswered && hasAnyAnswer" class="practice-submit-hint">
+                还有 {{ questions.length - answeredCount }} 题空着，提交后按错题计。
+              </p>
+              <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value || !hasAnyAnswer" @click="submit">
                 <span class="practice-submit-label">{{ practice.busy.value ? '正在提交…' : '提交全部答案' }}</span>
                 <span class="practice-submit-label practice-submit-label--short">{{ practice.busy.value ? '提交中…' : '提交' }}</span>
                 <AppIcon name="arrow" />
