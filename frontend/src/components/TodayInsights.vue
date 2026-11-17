@@ -32,10 +32,11 @@ const rootRef = ref<HTMLElement | null>(null)
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
 /** A mastered word left the schedule on purpose; it still counts as in review. */
 const STATE_KEYS = [
-  { key: 'new', label: '新词', color: '#e8c58a' },
-  { key: 'learning', label: '学习中', color: '#1cb0f6' },
-  { key: 'review', label: '复习中', color: '#ff9600' },
-  { key: 'relearning', label: '重学', color: '#a75cf0' },
+  // The colours live in controls.css so day and night each get their own set.
+  { key: 'new', label: '新词', color: 'var(--state-new)' },
+  { key: 'learning', label: '学习中', color: 'var(--state-learning)' },
+  { key: 'review', label: '复习中', color: 'var(--state-review)' },
+  { key: 'relearning', label: '重学', color: 'var(--state-relearning)' },
 ] as const
 
 const peakXp = computed(() => Math.max(1, ...(weekly.value?.days ?? []).map((day) => day.xp)))

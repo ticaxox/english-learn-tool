@@ -3262,15 +3262,18 @@ than its row reads as a different kind of thing. */
   height: 100%;
   text-decoration: none;
 }
-/* The book is the size of the column it stands in: the cover keeps its 2:3
- * shape and takes whatever height the task list beside it gives. */
+/* The book stands exactly as tall as the task list beside it: the height is
+ * the one variable, the width follows the 2:3 cover from it. */
 .personal-workspace .crumb-today-book__cover {
   position: relative;
   display: block;
-  height: 100%;
-  min-height: 128px;
-  aspect-ratio: 2 / 3;
+  height: var(--today-book-h, 204px);
   width: auto;
+  aspect-ratio: 2 / 3;
+  margin-inline: auto;
+}
+@media (max-width: 900px) {
+  .personal-workspace .crumb-today-book__cover { height: 168px; }
 }
 .personal-workspace .crumb-today-book__cover img {
   width: 100%;
@@ -3304,10 +3307,10 @@ than its row reads as a different kind of thing. */
 .personal-workspace .crumb-merged .crumb-task-list li:last-child { border-bottom: 2px dashed var(--ui-line); }
 .personal-workspace .crumb-merged .crumb-task-row {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 10px 4px;
+  gap: 12px;
+  padding: 13px 4px;
   text-decoration: none;
   color: inherit;
 }
@@ -3317,9 +3320,9 @@ than its row reads as a different kind of thing. */
   display: grid; place-items: center;
   font-size: 11px; color: var(--ui-muted);
 }
-.personal-workspace .crumb-merged .crumb-task-title { font-size: 13.5px; }
+.personal-workspace .crumb-merged .crumb-task-title { font-size: 15.5px; }
 .personal-workspace .crumb-merged .crumb-task-value {
-  font-size: 12.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums;
+  font-size: 13.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums;
 }
 .personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-state {
   background: var(--ui-accent-soft, #e3f0e1);
@@ -4435,6 +4438,32 @@ than its row reads as a different kind of thing. */
   outline-offset: -2px;
 }
 
+/* ---------------------------------------------------------------- insights
+ * 学习足迹、雷达、词态条是同一组读数，用同一套昼夜色：
+ * 白天是羊皮纸上的橙色，夜里是紫石上的一盏薄荷。 */
+.personal-workspace {
+  --insight-hot: #ff9600;
+  --insight-hot-soft: rgb(255 150 0 / 26%);
+  --insight-quiet: #e6d6b8;
+  --insight-quiet-ink: #8d7455;
+  --insight-track: #efe2c8;
+  --state-new: #e8c58a;
+  --state-learning: #1cb0f6;
+  --state-review: #ff9600;
+  --state-relearning: #a75cf0;
+}
+html[data-theme='night'] .personal-workspace {
+  --insight-hot: #7cf0c4;
+  --insight-hot-soft: rgb(124 240 196 / 24%);
+  --insight-quiet: #3a3160;
+  --insight-quiet-ink: #c9b6ff;
+  --insight-track: #2e2549;
+  --state-new: #c9b6ff;
+  --state-learning: #7cc4ff;
+  --state-review: #7cf0c4;
+  --state-relearning: #ff9e7a;
+}
+
 .personal-workspace .trail-month__day {
   display: grid;
   place-items: center;
@@ -4447,9 +4476,16 @@ than its row reads as a different kind of thing. */
   font-variant-numeric: tabular-nums;
 }
 
-.personal-workspace .trail-month__day.is-past { background: #e6d6b8; color: #8d7455; }
+.personal-workspace .trail-month__day.is-past {
+  background: var(--insight-quiet);
+  color: var(--insight-quiet-ink);
+}
 
-.personal-workspace .trail-month__day.is-lit { background: var(--g-orange, #ff9600); color: #fff; }
+.personal-workspace .trail-month__day.is-lit {
+  background: var(--insight-hot);
+  color: #fff;
+}
+html[data-theme='night'] .personal-workspace .trail-month__day.is-lit { color: #10261f; }
 
 .personal-workspace .trail-month__day.is-today {
   background: var(--ui-surface);

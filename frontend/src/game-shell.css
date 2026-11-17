@@ -501,21 +501,23 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   color: var(--rail-ink);
 }
 
+/* The mascot stands on its own: no hexagon plate behind it, just Hob — and
+ * bigger, since nothing is framing it any more. */
 .personal-workspace .workspace-brand-mark {
   display: grid;
-  width: 72px;
-  height: 72px;
+  width: 84px;
+  height: 84px;
   flex: 0 0 auto;
   place-items: center;
   border: 0;
   border-radius: 0;
-  background: var(--rail-mark);
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: none;
+  clip-path: none;
 }
 
 .personal-workspace .workspace-brand-mark .hob-mark {
-  width: 60px;
-  height: 60px;
+  width: 84px;
+  height: 84px;
 }
 
 .personal-workspace .workspace-brand-copy { gap: 0; }

@@ -169,8 +169,9 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
 }
 
 .word-radar__studied {
-  fill: color-mix(in oklab, var(--g-orange, #ff9600) 26%, transparent);
-  stroke: var(--g-orange, #ff9600);
+  /* 和「学习足迹」的格子、词态条同一盏灯：白天橙，夜里薄荷。 */
+  fill: var(--insight-hot-soft, color-mix(in oklab, #ff9600 26%, transparent));
+  stroke: var(--insight-hot, #ff9600);
   stroke-width: 2;
   stroke-linejoin: round;
   transform-origin: 50% 50%;

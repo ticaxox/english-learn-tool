@@ -196,9 +196,9 @@
 
 .practice-generation-panel {
   display: grid;
-  grid-template-columns: minmax(140px, 190px) minmax(0, 1fr);
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
   gap: 1.6rem;
-  align-items: center;
+  align-items: stretch;
   min-height: 16rem;
   border-color: #cbb98c;
   background: linear-gradient(135deg, #fffdf6, #f7f2e5);
@@ -209,8 +209,11 @@
 .practice-generation__mascot {
   display: block;
   width: 100%;
-  max-width: 190px;
-  margin-inline: auto;
+  height: 100%;
+  max-width: none;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center;
 }
 
 .practice-generation__copy {
