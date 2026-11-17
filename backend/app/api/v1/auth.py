@@ -11,6 +11,7 @@ from app.db.session import get_db_session
 from app.models.identity import User
 from app.schemas.auth import (
     AuthSessionResponse,
+    AvatarChangeRequest,
     ChangePasswordRequest,
     LoginRequest,
     RegisterRequest,
@@ -21,6 +22,7 @@ from app.schemas.common import ErrorResponse
 from app.services.auth import (
     AuthContext,
     IssuedSession,
+    change_avatar,
     change_password,
     change_username,
     login,
@@ -67,6 +69,7 @@ def _user_response(user: User) -> UserSelf:
         role=user.role,
         status=user.status,
         must_change_password=user.must_change_password,
+        avatar=profile.avatar if profile else "pumpkin",
         department=profile.department if profile else None,
         learning_group=profile.learning_group if profile else None,
         last_login_at=user.last_login_at,
@@ -303,3 +306,21 @@ async def me(
     context: Annotated[AuthContext, Depends(get_auth_context)],
 ) -> UserSelf:
     return user_self(context)
+
+
+@router.patch(
+    "/me/avatar",
+    response_model=UserSelf,
+    responses={
+        **_UNAUTHORIZED_RESPONSE,
+        422: {"model": ErrorResponse},
+    },
+    summary="Choose the pixel avatar shown in the shell and account settings",
+)
+async def change_avatar_endpoint(
+    payload: AvatarChangeRequest,
+    context: Annotated[AuthContext, Depends(get_auth_context)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> UserSelf:
+    user = await change_avatar(session, context=context, avatar=payload.avatar)
+    return _user_response(user)

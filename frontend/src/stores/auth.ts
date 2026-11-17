@@ -5,6 +5,7 @@ import {
   parseAuthTokenResponse,
   parseCurrentUser,
   type AuthTokenResponse,
+  type AvatarKey,
   type CurrentUser,
 } from '../api/contracts'
 import { isApiError } from '../api/errors'
@@ -198,6 +199,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function changeAvatar(avatar: AvatarKey): Promise<void> {
+    lastError.value = null
+    try {
+      const result = await apiClient.patch<unknown>('/auth/me/avatar', { avatar })
+      user.value = parseCurrentUser(result)
+    } catch (error) {
+      lastError.value = error
+      throw error
+    }
+  }
+
   async function changePassword(payload: ChangePasswordPayload): Promise<void> {
     const currentUsername = user.value?.username
     if (!currentUsername) {
@@ -264,6 +276,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     mustChangePassword,
     displayName,
+    avatar: computed<AvatarKey>(() => user.value?.avatar ?? 'pumpkin'),
     login,
     register,
     logout,
@@ -272,6 +285,7 @@ export const useAuthStore = defineStore('auth', () => {
     retryInitialization,
     changePassword,
     changeUsername,
+    changeAvatar,
     refreshAccessToken,
     markSessionExpired,
     clearSession,

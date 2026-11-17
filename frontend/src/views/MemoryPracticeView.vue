@@ -16,7 +16,7 @@ import FlashcardTrainer from '../components/FlashcardTrainer.vue'
 import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
 import LevelUpOverlay from '../components/LevelUpOverlay.vue'
-import { illustration } from '../assets/halloween'
+import { hobActions, illustration } from '../assets/halloween'
 import ShelfPicker from '../components/ShelfPicker.vue'
 import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
@@ -202,6 +202,7 @@ const hearts = ref(MAX_HEARTS)
 /** The flip card asks for a rating, not an answer, so nothing there costs
     a life — its rail shows the count and the clock only. */
 const showsLives = computed(() => (selectedModule.value ?? session.module.value) !== 'flashcard')
+const railSprite = computed(() => hobActions[selectedModule.value ?? session.module.value ?? ''] ?? hobActions.flashcard)
 /** This run's own tally — the server keeps the durable record. */
 const runCorrect = ref(0)
 const runWrong = ref(0)
@@ -652,6 +653,7 @@ watch(challengeModule, async (module, previous) => {
                 {{ timer.running.value ? timer.label.value : '已暂停' }}
               </span>
             </div>
+            <img class="memory-rail-sprite" :src="railSprite" alt="" aria-hidden="true" />
             <span class="memory-rail-track" aria-hidden="true">
               <span :style="{ width: `${progressPercent}%` }"></span>
             </span>

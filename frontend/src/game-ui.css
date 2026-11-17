@@ -5590,3 +5590,22 @@ html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating--mas
   .memory-swap-enter-active,
   .memory-swap-leave-active { transition: none; }
 }
+
+
+/* Hob sits on the clock card itself, between the readout and the progress
+   line. The art is square with its own air; never crop or stretch it. */
+.personal-workspace .practice-rail-sprite,
+.personal-workspace .memory-rail-sprite {
+  display: block;
+  width: 100%;
+  max-width: 172px;
+  height: auto;
+  margin: 2px auto 0;
+  object-fit: contain;
+}
+.personal-workspace .memory-rail-sprite { max-width: 150px; }
+
+@media (max-width: 860px) {
+  .personal-workspace .practice-rail-sprite { max-width: 132px; }
+  .personal-workspace .memory-rail-sprite { max-width: 128px; }
+}

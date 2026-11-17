@@ -9,6 +9,12 @@ export interface AuthTokenResponse {
   expires_in?: number
 }
 
+export type AvatarKey = 'pumpkin' | 'bat' | 'cat' | 'ghost' | 'skull' | 'witch' | 'candle' | 'candy'
+
+export const AVATAR_KEYS: readonly AvatarKey[] = [
+  'pumpkin', 'bat', 'cat', 'ghost', 'skull', 'witch', 'candle', 'candy',
+]
+
 export interface CurrentUser {
   id: string
   username: string
@@ -16,6 +22,7 @@ export interface CurrentUser {
   role: UserRole
   must_change_password: boolean
   status?: string
+  avatar?: AvatarKey
   department?: string | null
   learning_group?: string | null
 }
@@ -65,6 +72,10 @@ export function parseCurrentUser(payload: unknown): CurrentUser {
     throw new ContractError('当前用户响应缺少 must_change_password。')
   }
 
+  const avatar = typeof payload.avatar === 'string' && (AVATAR_KEYS as readonly string[]).includes(payload.avatar)
+    ? (payload.avatar as AvatarKey)
+    : 'pumpkin'
+
   return {
     id,
     username,
@@ -72,6 +83,7 @@ export function parseCurrentUser(payload: unknown): CurrentUser {
     role,
     must_change_password: mustChangePassword,
     status: typeof payload.status === 'string' ? payload.status : undefined,
+    avatar,
     department: typeof payload.department === 'string' || payload.department === null ? payload.department : undefined,
     learning_group:
       typeof payload.learning_group === 'string' || payload.learning_group === null

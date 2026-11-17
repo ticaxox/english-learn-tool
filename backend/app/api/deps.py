@@ -52,6 +52,7 @@ def user_self(context: AuthContext):
         role=context.user.role,
         status=context.user.status,
         must_change_password=context.user.must_change_password,
+        avatar=profile.avatar if profile else "pumpkin",
         department=profile.department if profile else None,
         learning_group=profile.learning_group if profile else None,
         last_login_at=context.user.last_login_at,

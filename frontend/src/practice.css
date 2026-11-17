@@ -212,6 +212,8 @@
   height: 100%;
   max-width: none;
   min-height: 0;
+  object-fit: contain;
+  object-position: center;
 }
 
 /* ArtImage stacks two frames; both have to give up their intrinsic height so

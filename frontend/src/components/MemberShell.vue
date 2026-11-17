@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import ThemeSwitch from './ThemeSwitch.vue'
 import HobMark from './HobMark.vue'
+import UserAvatar from './UserAvatar.vue'
 import { getActivePinia } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import { useGamification } from '../composables/useGamification'
@@ -256,10 +257,12 @@ onBeforeUnmount(() => {
               aria-controls="member-profile-menu"
               @click="toggleProfile"
             >
-              {{ userInitials }}
+              <UserAvatar v-if="auth?.user?.avatar" :avatar="auth.user.avatar" :label="`${displayName} 的像素头像`" />
+              <span v-else>{{ userInitials }}</span>
             </DivButton>
             <div v-if="profileOpen" id="member-profile-menu" class="ia-profile-menu" role="menu">
               <div class="ia-profile-summary">
+                <UserAvatar v-if="auth?.user?.avatar" :avatar="auth.user.avatar" :label="`${displayName} 的像素头像`" />
                 <span class="ia-profile-menu-label">个人资料</span>
                 <strong>{{ displayName }}</strong>
               </div>

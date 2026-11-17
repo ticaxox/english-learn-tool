@@ -377,3 +377,32 @@ export const candleStates: Readonly<Record<Mode, Readonly<Record<CandleState, st
 
 /** The mid burn state, for callers that only need one candle. */
 export const candles = { day: candleMidDay, night: candleMidNight } as const
+
+
+/** Hob performing the exercise at hand. Day art only; on the clock card. */
+import hobFlashcardDay from './char/hob-flashcard-day.webp'
+import hobChoiceDay from './char/hob-choice-day.webp'
+import hobSpellingDay from './char/hob-spelling-day.webp'
+import hobFillBlankDay from './char/hob-fill_blank-day.webp'
+import hobReadingDay from './char/hob-reading-day.webp'
+import hobTranslationDay from './char/hob-translation-day.webp'
+import hobWritingDay from './char/hob-writing-day.webp'
+import hobConversationDay from './char/hob-conversation-day.webp'
+import hobGradingDay from './char/hob-grading-day.webp'
+import hobMixedDay from './char/hob-mixed-day.webp'
+
+/** Keyed by the same type names as practiceBooks, plus the three memory drills
+ *  and the grading wait. The image is a sprite that sits on the rail; it does
+ *  not replace the card frame or carry any text. */
+export const hobActions: Readonly<Record<string, string>> = {
+  flashcard: hobFlashcardDay,
+  choice: hobChoiceDay,
+  spelling: hobSpellingDay,
+  fill_blank: hobFillBlankDay,
+  reading: hobReadingDay,
+  translation: hobTranslationDay,
+  writing: hobWritingDay,
+  conversation: hobConversationDay,
+  grading: hobGradingDay,
+  mixed: hobMixedDay,
+}

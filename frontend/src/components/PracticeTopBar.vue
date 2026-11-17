@@ -6,6 +6,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AppIcon from './AppIcon.vue'
+import UserAvatar from './UserAvatar.vue'
 import { useAuthStore } from '../stores/auth'
 import { MEMORY_MODULE_LABELS, MEMORY_MODULES, type MemoryModule } from '../types/learning'
 import { PRACTICE_TYPE_LABELS, type PracticeType } from '../api/practice'
@@ -25,6 +26,7 @@ try {
 }
 const displayName = computed(() => auth?.displayName || '学')
 const initials = computed(() => displayName.value.trim().slice(0, 2).toUpperCase())
+const avatar = computed(() => auth?.user?.avatar ?? 'pumpkin')
 
 type TabIcon = 'cards' | 'book' | 'star' | 'arrow' | 'spark' | 'dialogue'
 const memoryIcons: Record<MemoryModule, TabIcon> = {
@@ -82,6 +84,6 @@ function openSettings(): void {
       type="button"
       :aria-label="`${displayName} 的账户设置`"
       @click="openSettings"
-    >{{ initials }}</DivButton>
+    ><UserAvatar v-if="auth?.user" :avatar="avatar" :label="`${displayName} 的像素头像`" /><span v-else>{{ initials }}</span></DivButton>
   </header>
 </template>
