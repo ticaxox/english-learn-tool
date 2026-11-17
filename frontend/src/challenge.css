@@ -85,3 +85,12 @@
   white-space: nowrap;
   text-shadow: 0 1px 0 #fff8e6;
 }
+
+/* The mascot sits beside the trail's title: it is chewing its stem while the
+ * map waits, which is the whole joke of the page. */
+.challenge-page__title { display: flex; gap: 18px; align-items: center; }
+.challenge-page__mascot { display: block; width: 76px; height: 76px; flex: 0 0 auto; }
+.challenge-page__mascot .art-swap,
+.challenge-page__mascot .art-swap__stack { display: block; width: 100%; height: 100%; }
+.challenge-page__mascot .art-swap__frame { width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 720px) { .challenge-page__mascot { width: 56px; height: 56px; } }
