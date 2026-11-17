@@ -521,6 +521,9 @@ html[data-theme='night'] .levelup-card {
   border: 0;
   border-radius: 0;
   background: none;
+  /* The plate edge from the older framing layer still drew a gold bar across
+   * Hob's feet; with no plate there is nothing for it to cast. */
+  box-shadow: none;
   clip-path: none;
 }
 

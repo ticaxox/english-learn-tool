@@ -664,7 +664,15 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 }
 
 /* Settings is one card: sections are flat, separated by hairlines. */
-.personal-workspace .settings-form { padding: 22px; }
+.personal-workspace .settings-form {
+  /* Every two-column row in this form reads as one grid: the first column is
+   * this wide, the second starts after the same 40px gap, so the daily numbers
+   * sit directly above the challenge options instead of drifting left. */
+  --settings-lead: 294px;
+  --settings-lead-gap: 40px;
+  grid-template-columns: minmax(0, 1fr) !important;
+  padding: 22px;
+}
 
 .personal-workspace .settings-form fieldset {
   padding: 0;
@@ -1876,15 +1884,22 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 }
 
 .personal-workspace .settings-form .settings-daily-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 12px 40px;
+  display: grid;
+  grid-template-columns: var(--settings-lead) minmax(0, 1fr);
+  gap: 12px var(--settings-lead-gap);
   align-items: center;
 }
 
 .personal-workspace .settings-form .settings-daily-grid > .field {
-  flex: 0 0 auto;
+  min-width: 0;
   width: auto;
+}
+
+/* The second daily number stands in the same column as the second choice
+ * block below, rule and all. */
+.personal-workspace .settings-form .settings-daily-grid > .field + .field {
+  padding-left: var(--settings-lead-gap);
+  border-left: 1px solid var(--ui-line);
 }
 
 /* The little "≈ 5 天" chip is the same height as the stepper it sits beside. */
@@ -1899,6 +1914,12 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 @media (max-width: 760px) {
   .personal-workspace .settings-form .settings-goal-legend { flex-wrap: wrap; }
   .personal-workspace .settings-form .settings-daily-grid { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .settings-form .settings-daily-grid > .field + .field,
+  .personal-workspace .settings-form .settings-pair > .field--inline + .field--inline {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .personal-workspace .settings-pair { grid-template-columns: minmax(0, 1fr); }
 }
 
 .personal-workspace .settings-form fieldset.settings-goal-grid {
@@ -2678,9 +2699,14 @@ than its row reads as a different kind of thing. */
 }
 
 .personal-workspace .settings-pair {
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  gap: 16px 36px;
+  grid-template-columns: var(--settings-lead) minmax(0, 1fr);
+  gap: 16px var(--settings-lead-gap);
   margin-top: 18px;
+}
+
+.personal-workspace .settings-pair > .field--inline + .field--inline {
+  padding-left: var(--settings-lead-gap);
+  border-left: 1px solid var(--ui-line);
 }
 
 .personal-workspace .settings-pair > .field--inline { gap: 12px; }
@@ -4661,8 +4687,9 @@ html[data-theme='night'] .personal-workspace .trail-month__day.is-lit { color: #
   background: var(--ui-surface);
 }
 
-/* The unlocked count rides at the far end of the rail, not under the title. */
-.personal-workspace .badge-wall__head .badge-wall__rail { flex: 1; }
+/* The title takes the room; the tally and its rail close the row together. */
+.personal-workspace .badge-wall__head h3 { margin-right: auto; }
+.personal-workspace .badge-wall__head .badge-wall__rail { flex: 0 0 180px; width: 180px; }
 .personal-workspace .badge-wall__head .field-hint {
   margin: 0;
   font-size: 12px;

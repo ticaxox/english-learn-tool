@@ -492,11 +492,14 @@ pre {
   border-width: 6px 10px;
   border-style: solid;
   border-color: transparent;
+  /* The sheet is paper in both themes, so the field stays the pale carved one:
+   * the night carving is indigo, and ink on indigo is unreadable at this size. */
   border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch;
   border-radius: 0;
   background: none;
   box-shadow: none;
   min-height: 40px;
+  color: var(--crumb-cocoa-900, #35240f);
 }
 
 .auth-page .form-stack [type='submit'] {
@@ -508,21 +511,12 @@ pre {
   background: none;
   box-shadow: none;
   min-height: 46px;
-}
-
-html[data-theme='night'] /* The two labels sit a touch in from the card's edge, in line with the fields' inner text. */
-.auth-page .field label {
-  padding-left: 8px;
-}
-
-.auth-page .field input:not([type='checkbox']):not([type='radio']) {
-  width: 100%;
-  max-width: none;
-  border-image-source: url('./assets/halloween/card/control-field-night.webp');
+  color: var(--crumb-cocoa-900, #35240f);
 }
 
 html[data-theme='night'] .auth-page .form-stack [type='submit'] {
   border-image-source: url('./assets/halloween/card/control-badge-night.webp');
+  color: #eafff7;
 }
 
 
