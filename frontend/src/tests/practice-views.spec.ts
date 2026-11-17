@@ -154,8 +154,8 @@ describe('practice views', () => {
     expect(labels.some((text) => text.includes('拼写'))).toBe(true)
     // The conversations moved to the exercise shelf, not the drill cards.
     expect(labels.some((text) => text.includes('对话'))).toBe(false)
-    // The books stand on the page themselves: no drawn plinth under them.
-    expect(wrapper.find('.shelf-board').exists()).toBe(false)
+    // The books stand on a drawn plinth, the way a shelf looks.
+    expect(wrapper.find('.shelf-board').exists()).toBe(true)
   })
 
   it('opens the settings dialog when a book is picked', async () => {

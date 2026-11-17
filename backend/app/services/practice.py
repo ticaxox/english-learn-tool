@@ -504,7 +504,9 @@ async def create_practice_session(
             practice_type=payload.practice_type,
             count=payload.count,
             source=payload.source,
-            difficulty=payload.difficulty,
+            # No explicit level? Then write toward the learner's own goal: the
+            # exam target is what the questions are supposed to prepare for.
+            difficulty=payload.difficulty or _exam_type(user, None),
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
             target_words=target_words,
@@ -621,7 +623,7 @@ async def create_pool_practice_session(
             practice_type=practice_type,  # type: ignore[arg-type]
             count=count,
             source="whole_book",
-            difficulty=None,
+            difficulty=_exam_type(user, None),
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
             target_words=target_words,

@@ -69,6 +69,8 @@ const books = computed(() =>
 
       <span class="shelf-book__title">{{ entry.label }}</span>
     </button>
+
+    <span class="shelf-board" aria-hidden="true"></span>
   </div>
 </template>
 

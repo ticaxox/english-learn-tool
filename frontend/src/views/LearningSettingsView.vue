@@ -9,7 +9,6 @@
  */
 import { computed, onMounted, reactive, ref } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import CrumbDate from '../components/ui/CrumbDate.vue'
 import CrumbNumber from '../components/ui/CrumbNumber.vue'
 import CrumbTime from '../components/ui/CrumbTime.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -266,46 +265,9 @@ onMounted(() => {
       </div>
 
       <form class="panel settings-form" novalidate @submit.prevent="save">
-        <fieldset class="settings-goal-grid">
-          <legend>每日目标</legend>
-          <div class="field">
-            <label for="daily-new-words">每日新词量</label>
-            <CrumbNumber
-              id="daily-new-words"
-              v-model="form.dailyNewWords"
-              :min="DAILY_NEW_WORDS_MIN"
-              :max="DAILY_NEW_WORDS_MAX"
-              :step="1"
-              label="每日新词量"
-              :invalid="Boolean(fieldErrors.dailyNewWords)"
-            />
-            <p v-if="fieldErrors.dailyNewWords" id="daily-new-words-error" class="field-error" role="alert">
-              {{ fieldErrors.dailyNewWords }}
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="daily-minutes">每日学习时长</label>
-            <div class="field-inline-note">
-              <CrumbNumber
-                id="daily-minutes"
-                v-model="form.dailyMinutes"
-                :min="DAILY_MINUTES_MIN"
-                :max="DAILY_MINUTES_MAX"
-                :step="1"
-                label="每日学习时长（分钟）"
-                :invalid="Boolean(fieldErrors.dailyMinutes)"
-              />
-              <span v-if="completionDays !== null" class="field-badge" :title="`预计 ${completionDays} 天学完`">≈ {{ completionDays }} 天</span>
-            </div>
-            <p v-if="fieldErrors.dailyMinutes" id="daily-minutes-error" class="field-error" role="alert">
-              {{ fieldErrors.dailyMinutes }}
-            </p>
-          </div>
-        </fieldset>
-
         <fieldset>
           <legend>学习目标</legend>
+          <p class="field-hint">目标决定 AI 往哪个方向出题：选了四级，阅读和翻译就按四级的路子写。</p>
           <div class="settings-goal-grid">
             <div class="field">
               <label for="exam-target">目标考试</label>
@@ -315,9 +277,40 @@ onMounted(() => {
                 </option>
               </select>
             </div>
+
             <div class="field">
-              <label for="exam-date">考试日期</label>
-              <CrumbDate id="exam-date" v-model="form.examDate" label="考试日期" />
+              <label for="daily-new-words">每日新词量</label>
+              <CrumbNumber
+                id="daily-new-words"
+                v-model="form.dailyNewWords"
+                :min="DAILY_NEW_WORDS_MIN"
+                :max="DAILY_NEW_WORDS_MAX"
+                :step="1"
+                label="每日新词量"
+                :invalid="Boolean(fieldErrors.dailyNewWords)"
+              />
+              <p v-if="fieldErrors.dailyNewWords" id="daily-new-words-error" class="field-error" role="alert">
+                {{ fieldErrors.dailyNewWords }}
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="daily-minutes">每日学习时长</label>
+              <div class="field-inline-note">
+                <CrumbNumber
+                  id="daily-minutes"
+                  v-model="form.dailyMinutes"
+                  :min="DAILY_MINUTES_MIN"
+                  :max="DAILY_MINUTES_MAX"
+                  :step="1"
+                  label="每日学习时长（分钟）"
+                  :invalid="Boolean(fieldErrors.dailyMinutes)"
+                />
+                <span v-if="completionDays !== null" class="field-badge" :title="`预计 ${completionDays} 天学完`">≈ {{ completionDays }} 天</span>
+              </div>
+              <p v-if="fieldErrors.dailyMinutes" id="daily-minutes-error" class="field-error" role="alert">
+                {{ fieldErrors.dailyMinutes }}
+              </p>
             </div>
           </div>
         </fieldset>

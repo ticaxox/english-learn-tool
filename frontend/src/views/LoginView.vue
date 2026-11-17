@@ -101,9 +101,13 @@ async function retryConnection(): Promise<void> {
 
 <template>
   <main class="auth-page">
+    <!-- Hob stands beside the door, not on top of the form. -->
+    <aside class="auth-art" aria-hidden="true">
+      <ArtImage class="auth-art__mark" :set="illustration.welcome" />
+    </aside>
+
     <section class="auth-card" aria-labelledby="login-title">
-      <div class="auth-card__masthead">
-        <ArtImage class="auth-card__mark" :set="illustration.welcome" />
+      <div class="auth-card__masthead auth-card__masthead--seal-only">
         <span class="auth-card__seal">GRIMOIRE</span>
       </div>
       <p class="eyebrow">个人英语学习空间</p>

@@ -3267,7 +3267,7 @@ than its row reads as a different kind of thing. */
 .personal-workspace .crumb-today-book__cover {
   position: relative;
   display: block;
-  height: var(--today-book-h, 204px);
+  height: var(--today-book-h, 262px);
   width: auto;
   aspect-ratio: 2 / 3;
   margin-inline: auto;
@@ -3307,10 +3307,10 @@ than its row reads as a different kind of thing. */
 .personal-workspace .crumb-merged .crumb-task-list li:last-child { border-bottom: 2px dashed var(--ui-line); }
 .personal-workspace .crumb-merged .crumb-task-row {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 13px 4px;
+  gap: 14px;
+  padding: 18px 4px;
   text-decoration: none;
   color: inherit;
 }
@@ -3320,9 +3320,9 @@ than its row reads as a different kind of thing. */
   display: grid; place-items: center;
   font-size: 11px; color: var(--ui-muted);
 }
-.personal-workspace .crumb-merged .crumb-task-title { font-size: 15.5px; }
+.personal-workspace .crumb-merged .crumb-task-title { font-size: 17px; }
 .personal-workspace .crumb-merged .crumb-task-value {
-  font-size: 13.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums;
+  font-size: 14.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums;
 }
 .personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-state {
   background: var(--ui-accent-soft, #e3f0e1);
