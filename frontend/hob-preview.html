@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hob 素材应用预览</title>
+<link rel="stylesheet" href="/src/style.css" />
+<link rel="stylesheet" href="/src/cookie-theme.css" />
+<link rel="stylesheet" href="/src/member-redesign.css" />
+<link rel="stylesheet" href="/src/workspace-reset.css" />
+<link rel="stylesheet" href="/src/information-architecture.css" />
+<link rel="stylesheet" href="/src/personal-ui.css" />
+<link rel="stylesheet" href="/src/game-ui.css" />
+<link rel="stylesheet" href="/src/controls.css" />
+<link rel="stylesheet" href="/src/game-shell.css" />
+<style>
+body { margin:0; padding:28px; background:#fff3dc; color:#35240f; font-family:"Trebuchet MS","Microsoft YaHei",sans-serif; }
+h1 { margin:0 0 18px; }
+.personal-workspace { background:transparent; }
+.preview-grid { display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:18px; }
+.preview-panel { border:20px solid transparent; border-image:url('/src/assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round; padding:14px 16px; display:grid; gap:10px; justify-items:center; }
+.preview-panel h2 { margin:0; font-size:15px; align-self:start; }
+.practice-rail-sprite, .memory-rail-sprite { width:100%; max-width:172px; height:auto; display:block; }
+.memory-rail-sprite { max-width:150px; }
+.preview-books { display:flex; gap:20px; justify-content:center; margin:24px 0; }
+.preview-books img { width:150px; height:auto; }
+.preview-avatars { display:flex; gap:12px; flex-wrap:wrap; }
+.preview-avatars img { width:52px; height:52px; border-radius:50%; image-rendering:pixelated; border:2px solid #3b2a1a; }
+</style>
+</head>
+<body>
+<div class="personal-workspace">
+<h1>Hob 素材应用预览</h1>
+<div class="preview-grid">
+  <section class="preview-panel"><h2>翻卡计时栏</h2><img class="memory-rail-sprite" src="/src/assets/halloween/char/hob-flashcard-day.webp"></section>
+  <section class="preview-panel"><h2>选择计时栏</h2><img class="memory-rail-sprite" src="/src/assets/halloween/char/hob-choice-day.webp"></section>
+  <section class="preview-panel"><h2>填空计时栏</h2><img class="practice-rail-sprite" src="/src/assets/halloween/char/hob-fill_blank-day.webp"></section>
+  <section class="preview-panel"><h2>翻译计时栏</h2><img class="practice-rail-sprite" src="/src/assets/halloween/char/hob-translation-day.webp"></section>
+  <section class="preview-panel"><h2>改卷等待</h2><img class="practice-rail-sprite" src="/src/assets/halloween/char/hob-grading-day.webp"></section>
+  <section class="preview-panel"><h2>综合计时栏</h2><img class="practice-rail-sprite" src="/src/assets/halloween/char/hob-mixed-day.webp"></section>
+</div>
+<h2>词书封面 · 同一轮廓</h2>
+<div class="preview-books">
+  <img src="/src/assets/halloween/card/book-object-day.webp">
+  <img src="/src/assets/halloween/card/book-object-builtin-day.webp">
+  <img src="/src/assets/halloween/card/book-object-night.webp">
+  <img src="/src/assets/halloween/card/book-object-builtin-night.webp">
+</div>
+<h2>像素头像</h2>
+<div class="preview-avatars">
+  <img src="/src/assets/avatars/pumpkin.svg"><img src="/src/assets/avatars/bat.svg"><img src="/src/assets/avatars/cat.svg"><img src="/src/assets/avatars/ghost.svg">
+  <img src="/src/assets/avatars/skull.svg"><img src="/src/assets/avatars/witch.svg"><img src="/src/assets/avatars/candle.svg"><img src="/src/assets/avatars/candy.svg">
+</div>
+</div>
+</body>
+</html>
