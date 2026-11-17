@@ -6,7 +6,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-WordbookVisibility = Literal["private"]
+# ``organization`` is the built-in shelf: an administrator publishes a book
+# once and every learner studies from the same copy.
+WordbookVisibility = Literal["private", "organization"]
 WordbookStatus = Literal["importing", "ready", "failed", "deleting", "deleted"]
 WordbookJobStatus = Literal["queued", "running", "succeeded", "failed", "cancelled"]
 ExportFormat = Literal["csv", "txt", "pdf"]
@@ -23,6 +25,9 @@ class WordbookSummary(BaseModel):
     version: str
     entry_count: int
     is_active: bool
+    # The book ships with the product: everyone sees it, and its cover is the
+    # one binding that is not the learner's own.
+    is_builtin: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -65,6 +70,8 @@ class WordbookDetailResponse(BaseModel):
 class WordbookPatchRequest(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=4000)
+    # Administrators only: publish this book to every learner, or take it back.
+    is_builtin: bool | None = None
 
     @field_validator("name")
     @classmethod

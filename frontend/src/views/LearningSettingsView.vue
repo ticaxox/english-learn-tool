@@ -9,6 +9,7 @@
  */
 import { computed, onMounted, reactive, ref } from 'vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
+import CrumbDate from '../components/ui/CrumbDate.vue'
 import CrumbNumber from '../components/ui/CrumbNumber.vue'
 import CrumbTime from '../components/ui/CrumbTime.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -29,6 +30,8 @@ import {
   DAILY_MINUTES_MIN,
   DAILY_NEW_WORDS_MAX,
   DAILY_NEW_WORDS_MIN,
+  EXAM_TARGETS,
+  EXAM_TARGET_LABELS,
   type ExamTarget,
   type LearningProfile,
   type LearningProfileUpdate,
@@ -298,6 +301,24 @@ onMounted(() => {
             <p v-if="fieldErrors.dailyMinutes" id="daily-minutes-error" class="field-error" role="alert">
               {{ fieldErrors.dailyMinutes }}
             </p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>学习目标</legend>
+          <div class="settings-goal-grid">
+            <div class="field">
+              <label for="exam-target">目标考试</label>
+              <select id="exam-target" v-model="form.examTarget">
+                <option v-for="target in EXAM_TARGETS" :key="target" :value="target">
+                  {{ EXAM_TARGET_LABELS[target] }}
+                </option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="exam-date">考试日期</label>
+              <CrumbDate id="exam-date" v-model="form.examDate" label="考试日期" />
+            </div>
           </div>
         </fieldset>
 

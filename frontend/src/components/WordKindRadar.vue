@@ -134,7 +134,6 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
       <circle class="word-radar__hub" :cx="CENTRE" :cy="CENTRE" r="3" />
     </svg>
 
-    <p v-if="!hasShape" class="word-radar__empty">这周还没开始学词。</p>
   </figure>
 </template>
 

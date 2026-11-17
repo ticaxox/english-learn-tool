@@ -2,6 +2,8 @@
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import ArtImage from '../components/ArtImage.vue'
+import { illustration } from '../assets/halloween'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
@@ -227,7 +229,10 @@ void practice.load()
   <article class="practice-page practice-session-page member-practice-session-page" :class="{ 'is-embedded': embedded }">
     <PracticeTopBar v-if="!embedded" mode="practice" :active="session?.practiceType ?? null" />
 
-    <header class="practice-session-header practice-stage-header">
+    <header
+      class="practice-session-header practice-stage-header"
+      :class="{ 'is-ghost': session?.status === 'generating' }"
+    >
       <div>
         <p class="eyebrow">AI 练习</p>
         <h1>{{ session ? `${PRACTICE_TYPE_LABELS[session.practiceType]}练习` : '练习会话' }}</h1>
@@ -245,14 +250,17 @@ void practice.load()
 
     <template v-else-if="session">
       <section v-if="session.status === 'generating'" class="panel practice-generation-panel" aria-live="polite">
-        <p class="eyebrow">正在生成练习</p>
-        <h2>正在生成第 {{ session.generationNumber }} 组题目</h2>
-        <p>题目正在生成，请稍候。</p>
-        <p class="field-hint">通常需要 1–2 分钟；如果等待过久会自动结束，可以再重试。</p>
-        <div class="practice-generation-loader" aria-hidden="true"><span></span><span></span><span></span></div>
-        <div class="button-row">
-          <DivButton class="button-secondary" type="button" @click="cancelGeneration">取消生成</DivButton>
-          <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
+        <ArtImage class="practice-generation__mascot" :set="illustration.brewing" />
+        <div class="practice-generation__copy">
+          <p class="eyebrow">正在生成练习</p>
+          <h2>正在生成第 {{ session.generationNumber }} 组题目</h2>
+          <p>题目正在生成，请稍候。</p>
+          <p class="field-hint">通常需要 1–2 分钟；如果等待过久会自动结束，可以再重试。</p>
+          <div class="practice-generation-loader" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="button-row">
+            <DivButton class="button-secondary" type="button" @click="cancelGeneration">取消生成</DivButton>
+            <RouterLink class="button-secondary" to="/practice">返回练习中心</RouterLink>
+          </div>
         </div>
       </section>
 

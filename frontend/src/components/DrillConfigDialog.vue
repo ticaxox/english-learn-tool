@@ -11,7 +11,6 @@
 import { ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import ErrorNotice from './ErrorNotice.vue'
-import SvgPlateButton from './SvgPlateButton.vue'
 import { fetchMemoryConfig, saveMemoryConfig } from '../api/learning'
 import type { MemoryConfig, SpellingBlankType } from '../types/learning'
 import '../practice.css'
@@ -125,7 +124,6 @@ watch(
       <header class="practice-config-dialog__head">
         <div>
           <h2 id="drill-config-title">记忆题型配置</h2>
-          <p class="field-hint">勾选每种练习可以出示的面。勾一项就固定出这一项，勾多项时每张卡在勾中的面里取一个。</p>
         </div>
         <DivButton
           class="icon-button practice-config-dialog__close"
@@ -156,7 +154,6 @@ watch(
               {{ side.label }}
             </DivButton>
           </div>
-          <p class="field-hint">背面永远是正面没给的那一面。</p>
         </fieldset>
 
         <fieldset class="drill-config__group">
@@ -174,7 +171,6 @@ watch(
               {{ side.label }}
             </DivButton>
           </div>
-          <p class="field-hint">四个选项跟着题干换：问英文选中文，问中文选英文。</p>
         </fieldset>
 
         <fieldset class="drill-config__group">
@@ -198,9 +194,9 @@ watch(
 
         <div class="practice-create-footer">
           <DivButton class="button-secondary" type="button" @click="emit('close')">取消</DivButton>
-          <SvgPlateButton type="button" :disabled="saving" @click="save">
+          <DivButton class="button" type="button" :disabled="saving" @click="save">
             {{ saving ? '保存中…' : '保存配置' }}
-          </SvgPlateButton>
+          </DivButton>
         </div>
       </div>
     </section>

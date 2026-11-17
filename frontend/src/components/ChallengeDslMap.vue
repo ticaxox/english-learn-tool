@@ -527,7 +527,6 @@ function cardClasses(node: ChallengeMapNode): Record<string, boolean> {
         <p class="challenge-dsl-summary">
           还剩 <strong>{{ remaining }}</strong> 关<template v-if="minutesLeft > 0"> · 约 {{ minutesLeft }} 分钟</template>
         </p>
-        <p class="field-hint">点一下节点，看这一关的说明和开始按钮。</p>
       </div>
       <div class="challenge-dsl-legend" aria-hidden="true">
         <span class="is-done"><i></i>已完成</span>

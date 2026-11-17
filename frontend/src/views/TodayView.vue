@@ -17,7 +17,6 @@ import { illustration } from '../assets/halloween'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import ContractGate from '../components/ContractGate.vue'
-import GameHud from '../components/GameHud.vue'
 import BadgeWall from '../components/BadgeWall.vue'
 import TodayInsights from '../components/TodayInsights.vue'
 import { useGamification } from '../composables/useGamification'
@@ -93,16 +92,6 @@ const todayTasks = computed(() => {
   }))
 })
 
-const hobTip = computed(() => {
-  const remaining = todayTasks.value.filter((task) => !task.done)
-  if (remaining.length === 0) return '今天的任务都完成了，可以再走一圈，也可以明天再来。'
-  const next = remaining[0]
-  const left = Math.max(0, next.target - next.completed)
-  if (next.key === 'due-reviews') return `还差 ${left} 个到期复习，先清掉它们最划算。`
-  if (next.key === 'new-words') return `还有 ${left} 个新词没学，学完今天的词就齐了。`
-  if (next.key === 'learning-minutes') return `再学 ${left} 分钟就攒够今天的时间了。`
-  return `接下来做「${next.title}」。`
-})
 
 async function load(createIfMissing = false): Promise<void> {
   if (!frozen.value) return
@@ -161,8 +150,6 @@ onMounted(() => {
 
     <template v-else-if="plan">
       <section class="crumb-today-board crumb-trail-board crumb-merged">
-        <GameHud />
-
         <div class="crumb-merged-main">
           <span class="crumb-eyebrow">今日学习 · 今日任务</span>
 
@@ -190,23 +177,15 @@ onMounted(() => {
         </div>
 
         <aside class="crumb-merged-side crumb-today-side">
-          <div class="crumb-merged-book">
-            <img class="crumb-merged-book__cover" :src="bookObject[themeMode]" alt="" aria-hidden="true" />
-            <span class="crumb-eyebrow">当前词书</span>
-            <strong>{{ plan.wordbook?.name ?? '尚未选择' }}</strong>
-            <RouterLink class="crumb-inline-link" to="/wordbooks">
-              {{ plan.wordbook ? '换一本' : '去选择' }}
-            </RouterLink>
-          </div>
+          <RouterLink class="crumb-today-book" :to="plan.wordbook ? '/wordbooks' : '/wordbooks'">
+            <span class="crumb-today-book__cover">
+              <img :src="bookObject[themeMode]" alt="" aria-hidden="true" />
+              <span class="crumb-today-book__name">{{ plan.wordbook?.name ?? '还没有词书' }}</span>
+            </span>
+            <span class="crumb-inline-link">{{ plan.wordbook ? '换一本' : '去选择' }}</span>
+          </RouterLink>
         </aside>
       </section>
-
-      <div class="crumb-note-out">
-        <div class="crumb-tip">
-          <HobMark size="small" :mood="hobMood" :set="illustration.celebrate" />
-          <p>{{ hobTip }}</p>
-        </div>
-      </div>
 
       <ChallengeView embedded />
 

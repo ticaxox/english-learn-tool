@@ -292,6 +292,19 @@ html .personal-workspace .workspace-content:has(.kb) {
 
 .personal-workspace .kb-sort { display: flex; align-items: center; gap: 6px; color: var(--ui-muted); font-size: 12px; }
 
+/* The knowledge base is a library, not a form: its search box and its sort
+ * keep the flat hairline the rest of the page is drawn with, instead of the
+ * carved trough the settings pages use. */
+.personal-workspace .kb :is(input, textarea, select) {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: var(--ui-line) !important;
+  border-image: none !important;
+  border-radius: 6px !important;
+  background: var(--ui-surface-subtle) !important;
+  box-shadow: none !important;
+}
+
 .personal-workspace .kb-sort select {
   height: 28px;
   padding: 0 8px;

@@ -27,6 +27,7 @@ export interface Wordbook {
   version: string
   entry_count: number
   is_active: boolean
+  is_builtin?: boolean
   created_at: string
   updated_at: string
   description: string | null
@@ -358,6 +359,10 @@ export function parseWordbook(payload: unknown, context = '词书响应'): Wordb
     version: requiredString(record, 'version', context),
     entry_count: requiredInteger(record, 'entry_count', context),
     is_active: requiredBoolean(record, 'is_active', context),
+    is_builtin:
+      typeof record.is_builtin === 'boolean'
+        ? record.is_builtin
+        : record.visibility === 'organization',
     created_at: requiredString(record, 'created_at', context),
     updated_at: requiredString(record, 'updated_at', context),
     description: optionalString(record, 'description'),
@@ -589,6 +594,17 @@ export function parseWordbookJob(payload: unknown): WordbookJob {
 export async function getWordbookJob(jobId: string): Promise<WordbookJob> {
   const payload = await apiClient.get<unknown>(`/wordbooks/jobs/${encodeURIComponent(jobId)}`)
   return parseWordbookJob(payload)
+}
+
+export async function updateWordbook(
+  wordbookId: string,
+  patch: { name?: string; description?: string | null; is_builtin?: boolean },
+): Promise<Wordbook> {
+  const payload = await apiClient.patch(
+    `/wordbooks/${encodeURIComponent(wordbookId)}`,
+    patch,
+  )
+  return parseWordbook(payload)
 }
 
 export async function activateWordbook(wordbookId: string): Promise<ActivationResult> {

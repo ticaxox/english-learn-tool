@@ -393,13 +393,6 @@ onMounted(() => {
         </div>
       </section>
 
-      <header v-if="embedded" class="challenge-embedded-header">
-        <div>
-          <p class="eyebrow">今日学习 · 学习地图</p>
-          <h2>{{ plan.title || '今天的学习地图' }}</h2>
-        </div>
-      </header>
-
       <section v-if="!embedded && !canRegenerate" class="panel challenge-summary" aria-label="今日闯关摘要">
         <div class="challenge-summary__copy">
           <p class="eyebrow">{{ plan.localDate }} · {{ PLAN_STATUS_LABELS[plan.status] }}</p>

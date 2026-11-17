@@ -180,7 +180,8 @@ async def _active_wordbook(session: AsyncSession, user: User) -> Wordbook:
         .join(WordbookActivation, WordbookActivation.wordbook_id == Wordbook.id)
         .where(
             WordbookActivation.user_id == user.id,
-            Wordbook.owner_id == user.id,
+            # A built-in book has no owner: it is everyone's to study from.
+            or_(Wordbook.owner_id == user.id, Wordbook.visibility == "organization"),
             Wordbook.status == "ready",
         )
     )

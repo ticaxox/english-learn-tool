@@ -280,6 +280,12 @@ import bookObjectDay from './card/book-object-day.png'
 import bookObjectNight from './card/book-object-night.png'
 export const bookObject = { day: bookObjectDay, night: bookObjectNight } as const
 
+/* The built-in shelf: the same book in deep teal, so a title that ships with
+ * the product reads apart from the learner's own green copies at a glance. */
+import bookBuiltinDay from './card/book-object-builtin-day.png'
+import bookBuiltinNight from './card/book-object-builtin-night.png'
+export const builtinBook = { day: bookBuiltinDay, night: bookBuiltinNight } as const
+
 /* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
  * spirit-green one for the stop you are on, a dark unlit one for a stop out
  * of reach. */

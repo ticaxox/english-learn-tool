@@ -10,7 +10,7 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import UploadFile
-from sqlalchemy import func, select, text
+from sqlalchemy import func, or_, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -159,8 +159,13 @@ async def _load_wordbook(
     return book
 
 
+def _is_builtin(book: Wordbook) -> bool:
+    """A built-in book is the organisation shelf: one copy, every learner."""
+    return book.visibility == "organization"
+
+
 def _can_view(book: Wordbook, actor: User) -> bool:
-    return book.owner_id == actor.id
+    return book.owner_id == actor.id or _is_builtin(book)
 
 
 def _ensure_can_view(book: Wordbook, actor: User) -> None:
@@ -173,12 +178,17 @@ def _ensure_can_view(book: Wordbook, actor: User) -> None:
 
 
 async def _ensure_can_write(session: AsyncSession, book: Wordbook, actor: User) -> None:
-    if book.owner_id != actor.id:
-        raise AppError(
-            status_code=404,
-            code="WORDBOOK_NOT_FOUND",
-            message="The wordbook was not found.",
-        )
+    # The learner may edit the books they imported; a built-in book belongs to
+    # the product, so only an administrator may change, export or delete it.
+    if book.owner_id == actor.id:
+        return
+    if _is_builtin(book) and actor.role == "admin":
+        return
+    raise AppError(
+        status_code=404,
+        code="WORDBOOK_NOT_FOUND",
+        message="The wordbook was not found.",
+    )
 
 
 async def _entry_count(session: AsyncSession, wordbook_id: UUID) -> int:
@@ -217,6 +227,7 @@ async def _summary(
         version=book.version,
         entry_count=await _entry_count(session, book.id),
         is_active=book.id in (active_ids or set()),
+        is_builtin=_is_builtin(book),
         created_at=book.created_at,
         updated_at=book.updated_at,
     )
@@ -233,7 +244,10 @@ async def list_wordbooks(
 ) -> WordbookListResponse:
     if actor.status != "active":
         raise AppError(status_code=403, code="FORBIDDEN", message="The account is disabled.")
-    base = select(Wordbook).where(Wordbook.owner_id == actor.id, Wordbook.status != "deleted")
+    base = select(Wordbook).where(
+        or_(Wordbook.owner_id == actor.id, Wordbook.visibility == "organization"),
+        Wordbook.status != "deleted",
+    )
     total = int(await session.scalar(select(func.count()).select_from(base.subquery())) or 0)
     sort_column = {
         "created_at": Wordbook.created_at,
@@ -402,11 +416,11 @@ async def create_import_preview(
     description: str | None = None,
 ) -> ImportPreviewResponse:
     source_filename = _safe_filename(upload.filename)
-    if visibility != "private":
+    if visibility != "private" and actor.role != "admin":
         raise AppError(
-            status_code=422,
-            code="WORDBOOK_ORGANIZATION_DISABLED",
-            message="Personal wordbooks must be private.",
+            status_code=403,
+            code="WORDBOOK_BUILTIN_FORBIDDEN",
+            message="Only an administrator may publish a built-in wordbook.",
         )
     raw = await upload.read(settings.wordbook_max_bytes + 1)
     try:
@@ -700,11 +714,11 @@ async def confirm_wordbook_import(
             code="WORDBOOK_VISIBILITY_MISMATCH",
             message="Visibility must match the preview request.",
         )
-    if preview.requested_visibility != "private":
+    if preview.requested_visibility != "private" and actor.role != "admin":
         raise AppError(
-            status_code=409,
-            code="WORDBOOK_ORGANIZATION_DISABLED",
-            message="Personal wordbooks must be private.",
+            status_code=403,
+            code="WORDBOOK_BUILTIN_FORBIDDEN",
+            message="Only an administrator may publish a built-in wordbook.",
         )
 
     name = payload.name or preview.requested_name
@@ -717,7 +731,9 @@ async def confirm_wordbook_import(
         status="importing",
         name=name,
         description=_safe_display_text(description, limit=4000),
-        owner_id=actor.id,
+        # A built-in book belongs to the product, not to the administrator who
+        # imported it, so it carries no owner and no learner can edit it.
+        owner_id=None if visibility == "organization" else actor.id,
         created_by=actor.id,
         book_metadata={
             "source_filename": preview.source_filename,
@@ -1161,6 +1177,23 @@ async def update_wordbook(
         book.name = payload.name
     if "description" in payload.model_fields_set:
         book.description = payload.description
+    if payload.is_builtin is not None and payload.is_builtin != _is_builtin(book):
+        if actor.role != "admin":
+            raise AppError(
+                status_code=403,
+                code="WORDBOOK_BUILTIN_FORBIDDEN",
+                message="Only an administrator may publish a built-in wordbook.",
+            )
+        if payload.is_builtin:
+            # Publishing takes the book out of the importer's shelf and puts it
+            # on everyone's; the importer's own copy would only be a duplicate.
+            book.visibility = "organization"
+            book.owner_id = None
+        else:
+            # Taking it back hands the book to whoever did it, so it keeps an
+            # owner and the usual private rules.
+            book.visibility = "private"
+            book.owner_id = actor.id
     add_audit_event(
         session,
         actor=actor,

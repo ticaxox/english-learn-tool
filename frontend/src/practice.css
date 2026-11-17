@@ -187,16 +187,46 @@
 
 .practice-generation-panel {
   display: grid;
-  gap: 0.7rem;
+  grid-template-columns: minmax(140px, 190px) minmax(0, 1fr);
+  gap: 1.6rem;
+  align-items: center;
+  min-height: 16rem;
   border-color: #cbb98c;
   background: linear-gradient(135deg, #fffdf6, #f7f2e5);
+}
+
+/* Hob stirs the pot while the questions are being written; the copy and the
+ * dots sit centred beside it. */
+.practice-generation__mascot {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  margin-inline: auto;
+}
+
+.practice-generation__copy {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: center;
+  text-align: center;
+}
+
+/* The page title is hidden rather than removed while generating, so the panel
+ * underneath keeps its place instead of jumping up. */
+.practice-stage-header.is-ghost { visibility: hidden; }
+
+@media (max-width: 720px) {
+  .practice-generation-panel { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .practice-generation__mascot { max-width: 130px; }
 }
 
 .practice-generation-loader {
   display: flex;
   gap: 0.4rem;
   align-items: center;
+  justify-content: center;
   height: 1rem;
+  margin: 0.2rem auto 0;
 }
 
 .practice-generation-loader span {

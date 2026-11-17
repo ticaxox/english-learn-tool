@@ -1670,6 +1670,25 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   text-shadow: 0 2px 3px rgb(0 0 0 / 60%), 0 0 12px rgb(0 0 0 / 40%);
 }
 
+/* A built-in book says so on its cover: the teal binding plus this little
+ * plate is the whole difference from the learner's own green copies. */
+.personal-workspace .wordbook-cover__builtin {
+  position: absolute;
+  top: 3.5%;
+  left: 6%;
+  z-index: 2;
+  padding: 2px 8px;
+  border: 1.5px solid #7c5c12;
+  border-radius: 999px;
+  background: #ffd166;
+  color: #3a2508;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.45;
+  pointer-events: none;
+}
+
 /* The book in use is the one that glows, and the one with the bookmark in it. */
 .personal-workspace .wordbook-card--active .wordbook-cover {
   box-shadow: 6px 8px 0 rgb(59 42 26 / 16%), 0 0 0 3px #ffd166, 0 0 30px 8px rgb(255 200 0 / 45%);

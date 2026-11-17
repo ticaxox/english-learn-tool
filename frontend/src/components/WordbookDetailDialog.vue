@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import {
   getWordbookDetail,
+  updateWordbook,
   type Wordbook,
   type WordbookDetail,
   type WordbookStatus,
@@ -21,12 +22,14 @@ const props = withDefaults(defineProps<{
   canExport?: boolean
   canDelete?: boolean
   activating?: boolean
+  isAdmin?: boolean
 }>(), {
   book: null,
   canActivate: false,
   canExport: false,
   canDelete: false,
   activating: false,
+  isAdmin: false,
 })
 
 const emit = defineEmits<{
@@ -34,6 +37,7 @@ const emit = defineEmits<{
   (event: 'activate'): void
   (event: 'export'): void
   (event: 'delete'): void
+  (event: 'updated'): void
 }>()
 
 const PAGE_SIZE = 50
@@ -42,6 +46,28 @@ const loading = ref(false)
 const error = ref<unknown>(null)
 const dialogRef = ref<HTMLElement | null>(null)
 let loadRequestId = 0
+
+const builtinBusy = ref(false)
+const builtinError = ref<unknown>(null)
+const builtin = computed(() => Boolean(detail.value?.wordbook.is_builtin ?? props.book?.is_builtin))
+
+/** Administrators publish a book once; every learner then studies that copy. */
+async function toggleBuiltin(): Promise<void> {
+  if (!detail.value || builtinBusy.value) return
+  builtinBusy.value = true
+  builtinError.value = null
+  try {
+    const updated = await updateWordbook(detail.value.wordbook.id, {
+      is_builtin: !builtin.value,
+    })
+    detail.value = { ...detail.value, wordbook: updated }
+    emit('updated')
+  } catch (requestError) {
+    builtinError.value = requestError
+  } finally {
+    builtinBusy.value = false
+  }
+}
 
 const hasPrevious = computed(() => Boolean(detail.value && detail.value.offset > 0))
 const hasNext = computed(() => Boolean(
@@ -147,12 +173,23 @@ onMounted(() => {
             {{ activating ? '激活中…' : '设为主词书' }}
           </DivButton>
           <DivButton v-else class="button-secondary button-small" type="button" disabled>已在使用</DivButton>
+          <DivButton
+            v-if="isAdmin"
+            class="button-secondary button-small"
+            type="button"
+            :disabled="builtinBusy"
+            :aria-pressed="builtin"
+            @click="toggleBuiltin"
+          >
+            {{ builtin ? '取消内置' : '设为内置词书' }}
+          </DivButton>
           <DivButton v-if="canExport" class="button-secondary button-small" type="button" @click="emit('export')">导出</DivButton>
           <DivButton v-if="canDelete" class="button-danger button-small" type="button" @click="emit('delete')">删除</DivButton>
         </div>
         <DivButton class="icon-button" type="button" aria-label="关闭词书详情" @click="close"><CrumbIcon name="close" :size="18" /></DivButton>
       </header>
 
+      <ErrorNotice v-if="builtinError" :error="builtinError" :show-retry="false" />
       <LoadingState v-if="loading && !detail" label="正在读取词书与词条…" />
       <ErrorNotice v-else-if="error && !detail" :error="error" retry-label="重新读取" @retry="load(0)" />
 

@@ -208,14 +208,14 @@ describe('wordbook dialogs', () => {
   it('shows the exact required mapping fields and member/admin visibility choices', async () => {
     const memberWrapper = track(mount(WordbookImportDialog, { props: { isAdmin: false } }))
     expect(memberWrapper.get('select').text()).toContain('我的私有词书')
-    expect(memberWrapper.get('select').text()).not.toContain('组织词书')
+    expect(memberWrapper.get('select').text()).not.toContain('内置词书')
     await openImportPreview(memberWrapper)
     expect(memberWrapper.text()).toContain('headword｜单词')
     expect(memberWrapper.text()).toContain('definition_en｜英文释义')
     expect(memberWrapper.text()).toContain('definition_zh｜中文释义')
 
     const adminWrapper = track(mount(WordbookImportDialog, { props: { isAdmin: true } }))
-    expect(adminWrapper.get('select').text()).toContain('组织词书')
+    expect(adminWrapper.get('select').text()).toContain('内置词书')
   })
 
   it('previews structured rows, remaps first, confirms with the new hash and polls the real job', async () => {
