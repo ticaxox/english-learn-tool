@@ -1862,6 +1862,32 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
   }
 }
 
+/* 学习目标：选择器就挨在标题右边，下面一行放两个每日量。 */
+.personal-workspace .settings-form .settings-goal-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.personal-workspace .settings-form .settings-goal-select {
+  width: 220px;
+  max-width: 100%;
+}
+
+.personal-workspace .settings-form .settings-daily-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: 14px 44px;
+  align-items: start;
+  justify-content: start;
+}
+
+@media (max-width: 760px) {
+  .personal-workspace .settings-form .settings-goal-legend { flex-wrap: wrap; }
+  .personal-workspace .settings-form .settings-daily-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 .personal-workspace .settings-form fieldset.settings-goal-grid {
   display: grid;
   /* Columns as wide as their own fields, not as wide as a guess: sized to
@@ -5590,6 +5616,23 @@ html[data-theme='night'] .personal-workspace .practice-question-card--translatio
   border-radius: 0;
   box-shadow: none !important;
   color: #3d2c18;
+}
+
+/* 翻译的作答框：和题卡同一张纸，只是裁小了一块——它是卡片上的一张便签，
+ * 不是白框浮在上面。 */
+.member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
+.member-practice-page .practice-question-card--translation .practice-answer-textarea {
+  min-height: 96px;
+  padding: 4px 12px;
+  border-style: solid;
+  border-width: 18px;
+  border-image-source: var(--rune-paper-card);
+  border-image-slice: 64 fill;
+  border-image-width: 18px;
+  border-image-repeat: stretch;
+  border-color: transparent !important;
+  border-radius: 0;
+  line-height: 1.7;
 }
 
 /* A writing area worth writing in. */

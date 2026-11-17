@@ -135,7 +135,8 @@ describe('learning surfaces with the frozen contract', () => {
     // map-generation prefs stay their own block.
     expect(wrapper.text()).toContain('学习目标')
     expect(wrapper.text()).toContain('关卡生成')
-    expect(wrapper.text()).toContain('目标考试')
+    // The target is chosen from the heading itself, so it has no label of its own.
+    expect(wrapper.find('#exam-target').exists()).toBe(true)
     expect(wrapper.text()).not.toContain('记忆模块')
     expect(wrapper.find('#practice-pool-target').exists()).toBe(true)
     expect(wrapper.find('#challenge-generation-time').exists()).toBe(true)

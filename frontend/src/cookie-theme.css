@@ -435,26 +435,77 @@ pre {
 }
 
 .auth-art {
-  display: grid;
-  place-items: center;
+  display: block;
   justify-self: end;
+  align-self: center;
 }
 
 .auth-art__mark {
   display: block;
-  width: min(26vw, 300px);
+  width: min(36vw, 400px);
   height: auto;
   filter: drop-shadow(0 10px 0 rgb(74 48 37 / 12%));
 }
 
-.auth-art__mark .art-swap,
-.auth-art__mark .art-swap__stack {
+.auth-art__mark .art-swap {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+}
+
+/* The two frames sit on top of each other: keep the stack a grid, or they
+ * lay out one above the other and the picture is twice as tall as it is wide. */
+.auth-art__mark .art-swap__stack {
+  display: grid;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+}
+
+/* The login page is outside .personal-workspace, so the shared stacking rule
+ * does not reach these two frames — without this they sit one above the other
+ * and the picture is twice as tall as it is wide. */
+.auth-art__mark .art-swap__frame {
+  display: block;
+  width: 100%;
+  height: auto;
+  grid-area: 1 / 1;
 }
 
 .auth-card__masthead--seal-only { justify-content: flex-start; }
+
+/* The door wears the same controls as the rooms behind it: carved fields and
+ * a plate for the one action. */
+.auth-page .field input:not([type='checkbox']):not([type='radio']) {
+  border-width: 6px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  min-height: 40px;
+}
+
+.auth-page .form-stack [type='submit'] {
+  border-width: 10px 12px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-badge-day.webp') 30% 17% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  min-height: 46px;
+}
+
+html[data-theme='night'] .auth-page .field input:not([type='checkbox']):not([type='radio']) {
+  border-image-source: url('./assets/halloween/card/control-field-night.webp');
+}
+
+html[data-theme='night'] .auth-page .form-stack [type='submit'] {
+  border-image-source: url('./assets/halloween/card/control-badge-night.webp');
+}
+
 
 @media (max-width: 900px) {
   .auth-page { grid-template-columns: minmax(0, 1fr); }
@@ -463,7 +514,8 @@ pre {
 
 .auth-card {
   position: relative;
-  width: min(100%, 33rem);
+  width: 40rem;
+  max-width: 100%;
   padding: clamp(1.45rem, 5vw, 2.65rem);
   border: 2px solid var(--cocoa-900);
   border-radius: 32px 18px 30px 16px;
