@@ -26,13 +26,14 @@ function book(): Wordbook {
 }
 
 describe('T-FE-017 workspace depth', () => {
-  it('puts the player bar and the day\'s tasks on the Today board', () => {
+  it('puts the day\'s tasks and the wordbook on the Today board', () => {
     const today = source('../views/TodayView.vue')
-    expect(today).toContain('<GameHud')
+    // The board is the tasks: no player bar restating them, no tip box.
+    expect(today).not.toContain('<GameHud')
     expect(today).toContain('crumb-task-list')
-    expect(today).toContain('crumb-merged-book')
-    // The tip is advice from Crumbo, so it sits outside the plan card.
-    expect(today).toContain('crumb-note-out')
+    // The wordbook is the book itself, with the name written on the cover.
+    expect(today).toContain('crumb-today-book')
+    expect(today).toContain('crumb-today-book__name')
   })
 
   it('keeps a wordbook card to its cover and name', () => {

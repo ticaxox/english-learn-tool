@@ -93,15 +93,15 @@ describe('WordbooksView personal shelf', () => {
     })
   })
 
-  it('loads the personal catalog and hides organization books defensively', async () => {
+  it('loads the shelf, own books and built-in ones together', async () => {
     const wrapper = mountView()
     await flushPromises()
 
     expect(apiMocks.listWordbooks).toHaveBeenCalledWith({ offset: 0, limit: 100 })
-    expect(wrapper.text()).not.toContain('Business English')
-    expect(wrapper.text()).not.toContain('组织词书')
+    // A built-in book is everyone's shelf, so it shows beside the own ones.
+    expect(wrapper.text()).toContain('Business English')
     expect(wrapper.text()).toContain('个人词书')
-    expect(wrapper.text()).toContain('1–1 / 共 1 本')
+    expect(wrapper.text()).toContain('1–2 / 共 2 本')
     expect(localStorage.length).toBe(0)
     expect(sessionStorage.length).toBe(0)
   })

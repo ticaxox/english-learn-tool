@@ -21,7 +21,6 @@ import WordbookExportDialog from '../components/WordbookExportDialog.vue'
 import WordbookImportDialog from '../components/WordbookImportDialog.vue'
 import WordbookShelfCard from '../components/WordbookShelfCard.vue'
 import AppIcon from '../components/AppIcon.vue'
-import HobMark from '../components/HobMark.vue'
 
 const PAGE_SIZE = 12
 const CATALOG_PAGE_SIZE = 100
@@ -48,16 +47,14 @@ const deleteTarget = ref<Wordbook | null>(null)
 const filteredBooks = computed(() => {
   const query = filters.search.trim().toLocaleLowerCase('zh-CN')
   return catalog.value.filter((book) => {
-    const matchesVisibility = book.visibility === 'private'
     const matchesSearch = !query
       || book.name.toLocaleLowerCase('zh-CN').includes(query)
       || (book.description ?? '').toLocaleLowerCase('zh-CN').includes(query)
-    return matchesVisibility && matchesSearch
+    return matchesSearch
   })
 })
 const visibleBooks = computed(() => filteredBooks.value.slice(pageOffset.value, pageOffset.value + PAGE_SIZE))
-const personalBookCount = computed(() => catalog.value.filter((book) => book.visibility === 'private').length)
-const activeBook = computed(() => catalog.value.find((book) => book.visibility === 'private' && book.is_active) ?? null)
+const personalBookCount = computed(() => catalog.value.length)
 const filterActive = computed(() => Boolean(filters.search.trim()))
 const empty = computed(() => !loading.value && !error.value && personalBookCount.value === 0)
 const filteredEmpty = computed(() => !loading.value && !error.value && personalBookCount.value > 0 && filteredBooks.value.length === 0)
@@ -72,19 +69,12 @@ const pageSummary = computed(() => {
   return `${start}–${end} / 共 ${filteredBooks.value.length} 本`
 })
 
-function coverMark(name: string | undefined): string {
-  if (!name) return 'W'
-  const lastToken = name.trim().split(/\s+/).at(-1) ?? ''
-  if (/^\d{2,}$/.test(lastToken)) return lastToken.slice(-2)
-  return name.trim().slice(0, 1).toUpperCase() || 'W'
-}
-
 function canExport(book: Wordbook): boolean {
-  return canExportWordbook(book, auth.user?.id ?? null, false)
+  return canExportWordbook(book, auth.user?.id ?? null, auth.isAdmin)
 }
 
 function canDelete(book: Wordbook): boolean {
-  return canDeleteWordbook(book, auth.user?.id ?? null, false)
+  return canDeleteWordbook(book, auth.user?.id ?? null, auth.isAdmin)
 }
 
 async function load(): Promise<void> {
@@ -192,32 +182,6 @@ onMounted(() => {
 
 <template>
   <article class="wordbooks-page member-wordbooks-page wordbooks-workspace workspace-page crumb-wordbooks">
-    <header class="crumb-shelf-header">
-      <div class="crumb-shelf-heading">
-        <HobMark size="medium" :set="illustration.library" />
-        <div>
-          <p class="crumb-brand-kicker">GRIMOIRE LIBRARY</p>
-          <h1>咬一口，多记一个词。</h1>
-          <p>每一本词书，都是 Hob 守着的一炉火。</p>
-        </div>
-      </div>
-      <DivButton class="button crumb-import-button" type="button" @click="importOpen = true">
-        <AppIcon name="plus" /> 导入词书
-      </DivButton>
-    </header>
-
-    <section class="workspace-card wordbook-active-banner wordbook-active-strip crumb-current-book" :class="{ 'wordbook-active-banner--empty': !activeBook }">
-      <div class="wordbook-active-copy">
-        <span class="wordbook-active-mark" aria-hidden="true">{{ coverMark(activeBook?.name) }}</span>
-        <div>
-          <p class="workspace-kicker">当前主词书</p>
-          <strong>{{ activeBook?.name ?? '还没有激活词书' }}</strong>
-          <p>{{ activeBook ? `${activeBook.entry_count.toLocaleString('zh-CN')} 个词条` : '从下方列表选择一本开始学习。' }}</p>
-        </div>
-      </div>
-      <span v-if="activeBook" class="wordbook-status wordbook-status--active">使用中</span>
-    </section>
-
     <section class="workspace-card wordbooks-panel crumb-bookshelf">
       <div class="wordbook-toolbar">
         <h2 class="wordbook-toolbar-heading">{{ filterActive ? '搜索结果' : '词书书架' }}</h2>
@@ -236,8 +200,8 @@ onMounted(() => {
           <DivButton class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
             {{ loading ? '读取中…' : '刷新' }}
           </DivButton>
-          <DivButton class="button-secondary button-small wordbook-import-mobile" type="button" @click="importOpen = true">
-            <AppIcon name="plus" /> 导入
+          <DivButton class="button button-small" type="button" @click="importOpen = true">
+            <AppIcon name="plus" /> 导入词书
           </DivButton>
         </div>
       </div>
@@ -284,7 +248,7 @@ onMounted(() => {
 
     <WordbookImportDialog
       v-if="importOpen"
-      :is-admin="false"
+      :is-admin="auth.isAdmin"
       @close="importOpen = false"
       @completed="importCompleted"
     />
@@ -296,7 +260,9 @@ onMounted(() => {
       :can-export="selectedBook ? canExport(selectedBook) : false"
       :can-delete="selectedBook ? canDelete(selectedBook) : false"
       :activating="selectedBook ? activatingId === selectedBook.id : false"
+      :is-admin="auth.isAdmin"
       @close="detailId = null"
+      @updated="load"
       @activate="selectedBook && activate(selectedBook)"
       @export="selectedBook && (exportTarget = selectedBook)"
       @delete="selectedBook && (deleteTarget = selectedBook)"

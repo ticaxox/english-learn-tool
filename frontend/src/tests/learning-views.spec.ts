@@ -131,11 +131,11 @@ describe('learning surfaces with the frozen contract', () => {
     expect(wrapper.find('#daily-new-words').exists()).toBe(true)
     expect(wrapper.text()).not.toContain('组织信息')
     expect(wrapper.text()).not.toContain('学习部')
-    // The settings page now carries the daily goal and the map-generation prefs,
-    // and no longer the exam or memory modules.
-    expect(wrapper.text()).toContain('每日目标')
+    // The learning goal carries the exam target and the daily amounts; the
+    // map-generation prefs stay their own block.
+    expect(wrapper.text()).toContain('学习目标')
     expect(wrapper.text()).toContain('关卡生成')
-    expect(wrapper.text()).not.toContain('目标考试')
+    expect(wrapper.text()).toContain('目标考试')
     expect(wrapper.text()).not.toContain('记忆模块')
     expect(wrapper.find('#practice-pool-target').exists()).toBe(true)
     expect(wrapper.find('#challenge-generation-time').exists()).toBe(true)

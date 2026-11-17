@@ -3252,15 +3252,65 @@ than its row reads as a different kind of thing. */
   object-fit: contain;
   filter: drop-shadow(0 4px 0 rgb(59 42 26 / 18%));
 }
+
+/* The day's wordbook is the book itself, the way the shelf draws it: the
+ * leather, the clasp, and the name written straight on the cover. */
+.personal-workspace .crumb-today-book {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  height: 100%;
+  text-decoration: none;
+}
+/* The book stands exactly as tall as the task list beside it: the height is
+ * the one variable, the width follows the 2:3 cover from it. */
+.personal-workspace .crumb-today-book__cover {
+  position: relative;
+  display: block;
+  height: var(--today-book-h, 262px);
+  width: auto;
+  aspect-ratio: 2 / 3;
+  margin-inline: auto;
+}
+@media (max-width: 900px) {
+  .personal-workspace .crumb-today-book__cover { height: 168px; }
+}
+.personal-workspace .crumb-today-book__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 0 rgb(59 42 26 / 18%));
+}
+.personal-workspace .crumb-today-book__name {
+  position: absolute;
+  top: 24%;
+  right: 11%;
+  left: 11%;
+  color: #fbf2da;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.3;
+  text-align: center;
+  text-shadow: 0 2px 3px rgb(0 0 0 / 60%), 0 0 10px rgb(0 0 0 / 40%);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+.personal-workspace .crumb-today-book:hover .crumb-today-book__cover img {
+  filter: drop-shadow(0 6px 0 rgb(59 42 26 / 22%));
+  transform: translateY(-2px);
+}
+.personal-workspace .crumb-today-book__cover img { transition: transform 160ms ease, filter 160ms ease; }
 .personal-workspace .crumb-merged .crumb-task-list { list-style: none; margin: 0; padding: 0; }
 .personal-workspace .crumb-merged .crumb-task-list li { border-top: 2px dashed var(--ui-line); }
 .personal-workspace .crumb-merged .crumb-task-list li:last-child { border-bottom: 2px dashed var(--ui-line); }
 .personal-workspace .crumb-merged .crumb-task-row {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 10px 4px;
+  gap: 14px;
+  padding: 18px 4px;
   text-decoration: none;
   color: inherit;
 }
@@ -3270,9 +3320,9 @@ than its row reads as a different kind of thing. */
   display: grid; place-items: center;
   font-size: 11px; color: var(--ui-muted);
 }
-.personal-workspace .crumb-merged .crumb-task-title { font-size: 13.5px; }
+.personal-workspace .crumb-merged .crumb-task-title { font-size: 17px; }
 .personal-workspace .crumb-merged .crumb-task-value {
-  font-size: 12.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums;
+  font-size: 14.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums;
 }
 .personal-workspace .crumb-merged .crumb-task-list li.is-done .crumb-task-state {
   background: var(--ui-accent-soft, #e3f0e1);
@@ -4388,6 +4438,32 @@ than its row reads as a different kind of thing. */
   outline-offset: -2px;
 }
 
+/* ---------------------------------------------------------------- insights
+ * 学习足迹、雷达、词态条是同一组读数，用同一套昼夜色：
+ * 白天是羊皮纸上的橙色，夜里是紫石上的一盏薄荷。 */
+.personal-workspace {
+  --insight-hot: #ff9600;
+  --insight-hot-soft: rgb(255 150 0 / 26%);
+  --insight-quiet: #e6d6b8;
+  --insight-quiet-ink: #8d7455;
+  --insight-track: #efe2c8;
+  --state-new: #e8c58a;
+  --state-learning: #1cb0f6;
+  --state-review: #ff9600;
+  --state-relearning: #a75cf0;
+}
+html[data-theme='night'] .personal-workspace {
+  --insight-hot: #7cf0c4;
+  --insight-hot-soft: rgb(124 240 196 / 24%);
+  --insight-quiet: #3a3160;
+  --insight-quiet-ink: #c9b6ff;
+  --insight-track: #2e2549;
+  --state-new: #c9b6ff;
+  --state-learning: #7cc4ff;
+  --state-review: #7cf0c4;
+  --state-relearning: #ff9e7a;
+}
+
 .personal-workspace .trail-month__day {
   display: grid;
   place-items: center;
@@ -4400,9 +4476,16 @@ than its row reads as a different kind of thing. */
   font-variant-numeric: tabular-nums;
 }
 
-.personal-workspace .trail-month__day.is-past { background: #e6d6b8; color: #8d7455; }
+.personal-workspace .trail-month__day.is-past {
+  background: var(--insight-quiet);
+  color: var(--insight-quiet-ink);
+}
 
-.personal-workspace .trail-month__day.is-lit { background: var(--g-orange, #ff9600); color: #fff; }
+.personal-workspace .trail-month__day.is-lit {
+  background: var(--insight-hot);
+  color: #fff;
+}
+html[data-theme='night'] .personal-workspace .trail-month__day.is-lit { color: #10261f; }
 
 .personal-workspace .trail-month__day.is-today {
   background: var(--ui-surface);
@@ -4449,7 +4532,8 @@ than its row reads as a different kind of thing. */
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 22px;
-  align-items: center;
+  /* The radar takes the card's full height beside the state bar. */
+  align-items: stretch;
   flex: 1;
   min-height: 0;
 }
@@ -5318,10 +5402,16 @@ html[data-theme='night'] .member-practice-page .practice-article-panel {
   border-color: #b0742a !important;
 }
 
+/* 选中态跟着卡片走：同一张羊皮纸、同一道棕墨边，只是这一格被点亮了。 */
 .member-practice-session-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
 .member-practice-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) {
-  border-color: #b0742a !important;
-  box-shadow: inset 0 0 0 3px #f6eed9, inset 0 0 0 4px #d9b877 !important;
+  border-width: 2px !important;
+  border-color: #6f5226 !important;
+  background: #fbf4e2 !important;
+  box-shadow:
+    inset 0 0 0 3px #fbf4e2,
+    inset 0 0 0 4px #c9a86a,
+    0 0 0 3px rgb(160 122 58 / 16%) !important;
 }
 
 .member-practice-session-page .practice-question-card .practice-option--correct,
@@ -5370,14 +5460,15 @@ html[data-theme='night'] .member-practice-page .practice-question-card .practice
 
 html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
 html[data-theme='night'] .member-practice-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) {
-  /* 夜里的同一盏灯：底色透出琥珀，内壁一圈暖光，外面一层薄晕。 */
-  background: #3d2d1c !important;
+  /* 夜里同一种石头：底色亮一层紫，边是淡紫，内壁一圈微光。 */
+  background: #3a3160 !important;
   border-width: 2px !important;
-  border-color: #f0c274 !important;
+  border-color: #b9a6e6 !important;
   box-shadow:
-    inset 0 0 0 3px #3d2d1c,
-    inset 0 0 22px rgb(255 196 96 / 35%),
-    0 0 0 3px rgb(255 196 96 / 18%) !important;
+    inset 0 0 0 3px #3a3160,
+    inset 0 0 0 4px #6b5da0,
+    inset 0 0 22px rgb(185 166 230 / 30%),
+    0 0 0 3px rgb(185 166 230 / 16%) !important;
 }
 
 html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--correct,
@@ -7532,7 +7623,8 @@ html[data-theme='night'] .personal-workspace .personal-ai-page input[type="check
 
 /* 悬浮窗右上角那颗关闭钮：一枚小铜牌，中间的叉还是矢量图标，
  * 素材只负责牌面，不画那个叉。 */
-.personal-workspace .dialog-card .workspace-icon-button {
+.personal-workspace .dialog-card .workspace-icon-button,
+.personal-workspace .dialog-card .practice-config-dialog__close {
   width: 34px;
   height: 34px;
   min-height: 0;
@@ -7547,12 +7639,14 @@ html[data-theme='night'] .personal-workspace .personal-ai-page input[type="check
   color: #33200b !important;
 }
 
-.personal-workspace .dialog-card .workspace-icon-button:hover:not(:disabled) {
+.personal-workspace .dialog-card .workspace-icon-button:hover:not(:disabled),
+.personal-workspace .dialog-card .practice-config-dialog__close:hover:not(:disabled) {
   background: none !important;
   filter: brightness(1.06);
 }
 
-html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button {
+html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button,
+html[data-theme='night'] .personal-workspace .dialog-card .practice-config-dialog__close {
   border-image-source: url('./assets/halloween/card/control-close-night.webp') !important;
   color: #efe6ff !important;
 }

@@ -16,7 +16,6 @@ import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import TypeMark from '../components/TypeMark.vue'
 import PracticeRecordRow from '../components/PracticeRecordRow.vue'
-import AppIcon from '../components/AppIcon.vue'
 import DivButton from '../components/DivButton.vue'
 import {
   deletePracticeRecords,
@@ -25,7 +24,6 @@ import {
   PRACTICE_SOURCE_LABELS,
   PRACTICE_TYPE_LABELS,
   type PracticeRecordSummary,
-  type PracticeSource,
   type PracticeType,
 } from '../api/practice'
 import '../practice.css'
@@ -36,7 +34,6 @@ const route = useRoute()
 const router = useRouter()
 
 const practiceTypes: PracticeType[] = ['fill_blank', 'reading', 'translation', 'writing', 'conversation', 'mixed']
-const practiceSources: PracticeSource[] = ['today_new', 'today_review', 'memory_mistakes', 'whole_book', 'difficulty']
 /** The mistake book groups in one pass, so it loads a bigger slice at a time. */
 const MISTAKE_BATCH = 100
 const PAGE_SIZE = 12
@@ -51,7 +48,6 @@ const practiceType = computed<PracticeType | ''>(() => {
   const value = typeof route.query.type === 'string' ? route.query.type : ''
   return (practiceTypes as string[]).includes(value) ? (value as PracticeType) : ''
 })
-const source = ref<PracticeSource | ''>('')
 
 const records = ref<PracticeRecordSummary[]>([])
 const total = ref(0)
@@ -201,7 +197,6 @@ async function load(): Promise<void> {
     } else {
       const pageData = await listPracticeRecords({
         practiceType: practiceType.value || undefined,
-        source: source.value || undefined,
         onlyMistakes: false,
         offset: offset.value,
         limit: PAGE_SIZE,
@@ -288,16 +283,10 @@ watch(
   () => {
     offset.value = 0
     selected.value = []
-    // The source filter belongs to the records list only.
-    if (isMistakes.value) source.value = ''
     void load()
   },
 )
 
-watch(source, () => {
-  offset.value = 0
-  void load()
-})
 
 void load()
 </script>
@@ -306,16 +295,8 @@ void load()
   <article class="practice-page practice-records-page workspace-page">
     <header class="workspace-page-header records-header">
       <div class="records-header__copy">
-        <RouterLink class="records-back" to="/practice">
-          <AppIcon name="arrow-left" /> AI 练习
-        </RouterLink>
         <p class="workspace-kicker">复习巩固</p>
         <h1>{{ isMistakes ? '错题本' : '题目集' }}</h1>
-        <p class="workspace-page-lead">
-          {{ isMistakes
-            ? '答错过的练习先按日期归堆，最近的日期在最前面；一天里再按题型分开。点一条看当时那道题。'
-            : '每一次提交都在这里。点开一条，才看它的题目、你的作答和解析。' }}
-        </p>
       </div>
 
       <nav class="records-scope" aria-label="在题目集和错题本之间切换">
@@ -342,25 +323,17 @@ void load()
           :to="{ name: route.name as string, query: viewQuery('') }"
         >全部</RouterLink>
         <RouterLink
-          v-for="type in practiceTypes"
+          v-for="type in practiceTypes.filter((item) => item !== 'mixed')"
           :key="type"
           class="records-type-tab"
           :class="{ 'is-active': practiceType === type }"
           :to="{ name: route.name as string, query: viewQuery(type) }"
         >
-          <TypeMark :type="type" :size="18" />
           <span>{{ PRACTICE_TYPE_LABELS[type] }}</span>
         </RouterLink>
       </nav>
 
       <div class="records-filters__tail">
-        <label v-if="!isMistakes" class="records-source">
-          <span>来源</span>
-          <select v-model="source" aria-label="按来源筛选">
-            <option value="">全部来源</option>
-            <option v-for="item in practiceSources" :key="item" :value="item">{{ PRACTICE_SOURCE_LABELS[item] }}</option>
-          </select>
-        </label>
         <span class="records-tally">{{ total }} 条记录</span>
       </div>
     </section>

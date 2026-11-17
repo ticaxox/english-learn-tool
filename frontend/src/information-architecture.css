@@ -28,19 +28,25 @@
   font-weight: 800;
 }
 .workspace-shell .ia-profile-trigger:hover { border-color: var(--crumb-pumpkin); background: var(--workspace-warm-soft); color: var(--crumb-cocoa); }
+/* The account menu hangs on the same board as every other floating window. */
 .ia-profile-menu {
   position: absolute;
   z-index: 70;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   right: 0;
   display: grid;
   width: 244px;
-  overflow: hidden;
-  padding: 7px;
-  border: 2px solid var(--crumb-cocoa);
-  border-radius: 10px 16px 8px 14px;
-  background: var(--crumb-paper);
-  box-shadow: 4px 4px 0 var(--crumb-parchment-deep);
+  overflow: visible;
+  padding: 10px 12px;
+  border: 16px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .ia-profile-menu {
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
 }
 .ia-profile-summary {
   display: grid;
@@ -70,10 +76,13 @@
 }
 .workspace-shell .ia-profile-menu a:hover,
 .workspace-shell .ia-profile-menu [role="button"]:hover { background: var(--crumb-parchment); color: var(--crumb-forest); }
-.workspace-shell .ia-profile-menu .ia-profile-signout { color: #8a3f2d; }
+/* Every row in the account menu reads the same; signing out is just the last
+ * one, not a different kind of thing. */
+.workspace-shell .ia-profile-menu .ia-profile-signout { color: var(--crumb-cocoa); font-weight: 650; }
 
 .ia-admin-hub,
-.ia-settings-hub { display: grid; gap: 16px; }
+.ia-settings-hub,
+.ia-kb-page { display: grid; gap: 16px; }
 .ia-hub-header {
   display: flex;
   align-items: flex-start;

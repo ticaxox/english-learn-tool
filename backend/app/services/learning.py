@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import and_, delete, func, select, text
+from sqlalchemy import and_, delete, func, or_, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -179,7 +179,8 @@ async def _activated_wordbook(session: AsyncSession, user: User) -> Wordbook:
         .join(WordbookActivation, WordbookActivation.wordbook_id == Wordbook.id)
         .where(
             WordbookActivation.user_id == user.id,
-            Wordbook.owner_id == user.id,
+            # A built-in book has no owner: it is everyone's to study from.
+            or_(Wordbook.owner_id == user.id, Wordbook.visibility == "organization"),
             Wordbook.status == "ready",
         )
     )

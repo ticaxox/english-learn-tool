@@ -134,7 +134,6 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
       <circle class="word-radar__hub" :cx="CENTRE" :cy="CENTRE" r="3" />
     </svg>
 
-    <p v-if="!hasShape" class="word-radar__empty">这周还没开始学词。</p>
   </figure>
 </template>
 
@@ -144,12 +143,16 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
   display: grid;
   gap: 8px;
   justify-items: center;
+  height: 100%;
+  min-height: 0;
 }
 
+/* The radar is as tall as the card it sits in, not a 260px thumbnail. */
 .word-radar__chart {
   width: 100%;
-  max-width: 260px;
-  height: auto;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
   overflow: visible;
 }
 
@@ -170,8 +173,9 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
 }
 
 .word-radar__studied {
-  fill: color-mix(in oklab, var(--g-orange, #ff9600) 26%, transparent);
-  stroke: var(--g-orange, #ff9600);
+  /* 和「学习足迹」的格子、词态条同一盏灯：白天橙，夜里薄荷。 */
+  fill: var(--insight-hot-soft, color-mix(in oklab, #ff9600 26%, transparent));
+  stroke: var(--insight-hot, #ff9600);
   stroke-width: 2;
   stroke-linejoin: round;
   transform-origin: 50% 50%;

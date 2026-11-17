@@ -3,7 +3,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ArtImage from '../components/ArtImage.vue'
-import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import {
   createPracticeSession,
@@ -324,7 +323,7 @@ onMounted(() => {
               </div>
             </div>
             <div class="practice-create-footer">
-              <SvgPlateButton type="button" @click="startSpelling">开始拼写 <AppIcon name="arrow" /></SvgPlateButton>
+              <DivButton class="button" type="button" @click="startSpelling">开始拼写 <AppIcon name="arrow" /></DivButton>
             </div>
           </div>
         </section>
@@ -409,9 +408,9 @@ onMounted(() => {
           </div>
           <ErrorNotice v-if="createError" :error="createError" :show-retry="false" retry-label="重试创建" @retry="create" />
           <div class="practice-create-footer">
-            <SvgPlateButton class="practice-generate-action" type="submit" :disabled="creating">
+            <DivButton class="button practice-generate-action" type="submit" :disabled="creating">
               {{ creating ? '正在生成…' : '生成练习' }} <AppIcon name="arrow" />
-            </SvgPlateButton>
+            </DivButton>
           </div>
         </form>
       </section>

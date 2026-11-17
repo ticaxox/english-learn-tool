@@ -42,13 +42,6 @@ const emit = defineEmits<{
   (event: 'pick-book', type: PracticeType): void
 }>()
 
-/** Hints are fixed per mode, matching the copy the old cards carried. */
-const hints: Record<ShelfModule, string> = {
-  flashcard: '看词回忆释义',
-  choice: '选出正确释义',
-  spelling: '按提示拼写',
-}
-
 const titles = computed(() => props.labels)
 
 function pick(module: ShelfModule): void {
@@ -72,7 +65,6 @@ function pick(module: ShelfModule): void {
       <ArtImage class="shelf-book__art" :set="practiceBooks[module]" />
 
       <span class="shelf-book__title">{{ titles[module] }}</span>
-      <span class="shelf-book__hint">{{ hints[module] }}</span>
     </button>
 
     <button
@@ -86,10 +78,10 @@ function pick(module: ShelfModule): void {
       <ArtImage class="shelf-book__art" :set="practiceBooks[book.type]" />
 
       <span class="shelf-book__title">{{ book.label }}</span>
-      <span class="shelf-book__hint">{{ book.hint }}</span>
     </button>
 
     <span class="shelf-board" aria-hidden="true"></span>
+
   </div>
 </template>
 

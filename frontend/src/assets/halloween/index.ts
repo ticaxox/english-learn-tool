@@ -280,26 +280,39 @@ import bookObjectDay from './card/book-object-day.webp'
 import bookObjectNight from './card/book-object-night.webp'
 export const bookObject = { day: bookObjectDay, night: bookObjectNight } as const
 
-/* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
- * spirit-green one for the stop you are on, a dark unlit one for a stop out
- * of reach. */
-import pumpkinGreen from './char/pumpkin-green.webp'
-import pumpkinGreenNight from './char/pumpkin-green-night.webp'
-import pumpkinUnlit from './char/pumpkin-unlit.webp'
-import pumpkinUnlitNight from './char/pumpkin-unlit-night.webp'
+/* The built-in shelf: the same book in deep teal, so a title that ships with
+ * the product reads apart from the learner's own green copies at a glance. */
+import bookBuiltinDay from './card/book-object-builtin-day.webp'
+import bookBuiltinNight from './card/book-object-builtin-night.webp'
+export const builtinBook = { day: bookBuiltinDay, night: bookBuiltinNight } as const
+
+/* The trail's stops are jack-o'-lanterns: one for a stop you cleared, one for
+ * a stop still ahead (locked or not), a crowned one for the last stop and a
+ * vine-wrapped one for a side path. */
 import pumpkinMorning from './char/pumpkin-morning.webp'
+import pumpkinMidnight from './char/pumpkin-midnight.webp'
 import pumpkinDusk from './char/pumpkin-dusk.webp'
+import pumpkinGreenNight from './char/pumpkin-green-night.webp'
 import pumpkinBoss from './char/pumpkin-boss.webp'
 import pumpkinBossNight from './char/pumpkin-boss-night.webp'
 import pumpkinBranch from './char/pumpkin-branch.webp'
 import pumpkinBranchNight from './char/pumpkin-branch-night.webp'
+
+/**
+ * The map's five skins, as the asset picker hands them out
+ * (ai-workspace/.../shared-temp/pumpkin-picker):
+ *
+ *   已完成  morning / midnight · 未完成  dusk / green-night
+ *   首领    boss-night / boss （昼夜对调） · 支线  branch / branch-night
+ *
+ * `unlit` borrows the 未完成 art: the old faceless silhouette is retired, so
+ * a locked stop still wears a face.
+ */
 export const pumpkins = {
-  /** A cleared stop: bright by morning, a hot burn after dark. */
-  lit: { day: pumpkinMorning, night: pumpkinDusk },
-  green: { day: pumpkinGreen, night: pumpkinGreenNight },
-  unlit: { day: pumpkinUnlit, night: pumpkinUnlitNight },
-  /** The last stop wears a crown; a side path is a quiet one. */
-  boss: { day: pumpkinBoss, night: pumpkinBossNight },
+  lit: { day: pumpkinMorning, night: pumpkinMidnight },
+  green: { day: pumpkinDusk, night: pumpkinGreenNight },
+  unlit: { day: pumpkinDusk, night: pumpkinGreenNight },
+  boss: { day: pumpkinBossNight, night: pumpkinBoss },
   branch: { day: pumpkinBranch, night: pumpkinBranchNight },
 } as const
 

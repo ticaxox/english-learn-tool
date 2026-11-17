@@ -90,19 +90,20 @@ const sectionTabs = computed(() => {
   if (path.startsWith('/settings')) {
     const tabs = [
       { label: '词书', to: '/settings/wordbooks', active: path.startsWith('/settings/wordbooks') },
+      // The knowledge base is the exam corpus every learner's questions come
+      // from, so only an administrator may change it — and it sits with the
+      // wordbooks, the other thing a learner reads English out of.
+      ...(auth?.isAdmin
+        ? [{
+            label: '知识库',
+            to: '/settings/knowledge',
+            active: path.startsWith('/settings/knowledge'),
+          }]
+        : []),
       { label: '学习设置', to: '/settings/learning', active: path.startsWith('/settings/learning') },
       { label: 'AI 配置', to: '/settings/ai', active: path.startsWith('/settings/ai') },
       { label: '我的账户', to: '/settings/security', active: path.startsWith('/settings/security') },
     ]
-    // The knowledge base is the exam corpus every learner's questions come
-    // from, so only an administrator may change it.
-    if (auth?.isAdmin) {
-      tabs.push({
-        label: '知识库',
-        to: '/settings/knowledge',
-        active: path.startsWith('/settings/knowledge'),
-      })
-    }
     return tabs
   }
   return []
@@ -164,7 +165,6 @@ onBeforeUnmount(() => {
         <span class="workspace-brand-mark"><HobMark size="small" /></span>
         <span class="workspace-brand-copy">
           <strong>Grimoire</strong>
-          <small>英语学习路线</small>
         </span>
       </RouterLink>
 

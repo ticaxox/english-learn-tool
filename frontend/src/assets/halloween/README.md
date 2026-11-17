@@ -48,6 +48,7 @@
 | `sheet-{day,night}.webp` | AI 练习的横向卷轴，两端各一根木轴 |
 | `sheet-flat-{day,night}.webp` | 无轴的撕边纸片：阅读正文、作文题目 |
 | `book-object-{day,night}.webp` | 词书封面本体（书架上的立起来的那本） |
+| `book-object-builtin-{day,night}.webp` | 内置词书的封面：同一本书的深青皮官册，和学员自己的绿皮分开 |
 | `wordbook-cover-{day,night}.webp` | 词书封面平面版（旧的用法） |
 | `scroll-{cap-left,middle,cap-right}.webp` | 卷轴三件套框 |
 | `slab-{cap-left,middle,cap-right}.webp` | 石板三件套框 |
@@ -108,11 +109,11 @@
 
 | 文件 | 用途 |
 |---|---|
-| `pumpkin-morning.webp` / `pumpkin-dusk.webp` | 关卡节点：已通关的白昼版与黄昏版 |
-| `pumpkin-green.webp` / `pumpkin-green-night.webp` | 当前所在节点。白天苔绿，夜间深紫 + 薄荷刻脸 |
-| `pumpkin-unlit.webp` / `pumpkin-unlit-night.webp` | 未解锁节点。无刻脸、无光 |
-| `pumpkin-boss.webp` / `pumpkin-boss-night.webp` | 最终关。白天金冠，夜间失光银冠 |
-| `pumpkin-branch.webp` / `pumpkin-branch-night.webp` | 分支关。白天藤蔓，夜间薄荷刻脸 |
+| `pumpkin-morning.webp` / `pumpkin-midnight.webp` | 已通关的节点：白天橙底笑脸，夜间同一张笑脸的夜色版 |
+| `pumpkin-dusk.webp` / `pumpkin-green-night.webp` | 还没到 / 正站着的节点：白天红橙笑脸，夜间深紫冷脸（未解锁也用它） |
+| `pumpkin-boss-night.webp` / `pumpkin-boss.webp` | 最终关，昼夜对调：白天浅冠紫底，夜间薄荷冠薄荷脸 |
+| `pumpkin-branch.webp` / `pumpkin-branch-night.webp` | 支线关：橄榄绿，昼夜各一版 |
+| `pumpkin-green.webp` · `pumpkin-unlit{.webp,-night.webp}` | **本版未使用**（灰绿凶脸 / 棕底凶脸 / 没有五官的剪影），保留备查 |
 | `candle-{cold,low,mid,high}-{day,night}.webp` | 周报蜡烛，四种燃烧状态各画一张：冷（无焰、灰蜡）、低、中、高（白天带金环）。柱身等宽，高低由画本身决定，不再靠 CSS 拉伸 |
 | `charge-{flame,moon,book,crown,skull,star,owl,hourglass,key}.webp` | 徽章中心的徽记（AI 绘制，非 emoji）。夜间为 `-night` 版 |
 | `card/book-object-{day,night}.webp` | 词书封面本体。白天绿皮卡 + 黄铜，夜间紫皮卡 + 薄荷扣 |

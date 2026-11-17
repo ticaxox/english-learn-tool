@@ -353,7 +353,7 @@ onUnmounted(() => {
           <label class="field">
             <span>可见范围</span>
             <select v-model="form.visibility" :disabled="previewLoading">
-              <option v-if="props.isAdmin" value="organization">组织词书</option>
+              <option v-if="props.isAdmin" value="organization">内置词书（所有人可见）</option>
               <option value="private">我的私有词书</option>
             </select>
           </label>

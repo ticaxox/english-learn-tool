@@ -174,7 +174,7 @@ async def preview_wordbook_import_endpoint(
     context: Annotated[AuthContext, Depends(get_completed_auth_context)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
     file: Annotated[UploadFile, File(description="CSV, JSON, or TXT wordbook")],
-    visibility: Annotated[Literal["private"], Form()] = "private",
+    visibility: Annotated[Literal["private", "organization"], Form()] = "private",
     name: Annotated[str | None, Form(max_length=200)] = None,
     description: Annotated[str | None, Form(max_length=4000)] = None,
 ) -> ImportPreviewResponse:

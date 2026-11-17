@@ -232,15 +232,13 @@ onBeforeUnmount(() => {
 <template>
   <section class="badge-wall" aria-labelledby="badge-wall-title">
     <header class="badge-wall__head">
-      <div>
-        <h3 id="badge-wall-title">成就徽章</h3>
-        <p class="field-hint">
-          已解锁 <strong ref="countRef">{{ unlocked }}</strong> / {{ total }}
-        </p>
-      </div>
+      <h3 id="badge-wall-title">成就徽章</h3>
       <span class="badge-wall__rail" aria-hidden="true">
         <span :style="{ width: `${total ? (unlocked / total) * 100 : 0}%` }"></span>
       </span>
+      <p class="field-hint">
+        已解锁 <strong ref="countRef">{{ unlocked }}</strong> / {{ total }}
+      </p>
     </header>
 
     <ErrorNotice v-if="error" :error="error" retry-label="重新读取" @retry="load" />

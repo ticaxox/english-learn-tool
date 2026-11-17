@@ -32,10 +32,11 @@ const rootRef = ref<HTMLElement | null>(null)
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
 /** A mastered word left the schedule on purpose; it still counts as in review. */
 const STATE_KEYS = [
-  { key: 'new', label: '新词', color: '#e8c58a' },
-  { key: 'learning', label: '学习中', color: '#1cb0f6' },
-  { key: 'review', label: '复习中', color: '#ff9600' },
-  { key: 'relearning', label: '重学', color: '#a75cf0' },
+  // The colours live in controls.css so day and night each get their own set.
+  { key: 'new', label: '新词', color: 'var(--state-new)' },
+  { key: 'learning', label: '学习中', color: 'var(--state-learning)' },
+  { key: 'review', label: '复习中', color: 'var(--state-review)' },
+  { key: 'relearning', label: '重学', color: 'var(--state-relearning)' },
 ] as const
 
 const peakXp = computed(() => Math.max(1, ...(weekly.value?.days ?? []).map((day) => day.xp)))
@@ -210,12 +211,6 @@ onBeforeUnmount(() => {
         <div class="insight-split">
           <div class="insight-col">
             <div class="trail-week">
-              <div class="trail-week__head">
-                <span class="trail-week__title">本周节奏</span>
-                <span v-if="weekly" class="trail-week__meta">
-                  学习 {{ weekly.activeDays }} 天 · {{ weekly.xp }} XP
-                </span>
-              </div>
               <ol v-if="weekly" class="weekly-bars" aria-label="每天获得的经验">
                 <li
                   v-for="(day, index) in weekly.days"
@@ -282,10 +277,6 @@ onBeforeUnmount(() => {
       </article>
 
       <article class="insight-card insight-card--state">
-        <header class="insight-card__head">
-          <span class="insight-card__eyebrow">词的状态</span>
-        </header>
-
         <div class="state-body">
           <WordKindRadar v-if="weekly?.radar.length" class="state-radar" :axes="weekly.radar" />
 

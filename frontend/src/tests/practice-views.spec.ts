@@ -135,13 +135,12 @@ describe('practice views', () => {
 
   it('offers the four generated exercise types as books', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice')
-    const books = wrapper.findAll('.practice-shelf .shelf-book')
-    expect(books.map((book) => book.text())).toHaveLength(4)
-    const labels = books.map((book) => book.text())
+    const labels = wrapper.findAll('.practice-shelf .shelf-book').map((book) => book.text())
     expect(labels.some((text) => text.includes('填空'))).toBe(true)
     expect(labels.some((text) => text.includes('阅读'))).toBe(true)
-    // Conversation is one dialogue, so it stands on the card row instead.
-    expect(labels.some((text) => text.includes('对话'))).toBe(false)
+    expect(labels.some((text) => text.includes('翻译'))).toBe(true)
+    // Conversation is a single dialogue, and it keeps its own row.
+    expect(labels.some((text) => text.includes('对话'))).toBe(true)
     // The form is not on the page until a book is picked.
     expect(wrapper.find('.practice-config-dialog').exists()).toBe(false)
   })
@@ -153,9 +152,10 @@ describe('practice views', () => {
     expect(labels.some((text) => text.includes('翻卡'))).toBe(true)
     expect(labels.some((text) => text.includes('选择'))).toBe(true)
     expect(labels.some((text) => text.includes('拼写'))).toBe(true)
-    expect(labels.some((text) => text.includes('对话'))).toBe(true)
-    // A board under the books is the shelf; the card row stands on the page.
-    expect(wrapper.find('.shelf--cards .shelf-board').exists()).toBe(false)
+    // The conversations moved to the exercise shelf, not the drill cards.
+    expect(labels.some((text) => text.includes('对话'))).toBe(false)
+    // The books stand on a drawn plinth, the way a shelf looks.
+    expect(wrapper.find('.shelf-board').exists()).toBe(true)
   })
 
   it('opens the settings dialog when a book is picked', async () => {
@@ -172,15 +172,13 @@ describe('practice views', () => {
     expect(input.practiceType).toBe('reading')
   })
 
-  it('keeps a mixed set reachable without a book of its own', async () => {
+  it('opens the drill settings from the settings book', async () => {
     const { wrapper } = await mountRoute(PracticeHubView, '/practice')
-    await wrapper.get('.practice-shelf__mixed-link').trigger('click')
+    const settingsBook = wrapper.findAll('.practice-shelf .shelf-book').find((book) => book.text().includes('设置'))
+    expect(settingsBook).toBeTruthy()
+    await settingsBook!.trigger('click')
     await flushPromises()
-    expect(wrapper.find('.practice-config-dialog').exists()).toBe(true)
-    await wrapper.get('.practice-config-dialog form').trigger('submit')
-    await flushPromises()
-    const [input] = practiceMocks.createPracticeSession.mock.calls.at(-1)!
-    expect(input.practiceType).toBe('mixed')
+    expect(wrapper.find('.drill-config').exists()).toBe(true)
   })
 
   it('renders a choice question without any answer or explanation fields', () => {

@@ -103,7 +103,7 @@ describe('member-facing Chinese copy density', () => {
     expect(today).toContain('今日学习')
     expect(today).toContain('继续学习')
     expect(today).toContain('今日任务')
-    expect(today).toContain('当前词书')
+    expect(today).toContain('还没有词书')
 
     const wordbooks = source('../views/WordbooksView.vue')
     expect(wordbooks).toContain('个人词书')

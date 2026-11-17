@@ -425,6 +425,42 @@ pre {
   box-shadow: inset 0 0 0 1.5rem rgb(255 252 245 / 22%);
 }
 
+/* The door: Hob on the left, the form on the right. */
+.auth-page {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(1.5rem, 5vw, 4rem);
+}
+
+.auth-art {
+  display: grid;
+  place-items: center;
+  justify-self: end;
+}
+
+.auth-art__mark {
+  display: block;
+  width: min(26vw, 300px);
+  height: auto;
+  filter: drop-shadow(0 10px 0 rgb(74 48 37 / 12%));
+}
+
+.auth-art__mark .art-swap,
+.auth-art__mark .art-swap__stack {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-card__masthead--seal-only { justify-content: flex-start; }
+
+@media (max-width: 900px) {
+  .auth-page { grid-template-columns: minmax(0, 1fr); }
+  .auth-art { display: none; }
+}
+
 .auth-card {
   position: relative;
   width: min(100%, 33rem);

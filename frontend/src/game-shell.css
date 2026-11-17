@@ -358,14 +358,17 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 /* ----------------------------------------------------- quest board */
 
 /* Each quest is a row with a progress rail, not a bare text line. */
+/* Rows carry the page: bigger type and roomier rows, so the board does not
+ * read as a thin list floating in a wide card. */
 .personal-workspace .crumb-merged .crumb-task-row {
-  grid-template-columns: 26px minmax(0, 1fr) auto;
-  gap: 12px;
-  padding: 12px 8px;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 18px 10px;
 }
 
-.personal-workspace .crumb-merged .crumb-task-body { display: grid; gap: 5px; min-width: 0; }
-.personal-workspace .crumb-merged .crumb-task-title { font-size: 14px; font-weight: 700; }
+.personal-workspace .crumb-merged .crumb-task-body { display: grid; gap: 7px; min-width: 0; }
+.personal-workspace .crumb-merged .crumb-task-title { font-size: 17px; font-weight: 750; }
+.personal-workspace .crumb-merged .crumb-task-value { font-size: 14.5px; }
 
 .personal-workspace .crumb-merged .crumb-task-bar {
   position: relative;
@@ -397,7 +400,8 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
 }
 
 /* The board keeps a comfortable minimum so the right rail is not a stub. */
-.personal-workspace .crumb-today-board.crumb-merged { min-height: 340px; }
+/* No fixed floor: the board is exactly as tall as the tasks and the book. */
+.personal-workspace .crumb-today-board.crumb-merged { min-height: 0; }
 .personal-workspace .crumb-merged-side { align-self: stretch; }
 
 /* Reward tag above a node, so the map reads as a level select. */
@@ -501,21 +505,23 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   color: var(--rail-ink);
 }
 
+/* The mascot stands on its own: no hexagon plate behind it, just Hob — and
+ * bigger, since nothing is framing it any more. */
 .personal-workspace .workspace-brand-mark {
   display: grid;
-  width: 72px;
-  height: 72px;
+  width: 96px;
+  height: 96px;
   flex: 0 0 auto;
   place-items: center;
   border: 0;
   border-radius: 0;
-  background: var(--rail-mark);
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: none;
+  clip-path: none;
 }
 
 .personal-workspace .workspace-brand-mark .hob-mark {
-  width: 60px;
-  height: 60px;
+  width: 96px;
+  height: 96px;
 }
 
 .personal-workspace .workspace-brand-copy { gap: 0; }
@@ -541,8 +547,10 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   gap: 8px;
   margin: 0 12px 2px;
   padding: 11px 11px 12px;
-  border: 1px solid var(--rail-line);
-  background: var(--rail-panel-hi);
+  /* No frame and no plate: both the border and the panel's fill drew an edge
+   * right under Hob, which read as a stray line. */
+  border: 0;
+  background: none;
 }
 
 .personal-workspace .rail-plate__lv {

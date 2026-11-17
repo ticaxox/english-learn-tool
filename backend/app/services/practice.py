@@ -8,7 +8,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from arq.connections import ArqRedis
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
@@ -259,7 +259,8 @@ async def _resolve_wordbook(
         select(Wordbook).where(
             Wordbook.id == wordbook_id,
             Wordbook.status == "ready",
-            Wordbook.owner_id == user.id,
+            # Built-in books are studied by everyone, owned by no one.
+            or_(Wordbook.owner_id == user.id, Wordbook.visibility == "organization"),
         )
     )
     if wordbook is None:
@@ -344,8 +345,13 @@ async def claim_pool_session(
     idempotency_key: str,
     request_hash: str,
 ) -> PracticeSession | None:
-    """Take one ready pre-generated set for this request, if one exists."""
-    row = (
+    """Take one ready pre-generated set for this request, if one exists.
+
+    A pooled set was written for one fixed shape — a translation has a
+    direction, an essay a length — so a request only claims a set asking for
+    that same shape. Anything else is generated fresh.
+    """
+    rows = (
         await session.execute(
             select(PracticePoolItem, PracticeSession)
             .join(PracticeSession, PracticeSession.id == PracticePoolItem.session_id)
@@ -357,12 +363,28 @@ async def claim_pool_session(
             )
             .order_by(PracticePoolItem.created_at.asc())
             .with_for_update(skip_locked=True)
-            .limit(1)
+            .limit(20)
         )
-    ).first()
-    if row is None:
+    ).all()
+    if not rows:
         return None
-    item, practice = row
+    item, practice = None, None
+    for candidate_item, candidate_practice in rows:
+        context = candidate_practice.source_context or {}
+        if (
+            payload.translation_direction is not None
+            and context.get("translation_direction") != payload.translation_direction
+        ):
+            continue
+        if (
+            payload.writing_target_words is not None
+            and context.get("writing_target_words") != payload.writing_target_words
+        ):
+            continue
+        item, practice = candidate_item, candidate_practice
+        break
+    if item is None or practice is None:
+        return None
     practice.is_pool = False
     practice.source = payload.source
     practice.difficulty = payload.difficulty
@@ -411,16 +433,10 @@ async def create_practice_session(
             )
         return await _session_response(session, existing)
 
-    # A pre-generated set never carried the new direction/length options, so it
-    # is only reused when the learner did not ask for them.
-    wants_custom_shape = (
-        payload.translation_direction is not None or payload.writing_target_words is not None
+    # A pooled set is claimed only when it was written for the same shape.
+    claimed = await claim_pool_session(
+        session, user, payload, idempotency_key=idempotency_key, request_hash=request_hash
     )
-    claimed = None
-    if not wants_custom_shape:
-        claimed = await claim_pool_session(
-            session, user, payload, idempotency_key=idempotency_key, request_hash=request_hash
-        )
     if claimed is not None:
         # Refill the pool in the background; claiming must not wait for it.
         try:
@@ -488,7 +504,9 @@ async def create_practice_session(
             practice_type=payload.practice_type,
             count=payload.count,
             source=payload.source,
-            difficulty=payload.difficulty,
+            # No explicit level? Then write toward the learner's own goal: the
+            # exam target is what the questions are supposed to prepare for.
+            difficulty=payload.difficulty or _exam_type(user, None),
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
             target_words=target_words,
@@ -534,10 +552,15 @@ async def create_pool_practice_session(
     until they claim it. Whole-book words keep the content valid even when the
     daily plan rotates.
     """
+    # The set is written for one shape, and the claim has to ask for that shape.
+    pool_direction = "en_to_zh" if practice_type == "translation" else None
+    pool_target_words = 150 if practice_type == "writing" else None
     payload = PracticeCreateRequest(
         practice_type=practice_type,  # type: ignore[arg-type]
         source="whole_book",
         count=count,
+        translation_direction=pool_direction,  # type: ignore[arg-type]
+        writing_target_words=pool_target_words,
     )
     wordbook_id, target_entry_ids = await _resolve_target_entries(session, user, settings, payload)
     session_id = uuid4()
@@ -560,6 +583,8 @@ async def create_pool_practice_session(
             "difficulty": None,
             "wordbook_id": str(wordbook_id) if wordbook_id else None,
             "target_entry_ids": [str(entry_id) for entry_id in target_entry_ids],
+            "translation_direction": pool_direction,
+            "writing_target_words": pool_target_words,
             "pre_generated": True,
         },
         idempotency_key=f"pool:{session_id}",
@@ -598,13 +623,15 @@ async def create_pool_practice_session(
             practice_type=practice_type,  # type: ignore[arg-type]
             count=count,
             source="whole_book",
-            difficulty=None,
+            difficulty=_exam_type(user, None),
             wordbook_id=wordbook_id,
             target_entry_ids=target_entry_ids,
             target_words=target_words,
             practice_session_id=session_id,
             article_min_words=article_min_words,
             article_max_words=article_max_words,
+            translation_direction=pool_direction,  # type: ignore[arg-type]
+            writing_target_words=pool_target_words,
             knowledge_snippets=pool_snippets,
         ),
     )
@@ -1894,7 +1921,7 @@ async def create_practice_for_challenge(
             select(Wordbook).where(
                 Wordbook.id == wordbook_id,
                 Wordbook.status == "ready",
-                Wordbook.owner_id == user.id,
+                or_(Wordbook.owner_id == user.id, Wordbook.visibility == "organization"),
             )
         )
         resolved_entry_ids = list(

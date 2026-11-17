@@ -343,6 +343,8 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
 }
 .coach-page.coach-page .coach-message:first-of-type { padding-top: 4px; }
 
+/* Hob answers on the page itself: no little plate behind him in either theme —
+ * at night that plate read as a stray dark box around the sprite. */
 .coach-page.coach-page .coach-message-avatar {
   grid-column: 1;
   grid-row: 1;
@@ -351,12 +353,12 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 14px;
-  background: var(--coach-bubble);
-  border: 1px solid var(--coach-line);
-  box-shadow: var(--coach-shadow);
+  border-radius: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
 }
-.coach-page.coach-page .coach-message-avatar__art { width: 32px; height: 32px; }
+.coach-page.coach-page .coach-message-avatar__art { width: 40px; height: 40px; }
 .coach-page.coach-page .coach-message-avatar__you {
   font-family: var(--coach-display);
   font-size: 1.1rem;

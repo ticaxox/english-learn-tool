@@ -33,19 +33,10 @@ const emit = defineEmits<{
 }>()
 
 /** One line under each book: what that exercise asks of you. */
-const hints: Record<string, string> = {
-  fill_blank: '在句子里补上缺的词',
-  reading: '读一篇真题再答题',
-  translation: '把句子译成另一种语言',
-  writing: '按题目写一篇短文',
-  conversation: '和 AI 角色对话',
-}
-
 const books = computed(() =>
   props.types.map((type) => ({
     type,
     label: props.labels[type] ?? type,
-    hint: hints[type] ?? '',
     art: practiceBooks[type] ?? null,
   })),
 )
@@ -64,7 +55,6 @@ const books = computed(() =>
       <ArtImage class="shelf-book__art" :set="book.art" />
 
       <span class="shelf-book__title">{{ book.label }}</span>
-      <span class="shelf-book__hint">{{ book.hint }}</span>
     </button>
 
     <button
@@ -78,8 +68,8 @@ const books = computed(() =>
       <ArtImage class="shelf-book__art" :set="entry.art" />
 
       <span class="shelf-book__title">{{ entry.label }}</span>
-      <span class="shelf-book__hint">{{ entry.hint }}</span>
     </button>
+
     <span class="shelf-board" aria-hidden="true"></span>
   </div>
 </template>

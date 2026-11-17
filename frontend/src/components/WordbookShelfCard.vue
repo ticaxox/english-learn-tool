@@ -8,10 +8,10 @@
  * on them — lives in the dialog this opens.
  */
 import ArtImage from './ArtImage.vue'
-import { bookObject } from '../assets/halloween'
+import { bookObject, builtinBook } from '../assets/halloween'
 import type { Wordbook } from '../api/wordbooks'
 
-defineProps<{ book: Wordbook }>()
+const props = defineProps<{ book: Wordbook }>()
 const emit = defineEmits<{ detail: [] }>()
 
 
@@ -20,7 +20,10 @@ const emit = defineEmits<{ detail: [] }>()
 <template>
   <article
     class="wordbook-card"
-    :class="[`wordbook-card--${book.visibility}`, { 'wordbook-card--active': book.is_active }]"
+    :class="[
+      `wordbook-card--${book.visibility}`,
+      { 'wordbook-card--active': book.is_active, 'wordbook-card--builtin': book.is_builtin },
+    ]"
     role="button"
     tabindex="0"
     :aria-label="`${book.name}${book.is_active ? '，使用中' : ''}，打开查看词条`"
@@ -29,7 +32,8 @@ const emit = defineEmits<{ detail: [] }>()
     @keydown.space.prevent="emit('detail')"
   >
     <span class="wordbook-cover">
-      <ArtImage class="wordbook-cover__art" :set="bookObject" />
+      <ArtImage class="wordbook-cover__art" :set="props.book.is_builtin ? builtinBook : bookObject" />
+      <span v-if="book.is_builtin" class="wordbook-cover__builtin">内置</span>
       <span v-if="book.is_active" class="wordbook-cover__bookmark" aria-hidden="true"></span>
       <span class="wordbook-cover__name">{{ book.name }}</span>
     </span>
