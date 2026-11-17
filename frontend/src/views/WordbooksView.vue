@@ -200,7 +200,7 @@ onMounted(() => {
           <DivButton class="button-secondary button-small" type="button" :disabled="loading && catalog.length === 0" :aria-busy="loading" @click="load">
             {{ loading ? '读取中…' : '刷新' }}
           </DivButton>
-          <DivButton class="button button-small crumb-import-button" type="button" @click="importOpen = true">
+          <DivButton class="button button-small" type="button" @click="importOpen = true">
             <AppIcon name="plus" /> 导入词书
           </DivButton>
         </div>

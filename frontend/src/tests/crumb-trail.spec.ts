@@ -45,7 +45,7 @@ describe('T-FE-018 Grimoire IP depth', () => {
   it('turns wordbooks into Grimoire books, not rows', () => {
     const wordbooks = source('../views/WordbooksView.vue')
     expect(wordbooks).toContain('crumb-bookshelf')
-    expect(wordbooks).toContain('crumb-import-button')
+    expect(wordbooks).toContain('导入词书')
     // The card is the book itself: no row arrow and no action strip.
     expect(source('../components/WordbookShelfCard.vue')).not.toContain('wordbook-row-arrow')
   })

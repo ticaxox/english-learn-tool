@@ -48,6 +48,7 @@
 | `sheet-{day,night}.webp` | AI 练习的横向卷轴，两端各一根木轴 |
 | `sheet-flat-{day,night}.webp` | 无轴的撕边纸片：阅读正文、作文题目 |
 | `book-object-{day,night}.webp` | 词书封面本体（书架上的立起来的那本） |
+| `book-object-builtin-{day,night}.webp` | 内置词书的封面：同一本书的深青皮官册，和学员自己的绿皮分开 |
 | `wordbook-cover-{day,night}.webp` | 词书封面平面版（旧的用法） |
 | `scroll-{cap-left,middle,cap-right}.webp` | 卷轴三件套框 |
 | `slab-{cap-left,middle,cap-right}.webp` | 石板三件套框 |
