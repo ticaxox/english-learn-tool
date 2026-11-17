@@ -765,12 +765,15 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   box-shadow: none;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
-/* One line of writing, whatever the trough's border adds around it. */
+/* Writing grows upwards: one line at rest, up to four lines before the box
+   scrolls, so a longer message stays readable while it is being written. */
 .coach-page.coach-page .coach-composer__field textarea {
-  height: 24px;
+  height: auto;
   min-height: 24px;
-  max-height: 24px;
+  max-height: 96px;
   line-height: 24px;
+  overflow-y: auto;
+  field-sizing: content;
 }
 
 .coach-page.coach-page .coach-composer__field:focus-within {
@@ -1098,11 +1101,12 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   .coach-page.coach-page .coach-composer .coach-composer__field { padding: 5px 12px; }
 
   .coach-page.coach-page .coach-composer .coach-composer__field textarea {
-    height: 24px;
+    height: auto;
     min-height: 24px;
-    max-height: 24px;
+    max-height: 96px;
     line-height: 24px;
     resize: none;
+    field-sizing: content;
   }
 
   .coach-page.coach-page .coach-message {
@@ -1137,12 +1141,15 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   box-shadow: none;
 }
 
-/* One line of writing, whatever the trough's border adds around it. */
+/* Writing grows upwards: one line at rest, up to four lines before the box
+   scrolls, so a longer message stays readable while it is being written. */
 .coach-page.coach-page .coach-composer__field textarea {
-  height: 24px;
+  height: auto;
   min-height: 24px;
-  max-height: 24px;
+  max-height: 96px;
   line-height: 24px;
+  overflow-y: auto;
+  field-sizing: content;
 }
 
 .coach-page.coach-page .coach-composer__field:focus-within {

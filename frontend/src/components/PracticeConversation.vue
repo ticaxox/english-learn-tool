@@ -56,7 +56,7 @@ const shortRole = computed(() => {
   const cut = role.split(/\s+(?:who|that|which)\s+/i)[0]
   return cut.length >= 2 && cut.length <= 24 ? cut : '对话伙伴'
 })
-const scenario = computed(() => props.question.scenario ?? '')
+// The brief is Chinese-only now; only the Chinese scenario is printed.
 const scenarioZh = computed(() => props.question.scenarioZh ?? '')
 const targetWords = computed(() => props.question.targetWords ?? [])
 
@@ -181,20 +181,20 @@ function speakTurn(turn: PracticeConversationTurn): void {
 
 <template>
   <section class="practice-conversation">
-    <!-- The brief is a strip, not a page: who you are talking to, where, and
-         the words to reach for. Everything the learner needs to start and
-         nothing they have to read before they can. -->
-    <header class="practice-conversation__brief">
-      <div class="practice-conversation__headline">
-        <h2 class="practice-conversation__topic">{{ topic }}</h2>
-        <p v-if="topicZh" class="practice-conversation__zh">{{ topicZh }}</p>
+    <!-- The brief is a question card like every other task: same paper, same
+         header. It introduces the task in Chinese; the English lives in the
+         talk itself, where it is being practised. -->
+    <header class="practice-conversation__brief practice-question-card practice-question-card--conversation">
+      <div class="practice-question-card__header">
+        <div class="practice-question-step">
+          <span class="status-badge">口语对话</span>
+        </div>
       </div>
+      <h2 class="practice-conversation__topic">{{ topicZh || topic }}</h2>
       <p class="practice-conversation__role">
         <AppIcon name="coach" />
         <span class="practice-conversation__role-text">
-          <strong>{{ roleName }}</strong>
-          <em v-if="scenario">{{ scenario }}</em>
-          <em v-if="roleZh || scenarioZh">{{ scenarioZh || roleZh }}</em>
+          {{ roleZh || scenarioZh || roleName }}
         </span>
       </p>
       <ul v-if="targetWords.length" class="practice-conversation__words" aria-label="本轮要用到的词">
@@ -202,6 +202,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
       </ul>
     </header>
 
+    <section class="practice-conversation__chat">
     <div
       ref="scroller"
       class="practice-conversation__talk"
@@ -286,6 +287,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
       </p>
       <p v-if="error" class="practice-conversation__error" role="alert">{{ error }}</p>
     </form>
+    </section>
   </section>
 </template>
 
@@ -301,14 +303,31 @@ function speakTurn(turn: PracticeConversationTurn): void {
 }
 
 /* Two rows, top to bottom: the topic first, then the partner and the scene.
- * Side by side, a long scenario squeezed the title into a sliver. */
+ * Side by side, a long scenario squeezed the title into a sliver. The paper
+ * itself comes from the shared question-card rule. */
 .practice-conversation__brief {
   display: grid;
   gap: 0.3rem;
-  padding: 0.7rem 1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* The chat is its own sheet, like Hob's: a flat card under the question. */
+.practice-conversation__chat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 26rem;
+  padding: 14px 16px;
   border: 1px solid var(--ui-line, #ecd9bb);
   border-radius: 14px;
-  background: var(--ui-surface-subtle, #fff4e2);
+  background: var(--ui-surface, #fffdf6);
+}
+
+html[data-theme='night'] .practice-conversation__chat {
+  border-color: var(--ui-line, #3d2c66);
+  background: var(--ui-surface, #241a44);
 }
 
 .practice-conversation__headline {

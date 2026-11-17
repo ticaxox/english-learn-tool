@@ -1016,17 +1016,31 @@ html[data-theme='night'] .personal-workspace .records-scope__link.is-active {
 
 /* Select-all and delete are the head of the ledger, not a floating bar: the
  * strip shares its edges with the list beneath it. */
-.personal-workspace .records-body { display: grid; }
+/* 题目集与错题本是列表，不是书架：一张板卡、细分隔线，和设置页同一种读法。 */
+.personal-workspace .records-body {
+  display: grid;
+  padding: 14px 18px 10px;
+  border: 20px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+}
+
+html[data-theme='night'] .personal-workspace .records-body {
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
+}
+/* The records card is the sheet; its toolbar is the first line on it, not the
+   top of a second frame. */
 .personal-workspace .records-toolbar {
   display: flex;
   gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 18px;
-  border: 1.5px solid var(--ui-line);
-  border-bottom: 0;
-  border-radius: 16px 16px 0 0;
-  background: var(--ui-surface-subtle);
+  padding: 0 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--ui-line);
+  border-radius: 0;
+  background: none;
 }
 .personal-workspace .records-check-all {
   display: inline-flex;

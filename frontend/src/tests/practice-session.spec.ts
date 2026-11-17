@@ -101,7 +101,10 @@ describe('practice session orchestration', () => {
     const pending = practice.submit([{ questionId: 'q-1', answer: 'o-1' }], 'submit-key')
     await Promise.resolve()
     await Promise.resolve()
-    expect(practice.result.value?.status).toBe('scoring')
+    // Nothing is published while the score is still being written: the page
+    // keeps the "正在评卷" sheet up until the result is complete.
+    expect(practice.result.value).toBeNull()
+    expect(practice.session.value?.status).toBe('submitted')
     await vi.advanceTimersByTimeAsync(100)
     await vi.runOnlyPendingTimersAsync()
     await pending
