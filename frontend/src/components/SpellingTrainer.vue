@@ -269,7 +269,7 @@ function submit(): void {
   border-style: solid;
   border-width: 46px;
   border-color: transparent;
-  border-image-source: url('../assets/halloween/card/slab-biscuit.png');
+  border-image-source: url('../assets/halloween/card/slab-biscuit.webp');
   border-image-slice: 12% fill;
   border-image-width: 46px;
   border-image-repeat: stretch;
@@ -398,21 +398,21 @@ html[data-theme='night'] .spelling-cell:focus-visible {
 }
 
 .spell-verdict--right {
-  background-image: url('../assets/halloween/card/verdict-right-day.png');
+  background-image: url('../assets/halloween/card/verdict-right-day.webp');
   animation: spellStamp 280ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
 }
 
 .spell-verdict--wrong {
-  background-image: url('../assets/halloween/card/verdict-wrong-day.png');
+  background-image: url('../assets/halloween/card/verdict-wrong-day.webp');
   animation: spellStamp 280ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
 }
 
 html[data-theme='night'] .spell-verdict--right {
-  background-image: url('../assets/halloween/card/verdict-right-night.png');
+  background-image: url('../assets/halloween/card/verdict-right-night.webp');
 }
 
 html[data-theme='night'] .spell-verdict--wrong {
-  background-image: url('../assets/halloween/card/verdict-wrong-night.png');
+  background-image: url('../assets/halloween/card/verdict-wrong-night.webp');
 }
 
 @keyframes spellStamp {
@@ -427,7 +427,7 @@ html[data-theme='night'] .spell-verdict--wrong {
   right: -14px;
   width: 112px;
   height: 112px;
-  background: url('../assets/halloween/card/burst-crumbs.png') 0 0 / 896px 112px no-repeat;
+  background: url('../assets/halloween/card/burst-crumbs.webp') 0 0 / 896px 112px no-repeat;
   pointer-events: none;
   z-index: 1;
   animation: spellCrumbBurst 520ms steps(6) forwards;

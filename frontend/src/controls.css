@@ -1059,7 +1059,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
   border: 0;
   border-radius: 50%;
   background-color: transparent;
-  background-image: url('./assets/halloween/card/option-token-day.png');
+  background-image: url('./assets/halloween/card/option-token-day.webp');
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -1068,7 +1068,7 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 }
 
 html[data-theme='night'] .personal-workspace .option-badge {
-  background-image: url('./assets/halloween/card/option-token-night.png');
+  background-image: url('./assets/halloween/card/option-token-night.webp');
 }
 
 /* A picked, right or wrong option drops a ring around the token. */
@@ -6407,7 +6407,7 @@ select the digits. */
   padding: 10px 9px 9px;
   overflow: visible;
   border: 18px solid transparent;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -6542,7 +6542,7 @@ select the digits. */
   padding: 10px;
   overflow: visible;
   border: 18px solid transparent;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -6895,7 +6895,7 @@ html[data-theme='night'] .personal-workspace .crumb-time.is-disabled .crumb-time
  * stone one, so the panel no longer needs a shadow of its own. */
 html[data-theme='night'] .personal-workspace .crumb-time__picker,
 html[data-theme='night'] .personal-workspace .crumb-date__picker {
-  border-image-source: url('./assets/halloween/card/panel-board-night.png');
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
 }
 
 html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date__glyph { color: #5b4f7a; }
@@ -6910,7 +6910,7 @@ html[data-theme='night'] .personal-workspace .crumb-date.is-disabled .crumb-date
 .personal-workspace .insight-card,
 .personal-workspace .badge-wall {
   border: 20px solid transparent;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -6921,7 +6921,7 @@ html[data-theme='night'] .personal-workspace :is(
   .insight-card,
   .badge-wall
 ) {
-  border-image-source: url('./assets/halloween/card/panel-board-night.png');
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
 }
 
 /* 板里不再套板。右侧训练栏已经是一块板，里面的计时、生命那几格再各套一层，
@@ -6943,14 +6943,14 @@ html[data-theme='night'] .personal-workspace :is(
 .personal-workspace .settings-form.panel {
   padding: 14px 16px 12px !important;
   border: 20px solid transparent !important;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round !important;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
 }
 
 html[data-theme='night'] .personal-workspace .settings-form.panel {
-  border-image-source: url('./assets/halloween/card/panel-board-night.png') !important;
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp') !important;
 }
 
 /* 选项组不再各自是一张卡片。两列之间那条竖线就够了。 */
@@ -6989,7 +6989,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 10px 12px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-badge-day.png') 30% 17% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-badge-day.webp') 30% 17% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -7017,7 +7017,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 8px 12px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-option-off-day.png') 30% 8% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-off-day.webp') 30% 8% fill stretch;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -7026,7 +7026,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 
 .personal-workspace .settings-form .settings-toggle.is-active {
   border-width: 8px 12px;
-  border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-on-day.webp') 30% 8% fill stretch;
   background: none;
   box-shadow: none;
   color: #33200b;
@@ -7037,7 +7037,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 6px 10px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -7049,7 +7049,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   border-width: 6px 10px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -7057,7 +7057,7 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
 
 html[data-theme='night'] .personal-workspace .settings-form :is(.crumb-time, .crumb-date),
 html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crumb-date, .crumb-search, .crumb-file) {
-  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-field-night.webp') !important;
 }
 
 .personal-workspace .settings-form .crumb-stepper:hover,
@@ -7082,7 +7082,7 @@ html[data-theme='night'] .personal-workspace .dialog-card :is(.crumb-time, .crum
 /* 夜间：铜牌换成发烟的石牌，槽换成靛色墨沟。 */
 html[data-theme='night'] .personal-workspace :is(.button, .button-secondary, .button-danger, .member-primary-button, .workspace-primary-button, .workspace-secondary-button, .crumb-primary-action, [role="button"][type="submit"]):not(.svg-plate-button):not(.icon-button):not(.settings-toggle):not(.ai-toggle):not(.ai-provider-action):not(.kb *, .coach-page *),
 html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [role="button"]:not(.icon-button) {
-  border-image-source: url('./assets/halloween/card/control-badge-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-badge-night.webp') !important;
   color: #efe6ff !important;
   text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
 }
@@ -7098,19 +7098,19 @@ html[data-theme='night'] .personal-workspace .dialog-card .dialog-actions > [rol
   border-width: 6px 10px !important;
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
 }
 
 html[data-theme='night'] .personal-workspace .ai-kind-switch__option {
-  border-image-source: url('./assets/halloween/card/control-option-off-night.png');
+  border-image-source: url('./assets/halloween/card/control-option-off-night.webp');
   color: #efe6ff;
 }
 
 html[data-theme='night'] .personal-workspace .ai-kind-switch__option.is-active {
-  border-image-source: url('./assets/halloween/card/control-option-on-night.png');
+  border-image-source: url('./assets/halloween/card/control-option-on-night.webp');
   color: #efe6ff;
 }
 
@@ -7120,13 +7120,13 @@ html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hu
   .crumb-time,
   .crumb-date
 ) {
-  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-field-night.webp') !important;
   color: #efe6ff;
 }
 
 html[data-theme='night'] .personal-workspace .dialog-card input:not([type="checkbox"]):not([type="radio"]):not(.crumb-stepper__input):not(.crumb-time__input):not(.crumb-date__input):not(.crumb-search__input):not(.crumb-file__input),
 html[data-theme='night'] .personal-workspace .dialog-card textarea {
-  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-field-night.webp') !important;
   color: #efe6ff;
 }
 
@@ -7140,14 +7140,14 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
     min-width: 0;
     width: max-content;
     border: 12px solid transparent;
-    border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+    border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
     border-radius: 0;
     background: none;
     box-shadow: none;
   }
 
   html[data-theme='night'] .personal-workspace select::picker(select) {
-    border-image-source: url('./assets/halloween/card/panel-board-night.png');
+    border-image-source: url('./assets/halloween/card/panel-board-night.webp');
   }
 
   /* 只有被选中的那一行有框，别的是干净的行。框整张铺底——行只有三十几像素
@@ -7176,7 +7176,7 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
   /* 选中的那一行就是同一张 option-off「加了颜色」的那版：option-on。 */
   .personal-workspace select option:checked,
   .personal-workspace select option:focus {
-    border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+    border-image: url('./assets/halloween/card/control-option-on-day.webp') 30% 8% fill stretch;
     background: none;
     color: #33200b;
     font-weight: 800;
@@ -7192,7 +7192,7 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
   }
 
   .personal-workspace .crumb-time__cell.is-active {
-    border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+    border-image: url('./assets/halloween/card/control-option-on-day.webp') 30% 8% fill stretch;
     background: none;
     box-shadow: none;
     color: #33200b;
@@ -7200,7 +7200,7 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
   }
 
   html[data-theme='night'] .personal-workspace .crumb-time__cell.is-active {
-    border-image-source: url('./assets/halloween/card/control-option-on-night.png');
+    border-image-source: url('./assets/halloween/card/control-option-on-night.webp');
     color: #efe6ff;
   }
 
@@ -7212,7 +7212,7 @@ html[data-theme='night'] .personal-workspace .dialog-card textarea {
 
   html[data-theme='night'] .personal-workspace select option:checked,
   html[data-theme='night'] .personal-workspace select option:focus {
-    border-image-source: url('./assets/halloween/card/control-option-on-night.png');
+    border-image-source: url('./assets/halloween/card/control-option-on-night.webp');
     color: #efe6ff;
   }
 }
@@ -7248,7 +7248,7 @@ html[data-theme='night'] .personal-workspace .settings-form ::placeholder { colo
   height: 1.3rem;
   border: 0;
   border-radius: 0;
-  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+  background: url('./assets/halloween/card/control-switch-off-day.webp') center / 100% 100% no-repeat;
   transition: none;
 }
 
@@ -7257,7 +7257,7 @@ html[data-theme='night'] .personal-workspace .settings-form ::placeholder { colo
 .personal-workspace .notification-switch::after {
   position: absolute;
   inset: 0;
-  background: url('./assets/halloween/card/control-switch-on-day.png') center / 100% 100% no-repeat;
+  background: url('./assets/halloween/card/control-switch-on-day.webp') center / 100% 100% no-repeat;
   content: "";
   opacity: 0;
   transition: opacity 160ms cubic-bezier(.2, .9, .25, 1.05);
@@ -7265,7 +7265,7 @@ html[data-theme='night'] .personal-workspace .settings-form ::placeholder { colo
 
 .personal-workspace .notification-category-option > input:checked + .notification-switch {
   border-color: transparent;
-  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+  background: url('./assets/halloween/card/control-switch-off-day.webp') center / 100% 100% no-repeat;
 }
 
 .personal-workspace .notification-category-option > input:checked + .notification-switch::after { opacity: 1; }
@@ -7277,11 +7277,11 @@ html[data-theme='night'] .personal-workspace .settings-form ::placeholder { colo
 
 html[data-theme='night'] .personal-workspace .notification-switch,
 html[data-theme='night'] .personal-workspace .notification-category-option > input:checked + .notification-switch {
-  background-image: url('./assets/halloween/card/control-switch-off-night.png');
+  background-image: url('./assets/halloween/card/control-switch-off-night.webp');
 }
 
 html[data-theme='night'] .personal-workspace .notification-switch::after {
-  background-image: url('./assets/halloween/card/control-switch-on-night.png');
+  background-image: url('./assets/halloween/card/control-switch-on-night.webp');
 }
 
 /* 「启用 / 停用」是开关，不是按钮：它没有「按下去做一件事」的语义，只有两种状态。
@@ -7310,14 +7310,14 @@ html[data-theme='night'] .personal-workspace .notification-switch::after {
   height: 1.3rem;
   border: 0;
   border-radius: 0;
-  background: url('./assets/halloween/card/control-switch-off-day.png') center / 100% 100% no-repeat;
+  background: url('./assets/halloween/card/control-switch-off-day.webp') center / 100% 100% no-repeat;
 }
 
 /* 开态叠一层，用不透明度过渡——背景图本身没法补间，硬切会让旋钮瞬移。 */
 .personal-workspace .ai-toggle .ai-toggle__dot::after {
   position: absolute;
   inset: 0;
-  background: url('./assets/halloween/card/control-switch-on-day.png') center / 100% 100% no-repeat;
+  background: url('./assets/halloween/card/control-switch-on-day.webp') center / 100% 100% no-repeat;
   content: "";
   opacity: 0;
   transition: opacity 160ms cubic-bezier(.2, .9, .25, 1.05);
@@ -7326,11 +7326,11 @@ html[data-theme='night'] .personal-workspace .notification-switch::after {
 .personal-workspace .ai-toggle .ai-toggle__dot.is-on::after { opacity: 1; }
 
 html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot {
-  background-image: url('./assets/halloween/card/control-switch-off-night.png');
+  background-image: url('./assets/halloween/card/control-switch-off-night.webp');
 }
 
 html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
-  background-image: url('./assets/halloween/card/control-switch-on-night.png');
+  background-image: url('./assets/halloween/card/control-switch-on-night.webp');
 }
 
 /* 「对话模型 / 向量模型」是一组选项，跟设置里的选项用同一对零件：
@@ -7349,7 +7349,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
   border-width: 8px 12px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-option-off-day.png') 30% 8% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-off-day.webp') 30% 8% fill stretch;
   border-radius: 0;
   background: none;
   color: var(--ui-ink);
@@ -7360,7 +7360,7 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .ai-kind-switch__option.is-active {
   padding: 5px 15px;
   border-width: 8px 14px;
-  border-image: url('./assets/halloween/card/control-option-on-day.png') 30% 8% fill stretch;
+  border-image: url('./assets/halloween/card/control-option-on-day.webp') 30% 8% fill stretch;
   background: none;
   color: #33200b;
 }
@@ -7395,13 +7395,13 @@ html[data-theme='night'] .personal-workspace .ai-toggle .ai-toggle__dot::after {
 .personal-workspace .dialog-card select,
 .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
   border-width: 4px 8px !important;
-  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch !important;
 }
 
 html[data-theme='night'] .personal-workspace .settings-form select,
 html[data-theme='night'] .personal-workspace .dialog-card select,
 html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
-  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-field-night.webp') !important;
   color: #efe6ff;
 }
 
@@ -7415,7 +7415,7 @@ html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .
   border-width: 5px 8px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-ornament-day.png') 12% 5% fill stretch;
+  border-image: url('./assets/halloween/card/control-ornament-day.webp') 12% 5% fill stretch;
   border-radius: 0;
   background: none;
   color: #33200b;
@@ -7423,7 +7423,7 @@ html[data-theme='night'] .personal-workspace :is(.settings-form, .dialog-card, .
 
 html[data-theme='night'] .personal-workspace .personal-ai-provider__tag,
 html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
-  border-image-source: url('./assets/halloween/card/control-ornament-night.png');
+  border-image-source: url('./assets/halloween/card/control-ornament-night.webp');
   color: #efe6ff;
 }
 
@@ -7461,7 +7461,7 @@ html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
   margin: 0 6px 0 0;
   border: 0;
   border-radius: 0;
-  background: url('./assets/halloween/card/control-check-off-day.png') center / 100% 100% no-repeat;
+  background: url('./assets/halloween/card/control-check-off-day.webp') center / 100% 100% no-repeat;
   cursor: pointer;
   vertical-align: middle;
 }
@@ -7469,7 +7469,7 @@ html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
 .personal-workspace .personal-ai-page input[type="checkbox"]:checked {
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2333200b' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
-    url('./assets/halloween/card/control-check-on-day.png') center / 100% 100% no-repeat;
+    url('./assets/halloween/card/control-check-on-day.webp') center / 100% 100% no-repeat;
 }
 
 .personal-workspace .personal-ai-page input[type="checkbox"]:focus-visible {
@@ -7478,13 +7478,13 @@ html[data-theme='night'] .personal-workspace .personal-ai-provider__model {
 }
 
 html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"] {
-  background-image: url('./assets/halloween/card/control-check-off-night.png');
+  background-image: url('./assets/halloween/card/control-check-off-night.webp');
 }
 
 html[data-theme='night'] .personal-workspace .personal-ai-page input[type="checkbox"]:checked {
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23201337' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.6 4.5L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat,
-    url('./assets/halloween/card/control-check-on-night.png') center / 100% 100% no-repeat;
+    url('./assets/halloween/card/control-check-on-night.webp') center / 100% 100% no-repeat;
 }
 
 /* 悬浮窗右上角那颗关闭钮：一枚小铜牌，中间的叉还是矢量图标，
@@ -7497,7 +7497,7 @@ html[data-theme='night'] .personal-workspace .personal-ai-page input[type="check
   border-width: 5px !important;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-close-day.png') 20% 20% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-close-day.webp') 20% 20% fill stretch !important;
   border-radius: 0;
   background: none !important;
   box-shadow: none !important;
@@ -7510,7 +7510,7 @@ html[data-theme='night'] .personal-workspace .personal-ai-page input[type="check
 }
 
 html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button {
-  border-image-source: url('./assets/halloween/card/control-close-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-close-night.webp') !important;
   color: #efe6ff !important;
 }
 
@@ -7545,13 +7545,13 @@ html[data-theme='night'] .personal-workspace .dialog-card .workspace-icon-button
   border-width: 8px 13px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-badge-day.png') 30% 17% fill stretch;
+  border-image: url('./assets/halloween/card/control-badge-day.webp') 30% 17% fill stretch;
   border-radius: 0;
   background: none;
 }
 
 html[data-theme='night'] .personal-workspace .field-badge {
-  border-image-source: url('./assets/halloween/card/control-badge-night.png');
+  border-image-source: url('./assets/halloween/card/control-badge-night.webp');
 }
 
 /* 额度三列在窄面板里放不下：每行会被压到 200px 出头，右边那句「已用 N 次」
@@ -7572,7 +7572,7 @@ html[data-theme='night'] .personal-workspace .field-badge {
   border-width: 6px 10px;
   border-style: solid;
   border-color: transparent;
-  border-image: url('./assets/halloween/card/control-chip-off-day.png') 12% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-chip-off-day.webp') 12% 5% fill stretch !important;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -7582,18 +7582,18 @@ html[data-theme='night'] .personal-workspace .settings-form .crumb-stepper,
 html[data-theme='night'] .personal-workspace .dialog-card .crumb-stepper,
 html[data-theme='night'] .personal-workspace .personal-ai-page .crumb-stepper,
 html[data-theme='night'] .personal-workspace .ia-account-security .crumb-stepper {
-  border-image-source: url('./assets/halloween/card/control-chip-off-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-chip-off-night.webp') !important;
 }
 
 /* 选中的选项芯片：夜间换 another 张图（白天是琥珀牌，夜里是亮紫牌）。 */
 html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
-  border-image-source: url('./assets/halloween/card/control-option-on-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-option-on-night.webp') !important;
   color: #efe6ff !important;
   text-shadow: 0 1px 2px rgb(11 7 20 / 55%);
 }
 
 html[data-theme='night'] .personal-workspace .settings-toggle {
-  border-image-source: url('./assets/halloween/card/control-option-off-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-option-off-night.webp') !important;
 }
 
 /* ------------------------------------------------------------------
@@ -7715,13 +7715,13 @@ html[data-theme='night'] .personal-workspace .personal-ai-provider__actions .ai-
   background: none !important;
   box-shadow: none !important;
   min-height: 34px;
-  border-image: url('./assets/halloween/card/control-field-day.png') 18% 5% fill stretch !important;
+  border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch !important;
 }
 
 html[data-theme='night'] .personal-workspace .settings-form select,
 html[data-theme='night'] .personal-workspace .dialog-card select,
 html[data-theme='night'] .personal-workspace :is(.settings-page, .ia-settings-hub, .personal-ai-page, .ia-account-security, .notification-preferences-page, .wordbooks-page) select {
-  border-image-source: url('./assets/halloween/card/control-field-night.png') !important;
+  border-image-source: url('./assets/halloween/card/control-field-night.webp') !important;
   background: none !important;
   color: #efe6ff;
 }
