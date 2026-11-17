@@ -177,7 +177,7 @@ onMounted(() => {
         </div>
 
         <aside class="crumb-merged-side crumb-today-side">
-          <RouterLink class="crumb-today-book" :to="plan.wordbook ? '/wordbooks' : '/wordbooks'">
+          <RouterLink class="crumb-today-book" to="/wordbooks">
             <span class="crumb-today-book__cover">
               <img :src="bookObject[themeMode]" alt="" aria-hidden="true" />
               <span class="crumb-today-book__name">{{ plan.wordbook?.name ?? '还没有词书' }}</span>

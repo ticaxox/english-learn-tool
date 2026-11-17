@@ -75,7 +75,8 @@
 .workspace-shell .ia-profile-menu .ia-profile-signout { color: var(--crumb-cocoa); font-weight: 650; }
 
 .ia-admin-hub,
-.ia-settings-hub { display: grid; gap: 16px; }
+.ia-settings-hub,
+.ia-kb-page { display: grid; gap: 16px; }
 .ia-hub-header {
   display: flex;
   align-items: flex-start;

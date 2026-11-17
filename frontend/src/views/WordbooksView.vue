@@ -70,11 +70,11 @@ const pageSummary = computed(() => {
 })
 
 function canExport(book: Wordbook): boolean {
-  return canExportWordbook(book, auth.user?.id ?? null, false)
+  return canExportWordbook(book, auth.user?.id ?? null, auth.isAdmin)
 }
 
 function canDelete(book: Wordbook): boolean {
-  return canDeleteWordbook(book, auth.user?.id ?? null, false)
+  return canDeleteWordbook(book, auth.user?.id ?? null, auth.isAdmin)
 }
 
 async function load(): Promise<void> {

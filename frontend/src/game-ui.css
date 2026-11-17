@@ -1674,9 +1674,10 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
  * plate is the whole difference from the learner's own green copies. */
 .personal-workspace .wordbook-cover__builtin {
   position: absolute;
-  top: 3.5%;
-  left: 6%;
+  bottom: 7%;
+  left: 50%;
   z-index: 2;
+  transform: translateX(-50%);
   padding: 2px 8px;
   border: 1.5px solid #7c5c12;
   border-radius: 999px;
