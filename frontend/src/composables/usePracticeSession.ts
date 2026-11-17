@@ -205,9 +205,12 @@ export function usePracticeSession(sessionId: string, options: PracticeSessionOp
       const response = await api.submit(sessionId, answers, key)
       // The header reads session.status; keep it in step with the result view.
       if (session.value) session.value = { ...session.value, status: 'submitted' }
-      if (response.result) {
+      // Only a finished score opens the result view. A grading run that is
+      // still in flight keeps the "正在评卷" sheet on screen.
+      const graded = response.result && (response.result.status === 'completed' || response.result.status === 'failed')
+      if (graded) {
         result.value = response.result
-      } else if (response.status === 'scoring') {
+      } else if (response.status === 'scoring' || response.result) {
         pollCount = 0
         await pollResult()
       } else if (response.status === 'failed') {
@@ -228,8 +231,10 @@ export function usePracticeSession(sessionId: string, options: PracticeSessionOp
       while (!disposed && pollCount < maxPolls) {
         pollCount += 1
         const next = await api.result(sessionId)
-        result.value = next
+        // A half-graded result is not a result: publishing it flipped the page
+        // straight to the score view and the "正在评卷" sheet never appeared.
         if (next.status === 'completed' || next.status === 'failed') {
+          result.value = next
           if (next.status === 'failed') {
             submitError.value = new Error(next.errorMessage || 'AI 评分失败，未生成默认分数。')
           }

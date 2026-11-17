@@ -84,14 +84,18 @@ export function drawPaths(container: Element | null, options: { delay?: number }
   if (!container || !motionAllowed()) return
   const paths = Array.from(container.querySelectorAll('path'))
   if (paths.length === 0) return
+  // One pen: the trail runs from the first stop to the last, each leg starting
+  // where the previous one ended. A per-path stagger drew every leg at once,
+  // which read as the route growing out of every node at the same time.
+  const leg = 0.42
   gsap.fromTo(
     paths,
     { drawSVG: '0%' },
     {
       drawSVG: '100%',
-      duration: 1.1,
-      ease: 'power2.inOut',
-      stagger: 0.05,
+      duration: leg,
+      ease: 'none',
+      stagger: leg,
       delay: options.delay ?? 0.15,
     },
   )

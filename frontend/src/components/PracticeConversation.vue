@@ -56,7 +56,7 @@ const shortRole = computed(() => {
   const cut = role.split(/\s+(?:who|that|which)\s+/i)[0]
   return cut.length >= 2 && cut.length <= 24 ? cut : '对话伙伴'
 })
-const scenario = computed(() => props.question.scenario ?? '')
+// The brief is Chinese-only now; only the Chinese scenario is printed.
 const scenarioZh = computed(() => props.question.scenarioZh ?? '')
 const targetWords = computed(() => props.question.targetWords ?? [])
 
@@ -181,20 +181,20 @@ function speakTurn(turn: PracticeConversationTurn): void {
 
 <template>
   <section class="practice-conversation">
-    <!-- The brief is a strip, not a page: who you are talking to, where, and
-         the words to reach for. Everything the learner needs to start and
-         nothing they have to read before they can. -->
-    <header class="practice-conversation__brief">
-      <div class="practice-conversation__headline">
-        <h2 class="practice-conversation__topic">{{ topic }}</h2>
-        <p v-if="topicZh" class="practice-conversation__zh">{{ topicZh }}</p>
+    <!-- The brief is a question card like every other task: same paper, same
+         header. It introduces the task in Chinese; the English lives in the
+         talk itself, where it is being practised. -->
+    <header class="practice-conversation__brief practice-question-card practice-question-card--conversation">
+      <div class="practice-question-card__header">
+        <div class="practice-question-step">
+          <span class="status-badge">口语对话</span>
+        </div>
       </div>
+      <h2 class="practice-conversation__topic">{{ topicZh || topic }}</h2>
       <p class="practice-conversation__role">
         <AppIcon name="coach" />
         <span class="practice-conversation__role-text">
-          <strong>{{ roleName }}</strong>
-          <em v-if="scenario">{{ scenario }}</em>
-          <em v-if="roleZh || scenarioZh">{{ scenarioZh || roleZh }}</em>
+          {{ roleZh || scenarioZh || roleName }}
         </span>
       </p>
       <ul v-if="targetWords.length" class="practice-conversation__words" aria-label="本轮要用到的词">
@@ -202,6 +202,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
       </ul>
     </header>
 
+    <section class="practice-conversation__chat">
     <div
       ref="scroller"
       class="practice-conversation__talk"
@@ -244,30 +245,40 @@ function speakTurn(turn: PracticeConversationTurn): void {
       </p>
     </div>
 
+    <!-- The same bar Hob answers in: one field, one round tool, one round
+         send, and a hairline above the whole thing. -->
     <form class="practice-conversation__composer" @submit.prevent="send">
-      <textarea
-        v-model="draft"
-        class="practice-conversation__input"
-        rows="1"
-        maxlength="2000"
-        :placeholder="'回一句…'"
-        aria-label="对对话伙伴说"
-        @keydown.enter.exact.prevent="send"
-      ></textarea>
-      <div class="practice-conversation__controls">
+      <div class="practice-conversation__row-bar">
+        <div class="practice-conversation__field">
+          <textarea
+            v-model="draft"
+            class="practice-conversation__input"
+            rows="1"
+            maxlength="2000"
+            placeholder="回一句…"
+            aria-label="对对话伙伴说"
+            @keydown.enter.exact.prevent="send"
+          ></textarea>
+        </div>
         <button
           v-if="dictation.supported.value"
-          class="practice-conversation__mic"
+          class="practice-conversation__tool"
           :class="{ 'is-listening': dictation.listening.value }"
           type="button"
+          :aria-label="dictation.listening.value ? '停止语音输入' : '语音输入'"
           :aria-pressed="dictation.listening.value"
+          :title="dictation.listening.value ? '正在听…' : '语音'"
           @click="dictation.toggle()"
         >
           <AppIcon name="speaker" />
-          {{ dictation.listening.value ? '正在听…' : '语音' }}
         </button>
-        <button class="practice-conversation__send" type="submit" :disabled="!canSend">
-          {{ waitingForGuide ? '等它回话…' : '说' }}
+        <button
+          class="practice-conversation__send"
+          type="submit"
+          :aria-label="waitingForGuide ? '等它回话…' : '说'"
+          :title="waitingForGuide ? '等它回话…' : '说'"
+          :disabled="!canSend"
+        >
           <AppIcon name="send" />
         </button>
       </div>
@@ -276,6 +287,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
       </p>
       <p v-if="error" class="practice-conversation__error" role="alert">{{ error }}</p>
     </form>
+    </section>
   </section>
 </template>
 
@@ -290,20 +302,38 @@ function speakTurn(turn: PracticeConversationTurn): void {
   min-height: 34rem;
 }
 
+/* Two rows, top to bottom: the topic first, then the partner and the scene.
+ * Side by side, a long scenario squeezed the title into a sliver. The paper
+ * itself comes from the shared question-card rule. */
 .practice-conversation__brief {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* The chat is its own sheet, like Hob's: a flat card under the question. */
+.practice-conversation__chat {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.1rem;
-  align-items: center;
-  padding: 0.7rem 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 26rem;
+  padding: 14px 16px;
   border: 1px solid var(--ui-line, #ecd9bb);
   border-radius: 14px;
-  background: var(--ui-surface-subtle, #fff4e2);
+  background: var(--ui-surface, #fffdf6);
+}
+
+html[data-theme='night'] .practice-conversation__chat {
+  border-color: var(--ui-line, #3d2c66);
+  background: var(--ui-surface, #241a44);
 }
 
 .practice-conversation__headline {
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.5rem;
   align-items: baseline;
   min-width: 0;
 }
@@ -324,7 +354,6 @@ function speakTurn(turn: PracticeConversationTurn): void {
 
 .practice-conversation__role {
   display: flex;
-  flex: 1 1 18rem;
   gap: 0.45rem;
   align-items: flex-start;
   min-width: 0;
@@ -495,71 +524,122 @@ function speakTurn(turn: PracticeConversationTurn): void {
   to { opacity: 1; transform: translateY(-0.2rem); }
 }
 
-/* The composer is one bar: the line, and the two things you can do with it. */
+/* The composer copies Hob's: one field, one round tool, one round send, all
+ * sitting on a hairline that lights when you are writing. */
 .practice-conversation__composer {
   display: grid;
   gap: 0.4rem;
-  padding: 0.6rem;
-  border: 2px solid var(--ui-line-strong, #e0c9a4);
-  border-radius: 16px;
-  background: var(--ui-surface-subtle, #fff4e2);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.practice-conversation__row-bar {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid var(--ui-line, #ecd9bb);
+  transition: border-color 200ms ease;
+}
+
+.practice-conversation__row-bar:focus-within {
+  border-top-color: var(--g-orange, #ff9600);
+}
+
+.practice-conversation__field {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 14px;
+  border: 1px solid var(--ui-line, #ecd9bb);
+  border-radius: 11px;
+  background: var(--ui-surface, #fffdf6);
+  box-shadow: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.practice-conversation__field:focus-within {
+  border-color: var(--g-orange-edge, #cf7400);
+  box-shadow: 0 0 0 3px rgb(255 150 0 / 14%);
 }
 
 .practice-conversation__input {
+  flex: 1 1 auto;
+  min-width: 0;
   width: 100%;
   max-width: none;
-  min-height: 2.9rem;
-  max-height: 8rem;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--ui-line, #ecd9bb);
-  border-radius: 10px;
-  background: var(--ui-surface, #fffdf6);
+  min-height: 24px;
+  max-height: 196px;
+  padding: 1px 0;
+  border: 0;
+  background: none;
+  outline: none;
   color: var(--ui-ink, #35240f);
   font: inherit;
-  line-height: 1.55;
+  font-size: 1rem;
+  line-height: 24px;
   resize: none;
+  overflow-y: auto;
   field-sizing: content;
 }
 
-.practice-conversation__controls {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: space-between;
-}
+.practice-conversation__input::placeholder { color: var(--ui-muted, #7d6247); }
 
-.practice-conversation__mic,
+.practice-conversation__tool,
 .practice-conversation__send {
   display: inline-flex;
-  gap: 0.35rem;
+  flex: 0 0 auto;
   align-items: center;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--g-gold-edge, #d9a400);
-  background: var(--ui-surface, #fffdf6);
-  color: var(--g-orange-edge, #cf7400);
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
 }
 
-.practice-conversation__mic.is-listening {
+.practice-conversation__tool {
+  border: 1px solid var(--ui-line, #ecd9bb);
+  background: none;
+  color: var(--ui-muted, #7d6247);
+}
+
+.practice-conversation__tool:hover:not(:disabled) {
+  border-color: var(--ui-line-strong, #e0c9a4);
+  background: var(--ui-surface-subtle, #fff4e2);
+  color: var(--ui-ink, #35240f);
+}
+
+.practice-conversation__tool.is-listening {
   border-color: var(--g-red, #d93025);
   color: var(--g-red, #d93025);
-  background: var(--g-red-soft, #ffe5e2);
 }
 
 .practice-conversation__send {
-  border-color: var(--g-orange-edge, #cf7400);
+  border: 1px solid transparent;
   background: var(--g-orange, #ff9600);
   color: #35240f;
+  box-shadow: 0 2px 0 var(--g-orange-edge, #cf7400);
+}
+
+.practice-conversation__send:hover:not(:disabled) { filter: brightness(1.06); }
+
+.practice-conversation__send:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--g-orange-edge, #cf7400);
 }
 
 .practice-conversation__send:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+  border-color: var(--ui-line, #ecd9bb);
+  background: color-mix(in srgb, var(--ui-ink, #35240f) 8%, transparent);
+  color: color-mix(in srgb, var(--ui-ink, #35240f) 40%, transparent);
+  box-shadow: none;
+  cursor: default;
 }
+
+.practice-conversation__tool svg,
+.practice-conversation__send svg { width: 17px; height: 17px; }
 
 .practice-conversation__error {
   margin: 0;

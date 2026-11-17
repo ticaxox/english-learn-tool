@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
-import ArtImage from '../components/ArtImage.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import {
   createPracticeSession,
@@ -26,7 +25,7 @@ import DrillConfigDialog from '../components/DrillConfigDialog.vue'
 
 import '../practice.css'
 import ShelfPicker from '../components/ShelfPicker.vue'
-import { illustration, settingsCard } from '../assets/halloween'
+import { settingsCard } from '../assets/halloween'
 
 const router = useRouter()
 const route = useRoute()
@@ -398,11 +397,9 @@ onMounted(() => {
           </div>
 
           <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
-          <div v-if="creating" class="practice-generation-state is-loading" role="status" aria-live="polite">
-            <ArtImage class="practice-generation-art" :set="illustration.brewing" />
-            <div><strong>正在生成练习</strong><span>正在读取素材并准备题目，请稍候。</span></div>
-          </div>
-          <div v-else-if="createError" class="practice-generation-state is-error" role="status">
+          <!-- The wait belongs on the session page, not as a flash inside this
+               form: the button says "正在生成…" and the next page takes over. -->
+          <div v-if="createError" class="practice-generation-state is-error" role="status">
             <strong>这次没有生成成功</strong>
             <span>可以调整条件后重试，当前设置会保留。</span>
           </div>

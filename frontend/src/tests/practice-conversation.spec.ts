@@ -43,12 +43,13 @@ describe('conversation practice', () => {
     })
   })
 
-  it('shows the topic, the character and the opening line', async () => {
+  it('introduces the task in Chinese and still shows the opening line', async () => {
     const wrapper = mount(PracticeConversation, { props: { sessionId: 'session-1', question } })
     await flushPromises()
-    expect(wrapper.text()).toContain('A weekend hike')
+    // The brief speaks Chinese; the English belongs to the talk itself.
     expect(wrapper.text()).toContain('一次周末徒步')
-    expect(wrapper.text()).toContain('A friendly guide at the trailhead')
+    expect(wrapper.text()).toContain('trailhead 的向导')
+    expect(wrapper.text()).not.toContain('A weekend hike')
     expect(wrapper.text()).toContain('Morning! Ready to head up?')
     // The word the learner should reach for is on the table.
     expect(wrapper.text()).toContain('resilient')

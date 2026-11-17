@@ -1217,8 +1217,11 @@
 }
 
 /* Everything above the artwork is printed on the cover, so it needs the
-   cover's own contrast rather than the page's. */
-.app-shell--member .member-wordbooks-page .wordbook-cover > *:not(.wordbook-cover__art) {
+   cover's own contrast rather than the page's. The two decorations are the
+   exception: they anchor themselves to the cover's bottom edge and corner, and
+   forcing them back into the flow dropped the built-in plate out of the top of
+   the card as a stray dash. */
+.app-shell--member .member-wordbooks-page .wordbook-cover > *:not(.wordbook-cover__art):not(.wordbook-cover__builtin):not(.wordbook-cover__bookmark) {
   position: relative;
   z-index: 1;
 }

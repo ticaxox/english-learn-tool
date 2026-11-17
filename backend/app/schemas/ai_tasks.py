@@ -69,7 +69,8 @@ class PracticeGenerationContext(StrictModel):
 class BatchGradingItemContext(StrictModel):
     question_id: str = Field(min_length=1, max_length=64)
     source_text: str = Field(min_length=1, max_length=20_000)
-    user_answer: str = Field(min_length=1, max_length=20_000)
+    # A skipped question reaches the grader as an empty answer.
+    user_answer: str = Field(default="", max_length=20_000)
     exam_type: ExamType
     target_entry_ids: list[UUID] = Field(default_factory=list, max_length=100)
 
