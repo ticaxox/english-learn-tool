@@ -325,7 +325,7 @@ async def test_cors_preflight_allows_idempotency_key(client: httpx.AsyncClient) 
     assert "idempotency-key" in response.headers["access-control-allow-headers"].lower()
 
 
-async def test_personal_wordbook_boundaries_reject_legacy_and_cross_user_access(
+async def test_wordbook_shelf_shows_own_and_builtin_books_and_guards_the_rest(
     client, app, admin_user, member_user, user_factory
 ) -> None:
     owner_headers = await _login_headers(client, member_user.username)
@@ -340,9 +340,14 @@ async def test_personal_wordbook_boundaries_reject_legacy_and_cross_user_access(
     )
 
     owner_list = await client.get(WORDBOOKS_PATH, headers=owner_headers)
-    assert [item["id"] for item in owner_list.json()["items"]] == [owner_book]
+    visible = {item["id"]: item for item in owner_list.json()["items"]}
+    # The shelf is the learner's own books plus the built-in ones.
+    assert owner_book in visible
+    assert legacy_organization in visible
+    assert visible[legacy_organization]["is_builtin"] is True
+    assert visible[owner_book]["is_builtin"] is False
+    # Another learner's private book stays theirs.
     assert other_book not in owner_list.text
-    assert legacy_organization not in owner_list.text
 
     owner_detail = await client.get(f"{WORDBOOKS_PATH}/{owner_book}", headers=owner_headers)
     assert owner_detail.status_code == 200
@@ -353,7 +358,17 @@ async def test_personal_wordbook_boundaries_reject_legacy_and_cross_user_access(
         await client.get(f"{WORDBOOKS_PATH}/{owner_book}", headers=admin_headers),
         await client.post(f"{WORDBOOKS_PATH}/{owner_book}/activate", headers=other_headers),
         await client.post(f"{WORDBOOKS_PATH}/{owner_book}/activate", headers=admin_headers),
-        await client.get(f"{WORDBOOKS_PATH}/{legacy_organization}", headers=owner_headers),
+        await client.post(
+            f"{WORDBOOKS_PATH}/{legacy_organization}/export",
+            headers={**other_headers, "Idempotency-Key": "builtin-export-1"},
+            json={"format": "csv"},
+        ),
+        await client.request(
+            "DELETE",
+            f"{WORDBOOKS_PATH}/{legacy_organization}",
+            headers={**other_headers, "Idempotency-Key": "builtin-delete-1"},
+            json={},
+        ),
         await client.post(
             f"{WORDBOOKS_PATH}/{owner_book}/export",
             headers={**other_headers, "Idempotency-Key": "foreign-export-1"},
@@ -370,13 +385,30 @@ async def test_personal_wordbook_boundaries_reject_legacy_and_cross_user_access(
         assert response.status_code == 404
         assert response.json()["code"] == "WORDBOOK_NOT_FOUND"
 
+    # The built-in shelf is reachable, and readable, by everyone.
+    builtin_detail = await client.get(
+        f"{WORDBOOKS_PATH}/{legacy_organization}", headers=other_headers
+    )
+    assert builtin_detail.status_code == 200
+    assert builtin_detail.json()["wordbook"]["is_builtin"] is True
+
+    # Publishing is an administrator's act; a member is turned away.
+    member_organization_import = await client.post(
+        f"{WORDBOOKS_PATH}/import/preview",
+        headers=owner_headers,
+        data={"visibility": "organization", "name": "Member shared book"},
+        files={"file": ("words.csv", _csv_payload([_minimal_row()]), "text/csv")},
+    )
+    assert member_organization_import.status_code == 403
+    assert member_organization_import.json()["code"] == "WORDBOOK_BUILTIN_FORBIDDEN"
+
     organization_import = await client.post(
         f"{WORDBOOKS_PATH}/import/preview",
         headers=admin_headers,
-        data={"visibility": "organization", "name": "Legacy shared book"},
+        data={"visibility": "organization", "name": "Built-in book"},
         files={"file": ("words.csv", _csv_payload([_minimal_row()]), "text/csv")},
     )
-    assert organization_import.status_code == 422
+    assert organization_import.status_code == 201
 
     activated = await client.post(f"{WORDBOOKS_PATH}/{owner_book}/activate", headers=owner_headers)
     assert activated.status_code == 200
