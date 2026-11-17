@@ -4532,7 +4532,8 @@ html[data-theme='night'] .personal-workspace .trail-month__day.is-lit { color: #
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 22px;
-  align-items: center;
+  /* The radar takes the card's full height beside the state bar. */
+  align-items: stretch;
   flex: 1;
   min-height: 0;
 }

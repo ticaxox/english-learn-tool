@@ -428,9 +428,10 @@ pre {
 /* The door: Hob on the left, the form on the right. */
 .auth-page {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: center;
   gap: clamp(1.5rem, 5vw, 4rem);
-  place-items: center;
 }
 
 .auth-art {

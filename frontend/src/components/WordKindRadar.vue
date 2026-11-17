@@ -143,12 +143,16 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
   display: grid;
   gap: 8px;
   justify-items: center;
+  height: 100%;
+  min-height: 0;
 }
 
+/* The radar is as tall as the card it sits in, not a 260px thumbnail. */
 .word-radar__chart {
   width: 100%;
-  max-width: 260px;
-  height: auto;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
   overflow: visible;
 }
 
