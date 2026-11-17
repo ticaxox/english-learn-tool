@@ -384,7 +384,7 @@ html[data-theme='night'] .personal-workspace {
 .personal-workspace .wordbook-active-strip,
 .personal-workspace .memory-context-card {
   border: 20px solid transparent !important;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round !important;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -397,7 +397,7 @@ html[data-theme='night'] .personal-workspace :is(
   .wordbook-active-strip,
   .memory-context-card
 ) {
-  border-image-source: url('./assets/halloween/card/panel-board-night.png') !important;
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp') !important;
 }
 
 /* ------------------------------------------------------------------ pills */
@@ -546,14 +546,14 @@ html[data-theme='night'] .personal-workspace :is(
  * 权重，否则今天这块卡会掉回圆角矩形。 */
 .personal-workspace .crumb-trail-board {
   border: 20px solid transparent !important;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round !important;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round !important;
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
 }
 
 html[data-theme='night'] .personal-workspace .crumb-trail-board {
-  border-image-source: url('./assets/halloween/card/panel-board-night.png') !important;
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp') !important;
 }
 
 .personal-workspace .crumb-trail-board-head {
@@ -911,7 +911,7 @@ html[data-theme='night'] .personal-workspace .crumb-trail-board {
 .personal-workspace .dialog-card,
 .personal-workspace .dialog-backdrop .dialog-card {
   border: 40px solid transparent;
-  border-image: url('./assets/halloween/card/panel-board-day.png') 14% 14% 15% fill round;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -1526,7 +1526,7 @@ html[data-theme='night'] .personal-workspace .coach-action-notice {
 /* Dialogs keep a plate of their own at night; the ink is already cream, so a
  * cream panel would swallow it. */
 html[data-theme='night'] .personal-workspace .dialog-card {
-  border-image-source: url('./assets/halloween/card/panel-board-night.png');
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
   color: var(--ui-ink);
 }
 
