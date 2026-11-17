@@ -5643,75 +5643,15 @@ html[data-theme='night'] .member-practice-page .practice-question-card .practice
  * after dark the sheet is violet-black, so the ink has to turn over or the
  * passage and the essay prompt sink into it. */
 html[data-theme='night'] .personal-workspace .practice-article-panel .practice-article,
-html[data-theme='night'] .personal-workspace .practice-article-panel .eyebrow,
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-writing,
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-answer-textarea {
+html[data-theme='night'] .personal-workspace .practice-article-panel .eyebrow {
   color: #f3e9d2;
 }
 
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-prompt-note,
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-requirements {
-  color: #cdbfe4;
-}
 
-/* The translation answer is a scrap of torn paper lying on the card, so the
- * ink is simply the night ink on that scrap. */
-html[data-theme='night'] .personal-workspace .practice-question-card--translation .practice-answer-textarea {
-  background: transparent !important;
-  color: #f3e9d2;
-}
-
-/* Writing: the prompt is a sheet of its own, the answer is written on another.
-   Two objects, not one frame around both. */
-.member-practice-session-page .practice-question-card.practice-question-card--writing,
-.member-practice-page .practice-question-card.practice-question-card--writing {
-  width: min(100%, 760px);
-  margin-inline: auto;
-  gap: 1.1rem;
-  background: none;
-  box-shadow: none;
-  border-width: 0;
-  border-image-source: none;
-  border-radius: 0;
-  padding: 0;
-}
-
-.member-practice-session-page .practice-question-card--writing .practice-writing,
-.member-practice-page .practice-question-card--writing .practice-writing {
-  background: #f6e7c8;
-  background-clip: padding-box;
-  border-style: solid;
-  border-width: 24px;
-  border-image-source: var(--rune-parchment);
-  border-image-slice: 7% fill;
-  border-image-width: 24px;
-  border-image-repeat: stretch;
-  border-color: transparent;
-  border-radius: 0;
-  padding: 4px 10px 10px;
-  color: #3d2c18;
-}
-
-.member-practice-session-page .practice-question-card--writing .field,
-.member-practice-page .practice-question-card--writing .field {
-  background: #f3e3c3;
-  background-clip: padding-box;
-  border-style: solid;
-  border-width: 30px;
-  border-image-source: var(--rune-torn);
-  border-image-slice: 7% fill;
-  border-image-width: 30px;
-  border-image-repeat: stretch;
-  border-color: transparent;
-  border-radius: 0;
-  padding: 0 14px;
-}
-
-/* A writing area worth writing in: the same answer sheet, given more height. */
+/* A writing area worth writing in: same answer sheet, just taller. */
 .member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
 .member-practice-page .practice-question-card--writing .practice-answer-textarea {
   min-height: 260px;
-  line-height: 2;
 }
 
 /* An option on the sheet is a ruled answer box cut from the same paper — sharp

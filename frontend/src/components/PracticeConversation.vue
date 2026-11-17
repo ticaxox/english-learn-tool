@@ -13,6 +13,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import SpokenText from './SpokenText.vue'
+import { useRuneSurface } from '../composables/useRuneSurface'
 import {
   listConversationTurns,
   postConversationTurn,
@@ -31,6 +32,19 @@ const emit = defineEmits<{
   (event: 'answer', value: string): void
 }>()
 
+// The brief wears the same paper as the written questions, in both themes.
+const { surface } = useRuneSurface()
+const composerInput = ref<HTMLTextAreaElement | null>(null)
+
+function resizeComposerInput(): void {
+  const el = composerInput.value
+  if (!el) return
+  el.style.height = 'auto'
+  const next = Math.min(96, Math.max(24, el.scrollHeight - 2))
+  el.style.height = `${next}px`
+  el.style.overflowY = el.scrollHeight > next + 2 ? 'auto' : 'hidden'
+}
+
 const turns = ref<PracticeConversationTurn[]>([])
 const draft = ref('')
 const loading = ref(false)
@@ -44,18 +58,6 @@ const topic = computed(() => props.question.topic ?? '')
 const topicZh = computed(() => props.question.topicZh ?? '')
 const roleName = computed(() => props.question.role ?? '对话伙伴')
 const roleZh = computed(() => props.question.roleZh ?? '')
-/**
- * The guide's short name for the bubbles.
- *
- * The role reads like a description — "a guide at the trailhead who knows the
- * mountain well" — which is right in the brief and too long above every line.
- * The name before the first dash is the name.
- */
-const shortRole = computed(() => {
-  const role = roleName.value
-  const cut = role.split(/\s+(?:who|that|which)\s+/i)[0]
-  return cut.length >= 2 && cut.length <= 24 ? cut : '对话伙伴'
-})
 // The brief is Chinese-only now; only the Chinese scenario is printed.
 const scenarioZh = computed(() => props.question.scenarioZh ?? '')
 const targetWords = computed(() => props.question.targetWords ?? [])
@@ -94,6 +96,7 @@ async function load(): Promise<void> {
 }
 
 watch(() => props.sessionId, () => { void load() }, { immediate: true })
+watch(draft, () => { void nextTick(resizeComposerInput) })
 
 /** A wider window can fit more of the talk, so the fade may no longer belong. */
 function remeasure(): void {
@@ -184,13 +187,16 @@ function speakTurn(turn: PracticeConversationTurn): void {
     <!-- The brief is a question card like every other task: same paper, same
          header. It introduces the task in Chinese; the English lives in the
          talk itself, where it is being practised. -->
-    <header class="practice-conversation__brief practice-question-card practice-question-card--conversation">
+    <header
+      class="practice-conversation__brief practice-question-card practice-question-card--conversation"
+      :style="surface"
+    >
       <div class="practice-question-card__header">
         <div class="practice-question-step">
           <span class="status-badge">口语对话</span>
         </div>
       </div>
-      <h2 class="practice-conversation__topic">{{ topicZh || topic }}</h2>
+      <h2 id="practice-conversation-title" class="practice-conversation__topic">{{ topicZh || topic }}</h2>
       <p class="practice-conversation__role">
         <AppIcon name="coach" />
         <span class="practice-conversation__role-text">
@@ -220,7 +226,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
           v-if="index === 0 || turns[index - 1].speaker !== turn.speaker"
           class="practice-conversation__speaker"
         >
-          <span class="practice-conversation__who">{{ turn.speaker === 'guide' ? shortRole : '我' }}</span>
+          <span class="practice-conversation__who">{{ turn.speaker === 'guide' ? 'Hob' : '我' }}</span>
         </p>
         <div class="practice-conversation__row">
           <div class="practice-conversation__bubble">
@@ -239,9 +245,9 @@ function speakTurn(turn: PracticeConversationTurn): void {
         </div>
       </article>
 
-      <p v-if="waitingForGuide" class="practice-conversation__waiting">
+      <p v-if="waitingForGuide" class="practice-conversation__waiting" role="status">
         <span class="practice-conversation__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-        {{ shortRole }} 正在想下一句…
+        Hob 正在想下一句…
       </p>
     </div>
 
@@ -251,6 +257,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
       <div class="practice-conversation__row-bar">
         <div class="practice-conversation__field">
           <textarea
+            ref="composerInput"
             v-model="draft"
             class="practice-conversation__input"
             rows="1"
@@ -299,7 +306,8 @@ function speakTurn(turn: PracticeConversationTurn): void {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-height: 34rem;
+  min-height: 0;
+  width: 100%;
 }
 
 /* Two rows, top to bottom: the topic first, then the partner and the scene.
@@ -308,26 +316,26 @@ function speakTurn(turn: PracticeConversationTurn): void {
 .practice-conversation__brief {
   display: grid;
   gap: 0.3rem;
-  padding: 0;
-  border: 0;
-  background: none;
+  width: 100%;
 }
 
-/* The chat is its own sheet, like Hob's: a flat card under the question. */
+/* The chat is its own card inside the question card, like Hob's composer:
+   no second paper frame, just the host card with clear inner space. */
 .practice-conversation__chat {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   min-height: 26rem;
-  padding: 14px 16px;
-  border: 1px solid var(--ui-line, #ecd9bb);
-  border-radius: 14px;
-  background: var(--ui-surface, #fffdf6);
+  padding: 10px 0 0;
+  border: 0;
+  border-top: 1px solid var(--ui-line, #ecd9bb);
+  border-radius: 0;
+  background: transparent;
 }
 
 html[data-theme='night'] .practice-conversation__chat {
   border-color: var(--ui-line, #3d2c66);
-  background: var(--ui-surface, #241a44);
+  background: transparent;
 }
 
 .practice-conversation__headline {
@@ -538,7 +546,7 @@ html[data-theme='night'] .practice-conversation__chat {
   display: flex;
   gap: 10px;
   align-items: flex-end;
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--ui-line, #ecd9bb);
   transition: border-color 200ms ease;
 }
@@ -547,22 +555,20 @@ html[data-theme='night'] .practice-conversation__chat {
   border-top-color: var(--g-orange, #ff9600);
 }
 
+/* The answer trough is the same control-field art the settings pages use. */
 .practice-conversation__field {
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
-  padding: 6px 14px;
-  border: 1px solid var(--ui-line, #ecd9bb);
-  border-radius: 11px;
-  background: var(--ui-surface, #fffdf6);
+  padding: 4px 12px;
+  border: 6px solid transparent;
+  border-image: url('../assets/halloween/card/control-field-day.webp') 18% 5% fill stretch;
+  background: none;
   box-shadow: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: filter 160ms ease;
 }
 
-.practice-conversation__field:focus-within {
-  border-color: var(--g-orange-edge, #cf7400);
-  box-shadow: 0 0 0 3px rgb(255 150 0 / 14%);
-}
+.practice-conversation__field:focus-within { filter: brightness(1.03); }
 
 .practice-conversation__input {
   flex: 1 1 auto;
@@ -570,8 +576,8 @@ html[data-theme='night'] .practice-conversation__chat {
   width: 100%;
   max-width: none;
   min-height: 24px;
-  max-height: 196px;
-  padding: 1px 0;
+  max-height: 96px;
+  padding: 0;
   border: 0;
   background: none;
   outline: none;
@@ -580,7 +586,7 @@ html[data-theme='night'] .practice-conversation__chat {
   font-size: 1rem;
   line-height: 24px;
   resize: none;
-  overflow-y: auto;
+  overflow-y: hidden;
   field-sizing: content;
 }
 

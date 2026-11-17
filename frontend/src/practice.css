@@ -379,6 +379,16 @@
   line-height: 1.6;
 }
 
+/* The answer sheet is drawn art (answer-sheet-{day,night}.webp in controls.css);
+ * a dark inherited panel background must not sit behind its transparent fill. */
+.member-practice-session-page .practice-question-card .practice-answer-textarea,
+.member-practice-page .practice-question-card .practice-answer-textarea {
+  background: none !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 .practice-requirements,
 .dimension-list,
 .result-list {
