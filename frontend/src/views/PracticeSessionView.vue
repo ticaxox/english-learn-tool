@@ -17,8 +17,6 @@ import { loadWordGlossary } from '../composables/useWordGlossary'
 import { useToast } from '../composables/useToast'
 import { isApiError } from '../api/errors'
 import {
-  PRACTICE_SOURCE_LABELS,
-  PRACTICE_STATUS_LABELS,
   PRACTICE_TYPE_LABELS,
   type PracticeAnswerInput,
 } from '../api/practice'
@@ -26,7 +24,6 @@ import PracticeTopBar from '../components/PracticeTopBar.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
 import LevelUpOverlay from '../components/LevelUpOverlay.vue'
 import { fetchProgress } from '../api/progress'
-import { sparkBurst, popIn } from '../composables/useMotion'
 import '../practice.css'
 
 const props = withDefaults(defineProps<{ sessionId?: string; embedded?: boolean }>(), { embedded: false })
@@ -142,11 +139,9 @@ function answerPayload(): PracticeAnswerInput[] {
   }))
 }
 
-const award = ref<{ xp: number; crumbs: number; from: number; to: number } | null>(null)
 const levelUp = ref<{ level: number; title: string } | null>(null)
 
 async function submit(): Promise<void> {
-  award.value = null
   formError.value = null
   if (!allAnswered.value) {
     formError.value = `还有 ${questions.value.length - answeredCount.value} 题未作答。请完成全部题目后提交。`
@@ -163,26 +158,11 @@ async function submit(): Promise<void> {
   if (response) {
     pendingSubmitKey = null
     pendingSubmitSignature = ''
-    // The server owns the numbers; diff two reads to show what this set earned.
+    // The server owns the numbers; only a level change still needs saying aloud.
     const after = await fetchProgress().catch(() => null)
-    if (before && after) {
-      const xp = after.xp - before.xp
-      const crumbs = after.crumbs - before.crumbs
-      if (xp > 0 || crumbs > 0 || after.level.level > before.level.level) {
-        award.value = {
-          xp,
-          crumbs,
-          from: before.level.level,
-          to: after.level.level,
-        }
-        // Let the result render, then pop the line and throw a crumb burst.
-        await nextTick()
-        popIn(document.querySelector('.practice-award'), { y: 10, scale: 0.94 })
-        if (xp > 0) sparkBurst(document.querySelector('.practice-award'))
-        if (after.level.level > before.level.level) {
-          levelUp.value = { level: after.level.level, title: after.level.title }
-        }
-      }
+    if (before && after && after.level.level > before.level.level) {
+      await nextTick()
+      levelUp.value = { level: after.level.level, title: after.level.title }
     }
   }
 }
@@ -236,9 +216,6 @@ void practice.load()
       <div>
         <p class="eyebrow">AI 练习</p>
         <h1>{{ session ? `${PRACTICE_TYPE_LABELS[session.practiceType]}练习` : '练习会话' }}</h1>
-        <p v-if="session" class="lead">
-          {{ PRACTICE_SOURCE_LABELS[session.source] }} · {{ session.questionCount }} 题 · {{ PRACTICE_STATUS_LABELS[session.status] }}
-        </p>
       </div>
     </header>
 
@@ -282,12 +259,6 @@ void practice.load()
           :title="levelUp.title"
           @close="levelUp = null"
         />
-        <p v-if="award" class="practice-award" :class="{ 'is-levelup': award.to > award.from }" role="status">
-          <span v-if="award.to > award.from" class="practice-award__levelup">
-            升级到 Lv.{{ award.to }}！
-          </span>
-          <span>+{{ award.xp }} XP · +{{ award.crumbs }} 灯油</span>
-        </p>
         <PracticeResultView :result="result" :questions="questions" />
       </template>
 

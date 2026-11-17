@@ -72,8 +72,6 @@ const correctPercent = computed(() => {
 
     <div class="practice-result__layout">
     <aside class="practice-result__aside">
-    <ArtImage class="practice-result__art" :set="illustration.celebrate" />
-
     <section class="panel practice-result__card">
       <h2 id="practice-result-title" class="visually-hidden">本次练习得分</h2>
       <div class="practice-result__scoreline">
@@ -88,6 +86,8 @@ const correctPercent = computed(() => {
         <span class="practice-result__bar-fill" :style="{ width: `${correctPercent}%` }"></span>
       </div>
     </section>
+
+    <ArtImage class="practice-result__art" :set="illustration.celebrate" />
     </aside>
 
     <div class="practice-result__answers">

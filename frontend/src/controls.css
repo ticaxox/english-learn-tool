@@ -2493,11 +2493,13 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 .personal-workspace .practice-session-side {
   display: grid;
   gap: 14px;
-  padding: 22px 20px;
-  border: 2px solid #ecd9bb;
-  border-radius: 18px;
-  background: #fffdf6;
-  box-shadow: 0 2px 0 rgb(59 42 26 / 5%);
+  padding: 12px 14px;
+  /* 设置页那块板：同一张 panel-board，同样的九宫格与内距。 */
+  border: 20px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .personal-workspace .practice-rail-head {
@@ -2540,8 +2542,9 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 }
 
 html[data-theme='night'] .personal-workspace .practice-session-side {
-  border-color: #3a3160;
-  background: #221b3a;
+  border-color: transparent;
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
+  background: none;
   box-shadow: none;
 }
 
@@ -5210,7 +5213,21 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .personal-workspace .personal-knowledge__list li:last-child { border-bottom: 0; }
 .personal-workspace .personal-knowledge__list small { color: var(--ui-muted); font-size: 0.74rem; }
-.practice-result__art { display: block; width: 88px; height: auto; margin: 0 auto 10px; object-fit: contain; }
+/* 得分卡在上、插画在下，两者同宽：插画是这一页的收尾，不是标题旁的小图标。 */
+.practice-result__art { display: block; width: 100%; height: auto; margin: 10px 0 0; object-fit: contain; }
+
+/* 结果里的题卡也用设置页那块板，和作答时是同一件东西的两种状态。 */
+.personal-workspace .result-question {
+  border: 20px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-theme='night'] .personal-workspace .result-question {
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
+}
 .practice-type-pill__art { width: 20px; height: 20px; object-fit: contain; display: block; }
 
 /* While a question is on screen the card must sit on the page, not inside a
@@ -5334,14 +5351,15 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
   border-color: #b0742a !important;
 }
 
-.member-practice-session-page .practice-question-card .practice-option:has(input:checked),
-.member-practice-page .practice-question-card .practice-option:has(input:checked) {
+.member-practice-session-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
+.member-practice-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) {
   border-color: #b0742a !important;
   box-shadow: inset 0 0 0 3px #f6eed9, inset 0 0 0 4px #d9b877 !important;
 }
 
 .member-practice-session-page .practice-question-card .practice-option--correct,
 .member-practice-page .practice-question-card .practice-option--correct {
+  border-width: 2px !important;
   border-color: #5d8f52 !important;
   background: #e9f1d9 !important;
   box-shadow: inset 0 0 0 3px #e9f1d9, inset 0 0 0 4px #b7cfa2 !important;
@@ -5349,6 +5367,7 @@ html[data-theme='night'] .personal-workspace .emblem--seal:not(.is-earned) .embl
 
 .member-practice-session-page .practice-question-card .practice-option--wrong,
 .member-practice-page .practice-question-card .practice-option--wrong {
+  border-width: 2px !important;
   border-color: #a95244 !important;
   background: #f7ded6 !important;
   box-shadow: inset 0 0 0 3px #f7ded6, inset 0 0 0 4px #dcae9f !important;
@@ -5382,14 +5401,21 @@ html[data-theme='night'] .member-practice-page .practice-question-card .practice
   box-shadow: inset 0 0 0 3px #241d3a, inset 0 0 0 4px #50457a !important;
 }
 
-html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option:has(input:checked),
-html[data-theme='night'] .member-practice-page .practice-question-card .practice-option:has(input:checked) {
-  border-color: #c0acee !important;
-  box-shadow: inset 0 0 0 3px #241d3a, inset 0 0 0 4px #c0acee !important;
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) {
+  /* 夜里的同一盏灯：底色透出琥珀，内壁一圈暖光，外面一层薄晕。 */
+  background: #3d2d1c !important;
+  border-width: 2px !important;
+  border-color: #f0c274 !important;
+  box-shadow:
+    inset 0 0 0 3px #3d2d1c,
+    inset 0 0 22px rgb(255 196 96 / 35%),
+    0 0 0 3px rgb(255 196 96 / 18%) !important;
 }
 
 html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--correct,
 html[data-theme='night'] .member-practice-page .practice-question-card .practice-option--correct {
+  border-width: 2px !important;
   border-color: #6faf62 !important;
   background: #1f3a24 !important;
   box-shadow: inset 0 0 0 3px #1f3a24, inset 0 0 0 4px #3d5a36 !important;
@@ -5397,6 +5423,7 @@ html[data-theme='night'] .member-practice-page .practice-question-card .practice
 
 html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-option--wrong,
 html[data-theme='night'] .member-practice-page .practice-question-card .practice-option--wrong {
+  border-width: 2px !important;
   border-color: #c4746a !important;
   background: #3a1f1e !important;
   box-shadow: inset 0 0 0 3px #3a1f1e, inset 0 0 0 4px #5d3733 !important;
@@ -5539,14 +5566,20 @@ html[data-theme='night'] .personal-workspace .practice-question-card--translatio
   border-color: rgb(122 92 48 / 70%);
 }
 
-.member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked),
-.member-practice-session-page .practice-question-card--fill_blank .practice-option:has(input:checked),
-.member-practice-page .practice-question-card--reading .practice-option:has(input:checked),
-.member-practice-page .practice-question-card--fill_blank .practice-option:has(input:checked) {
-  background: rgb(255 150 0 / 14%);
-  border-width: 2px;
-  border-color: #ff9600;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 60%);
+html[data-theme='day'] .member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
+html[data-theme='day'] .member-practice-session-page .practice-question-card--fill_blank .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
+html[data-theme='day'] .member-practice-page .practice-question-card--reading .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked),
+html[data-theme='day'] .member-practice-page .practice-question-card--fill_blank .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) {
+  /* 选中是把这一格点亮：底色换成琥珀、内壁透出一圈灯芯的光、外面托一层暖晕，
+   * 而不只是把边框从灰换成橙。 */
+  background: #ffe2ad !important;
+  border-width: 2px !important;
+  border-color: #d98514 !important;
+  box-shadow:
+    inset 0 0 0 1px #fff8e8,
+    inset 0 0 22px rgb(255 168 40 / 50%),
+    0 0 0 3px rgb(255 168 40 / 20%),
+    0 6px 16px rgb(190 118 16 / 22%) !important;
 }
 
 /* The letter is stamped in ink, so the row has a strong fixed anchor. */
@@ -5562,13 +5595,14 @@ html[data-theme='night'] .personal-workspace .practice-question-card--translatio
   --badge-ink: #f6e7c8;
 }
 
-.member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked) .option-badge,
-.member-practice-session-page .practice-question-card--fill_blank .practice-option:has(input:checked) .option-badge,
-.member-practice-page .practice-question-card--reading .practice-option:has(input:checked) .option-badge,
-.member-practice-page .practice-question-card--fill_blank .practice-option:has(input:checked) .option-badge {
+html[data-theme='day'] .member-practice-session-page .practice-question-card--reading .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) .option-badge,
+html[data-theme='day'] .member-practice-session-page .practice-question-card--fill_blank .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) .option-badge,
+html[data-theme='day'] .member-practice-page .practice-question-card--reading .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) .option-badge,
+html[data-theme='day'] .member-practice-page .practice-question-card--fill_blank .practice-option:has(input:checked):not(.practice-option--correct):not(.practice-option--wrong):not(.practice-option--picked) .option-badge {
   background: #ff9600;
   border-color: #b35f00;
   color: #35240f;
+  box-shadow: 0 0 0 3px rgb(255 168 40 / 30%);
 }
 
 /* The translation answer is where you write, so it is a torn sheet laid on the
