@@ -547,9 +547,9 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   gap: 8px;
   margin: 0 12px 2px;
   padding: 11px 11px 12px;
-  /* No frame and no plate: both the border and the panel's fill drew an edge
-   * right under Hob, which read as a stray line. */
-  border: 0;
+  /* The plate is framed again — it just keeps its own fill off, so the frame
+   * is a card edge rather than a colour change under Hob. */
+  border: 1px solid var(--rail-line);
   background: none;
 }
 

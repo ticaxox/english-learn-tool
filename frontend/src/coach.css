@@ -765,6 +765,14 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   box-shadow: none;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
+/* One line of writing, whatever the trough's border adds around it. */
+.coach-page.coach-page .coach-composer__field textarea {
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+  line-height: 24px;
+}
+
 .coach-page.coach-page .coach-composer__field:focus-within {
   border-color: var(--coach-accent-ink);
   box-shadow: 0 0 0 3px var(--coach-accent-wash);
@@ -1110,4 +1118,59 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
   .coach-page.coach-page .coach-main-topbar { padding-inline: 12px; }
   .coach-page.coach-page .coach-messages { padding: 56px 14px 4px; }
   .coach-page.coach-page .coach-composer { padding-inline: 12px; }
+}
+
+
+/* ---------------------------------------------------------------------------
+ * The coach page wears the same carved controls as the settings pages: the
+ * composer is a trough, the two real buttons are the same plate.
+ * ------------------------------------------------------------------------- */
+.coach-page.coach-page .coach-composer__field {
+  align-items: center;
+  padding: 4px 12px;
+  border-width: 6px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-field-day.webp') 18% 5% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* One line of writing, whatever the trough's border adds around it. */
+.coach-page.coach-page .coach-composer__field textarea {
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+  line-height: 24px;
+}
+
+.coach-page.coach-page .coach-composer__field:focus-within {
+  border-color: transparent;
+  box-shadow: none;
+  filter: brightness(1.03);
+}
+
+.coach-page.coach-page .coach-history__new,
+.coach-page.coach-page .coach-mobile-new,
+.coach-page.coach-page .coach-composer__send {
+  border-width: 8px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('./assets/halloween/card/control-badge-day.webp') 30% 17% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #33200b;
+}
+
+html[data-theme='night'] .coach-page.coach-page .coach-composer__field {
+  border-image-source: url('./assets/halloween/card/control-field-night.webp');
+}
+
+html[data-theme='night'] .coach-page.coach-page .coach-history__new,
+html[data-theme='night'] .coach-page.coach-page .coach-mobile-new,
+html[data-theme='night'] .coach-page.coach-page .coach-composer__send {
+  border-image-source: url('./assets/halloween/card/control-badge-night.webp');
+  color: #efe6ff;
 }

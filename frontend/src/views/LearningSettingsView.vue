@@ -266,18 +266,22 @@ onMounted(() => {
 
       <form class="panel settings-form" novalidate @submit.prevent="save">
         <fieldset>
-          <legend>学习目标</legend>
+          <!-- The target sits in the heading itself: no second label needed. -->
+          <legend class="settings-goal-legend">
+            <span>学习目标</span>
+            <select
+              id="exam-target"
+              v-model="form.examTarget"
+              class="settings-goal-select"
+              aria-label="学习目标"
+            >
+              <option v-for="target in EXAM_TARGETS" :key="target" :value="target">
+                {{ EXAM_TARGET_LABELS[target] }}
+              </option>
+            </select>
+          </legend>
           <p class="field-hint">目标决定 AI 往哪个方向出题：选了四级，阅读和翻译就按四级的路子写。</p>
-          <div class="settings-goal-grid">
-            <div class="field">
-              <label for="exam-target">目标考试</label>
-              <select id="exam-target" v-model="form.examTarget">
-                <option v-for="target in EXAM_TARGETS" :key="target" :value="target">
-                  {{ EXAM_TARGET_LABELS[target] }}
-                </option>
-              </select>
-            </div>
-
+          <div class="settings-daily-grid">
             <div class="field">
               <label for="daily-new-words">每日新词量</label>
               <CrumbNumber
