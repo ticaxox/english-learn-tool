@@ -74,6 +74,26 @@ class AiGenerationError(Exception):
         return self.message
 
 
+# Language of the feedback is a product decision, not an admin setting: an
+# operator editing the prompt must not be able to leave a Chinese learner with
+# English-only feedback. Appending it here also covers prompts already seeded
+# in the database, which do not re-read the defaults.
+_PROMPT_SUFFIXES: dict[str, str] = {
+    "subjective_grading": (
+        " Write explanation, errors and suggestions in Simplified Chinese. "
+        "Write reference_content in English. "
+        "If the learner answer is empty, score it 0 and say the question was left unanswered."
+    ),
+}
+
+
+def _prompt_text(task_type: str, template: str) -> str:
+    suffix = _PROMPT_SUFFIXES.get(task_type)
+    if not suffix or "reference_content in English" in template:
+        return template
+    return template + suffix
+
+
 def _canonical_request(task_type: str, context: dict[str, Any]) -> tuple[str, str]:
     encoded = json.dumps(
         {"task_type": task_type, "context": context},
@@ -369,7 +389,7 @@ async def create_ai_job(
         provider_name=providers[0].name,
         model_id=providers[0].model_id,
         prompt_key=task_type,
-        prompt_snapshot=prompt.template,
+        prompt_snapshot=_prompt_text(task_type, prompt.template),
         input_context=context,
         idempotency_key=idempotency_key,
         request_hash=request_hash,

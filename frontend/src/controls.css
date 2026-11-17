@@ -2863,7 +2863,9 @@ than its row reads as a different kind of thing. */
   pointer-events: none;
 }
 
-/* Path states: walked = solid gold; ahead = crumb dots; next leg = green dots. */
+/* Path states: walked = solid green from the first stop up to the one you are
+ * standing on; the leg you are about to take = gold crumbs; the rest = pale
+ * crumbs. Green behind you, gold ahead — never the other way round. */
 .challenge-dsl-links path {
   fill: none;
   stroke: #d9cbb3;
@@ -2872,8 +2874,8 @@ than its row reads as a different kind of thing. */
   stroke-dasharray: 1 15;
 }
 
-.challenge-dsl-links path.is-done { stroke: #e8b53e; stroke-dasharray: none; }
-.challenge-dsl-links path.is-next { stroke: #7fbf7f; stroke-dasharray: 1 12; }
+.challenge-dsl-links path.is-done { stroke: #5aa564; stroke-dasharray: none; }
+.challenge-dsl-links path.is-next { stroke: #e8b53e; stroke-dasharray: 1 12; }
 .challenge-dsl-links path.is-branch { stroke-width: 4; stroke-dasharray: 2 12; opacity: 0.9; }
 
 .personal-workspace .challenge-dsl-card {
@@ -5385,9 +5387,11 @@ html[data-theme='night'] .personal-workspace .result-question {
 .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
 .member-practice-session-page .practice-question-card.practice-question-card--reading,
 .member-practice-session-page .practice-question-card.practice-question-card--translation,
+.member-practice-session-page .practice-question-card.practice-question-card--writing,
 .member-practice-page .practice-question-card.practice-question-card--fill_blank,
 .member-practice-page .practice-question-card.practice-question-card--reading,
-.member-practice-page .practice-question-card.practice-question-card--translation {
+.member-practice-page .practice-question-card.practice-question-card--translation,
+.member-practice-page .practice-question-card.practice-question-card--writing {
   width: min(100%, 860px);
   margin-inline: auto;
   /* The same cut-paper card the memory drills sit on, not the scroll: one
@@ -5404,6 +5408,17 @@ html[data-theme='night'] .personal-workspace .result-question {
   border-color: transparent;
   border-radius: 0;
   padding: 4px 26px 6px;
+}
+
+/* In the live session the card fills its column: the passage above it is a row
+ * of the same grid, and its left edge has to land on the card's left edge, not
+ * on a centred 860px card inside an 880px column. */
+.member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
+.member-practice-session-page .practice-question-card.practice-question-card--reading,
+.member-practice-session-page .practice-question-card.practice-question-card--translation,
+.member-practice-session-page .practice-question-card.practice-question-card--writing {
+  width: 100%;
+  margin-inline: 0;
 }
 
 /* The reading passage gets its own sheet, same stock, laid out wide.
@@ -5498,6 +5513,30 @@ html[data-theme='night'] .member-practice-page .practice-article-panel {
   border-color: #a95244 !important;
   background: #f7ded6 !important;
   box-shadow: inset 0 0 0 3px #f7ded6, inset 0 0 0 4px #dcae9f !important;
+}
+
+/* The answer box is its own sheet inside the question sheet: the writing panel
+ * drawn for this card, so translation and writing write on the same paper. */
+.member-practice-session-page .practice-question-card .practice-answer-textarea,
+.member-practice-page .practice-question-card .practice-answer-textarea {
+  width: 100%;
+  max-width: none;
+  min-height: 104px;
+  padding: 8px 16px 10px;
+  border: 22px solid transparent;
+  border-image: url('./assets/halloween/card/answer-sheet-day.webp') 15% 8% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #35240f;
+  line-height: 1.75;
+  resize: vertical;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-answer-textarea,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-answer-textarea {
+  border-image-source: url('./assets/halloween/card/answer-sheet-night.webp');
+  color: #efe6f7;
 }
 
 /* The letter is cut into the plate, not set in a stone token. */
@@ -7245,8 +7284,12 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   color: var(--ui-ink);
 }
 
-.personal-workspace .settings-form .settings-toggle.is-active {
+/* On means the lit chip, wherever the toggle is: the settings form and the
+ * drill-config dialog's floating window use the same highlight, so pressing a
+ * button never turns into a green glow ring. */
+.personal-workspace .settings-toggle.is-active {
   border-width: 8px 12px;
+  border-color: transparent;
   border-image: url('./assets/halloween/card/control-option-on-day.webp') 30% 8% fill stretch;
   background: none;
   box-shadow: none;
@@ -7810,7 +7853,7 @@ html[data-theme='night'] .personal-workspace .ia-account-security .crumb-stepper
 }
 
 /* 选中的选项芯片：夜间换 another 张图（白天是琥珀牌，夜里是亮紫牌）。 */
-html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
+html[data-theme='night'] .personal-workspace .settings-toggle.is-active {
   border-image-source: url('./assets/halloween/card/control-option-on-night.webp') !important;
   color: #efe6ff !important;
   text-shadow: 0 1px 2px rgb(11 7 20 / 55%);

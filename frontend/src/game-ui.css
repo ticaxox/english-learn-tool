@@ -3686,14 +3686,33 @@ html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
 .personal-workspace.is-immersive .workspace-content { width: min(100%, 1320px); }
 
 .personal-workspace .member-practice-session-page .member-practice-session-layout {
-  grid-template-columns: minmax(0, 1fr) 280px;
+  /* One fixed measure for the questions and one for the rail, centred as a
+   * pair: the passage above them is a row of this same grid, so its edges land
+   * on the question card's left and the timer card's right. */
+  grid-template-columns: minmax(0, 960px) 280px;
+  justify-content: center;
   gap: 14px;
   align-items: start;
 }
 
+/* The passage is a full-width row of that grid, not a panel of its own. */
+.personal-workspace .member-practice-session-page .member-practice-session-layout > .practice-article-panel--wide {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.personal-workspace .member-practice-session-page .member-practice-workbench {
+  width: 100%;
+  margin: 0;
+}
+
 .personal-workspace .member-practice-session-page .member-practice-session-aside {
   position: sticky;
-  top: 20px;
+  /* Below the sticky top bar, not under it: the rail used to slide up behind
+   * the header and lose its top edge. */
+  top: 82px;
   display: grid;
   gap: 10px;
 }

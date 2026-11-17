@@ -553,12 +553,11 @@ html[data-theme='night'] .levelup-card {
 .personal-workspace .rail-plate {
   display: grid;
   gap: 8px;
-  margin: 0 12px 2px;
+  /* A clear gap under Hob, then the plate closes on all four sides: the level
+   * card is a framed plate, not a three-sided bracket. */
+  margin: 10px 12px 2px;
   padding: 11px 11px 12px;
-  /* Framed on three sides only: the top edge read as a stray line across
-   * Hob's feet. */
   border: 1px solid var(--rail-line);
-  border-top: 0;
   background: none;
 }
 

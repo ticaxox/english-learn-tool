@@ -109,10 +109,10 @@ function optionClass(option: PracticeOption): Record<string, boolean> {
       <p v-if="question.roleZh" class="practice-translation-note">{{ question.roleZh }}</p>
     </div>
 
+    <!-- Writing asks the same way translation does: the task on the sheet, the
+         requirements under it, then one writing box. -->
     <div v-else class="practice-writing">
-      <p class="practice-prompt-note">题目</p>
       <SpokenText v-if="question.prompt" class="practice-prompt-text" :text="question.prompt" :highlight="question.targetWords" emphasis="bold" />
-      <p v-if="question.requirements.length" class="practice-prompt-note">要求</p>
       <div role="list" v-if="question.requirements.length" class="practice-requirements">
         <div role="listitem" v-for="requirement in question.requirements" :key="requirement">{{ requirement }}</div>
       </div>
