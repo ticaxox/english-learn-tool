@@ -5,6 +5,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 const props = defineProps<{ embedded?: boolean }>()
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import ArtImage from '../components/ArtImage.vue'
+import { illustration } from '../assets/halloween'
 import CrumbIcon from '../components/ui/CrumbIcon.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -328,10 +330,14 @@ onMounted(() => {
 <template>
   <article class="challenge-page challenge-game-stage crumb-challenge workspace-page" :class="{ 'is-embedded': embedded }">
     <header v-if="!embedded" class="workspace-page-header challenge-page-header">
-      <div>
-        <p class="eyebrow">今日学习 · 学习地图</p>
-        <h1>{{ plan?.title || '今天的学习地图' }}</h1>
-        <p class="lead">按顺序完成，最后挑战终点。</p>
+      <div class="challenge-page__title">
+        <div>
+          <p class="eyebrow">今日学习 · 学习地图</p>
+          <h1>{{ plan?.title || '今天的学习地图' }}</h1>
+          <p class="lead">按顺序完成，最后挑战终点。</p>
+        </div>
+        <!-- Hob is chewing on its own stem while the trail waits. -->
+        <ArtImage class="challenge-page__mascot" :set="illustration.gnaw" />
       </div>
       <div class="workspace-header-actions challenge-page-actions">
         <RouterLink class="button-secondary" to="/overview">返回今日学习</RouterLink>
