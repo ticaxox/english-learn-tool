@@ -4490,6 +4490,9 @@ html[data-theme='night'] .personal-workspace {
   --state-relearning: #ff9e7a;
 }
 
+/* 学习足迹与词的状态并排，两张卡一样高：以高的那张为准，另一张跟着拉伸。 */
+.personal-workspace .today-insights { align-items: stretch; }
+
 .personal-workspace .trail-month__day {
   display: grid;
   place-items: center;

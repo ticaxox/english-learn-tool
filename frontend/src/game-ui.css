@@ -4454,7 +4454,16 @@ html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
   gap: 14px 20px;
   align-items: start;
 }
-.personal-workspace .practice-result__aside { display: grid; grid-column: 2; grid-row: 1; gap: 14px; align-content: start; }
+.personal-workspace .practice-result__aside {
+  display: grid;
+  grid-column: 2;
+  grid-row: 1;
+  gap: 14px;
+  align-content: start;
+  /* The questions scroll past; the score and Hob stay put. */
+  position: sticky;
+  top: 18px;
+}
 .personal-workspace .practice-result__hero { flex-direction: column; align-items: flex-start; gap: 8px; }
 .personal-workspace .practice-result__score { white-space: nowrap; }
 .personal-workspace .practice-result__aside .practice-result__summary { grid-template-columns: minmax(0, 1fr); }

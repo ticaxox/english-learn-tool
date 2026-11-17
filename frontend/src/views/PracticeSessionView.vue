@@ -16,10 +16,7 @@ import { usePracticeSession } from '../composables/usePracticeSession'
 import { loadWordGlossary } from '../composables/useWordGlossary'
 import { useToast } from '../composables/useToast'
 import { isApiError } from '../api/errors'
-import {
-  PRACTICE_TYPE_LABELS,
-  type PracticeAnswerInput,
-} from '../api/practice'
+import { type PracticeAnswerInput } from '../api/practice'
 import PracticeTopBar from '../components/PracticeTopBar.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
 import LevelUpOverlay from '../components/LevelUpOverlay.vue'
@@ -205,16 +202,6 @@ void practice.load()
 <template>
   <article class="practice-page practice-session-page member-practice-session-page" :class="{ 'is-embedded': embedded }">
     <PracticeTopBar v-if="!embedded" mode="practice" :active="session?.practiceType ?? null" />
-
-    <header
-      class="practice-session-header practice-stage-header"
-      :class="{ 'is-ghost': session?.status === 'generating' }"
-    >
-      <div>
-        <p class="eyebrow">AI 练习</p>
-        <h1>{{ session ? `${PRACTICE_TYPE_LABELS[session.practiceType]}练习` : '练习会话' }}</h1>
-      </div>
-    </header>
 
     <LoadingState v-if="practice.loading.value" label="正在读取练习会话…" />
     <section v-else-if="practice.error.value" class="panel">

@@ -107,14 +107,12 @@ async function retryConnection(): Promise<void> {
     </aside>
 
     <section class="auth-card" aria-labelledby="login-title">
-      <div class="auth-card__masthead auth-card__masthead--seal-only">
+      <div class="auth-card__masthead">
         <span class="auth-card__seal">GRIMOIRE</span>
+        <h1 id="login-title" class="auth-card__title">
+          {{ mode === 'login' ? '登录学习空间' : '创建学习账号' }}
+        </h1>
       </div>
-      <p class="eyebrow">个人英语学习空间</p>
-      <h1 id="login-title">{{ mode === 'login' ? '登录学习空间' : '创建学习账号' }}</h1>
-      <p class="lead">
-        {{ mode === 'login' ? '使用你的账号继续学习。' : '用户名唯一，密码至少 12 位且包含三类字符。' }}
-      </p>
 
       <div v-if="route.query.reason === 'session-expired'" class="alert alert-warning" role="status">
         登录状态已失效，请重新登录。
@@ -149,7 +147,6 @@ async function retryConnection(): Promise<void> {
             required
             :disabled="submitting"
           />
-          <p class="field-hint">3–32 位英文字母、数字或下划线。</p>
         </div>
 
         <div class="field">

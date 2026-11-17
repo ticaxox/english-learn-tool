@@ -472,11 +472,17 @@ pre {
   grid-area: 1 / 1;
 }
 
-.auth-card__masthead--seal-only { justify-content: flex-start; }
+.auth-card__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.1;
+}
 
 /* The door wears the same controls as the rooms behind it: carved fields and
  * a plate for the one action. */
 .auth-page .field input:not([type='checkbox']):not([type='radio']) {
+  width: 100%;
+  max-width: none;
   border-width: 6px 10px;
   border-style: solid;
   border-color: transparent;
@@ -499,6 +505,8 @@ pre {
 }
 
 html[data-theme='night'] .auth-page .field input:not([type='checkbox']):not([type='radio']) {
+  width: 100%;
+  max-width: none;
   border-image-source: url('./assets/halloween/card/control-field-night.webp');
 }
 
@@ -546,9 +554,9 @@ html[data-theme='night'] .auth-page .form-stack [type='submit'] {
 
 .auth-card__masthead {
   display: flex;
-  gap: 1rem;
+  gap: 14px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 1.35rem;
   padding-bottom: 1rem;
   border-bottom: 1px dashed var(--cookie-300);
