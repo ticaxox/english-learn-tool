@@ -664,7 +664,15 @@ html[data-theme='night'] .personal-workspace input[type="time"]::-webkit-calenda
 }
 
 /* Settings is one card: sections are flat, separated by hairlines. */
-.personal-workspace .settings-form { padding: 22px; }
+.personal-workspace .settings-form {
+  /* Every two-column row in this form reads as one grid: the first column is
+   * this wide, the second starts after the same 40px gap, so the daily numbers
+   * sit directly above the challenge options instead of drifting left. */
+  --settings-lead: 294px;
+  --settings-lead-gap: 40px;
+  grid-template-columns: minmax(0, 1fr) !important;
+  padding: 22px;
+}
 
 .personal-workspace .settings-form fieldset {
   padding: 0;
@@ -1876,15 +1884,22 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 }
 
 .personal-workspace .settings-form .settings-daily-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 12px 40px;
+  display: grid;
+  grid-template-columns: var(--settings-lead) minmax(0, 1fr);
+  gap: 12px var(--settings-lead-gap);
   align-items: center;
 }
 
 .personal-workspace .settings-form .settings-daily-grid > .field {
-  flex: 0 0 auto;
+  min-width: 0;
   width: auto;
+}
+
+/* The second daily number stands in the same column as the second choice
+ * block below, rule and all. */
+.personal-workspace .settings-form .settings-daily-grid > .field + .field {
+  padding-left: var(--settings-lead-gap);
+  border-left: 1px solid var(--ui-line);
 }
 
 /* The little "≈ 5 天" chip is the same height as the stepper it sits beside. */
@@ -1899,6 +1914,12 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 @media (max-width: 760px) {
   .personal-workspace .settings-form .settings-goal-legend { flex-wrap: wrap; }
   .personal-workspace .settings-form .settings-daily-grid { grid-template-columns: minmax(0, 1fr); }
+  .personal-workspace .settings-form .settings-daily-grid > .field + .field,
+  .personal-workspace .settings-form .settings-pair > .field--inline + .field--inline {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .personal-workspace .settings-pair { grid-template-columns: minmax(0, 1fr); }
 }
 
 .personal-workspace .settings-form fieldset.settings-goal-grid {
@@ -1982,10 +2003,19 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
   .personal-workspace .practice-hub-layout { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* 题目列表 wears the same board as the records list: one card, not a shelf. */
 .personal-workspace .practice-tasks-card {
   display: grid;
   gap: 10px;
-  padding: 16px;
+  padding: 14px 18px 10px;
+  border: 20px solid transparent;
+  border-image: url('./assets/halloween/card/panel-board-day.webp') 14% 14% 15% fill round;
+  border-radius: 0;
+  background: none;
+}
+
+html[data-theme='night'] .personal-workspace .practice-tasks-card {
+  border-image-source: url('./assets/halloween/card/panel-board-night.webp');
 }
 
 .practice-tasks-head {
@@ -2678,9 +2708,14 @@ than its row reads as a different kind of thing. */
 }
 
 .personal-workspace .settings-pair {
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  gap: 16px 36px;
+  grid-template-columns: var(--settings-lead) minmax(0, 1fr);
+  gap: 16px var(--settings-lead-gap);
   margin-top: 18px;
+}
+
+.personal-workspace .settings-pair > .field--inline + .field--inline {
+  padding-left: var(--settings-lead-gap);
+  border-left: 1px solid var(--ui-line);
 }
 
 .personal-workspace .settings-pair > .field--inline { gap: 12px; }
@@ -2837,7 +2872,9 @@ than its row reads as a different kind of thing. */
   pointer-events: none;
 }
 
-/* Path states: walked = solid gold; ahead = crumb dots; next leg = green dots. */
+/* Path states: walked = solid green from the first stop up to the one you are
+ * standing on; the leg you are about to take = gold crumbs; the rest = pale
+ * crumbs. Green behind you, gold ahead — never the other way round. */
 .challenge-dsl-links path {
   fill: none;
   stroke: #d9cbb3;
@@ -2846,8 +2883,8 @@ than its row reads as a different kind of thing. */
   stroke-dasharray: 1 15;
 }
 
-.challenge-dsl-links path.is-done { stroke: #e8b53e; stroke-dasharray: none; }
-.challenge-dsl-links path.is-next { stroke: #7fbf7f; stroke-dasharray: 1 12; }
+.challenge-dsl-links path.is-done { stroke: #5aa564; stroke-dasharray: none; }
+.challenge-dsl-links path.is-next { stroke: #e8b53e; stroke-dasharray: 1 12; }
 .challenge-dsl-links path.is-branch { stroke-width: 4; stroke-dasharray: 2 12; opacity: 0.9; }
 
 .personal-workspace .challenge-dsl-card {
@@ -4519,6 +4556,14 @@ html[data-theme='night'] .personal-workspace {
   font-variant-numeric: tabular-nums;
 }
 
+/* Days still to come are blank parchment by day and unlit slots by night: the
+ * same square, but the night one is the room after dark, not cream paper. */
+html[data-theme='night'] .personal-workspace .trail-month__day {
+  background: #241a44;
+  color: #7d6fa6;
+  box-shadow: inset 0 0 0 1px #33265a;
+}
+
 .personal-workspace .trail-month__day.is-past {
   background: var(--insight-quiet);
   color: var(--insight-quiet-ink);
@@ -4661,8 +4706,9 @@ html[data-theme='night'] .personal-workspace .trail-month__day.is-lit { color: #
   background: var(--ui-surface);
 }
 
-/* The unlocked count rides at the far end of the rail, not under the title. */
-.personal-workspace .badge-wall__head .badge-wall__rail { flex: 1; }
+/* The title takes the room; the tally and its rail close the row together. */
+.personal-workspace .badge-wall__head h3 { margin-right: auto; }
+.personal-workspace .badge-wall__head .badge-wall__rail { flex: 0 0 180px; width: 180px; }
 .personal-workspace .badge-wall__head .field-hint {
   margin: 0;
   font-size: 12px;
@@ -5358,9 +5404,13 @@ html[data-theme='night'] .personal-workspace .result-question {
 .member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
 .member-practice-session-page .practice-question-card.practice-question-card--reading,
 .member-practice-session-page .practice-question-card.practice-question-card--translation,
+.member-practice-session-page .practice-question-card.practice-question-card--writing,
+.member-practice-session-page .practice-question-card.practice-question-card--conversation,
 .member-practice-page .practice-question-card.practice-question-card--fill_blank,
 .member-practice-page .practice-question-card.practice-question-card--reading,
-.member-practice-page .practice-question-card.practice-question-card--translation {
+.member-practice-page .practice-question-card.practice-question-card--translation,
+.member-practice-page .practice-question-card.practice-question-card--writing,
+.member-practice-page .practice-question-card.practice-question-card--conversation {
   width: min(100%, 860px);
   margin-inline: auto;
   /* The same cut-paper card the memory drills sit on, not the scroll: one
@@ -5377,6 +5427,18 @@ html[data-theme='night'] .personal-workspace .result-question {
   border-color: transparent;
   border-radius: 0;
   padding: 4px 26px 6px;
+}
+
+/* In the live session the card fills its column: the passage above it is a row
+ * of the same grid, and its left edge has to land on the card's left edge, not
+ * on a centred 860px card inside an 880px column. */
+.member-practice-session-page .practice-question-card.practice-question-card--fill_blank,
+.member-practice-session-page .practice-question-card.practice-question-card--reading,
+.member-practice-session-page .practice-question-card.practice-question-card--translation,
+.member-practice-session-page .practice-question-card.practice-question-card--writing,
+.member-practice-session-page .practice-question-card.practice-question-card--conversation {
+  width: 100%;
+  margin-inline: 0;
 }
 
 /* The reading passage gets its own sheet, same stock, laid out wide.
@@ -5473,6 +5535,30 @@ html[data-theme='night'] .member-practice-page .practice-article-panel {
   box-shadow: inset 0 0 0 3px #f7ded6, inset 0 0 0 4px #dcae9f !important;
 }
 
+/* The answer box is its own sheet inside the question sheet: the writing panel
+ * drawn for this card, so translation and writing write on the same paper. */
+.member-practice-session-page .practice-question-card .practice-answer-textarea,
+.member-practice-page .practice-question-card .practice-answer-textarea {
+  width: 100%;
+  max-width: none;
+  min-height: 104px;
+  padding: 8px 16px 10px;
+  border: 22px solid transparent;
+  border-image: url('./assets/halloween/card/answer-sheet-day.webp') 15% 8% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #35240f;
+  line-height: 1.75;
+  resize: vertical;
+}
+
+html[data-theme='night'] .member-practice-session-page .practice-question-card .practice-answer-textarea,
+html[data-theme='night'] .member-practice-page .practice-question-card .practice-answer-textarea {
+  border-image-source: url('./assets/halloween/card/answer-sheet-night.webp');
+  color: #efe6f7;
+}
+
 /* The letter is cut into the plate, not set in a stone token. */
 .member-practice-session-page .practice-question-card .practice-option .option-badge,
 .member-practice-page .practice-question-card .practice-option .option-badge {
@@ -5557,106 +5643,15 @@ html[data-theme='night'] .member-practice-page .practice-question-card .practice
  * after dark the sheet is violet-black, so the ink has to turn over or the
  * passage and the essay prompt sink into it. */
 html[data-theme='night'] .personal-workspace .practice-article-panel .practice-article,
-html[data-theme='night'] .personal-workspace .practice-article-panel .eyebrow,
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-writing,
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-answer-textarea {
+html[data-theme='night'] .personal-workspace .practice-article-panel .eyebrow {
   color: #f3e9d2;
 }
 
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-prompt-note,
-html[data-theme='night'] .personal-workspace .practice-question-card--writing .practice-requirements {
-  color: #cdbfe4;
-}
 
-/* The translation answer is a scrap of torn paper lying on the card, so the
- * ink is simply the night ink on that scrap. */
-html[data-theme='night'] .personal-workspace .practice-question-card--translation .practice-answer-textarea {
-  background: transparent !important;
-  color: #f3e9d2;
-}
-
-/* Writing: the prompt is a sheet of its own, the answer is written on another.
-   Two objects, not one frame around both. */
-.member-practice-session-page .practice-question-card.practice-question-card--writing,
-.member-practice-page .practice-question-card.practice-question-card--writing {
-  width: min(100%, 760px);
-  margin-inline: auto;
-  gap: 1.1rem;
-  background: none;
-  box-shadow: none;
-  border-width: 0;
-  border-image-source: none;
-  border-radius: 0;
-  padding: 0;
-}
-
-.member-practice-session-page .practice-question-card--writing .practice-writing,
-.member-practice-page .practice-question-card--writing .practice-writing {
-  background: #f6e7c8;
-  background-clip: padding-box;
-  border-style: solid;
-  border-width: 24px;
-  border-image-source: var(--rune-parchment);
-  border-image-slice: 7% fill;
-  border-image-width: 24px;
-  border-image-repeat: stretch;
-  border-color: transparent;
-  border-radius: 0;
-  padding: 4px 10px 10px;
-  color: #3d2c18;
-}
-
-.member-practice-session-page .practice-question-card--writing .field,
-.member-practice-page .practice-question-card--writing .field {
-  background: #f3e3c3;
-  background-clip: padding-box;
-  border-style: solid;
-  border-width: 30px;
-  border-image-source: var(--rune-torn);
-  border-image-slice: 7% fill;
-  border-image-width: 30px;
-  border-image-repeat: stretch;
-  border-color: transparent;
-  border-radius: 0;
-  padding: 0 14px;
-}
-
-/* Ink straight on the sheet, never a white box floating on it. */
-.member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
-.member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
-.member-practice-page .practice-question-card--writing .practice-answer-textarea,
-.member-practice-page .practice-question-card--translation .practice-answer-textarea {
-  background: transparent !important;
-  border-style: solid;
-  border-width: 0 0 1px;
-  border-color: rgb(122 92 48 / 45%);
-  border-radius: 0;
-  box-shadow: none !important;
-  color: #3d2c18;
-}
-
-/* 翻译的作答框：和题卡同一张纸，只是裁小了一块——它是卡片上的一张便签，
- * 不是白框浮在上面。 */
-.member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
-.member-practice-page .practice-question-card--translation .practice-answer-textarea {
-  min-height: 96px;
-  padding: 4px 12px;
-  border-style: solid;
-  border-width: 18px;
-  border-image-source: var(--rune-paper-card);
-  border-image-slice: 64 fill;
-  border-image-width: 18px;
-  border-image-repeat: stretch;
-  border-color: transparent !important;
-  border-radius: 0;
-  line-height: 1.7;
-}
-
-/* A writing area worth writing in. */
+/* A writing area worth writing in: same answer sheet, just taller. */
 .member-practice-session-page .practice-question-card--writing .practice-answer-textarea,
 .member-practice-page .practice-question-card--writing .practice-answer-textarea {
   min-height: 260px;
-  line-height: 2;
 }
 
 /* An option on the sheet is a ruled answer box cut from the same paper — sharp
@@ -5721,26 +5716,6 @@ html[data-theme='day'] .member-practice-page .practice-question-card--fill_blank
   border-color: #b35f00;
   color: #35240f;
   box-shadow: 0 0 0 3px rgb(255 168 40 / 30%);
-}
-
-/* The translation answer is where you write, so it is a torn sheet laid on the
-   card: the question is the filed document, the answer is the scrap. */
-.member-practice-session-page .practice-question-card--translation .practice-answer-textarea,
-.member-practice-page .practice-question-card--translation .practice-answer-textarea {
-  min-height: 180px;
-  padding: 10px 16px;
-  border-style: solid;
-  border-width: 18px;
-  border-image-source: var(--rune-torn);
-  border-image-slice: 7% fill;
-  border-image-width: 18px;
-  border-image-repeat: stretch;
-  border-color: transparent;
-  border-radius: 0;
-  background: transparent !important;
-  background-image: none !important;
-  color: #3d2c18;
-  line-height: 1.9;
 }
 
 /* ============================================================
@@ -7218,8 +7193,12 @@ html[data-theme='night'] .personal-workspace .settings-form.panel {
   color: var(--ui-ink);
 }
 
-.personal-workspace .settings-form .settings-toggle.is-active {
+/* On means the lit chip, wherever the toggle is: the settings form and the
+ * drill-config dialog's floating window use the same highlight, so pressing a
+ * button never turns into a green glow ring. */
+.personal-workspace .settings-toggle.is-active {
   border-width: 8px 12px;
+  border-color: transparent;
   border-image: url('./assets/halloween/card/control-option-on-day.webp') 30% 8% fill stretch;
   background: none;
   box-shadow: none;
@@ -7783,7 +7762,7 @@ html[data-theme='night'] .personal-workspace .ia-account-security .crumb-stepper
 }
 
 /* 选中的选项芯片：夜间换 another 张图（白天是琥珀牌，夜里是亮紫牌）。 */
-html[data-theme='night'] .personal-workspace .settings-form .settings-toggle.is-active {
+html[data-theme='night'] .personal-workspace .settings-toggle.is-active {
   border-image-source: url('./assets/halloween/card/control-option-on-night.webp') !important;
   color: #efe6ff !important;
   text-shadow: 0 1px 2px rgb(11 7 20 / 55%);

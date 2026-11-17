@@ -477,8 +477,10 @@ const edges = computed<Edge[]>(() => {
         controls,
         length: Math.hypot(to.x - from.x, to.y - from.y),
         classes: {
-          // A leg already walked is gold even when its far stop is still open.
-          'is-done': node.statusKey === 'completed' || parent.node.statusKey === 'completed',
+          // Walked means the leg on the way here: everything up to and
+          // including the stop the learner is standing on. The leg that leads
+          // *out* of the current stop is still ahead, so it stays unlit.
+          'is-done': node.statusKey === 'completed' || node.id === focusId.value,
           // The leg leaving the current stop is the one the learner takes next.
           'is-next': parentId === focusId.value,
           'is-branch': node.optional,

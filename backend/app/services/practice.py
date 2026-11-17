@@ -348,8 +348,10 @@ async def claim_pool_session(
     """Take one ready pre-generated set for this request, if one exists.
 
     A pooled set was written for one fixed shape — a translation has a
-    direction, an essay a length — so a request only claims a set asking for
-    that same shape. Anything else is generated fresh.
+    direction, an essay a length — but those are presentation choices on top
+    of the generated questions, not different questions. A ready set is
+    claimed by type and count alone, then its context is rewritten to the
+    learner's request, so pre-generation always saves the wait it exists for.
     """
     rows = (
         await session.execute(
@@ -368,22 +370,8 @@ async def claim_pool_session(
     ).all()
     if not rows:
         return None
-    item, practice = None, None
-    for candidate_item, candidate_practice in rows:
-        context = candidate_practice.source_context or {}
-        if (
-            payload.translation_direction is not None
-            and context.get("translation_direction") != payload.translation_direction
-        ):
-            continue
-        if (
-            payload.writing_target_words is not None
-            and context.get("writing_target_words") != payload.writing_target_words
-        ):
-            continue
-        item, practice = candidate_item, candidate_practice
-        break
-    if item is None or practice is None:
+    item, practice = rows[0]
+    if practice is None:
         return None
     practice.is_pool = False
     practice.source = payload.source
@@ -394,6 +382,8 @@ async def claim_pool_session(
         **practice.source_context,
         "source": payload.source,
         "difficulty": payload.difficulty,
+        "translation_direction": payload.translation_direction,
+        "writing_target_words": payload.writing_target_words,
         "claimed_from_pool": True,
     }
     await session.delete(item)

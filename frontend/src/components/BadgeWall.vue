@@ -233,12 +233,15 @@ onBeforeUnmount(() => {
   <section class="badge-wall" aria-labelledby="badge-wall-title">
     <header class="badge-wall__head">
       <h3 id="badge-wall-title">成就徽章</h3>
-      <span class="badge-wall__rail" aria-hidden="true">
-        <span :style="{ width: `${total ? (unlocked / total) * 100 : 0}%` }"></span>
-      </span>
       <p class="field-hint">
         已解锁 <strong ref="countRef">{{ unlocked }}</strong> / {{ total }}
       </p>
+      <!-- The rail sits after the count: it is the distance that number still
+       * has to travel, so it reads as part of the tally, not as a rule across
+       * the header. -->
+      <span class="badge-wall__rail" aria-hidden="true">
+        <span :style="{ width: `${total ? (unlocked / total) * 100 : 0}%` }"></span>
+      </span>
     </header>
 
     <ErrorNotice v-if="error" :error="error" retry-label="重新读取" @retry="load" />

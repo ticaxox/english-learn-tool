@@ -174,7 +174,9 @@ class PracticeDraftResponse(BaseModel):
 
 class PracticeAnswerInput(BaseModel):
     question_id: str = Field(min_length=1, max_length=64)
-    answer: str = Field(min_length=1, max_length=20_000)
+    # An empty answer is a real answer: the learner hands in what they have and
+    # the blank counts as wrong instead of rejecting the whole submission.
+    answer: str = Field(default="", max_length=20_000)
 
 
 class PracticeSubmitRequest(_StrictModel):

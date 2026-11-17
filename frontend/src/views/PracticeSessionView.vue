@@ -246,24 +246,32 @@ void practice.load()
         <PracticeResultView :result="result" :questions="questions" />
       </template>
 
-      <section v-else-if="session.status === 'submitted'" class="panel" aria-live="polite">
-        <p class="eyebrow">主观题评分中</p>
-        <h2>正在评分，请稍候</h2>
-        <p>评分完成前不会显示答案和分数。</p>
-        <p v-if="practice.submitError.value" class="alert alert-warning">{{ String(practice.submitError.value) }}</p>
+      <!-- Grading is the same wait as generation, so it wears the same sheet. -->
+      <section v-else-if="session.status === 'submitted'" class="panel practice-generation-panel" aria-live="polite">
+        <ArtImage class="practice-generation__mascot" :set="illustration.brewing" />
+        <div class="practice-generation__copy">
+          <p class="eyebrow">正在评卷</p>
+          <h2>正在批改这一组答案</h2>
+          <p>评分完成前不会显示答案和分数。</p>
+          <p class="field-hint">通常需要几十秒；改卷完成后这一页会自己打开成绩。</p>
+          <div class="practice-generation-loader" aria-hidden="true"><span></span><span></span><span></span></div>
+          <p v-if="practice.submitError.value" class="alert alert-warning">{{ String(practice.submitError.value) }}</p>
+        </div>
       </section>
 
       <template v-else-if="session.status === 'ready'">
-        <section
-          v-if="isReading && readingArticle"
-          class="panel practice-article-panel practice-article-panel--wide"
-          :style="surface"
-        >
-          <p class="eyebrow">阅读材料</p>
-          <SpokenText class="practice-article" :text="readingArticle" :highlight="readingWords" />
-        </section>
-
         <div class="member-practice-session-layout">
+          <!-- The passage shares the two columns below it, so its right edge
+               lands on the timer card and its left edge on the questions. -->
+          <section
+            v-if="isReading && readingArticle"
+            class="panel practice-article-panel practice-article-panel--wide"
+            :style="surface"
+          >
+            <p class="eyebrow">阅读材料</p>
+            <SpokenText class="practice-article" :text="readingArticle" :highlight="readingWords" />
+          </section>
+
           <div class="member-practice-workbench">
 
             <section v-if="draftConflict" class="alert alert-warning" role="alert">
@@ -307,10 +315,10 @@ void practice.load()
               </span>
               <p v-if="formError" class="field-error" role="alert">{{ formError }}</p>
               <ErrorNotice v-if="practice.submitError.value" :error="practice.submitError.value" :show-retry="false" retry-label="重试" @retry="submit" />
-              <p v-if="!allAnswered && hasAnyAnswer" class="practice-submit-hint">
+              <p v-if="!allAnswered" class="practice-submit-hint">
                 还有 {{ questions.length - answeredCount }} 题空着，提交后按错题计。
               </p>
-              <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value || !hasAnyAnswer" @click="submit">
+              <SvgPlateButton class="practice-submit-button" block :disabled="practice.busy.value" @click="submit">
                 <span class="practice-submit-label">{{ practice.busy.value ? '正在提交…' : '提交全部答案' }}</span>
                 <span class="practice-submit-label practice-submit-label--short">{{ practice.busy.value ? '提交中…' : '提交' }}</span>
                 <AppIcon name="arrow" />

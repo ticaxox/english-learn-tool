@@ -154,6 +154,7 @@ function appliedActions(message: CoachMessage): CoachActionReceipt[] {
 
 async function focusComposer(): Promise<void> {
   await nextTick()
+  resizeComposer()
   composer.value?.focus()
 }
 
@@ -207,6 +208,18 @@ async function submitMessage(): Promise<void> {
   await focusComposer()
 }
 
+function resizeComposer(): void {
+  const el = composer.value
+  if (!el) return
+  // Auto-grow without relying on field-sizing: one line at rest, four at most.
+  el.style.height = 'auto'
+  const next = Math.min(96, Math.max(24, el.scrollHeight - 2))
+  el.style.height = `${next}px`
+  el.style.overflowY = el.scrollHeight > next + 2 ? 'auto' : 'hidden'
+}
+
+watch(draft, () => { void nextTick(resizeComposer) })
+
 function onComposerKeydown(event: KeyboardEvent): void {
   if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
     event.preventDefault()
@@ -231,6 +244,7 @@ watch(
 onMounted(async () => {
   await coach.loadConversations(true)
   await focusComposer()
+  resizeComposer()
 })
 
 watch(

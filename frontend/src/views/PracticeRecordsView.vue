@@ -14,7 +14,6 @@ import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
-import TypeMark from '../components/TypeMark.vue'
 import PracticeRecordRow from '../components/PracticeRecordRow.vue'
 import DivButton from '../components/DivButton.vue'
 import {
@@ -400,7 +399,6 @@ void load()
           <template v-if="practiceType === ''">
             <div v-for="group in day.types" :key="group.type" class="records-subgroup">
               <header class="records-subgroup__head">
-                <TypeMark :type="group.type" :size="18" />
                 <h3>{{ group.label }}</h3>
                 <span>{{ group.items.length }} 条</span>
               </header>
@@ -410,7 +408,6 @@ void load()
                   :key="record.id"
                   :record="record"
                   :checked="selected.includes(record.id)"
-                  :show-mark="false"
                   :title="timeOfDay(record.submittedAt)"
                   :meta="`${PRACTICE_SOURCE_LABELS[record.source]} · ${record.totalQuestions} 题 · 错 ${record.wrongCount}`"
                   @toggle="toggleSelected(record.id)"
@@ -426,7 +423,6 @@ void load()
               :key="record.id"
               :record="record"
               :checked="selected.includes(record.id)"
-              :show-mark="false"
               :title="timeOfDay(record.submittedAt)"
               :meta="`${PRACTICE_SOURCE_LABELS[record.source]} · ${record.totalQuestions} 题 · 错 ${record.wrongCount}`"
               @toggle="toggleSelected(record.id)"

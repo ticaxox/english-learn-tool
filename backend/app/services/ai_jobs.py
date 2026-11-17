@@ -74,6 +74,37 @@ class AiGenerationError(Exception):
         return self.message
 
 
+# Language of the feedback is a product decision, not an admin setting: an
+# operator editing the prompt must not be able to leave a Chinese learner with
+# English-only feedback. Appending it here also covers prompts already seeded
+# in the database, which do not re-read the defaults.
+_PROMPT_SUFFIXES: dict[str, str] = {
+    "subjective_grading": (
+        " Write explanation, errors and suggestions in Simplified Chinese. "
+        "Write reference_content in English. "
+        "If the learner answer is empty, score it 0 and say the question was left unanswered."
+    ),
+    "challenge_plan": (
+        " Return 3-6 main nodes (3 when uncertain) plus at most one OPTIONAL_SIDE node. "
+        "Main node order: REVIEW, NEW_WORDS, at most one AI_PRACTICE, WORD_DRILL, final BOSS. "
+        "Put every due entry ID on REVIEW and every new entry ID on NEW_WORDS; no other node "
+        "carries entry IDs. Never omit or repeat an entry. Main estimated_minutes must sum to "
+        "80-120 percent of target_minutes. AI_PRACTICE uses an allowed practice_type and "
+        "practice_count 1 for writing/conversation or 3/5/10/15/20 otherwise; WORD_DRILL "
+        "uses an allowed drill_mode; BOSS uses fill_blank with 5 or 10. Do not add optional, "
+        "practice_type, practice_count or drill_mode to node types that do not allow them. "
+        "Use short Simplified Chinese copy without < or >. Copy every ID verbatim."
+    ),
+}
+
+
+def _prompt_text(task_type: str, template: str) -> str:
+    suffix = _PROMPT_SUFFIXES.get(task_type)
+    if not suffix or "reference_content in English" in template:
+        return template
+    return template + suffix
+
+
 def _canonical_request(task_type: str, context: dict[str, Any]) -> tuple[str, str]:
     encoded = json.dumps(
         {"task_type": task_type, "context": context},
@@ -369,7 +400,7 @@ async def create_ai_job(
         provider_name=providers[0].name,
         model_id=providers[0].model_id,
         prompt_key=task_type,
-        prompt_snapshot=prompt.template,
+        prompt_snapshot=_prompt_text(task_type, prompt.template),
         input_context=context,
         idempotency_key=idempotency_key,
         request_hash=request_hash,

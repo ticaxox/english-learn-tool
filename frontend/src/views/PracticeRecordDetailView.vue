@@ -11,7 +11,6 @@ import { RouterLink, useRoute } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
 import PracticeResultView from '../components/PracticeResultView.vue'
-import TypeMark from '../components/TypeMark.vue'
 import AppIcon from '../components/AppIcon.vue'
 import {
   getPracticeRecord,
@@ -118,7 +117,6 @@ watch(
     <section v-else-if="record" class="record-detail" aria-label="练习记录详情">
       <header class="record-detail__head">
         <div class="record-detail__title">
-          <TypeMark :type="record.practiceType" :size="30" />
           <div>
             <h2>{{ PRACTICE_TYPE_LABELS[record.practiceType] }} · {{ record.totalQuestions }} 题</h2>
             <p>
