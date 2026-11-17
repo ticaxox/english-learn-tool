@@ -74,7 +74,17 @@
       }
       .tile--night .rules { background: #251a44; color: #d7cbf0; }
 
-      /* The night painting of each material, shown next to the day one. */
+      /* The night sample uses .is-night on its wrapper instead of changing the
+         whole document's theme; these mirror the app's [data-theme='night']
+         rules so both paintings can be seen side by side. */
+      .is-night .auth-card { border-image-source: url('/src/assets/halloween/card/panel-auth-night.webp'); box-shadow: 0 14px 0 rgb(0 0 0 / 28%); }
+      .is-night .auth-card__seal { border-image-source: url('/src/assets/halloween/card/control-ornament-night.webp'); color: #efe6f7; }
+      .is-night .auth-card .alert { border-image-source: url('/src/assets/halloween/card/panel-scrap-night.webp'); color: #efe6f7; }
+      .is-night .auth-page .form-stack [type='submit'] { border-image-source: url('/src/assets/halloween/card/control-badge-night.webp'); color: #eafff7; }
+      .is-night .auth-page .auth-switch__link { border-image-source: url('/src/assets/halloween/card/control-chip-off-night.webp'); color: #ffd166; }
+      /* The input stays the pale day field in both themes, by design. */
+      .is-night .auth-page .field input { color: #35240f; }
+
       .is-night .m-field { border-image-source: url('/src/assets/halloween/card/control-field-night.webp'); }
       .is-night .m-badge { border-image-source: url('/src/assets/halloween/card/control-badge-night.webp'); }
       .is-night .m-chip { border-image-source: url('/src/assets/halloween/card/control-chip-off-night.webp'); }
