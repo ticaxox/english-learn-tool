@@ -1876,12 +1876,17 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
 }
 
 .personal-workspace .settings-form .settings-daily-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  gap: 14px 44px;
-  align-items: start;
-  justify-content: start;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px 40px;
+  align-items: center;
 }
+
+.personal-workspace .settings-form .settings-daily-grid > .field {
+  flex: 0 0 auto;
+  width: auto;
+}
+
 
 @media (max-width: 760px) {
   .personal-workspace .settings-form .settings-goal-legend { flex-wrap: wrap; }
@@ -3909,9 +3914,10 @@ than its row reads as a different kind of thing. */
 
 /* The reading passage spans the session width, above the questions and the rail. */
 .personal-workspace .member-practice-session-page > .practice-article-panel--wide {
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
+  /* Same column as the question cards below it, so the two line up. */
+  width: min(100%, 860px);
+  max-width: 860px;
+  margin-inline: auto;
 }
 
 /* ------------------------------- practice hub: one-row filters, slimmer rail */

@@ -1842,11 +1842,18 @@ html[data-theme='night'] .personal-workspace .progress-card__streak.is-active {
   background-size: 22px 22px;
 }
 
+/* The sign-in card is drawn — parchment panel with brass corner brackets —
+ * so this sheet owns the frame and leaves size/padding to cookie-theme. */
 .auth-card {
-  border: 2px solid #3b2a1a;
-  border-radius: 26px;
-  background: #fffdf6;
-  box-shadow: 0 8px 0 rgb(59 42 26 / 14%), 0 26px 60px rgb(59 42 26 / 12%);
+  border: 26px solid transparent;
+  border-image: url('./assets/halloween/card/panel-auth-day.webp') 9% 12% 9% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: 0 26px 60px rgb(59 42 26 / 12%);
+}
+
+html[data-theme='night'] .auth-card {
+  border-image-source: url('./assets/halloween/card/panel-auth-night.webp');
 }
 
 .auth-card h1 {
@@ -4460,9 +4467,11 @@ html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
   grid-row: 1;
   gap: 14px;
   align-content: start;
-  /* The questions scroll past; the score and Hob stay put. */
+  /* The questions scroll past; the score and Hob stay put — pinned below the
+   * shell's sticky top bar (64px) so the bar never rolls over it. */
   position: sticky;
-  top: 18px;
+  top: 80px;
+  z-index: 1;
 }
 .personal-workspace .practice-result__hero { flex-direction: column; align-items: flex-start; gap: 8px; }
 .personal-workspace .practice-result__score { white-space: nowrap; }
