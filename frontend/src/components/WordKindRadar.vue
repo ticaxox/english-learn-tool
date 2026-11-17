@@ -152,6 +152,9 @@ function labelAt(index: number): { x: number; y: number; anchor: string } {
   width: 100%;
   max-width: none;
   height: 100%;
+  /* Capped so the radar never becomes the card that sets the row height:
+   * 学习足迹 beside it is the taller one. */
+  max-height: 280px;
   min-height: 0;
   overflow: visible;
 }

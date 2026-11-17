@@ -438,18 +438,23 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   backdrop-filter: blur(2px);
 }
 
+/* The level-up moment hangs on its own banner: gold corner plates and a
+ * parchment face; the art carries the frame, so no CSS border or fill. */
 .levelup-card {
   display: grid;
   justify-items: center;
   gap: 4px;
-  padding: 32px 44px 24px;
-  border: 3px solid var(--game-gold, #e9b43b);
-  border-radius: 26px;
-  background:
-    radial-gradient(circle at 50% 0%, rgb(233 180 59 / 35%), transparent 12rem),
-    var(--game-paper, #fffaf0);
-  box-shadow: 0 12px 0 rgb(43 29 15 / 25%);
+  padding: 30px 42px 26px;
+  border: 26px solid transparent;
+  border-image: url('./assets/halloween/card/panel-levelup-day.webp') 22% 13% 22% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   text-align: center;
+}
+
+html[data-theme='night'] .levelup-card {
+  border-image-source: url('./assets/halloween/card/panel-levelup-night.webp');
 }
 
 .levelup-kicker {
@@ -547,9 +552,10 @@ html[data-theme='night'] .personal-workspace .hud-stat--streak.is-hot {
   gap: 8px;
   margin: 0 12px 2px;
   padding: 11px 11px 12px;
-  /* The plate is framed again — it just keeps its own fill off, so the frame
-   * is a card edge rather than a colour change under Hob. */
+  /* Framed on three sides only: the top edge read as a stray line across
+   * Hob's feet. */
   border: 1px solid var(--rail-line);
+  border-top: 0;
   background: none;
 }
 

@@ -77,8 +77,18 @@ html[data-theme='night'] .ia-profile-menu {
 .workspace-shell .ia-profile-menu a:hover,
 .workspace-shell .ia-profile-menu [role="button"]:hover { background: var(--crumb-parchment); color: var(--crumb-forest); }
 /* Every row in the account menu reads the same; signing out is just the last
- * one, not a different kind of thing. */
-.workspace-shell .ia-profile-menu .ia-profile-signout { color: var(--crumb-cocoa); font-weight: 650; }
+ * one, not a different kind of thing. The child selector outranks the generic
+ * .div-button weight that made that row look bolder than the links above it. */
+.workspace-shell .ia-profile-menu > a,
+.workspace-shell .ia-profile-menu > [role='button'],
+.workspace-shell .ia-profile-menu > button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+  color: var(--crumb-cocoa);
+  min-height: 36px;
+}
 
 .ia-admin-hub,
 .ia-settings-hub,

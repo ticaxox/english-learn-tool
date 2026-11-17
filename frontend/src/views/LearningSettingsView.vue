@@ -280,7 +280,6 @@ onMounted(() => {
               </option>
             </select>
           </legend>
-          <p class="field-hint">目标决定 AI 往哪个方向出题：选了四级，阅读和翻译就按四级的路子写。</p>
           <div class="settings-daily-grid">
             <div class="field">
               <label for="daily-new-words">每日新词量</label>
