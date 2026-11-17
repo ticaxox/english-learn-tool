@@ -507,7 +507,9 @@ html[data-theme='night'] .auth-page .form-stack [type='submit'] {
 }
 
 
-@media (max-width: 900px) {
+/* Below this the two columns stop fitting side by side (400 + 640 + gap), so
+ * the door goes back to a single centred card. */
+@media (max-width: 1180px) {
   .auth-page { grid-template-columns: minmax(0, 1fr); }
   .auth-art { display: none; }
 }
