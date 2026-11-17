@@ -12,24 +12,24 @@ export type ThemeMode = Readonly<Record<Mode, string>>
 /** Every practice type that has a painted cover: five AI exercise types plus the three memory modules. */
 export type PracticeArt = Readonly<Record<string, ThemeMode>>
 
-import flashcardDay from './book/book-flashcard-day.png'
-import flashcardNight from './book/book-flashcard-night.png'
-import choiceDay from './book/book-choice-day.png'
-import choiceNight from './book/book-choice-night.png'
-import spellingDay from './book/book-spelling-day.png'
-import spellingNight from './book/book-spelling-night.png'
-import fillBlankDay from './book/book-cloze-day.png'
-import fillBlankNight from './book/book-cloze-night.png'
-import readingDay from './book/book-reading-day.png'
-import readingNight from './book/book-reading-night.png'
-import translationDay from './book/book-translation-day.png'
-import translationNight from './book/book-translation-night.png'
-import writingDay from './book/book-writing-day.png'
-import writingNight from './book/book-writing-night.png'
-import conversationDay from './book/book-conversation-day.png'
-import conversationNight from './book/book-conversation-night.png'
-import settingsCardDay from './card/settings-card-day.png'
-import settingsCardNight from './card/settings-card-night.png'
+import flashcardDay from './book/book-flashcard-day.webp'
+import flashcardNight from './book/book-flashcard-night.webp'
+import choiceDay from './book/book-choice-day.webp'
+import choiceNight from './book/book-choice-night.webp'
+import spellingDay from './book/book-spelling-day.webp'
+import spellingNight from './book/book-spelling-night.webp'
+import fillBlankDay from './book/book-cloze-day.webp'
+import fillBlankNight from './book/book-cloze-night.webp'
+import readingDay from './book/book-reading-day.webp'
+import readingNight from './book/book-reading-night.webp'
+import translationDay from './book/book-translation-day.webp'
+import translationNight from './book/book-translation-night.webp'
+import writingDay from './book/book-writing-day.webp'
+import writingNight from './book/book-writing-night.webp'
+import conversationDay from './book/book-conversation-day.webp'
+import conversationNight from './book/book-conversation-night.webp'
+import settingsCardDay from './card/settings-card-day.webp'
+import settingsCardNight from './card/settings-card-night.webp'
 
 /** Keyed by the product's own type names; `cloze` is the file name for fill-blank. */
 export const practiceBooks: PracticeArt = {
@@ -46,31 +46,31 @@ export const practiceBooks: PracticeArt = {
 /** 设置不是一本书：它是一张立起来的卡片，和书站在同一块木板上。 */
 export const settingsCard: ThemeMode = { day: settingsCardDay, night: settingsCardNight }
 
-import slabBiscuit from './card/slab-biscuit.png'
-import slabStele from './card/slab-stele.png'
-import barBiscuit from './card/bar-biscuit.png'
-import barBiscuitOn from './card/bar-biscuit-on.png'
-import barStele from './card/bar-stele.png'
-import barSteleOn from './card/bar-stele-on.png'
-import chipBiscuit from './card/chip-biscuit.png'
-import chipStele from './card/chip-stele.png'
-import sheetBrassDay from './card/sheet-brass-day.png'
-import sheetBrassNight from './card/sheet-brass-night.png'
-import sheetParchedDay from './card/sheet-parched-day.png'
-import sheetParchedNight from './card/sheet-parched-night.png'
-import wordbookCoverDay from './card/wordbook-cover-day.png'
-import wordbookCoverNight from './card/wordbook-cover-night.png'
-import cardFrameDay from './card/card-frame-day.png'
-import cardFrameNight from './card/card-frame-night.png'
-import cardBack from './card/card-back.png'
-import paperCardDay from './card/card-frame-paper-day.png'
-import paperCardNight from './card/card-frame-paper-night.png'
-import optionPlateDay from './card/option-plate-day.png'
-import optionPlateNight from './card/option-plate-night.png'
-import optionTokenDay from './card/option-token-day.png'
-import optionTokenNight from './card/option-token-night.png'
-import letterTileDay from './card/letter-tile-day.png'
-import letterTileNight from './card/letter-tile-night.png'
+import slabBiscuit from './card/slab-biscuit.webp'
+import slabStele from './card/slab-stele.webp'
+import barBiscuit from './card/bar-biscuit.webp'
+import barBiscuitOn from './card/bar-biscuit-on.webp'
+import barStele from './card/bar-stele.webp'
+import barSteleOn from './card/bar-stele-on.webp'
+import chipBiscuit from './card/chip-biscuit.webp'
+import chipStele from './card/chip-stele.webp'
+import sheetBrassDay from './card/sheet-brass-day.webp'
+import sheetBrassNight from './card/sheet-brass-night.webp'
+import sheetParchedDay from './card/sheet-parched-day.webp'
+import sheetParchedNight from './card/sheet-parched-night.webp'
+import wordbookCoverDay from './card/wordbook-cover-day.webp'
+import wordbookCoverNight from './card/wordbook-cover-night.webp'
+import cardFrameDay from './card/card-frame-day.webp'
+import cardFrameNight from './card/card-frame-night.webp'
+import cardBack from './card/card-back.webp'
+import paperCardDay from './card/card-frame-paper-day.webp'
+import paperCardNight from './card/card-frame-paper-night.webp'
+import optionPlateDay from './card/option-plate-day.webp'
+import optionPlateNight from './card/option-plate-night.webp'
+import optionTokenDay from './card/option-token-day.webp'
+import optionTokenNight from './card/option-token-night.webp'
+import letterTileDay from './card/letter-tile-day.webp'
+import letterTileNight from './card/letter-tile-night.webp'
 
 /** The question card. The frame is exactly 2:3; do not stretch it. */
 export const questionCard = {
@@ -154,30 +154,30 @@ export const wordbookCover: ThemeMode = {
   night: wordbookCoverNight,
 }
 
-import brewingDay from './char/brewing-day.png'
-import brewingNight from './char/brewing-night.png'
-import emptySearchDay from './char/empty-search-day.png'
-import emptySearchNight from './char/empty-search-night.png'
-import hobDay from './char/hob-day.png'
-import hobNight from './char/hob-night.png'
-import emptyDay from './char/empty-day.png'
-import emptyNight from './char/empty-night.png'
-import resultDay from './char/result-day.png'
-import resultNight from './char/result-night.png'
-import welcomeDay from './char/welcome-day.png'
-import welcomeNight from './char/welcome-night.png'
-import notFoundDay from './char/notfound-day.png'
-import notFoundNight from './char/notfound-night.png'
-import libraryDay from './char/library-day.png'
-import libraryNight from './char/library-night.png'
-import celebrateDay from './char/celebrate-day.png'
-import celebrateNight from './char/celebrate-night.png'
-import gnawDay from './char/gnaw-day.png'
-import gnawNight from './char/gnaw-night.png'
-import guideDay from './char/guide-day.png'
-import guideNight from './char/guide-night.png'
-import museDay from './char/muse-day.png'
-import museNight from './char/muse-night.png'
+import brewingDay from './char/brewing-day.webp'
+import brewingNight from './char/brewing-night.webp'
+import emptySearchDay from './char/empty-search-day.webp'
+import emptySearchNight from './char/empty-search-night.webp'
+import hobDay from './char/hob-day.webp'
+import hobNight from './char/hob-night.webp'
+import emptyDay from './char/empty-day.webp'
+import emptyNight from './char/empty-night.webp'
+import resultDay from './char/result-day.webp'
+import resultNight from './char/result-night.webp'
+import welcomeDay from './char/welcome-day.webp'
+import welcomeNight from './char/welcome-night.webp'
+import notFoundDay from './char/notfound-day.webp'
+import notFoundNight from './char/notfound-night.webp'
+import libraryDay from './char/library-day.webp'
+import libraryNight from './char/library-night.webp'
+import celebrateDay from './char/celebrate-day.webp'
+import celebrateNight from './char/celebrate-night.webp'
+import gnawDay from './char/gnaw-day.webp'
+import gnawNight from './char/gnaw-night.webp'
+import guideDay from './char/guide-day.webp'
+import guideNight from './char/guide-night.webp'
+import museDay from './char/muse-day.webp'
+import museNight from './char/muse-night.webp'
 
 /**
  * Large illustrations: one per moment, not one repeated everywhere.
@@ -213,12 +213,12 @@ export const illustration = {
   emptySearch: { day: emptySearchDay, night: emptySearchNight },
 } as const
 
-import badgesDay from './icon/badges-day.png'
-import badgesNight from './icon/badges-night.png'
-import dockDay from './icon/dock-day.png'
-import dockNight from './icon/dock-night.png'
-import actionsDay from './icon/actions-day.png'
-import actionsNight from './icon/actions-night.png'
+import badgesDay from './icon/badges-day.webp'
+import badgesNight from './icon/badges-night.webp'
+import dockDay from './icon/dock-day.webp'
+import dockNight from './icon/dock-night.webp'
+import actionsDay from './icon/actions-day.webp'
+import actionsNight from './icon/actions-night.webp'
 
 /**
  * Design sheets, NOT sprite sheets: each is a grid of separate icons with no
@@ -242,15 +242,15 @@ export function forMode(set: ThemeMode, mode: Mode): string {
 
 /* Three-piece frames: the two ends keep their painted detail, the middle is a
  * plain strip that stretches, so a wide surface never distorts an edge. */
-import scrollCapLeft from './card/scroll-cap-left.png'
-import scrollMiddle from './card/scroll-middle.png'
-import scrollCapRight from './card/scroll-cap-right.png'
-import slabCapLeft from './card/slab-cap-left.png'
-import slabMiddle from './card/slab-middle.png'
-import slabCapRight from './card/slab-cap-right.png'
-import parchmentCapLeft from './card/parchment-cap-left.png'
-import parchmentMiddle from './card/parchment-middle.png'
-import parchmentCapRight from './card/parchment-cap-right.png'
+import scrollCapLeft from './card/scroll-cap-left.webp'
+import scrollMiddle from './card/scroll-middle.webp'
+import scrollCapRight from './card/scroll-cap-right.webp'
+import slabCapLeft from './card/slab-cap-left.webp'
+import slabMiddle from './card/slab-middle.webp'
+import slabCapRight from './card/slab-cap-right.webp'
+import parchmentCapLeft from './card/parchment-cap-left.webp'
+import parchmentMiddle from './card/parchment-middle.webp'
+import parchmentCapRight from './card/parchment-cap-right.webp'
 
 export type Frame3Part = { left: string; middle: string; right: string }
 
@@ -276,29 +276,29 @@ export const parchmentFrame: Frame3Part = {
 }
 
 /** A closed spellbook as an object: spine, page block and clasp, no backdrop. */
-import bookObjectDay from './card/book-object-day.png'
-import bookObjectNight from './card/book-object-night.png'
+import bookObjectDay from './card/book-object-day.webp'
+import bookObjectNight from './card/book-object-night.webp'
 export const bookObject = { day: bookObjectDay, night: bookObjectNight } as const
 
 /* The built-in shelf: the same book in deep teal, so a title that ships with
  * the product reads apart from the learner's own green copies at a glance. */
-import bookBuiltinDay from './card/book-object-builtin-day.png'
-import bookBuiltinNight from './card/book-object-builtin-night.png'
+import bookBuiltinDay from './card/book-object-builtin-day.webp'
+import bookBuiltinNight from './card/book-object-builtin-night.webp'
 export const builtinBook = { day: bookBuiltinDay, night: bookBuiltinNight } as const
 
 /* The trail's stops are jack-o'-lanterns: lit for a stop you cleared, a
  * spirit-green one for the stop you are on, a dark unlit one for a stop out
  * of reach. */
-import pumpkinGreen from './char/pumpkin-green.png'
-import pumpkinGreenNight from './char/pumpkin-green-night.png'
-import pumpkinUnlit from './char/pumpkin-unlit.png'
-import pumpkinUnlitNight from './char/pumpkin-unlit-night.png'
-import pumpkinMorning from './char/pumpkin-morning.png'
-import pumpkinDusk from './char/pumpkin-dusk.png'
-import pumpkinBoss from './char/pumpkin-boss.png'
-import pumpkinBossNight from './char/pumpkin-boss-night.png'
-import pumpkinBranch from './char/pumpkin-branch.png'
-import pumpkinBranchNight from './char/pumpkin-branch-night.png'
+import pumpkinGreen from './char/pumpkin-green.webp'
+import pumpkinGreenNight from './char/pumpkin-green-night.webp'
+import pumpkinUnlit from './char/pumpkin-unlit.webp'
+import pumpkinUnlitNight from './char/pumpkin-unlit-night.webp'
+import pumpkinMorning from './char/pumpkin-morning.webp'
+import pumpkinDusk from './char/pumpkin-dusk.webp'
+import pumpkinBoss from './char/pumpkin-boss.webp'
+import pumpkinBossNight from './char/pumpkin-boss-night.webp'
+import pumpkinBranch from './char/pumpkin-branch.webp'
+import pumpkinBranchNight from './char/pumpkin-branch-night.webp'
 export const pumpkins = {
   /** A cleared stop: bright by morning, a hot burn after dark. */
   lit: { day: pumpkinMorning, night: pumpkinDusk },
@@ -310,24 +310,24 @@ export const pumpkins = {
 } as const
 
 /* The charges painted onto the badges: one picture per family of feats. */
-import chargeFlame from './char/charge-flame.png'
-import chargeFlameNight from './char/charge-flame-night.png'
-import chargeMoon from './char/charge-moon.png'
-import chargeMoonNight from './char/charge-moon-night.png'
-import chargeBook from './char/charge-book.png'
-import chargeBookNight from './char/charge-book-night.png'
-import chargeCrown from './char/charge-crown.png'
-import chargeCrownNight from './char/charge-crown-night.png'
-import chargeSkull from './char/charge-skull.png'
-import chargeSkullNight from './char/charge-skull-night.png'
-import chargeStar from './char/charge-star.png'
-import chargeStarNight from './char/charge-star-night.png'
-import chargeOwl from './char/charge-owl.png'
-import chargeOwlNight from './char/charge-owl-night.png'
-import chargeHourglass from './char/charge-hourglass.png'
-import chargeHourglassNight from './char/charge-hourglass-night.png'
-import chargeKey from './char/charge-key.png'
-import chargeKeyNight from './char/charge-key-night.png'
+import chargeFlame from './char/charge-flame.webp'
+import chargeFlameNight from './char/charge-flame-night.webp'
+import chargeMoon from './char/charge-moon.webp'
+import chargeMoonNight from './char/charge-moon-night.webp'
+import chargeBook from './char/charge-book.webp'
+import chargeBookNight from './char/charge-book-night.webp'
+import chargeCrown from './char/charge-crown.webp'
+import chargeCrownNight from './char/charge-crown-night.webp'
+import chargeSkull from './char/charge-skull.webp'
+import chargeSkullNight from './char/charge-skull-night.webp'
+import chargeStar from './char/charge-star.webp'
+import chargeStarNight from './char/charge-star-night.webp'
+import chargeOwl from './char/charge-owl.webp'
+import chargeOwlNight from './char/charge-owl-night.webp'
+import chargeHourglass from './char/charge-hourglass.webp'
+import chargeHourglassNight from './char/charge-hourglass-night.webp'
+import chargeKey from './char/charge-key.webp'
+import chargeKeyNight from './char/charge-key-night.webp'
 export const charge = {
   flame: { day: chargeFlame, night: chargeFlameNight },
   moon: { day: chargeMoon, night: chargeMoonNight },
@@ -342,14 +342,14 @@ export const charge = {
 
 /* The week's candles: one drawing per burn state, day and night. The lengths
  * still come from the day's XP; these drawings change the wax and flame. */
-import candleColdDay from './char/candle-cold-day.png'
-import candleLowDay from './char/candle-low-day.png'
-import candleMidDay from './char/candle-mid-day.png'
-import candleHighDay from './char/candle-high-day.png'
-import candleColdNight from './char/candle-cold-night.png'
-import candleLowNight from './char/candle-low-night.png'
-import candleMidNight from './char/candle-mid-night.png'
-import candleHighNight from './char/candle-high-night.png'
+import candleColdDay from './char/candle-cold-day.webp'
+import candleLowDay from './char/candle-low-day.webp'
+import candleMidDay from './char/candle-mid-day.webp'
+import candleHighDay from './char/candle-high-day.webp'
+import candleColdNight from './char/candle-cold-night.webp'
+import candleLowNight from './char/candle-low-night.webp'
+import candleMidNight from './char/candle-mid-night.webp'
+import candleHighNight from './char/candle-high-night.webp'
 
 export type CandleState = 'cold' | 'low' | 'mid' | 'high'
 

@@ -7,14 +7,14 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import type { ChoiceQuestion } from '../types/learning'
 import { useRuneSurface } from '../composables/useRuneSurface'
-import plateDayA from '../assets/halloween/card/option-day-a.png'
-import plateDayB from '../assets/halloween/card/option-day-b.png'
-import plateDayC from '../assets/halloween/card/option-day-c.png'
-import plateDayD from '../assets/halloween/card/option-day-d.png'
-import plateNightA from '../assets/halloween/card/option-night-a.png'
-import plateNightB from '../assets/halloween/card/option-night-b.png'
-import plateNightC from '../assets/halloween/card/option-night-c.png'
-import plateNightD from '../assets/halloween/card/option-night-d.png'
+import plateDayA from '../assets/halloween/card/option-day-a.webp'
+import plateDayB from '../assets/halloween/card/option-day-b.webp'
+import plateDayC from '../assets/halloween/card/option-day-c.webp'
+import plateDayD from '../assets/halloween/card/option-day-d.webp'
+import plateNightA from '../assets/halloween/card/option-night-a.webp'
+import plateNightB from '../assets/halloween/card/option-night-b.webp'
+import plateNightC from '../assets/halloween/card/option-night-c.webp'
+import plateNightD from '../assets/halloween/card/option-night-d.webp'
 
 /** One drawing per letter per theme: the letter is cut into the plate. */
 const PLATE_ART = {
@@ -197,7 +197,7 @@ function choose(optionId: string): void {
   border-style: solid;
   border-width: 46px;
   border-color: transparent;
-  border-image-source: url('../assets/halloween/card/slab-biscuit.png');
+  border-image-source: url('../assets/halloween/card/slab-biscuit.webp');
   border-image-slice: 12% fill;
   border-image-width: 46px;
   border-image-repeat: stretch;
@@ -362,21 +362,21 @@ html[data-theme='night'] .choice-option__mark {
 }
 
 .choice-option--right .choice-option__stamp {
-  background-image: url('../assets/halloween/card/verdict-right-day.png');
+  background-image: url('../assets/halloween/card/verdict-right-day.webp');
   animation: choiceStamp 260ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
 }
 
 .choice-option--wrong .choice-option__stamp {
-  background-image: url('../assets/halloween/card/verdict-wrong-day.png');
+  background-image: url('../assets/halloween/card/verdict-wrong-day.webp');
   animation: choiceStamp 260ms cubic-bezier(0.22, 0.9, 0.3, 1.12) forwards;
 }
 
 html[data-theme='night'] .choice-option--right .choice-option__stamp {
-  background-image: url('../assets/halloween/card/verdict-right-night.png');
+  background-image: url('../assets/halloween/card/verdict-right-night.webp');
 }
 
 html[data-theme='night'] .choice-option--wrong .choice-option__stamp {
-  background-image: url('../assets/halloween/card/verdict-wrong-night.png');
+  background-image: url('../assets/halloween/card/verdict-wrong-night.webp');
 }
 
 @keyframes choiceStamp {
@@ -394,7 +394,7 @@ html[data-theme='night'] .choice-option--wrong .choice-option__stamp {
   width: 112px;
   height: 112px;
   margin-top: -56px;
-  background: url('../assets/halloween/card/burst-crumbs.png') 0 0 / 896px 112px no-repeat;
+  background: url('../assets/halloween/card/burst-crumbs.webp') 0 0 / 896px 112px no-repeat;
   pointer-events: none;
   z-index: 1;
   /* Starts once the pieces have left the middle: the opening frame is a
