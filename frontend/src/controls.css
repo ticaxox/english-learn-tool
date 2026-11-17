@@ -5354,6 +5354,15 @@ html[data-theme='night'] .personal-workspace .result-question {
   padding-inline: 20px;
 }
 
+/* At night the shell's `.panel` rule paints the board (html[data-theme] +
+   :is(.panel) outranks the two classes above), which left the passage on a
+   different stock from the questions below it. The passage keeps the same
+   sheet as the question card in both themes — the paper card's night drawing. */
+html[data-theme='night'] .member-practice-session-page .practice-article-panel,
+html[data-theme='night'] .member-practice-page .practice-article-panel {
+  border-image-source: var(--rune-paper-card) !important;
+}
+
 /* The question number sits close to the line it introduces, and the answer
    plates get the room instead: the gap above the sentence shrinks, the gap
    between the sentence and the options grows. */
