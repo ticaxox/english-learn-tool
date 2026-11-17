@@ -1887,6 +1887,14 @@ html[data-theme='night'] .personal-workspace .option-badge__letter { color: #f3e
   width: auto;
 }
 
+/* The little "≈ 5 天" chip is the same height as the stepper it sits beside. */
+.personal-workspace .settings-daily-grid .field-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding-block: 0;
+}
+
 
 @media (max-width: 760px) {
   .personal-workspace .settings-form .settings-goal-legend { flex-wrap: wrap; }

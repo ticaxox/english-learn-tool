@@ -282,7 +282,7 @@ onMounted(() => {
           </legend>
           <div class="settings-daily-grid">
             <div class="field field--inline">
-              <label for="daily-new-words">每日新词量</label>
+              <label for="daily-new-words">每日新词量（词）</label>
               <CrumbNumber
                 id="daily-new-words"
                 v-model="form.dailyNewWords"
@@ -298,7 +298,7 @@ onMounted(() => {
             </div>
 
             <div class="field field--inline">
-              <label for="daily-minutes">每日学习时长</label>
+              <label for="daily-minutes">每日学习时长（分钟）</label>
               <div class="field-inline-note">
                 <CrumbNumber
                   id="daily-minutes"
