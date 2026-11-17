@@ -212,6 +212,13 @@
   height: 100%;
   max-width: none;
   min-height: 0;
+}
+
+/* ArtImage stacks two frames; both have to give up their intrinsic height so
+ * Hob takes the row's height and the copy beside it decides how tall that is. */
+.practice-generation__mascot .art-swap__stack { height: 100%; }
+.practice-generation__mascot .art-swap__frame {
+  height: 100%;
   object-fit: contain;
   object-position: center;
 }
