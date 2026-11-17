@@ -2920,7 +2920,7 @@ than its row reads as a different kind of thing. */
   border: 0;
   border-radius: 0;
   background-color: transparent !important;
-  background-image: var(--pumpkin-todo) !important;
+  background-image: var(--pumpkin-unlit) !important;
   background-position: center !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
@@ -2929,20 +2929,20 @@ than its row reads as a different kind of thing. */
 }
 
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-completed {
-  background-image: var(--pumpkin-done) !important;
+  background-image: var(--pumpkin-lit) !important;
   color: #5a3208;
   filter: drop-shadow(0 0 12px rgb(255 150 0 / 55%));
 }
 
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-in_progress,
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-unlocked {
-  background-image: var(--pumpkin-todo) !important;
+  background-image: var(--pumpkin-green) !important;
   color: #5a3208;
   filter: drop-shadow(0 0 14px rgb(255 170 60 / 70%));
 }
 
 .personal-workspace .challenge-dsl-map--pumpkin .challenge-dsl-card.is-failed {
-  background-image: var(--pumpkin-todo) !important;
+  background-image: var(--pumpkin-unlit) !important;
   color: #ff9a8a;
   filter: saturate(0.7) brightness(0.85);
 }
