@@ -84,6 +84,17 @@ _PROMPT_SUFFIXES: dict[str, str] = {
         "Write reference_content in English. "
         "If the learner answer is empty, score it 0 and say the question was left unanswered."
     ),
+    "challenge_plan": (
+        " Return 3-6 main nodes (3 when uncertain) plus at most one OPTIONAL_SIDE node. "
+        "Main node order: REVIEW, NEW_WORDS, at most one AI_PRACTICE, WORD_DRILL, final BOSS. "
+        "Put every due entry ID on REVIEW and every new entry ID on NEW_WORDS; no other node "
+        "carries entry IDs. Never omit or repeat an entry. Main estimated_minutes must sum to "
+        "80-120 percent of target_minutes. AI_PRACTICE uses an allowed practice_type and "
+        "practice_count 1 for writing/conversation or 3/5/10/15/20 otherwise; WORD_DRILL "
+        "uses an allowed drill_mode; BOSS uses fill_blank with 5 or 10. Do not add optional, "
+        "practice_type, practice_count or drill_mode to node types that do not allow them. "
+        "Use short Simplified Chinese copy without < or >. Copy every ID verbatim."
+    ),
 }
 
 
