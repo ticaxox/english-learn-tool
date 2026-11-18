@@ -183,13 +183,12 @@ function speakTurn(turn: PracticeConversationTurn): void {
 </script>
 
 <template>
-  <section class="practice-conversation">
+  <section class="practice-conversation" :style="surface">
     <!-- The brief is a question card like every other task: same paper, same
          header. It introduces the task in Chinese; the English lives in the
          talk itself, where it is being practised. -->
     <header
       class="practice-conversation__brief practice-question-card practice-question-card--conversation"
-      :style="surface"
     >
       <div class="practice-question-card__header">
         <div class="practice-question-step">
@@ -319,23 +318,21 @@ function speakTurn(turn: PracticeConversationTurn): void {
   width: 100%;
 }
 
-/* The chat is its own card inside the question card, like Hob's composer:
-   no second paper frame, just the host card with clear inner space. */
+/* B: the chat sits on its own sheet of the same paper as the question.
+   Two cards, both with a drawn edge, instead of one card and a divider. */
 .practice-conversation__chat {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   min-height: 26rem;
-  padding: 10px 0 0;
-  border: 0;
-  border-top: 1px solid var(--ui-line, #ecd9bb);
+  padding: 10px 24px 14px;
+  border: 24px solid transparent;
+  border-image-source: var(--rune-paper-card);
+  border-image-slice: 64 fill;
+  border-image-width: 24px;
+  border-image-repeat: stretch;
   border-radius: 0;
-  background: transparent;
-}
-
-html[data-theme='night'] .practice-conversation__chat {
-  border-color: var(--ui-line, #3d2c66);
-  background: transparent;
+  background: none;
 }
 
 .practice-conversation__headline {
