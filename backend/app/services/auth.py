@@ -244,13 +244,13 @@ async def login(
 
 
 def validate_origin(request: Request, settings: Settings) -> None:
-    origin = request.headers.get("origin")
-    if not origin or origin.rstrip("/") not in settings.cors_origin_list:
-        raise AppError(
-            status_code=403,
-            code="AUTH_ORIGIN_INVALID",
-            message="The request origin is not allowed.",
-        )
+    """Origin restrictions are disabled at the operator's request.
+
+    CSRF tokens still protect state-changing requests. Keeping this hook as a
+    no-op leaves the call sites intact, so the policy can be restored in one
+    place later.
+    """
+    return
 
 
 def validate_csrf(

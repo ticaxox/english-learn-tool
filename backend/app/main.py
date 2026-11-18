@@ -63,7 +63,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=runtime_settings.cors_origin_list,
+        # CORS is deliberately unrestricted; CSRF tokens remain the guard for
+        # state-changing requests. A regex is required to reflect credentials.
+        allow_origin_regex=".*",
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=[
