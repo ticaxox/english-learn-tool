@@ -199,12 +199,19 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function changeAvatar(avatar: AvatarKey): Promise<void> {
+  async function changeAvatar(avatar: AvatarKey): Promise<boolean> {
     lastError.value = null
     try {
       const result = await apiClient.patch<unknown>('/auth/me/avatar', { avatar })
       user.value = parseCurrentUser(result)
+      return true
     } catch (error) {
+      // Older local backends predate this endpoint. Keep the preview switchable
+      // in-memory; only a real failure should surface as an error.
+      if (isApiError(error) && (error.status === 404 || error.status === 405)) {
+        if (user.value) user.value = { ...user.value, avatar }
+        return false
+      }
       lastError.value = error
       throw error
     }

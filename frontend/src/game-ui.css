@@ -5594,25 +5594,19 @@ html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating--mas
 
 /* Hob stands under the question list, not inside a card or the clock rail.
    The sprite is square with its own air; never crop or stretch it. */
-.personal-workspace .practice-aside-hob {
-  display: flex;
-  justify-content: center;
-  padding: 8px 0 2px;
-}
-
-.personal-workspace .practice-rail-sprite,
-.personal-workspace .memory-rail-sprite {
+.personal-workspace .practice-aside-hob,
+.personal-workspace .memory-aside-hob {
   display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  margin: 0 auto;
-  object-fit: contain;
+  width: 100%;
+  padding: 12px 0 0;
 }
-.personal-workspace .practice-aside-hob .practice-rail-sprite { width: 172px; max-width: 45%; }
-.personal-workspace .memory-rail-sprite { width: 150px; }
 
-@media (max-width: 860px) {
-  .personal-workspace .practice-aside-hob .practice-rail-sprite { width: 132px; max-width: 55%; }
-  .personal-workspace .memory-rail-sprite { width: 128px; }
+.personal-workspace .practice-aside-hob .practice-rail-sprite,
+.personal-workspace .memory-aside-hob .memory-rail-sprite {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  object-fit: contain;
 }

@@ -33,16 +33,19 @@ const avatar = ref<AvatarKey>(auth.user?.avatar ?? 'pumpkin')
 const avatarError = ref<unknown>(null)
 const avatarSaved = ref(false)
 const avatarSaving = ref(false)
+const avatarLocalOnly = ref(false)
 
 async function chooseAvatar(next: AvatarKey): Promise<void> {
   if (avatarSaving.value || next === avatar.value) return
   avatarSaving.value = true
   avatarError.value = null
   avatarSaved.value = false
+  avatarLocalOnly.value = false
   try {
-    await auth.changeAvatar(next)
+    const persisted = await auth.changeAvatar(next)
     avatar.value = auth.user?.avatar ?? next
-    avatarSaved.value = true
+    avatarSaved.value = persisted
+    avatarLocalOnly.value = !persisted
   } catch (error) {
     avatarError.value = error
   } finally {
@@ -230,6 +233,7 @@ async function saveAll(): Promise<void> {
 
     <p v-if="usernameSaved" class="alert alert-success" role="status">用户名已更新。</p>
     <p v-if="avatarSaved" class="alert alert-success" role="status">头像已更新。</p>
+    <p v-if="avatarLocalOnly" class="field-hint" role="status">当前本地后端还没有头像保存接口，选择只在本次预览生效。</p>
     <p v-if="saved" class="alert alert-success" role="status">密码已更新，当前会话已重新登录。</p>
     <ErrorNotice v-if="error" :error="error" :show-retry="false" />
     <ErrorNotice v-if="usernameError" :error="usernameError" :show-retry="false" />
