@@ -40,17 +40,6 @@ const routes: RouteRecordRaw[] = [
     component: LoginView,
     meta: { public: true },
   },
-  // DEV ONLY: the mascot at its real sizes on the real tokens, with no backend.
-  // `import.meta.env.DEV` is statically false in a build, so the branch and the
-  // chunk behind it both drop out.
-  ...(import.meta.env.DEV
-    ? [{
-        path: '/_mascot',
-        name: 'mascot-preview',
-        component: () => import('../views/MascotPreview.vue'),
-        meta: { public: true },
-      } satisfies RouteRecordRaw]
-    : []),
   {
     path: '/change-password',
     name: 'change-password',
