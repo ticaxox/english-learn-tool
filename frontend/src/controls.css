@@ -4582,6 +4582,18 @@ html[data-theme='night'] .personal-workspace .trail-month__dow { color: #c9b6ff;
   color: #fff;
 }
 html[data-theme='night'] .personal-workspace .trail-month__day.is-lit { color: #10261f; }
+html[data-theme='night'] .personal-workspace .trail-month__day.is-past {
+  background: var(--insight-quiet);
+  color: var(--insight-quiet-ink);
+}
+html[data-theme='night'] .personal-workspace .trail-month__day.is-lit {
+  background: var(--insight-hot);
+  color: #10261f;
+}
+html[data-theme='night'] .personal-workspace .trail-month__day.is-today {
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+}
 
 .personal-workspace .trail-month__day.is-today {
   background: var(--ui-surface);
