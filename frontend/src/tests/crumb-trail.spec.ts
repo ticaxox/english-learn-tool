@@ -24,11 +24,12 @@ const book: Wordbook = {
 }
 
 describe('T-FE-018 Grimoire IP depth', () => {
-  it('renames the member brand and gives Hob one reusable mark', () => {
+  it('renames the member brand and uses the painted wordmark', () => {
     const shell = source('../components/MemberShell.vue')
     expect(shell).toContain('Grimoire')
-    expect(shell).toContain('HobMark')
-    // The mascot is the drawn character (day/night), not a second vector sketch.
+    expect(shell).toContain('workspace-brand-logo')
+    expect(shell).toContain('wordmark')
+    // Hob keeps one reusable drawn mark for the places that still need a face.
     expect(source('../components/HobMark.vue')).toContain('illustration.hob')
   })
 
