@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import LoadingState from '../components/LoadingState.vue'
+import UserAvatar from '../components/UserAvatar.vue'
+import { AVATAR_KEYS, type AvatarKey } from '../api/contracts'
 import { ValidationError } from '../api/errors'
 import {
   createPersonalToken,
@@ -27,6 +29,29 @@ const saved = ref(false)
 const username = ref(auth.user?.username ?? '')
 const usernameError = ref<unknown>(null)
 const usernameSaved = ref(false)
+const avatar = ref<AvatarKey>(auth.user?.avatar ?? 'pumpkin')
+const avatarError = ref<unknown>(null)
+const avatarSaved = ref(false)
+const avatarSaving = ref(false)
+const avatarLocalOnly = ref(false)
+
+async function chooseAvatar(next: AvatarKey): Promise<void> {
+  if (avatarSaving.value || next === avatar.value) return
+  avatarSaving.value = true
+  avatarError.value = null
+  avatarSaved.value = false
+  avatarLocalOnly.value = false
+  try {
+    const persisted = await auth.changeAvatar(next)
+    avatar.value = auth.user?.avatar ?? next
+    avatarSaved.value = persisted
+    avatarLocalOnly.value = !persisted
+  } catch (error) {
+    avatarError.value = error
+  } finally {
+    avatarSaving.value = false
+  }
+}
 
 const tokens = ref<PersonalToken[]>([])
 const tokensLoading = ref(false)
@@ -207,9 +232,42 @@ async function saveAll(): Promise<void> {
     </header>
 
     <p v-if="usernameSaved" class="alert alert-success" role="status">用户名已更新。</p>
+    <p v-if="avatarSaved" class="alert alert-success" role="status">头像已更新。</p>
+    <p v-if="avatarLocalOnly" class="field-hint" role="status">当前本地后端还没有头像保存接口，选择只在本次预览生效。</p>
     <p v-if="saved" class="alert alert-success" role="status">密码已更新，当前会话已重新登录。</p>
     <ErrorNotice v-if="error" :error="error" :show-retry="false" />
     <ErrorNotice v-if="usernameError" :error="usernameError" :show-retry="false" />
+    <ErrorNotice v-if="avatarError" :error="avatarError" :show-retry="false" />
+
+    <div class="ia-security-block ia-avatar-block" aria-labelledby="account-avatar-title">
+      <header>
+        <p class="eyebrow">像素头像</p>
+        <h2 id="account-avatar-title">选一个 Hob 世界里的自己</h2>
+        <p class="field-hint">选中即保存到账号，主界面、练习页和个人资料菜单会一起换。</p>
+      </header>
+      <div class="ia-avatar-current">
+        <UserAvatar :avatar="avatar" size="large" :label="`当前头像：${avatar}`" />
+        <div>
+          <strong>当前头像</strong>
+          <span>16×16 像素，昼夜同图，随界面配色换底。</span>
+        </div>
+      </div>
+      <div class="ia-avatar-grid" role="group" aria-label="头像选择">
+        <button
+          v-for="option in AVATAR_KEYS"
+          :key="option"
+          type="button"
+          class="ia-avatar-choice"
+          :class="{ 'is-selected': option === avatar }"
+          :disabled="avatarSaving"
+          :aria-pressed="option === avatar"
+          :aria-label="`使用${option}头像`"
+          @click="chooseAvatar(option)"
+        >
+          <UserAvatar :avatar="option" :label="option" />
+        </button>
+      </div>
+    </div>
 
     <form class="ia-kv-form" @submit.prevent="saveAll">
       <div class="ia-kv-row">
@@ -331,3 +389,29 @@ async function saveAll(): Promise<void> {
   </section>
 
 </template>
+
+
+<style scoped>
+.ia-avatar-block { margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1px dashed var(--ui-line); }
+.ia-avatar-current { display: flex; align-items: center; gap: 14px; margin: 12px 0 16px; }
+.ia-avatar-current strong { display: block; font-size: 14px; }
+.ia-avatar-current span { display: block; margin-top: 2px; color: var(--ui-muted); font-size: 12px; }
+.ia-avatar-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.ia-avatar-choice {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  padding: 0;
+  border: 2px solid var(--ui-line);
+  border-radius: 50%;
+  background: var(--ui-surface);
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+.ia-avatar-choice:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--g-orange-edge); }
+.ia-avatar-choice.is-selected { border-color: var(--ui-ink); box-shadow: 0 0 0 3px var(--g-gold); }
+.ia-avatar-choice:focus-visible { outline: 3px solid var(--g-orange); outline-offset: 2px; }
+.ia-avatar-choice:disabled { cursor: wait; opacity: 0.7; }
+.ia-avatar-choice .user-avatar { width: 46px; height: 46px; }
+</style>

@@ -20,11 +20,20 @@ import { useSpeechRecognition } from '../composables/useSpeechRecognition'
 import '../coach.css'
 import { illustration } from '../assets/halloween'
 import ArtImage from '../components/ArtImage.vue'
+import UserAvatar from '../components/UserAvatar.vue'
+import { useAuthStore } from '../stores/auth'
 
 const props = withDefaults(defineProps<{ surface?: 'panel' | 'page' }>(), { surface: 'panel' })
 const isPage = computed(() => props.surface === 'page')
 // The full-screen page keeps its own history; the floating panel never shows one.
 const coach = useCoachWorkspace(undefined, props.surface)
+let auth: ReturnType<typeof useAuthStore> | null = null
+try {
+  auth = useAuthStore()
+} catch {
+  auth = null
+}
+const userAvatar = computed(() => auth?.user?.avatar ?? 'pumpkin')
 const draft = ref('')
 const dictation = useSpeechRecognition((text) => {
   draft.value = draft.value.trim() ? `${draft.value.trim()} ${text}` : text
@@ -440,7 +449,7 @@ async function revertTo(message: CoachMessage): Promise<void> {
             >
               <span class="coach-message-avatar" :class="`coach-message-avatar--${message.role}`" aria-hidden="true">
                 <ArtImage v-if="message.role === 'assistant'" class="coach-message-avatar__art" :set="illustration.hob" />
-                <span v-else class="coach-message-avatar__you">你</span>
+                <UserAvatar v-else :avatar="userAvatar" :label="`${auth?.displayName || '你'} 的像素头像`" />
               </span>
 
               <div class="coach-message-body">

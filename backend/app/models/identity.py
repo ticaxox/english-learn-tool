@@ -86,6 +86,10 @@ class UserProfile(Base):
             "practice_pool_target >= 0 AND practice_pool_target <= 5",
             name="practice_pool_target_range",
         ),
+        CheckConstraint(
+            "avatar IN ('pumpkin','bat','cat','ghost','skull','witch','candle','candy')",
+            name="user_profile_avatar_valid",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -116,6 +120,11 @@ class UserProfile(Base):
     )
     notification_preferences: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
+    # Which 16×16 pixel sprite the learner picked in account settings. The
+    # sprite itself ships with the frontend; the database stores only its key.
+    avatar: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="pumpkin", server_default=text("'pumpkin'")
     )
     practice_pool_target: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")

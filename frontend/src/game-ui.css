@@ -5377,7 +5377,7 @@ html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
   /* The readings sit lower than the top of the card, and the ratings lower
      again: the card leads, the side follows. */
   gap: 46px;
-  padding-top: 48px;
+  padding-top: 0;
   align-content: start;
 }
 
@@ -5589,4 +5589,24 @@ html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating--mas
 @media (prefers-reduced-motion: reduce) {
   .memory-swap-enter-active,
   .memory-swap-leave-active { transition: none; }
+}
+
+
+/* Hob stands under the question list, not inside a card or the clock rail.
+   The sprite is square with its own air; never crop or stretch it. */
+.personal-workspace .practice-aside-hob,
+.personal-workspace .memory-aside-hob {
+  display: block;
+  width: 100%;
+  padding: 12px 0 0;
+}
+
+.personal-workspace .practice-aside-hob .practice-rail-sprite,
+.personal-workspace .memory-aside-hob .memory-rail-sprite {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  object-fit: contain;
 }

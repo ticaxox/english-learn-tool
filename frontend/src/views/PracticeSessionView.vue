@@ -3,7 +3,7 @@ import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import ArtImage from '../components/ArtImage.vue'
-import { illustration } from '../assets/halloween'
+import { hobActions, illustration } from '../assets/halloween'
 import SvgPlateButton from '../components/SvgPlateButton.vue'
 import ErrorNotice from '../components/ErrorNotice.vue'
 import { timerLimitFromQuery, useSessionTimer } from '../composables/useSessionTimer'
@@ -55,6 +55,8 @@ watch(() => session.value?.status, (status) => {
   }
 }, { immediate: true })
 const result = practice.result
+// The sprite sits on the clock rail, on top of the wood card — not inside a question card.
+const railSprite = computed(() => hobActions[session.value?.practiceType ?? ''] ?? hobActions.mixed)
 
 // Words in the passage that belong to the learner's wordbook open a little
 // gloss; the whole book is read once per session.
@@ -248,7 +250,7 @@ void practice.load()
 
       <!-- Grading is the same wait as generation, so it wears the same sheet. -->
       <section v-else-if="session.status === 'submitted'" class="panel practice-generation-panel" aria-live="polite">
-        <ArtImage class="practice-generation__mascot" :set="illustration.brewing" />
+        <img class="practice-generation__mascot" :src="hobActions.grading" alt="" />
         <div class="practice-generation__copy">
           <p class="eyebrow">正在评卷</p>
           <h2>正在批改这一组答案</h2>
@@ -325,6 +327,12 @@ void practice.load()
               </SvgPlateButton>
               <DivButton class="button-secondary practice-regenerate-button" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</DivButton>
             </section>
+
+            <!-- Hob stands below the answering rail, on the page rather than
+                 inside the clock card. Every question type shares this slot. -->
+            <div class="practice-aside-hob" aria-hidden="true">
+              <img class="practice-rail-sprite" :src="railSprite" alt="" />
+            </div>
           </aside>
         </div>
       </template>

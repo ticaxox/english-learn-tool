@@ -23,6 +23,34 @@ def bearer(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
+async def test_pixel_avatar_choice_round_trips_and_validates(client, user_factory) -> None:
+    member = await user_factory(role="member", must_change_password=False)
+    logged_in = await login(client, member.username)
+    assert logged_in.status_code == 200
+    token = logged_in.json()["access_token"]
+    assert logged_in.json()["user"]["avatar"] == "pumpkin"
+
+    changed = await client.patch(
+        "/api/v1/auth/me/avatar",
+        headers=bearer(token),
+        json={"avatar": "witch"},
+    )
+    assert changed.status_code == 200
+    assert changed.json()["avatar"] == "witch"
+
+    me = await client.get(ME_PATH, headers=bearer(token))
+    assert me.status_code == 200
+    assert me.json()["avatar"] == "witch"
+
+    invalid = await client.patch(
+        "/api/v1/auth/me/avatar",
+        headers=bearer(token),
+        json={"avatar": "not-a-sprite"},
+    )
+    assert invalid.status_code == 422
+    assert me.json()["avatar"] == "witch"
+
+
 async def test_initial_password_change_flow_and_cookie_contract(client, user_factory) -> None:
     admin_user = await user_factory(role="admin", must_change_password=True)
     response = await login(client, admin_user.username)

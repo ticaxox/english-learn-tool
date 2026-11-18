@@ -532,6 +532,19 @@ html[data-theme='night'] .levelup-card {
   height: 96px;
 }
 
+.personal-workspace .workspace-brand-logo {
+  display: block;
+  width: 184px;
+  height: auto;
+}
+
+.personal-workspace.is-sidebar-collapsed .workspace-brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  object-position: left center;
+}
+
 .personal-workspace .workspace-brand-copy { gap: 0; }
 
 .personal-workspace .workspace-brand-copy strong {
@@ -842,7 +855,6 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   place-items: center;
   padding: 0 13px;
   border-bottom: 3px solid transparent;
-  border-radius: 0;
   background: transparent;
   color: var(--rail-muted);
   font-size: 0.86rem;
@@ -903,16 +915,22 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
 
 .personal-workspace .workspace-avatar-button.ia-profile-trigger {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 46px;
+  height: 46px;
   min-width: 0;
   min-height: 0;
+  padding: 0;
   place-items: center;
+  overflow: hidden;
   border: 0;
   border-radius: 50%;
-  background: var(--rail-mark);
-  box-shadow: 0 2px 0 var(--rail-edge);
+  background: transparent;
+  box-shadow: none;
   color: #3b2a14;
+}
+
+.personal-workspace .workspace-avatar-button .user-avatar { width: 100%; height: 100%; }
+.personal-workspace .workspace-avatar-button {
   font-family: var(--font-code);
   font-size: 11px;
   font-weight: 800;
@@ -1181,7 +1199,8 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   /* The session's small marks: exit, speak, rate and end. */
   .personal-workspace .lesson-hud__exit { width: 40px; height: 40px; }
   .personal-workspace .speak-button { width: 36px; height: 36px; }
-  .personal-workspace .workspace-avatar-button.ia-profile-trigger { width: 40px; height: 40px; }
+  .personal-workspace .workspace-avatar-button.ia-profile-trigger { width: 46px; height: 46px; }
+  .personal-workspace .workspace-avatar-button.ia-profile-trigger .user-avatar { width: 100%; height: 100%; }
   .personal-workspace .memory-rail-end,
   .personal-workspace .memory-session-rail .memory-rail-end { min-height: 44px; }
   .personal-workspace .memory-rail-actions .div-button { min-height: 44px; }
@@ -1470,3 +1489,6 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   }
   .personal-workspace .wordbook-grid .wordbook-cover__name { font-size: 0.52rem; }
 }
+
+/* The wordmark is the whole brand mark now: centre it in the rail. */
+.personal-workspace .workspace-brand { justify-content: center; }

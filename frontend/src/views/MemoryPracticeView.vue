@@ -16,7 +16,7 @@ import FlashcardTrainer from '../components/FlashcardTrainer.vue'
 import ChoiceTrainer from '../components/ChoiceTrainer.vue'
 import SpellingTrainer from '../components/SpellingTrainer.vue'
 import LevelUpOverlay from '../components/LevelUpOverlay.vue'
-import { illustration } from '../assets/halloween'
+import { hobActions, illustration } from '../assets/halloween'
 import ShelfPicker from '../components/ShelfPicker.vue'
 import { fetchMemoryConfig, fetchTodayPlan, resetMemoryProgress } from '../api/learning'
 import { isContractFrozen } from '../api/contract-adapter'
@@ -202,6 +202,7 @@ const hearts = ref(MAX_HEARTS)
 /** The flip card asks for a rating, not an answer, so nothing there costs
     a life — its rail shows the count and the clock only. */
 const showsLives = computed(() => (selectedModule.value ?? session.module.value) !== 'flashcard')
+const railSprite = computed(() => hobActions[selectedModule.value ?? session.module.value ?? ''] ?? hobActions.flashcard)
 /** This run's own tally — the server keeps the durable record. */
 const runCorrect = ref(0)
 const runWrong = ref(0)
@@ -667,6 +668,11 @@ watch(challengeModule, async (module, previous) => {
             结束本次
           </DivButton>
           <p v-else class="memory-rail-state">本轮训练已结束，成绩会记入今日进度。</p>
+        </div>
+
+        <!-- Hob stands under the rail, on the page rather than inside the card. -->
+        <div class="memory-aside-hob" aria-hidden="true">
+          <img class="memory-rail-sprite" :src="railSprite" alt="" />
         </div>
 
         <!-- What you make of the card is the one thing to do after it turns

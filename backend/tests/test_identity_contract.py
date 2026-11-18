@@ -55,6 +55,7 @@ async def test_real_login_change_password_me_refresh_admin_and_logout_flow(
     me = await client.get(ME_PATH, headers=bearer(second["access_token"]))
     assert me.status_code == 200
     assert me.json()["username"] == user.username
+    assert me.json()["avatar"] == "pumpkin"
 
     refreshed = await client.post(
         REFRESH_PATH,

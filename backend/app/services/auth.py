@@ -749,3 +749,32 @@ async def change_username(
     )
     await session.commit()
     return user
+
+
+async def change_avatar(
+    session: AsyncSession,
+    *,
+    context: AuthContext,
+    avatar: str,
+) -> User:
+    """Persist the caller's pixel-sprite choice. Validation is in the schema."""
+    user = context.user
+    profile = user.profile
+    if profile is None:
+        raise AppError(
+            status_code=422,
+            code="PROFILE_MISSING",
+            message="The learning profile is missing.",
+        )
+    profile.avatar = avatar
+    add_audit_event(
+        session,
+        actor=user,
+        action="auth.avatar.change",
+        target_type="user",
+        target_id=user.id,
+        target_username=user.username_normalized,
+        outcome="success",
+    )
+    await session.commit()
+    return user

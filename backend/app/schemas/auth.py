@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.security import password_policy_error, validate_username
 
+AVATAR_KEYS = frozenset({"pumpkin", "bat", "cat", "ghost", "skull", "witch", "candle", "candy"})
+
 
 class LoginRequest(BaseModel):
     username: str = Field(min_length=3, max_length=32)
@@ -57,6 +59,18 @@ class UsernameChangeRequest(BaseModel):
         return validate_username(value)
 
 
+class AvatarChangeRequest(BaseModel):
+    avatar: str = Field(min_length=1, max_length=24)
+
+    @field_validator("avatar")
+    @classmethod
+    def avatar_is_one_of_the_sprites(cls, value: str) -> str:
+        key = value.strip()
+        if key not in AVATAR_KEYS:
+            raise ValueError("Unknown avatar sprite.")
+        return key
+
+
 class UserSelf(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -66,6 +80,7 @@ class UserSelf(BaseModel):
     role: Literal["admin", "member"]
     status: Literal["active", "disabled"]
     must_change_password: bool
+    avatar: str = "pumpkin"
     department: str | None = None
     learning_group: str | None = None
     last_login_at: datetime | None = None

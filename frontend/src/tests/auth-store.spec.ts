@@ -63,6 +63,54 @@ describe('auth store', () => {
     expect((meCall[1].headers as Headers).get('Authorization')).toBe('Bearer memory-only-token')
   })
 
+  it('saves the chosen pixel avatar through the real endpoint', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ access_token: 'avatar-token', csrf_token: 'csrf-avatar' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            id: '9ad81de0-83b0-44ba-a67c-ad817f73eb7d',
+            username: 'leader',
+            display_name: '学习负责人',
+            role: 'member',
+            must_change_password: false,
+            avatar: 'pumpkin',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            id: '9ad81de0-83b0-44ba-a67c-ad817f73eb7d',
+            username: 'leader',
+            display_name: '学习负责人',
+            role: 'member',
+            must_change_password: false,
+            avatar: 'cat',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    const auth = useAuthStore()
+    await auth.login({ username: 'leader', password: 'Strong-pass-123' })
+    expect(auth.avatar).toBe('pumpkin')
+
+    await auth.changeAvatar('cat')
+
+    const patchCall = fetchMock.mock.calls[2] as [string, RequestInit]
+    expect(patchCall[0]).toBe('/api/v1/auth/me/avatar')
+    expect((patchCall[1].headers as Headers).get('Content-Type')).toContain('application/json')
+    expect(auth.avatar).toBe('cat')
+  })
+
   it('clears the in-memory session when refresh is rejected', async () => {
     vi.stubGlobal(
       'fetch',

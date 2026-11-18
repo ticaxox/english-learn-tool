@@ -17,6 +17,7 @@ Create Date: 2026-11-13
 from collections.abc import Sequence
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "20261113_0029"
@@ -35,9 +36,7 @@ def upgrade() -> None:
             server_default=sa.text("'chat'"),
         ),
     )
-    op.create_check_constraint(
-        "kind_valid", "ai_providers", "kind IN ('chat', 'embedding')"
-    )
+    op.create_check_constraint("kind_valid", "ai_providers", "kind IN ('chat', 'embedding')")
 
 
 def downgrade() -> None:
