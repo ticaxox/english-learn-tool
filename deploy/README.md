@@ -65,11 +65,10 @@ file bodies or credentials.
 
 ## CI
 
-`.github/workflows/ci.yml` runs five blocking jobs:
+`.github/workflows/ci.yml` runs four blocking jobs:
 
 - backend lint and integration tests on real PostgreSQL and Redis;
 - frontend build and unit tests;
-- quality-manifest validation;
 - Gitleaks secret scanning;
 - Compose build, migration, storage, health, security-header and SSE checks.
 

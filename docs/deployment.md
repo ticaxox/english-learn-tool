@@ -56,13 +56,12 @@ deploy/scripts/deploy.sh <version>
 
 ## 4. CI
 
-`.github/workflows/ci.yml` 在 PR、push main 与手动触发时运行五个阻塞作业：
+`.github/workflows/ci.yml` 在 PR、push main 与手动触发时运行四个阻塞作业：
 
 | 作业 | 内容 |
 |---|---|
 | backend | uv sync → 建测试库 → ruff lint → ruff format check → pytest（PG16 + Redis7 service） |
 | frontend | npm ci → build（vue-tsc + vite）→ vitest |
-| quality | 质量清单 unittest + 结构校验 |
 | security | gitleaks 扫描 Git 历史 |
 | compose | compose config、22 个部署测试、安全头合同、起栈、词书卷探针 |
 
