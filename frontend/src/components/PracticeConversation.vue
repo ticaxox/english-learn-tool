@@ -596,8 +596,6 @@ html[data-theme='night'] .practice-conversation__field {
   border-image-source: url('../assets/halloween/card/control-field-night.webp');
 }
 
-.practice-conversation__field:focus-within { filter: brightness(1.03); }
-
 .practice-conversation__input {
   flex: 1 1 auto;
   min-width: 0;
@@ -615,6 +613,7 @@ html[data-theme='night'] .practice-conversation__field {
   line-height: 24px;
   resize: none;
   overflow-y: hidden;
+  box-shadow: none !important;
   field-sizing: content;
 }
 
