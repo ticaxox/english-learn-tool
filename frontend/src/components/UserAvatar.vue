@@ -50,7 +50,7 @@ const source = computed(() => sprites[props.avatar] ?? pumpkin)
   image-rendering: pixelated;
 }
 
-.user-avatar--small { width: 38px; height: 38px; }
+.user-avatar--small { width: 30px; height: 30px; }
 .user-avatar--medium { width: 52px; height: 52px; }
 .user-avatar--large { width: 72px; height: 72px; }
 </style>

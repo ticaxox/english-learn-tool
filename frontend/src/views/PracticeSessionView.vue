@@ -312,7 +312,6 @@ void practice.load()
                   {{ sessionTimer.running.value ? sessionTimer.label.value : '已暂停' }}
                 </span>
               </div>
-              <img class="practice-rail-sprite" :src="railSprite" alt="" aria-hidden="true" />
               <span class="practice-rail-track" aria-hidden="true">
                 <span :style="{ width: `${questions.length ? Math.round(answeredCount / questions.length * 100) : 0}%` }"></span>
               </span>
@@ -328,6 +327,12 @@ void practice.load()
               </SvgPlateButton>
               <DivButton class="button-secondary practice-regenerate-button" type="button" :disabled="!canRegenerate" @click="regenerate">未作答重生成</DivButton>
             </section>
+
+            <!-- Hob stands below the answering rail, on the page rather than
+                 inside the clock card. Every question type shares this slot. -->
+            <div class="practice-aside-hob" aria-hidden="true">
+              <img class="practice-rail-sprite" :src="railSprite" alt="" />
+            </div>
           </aside>
         </div>
       </template>

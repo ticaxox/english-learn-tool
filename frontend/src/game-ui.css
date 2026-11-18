@@ -5592,20 +5592,27 @@ html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating--mas
 }
 
 
-/* Hob sits on the clock card itself, between the readout and the progress
-   line. The art is square with its own air; never crop or stretch it. */
+/* Hob stands under the question list, not inside a card or the clock rail.
+   The sprite is square with its own air; never crop or stretch it. */
+.personal-workspace .practice-aside-hob {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 2px;
+}
+
 .personal-workspace .practice-rail-sprite,
 .personal-workspace .memory-rail-sprite {
   display: block;
-  width: 100%;
-  max-width: 172px;
+  width: auto;
+  max-width: 100%;
   height: auto;
-  margin: 2px auto 0;
+  margin: 0 auto;
   object-fit: contain;
 }
-.personal-workspace .memory-rail-sprite { max-width: 150px; }
+.personal-workspace .practice-aside-hob .practice-rail-sprite { width: 172px; max-width: 45%; }
+.personal-workspace .memory-rail-sprite { width: 150px; }
 
 @media (max-width: 860px) {
-  .personal-workspace .practice-rail-sprite { max-width: 132px; }
-  .personal-workspace .memory-rail-sprite { max-width: 128px; }
+  .personal-workspace .practice-aside-hob .practice-rail-sprite { width: 132px; max-width: 55%; }
+  .personal-workspace .memory-rail-sprite { width: 128px; }
 }
