@@ -516,7 +516,8 @@ function parseQuestionResult(value: unknown, context: string): PracticeQuestionR
   return {
     questionId: stringValue(body.question_id, context, 'question_id'),
     questionType: enumValue(body.question_type, PRACTICE_TYPES, context, 'question_type'),
-    userAnswer: stringValue(body.user_answer, context, 'user_answer'),
+    // A skipped question is a real answer: the server records it as an empty string.
+    userAnswer: nullableString(body.user_answer, context, 'user_answer') ?? '',
     gradedCorrect: body.is_correct === null || body.is_correct === undefined ? null : booleanValue(body.is_correct, context, 'is_correct'),
     isMistake: body.is_mistake === undefined ? false : booleanValue(body.is_mistake, context, 'is_mistake'),
     score: nullableNumber(body.score, context, 'score'),

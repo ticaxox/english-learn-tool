@@ -165,6 +165,14 @@ describe('practice API contract', () => {
     const result = parsePracticeResult(resultPayload)
     expect(result.questions[0]).toMatchObject({ gradedCorrect: true, correctChoiceId: 'o-1', explanation: expect.stringContaining('resilience') })
   })
+  it('accepts an unanswered question in a submitted result', () => {
+    const payload = {
+      ...resultPayload,
+      questions: [{ ...resultPayload.questions[0], user_answer: '', is_correct: false, is_mistake: true }],
+    }
+    expect(parsePracticeResult(payload).questions[0].userAnswer).toBe('')
+  })
+
 
   it('builds record filters and parses record detail', async () => {
     expect(buildPracticeRecordQuery({ practiceType: 'reading', source: 'today_new', offset: 20, limit: 10 }))
