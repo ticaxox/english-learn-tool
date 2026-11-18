@@ -12,8 +12,10 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
+import ArtImage from './ArtImage.vue'
 import SpokenText from './SpokenText.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
+import { illustration } from '../assets/halloween'
 import {
   listConversationTurns,
   postConversationTurn,
@@ -183,13 +185,12 @@ function speakTurn(turn: PracticeConversationTurn): void {
 </script>
 
 <template>
-  <section class="practice-conversation">
+  <section class="practice-conversation" :style="surface">
     <!-- The brief is a question card like every other task: same paper, same
          header. It introduces the task in Chinese; the English lives in the
          talk itself, where it is being practised. -->
     <header
       class="practice-conversation__brief practice-question-card practice-question-card--conversation"
-      :style="surface"
     >
       <div class="practice-question-card__header">
         <div class="practice-question-step">
@@ -216,19 +217,21 @@ function speakTurn(turn: PracticeConversationTurn): void {
       aria-live="polite"
     >
       <article
-        v-for="(turn, index) in turns"
+        v-for="turn in turns"
         :key="turn.id"
         class="practice-conversation__turn"
         :class="`practice-conversation__turn--${turn.speaker}`"
         v-show="turn.line.trim()"
       >
-        <p
-          v-if="index === 0 || turns[index - 1].speaker !== turn.speaker"
-          class="practice-conversation__speaker"
-        >
-          <span class="practice-conversation__who">{{ turn.speaker === 'guide' ? 'Hob' : '我' }}</span>
-        </p>
         <div class="practice-conversation__row">
+          <span
+            class="practice-conversation__avatar"
+            :class="`practice-conversation__avatar--${turn.speaker}`"
+            aria-hidden="true"
+          >
+            <ArtImage v-if="turn.speaker === 'guide'" class="practice-conversation__avatar-art" :set="illustration.hob" />
+            <span v-else>你</span>
+          </span>
           <div class="practice-conversation__bubble">
             <SpokenText class="practice-conversation__line" :text="turn.line" :highlight="targetWords" />
             <p v-if="turn.lineZh" class="practice-conversation__zh">{{ turn.lineZh }}</p>
@@ -319,23 +322,21 @@ function speakTurn(turn: PracticeConversationTurn): void {
   width: 100%;
 }
 
-/* The chat is its own card inside the question card, like Hob's composer:
-   no second paper frame, just the host card with clear inner space. */
+/* B: the chat sits on its own sheet of the same paper as the question.
+   Two cards, both with a drawn edge, instead of one card and a divider. */
 .practice-conversation__chat {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   min-height: 26rem;
-  padding: 10px 0 0;
-  border: 0;
-  border-top: 1px solid var(--ui-line, #ecd9bb);
+  padding: 10px 24px 14px;
+  border: 24px solid transparent;
+  border-image-source: var(--rune-paper-card);
+  border-image-slice: 64 fill;
+  border-image-width: 24px;
+  border-image-repeat: stretch;
   border-radius: 0;
-  background: transparent;
-}
-
-html[data-theme='night'] .practice-conversation__chat {
-  border-color: var(--ui-line, #3d2c66);
-  background: transparent;
+  background: none;
 }
 
 .practice-conversation__headline {
@@ -425,7 +426,7 @@ html[data-theme='night'] .practice-conversation__chat {
   mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent 100%);
 }
 
-/* A turn is a column so the name sits above its own bubble, not beside it. */
+/* Hob's own chat grammar: a portrait beside each line, then a bubble. */
 .practice-conversation__turn {
   display: flex;
   flex-direction: column;
@@ -436,43 +437,65 @@ html[data-theme='night'] .practice-conversation__chat {
 
 .practice-conversation__row {
   display: flex;
-  gap: 0.4rem;
+  gap: 8px;
   align-items: flex-end;
+  width: 100%;
   max-width: 100%;
 }
 
-.practice-conversation__who {
-  display: inline-block;
-  font-size: 0.72rem;
+.practice-conversation__avatar {
+  display: grid;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ui-ink, #35240f);
+  font-family: var(--font-code, ui-monospace, monospace);
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.04em;
-  color: var(--ui-muted, #7d6247);
+}
+
+.practice-conversation__avatar-art,
+.practice-conversation__avatar-art .art-swap,
+.practice-conversation__avatar-art .art-swap__stack,
+.practice-conversation__avatar-art .art-swap__frame {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+
+.practice-conversation__avatar-art .art-swap__frame { object-fit: contain; }
+
+.practice-conversation__avatar--learner {
+  background: var(--g-gold-soft, #fff2b8);
+  color: #8c4706;
 }
 
 .practice-conversation__bubble {
+  width: fit-content;
   max-width: min(38rem, 82%);
-  padding: 0.65rem 0.9rem;
+  padding: 10px 14px 11px;
   border: 1px solid var(--ui-line, #ecd9bb);
   border-radius: 4px 16px 16px 16px;
-  background: var(--ui-surface, #fffdf6);
+  background: var(--ui-surface, #fffbf2);
+  box-shadow: 0 1px 2px rgb(53 36 15 / 6%), 0 2px 7px rgb(53 36 15 / 5%);
 }
 
-.practice-conversation__turn--learner {
-  align-items: flex-end;
-}
+.practice-conversation__turn--learner { align-items: flex-end; }
+
 
 .practice-conversation__turn--learner .practice-conversation__row {
   flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 
 .practice-conversation__turn--learner .practice-conversation__bubble {
   border-color: var(--g-gold-edge, #d9a400);
   border-radius: 16px 4px 16px 16px;
   background: var(--g-gold-soft, #fff2b8);
-}
-
-.practice-conversation__turn--learner .practice-conversation__who {
-  color: var(--g-orange-edge, #cf7400);
 }
 
 .practice-conversation__line {
@@ -555,20 +578,23 @@ html[data-theme='night'] .practice-conversation__chat {
   border-top-color: var(--g-orange, #ff9600);
 }
 
-/* The answer trough is the same control-field art the settings pages use. */
+/* Same composer as Hob: the carved field trough from the control set. */
 .practice-conversation__field {
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
+  align-items: center;
   padding: 4px 12px;
   border: 6px solid transparent;
   border-image: url('../assets/halloween/card/control-field-day.webp') 18% 5% fill stretch;
+  border-radius: 0;
   background: none;
   box-shadow: none;
-  transition: filter 160ms ease;
 }
 
-.practice-conversation__field:focus-within { filter: brightness(1.03); }
+html[data-theme='night'] .practice-conversation__field {
+  border-image-source: url('../assets/halloween/card/control-field-night.webp');
+}
 
 .practice-conversation__input {
   flex: 1 1 auto;
@@ -587,6 +613,7 @@ html[data-theme='night'] .practice-conversation__chat {
   line-height: 24px;
   resize: none;
   overflow-y: hidden;
+  box-shadow: none !important;
   field-sizing: content;
 }
 
@@ -623,10 +650,19 @@ html[data-theme='night'] .practice-conversation__chat {
 }
 
 .practice-conversation__send {
-  border: 1px solid transparent;
-  background: var(--g-orange, #ff9600);
-  color: #35240f;
-  box-shadow: 0 2px 0 var(--g-orange-edge, #cf7400);
+  border-width: 8px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('../assets/halloween/card/control-badge-day.webp') 30% 17% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #33200b;
+}
+
+html[data-theme='night'] .practice-conversation__send {
+  border-image-source: url('../assets/halloween/card/control-badge-night.webp');
+  color: #efe6ff;
 }
 
 .practice-conversation__send:hover:not(:disabled) { filter: brightness(1.06); }
