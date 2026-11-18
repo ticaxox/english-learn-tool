@@ -26,18 +26,7 @@ npm run dev
 
 ## 2. 演示账号
 
-首次环境可以直接注册。若需要预置数据，可用：
-
-```powershell
-$env:DEMO_SEED_CONFIRM = 'YES'
-$env:DEMO_ADMIN_PASSWORD = '<unique demo admin password>'
-$env:DEMO_MEMBER_PASSWORD = '<different unique demo member password>'
-uv run --project backend python docs/competition/seed_demo_data.py --apply
-```
-
-脚本创建 `demo_admin`、`demo_member`、`demo_member2`、`demo_member3` 四个账号。密码只从环境变量读取，不写入仓库。
-
-> **注意**：脚本原先硬校验迁移 head `844c0d89f737`，已改为 `20261114_0032`；它包含组织版时代的通知、看板等数据，**尚未在当前 schema 上执行验证**。演示前请在一次性数据库上先跑一遍，不要直接打生产库。
+首次环境直接在页面注册即可。需要多账号演示时，用不同的邮箱/用户名注册，或使用团队自己的演示数据脚本；仓库不内置演示账号密码，也不要求在演示环境使用固定账号。
 
 ## 3. 页面走查（约 6 分钟）
 

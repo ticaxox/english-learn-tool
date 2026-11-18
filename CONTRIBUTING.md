@@ -23,7 +23,7 @@
 | `frontend/**` | A20；`frontend/src/assets/**` 由 A21 交付 |
 | `.github/**`、`deploy/**`、容器文件 | A40 |
 | `tests/**`、质量证据 | A30 |
-| `docs/**`、根 README、比赛材料 | A50 |
+| `docs/**`、根 README | A50 |
 
 关注点只是默认倾向，不代表独占；任何人在自己的分支里都可以做全栈改动。
 

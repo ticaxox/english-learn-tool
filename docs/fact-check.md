@@ -51,7 +51,6 @@
 | 后端 pytest 209 个 | 需要真实 PostgreSQL 16 与 Redis 7 |
 | `alembic upgrade head` 在真实库 | 只做过离线 SQL 渲染 |
 | `npm run build` / `npm test` 在当前 tip | 上次执行在 `d90778d` |
-| 演示 seed 脚本 | head 已更新，未在当前 schema 上执行 |
 | 线上预览的版本 | 11-17 之后未核实 |
 
 ## 4. 维护规则
