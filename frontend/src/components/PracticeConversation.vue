@@ -12,8 +12,10 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
+import ArtImage from './ArtImage.vue'
 import SpokenText from './SpokenText.vue'
 import { useRuneSurface } from '../composables/useRuneSurface'
+import { illustration } from '../assets/halloween'
 import {
   listConversationTurns,
   postConversationTurn,
@@ -215,19 +217,21 @@ function speakTurn(turn: PracticeConversationTurn): void {
       aria-live="polite"
     >
       <article
-        v-for="(turn, index) in turns"
+        v-for="turn in turns"
         :key="turn.id"
         class="practice-conversation__turn"
         :class="`practice-conversation__turn--${turn.speaker}`"
         v-show="turn.line.trim()"
       >
-        <p
-          v-if="index === 0 || turns[index - 1].speaker !== turn.speaker"
-          class="practice-conversation__speaker"
-        >
-          <span class="practice-conversation__who">{{ turn.speaker === 'guide' ? 'Hob' : '我' }}</span>
-        </p>
         <div class="practice-conversation__row">
+          <span
+            class="practice-conversation__avatar"
+            :class="`practice-conversation__avatar--${turn.speaker}`"
+            aria-hidden="true"
+          >
+            <ArtImage v-if="turn.speaker === 'guide'" class="practice-conversation__avatar-art" :set="illustration.hob" />
+            <span v-else>你</span>
+          </span>
           <div class="practice-conversation__bubble">
             <SpokenText class="practice-conversation__line" :text="turn.line" :highlight="targetWords" />
             <p v-if="turn.lineZh" class="practice-conversation__zh">{{ turn.lineZh }}</p>
@@ -422,7 +426,7 @@ function speakTurn(turn: PracticeConversationTurn): void {
   mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent 100%);
 }
 
-/* A turn is a column so the name sits above its own bubble, not beside it. */
+/* Hob's own chat grammar: a portrait beside each line, then a bubble. */
 .practice-conversation__turn {
   display: flex;
   flex-direction: column;
@@ -433,43 +437,65 @@ function speakTurn(turn: PracticeConversationTurn): void {
 
 .practice-conversation__row {
   display: flex;
-  gap: 0.4rem;
+  gap: 8px;
   align-items: flex-end;
+  width: 100%;
   max-width: 100%;
 }
 
-.practice-conversation__who {
-  display: inline-block;
-  font-size: 0.72rem;
+.practice-conversation__avatar {
+  display: grid;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ui-ink, #35240f);
+  font-family: var(--font-code, ui-monospace, monospace);
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.04em;
-  color: var(--ui-muted, #7d6247);
+}
+
+.practice-conversation__avatar-art,
+.practice-conversation__avatar-art .art-swap,
+.practice-conversation__avatar-art .art-swap__stack,
+.practice-conversation__avatar-art .art-swap__frame {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+
+.practice-conversation__avatar-art .art-swap__frame { object-fit: contain; }
+
+.practice-conversation__avatar--learner {
+  background: var(--g-gold-soft, #fff2b8);
+  color: #8c4706;
 }
 
 .practice-conversation__bubble {
+  width: fit-content;
   max-width: min(38rem, 82%);
-  padding: 0.65rem 0.9rem;
+  padding: 10px 14px 11px;
   border: 1px solid var(--ui-line, #ecd9bb);
   border-radius: 4px 16px 16px 16px;
-  background: var(--ui-surface, #fffdf6);
+  background: var(--ui-surface, #fffbf2);
+  box-shadow: 0 1px 2px rgb(53 36 15 / 6%), 0 2px 7px rgb(53 36 15 / 5%);
 }
 
-.practice-conversation__turn--learner {
-  align-items: flex-end;
-}
+.practice-conversation__turn--learner { align-items: flex-end; }
+
 
 .practice-conversation__turn--learner .practice-conversation__row {
   flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 
 .practice-conversation__turn--learner .practice-conversation__bubble {
   border-color: var(--g-gold-edge, #d9a400);
   border-radius: 16px 4px 16px 16px;
   background: var(--g-gold-soft, #fff2b8);
-}
-
-.practice-conversation__turn--learner .practice-conversation__who {
-  color: var(--g-orange-edge, #cf7400);
 }
 
 .practice-conversation__line {
