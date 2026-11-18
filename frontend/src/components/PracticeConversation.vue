@@ -552,20 +552,17 @@ function speakTurn(turn: PracticeConversationTurn): void {
   border-top-color: var(--g-orange, #ff9600);
 }
 
-/* The answer trough is the same control-field art the settings pages use. */
+/* No second card inside the paper card: the answer line belongs to the chat
+   sheet itself, so the composer is just text on the sheet. */
 .practice-conversation__field {
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
-  padding: 4px 12px;
-  border: 6px solid transparent;
-  border-image: url('../assets/halloween/card/control-field-day.webp') 18% 5% fill stretch;
+  padding: 2px 2px 0;
+  border: 0;
   background: none;
   box-shadow: none;
-  transition: filter 160ms ease;
 }
-
-.practice-conversation__field:focus-within { filter: brightness(1.03); }
 
 .practice-conversation__input {
   flex: 1 1 auto;
