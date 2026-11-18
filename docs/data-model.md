@@ -1,167 +1,117 @@
 # 数据模型
 
-- 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 迁移 head：`844c0d89f737`
-- 应用表：46 张（另含 Alembic `alembic_version`）
-- 权威源：PostgreSQL 16；Redis 只做队列、短期协调和缓存
-- 隐私：仓库只包含 schema、迁移和合成数据说明，不包含真实成员数据
+- 代码基线：`main` @ `1cea3ff` / `v0.1.7`
+- 迁移 head：`20261114_0032`（40 个 revision，单头）
+- 数据表：59 张（不含 `alembic_version`）
+- 数据库：PostgreSQL 16；ORM：SQLAlchemy 2 async；迁移：Alembic
 
-## 1. 领域分组
+## 1. 表分组
 
-### 系统与审计
+### 身份与审计（6）
 
-- `system_metadata`
-- `audit_logs`
-- `alembic_version`
+| 表 | 用途 |
+|---|---|
+| `users` | 账号、角色、状态、密码哈希、最后登录 |
+| `user_profiles` | 显示名、学习目标、难度偏好、额度覆盖、通知偏好 |
+| `refresh_tokens` | Refresh Token 哈希、轮换链、IP/UA、撤销 |
+| `personal_access_tokens` | MCP 与外部调用的个人令牌（只存哈希） |
+| `audit_logs` | 登录、刷新、管理操作等审计事件 |
+| `import_previews` | 成员批量导入的预览与结果 |
 
-### 身份与会话
+### 词书（7）
 
-- `users`
-- `user_profiles`
-- `refresh_tokens`
+`wordbooks`、`wordbook_definitions`、`wordbook_entries`、`wordbook_examples`、`wordbook_import_previews`、`wordbook_jobs`、`wordbook_activations`。
 
-### 词书与后台任务
+- 词书归属用户；内置词书以系统定义形式提供。
+- 导入走预览令牌与持久 `wordbook_jobs`；文件落私有卷，库里只存元数据。
 
-- `wordbooks`
-- `wordbook_entries`
-- `wordbook_definitions`
-- `wordbook_examples`
-- `wordbook_activations`
-- `wordbook_import_previews`
-- `wordbook_jobs`
+### 学习与记忆（10）
 
-### 学习、记忆与计划
+`daily_plans`、`daily_plan_words`、`daily_activities`、`learning_heartbeats`、`memory_configs`、`memory_sessions`、`memory_session_items`、`memory_events`、`user_word_states`、`mistake_flags`。
 
-- `daily_plans`
-- `daily_plan_words`
-- `daily_activities`
-- `learning_heartbeats`
-- `memory_configs`
-- `memory_sessions`
-- `memory_session_items`
-- `memory_events`
-- `user_word_states`
-- `mistake_flags`
+- `user_word_states` 保存每张卡的 FSRS 状态（难度、稳定度、到期时间等）。
+- `memory_events` 逐题记录 shown / answer / mastered，带客户端事件键，重复提交不重复推进调度。
 
-### AI 平台
+### 练习（8）
 
-- `ai_providers`
-- `ai_prompts`
-- `ai_jobs`
-- `ai_job_events`
-- `ai_usage_ledger`
+`practice_sessions`、`practice_questions`、`practice_submissions`、`practice_events`、`practice_generations`、`practice_deletions`、`practice_pool_items`、`practice_conversation_turns`。
 
-### 练习
+- 会话状态：`generating` / `ready` / `submitted` / `failed` / `cancelled`；提交状态：`scoring` / `completed` / `failed`。
+- 预生成池按（题型 × 难度 × 来源）存放，新会话优先领取。
 
-- `practice_sessions`
-- `practice_generations`
-- `practice_questions`
-- `practice_submissions`
-- `practice_events`
-- `practice_deletions`
+### AI 平台（6）
 
-### 教练
+`ai_providers`、`ai_prompts`、`ai_jobs`、`ai_job_events`、`ai_usage_ledger`、`ai_memories`。
 
-- `coach_conversations`
-- `coach_messages`
-- `coach_stream_events`
-- `coach_context_snapshots`
-- `coach_action_receipts`
+- `ai_providers` 按 `owner_id` 归属；`kind` 为 `chat` 或 `embedding`；Key 以 AES-GCM 密文保存。
+- `ai_jobs` 保存任务类型、提示词快照、请求哈希、provider、终态与错误码。
+- `ai_usage_ledger` 以 `(job_id, quota_item)` 唯一，记录 reserve / consume / release。
 
-### 通知
+### 教练（7）
 
-- `notifications`
-- `notification_outbox`
+`coach_conversations`、`coach_messages`、`coach_stream_events`、`coach_attachments`、`coach_action_receipts`、`coach_context_snapshots`、`coach_memories`。
 
-### 每日挑战
+- 消息任务 202；`coach_stream_events` 是 SSE 的持久事件源。
+- 受控动作有 before/after 回执，24 小时内可撤销。
 
-- `daily_challenge_plans`
-- `challenge_plan_contexts`
-- `challenge_nodes`
-- `challenge_node_progress`
-- `challenge_boss_results`
+### 闯关（5）
 
-## 2. 关键不变量
+`daily_challenge_plans`、`challenge_plan_contexts`、`challenge_nodes`、`challenge_node_progress`、`challenge_boss_results`。
 
-### 身份
+- `(user_id, local_date)` 唯一：每人每天一张图。
+- 节点按 `order_index` 与 `client_key` 唯一；计划生成后当日锁定。
 
-- 用户名规范化后唯一。
-- 密码只存 Argon2id 哈希。
-- 最后一个启用管理员不可删除、停用或降级。
-- Refresh Token 只存哈希；轮换/重放检测由服务端完成。
+### 游戏化（4）
 
-### 词书
+`user_game_stats`、`xp_events`、`daily_quests`、`user_achievements`。
 
-- `visibility=organization` 时 `owner_id` 必须为空；私有词书必须有 owner。
-- 同一词书内规范化 headword 唯一。
-- 删除词书后条目不再可见；后台删除任务保留可追溯状态。
-- 词书文件使用私有卷，不通过公开静态目录暴露。
+- `xp_events` 记录每次奖励来源，服务端按来源去重，避免重复计分。
+- 等级、连续天数、灯油、任务与徽章都从事件与统计表推导。
 
-### 学习与 FSRS
+### 知识库（3）
 
-- `user_word_states` 对 `(user_id, wordbook_id, entry_id)` 唯一。
-- `due_at`、`fsrs_card` 和复习间隔只由后端 FSRS 服务写入。
-- 今日计划按用户时区和 `local_date` 固定；档案修改从次日目标生效。
-- 学习事件带幂等键，重复提交不能重复推进卡片。
+`knowledge_documents`、`knowledge_chunks`、`knowledge_folders`。
 
-### AI
+- 文件夹可嵌套；文档有难度、来源与索引状态。
+- `knowledge_chunks.embedding` 为可选向量（Postgres 数组），未生成时为空。
 
-- provider Key 使用服务端加密；数据库保存密文与掩码，不保存明文。
-- AI 任务、额度预留/消费/释放和错误状态持久化。
-- 提示词快照在任务创建时冻结；后续提示词修改只影响未来任务。
-- 题目提交前不能通过 API 返回答案、解析或参考内容。
+### 通知与系统（2 + 1）
 
-### 教练与挑战
+`notifications`、`notification_outbox`、`system_metadata`。
 
-- 教练消息和 stream event 按会话/消息序号唯一。
-- action receipt 保存 before/after 状态，撤销前重新校验当前状态。
-- 每日挑战对 `(user_id, local_date)` 唯一；节点顺序和 client key 唯一。
-- BOSS 提交幂等；完成结果刷新后仍可读取。
+- 通知后端完整；个人版前端当前没有通知入口与路由。
 
-### 通知
+## 2. 关键约束与不变量
 
-- `(user_id, dedupe_key)` 防止重复通知。
-- 非 AI 通知受 DND 与每日上限约束；AI 失败/完成按产品规则保留例外。
-- 通知正文按纯文本渲染，不把模型 Markdown 直接注入 HTML。
+| 不变量 | 实现 |
+|---|---|
+| AI 任务幂等 | `ai_jobs` 唯一约束 `(user_id, idempotency_key)` |
+| 额度不重复记账 | `ai_usage_ledger` 唯一 `(job_id, quota_item)` |
+| provider 名称不重复 | `ai_providers` 唯一 `(owner_id, name_normalized)`；默认 provider 必须 enabled |
+| 每日一图 | `daily_challenge_plans` 唯一 `(user_id, local_date)` |
+| 节点不重复 | `challenge_nodes` 唯一 `(plan_id, order_index)` 与 `(plan_id, client_key)` |
+| 记忆偏好唯一 | `ai_memories` 唯一 `(user_id, memory_key)` |
+| 练习池不超发 | 领取时在事务内更新 `practice_pool_items` 状态 |
+| FSRS 只在服务端 | 客户端只上报答题结果，间隔与到期由服务端计算 |
 
 ## 3. 迁移链
 
 ```text
-20261022_0001
-  → 20261022_0002
-  → f1b8d947271c
-  → 38236bfd0899
-  → c5ab093fd0f9
-  → fbff60ce778f
-  → 297df76b0133
-  → cd6e2b2dd57e
-  → 0bea27d11d11
-  → 844c0d89f737
+0001 → 0002 → f1b8d947271c → … → 844c0d89f737 → 0003 → … → 0026
+      ↘ 20261110_0027（merge 0026 与 844c0d89f737）
+        → 0028 conversation practice
+        → 0029 embedding provider（ai_providers.kind）
+        → 0030 knowledge folders
+        → 0031 knowledge nesting
+        → 0032 difficulty under goals（当前 head）
 ```
 
-T-QA-004 已执行空库 upgrade、`alembic check`、downgrade 和 re-upgrade，drift 为 0。
+- 迁移在启动时由 `tests/conftest.py` 或 Compose `migrate` 服务执行；生产部署脚本会在迁移前备份。
+- `alembic heads` 必须只有 `20261114_0032`；新增迁移应从该 head 续接，避免多头。
 
-## 4. 备份、恢复与删除
+## 4. 隐私与敏感字段
 
-- 合成库 `pg_dump`/`pg_restore` 已验证关键表计数一致。
-- 演示环境备份/RPO/RTO 与数据库/词书恢复已由 T-SHIP-002/003 验证；稳定生产 SLA 和主密钥分离仍需最终复核。
-- 应用回滚不等于数据库回滚；结构不兼容时必须停止并走单独批准的数据恢复流程。
-- 词书卷是私有数据资产，必须与 PostgreSQL 备份策略一起设计。
-- 删除演示数据时只删除固定 demo 命名空间，不执行全库清理。
-
-## 5. 隐私边界
-
-| 数据 | 成员本人 | 管理员 |
-|---|---|---|
-| 账号状态、学习档案 | 可读/可改 | 可读必要聚合/管理字段 |
-| 私有词书正文 | 可读本人 | 不可读 |
-| 答题、作文、翻译正文 | 可读本人 | 不可读 |
-| 未提交草稿 | 可读本人 | 不可读 |
-| 教练消息与 action 正文 | 可读本人 | 不可读 |
-| 组织学习时长/完成率 | 可读本人 | 可读聚合，低于最小分组时抑制 |
-
-## 6. 演示数据
-
-可执行脚本：[`competition/seed_demo_data.py`](competition/seed_demo_data.py)
-
-脚本只创建固定 demo UUID 命名空间内的数据，支持重复初始化；不会删除非 demo 用户或词书。验证记录见 `ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`。
+- 密码只存 Argon2id 哈希；Refresh Token 与个人访问令牌只存哈希。
+- AI provider Key 以 `SECRET_ENCRYPTION_KEY` 派生的 AES-GCM 密文保存，接口只回掩码。
+- 管理看板只返回聚合指标，不返回答题正文、草稿、教练对话或私有词书正文。
+- 真实用户数据、密钥与生产连接串不得进入仓库或文档。

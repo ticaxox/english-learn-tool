@@ -1,106 +1,62 @@
-# AI 英语学习工具
+# Grimoire
 
-面向学校、企业培训项目或学习组织内部成员的私有英语学习平台。产品把词书、FSRS 间隔复习、AI 练习、AI 教练、每日闯关和组织聚合看板整合为同一套真实学习闭环；首版不提供公开注册、陌生人社交或公开排行榜。
+**个人 AI 英语学习空间。**
 
-## 当前状态
+选一本词书，按 FSRS 的节奏记单词，用 AI 练习和 AI 教练把词用出去，每天沿着南瓜小径闯一关。界面是一套万圣节的昼夜双态画：白天是奶油纸与黄铜，夜里是深紫与发光的南瓜灯，守着那盏灯的角色叫 Hob。
 
-本交付分支基于 T-QA-004 冻结提交 `efc6bcbd2679eca02613a7143c68d04dddc36a59`，当前是**可运行、可联调、可容器化的 M5 代码基线**。T-SHIP-004 已通过 A00 授权的临时 HTTP IP 预览（`v0.1.2`，commit `8d5cb83`，主题 Whisker Crumb）；稳定 HTTPS 未验证，完整 MVP 仍为 `FAIL / NOT_READY`，不得把预览通过解释为最终比赛验收通过。
+## 功能
 
-| 范围 | 当前状态 | 证据 |
-|---|---|---|
-| 认证、成员管理、最后管理员保护 | 已实现并通过真实 PostgreSQL/Redis/API/浏览器验证 | `backend/tests/test_auth.py`、`test_admin_users.py`、T-QA-004 |
-| 词书导入、导出、删除与持久任务 | 已实现；ARQ worker/scheduler 真实运行验证 | `backend/tests/test_wordbooks.py`、`test_wordbook_jobs.py` |
-| 今日计划、FSRS 记忆训练、错词 | 已实现并通过真实浏览器闭环 | `backend/tests/test_learning_api.py`、`test_memory_api.py` |
-| 四类 AI 练习、草稿、评分、记录、错题 | 已实现；受控 provider 与真实 worker 验证 | `backend/tests/test_practice_api.py`、T-QA-004 |
-| AI provider、提示词、额度、失败重试 | 已实现；Key 加密、掩码、SSRF 拦截与额度账本验证 | `backend/tests/test_ai_admin.py`、`test_ai_jobs.py` |
-| AI 教练 SSE、受控动作与 24h 撤销 | 已实现；真实 SSE 与 action receipt 验证 | `backend/tests/test_coach_api.py`、T-QA-004 |
-| 每日闯关、共享进度、BOSS | 已实现；API 与浏览器条件链路验证 | `backend/tests/test_challenge_api.py`、T-QA-004 |
-| 通知、DND、去重与 AI 例外 | 已实现；真实链路验证 | `backend/tests/test_notifications.py` |
-| 管理员组织聚合看板与隐私边界 | 已实现；0/1/2/3 成员聚合与隐私测试通过 | `backend/tests/test_dashboard_api.py` |
-| 成员端结构重构 v0.1.2 | 已上线：`member-rail`、`member-topbar`、移动导航、Whisker Crumb；Today / Word shelf / Practice / Mr. Whisker 使用真实数据 | T-FE-014、T-SHIP-004 |
-| Docker Compose、CI、空库迁移、健康检查 | 已验证；Compose 七服务、非 root、回环端口与迁移通过 | T-SHIP-001、run `39801657963` |
-| 临时 HTTP 公网预览 | **已验证**：`http://23.94.141.170:18080`，`v0.1.2`，commit `8d5cb83`，主题 Whisker Crumb；仅临时 HTTP | T-SHIP-004 / A40 证据 |
-| 稳定 HTTPS、最终 MVP | **未验证/未通过**；不能宣称稳定 HTTPS 或最终 MVP PASS | `docs/deployment.md`、`docs/fact-check.md` |
-| 比赛视频、公网截图、最终提交清单 | v0.1.2 的 7 张真实预览截图、脚本和提交清单已准备；最终录屏与稳定 HTTPS 截图待完成 | `docs/competition/` |
+- **今日学习**：每日计划、到期复习、任务环、推荐词书、内嵌闯关地图、周报与徽章墙。
+- **词书**：内置词书，或导入自己的 CSV / JSON / TXT；支持预览、导入任务、启用、导出与删除。
+- **记忆训练**：FSRS 6.3.2 服务端调度，翻卡、选择、拼写三种模块，错词优先级、掌握与恢复。
+- **AI 练习**：填空、阅读、翻译、作文、对话、混合六种题型；服务端生成、服务端判分，支持草稿、重生成、交卷、记录与错题。
+- **AI 教练 Hob**：多轮对话、流式回复、附件、语音输入，以及带 24 小时撤销的受控动作。
+- **每日闯关**：由 AI 编排的节点地图，复习、新词、练习、支线与终点 BOSS。
+- **游戏化**：经验、等级（余烬→火舌→熔炉→锻铁→淬火）、灯油、连续天数与冻结、每日任务、23 枚徽章、周报。
+- **知识库**：导入真题与资料，练习与教练都能带着出处引用。
+- **个人 AI 配置**：自备 OpenAI 兼容 provider，连接测试、模型列表、额度与用量。
+- **昼夜主题**：跟随系统或手动切换，素材交叉淡出。
 
-> 事实规则：只有代码、测试、真实 API/浏览器、固定 CI run 或部署证据支持的能力才能标记为“已验证”。计划、占位值、QA 截图和容器构建不能冒充生产完成。
+## 技术栈
 
-## 产品闭环
+| 层 | 选型 |
+|---|---|
+| 前端 | Vue 3.5、TypeScript、Vite 8、Pinia、vue-router 5 |
+| 后端 | Python 3.12、FastAPI、Pydantic v2、SQLAlchemy 2 async |
+| 数据 | PostgreSQL 16、Alembic |
+| 队列 | Redis 7、ARQ |
+| 记忆 | fsrs 6.3.2 |
+| AI | OpenAI 兼容网关（chat / embedding），Key 加密存储 |
 
-### 管理员
+## 快速开始
 
-- 登录、首次改密、会话刷新与退出。
-- 创建成员、CSV 批量导入、启停、重置密码、角色调整和最后管理员保护。
-- 创建或导入组织词书，查看持久导入任务和结果。
-- 配置 OpenAI 兼容 provider、提示词、连接检查、额度和备用顺序。
-- 查看组织聚合学习指标，但不读取成员答题正文、草稿、私有词书正文或教练对话。
+### Docker Compose
 
-### 成员
-
-- 登录、首次改密、学习档案与通知偏好。
-- 选择主词书、导入个人词书。
-- 获取今日新词和到期复习，完成翻卡、选择、拼写三类记忆训练。
-- 完成填空、阅读、翻译、作文四类 AI 练习；支持草稿、提交、评分、记录、错题和删除。
-- 使用 AI 教练读取合法上下文、接收 SSE 回复、执行受控动作并在 24 小时内撤销。
-- 完成每日闯关、共享进度和终点 BOSS，接收站内通知并配置 DND。
-
-## 技术架构
-
-```text
-Browser
-  │
-  ▼
-Vue 3 / Vite / Pinia ── /api proxy ── FastAPI /api/v1
-                                      │
-                         ┌────────────┼────────────┐
-                         ▼            ▼            ▼
-                    PostgreSQL 16   Redis 7     ARQ worker
-                    SQLAlchemy      queue /     scheduler
-                    Alembic         cache       AI / import jobs
-                         │
-                         └── 私有词书卷（api/worker/scheduler 共享）
-```
-
-当前是模块化单体：身份、词书、学习、记忆、练习、AI、教练、挑战、通知和看板在同一后端应用中按领域拆分；Redis 负责队列与短期协调，PostgreSQL 是业务权威数据源。详细组件、请求链路和边界见 [架构文档](docs/architecture.md)。
-
-## 快速启动
-
-### Docker Compose（推荐验收路径）
-
-需要 Docker Engine 与 Docker Compose v2。示例值只用于一次性本地/CI 环境；真实环境必须替换全部密钥。
+需要 Docker Engine 与 Compose v2。
 
 ```bash
 cp .env.example .env
 chmod 600 .env
-# 编辑 .env，设置 POSTGRES_PASSWORD、JWT_SECRET、REFRESH_TOKEN_PEPPER、SECRET_ENCRYPTION_KEY 等
+# 编辑 .env，替换 POSTGRES_PASSWORD、JWT_SECRET、REFRESH_TOKEN_PEPPER、SECRET_ENCRYPTION_KEY
 docker compose up --build -d
 docker compose ps
 ```
 
-Compose 会先运行一次性 `migrate` 服务执行 `alembic upgrade head`，再启动 API、worker、scheduler、frontend 和反向代理。默认只有反向代理绑定 `127.0.0.1:8080`，PostgreSQL、Redis 与内部服务不发布宿主端口。
-
-创建首个管理员：
-
-```bash
-docker compose run --rm   -e BOOTSTRAP_ADMIN_USERNAME=admin   -e BOOTSTRAP_ADMIN_DISPLAY_NAME='Organization Administrator'   -e BOOTSTRAP_ADMIN_PASSWORD='<unique password from a secret channel>'   api python -m app.cli bootstrap-admin
-```
-
-然后按 [演示数据说明](docs/competition/demo-data.md) 初始化合成演示组织。演示密码不进入仓库，由运行者在环境变量中设置。
+Compose 会先执行一次 `alembic upgrade head`，再启动 API、worker、scheduler、frontend 与反向代理。默认入口是 `http://127.0.0.1:8080`。
 
 ### 本地开发
 
-后端需要 Python 3.12、`uv`、PostgreSQL 16 和 Redis 7：
+后端：
 
 ```powershell
 cd backend
 uv sync --locked --all-groups
 Copy-Item .env.example .env
-# 编辑 .env；不要提交真实密钥
 uv run alembic upgrade head
 uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-另开终端启动 worker 与 scheduler：
+另开两个终端：
 
 ```powershell
 cd backend
@@ -108,7 +64,7 @@ uv run arq app.workers.worker.WorkerSettings
 uv run arq app.workers.scheduler.SchedulerSettings
 ```
 
-前端需要 Node.js 24 与 npm 11：
+前端：
 
 ```powershell
 cd frontend
@@ -116,119 +72,62 @@ npm ci
 npm run dev
 ```
 
-开发地址：前端 `http://127.0.0.1:5173`，后端 `http://127.0.0.1:8000`。详细命令与未覆盖范围见 [测试文档](docs/testing.md)。
+打开 `http://127.0.0.1:5173`，注册账号即可开始。AI 功能需要先在「设置 → AI 配置」里添加一个 provider。
 
-## 环境变量
+## 配置
 
-根 `.env.example` 只包含占位值。关键变量：
+根 `.env.example` 只含占位值。常用变量：
 
 | 变量 | 用途 |
 |---|---|
-| `POSTGRES_DB`、`POSTGRES_USER`、`POSTGRES_PASSWORD` | PostgreSQL 数据库与容器初始化 |
-| `DATABASE_URL` | SQLAlchemy async PostgreSQL 连接串 |
-| `REDIS_URL` | Redis 队列、会话与短期协调 |
+| `DATABASE_URL` | PostgreSQL 连接串 |
+| `REDIS_URL` | 队列与短期协调 |
 | `JWT_SECRET` | Access Token 签名 |
 | `REFRESH_TOKEN_PEPPER` | Refresh Token 哈希保护 |
-| `SECRET_ENCRYPTION_KEY` | AI provider Key 服务端加密 |
-| `CORS_ORIGINS` | 允许的前端 Origin |
-| `WORDBOOK_STORAGE_DIR` | 私有词书文件卷路径 |
-| `AI_ALLOW_PRIVATE_PROVIDER_URLS` | 是否允许受控测试环境的私有 provider 地址；生产默认关闭 |
+| `SECRET_ENCRYPTION_KEY` | AI provider Key 加密 |
+| `CORS_ORIGINS` | 允许的前端来源 |
+| `WORDBOOK_STORAGE_DIR` | 词书文件目录（绝对路径） |
+| `AI_ALLOW_PRIVATE_PROVIDER_URLS` | 是否允许私有 provider 地址 |
 
-真实密钥、生产连接串、成员数据和服务器接入资料不得提交到 Git。完整占位说明以根 `.env.example` 为准。
+生产环境会拒绝占位密钥与私有 provider 地址。
 
-## 数据库与迁移
-
-- 当前迁移 head：`844c0d89f737`。
-- 当前有 46 张应用表（另含 Alembic `alembic_version`），覆盖身份、词书、学习、记忆、AI、练习、教练、通知、挑战、审计和系统元数据。
-- 本地迁移：
+## 数据库
 
 ```powershell
 cd backend
 uv run alembic upgrade head
-uv run alembic check
+uv run alembic heads
 ```
 
-- 容器空库迁移由 Compose 一次性 `migrate` 服务完成；T-QA-004 已完成空库 upgrade/downgrade/re-upgrade 验证。
-- 迁移回滚与备份恢复的边界见 [部署文档](docs/deployment.md)。
+迁移保持单头；容器空库迁移由 Compose 的 `migrate` 服务完成。
 
-## 测试与质量
+## 测试
 
 ```powershell
-# 后端
+# 后端（需要 PostgreSQL 16 与 Redis 7）
 cd backend
-uv sync --locked --all-groups
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest
 
 # 前端
 cd frontend
-npm ci
-npm test
 npm run build
+npm test
 ```
 
-T-QA-004 的冻结结果：后端 156 passed、前端 310 passed、M3 API 54/54、M3 浏览器 13/13、M4R API 21/21、M4R 浏览器 14/14；47 个门禁为 40 PASS / 3 CONDITIONAL / 4 FAIL / 0 NOT_RUN。当前交付新增的演示数据脚本在一次性独立数据库中首次初始化与重复初始化均通过，真实 API 读取 13 项全部返回 200。
+## 项目结构
 
-完整证据、环境、性能原始值和未验证项见 [测试文档](docs/testing.md) 与 [事实核对](docs/fact-check.md)。
+```text
+backend/          FastAPI 应用、模型、服务、ARQ worker 与迁移
+frontend/         Vue 应用、组件、页面、样式与万圣节素材
+deploy/           Dockerfile、Compose overlay、部署与备份脚本
+docs/             架构、数据模型、API、AI、安全、测试、部署与演示
+tests/            质量基线
+```
 
-## API 与 OpenAPI
+## 文档
 
-- API 前缀：`/api/v1`
-- OpenAPI JSON：`http://127.0.0.1:8000/api/v1/openapi.json`
-- Swagger UI：`http://127.0.0.1:8000/api/v1/docs`
-- 当前 OpenAPI：84 个路径、153 个 schema
-- 认证：短时 Access Token + HttpOnly Refresh Cookie + CSRF 双提交
-- 异步：词书任务、AI 任务和部分练习评分使用 `202` + 持久任务状态查询
-- 流式：AI 教练使用 SSE，断线后可按事件序号恢复
-
-接口分组、错误结构、分页、SSE 和“202 不是成功”的边界见 [API 文档](docs/api.md)。
-
-## 安全与隐私
-
-- 密码使用 Argon2id；Refresh Token 数据库只存哈希并轮换。
-- Access Token 仅保存在前端内存，不使用 localStorage/sessionStorage 保存业务真相。
-- Cookie 写请求校验 Origin 与 CSRF；最后管理员不可删除、停用或降级。
-- AI provider Key 服务端加密保存，接口只返回掩码；Base URL 阻止云元数据地址和非法内网访问。
-- 管理员看板只展示聚合指标，不返回成员答题正文、草稿、教练对话或私有词书正文。
-- 容器应用以 UID/GID `10001` 非 root 运行，启用只读根文件系统、`cap_drop: ALL` 与 `no-new-privileges`。
-- 当前仍未完成 CSP、生产备份审批/RPO/RTO、生产恢复演练和公网 TLS 验证。
-
-详见 [安全与隐私](docs/security-privacy.md)。
-
-## 演示与比赛材料
-
-- **临时预览**：`http://23.94.141.170:18080`（`v0.1.2`，commit `8d5cb83`，Whisker Crumb 主题，成员端结构重构；HTTP，不是稳定 HTTPS）
-- [演示数据与账号说明](docs/competition/demo-data.md)
-- [可执行合成数据脚本](docs/competition/seed_demo_data.py)
-- [演示截图与事实清单](docs/competition/screenshots/README.md)
-- [技术文档正文](docs/competition/technical-document.md)
-- [5–8 分钟视频脚本](docs/competition/demo-video-script.md)
-- [最终提交清单](docs/competition/submission-checklist.md)
-- [来源、许可证与素材边界](docs/competition/licensing.md)
-
-临时 HTTP 预览已可用；演示用户名 `demo_admin`、`demo_member`，密码只从 A40 的 ACL 本地凭据文件安全获取，不写入仓库/文档/证据。稳定 HTTPS、最终视频和最终 MVP 验收仍未完成，相关项保留 `TODO`。
-
-## GitHub、CI 与发布
-
-- 仓库：`ticaxox/english-learn-tool`（Private）。
-- `main` 只由 A01 SYNC 协调合并；执行 Agent 使用独立分支和 PR。
-- CI 覆盖后端、前端、质量清单、敏感信息扫描和 Compose 集成五类作业。
-- 发布工作流会构建 API、frontend 与 reverse-proxy 三个 GHCR 镜像，并要求完整 Git SHA/不可变 tag。
-- `v0.1.2` 版本标签、release workflow `40094317102` 和三镜像 digest 已验证；服务器使用校验后的 release bundle，GHCR 在线拉取流程仍未单独验证。
-
-## 已知限制
-
-1. **临时 HTTP 预览可用，稳定 HTTPS 未验证**：T-SHIP-004 只验证 A00 授权的 IP + 高位端口预览，不代表稳定 HTTPS、DNS 或长期生产 SLA。
-2. **CSP 状态待复核**：预览响应已带 CSP 头，但 T-QA-004 的 `F-SEC-01` 仍保留 CONDITIONAL，需 A30/A01 按最终证据重新分类。
-3. **回滚边界**：演示环境已做数据库/词书恢复和机械回滚；没有历史兼容业务版本，不能宣称旧业务功能回滚已验证。
-4. **Today 页面 AI 摘要仍是旧字段**：后端 `GET /learning/today` 的 `ai_practice` 目前仍返回 `not_available`；已实现的四类 AI 练习从 `/practice` 使用，不能把 Today 摘要当作 AI 练习未实现。
-5. **最终 MVP 未验收**：47 门禁仍有 3 CONDITIONAL、4 FAIL；完整 MVP 为 `FAIL / NOT_READY`。
-6. **许可证未决定**：仓库未添加开源许可证，公开提交前需 A00 决策；见 [licensing](docs/competition/licensing.md)。
-
-## 文档导航
-
-- [文档索引](docs/README.md)
 - [架构](docs/architecture.md)
 - [数据模型](docs/data-model.md)
 - [API](docs/api.md)
@@ -237,8 +136,7 @@ T-QA-004 的冻结结果：后端 156 passed、前端 310 passed、M3 API 54/54�
 - [测试](docs/testing.md)
 - [部署](docs/deployment.md)
 - [演示](docs/demo.md)
-- [事实核对](docs/fact-check.md)
 
 ## 贡献
 
-开发、测试、分支、PR 和敏感信息边界见 [CONTRIBUTING.md](CONTRIBUTING.md)。正式任务由 A01 SYNC 派发；执行 Agent 必须核对角色、`thread_id`、分支和工作树登记。
+见 [CONTRIBUTING.md](CONTRIBUTING.md)。

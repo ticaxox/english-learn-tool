@@ -1,111 +1,63 @@
-# AI 英语学习工具｜前端
+# 前端
 
-这是个人学习版的 Vue 3 应用，覆盖真实认证、个人词书、今日学习、学习中心、记忆训练、四类 AI 练习、AI 教练和个人 AI 提供商配置。业务状态、评分、队列、连接检查与用量均以服务端为唯一真相，不使用静态业务假数据。
+Grimoire 的个人学习版前端：Vue 3 + TypeScript + Vite，万圣节昼夜双态，所有业务状态以服务端为唯一真相。
 
-## 环境
+## 技术栈
 
-- Node.js 20.19+（当前开发环境使用 Node.js 24）
-- npm 10+
-- 真实运行的 FastAPI 后端（默认 `http://127.0.0.1:8000`）
+- Vue 3.5 / TypeScript 6 / Vite 8 / Pinia 4 / vue-router 5
+- vitest 5 + jsdom + @vue/test-utils
+- 少量依赖：`reka-ui`（Toaster）、`motion-v`（SvgPlateButton）、`gsap`（useMotion）、`@lucide/vue`（Toaster）
+- 无 Tailwind、无 UI 组件库；样式是手写 CSS
 
-## 安装与启动
+## 页面与路由
 
-```bash
-npm ci
-npm run dev
-```
+| 路径 | 页面 |
+|---|---|
+| `/login`、`/change-password` | 登录、强制改密 |
+| `/overview` | 今日学习：任务环、今日任务、推荐词书、内嵌闯关、周报、徽章墙 |
+| `/practice` | 练习入口：记忆三模块 + 六种 AI 练习，`?session=` 同页作答 |
+| `/practice/records`、`/practice/records/:recordId`、`/practice/mistakes`、`/practice/tasks` | 记录、详情、错题、任务集 |
+| `/challenges`、`/challenges/:challengeId` | 每日闯关地图与详情 |
+| `/coach` | Hob：对话、SSE、附件、动作回执 |
+| `/settings` → `learning` / `ai` / `security` / `wordbooks` / `knowledge` | 设置 |
+| `/admin/**` | 管理端（个人版导航不暴露） |
+| `/_mascot` | 素材/角色预览 |
 
-默认浏览器请求 `/api/v1`，开发服务器和预览服务器都会把 `/api` 代理到 `http://127.0.0.1:8000`，无需先创建 `.env`。需要切换后端地址时，再复制 `.env.example` 为 `.env` 并设置：
+主导航只有四项：今日学习、练习、Hob、设置。二级页签在顶栏。
 
-```dotenv
-VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
-VITE_API_PROXY_TARGET=http://127.0.0.1:8000
-```
+## 分层
 
-如果后端未启动，登录页和业务骨架页会显示真实网络错误、Request ID（后端提供时）和重试入口，不会切换为 mock 登录或静态演示数据。
+| 层 | 位置 |
+|---|---|
+| 入口 | `src/main.ts`：先定 surface（`/m` 手机树），预涂主题，再加载全局样式 |
+| 外壳 | `src/components/MemberShell.vue`：侧栏 rail、顶栏页签、手机底部导航、教练抽屉 |
+| API | `src/api/client.ts`：Bearer + CSRF、401 单次刷新、错误规整 |
+| 契约 | `src/api/contract-adapter.ts`：后端 snake_case 与前端类型的唯一映射层 |
+| 状态 | `src/stores/auth.ts`（唯一 Pinia store）+ composables |
+| 样式 | 18 张 CSS：`game-ui.css`、`controls.css`、`game-shell.css` 等 |
 
-## 后端契约
+## 主题与素材
 
-认证流程按 v1.1 文档实现：
+- `useTheme.ts`：cookie `crumb_theme` + `prefers-color-scheme`，写 `<html data-theme>`。
+- `ThemeSwitch.vue`：侧栏底部与个人资料菜单。
+- `ArtImage.vue`：同一格叠 day/night 两张图，切换 520ms 交叉淡出。
+- 素材在 `src/assets/halloween/`，规则见该目录的 README。
+- 手机端走 `/m` URL 树与媒体查询，没有第二套组件。
 
-- `POST /api/v1/auth/login`：用户名、密码；响应包含 `access_token` 与 `csrf_token`。
-- `POST /api/v1/auth/refresh`：使用 HttpOnly Refresh Cookie 轮换令牌；刷新请求需要可读 CSRF Cookie 与 `X-CSRF-Token`，响应返回新令牌。
-- `GET /api/v1/auth/me`：返回当前用户对象。
-- `POST /api/v1/auth/change-password`：提交 `old_password` 和
-ew_password`。
-- `POST /api/v1/auth/logout`：撤销当前刷新令牌。
-
-当前用户对象至少包含：
-
-```json
-{
-  "id": "uuid",
-  "username": "member_name",
-  "display_name": "显示名称",
-  "role": "member",
-  "must_change_password": false
-}
-```
-
-Access Token 仅保存在 API client 的内存中。页面刷新后通过 HttpOnly Cookie 调用刷新接口恢复会话，不使用 localStorage 或 sessionStorage 保存业务真相。
-
-统一错误结构应遵循：
-
-```json
-{
-  "code": "ERROR_CODE",
-  "message": "错误说明",
-  "details": {},
-  "request_id": "uuid"
-}
-```
-
-API client 优先读取响应头 `X-Request-ID`，并在错误界面展示。对于 Cookie 写请求，API client 会优先使用内存中的 CSRF Token，页面刷新后从覆盖 SPA 根路径的可读 Cookie 恢复，并回传 `X-CSRF-Token`；HttpOnly Refresh Cookie 仍保持最小路径。最终细节以 A10 的 OpenAPI 与真实联调结果为准。
-
-## 已实现范围
-
-- Vue 3 + Vite + TypeScript + Pinia + Vue Router。
-- 登录、首次改密、会话恢复、退出、Access Token 内存保存。
-- 角色守卫、管理员路由保护、改密拦截。
-- 真实成员列表、搜索、角色/状态筛选和游标分页。
-- 单个创建、CSV 预览与确认、启停、角色修改、重置密码和删除确认。
-- 一次性临时密码仅在当前页面状态显示，关闭后清除；不使用 localStorage/sessionStorage 业务真相。
-- 隐私安全的成员详情与允许的聚合指标，不展示答案、草稿、教练或私有词书正文。
-- 统一 API client、`/api/v1` 前缀、结构化错误、网络重试和 Request ID 展示。
-- 403/管理员越权、429、404、后端不可用、登录失败和最后管理员保护错误等可见状态。
-- 学习档案 `GET/PATCH /users/me/profile` 与记忆配置 `GET/PUT /memory/config`。
-- 今日计划 `GET /learning/today`、幂等创建 `/learning/daily-plan/ensure` 与服务端统计 `/learning/stats`。
-- 翻卡、选择、拼写三种训练；服务端判分、事件幂等键、会话刷新恢复与 30 秒心跳/后台暂停。
-- 错词列表、重点复习、已记住/恢复，以及真实空态和失败态。
-- T-BE-004 契约坐标固定为 `contract_sha 25ad69f` / OpenAPI raw `248ff876…f57e7`；字段映射集中在 `src/api/contract-adapter.ts`。
-- 设置 → AI 配置：当前用户自己的 Provider 列表、创建/编辑/删除、启停、默认与备用顺序、真实连接检查、模型列表与手填回退；API Key 只显示服务端掩码。
-- T-BE-005 管理员契约固定为 `6c72f19` / OpenAPI raw `7a0463b5…` / semantic `8497bc98…`；API Key 只存在于当前表单内存，列表仅显示服务端掩码。
-- AI 练习：填空、阅读、翻译、作文四类创建与 202 生成轮询；服务端草稿/版本冲突、未作答重生成、提交幂等、提交后结果、记录筛选、错题与本人批量删除。
-- T-BE-006 最终契约为 `d6dcdbf`；提交前页面与 API 解析均拒绝答案、解析、参考内容或评分字段。
-- 站内通知：游标分页、未读筛选、单条/全部已读、未读数、类别偏好、免打扰时间、每日非 AI 上限与 AI 例外说明；正文只按纯文本渲染。
-- T-BE-007 通知契约坐标固定为 `fe52cf2` / raw `8309ee03…` / semantic `82a08895…`，实时 OpenAPI semantic 与冻结值一致。
-- AI 教练：长期会话 CRUD、游标消息分页、202 消息任务、真实 SSE 增量、usage、刷新/断线恢复、action receipt 与 24 小时撤销。
-- T-BE-008 教练契约固定为 `44f49ca` / raw `99026f88…` / semantic `dfe1ca30…`；不保存对话正文或回执到浏览器存储。
-- Vitest 测试基线。
-
-## 路由
-
-`/login`、`/change-password`、`/overview`、`/challenges`、`/challenges/:challengeId`、`/coach`、`/wordbooks`、`/memory`、`/memory/mistakes`、`/practice`、`/practice/:sessionId`、`/practice/records`、`/practice/mistakes`、`/settings/learning`、`/settings/ai`、`/settings/security`。
-
-个人词书、学习、AI 练习、AI 教练与个人 AI 提供商均使用真实接口。组织管理、成员、看板、通知与社交入口不属于个人版路由。
-
-## 验证
+## 测试
 
 ```bash
 npm ci
-npm test
-npm run build
-git diff --check
+npm run build     # vue-tsc -b && vite build
+npm test          # vitest run
 ```
 
-## 暂不包含
+- 58 个 spec、446 个 `it`。
+- 最近一次实跑（2026-11-17，`d90778d`）：build 通过，442/442 通过。
+- 没有浏览器 E2E 或视觉回归；昼夜与断点靠人眼与 `screenshots/` 下的手工探针。
 
-- 每日闯关和控制台图表。
-- 前端自行推进 FSRS、静态评分、离线计时或浏览器存储学习状态。
-- 复杂动画、游戏化皮肤、图片或图标素材。
-- 后端、CI、Docker、部署与服务器操作。
+## 约定
+
+- 业务状态不在浏览器持久化；不使用 localStorage/sessionStorage 保存学习真相。
+- 写操作带 `Idempotency-Key`；提交类操作在 composable 里持锁防双击。
+- 不新增覆盖层样式表；改原样式表。

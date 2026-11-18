@@ -1,83 +1,117 @@
 # AI 链路
 
-- 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 状态：M3/M4 代码内实现与真实链路验证；临时 HTTP 预览已由 T-SHIP-004 验证；稳定 HTTPS/生产 provider 未验证
-- 相关代码：`backend/app/models/ai.py`、`services/ai_*.py`、`services/practice.py`、`services/coach.py`、`services/challenge.py`
+- 代码基线：`main` @ `1cea3ff` / `v0.1.7`
+- 相关代码：`app/services/ai_jobs.py`、`ai_providers.py`、`ai_security.py`、`ai_prompts.py`、`ai_usage.py`、`knowledge.py`、`coach.py`、`coach_tools.py`、`challenge.py`
 
-## 1. 分层
+## 1. Provider
 
-```text
-业务请求
-  → 合法上下文/JSON Schema
-  → ai_jobs 持久化任务
-  → ARQ worker 调用 OpenAI 兼容 provider
-  → Pydantic + 业务校验器
-  → 事务保存结果或失败状态
-  → 前端轮询/SSE 读取
-```
+- 只支持 **OpenAI 兼容**接口：`POST {base_url}/chat/completions`、`GET {base_url}/models`、`POST {base_url}/embeddings`。
+- 两种 `kind`：`chat` 与 `embedding`；embedding 任务优先选 embedding provider，缺失时回退到旧 chat provider 的 `embedding_model`。
+- **BYOK**：`ai_providers.owner_id` 决定归属。学习者的任务只使用自己的 provider；管理员配置仅供管理员自己。
+- 选择顺序：enabled → kind 匹配 → 按 `priority` → `is_default` → `created_at`。
+- 结构化输出：优先 `response_format: json_schema`，上游 400/422 时降级为 `json_object`；每个任务最多一次 JSON 修复。
+- 安全：Base URL 经过校验，阻止云元数据地址与私有网段（`AI_ALLOW_PRIVATE_PROVIDER_URLS` 仅限受控测试）；重定向限制同源次数。
+- 重试：`ai_provider_retry_limit` 默认 2，退避 0.25s；超时按 provider 配置。
 
-AI 不是数据库权限主体。所有写入必须由后端服务完成，AI 输出视为不可信数据。
+## 2. 任务平台
 
-## 2. Provider 与密钥
+`ai_jobs` 是唯一入口。创建任务时写入：任务类型、prompt 快照、幂等键、请求哈希、provider、额度项与终态。
 
-- 管理员配置 OpenAI 兼容 `base_url`、`model_id`、优先级和超时。
-- API Key 使用服务端认证加密保存；列表只返回掩码。
-- Base URL 校验协议/主机，阻止云元数据地址和不允许的私有地址。
-- 默认 provider、备用顺序、连接检查和模型列表均为真实接口。
-- 测试环境可使用受控 OpenAI 兼容 provider；仓库不包含真实 Key。
+| 任务类型 | 用途 | 额度类型 |
+|---|---|---|
+| `practice_generation` | 生成练习题目 | `question_generation` |
+| `subjective_grading` | 主观题评分 | `subjective_grading` |
+| `coach_reply` | 教练回复 | `coach_messages` |
+| `conversation_turn` | 对话型练习的一轮 | `coach_messages` |
+| `challenge_plan` | 每日闯关地图 | 不单独计费 |
+| `json_repair` | 修复模型输出 | 不单独计费 |
 
-## 3. 提示词与任务
+状态：`queued` → `running` → `succeeded` / `failed` / `stale` / `cancelled`。scheduler 会回收超时任务并释放额度。
 
-- 数据库迁移预置五类提示词：练习生成、主观题评分、教练回复、挑战编排、JSON 修复。
-- 管理员覆盖提示词只影响未来任务。
-- 任务保存提示词快照、provider/model、输入上下文、幂等键、请求哈希、尝试次数和修复次数。
-- JSON 非法时最多修复一次；逻辑仍不合法时按任务边界重生成，整体尝试有上限。
-- 失败不返回半成品，不扣逻辑额度；可重试错误保留真实失败态。
+幂等：`(user_id, idempotency_key)` 唯一；相同键重复提交返回同一任务。
+
+## 3. 提示词
+
+- `ai_prompts` 按 `prompt_key` 存储模板，有版本与启用状态；任务创建时把当时的模板写入 job 快照，之后再改提示词不影响在途任务。
+- 管理员可在 `/admin/ai/prompts` 查看与更新；个人版用户不直接编辑。
 
 ## 4. 额度与并发
 
-- 每日额度：教练消息、结构化题目生成、主观题评分分别计数。
-- 额度账本记录 reserve、consume、release。
-- 每人最多 2 个并发 AI 任务；取消/失败释放并发槽。
-- 重复幂等请求不重复扣额度。
-- 数据库任务状态是权威，Redis 只负责队列和短期并发协调。
+- 额度按**任务次数**计，不按 token 或金额。
+- 默认每日本地日：教练消息 100、出题 20、主观评分 50；`user_profiles.ai_quota_limits` 可按用户覆盖，`-1` 为不限。
+- 账本：reserve → consume（成功）/ release（失败、取消、stale）；`(job_id, quota_item)` 唯一，防止重复记账。
+- 并发：每用户最多 2 个进行中的 AI 任务（Redis ZSET + Lua）；超出的任务排队或返回限流错误。
+- 用量查询：`GET /ai/usage/me`、`GET /me/progress`、`GET /admin/ai/usage`。
 
-## 5. 四类 AI 练习
+## 5. RAG 与知识库
 
-| 类型 | 生成 | 判分 | 关键边界 |
-|---|---|---|---|
-| 填空 | 结构化生成 | 后端客观判分 | 选项唯一、答案不提前返回 |
-| 阅读 | 结构化生成 | 后端客观判分 | 文章/问题数量与词条实体合法 |
-| 翻译 | 结构化生成 | AI 主观评分 | 分数维度合法、低分进入错题 |
-| 作文 | 结构化生成 | AI 主观评分 | 目标词数/要求合法、可提前提交 |
+### 5.1 书架模型
 
-练习支持草稿版本、提交幂等、记录筛选、错题和本人批量删除。提交前 API 只返回可作答字段；提交后才返回答案、解析和建议。
+- 公共书架（管理员维护真题，按难度）与个人书架（学习者自己导入）。
+- 检索只读该学习者可读的书架：公共真题架、目标难度架、个人架。
 
-## 6. AI 教练
+### 5.2 分块与向量
 
-- 长期会话、游标消息分页、202 消息任务、SSE 增量、usage 和断线恢复。
-- 允许读取当前页面、合法实体 ID、本人学习事件、今日计划、FSRS 概况和主动输入。
-- 禁止读取其他成员数据、Key、密码、令牌或管理员配置。
-- 自动写入必须走受控 action schema；receipt 保存 before/after 状态和 24h 撤销期限。
-- 撤销前重新校验状态；冲突返回可解释错误，不强行回滚。
+- 题号感知分块：以编号题为单位，长题按 900 字符切分，重叠 120，单文档最多 400 块。
+- embedding 可选；未配置 embedding provider 时只用关键词。
+- 向量以 Postgres `ARRAY(Float)` 存在 `knowledge_chunks.embedding`，不使用 pgvector。
 
-## 7. 每日挑战
+### 5.3 检索
 
-- 后端先计算今日新词、到期词、合法实体和练习额度。
-- AI 只编排节点顺序、词条分配、可选支线和文案；不得减少新词量或虚构实体。
-- 地图生成后当天锁定；失败显示真实失败和重试，不使用假地图。
-- 传统学习与挑战节点共享进度；BOSS 提交幂等并持久化结果。
+- 查询时对候选 chunk 逐条打分：`score = 0.6 × max(关键词分, 余弦) + 0.4 × min(关键词分, 余弦)`。
+- 阈值 0.12，最多返回 6 条，带文档出处与 chunk 序号。
+- 练习生成会引用 3 条片段；教练通过 `search_knowledge` 工具检索。
+- 规模边界：线性扫描适合千级 chunk；万级应迁移 pgvector 与 ANN 索引。
 
-## 8. 失败与可观测性
+## 6. 教练
 
-- 失败状态包含 `error_code`、可重试标记和 Request ID。
-- 日志不记录 Key、完整 prompt、答案正文或教练全文。
-- 管理员用量页面只展示聚合任务/provider 状态。
-- T-QA-004 已验证 provider 故障切换、JSON 修复、额度释放、并发上限、取消和任务重启恢复。
+- 会话、消息、附件、记忆快照、SSE 事件日志全部落库。
+- 回复任务 202；前端订阅 `/coach/streams/{message_id}`，支持 `Last-Event-ID` 续传。
+- 受控动作共 8 个：
 
-## 9. 未验证边界
+| 工具 | 作用 |
+|---|---|
+| `adjust_daily_plan` | 调整新词量与学习时长 |
+| `search_knowledge` | 检索可读书架的原文片段 |
+| `list_knowledge` | 列出可读书架与文档 |
+| `read_knowledge_document` | 读取指定文档内容 |
+| `start_practice` | 直接开始一组练习 |
+| `activate_wordbook` | 启用一本词书 |
+| `create_practice_questions` | 按主题生成练习题 |
+| `mark_review_focus` | 标记需要重点复习的词 |
 
-- 真实生产 provider 凭据、配额和网络策略未冻结。
-- 公网 SSE 不缓冲已由 T-SHIP-004 验证；稳定 TLS/域名尚未验证。
-- `GET /learning/today` 的 AI 摘要仍为旧字段；AI 练习入口是 `/practice`。
-- 不把受控测试 provider 的结果写成真实生产模型效果。
+- 每个动作生成 before/after 回执，24 小时内可通过 `/coach/action-receipts/{id}/undo` 撤销。
+
+## 7. 闯关生成
+
+- 服务端先准备上下文：今日新词/到期词、合法节点类型、额度、可选支线。
+- AI 只决定顺序与文案，节点类型必须落在允许集合：REVIEW / NEW_WORDS / WORD_DRILL / AI_PRACTICE / BOSS / OPTIONAL_SIDE。
+- 输出经 Pydantic 与业务校验；计划当日锁定，重生成需显式接口。
+
+## 8. 失败码
+
+| 错误码 | 含义 |
+|---|---|
+| `AI_PROVIDER_UNAVAILABLE` | 没有可用 provider，或上游 5xx 被归为暂不可用 |
+| `AI_PROVIDER_TIMEOUT` | 上游超时 |
+| `AI_PROVIDER_NETWORK` | 网络错误 |
+| `AI_PROVIDER_AUTH_FAILED` | Key 无效 |
+| `AI_PROVIDER_URL_BLOCKED` | URL 命中拦截规则 |
+| `AI_OUTPUT_INVALID` | 输出无法通过 schema/业务校验 |
+| `AI_JOB_TIMEOUT` / `AI_JOB_STALE` | 任务超时或被回收 |
+| `AI_INTERNAL_ERROR` | 其他内部错误 |
+
+> 历史真实数据（2026-11-12 转储）显示失败率约 59%，主要来自第三方中转站的超时与不可达，而不是没有配置 Key。
+
+## 9. 配置项
+
+| 变量 | 默认 | 说明 |
+|---|---|---|
+| `AI_PROVIDER_RETRY_LIMIT` | 2 | 单 provider 重试次数 |
+| `AI_PROVIDER_RETRY_BACKOFF_SECONDS` | 0.25 | 退避 |
+| `AI_DAILY_COACH_MESSAGES` | 100 | 教练消息额度 |
+| `AI_DAILY_QUESTION_GENERATION` | 20 | 出题额度 |
+| `AI_DAILY_SUBJECTIVE_GRADING` | 50 | 主观评分额度 |
+| `AI_ALLOW_PRIVATE_PROVIDER_URLS` | false | 允许私有 provider 地址 |
+
+（域名与 Key 在页面配置，不进入环境变量。）

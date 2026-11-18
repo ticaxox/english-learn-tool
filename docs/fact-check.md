@@ -1,78 +1,61 @@
 # 文档与代码事实核对
 
-- 代码基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- 临时公网预览：`http://23.94.141.170:18080`（`v0.1.2`，commit `8d5cb83`，主题 Whisker Crumb）
-- 迁移 head：`844c0d89f737`
-- OpenAPI：84 路径 / 153 schema
-- 核对日期：2026-10-24
-- 用途：防止把 QA 截图、临时 HTTP 预览或计划项误写成稳定生产/最终 MVP 完成
+- 代码基线：`main` @ `1cea3ff` / `v0.1.7`（2026-11-18）
+- 用途：把文档里的关键陈述映射到可复核的代码或证据；数字以本页为准。
 
-## 1. 当前事实映射
+## 1. 当前事实
 
-| 陈述 | 代码/证据 | 状态 |
+| 陈述 | 证据 | 状态 |
 |---|---|---|
-| FastAPI 应用与 `/api/v1` | `backend/app/main.py`、`router.py` | 已验证 |
-| 认证、Refresh、CSRF、改密 | `api/v1/auth.py`、`services/auth.py`、后端测试 | 已验证 |
-| 成员管理、最后管理员保护 | `api/v1/admin.py`、`services/users.py` | 已验证 |
-| 词书、导入、导出、删除任务 | `models/wordbooks.py`、ARQ worker/scheduler | 已验证 |
-| 今日计划、心跳、统计 | `api/v1/learning.py`、`services/learning.py` | 已验证 |
-| FSRS 记忆训练 | `services/memory.py`、`fsrs_scheduler.py` | 已验证 |
-| AI provider、提示词、额度、任务 | `models/ai.py`、`services/ai_*.py` | 已验证（受控 provider） |
-| 四类 AI 练习 | `api/v1/practice.py`、`services/practice.py` | 已验证 |
-| 教练 SSE、action receipt、撤销 | `api/v1/coach.py`、`services/coach.py` | 已验证 |
-| 每日闯关/BOSS | `api/v1/challenges.py`、`services/challenge.py` | 已验证 |
-| 通知/DND/去重 | `api/v1/notifications.py`、`services/notifications.py` | 已验证 |
-| 管理员聚合看板/隐私 | `api/v1/admin_dashboard.py`、`services/dashboard.py` | 已验证 |
-| 成员端结构重构 v0.1.2 | `MemberShell.vue`、`member-rail`、`member-topbar`、移动导航、Word shelf、Practice room、Mr. Whisker | 已验证（T-FE-014 / T-SHIP-004） |
-| 46 张应用表（另含 Alembic 版本表） | SQLAlchemy metadata / Alembic | 已验证 |
-| Docker Compose/CI | T-SHIP-001 run `39801657963` | 已验证（该 run） |
-| T-QA-004 M5 代码内硬化 | 后端 156、前端 310、M3/M4R API/浏览器 | PASS_WITH_CONDITIONS |
-| 临时 HTTP 公网预览 | URL / `v0.1.2` / commit `8d5cb83` / Whisker Crumb / T-SHIP-004 | PASS（仅临时 HTTP） |
-| 发布镜像与 digest | release `v0.1.2`；workflow `40094317102`；三镜像 digest | 已验证 |
-| 预览备份/恢复/机械回滚 | RPO 24h / RTO 2h / 保留 7 天；数据库与词书恢复 | PASS_WITH_LIMITS |
-| 稳定 HTTPS/TLS/长期 SLA | 本次授权范围外 | 未验证 |
-| 演示数据脚本 | `docs/competition/seed_demo_data.py` | 首次/重复初始化 PASS |
-| 演示截图 | `docs/competition/screenshots/` | 7 张 v0.1.2 真实预览截图 + 9 张历史 QA 截图 |
-| 最终视频 | 比赛交付 | TODO |
-| 完整 MVP | 47 门禁 40/3/4/0 | FAIL / NOT_READY |
+| 迁移 head 为 `20261114_0032`，单头 | `backend/alembic/versions/`（40 个 revision） | 已验证 |
+| 59 张应用表 | `grep __tablename__ backend/app/models/*.py` | 已验证 |
+| OpenAPI 117 路径 / 148 操作 / 203 schema | `app.openapi()` 实际生成 | 已验证 |
+| 凭证 `/api/v1/mcp` 不进 OpenAPI | `api/v1/mcp.py` 的 `include_in_schema=False` | 已验证 |
+| 后端 40 个测试文件 / 209 个测试函数 | `backend/tests/` | 已验证（静态计数） |
+| 前端 58 个 spec / 446 个 `it` | `frontend/src/tests/` | 已验证（静态计数） |
+| 前端最近一次实跑 442/442 通过 | 2026-11-17 `d90778d` 的 vitest 输出 | 已验证（旧于当前 tip） |
+| 后端 209 个测试当前未执行 | 本机无 PostgreSQL/Redis；conftest 连接失败 | 未验证 |
+| `ruff check` 仍有 5 处告警、`format` 1 个文件待格式化 | 2026-11-18 在 `1cea3ff` 上实跑 | 已验证 |
+| AI 为 BYOK | `ai_providers.owner_id`、`_providers_for_job(owner_id=...)` | 已验证 |
+| 额度为任务计数（100/20/50 每日） | `app/core/config.py` | 已验证 |
+| RAG 分块 900/120、≤400 块、阈值 0.12、最多 6 条 | `app/services/knowledge.py` | 已验证 |
+| 23 枚徽章、等级曲线 120·L^1.35 | `app/services/gamification.py` | 已验证 |
+| 昼夜由 cookie + `data-theme` 驱动，520ms 淡出 | `useTheme.ts`、`ArtImage.vue`、`game-ui.css` | 已验证（代码） |
+| 线上预览上次核实为 `v0.1.5` | 2026-11-17 `/health/live` | 已验证（旧于当前日期） |
+| 最新标签为 `v0.1.7` | `git tag` | 已验证 |
+| 仓库公开但无 LICENSE | GitHub API（2026-11-17）+ `git ls-tree` | 已验证 |
 
-## 2. 不可升级的事项
+## 2. 已废弃的旧口径
 
-- 稳定 HTTPS、TLS、域名或长期生产 SLA 已完成。
-- 历史兼容业务版本回滚已通过。
-- 真实生产 provider 的模型效果、配额和网络策略。
-- 最终比赛视频已录制；稳定 HTTPS 截图已取得。
-- 完整 MVP 已 PASS。
-- Today 页面 `ai_practice=not_available` 已修复。
+以下数字与说法来自 2026-10-24 的组织版基线，**不得再引用**：
 
-## 3. 已知差异
+| 旧说法 | 现状 |
+|---|---|
+| 迁移 head `844c0d89f737` | 现为 `20261114_0032` |
+| 46 张表 | 现为 59 张 |
+| OpenAPI 84 路径 / 153 schema | 现为 117 / 203 |
+| 后端 156 passed | 现为 209 个测试函数；最近可复现执行是 10-22 的旧树 |
+| 前端 310 passed | 现为 446 个 `it`；11-17 实跑 442 全绿 |
+| 产品名 Whisker Crumb | 现为 Grimoire，角色 Hob |
+| 主题只有 Whisker Crumb | 现为万圣节昼夜双态 |
+| 组织版成员/看板/通知是主路径 | 个人版主导航只有 今日 / 练习 / Hob / 设置 |
+| 预览 `v0.1.2` / `8d5cb83` | 标签已到 v0.1.7；预览上次核实 v0.1.5 |
+| 仓库 Private | 实为公开 |
+| CSP 未完成、F-SEC-01 未关闭 | 两份 nginx 与后端中间件均已输出 CSP |
+| 「Origin + CSRF 双校验」 | 11-18 起 Origin 校验为空实现，只剩 CSRF |
 
-| 项目 | 当前差异 | 处理 |
-|---|---|---|
-| 预览传输 | 只有临时 HTTP IP；HSTS 头不能替代 HTTPS | 保留“临时 HTTP 预览”边界 |
-| 生产备份 | 演示环境恢复通过；历史兼容业务回滚未验证 | 保留 CONDITIONAL |
-| 版本发布 | `v0.1.2`、release workflow 和三镜像 digest 已通过；GHCR 在线拉取未单独验证 | 记录为已验证范围，不升级最终 MVP |
-| Today AI 摘要 | `GET /learning/today` 仍返回旧 `not_available` | 文档指向 `/practice`；修复需另立代码任务 |
-| 真实 provider | QA 使用受控 OpenAI 兼容 provider | 不写成真实生产模型效果 |
-| 本机 Compose | `docker` 实为 `wslc`，无 Compose | 容器运行证据引用 Actions/A40 |
-| 许可证 | 仓库未选择开源许可证 | 公开提交前由 A00 决策 |
+## 3. 需要重跑才能确认
 
-## 4. 证据索引
+| 项 | 原因 |
+|---|---|
+| 后端 pytest 209 个 | 需要真实 PostgreSQL 16 与 Redis 7 |
+| `alembic upgrade head` 在真实库 | 只做过离线 SQL 渲染 |
+| `npm run build` / `npm test` 在当前 tip | 上次执行在 `d90778d` |
+| 线上预览的版本 | 11-17 之后未核实 |
 
-- T-QA-004 报告：`ai-workspace/10-collaboration/reports/T-QA-004-TEST.md`
-- T-QA-004 证据：`ai-workspace/04-qa/evidence/T-QA-004/README.md`
-- T-SHIP-004 报告：`ai-workspace/10-collaboration/reports/T-SHIP-004-SHIP.md`
-- T-SHIP-004 公网证据：`ai-workspace/10-collaboration/sessions/A40-SHIP/test-artifacts/T-SHIP-004-20261024/racknerd/`
-- 本任务公网轻量核验：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/public-preview-check.json`
-- 演示数据验证：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`
-- 质量门禁：`tests/quality-baseline/acceptance-gates.json`
+## 4. 维护规则
 
-## 5. 更新触发条件
-
-- 新 API、表、worker 任务、前端路由或真实业务联调。
-- 稳定 HTTPS、DNS 或长期生产 SLA 完成。
-- A30 更新质量门禁状态。
-- A00 决定许可证或最终比赛范围。
-- 最终视频、稳定 HTTPS 截图或评审账号完成。
-
-更新时必须记录提交 SHA、Actions run、日期、命令、结果和未覆盖范围。
+1. 改文档中的数字前，先在当前 `main` 上跑出对应证据。
+2. 新功能必须同时更新本页与对应专题文档。
+3. 未执行的事项写「未验证」，不写「已通过」。
+4. 本页与代码冲突时，以代码为准，并立即修文档。
