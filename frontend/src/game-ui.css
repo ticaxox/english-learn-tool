@@ -4248,7 +4248,7 @@ html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
 .personal-workspace .memory-workbench-grid.is-session {
   grid-template-columns: minmax(0, 1080px) 268px;
   justify-content: center;
-  align-items: stretch;
+  align-items: start;
   gap: 18px 44px;
 }
 
@@ -4268,15 +4268,11 @@ html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
   padding-bottom: 0;
 }
 
-.personal-workspace .memory-session-side { align-self: stretch; display: flex; flex-direction: column; gap: 10px; }
-
 .personal-workspace .memory-workbench-grid.is-session .memory-session-rail {
   position: sticky;
   top: 24px;
   display: grid;
   align-content: start;
-  flex: 1 1 auto;
-  min-height: 0;
   gap: 18px;
   padding: 22px 20px;
   width: 100%;
@@ -5381,23 +5377,13 @@ html[data-theme='night'] .personal-workspace .spelling-cell--prefilled {
   /* The readings sit lower than the top of the card, and the ratings lower
      again: the card leads, the side follows. */
   gap: 46px;
-  padding-top: 48px;
-  align-content: start;
-}
-
-.personal-workspace .memory-workbench-grid.is-session .memory-session-side {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
   padding-top: 0;
-  align-content: normal;
+  align-content: start;
 }
 
 .personal-workspace .memory-workbench-grid.is-session .memory-session-side .memory-session-rail {
   position: static;
   top: auto;
-  flex: 1 1 auto;
-  height: auto;
 }
 
 .memory-ratings {
@@ -5623,32 +5609,4 @@ html[data-theme='night'] .personal-workspace .memory-ratings .memory-rating--mas
   height: auto;
   margin: 0;
   object-fit: contain;
-}
-
-/* The memory clock card owns the full height of the question row. The rail
-   flexes to that height and Hob stands at its foot, so the two cards line up. */
-.personal-workspace .memory-workbench-grid.is-session .memory-session-side {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 0;
-  align-content: normal;
-}
-
-.personal-workspace .memory-workbench-grid.is-session .memory-session-side .memory-session-rail {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  height: auto;
-}
-
-.personal-workspace .memory-session-rail .memory-aside-hob {
-  display: flex;
-  justify-content: center;
-  margin-top: auto;
-  padding-top: 12px;
-}
-
-.personal-workspace .memory-session-rail .memory-aside-hob .memory-rail-sprite {
-  max-width: 150px;
 }
