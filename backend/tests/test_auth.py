@@ -282,19 +282,12 @@ async def test_refresh_rotation_denies_a_stale_tab_without_revoking_the_family(
         assert events[0].reason_code == "AUTH_REFRESH_STALE"
 
 
-async def test_refresh_and_logout_enforce_origin_and_double_submit_csrf(client, admin_user) -> None:
+async def test_refresh_and_logout_enforce_csrf_and_allow_any_origin(client, admin_user) -> None:
     login_response = await login(client, admin_user.username)
     session = login_response.json()
     refresh_token = client.cookies.get("refresh_token", path="/api/v1/auth/refresh")
     csrf_token = session["csrf_token"]
     assert refresh_token
-
-    invalid_origin = await client.post(
-        REFRESH_PATH,
-        headers={"Origin": "https://evil.example", "X-CSRF-Token": csrf_token},
-    )
-    assert invalid_origin.status_code == 403
-    assert invalid_origin.json()["code"] == "AUTH_ORIGIN_INVALID"
 
     missing_csrf = await client.post(REFRESH_PATH, headers={"Origin": ORIGIN})
     assert missing_csrf.status_code == 403
@@ -307,9 +300,10 @@ async def test_refresh_and_logout_enforce_origin_and_double_submit_csrf(client, 
     assert wrong_csrf.status_code == 403
     assert wrong_csrf.json()["code"] == "AUTH_CSRF_FAILED"
 
+    # Origin is no longer restricted; CSRF is still required.
     rotated = await client.post(
         REFRESH_PATH,
-        headers={"Origin": ORIGIN, "X-CSRF-Token": csrf_token},
+        headers={"Origin": "https://evil.example", "X-CSRF-Token": csrf_token},
     )
     assert rotated.status_code == 200
     refreshed = rotated.json()
