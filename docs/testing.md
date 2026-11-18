@@ -1,111 +1,74 @@
 # 测试与验证记录
 
-- 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`
-- M5 代码内结论：`PASS_WITH_CONDITIONS`
-- 最终 MVP：`FAIL / NOT_READY`
-- QA 证据：`ai-workspace/04-qa/evidence/T-QA-004/`
-- 本任务新增演示数据证据：`ai-workspace/10-collaboration/sessions/A50-DOCS/test-artifacts/T-DOC-002/seed-verification.json`
+- 代码基线：`main` @ `1cea3ff` / `v0.1.7`（2026-11-18）
+- 原则：测试结论必须可复现；没有执行证据的能力不标记为「已验证」。
 
-## 1. 已验证结果
+## 1. 测试清单
 
-| 范围 | 结果 | 证据 |
-|---|---|---|
-| 后端全量 | 156 passed；Ruff lint/format PASS | T-QA-004 |
-| 前端全量 | 310 passed；`npm ci`/build PASS；0 已知漏洞 | T-QA-004 |
-| M3 真实 API | 54/54 PASS | `results/m5-m3-20261024-0235/api-acceptance.json` |
-| M3 真实浏览器 | 13/13 PASS | 同目录 `browser-acceptance.json` |
-| M4R 条件链路 API | 21/21 PASS | `results/m5-m4r-20261024-0242/api-acceptance.json` |
-| M4R 真实浏览器 | 14/14 PASS，0 缺口 | 同目录 `browser-acceptance.json` |
-| 性能 | 读 P95 0.031 ms、提交 47 ms、5000 行导入 1.92 s、SSE 首事件 31 ms | `results/m5-probe-20261024-0312/api-acceptance.json` |
-| 迁移 | 空库 upgrade/check/downgrade/re-upgrade PASS，drift 0 | T-QA-004 日志 |
-| 备份恢复 | 合成库 dump/restore 关键表计数一致 | T-QA-004 |
-| 依赖审计 | 后端 0、前端 0 已知漏洞 | T-QA-004 |
-| 47 门禁 | 40 PASS / 3 CONDITIONAL / 4 FAIL / 0 NOT_RUN | `tests/quality-baseline/acceptance-gates.json` |
-| 临时 HTTP 公网预览 | PASS：`http://23.94.141.170:18080`，`v0.1.2`，commit `8d5cb83`，Whisker Crumb | T-SHIP-004 / A40 evidence |
-| 发布镜像 digest | API/frontend/reverse-proxy 三镜像已记录 | release `v0.1.2` / workflow `40094317102` |
+| 套件 | 规模 | 环境 | 说明 |
+|---|---|---|---|
+| 后端 pytest | 40 个文件 / 209 个测试函数 | 真实 PostgreSQL 16 + Redis 7 | `conftest.py` 在会话开始时执行 `alembic upgrade head`；每用例事务回滚、Redis flush |
+| 前端 vitest | 58 个 spec / 446 个 `it` | jsdom + @vue/test-utils | 无浏览器布局测试 |
+| 质量清单 | 5 个 unittest + 1 个校验器 | 纯标准库 | `tests/quality-baseline/` |
+| 部署测试 | 22 个 unittest | 纯标准库 | `deploy/tests/`，含 nginx 安全头与 Compose 合同 |
+| 手工 E2E | `tests/m4-learning-int`、`tests/m4-condition-recheck-003r`、`tests/m5-hardening-004` | 一次性容器栈 + Playwright/Edge | 不在 CI，路径绑本机，换机不可直接复现 |
 
-T-QA-004 的 PR CI run `40006774365` 为 5/5 PASS；基线 CI run `39999074319` 为 5/5 PASS。
+后端覆盖域：认证与 CSRF、成员管理、词书导入导出任务、学习计划与心跳、FSRS 记忆与 cloze、六类练习、教练 SSE/附件/撤销、每日闯关与 BOSS、通知、看板、AI provider/提示词/额度/任务/记忆、知识库、MCP、健康、日志、数据库、worker 队列。
 
-## 2. 后端命令
+前端覆盖域：API 契约、认证、词书、学习训练器、练习、教练、闯关地图、通知、管理员页、个人 AI、游戏化、万圣节素材契约、主题与路由守卫、生产代码禁用项（localStorage、答案字段、mock 数据）。
+
+## 2. 命令
 
 ```powershell
+# 后端（需要真实 PostgreSQL 与 Redis）
 cd backend
 uv sync --locked --all-groups
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest
-uv run alembic upgrade head
-uv run alembic check
-```
 
-测试必须使用真实 PostgreSQL/Redis；`TEST_DATABASE_URL` 和 `TEST_REDIS_URL` 指向隔离资源。不得使用内存数据库、生产连接串或真实成员数据。
-
-## 3. 前端命令
-
-```powershell
+# 前端
 cd frontend
 npm ci
-npm test
 npm run build
+npm test
+
+# 质量清单
+python -m unittest discover -s tests/quality-baseline -p "test_*.py"
+python tests/quality-baseline/validate_manifest.py --workspace-root .
 ```
 
-T-QA-004 已覆盖认证、成员管理、词书、记忆、练习、教练、挑战、通知、看板和错误态。视觉截图来自真实浏览器，不是 PPT 或静态 mock。
+后端可用 `TEST_DATABASE_URL` / `TEST_REDIS_URL` 指向一次性资源；测试不会自动创建数据库。
 
-## 4. 演示数据初始化验证
+## 3. 最近一次执行
 
-在一次性 PostgreSQL 数据库中执行：
+| 时间 | 基线 | 项目 | 结果 |
+|---|---|---|---|
+| 2026-11-17 | `d90778d` | 前端 `npm run build` | 通过，1.93s，产物约 894KB JS + 801KB CSS |
+| 2026-11-17 | `d90778d` | 前端 `npm test` | **58 文件 / 442 用例全过** |
+| 2026-11-18 | `1cea3ff` | 后端 `ruff check` | **5 处告警**（`coach_tools.py:52` E501 + 4 个迁移文件 I001）；`ruff format --check` 尚有 1 个文件待格式化 |
+| 2026-11-17 | `d90778d` | 后端 `pytest` | **未执行**：本机无 PostgreSQL/Redis，conftest 在连接阶段失败 |
+| 2026-11-17 | `d90778d` | `alembic heads` | 单头 `20261114_0032` |
+| 2026-11-17 | `d90778d` | `alembic upgrade head --sql` | 离线渲染通过：39 次升级、60 条 CREATE TABLE |
+| 2026-11-17 | `d90778d` | `uv lock --check` | 通过 |
 
-```powershell
-$env:DEMO_SEED_CONFIRM = 'YES'
-$env:DEMO_ADMIN_PASSWORD = '<unique demo admin password>'
-$env:DEMO_MEMBER_PASSWORD = '<different unique demo member password>'
-uv run --project backend python docs/competition/seed_demo_data.py --apply
-```
+历史 QA 证据不在本仓库内，且对应更早的代码，不能代表当前状态。
 
-验证结果：
+## 4. 质量门禁
 
-- 首次初始化：PASS。
-- 重复初始化：PASS。
-- 数据库 revision：`844c0d89f737`。
-- 4 个合成账号、20 个词条、60 个记忆状态、3 个每日计划、1 个练习记录、1 个教练会话、5 个挑战节点、3 个通知。
-- 真实 API：管理员登录/看板/成员/词书，成员登录/今日计划/档案/挑战/练习记录/练习详情/教练会话/教练消息/未读数，共 13 项均返回 200。
-- 管理员看板显示 3 个活跃成员和 1 个隐私安全分组，不返回成员正文。
-- 练习详情包含 3 题、1 个错题；教练消息包含 `adjust_daily_plan` applied receipt；挑战地图包含 5 个节点。
+`tests/quality-baseline/acceptance-gates.json` 仍是 2026-10-24 的 47 条（40 PASS / 3 CONDITIONAL / 4 FAIL），描述的是组织版交付。它与当前产品已错位：
 
-说明：`GET /learning/today` 的 `ai_practice` 字段仍返回旧 `not_available`；已实现的 AI 练习从 `/practice` 使用。该差异不隐藏、不伪修，作为当前已知限制记录。
+- 仍把「成员管理、看板、通知」记为 PASS，而个人版已从导航移除；
+- 未覆盖 11 月新增的知识库/RAG、MCP、游戏化、对话练习；
+- `F-SEC-01` 的 CSP 条件已被实现覆盖，但没有重新分类；
+- `F-DEMO-01` 依赖的 seed 脚本刚刚对齐迁移 head，尚未执行验证。
 
-公网轻量核验：`/health/live`、`/health/ready`、首页均 HTTP 200；`/api/v1` 返回 `v0.1.2` / `test`。登录、SSE、Cookie/CSRF、共享词书卷、备份恢复和机械回滚引用 T-SHIP-004，不在本任务重复全量测试。
+**结论**：门禁清单需要按个人版重写；在此之前不要用它对外声明完成度。
 
-## 5. 47 门禁状态
+## 5. 已知缺口
 
-已 PASS 的核心门禁包括认证、成员管理、词书、记忆、档案、四类 AI 练习、答案防泄露、记录、通知、E2E、AI 合同、安全头部分项、Docker、性能和迁移。
-
-保留条件/失败：
-
-- `F-SEC-01` CONDITIONAL：v0.1.2 预览响应已有 CSP/安全头，但仍待 A30/A01 按最终证据重新分类。
-- `F-AUDIT-01` CONDITIONAL：演示环境 RPO/RTO 与数据库/词书恢复已通过；生产级审批和历史兼容业务回滚仍待复核。
-- `F-GIT-01` CONDITIONAL：`v0.1.2` tag/release 已完成；质量门禁的最终发布历史分类仍待 A30/A01 复核。
-- `F-DEMO-01` FAIL：本任务已增加可执行演示数据脚本和账号说明，但最终状态仍由 A30/A01 复验后更新。
-- `F-DOC-01` FAIL：本任务更新 README、技术文档和专题文档，但最终状态仍由 A30/A01 复验后更新。
-- `F-COMP-01` FAIL：v0.1.2 临时 HTTP 预览和 7 张真实截图已准备；最终视频、稳定 HTTPS 截图和最终提交验收仍待完成。
-- `F-FINAL-01` FAIL：最终 MVP 未验收。
-
-## 6. 不重复执行的范围
-
-A01 明确要求复用 T-QA-004 的 M3/M4R/性能/安全证据，不重复全量测试。本任务没有把旧的 156/310 数字冒充当前文档分支新跑结果；它们是固定 QA 基线证据，文档分支只新增 Markdown、截图和演示数据脚本。
-
-## 7. 提交前检查
-
-- `git diff --check`
-- Markdown 链接、图片路径、UTF-8、无 BOM、最终换行、无尾随空白
-- 敏感信息扫描
-- 截图 SHA256 与 QA 来源一致
-- 演示脚本语法、`--help`、首次/重复初始化
-- PR CI 5/5
-
-## 8. 相关文档
-
-- [事实核对](fact-check.md)
-- [部署](deployment.md)
-- [演示数据](competition/demo-data.md)
-- [截图清单](competition/screenshots/README.md)
+1. 后端 209 个测试在当前 schema 上从未执行过；40 条迁移也从未在真实 PostgreSQL 上完整 upgrade。
+2. 没有自动化浏览器 E2E，也没有视觉回归；昼夜、移动端断点只能靠人眼与手工探针。
+3. 前端测试有相当一部分把 CSS/源码当文本断言，选择器重命名会误报。
+4. CI 的 backend job 会先跑 ruff，若 lint 未清零则 pytest 不会执行。
+5. 没有覆盖率统计。

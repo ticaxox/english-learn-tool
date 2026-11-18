@@ -73,7 +73,7 @@ from app.models.wordbooks import (  # noqa: E402
 )
 from app.services.fsrs_scheduler import FSRS_ALGORITHM_VERSION, new_card_payload  # noqa: E402
 
-EXPECTED_ALEMBIC_HEAD = "844c0d89f737"
+EXPECTED_ALEMBIC_HEAD = "20261114_0032"
 DEMO_NAMESPACE = uuid5(NAMESPACE_URL, "english-learn-tool/competition-demo/v1")
 DEMO_BOOK_NAME = "Aurora English Lab · Synthetic Demo 20"
 DEMO_BOOK_KEY = "wordbook:aurora-demo"

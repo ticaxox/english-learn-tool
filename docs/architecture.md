@@ -1,120 +1,99 @@
 # 架构与当前边界
 
-- 交付基线：`efc6bcbd2679eca02613a7143c68d04dddc36a59`（T-QA-004 冻结）
-- 迁移 head：`844c0d89f737`
-- 当前形态：模块化单体 + 独立 worker/scheduler + Vue SPA
-- 完整 MVP：`FAIL / NOT_READY`；本文描述的是已实现代码，不是最终验收结论
+- 代码基线：`main` @ `1cea3ff` / `v0.1.7`（2026-11-18）
+- 形态：模块化单体（FastAPI）+ 两个 ARQ 进程 + PostgreSQL 16 + Redis 7
+- 前端：Vue 3.5 + TypeScript + Vite 8 + Pinia + vue-router 5
 
-## 1. 运行拓扑
+## 1. 运行时拓扑
 
 ```text
-┌──────────────────────────── Browser ────────────────────────────┐
-│ Vue 3 + Vite + Pinia + Vue Router                              │
-│ 认证、词书、今日计划、记忆、练习、教练、挑战、通知、管理员页面      │
-└──────────────────────────────┬─────────────────────────────────┘
-                               │ /api + SSE
-                               ▼
-┌──────────────────────────── FastAPI ────────────────────────────┐
-│ Request ID / 统一错误 / 安全头 / CORS / 认证与 CSRF              │
-│ auth · users · wordbooks · learning · memory · practice · ai     │
-│ coach · challenges · notifications · dashboard · audit          │
-└──────────────┬───────────────────────────────┬──────────────────┘
-               │                               │
-               ▼                               ▼
-       PostgreSQL 16                    Redis 7 + ARQ
-       46 张应用表                      wordbook jobs / AI jobs
-       SQLAlchemy + Alembic              scheduler / 短期并发
-               │
-               ▼
-       私有词书卷（api / worker / scheduler 共享）
+Browser
+  │  HTTPS/HTTP
+  ▼
+reverse-proxy (nginx) ── frontend (nginx, dist) ── api (uvicorn :8000)
+                                   │
+                                   ├── PostgreSQL 16
+                                   ├── Redis 7
+                                   ├── worker  (ARQ: AI / 词书 / 练习池)
+                                   ├── scheduler (ARQ cron: 计划 / 通知 / 回收)
+                                   └── 私有卷 /app/var/{wordbooks,coach}
 ```
 
-反向代理只默认发布 `127.0.0.1:8080`；PostgreSQL、Redis、API、worker、scheduler 和 frontend 不直接发布宿主端口。容器应用以 UID/GID `10001` 运行。
+- 只有 `reverse-proxy` 发布宿主端口（默认 `127.0.0.1:8080`）。
+- 应用容器以 UID 10001 运行，根文件系统只读，`cap_drop: ALL`，`no-new-privileges`。
+- `api`、`worker`、`scheduler` 共享数据库、Redis 与词书/教练文件卷。
 
-## 2. 模块职责
+## 2. 后端分层
 
-| 模块 | 主要代码 | 当前职责 |
+| 层 | 目录 | 职责 |
 |---|---|---|
-| Auth | `backend/app/api/v1/auth.py`、`services/auth.py` | 登录、Refresh 轮换、CSRF、改密、退出、会话恢复 |
-| Identity | `models/identity.py`、`api/v1/admin.py` | 管理员/成员、最后管理员保护、CSV 导入、审计 |
-| Wordbooks | `models/wordbooks.py`、`services/wordbooks.py` | 组织/私有词书、预览、导入、导出、删除、持久任务 |
-| Learning | `models/learning.py`、`services/learning.py` | 学习档案、今日快照、心跳、统计、每日计划 |
-| Memory | `services/memory.py`、`fsrs_scheduler.py` | FSRS 卡片、翻卡/选择/拼写、错词、已记住/恢复 |
-| AI | `models/ai.py`、`services/ai_*.py` | provider、提示词、加密 Key、额度、任务、校验、故障切换 |
-| Practice | `models/practice.py`、`services/practice.py` | 四类练习、草稿、提交、评分、记录、错题 |
-| Coach | `models/coach.py`、`services/coach.py` | 长期对话、SSE、上下文、受控 action、24h 撤销 |
-| Challenges | `models/challenge.py`、`services/challenge.py` | 今日地图、节点进度、共享学习进度、BOSS 结果 |
-| Notifications | `models/notifications.py`、`services/notifications.py` | 站内通知、偏好、DND、去重、AI 例外 |
-| Dashboard | `services/dashboard.py` | 组织聚合指标、最小分组、隐私抑制 |
-| Audit | `services/audit.py` | 登录、管理操作、AI action 等安全事件 |
+| 传输 | `app/api/v1/*` | 路由、依赖注入、鉴权、把服务异常映射为 HTTP |
+| 服务 | `app/services/*` | 全部业务逻辑：记忆、练习、教练、闯关、游戏化、知识库、AI 任务 |
+| 模型 | `app/models/*` | SQLAlchemy 2 映射，59 张表、13 个模块 |
+| 契约 | `app/schemas/*` | Pydantic v2 请求/响应模型 |
+| 基础设施 | `app/core`、`app/db`、`app/workers` | 配置、安全、数据库会话、ARQ |
+
+`app/main.py` 的 lifespan 负责创建 ARQ pool、Redis、engine、session factory 与本地文件存储；中间件包括 CORS、安全响应头与 `X-Request-ID`。
 
 ## 3. 关键请求链路
 
-### 认证
+### 3.1 认证
 
-1. `POST /auth/login` 校验 Argon2id 密码并签发短时 Access Token。
-2. Refresh Token 只存哈希，放在 HttpOnly Cookie；CSRF Token 使用可读 Cookie + `X-CSRF-Token` 双提交。
-3. 前端 Access Token 只保存在内存；页面刷新通过 Refresh Cookie 恢复。
-4. 管理员重置密码、停用、删除或改密会撤销对应 Refresh 会话。
+`POST /auth/login` → 校验 Argon2id → 签发短时 Access Token（响应体）+ HttpOnly Refresh Cookie（服务端存哈希、轮换，15 秒复用宽限）→ 写请求携带 `X-CSRF-Token`。2026-11-18 起不再校验 Origin 白名单，CSRF 仍是写请求的防线。
 
-### 词书
+### 3.2 记忆训练（FSRS）
 
-1. 预览接口解析 CSV/JSON/TXT，返回映射、预览 token/hash 和错误。
-2. 确认导入写入持久 `wordbook_jobs`，由 ARQ worker 执行。
-3. worker/scheduler 共享私有词书卷；PostgreSQL 保存任务状态、进度和结果，Redis 只做队列。
-4. 导出/删除同样是持久任务；删除后条目可见性立即被阻断。
+`GET /learning/today` 给出新词与到期词 → `POST /memory/sessions` 建会话 → 逐题 `POST /memory/sessions/{id}/events`（幂等）→ 服务端用 `fsrs==6.3.2` 计算 `due_at`/间隔，只接受 again/good 两档，禁用 fuzz → `complete` 后落 `user_word_states`。
 
-### 记忆与今日计划
+### 3.3 AI 练习
 
-1. 后端按用户时区计算 `local_date` 和固定快照。
-2. FSRS 只由服务端计算卡片状态、`due_at` 和复习间隔；客户端只提交动作/答案。
-3. 翻卡、选择、拼写共享同一份学习事件和错词状态。
-4. 今日页面读取服务端快照，不把浏览器本地状态当作业务真相。
+`POST /practice/sessions` 先尝试领取预生成池；未命中则创建 `generating` 会话与 `practice_generation` 任务（202）→ worker 调 provider → Pydantic + 业务校验、最多一次 JSON 修复 → 题目落库，答案在交卷前不下发 → `submit` 同步判客观题，主观题走一次 `subjective_grading` 任务。
 
-### AI 练习
+### 3.4 AI 教练
 
-1. 成员创建练习，后端解析合法词书/词条上下文并持久化任务。
-2. ARQ worker 调用 OpenAI 兼容 provider。
-3. Pydantic + 业务校验器校验 JSON、题量、选项、实体 ID、答案和分数范围。
-4. 提交前 API 不返回答案、解析或参考内容；提交后客观题由后端判分，主观题进入 AI 评分。
-5. 失败保留真实错误和 Request ID，不生成假题或假分数。
+`POST /coach/conversations/{id}/messages` 建 202 消息任务 → worker 生成回复并写 `coach_stream_events` → 前端通过 SSE 端点按 `Last-Event-ID` 续传；控制器输出的 8 个受控动作先落 `coach_action_receipts`，24 小时内可撤销。
 
-### 教练与挑战
+### 3.5 每日闯关
 
-- 教练使用 SSE 流式事件，数据库保存事件序号；断线后从 `Last-Event-ID` 恢复。
-- 受控 action 写入 receipt，保存前后状态和 24 小时撤销期限。
-- 挑战地图由后端生成并锁定；传统学习与地图节点共享同一份计划进度。
-- BOSS 提交幂等，刷新页面后仍可读取已完成结果。
+`POST /challenges/today/generate` 建 `challenge_plan` 任务；服务端准备上下文（新词、到期词、额度、合法实体），AI 只编排顺序与文案；计划生成后当日锁定，节点开始/完成与 BOSS 提交都幂等。
 
-## 4. 数据与一致性
+### 3.6 知识库检索
 
-- PostgreSQL 是业务权威源；Redis 不保存唯一业务真相。
-- 写请求使用幂等键或请求指纹；重复请求返回同一结果或明确冲突。
-- 词书、AI、练习评分、通知和挑战任务均有持久状态。
-- 数据库迁移必须可回滚；当前 head 为 `844c0d89f737`。
-- 备份、恢复、回滚脚本和演示环境演练已由 T-SHIP-002/003 验证；稳定生产 SLA 仍未验证。
+导入 → 分块（题号感知，900/120，单文档 ≤400 块）→ 可选 embedding → `GET /knowledge/search` 或教练 `search_knowledge` 触发检索：Python 线性扫描，余弦与关键词取高低分混合（0.6·max + 0.4·min），阈值 0.12，最多 6 条，返回出处。检索范围限于该学习者可读的书架（公共真题架、目标难度架、个人架）。
 
-## 5. 可观测性与安全
+## 4. AI 任务平台
 
-- 所有响应回写 `X-Request-ID`；错误体包含同一 ID。
-- 结构化日志记录方法、路径、状态、延迟和必要用户/任务 ID，不记录密码、Key、完整答案或教练正文。
-- 管理员操作与 AI 自动写入进入审计记录。
-- 安全头已覆盖 `X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy`；CSP 仍为 CONDITIONAL。
-- 容器非 root、只读根文件系统、`cap_drop: ALL`、`no-new-privileges` 已在 CI 验证。
+- `ai_jobs` 保存任务类型、提示词快照、幂等键与请求哈希、provider、终态与错误码。
+- 任务类型：`practice_generation`、`subjective_grading`、`coach_reply`、`challenge_plan`、`json_repair`、`conversation_turn`。
+- provider 选择：enabled + kind=chat + owner=调用者，按 priority → is_default → created_at 排序，失败自动降级到下一个。
+- 额度：reserve → consume / release；三类计数（教练 100、出题 20、主观评分 50 / 日）。
+- 并发：每用户最多 2 个进行中的 AI 任务（Redis ZSET + Lua）。
+- scheduler 定期回收 stale 任务并释放额度。
 
-## 6. 当前限制
+## 5. 前端分层
 
-- T-SHIP-004 已验证临时 HTTP IP 预览、`v0.1.2` 镜像 digest、备份恢复和机械回滚；稳定 HTTPS/DNS 不在本次授权范围。
-- `GET /learning/today` 的 `ai_practice` 摘要仍是旧 `not_available` 字段；已实现 AI 练习从 `/practice` 进入。
-- 质量清单仍为 40 PASS / 3 CONDITIONAL / 4 FAIL；不能把 M5 代码内 PASS_WITH_CONDITIONS 写成最终 MVP PASS。
-- 前端视觉允许简洁，当前重点是真实业务闭环而不是复杂动画或素材系统。
+| 层 | 位置 | 说明 |
+|---|---|---|
+| 入口 | `src/main.ts` | 先定 surface（`/m` 手机树），预涂主题，再依次加载 10 张全局样式表 |
+| 路由 | `src/router/index.ts` | 30 条 path / 24 个命名路由，全部静态加载；守卫负责会话恢复、强制改密、adminOnly |
+| 外壳 | `src/components/MemberShell.vue` | 左侧 rail（等级板、四项导航、昼夜开关、折叠把手）+ 顶栏二级页签 + 手机底部导航 + 教练抽屉 |
+| API | `src/api/client.ts` | 唯一 fetch 封装：Bearer + CSRF、401 单次刷新、GET 重试、错误规整 |
+| 契约 | `src/api/contract-adapter.ts` | 后端 snake_case 与前端类型的唯一映射层 |
+| 状态 | `src/stores/auth.ts` + composables | 只有 auth 是 Pinia store，其余为模块级 composable |
+| 样式 | 18 张 CSS | `game-ui.css` 令牌与游戏层、`controls.css` 控件套件、`game-shell.css` 外壳；页面级样式由各视图 import |
 
-## 7. 相关文档
+主题：`useTheme.ts` 读写 cookie `crumb_theme`、首次跟随 `prefers-color-scheme`，把 `data-theme` 写到 `<html>`；`ArtImage.vue` 在同一格叠 day/night 两张图，切换时 520ms 交叉淡出。
 
-- [数据模型](data-model.md)
-- [API](api.md)
-- [AI 链路](ai-pipeline.md)
-- [安全与隐私](security-privacy.md)
-- [测试](testing.md)
-- [部署](deployment.md)
-- [事实核对](fact-check.md)
+## 6. 数据与队列边界
+
+- PostgreSQL 是业务权威；Redis 只做队列、并发锁与短期协调，丢失可从数据库恢复。
+- 词书文件与教练附件在私有卷，数据库只存元数据与路径。
+- 所有异步任务都可在数据库中查询终态；`202` 只代表已接收。
+
+## 7. 已知边界
+
+1. RAG 检索是线性扫描，规模适合千级 chunk；万级需要 pgvector。
+2. 夜间样式是 `html[data-theme='night']` 逐条覆盖（约 262 条），不是令牌翻面，新组件容易漏。
+3. 个人版没有删除管理端接口，`/admin/*` 仍可访问，只是成员端导航不暴露。
+4. `GET /learning/today` 的 `ai_practice` 摘要仍固定返回 `not_available`。
+5. 全部路由静态加载，构建产物约 894KB JS + 801KB CSS（2026-11-17 实测）。
