@@ -578,17 +578,25 @@ function speakTurn(turn: PracticeConversationTurn): void {
   border-top-color: var(--g-orange, #ff9600);
 }
 
-/* No second card inside the paper card: the answer line belongs to the chat
-   sheet itself, so the composer is just text on the sheet. */
+/* Same composer as Hob: the carved field trough from the control set. */
 .practice-conversation__field {
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
-  padding: 2px 2px 0;
-  border: 0;
+  align-items: center;
+  padding: 4px 12px;
+  border: 6px solid transparent;
+  border-image: url('../assets/halloween/card/control-field-day.webp') 18% 5% fill stretch;
+  border-radius: 0;
   background: none;
   box-shadow: none;
 }
+
+html[data-theme='night'] .practice-conversation__field {
+  border-image-source: url('../assets/halloween/card/control-field-night.webp');
+}
+
+.practice-conversation__field:focus-within { filter: brightness(1.03); }
 
 .practice-conversation__input {
   flex: 1 1 auto;
@@ -643,10 +651,19 @@ function speakTurn(turn: PracticeConversationTurn): void {
 }
 
 .practice-conversation__send {
-  border: 1px solid transparent;
-  background: var(--g-orange, #ff9600);
-  color: #35240f;
-  box-shadow: 0 2px 0 var(--g-orange-edge, #cf7400);
+  border-width: 8px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: url('../assets/halloween/card/control-badge-day.webp') 30% 17% fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #33200b;
+}
+
+html[data-theme='night'] .practice-conversation__send {
+  border-image-source: url('../assets/halloween/card/control-badge-night.webp');
+  color: #efe6ff;
 }
 
 .practice-conversation__send:hover:not(:disabled) { filter: brightness(1.06); }
