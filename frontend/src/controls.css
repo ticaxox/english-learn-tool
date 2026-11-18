@@ -4560,9 +4560,17 @@ html[data-theme='night'] .personal-workspace {
  * same square, but the night one is the room after dark, not cream paper. */
 html[data-theme='night'] .personal-workspace .trail-month__day {
   background: #241a44;
-  color: #7d6fa6;
-  box-shadow: inset 0 0 0 1px #33265a;
+  color: #c9b6ff;
+  box-shadow: inset 0 0 0 1px #4a3a7a;
 }
+
+/* Future and ordinary days carry the date too; keep it readable on the
+ * unlit slot. Today keeps its cream ink, lit days keep their dark ink. */
+html[data-theme='night'] .personal-workspace .trail-month__day:not(.is-past):not(.is-lit):not(.is-today) {
+  color: #c9b6ff;
+}
+
+html[data-theme='night'] .personal-workspace .trail-month__dow { color: #c9b6ff; }
 
 .personal-workspace .trail-month__day.is-past {
   background: var(--insight-quiet);
@@ -4804,6 +4812,8 @@ html[data-theme='night'] .personal-workspace .trail-month__day.is-lit { color: #
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
+html[data-theme='night'] .personal-workspace .weekly-day__lamp { color: #d8cdf8; }
+html[data-theme='night'] .personal-workspace .weekly-day__xp { color: #b9a4e6; }
 
 .personal-workspace .weekly-goals {
   display: grid;
