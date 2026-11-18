@@ -3,12 +3,12 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import ThemeSwitch from './ThemeSwitch.vue'
-import HobMark from './HobMark.vue'
 import UserAvatar from './UserAvatar.vue'
 import { getActivePinia } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import { useGamification } from '../composables/useGamification'
 import { isNight } from '../composables/useTheme'
+import wordmark from '../assets/logo/wordmark.webp'
 
 const props = defineProps<{
   displayName: string
@@ -163,10 +163,7 @@ onBeforeUnmount(() => {
   >
     <aside v-if="!immersive" class="workspace-sidebar ia-sidebar" aria-label="主导航">
       <RouterLink class="workspace-brand" to="/overview" aria-label="Grimoire 今日学习">
-        <span class="workspace-brand-mark"><HobMark size="small" /></span>
-        <span class="workspace-brand-copy">
-          <strong>Grimoire</strong>
-        </span>
+        <img class="workspace-brand-logo" :src="wordmark" alt="Grimoire" />
       </RouterLink>
 
       <section class="rail-plate" aria-label="等级进度">

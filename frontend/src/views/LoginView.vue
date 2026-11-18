@@ -2,8 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ErrorNotice from '../components/ErrorNotice.vue'
-import ArtImage from '../components/ArtImage.vue'
-import { illustration } from '../assets/halloween'
+import appicon from '../assets/logo/appicon.webp'
 import { useAuthStore } from '../stores/auth'
 import { safeInternalRedirect, validateUsername } from '../lib/validation'
 
@@ -103,7 +102,7 @@ async function retryConnection(): Promise<void> {
   <main class="auth-page">
     <!-- Hob stands beside the door, not on top of the form. -->
     <aside class="auth-art" aria-hidden="true">
-      <ArtImage class="auth-art__mark" :set="illustration.welcome" />
+      <img class="auth-art__mark" :src="appicon" alt="" />
     </aside>
 
     <section class="auth-card" aria-labelledby="login-title">

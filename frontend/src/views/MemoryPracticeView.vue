@@ -668,11 +668,12 @@ watch(challengeModule, async (module, previous) => {
             结束本次
           </DivButton>
           <p v-else class="memory-rail-state">本轮训练已结束，成绩会记入今日进度。</p>
-        </div>
 
-        <!-- Hob stands under the rail, on the page rather than inside the card. -->
-        <div class="memory-aside-hob" aria-hidden="true">
-          <img class="memory-rail-sprite" :src="railSprite" alt="" />
+          <!-- Hob sits at the foot of the rail, inside the same card, so the
+               clock card and the question card share one height. -->
+          <div class="memory-aside-hob" aria-hidden="true">
+            <img class="memory-rail-sprite" :src="railSprite" alt="" />
+          </div>
         </div>
 
         <!-- What you make of the card is the one thing to do after it turns
