@@ -262,7 +262,6 @@ onBeforeUnmount(() => {
             </DivButton>
             <div v-if="profileOpen" id="member-profile-menu" class="ia-profile-menu" role="menu">
               <div class="ia-profile-summary">
-                <UserAvatar v-if="auth?.user?.avatar" :avatar="auth.user.avatar" :label="`${displayName} 的像素头像`" />
                 <span class="ia-profile-menu-label">个人资料</span>
                 <strong>{{ displayName }}</strong>
               </div>

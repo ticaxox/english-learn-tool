@@ -532,6 +532,19 @@ html[data-theme='night'] .levelup-card {
   height: 96px;
 }
 
+.personal-workspace .workspace-brand-logo {
+  display: block;
+  width: 172px;
+  height: auto;
+}
+
+.personal-workspace.is-sidebar-collapsed .workspace-brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  object-position: left center;
+}
+
 .personal-workspace .workspace-brand-copy { gap: 0; }
 
 .personal-workspace .workspace-brand-copy strong {
@@ -916,8 +929,6 @@ html[data-theme='night'] .personal-workspace .workspace-nav-link.member-nav-link
   box-shadow: none;
   color: #3b2a14;
 }
-
-.personal-workspace .workspace-avatar-button .user-avatar { width: 100%; height: 100%; }
 
 .personal-workspace .workspace-avatar-button .user-avatar { width: 100%; height: 100%; }
 .personal-workspace .workspace-avatar-button {

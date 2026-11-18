@@ -367,9 +367,10 @@ html[data-theme='night'] .coach-page.coach-page .coach-history__title { color: v
 }
 .coach-page.coach-page .coach-message-avatar--user {
   grid-column: 3;
-  background: color-mix(in srgb, var(--coach-mine) 24%, var(--coach-page));
-  border-color: color-mix(in srgb, var(--coach-mine) 58%, transparent);
+  background: none;
+  border: 0;
 }
+.coach-page.coach-page .coach-message-avatar--user .user-avatar { width: 40px; height: 40px; }
 
 /* The bubble owns the width; the meta row hangs from its right edge. */
 .coach-page.coach-page .coach-message-body {

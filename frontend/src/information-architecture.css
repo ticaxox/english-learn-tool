@@ -50,9 +50,6 @@ html[data-theme='night'] .ia-profile-menu {
 }
 .ia-profile-summary {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  column-gap: 10px;
   gap: 2px;
   margin-bottom: 5px;
   padding: 9px 10px 11px;
